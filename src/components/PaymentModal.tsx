@@ -20,22 +20,37 @@ export const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
   const [isGuest, setIsGuest] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
   const [amount, setAmount] = useState("");
-  const [productName, setProductName] = useState("");
-  const [subscriptionTier, setSubscriptionTier] = useState("basic");
+  const [credits, setCredits] = useState("");
+  const [subscriptionTier, setSubscriptionTier] = useState("keyword-research");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  const CREDIT_PRICE = 0.70;
+
   const subscriptionPlans = {
-    basic: { price: 9.99, priceId: "price_basic", name: "Basic Plan" },
-    premium: { price: 29.99, priceId: "price_premium", name: "Premium Plan" },
-    enterprise: { price: 99.99, priceId: "price_enterprise", name: "Enterprise Plan" }
+    "keyword-research": { price: 29.99, priceId: "price_keyword_research", name: "Keyword Research Tool" },
+    "rank-tracker": { price: 39.99, priceId: "price_rank_tracker", name: "Search Engine Rank Tracker" },
+    "seo-competition": { price: 49.99, priceId: "price_seo_competition", name: "SEO Competition Tool" },
+    "indexing-service": { price: 19.99, priceId: "price_indexing_service", name: "Indexing Service" }
+  };
+
+  // Calculate total amount based on credits
+  const calculateAmount = (creditCount: string) => {
+    const numCredits = parseFloat(creditCount) || 0;
+    return (numCredits * CREDIT_PRICE).toFixed(2);
+  };
+
+  // Update amount when credits change
+  const handleCreditsChange = (newCredits: string) => {
+    setCredits(newCredits);
+    setAmount(calculateAmount(newCredits));
   };
 
   const handlePayment = async () => {
-    if (!amount || !productName) {
+    if (!credits || parseFloat(credits) <= 0) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields",
+        description: "Please enter a valid number of credits",
         variant: "destructive",
       });
       return;
@@ -56,7 +71,7 @@ export const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
           amount: parseFloat(amount),
-          productName,
+          productName: `${credits} Backlink Credits`,
           isGuest,
           guestEmail: isGuest ? guestEmail : undefined,
           paymentMethod
@@ -197,48 +212,63 @@ export const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
             </div>
 
             <TabsContent value="payment" className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="amount">Amount ($)</Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  step="0.01"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0.00"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="productName">Product/Service Name</Label>
-                <Input
-                  id="productName"
-                  value={productName}
-                  onChange={(e) => setProductName(e.target.value)}
-                  placeholder="Enter product or service name"
-                />
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="credits">Number of Credits</Label>
+                  <Input
+                    id="credits"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={credits}
+                    onChange={(e) => handleCreditsChange(e.target.value)}
+                    placeholder="Enter number of credits"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    $0.70 per credit • 1 credit = 1 premium backlink
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="total">Total Amount</Label>
+                  <Input
+                    id="total"
+                    value={`$${amount}`}
+                    readOnly
+                    className="bg-muted"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    {credits ? `${credits} credits × $0.70 = $${amount}` : 'Enter credits to see total'}
+                  </p>
+                </div>
               </div>
               <Button 
                 onClick={handlePayment} 
-                disabled={loading}
+                disabled={loading || !credits || parseFloat(credits) <= 0}
                 className="w-full"
               >
-                {loading ? "Processing..." : `Pay $${amount || "0.00"}`}
+                {loading ? "Processing..." : `Buy ${credits || 0} Credits for $${amount || "0.00"}`}
               </Button>
             </TabsContent>
 
             <TabsContent value="subscription" className="space-y-4">
-              <div className="space-y-2">
-                <Label>Subscription Plan</Label>
-                <RadioGroup value={subscriptionTier} onValueChange={setSubscriptionTier}>
-                  {Object.entries(subscriptionPlans).map(([key, plan]) => (
-                    <div key={key} className="flex items-center space-x-2">
-                      <RadioGroupItem value={key} id={key} />
-                      <Label htmlFor={key} className="flex-1">
-                        {plan.name} - ${plan.price}/month
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>SEO Tool Subscriptions</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Subscribe to professional SEO tools for ongoing campaigns
+                  </p>
+                  <RadioGroup value={subscriptionTier} onValueChange={setSubscriptionTier}>
+                    {Object.entries(subscriptionPlans).map(([key, plan]) => (
+                      <div key={key} className="flex items-center space-x-2 p-3 border rounded-lg">
+                        <RadioGroupItem value={key} id={key} />
+                        <Label htmlFor={key} className="flex-1 cursor-pointer">
+                          <div className="font-medium">{plan.name}</div>
+                          <div className="text-sm text-muted-foreground">${plan.price}/month</div>
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
               </div>
               <Button 
                 onClick={handleSubscription} 
