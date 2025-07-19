@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,12 +10,15 @@ import {
   Search,
   Link,
   BarChart3,
-  CheckCircle
+  CheckCircle,
+  CreditCard
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { PaymentModal } from "@/components/PaymentModal";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 
   const features = [
     {
@@ -163,9 +167,19 @@ const Index = () => {
                     <span className="text-sm">Mobile app included</span>
                   </div>
                 </div>
-                <Button className="w-full" onClick={() => navigate("/login")}>
-                  Get Started Now
-                </Button>
+                <div className="space-y-2">
+                  <Button className="w-full" onClick={() => navigate("/login")}>
+                    Get Started Now
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    onClick={() => setPaymentModalOpen(true)}
+                  >
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Buy Credits Now
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -184,6 +198,11 @@ const Index = () => {
           </p>
         </div>
       </footer>
+
+      <PaymentModal 
+        isOpen={paymentModalOpen} 
+        onClose={() => setPaymentModalOpen(false)} 
+      />
     </div>
   );
 };
