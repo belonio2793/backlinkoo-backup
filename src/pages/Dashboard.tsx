@@ -302,7 +302,10 @@ const Dashboard = () => {
                     <p className="text-green-700 mb-4">
                       You have {credits} credits available. Create your first backlink campaign to start building authority for your website.
                     </p>
-                    <Button onClick={() => setShowCampaignForm(true)}>
+                    <Button onClick={() => {
+                      console.log('Creating first campaign...');
+                      setShowCampaignForm(true);
+                    }}>
                       <Plus className="h-4 w-4 mr-2" />
                       Create Your First Campaign
                     </Button>
