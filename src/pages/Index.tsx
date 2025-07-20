@@ -39,7 +39,7 @@ const Index = () => {
     {
       icon: Globe,
       title: "SEO Analysis",
-      description: "Comprehensive SEO metrics including DA, PA, CF, TF analysis"
+      description: "Comprehensive SEO metrics including Domain Authority (DA), Page Authority (PA), Citation Flow (CF), Trust Factor (TF) analysis"
     },
     {
       icon: TrendingUp,
