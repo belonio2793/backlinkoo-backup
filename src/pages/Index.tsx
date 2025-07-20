@@ -106,7 +106,7 @@ const Index = () => {
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Everything You Need for SEO Success</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive SEO tools and premium backlink services in one powerful platform
+              Comprehensive SEO tools and premium backlink services in one platform
             </p>
           </div>
           
