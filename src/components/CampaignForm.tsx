@@ -17,7 +17,7 @@ export const CampaignForm = ({ onSuccess, onCancel }: CampaignFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     targetUrls: [""],
-    keywords: "",
+    keywords: [""],
     linksRequested: 5
   });
   const { toast } = useToast();
@@ -38,7 +38,9 @@ export const CampaignForm = ({ onSuccess, onCancel }: CampaignFormProps) => {
   };
 
   const addTargetUrl = () => {
-    setFormData({ ...formData, targetUrls: [...formData.targetUrls, ""] });
+    if (formData.targetUrls.length < 10) {
+      setFormData({ ...formData, targetUrls: [...formData.targetUrls, ""] });
+    }
   };
 
   const removeTargetUrl = (index: number) => {
@@ -50,6 +52,23 @@ export const CampaignForm = ({ onSuccess, onCancel }: CampaignFormProps) => {
     const newUrls = [...formData.targetUrls];
     newUrls[index] = value;
     setFormData({ ...formData, targetUrls: newUrls });
+  };
+
+  const addKeyword = () => {
+    if (formData.keywords.length < 5) {
+      setFormData({ ...formData, keywords: [...formData.keywords, ""] });
+    }
+  };
+
+  const removeKeyword = (index: number) => {
+    const newKeywords = formData.keywords.filter((_, i) => i !== index);
+    setFormData({ ...formData, keywords: newKeywords });
+  };
+
+  const updateKeyword = (index: number, value: string) => {
+    const newKeywords = [...formData.keywords];
+    newKeywords[index] = value;
+    setFormData({ ...formData, keywords: newKeywords });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,9 +106,8 @@ export const CampaignForm = ({ onSuccess, onCancel }: CampaignFormProps) => {
         throw new Error(`Insufficient credits. You need ${formData.linksRequested} credits but only have ${creditsData?.amount || 0}`);
       }
 
-      // Parse keywords into array
+      // Filter out empty keywords
       const keywordsArray = formData.keywords
-        .split(',')
         .map(k => k.trim())
         .filter(k => k.length > 0);
 
@@ -143,7 +161,7 @@ export const CampaignForm = ({ onSuccess, onCancel }: CampaignFormProps) => {
       // Reset form
       setFormData({
         targetUrls: [""],
-        keywords: "",
+        keywords: [""],
         linksRequested: 5
       });
 
@@ -206,27 +224,52 @@ export const CampaignForm = ({ onSuccess, onCancel }: CampaignFormProps) => {
               size="sm"
               onClick={addTargetUrl}
               className="w-full"
+              disabled={formData.targetUrls.length >= 10}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Another URL
+              Add Another URL ({formData.targetUrls.length}/10)
             </Button>
             <p className="text-xs text-muted-foreground">
-              The pages you want to build backlinks to. All URL formats accepted.
+              The pages you want to build backlinks to. All URL formats accepted. Maximum 10 URLs.
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="keywords">Target Keywords</Label>
-            <Textarea
-              id="keywords"
-              value={formData.keywords}
-              onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
-              placeholder="SEO tools, backlink building, digital marketing"
-              rows={3}
-              required
-            />
+            <Label>Target Keywords</Label>
+            {formData.keywords.map((keyword, index) => (
+              <div key={index} className="flex gap-2">
+                <Input
+                  value={keyword}
+                  onChange={(e) => updateKeyword(index, e.target.value)}
+                  placeholder="e.g., SEO tools"
+                  required={index === 0}
+                  className="flex-1"
+                />
+                {formData.keywords.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeKeyword(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addKeyword}
+              className="w-full"
+              disabled={formData.keywords.length >= 5}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Another Keyword ({formData.keywords.length}/5)
+            </Button>
             <p className="text-xs text-muted-foreground">
-              Separate keywords with commas. These will be used as anchor text.
+              Keywords will be used as anchor text. Maximum 5 keywords per campaign.
             </p>
           </div>
 
