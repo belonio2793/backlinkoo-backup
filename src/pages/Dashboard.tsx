@@ -40,28 +40,39 @@ const Dashboard = () => {
   const fetchUserData = async () => {
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) return;
+      console.log('Auth user:', user, 'Auth error:', authError);
+      if (authError || !user) {
+        console.log('No authenticated user found');
+        return;
+      }
 
       // Get user profile and role
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
         .eq('user_id', user.id)
         .single();
+
+      console.log('Profile data:', profile, 'Profile error:', profileError);
 
       if (profile?.role === 'admin') {
         setUserType('admin');
       }
 
       // Get user credits
-      const { data: creditsData } = await supabase
+      const { data: creditsData, error: creditsError } = await supabase
         .from('credits')
         .select('amount')
         .eq('user_id', user.id)
         .single();
 
+      console.log('Credits data:', creditsData, 'Credits error:', creditsError);
+
       if (creditsData) {
         setCredits(creditsData.amount);
+        console.log('Setting credits to:', creditsData.amount);
+      } else {
+        console.log('No credits data found');
       }
 
       // Check if user has any campaigns (first time user check)
