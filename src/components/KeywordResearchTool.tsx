@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,19 @@ interface KeywordData {
   topCompetitors?: string[];
 }
 
+interface RankingUrl {
+  position: number;
+  url: string;
+  title: string;
+  description: string;
+  domain: string;
+  domainAuthority?: number;
+  pageAuthority?: number;
+  backlinks?: number;
+  estimatedTraffic?: number;
+  socialShares?: number;
+}
+
 interface GeographicData {
   country: string;
   countryCode: string;
@@ -31,14 +44,35 @@ export const KeywordResearchTool = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [keywords, setKeywords] = useState<KeywordData[]>([]);
+  const [rankingUrls, setRankingUrls] = useState<RankingUrl[]>([]);
   const [selectedCountry, setSelectedCountry] = useState("US");
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedEngine, setSelectedEngine] = useState("google");
   const [geographicData, setGeographicData] = useState<GeographicData[]>([]);
+  const [userLocation, setUserLocation] = useState<{country: string; city: string} | null>(null);
   const { toast } = useToast();
 
   const [aiInsights, setAiInsights] = useState<string>("");
   const [showInsights, setShowInsights] = useState(false);
+
+  // Detect user location on component mount
+  useEffect(() => {
+    const detectLocation = async () => {
+      try {
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        setUserLocation({
+          country: data.country_name || 'United States',
+          city: data.city || ''
+        });
+        setSelectedCountry(data.country_code || 'US');
+        if (data.city) setSelectedCity(data.city);
+      } catch (error) {
+        console.log('Could not detect location, using defaults');
+      }
+    };
+    detectLocation();
+  }, []);
 
   // Advanced keyword research with geographic and competition analysis
   const performKeywordResearch = async (searchTerm: string) => {
@@ -106,13 +140,14 @@ export const KeywordResearchTool = () => {
     try {
       const results = await performKeywordResearch(searchTerm.trim());
       setKeywords(results.keywords);
+      setRankingUrls(results.rankingUrls || []);
       setGeographicData(results.geographicData || []);
       setAiInsights(results.aiInsights);
       setShowInsights(true);
 
       toast({
         title: "Research Complete",
-        description: `Found ${results.keywords.length} keywords with competition analysis`,
+        description: `Found ${results.keywords.length} keywords and ${results.rankingUrls?.length || 0} ranking URLs`,
       });
     } catch (error) {
       console.error('Keyword research failed:', error);
@@ -218,7 +253,13 @@ export const KeywordResearchTool = () => {
             </Select>
           )}
 
-          <Button 
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
+            {userLocation && (
+              <span>📍 Detected location: {userLocation.city ? `${userLocation.city}, ` : ''}{userLocation.country}</span>
+            )}
+          </div>
+          
+          <Button
             onClick={handleSearch} 
             disabled={isSearching}
             className="w-full md:w-auto"
@@ -251,10 +292,11 @@ export const KeywordResearchTool = () => {
 
       {keywords.length > 0 && (
         <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Keyword Overview</TabsTrigger>
-            <TabsTrigger value="competition">Competition Analysis</TabsTrigger>
-            <TabsTrigger value="geographic">Geographic Data</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Keywords</TabsTrigger>
+            <TabsTrigger value="rankings">Top 10 Rankings</TabsTrigger>
+            <TabsTrigger value="competition">Competition</TabsTrigger>
+            <TabsTrigger value="geographic">Geographic</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -262,7 +304,7 @@ export const KeywordResearchTool = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5" />
-                  Keyword Research Results
+                  Keyword Analysis Results
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -324,6 +366,77 @@ export const KeywordResearchTool = () => {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="rankings">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Top 10 Ranking URLs
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {rankingUrls.length > 0 ? (
+                  <div className="space-y-4">
+                    {rankingUrls.map((ranking, index) => (
+                      <div key={index} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
+                              {ranking.position}
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-medium text-lg mb-1">{ranking.title}</h3>
+                              <a 
+                                href={ranking.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline text-sm"
+                              >
+                                {ranking.domain}
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                          {ranking.description}
+                        </p>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-xs">
+                          <div className="flex flex-col">
+                            <span className="text-muted-foreground">Domain Authority</span>
+                            <span className="font-medium">{ranking.domainAuthority || 'N/A'}</span>
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-muted-foreground">Page Authority</span>
+                            <span className="font-medium">{ranking.pageAuthority || 'N/A'}</span>
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-muted-foreground">Backlinks</span>
+                            <span className="font-medium">{ranking.backlinks?.toLocaleString() || 'N/A'}</span>
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-muted-foreground">Est. Traffic</span>
+                            <span className="font-medium">{ranking.estimatedTraffic?.toLocaleString() || 'N/A'}/mo</span>
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-muted-foreground">Social Shares</span>
+                            <span className="font-medium">{ranking.socialShares?.toLocaleString() || 'N/A'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Ranking URLs will appear here after running a search</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
