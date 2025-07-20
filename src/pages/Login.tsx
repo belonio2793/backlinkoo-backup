@@ -238,7 +238,7 @@ const Login = () => {
             <Infinity className="h-8 w-8 text-primary" />
             <h1 className="text-2xl font-bold text-foreground">Backlink ∞</h1>
           </div>
-          <p className="text-muted-foreground">Professional SEO & Backlink Management</p>
+          <p className="text-muted-foreground">Powerful SEO & Backlink Management</p>
         </div>
 
         <Card>

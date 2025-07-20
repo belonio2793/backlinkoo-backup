@@ -79,7 +79,7 @@ const Index = () => {
       <section className="py-20 px-4">
         <div className="container mx-auto text-center">
           <Badge variant="outline" className="mb-6">
-            Professional SEO & Backlink Management
+            Powerful SEO & Backlink Management
           </Badge>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 text-foreground">
             Boost Your Rankings with
