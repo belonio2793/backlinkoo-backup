@@ -94,36 +94,6 @@ const Login = () => {
     }
   };
 
-  const checkEmailExists = async (email: string): Promise<boolean> => {
-    try {
-      // Use password reset to check if user exists
-      // This won't actually send an email, just checks if user exists
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/nonexistent-page`
-      });
-      
-      // If no error, user exists (email was accepted)
-      // If error contains "User not found" or similar, user doesn't exist
-      if (!error) {
-        return true; // User exists
-      }
-      
-      // Check error message to determine if user doesn't exist
-      const errorMsg = error.message.toLowerCase();
-      if (errorMsg.includes('user not found') || 
-          errorMsg.includes('email not confirmed') ||
-          errorMsg.includes('invalid email')) {
-        return false; // User doesn't exist
-      }
-      
-      // For other errors, assume user might exist to be safe
-      return true;
-    } catch (error) {
-      console.error('Error checking email existence:', error);
-      // If we can't check, assume user doesn't exist to allow signup
-      return false;
-    }
-  };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,27 +109,6 @@ const Login = () => {
       return;
     }
 
-    // Check if email already exists before attempting signup
-    console.log("Checking if email exists:", email);
-    const emailExists = await checkEmailExists(email);
-    console.log("Email exists result:", emailExists);
-    
-    if (emailExists) {
-      toast({
-        title: "Email Already Registered",
-        description: "This email address is already registered. Please use the Sign In tab to log into your account.",
-        variant: "destructive",
-      });
-      
-      // Switch to login tab automatically
-      const loginTab = document.querySelector('[value="login"]') as HTMLElement;
-      if (loginTab) {
-        loginTab.click();
-      }
-      
-      setIsLoading(false);
-      return;
-    }
 
     try {
       cleanupAuthState();
@@ -185,24 +134,19 @@ const Login = () => {
         console.log("Error message:", error.message);
         console.log("Error status:", error.status);
         
-        // Check for various "already registered" error messages and conditions
+        // Check for specific "already registered" error messages from Supabase
         const errorMessage = error.message.toLowerCase();
         const isAlreadyRegistered = 
           errorMessage.includes("user already registered") || 
           errorMessage.includes("already registered") ||
           errorMessage.includes("already been registered") ||
           errorMessage.includes("email address is already registered") ||
-          errorMessage.includes("account with this email already exists") ||
-          errorMessage.includes("email rate limit exceeded") ||
-          errorMessage.includes("signup is disabled") ||
-          errorMessage.includes("unable to validate email address") ||
-          error.status === 422 ||
-          error.status === 429;
+          errorMessage.includes("account with this email already exists");
         
         if (isAlreadyRegistered) {
           toast({
-            title: "Account Already Registered",
-            description: "This email is already registered and verified. Please use the Sign In tab to log into your account.",
+            title: "Account Already Exists",
+            description: "This email is already registered. Please use the Sign In tab to log into your account.",
             variant: "destructive",
           });
           
