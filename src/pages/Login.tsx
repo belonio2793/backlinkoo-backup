@@ -163,7 +163,33 @@ const Login = () => {
         }
       }
 
-      // Only show success message if no error and user was created
+      // Check if user already exists but signup didn't throw an error
+      // This happens when a user is already registered but not yet confirmed
+      if (data.user && !data.user.email_confirmed_at && data.user.created_at) {
+        const createdAt = new Date(data.user.created_at);
+        const now = new Date();
+        const timeDiff = now.getTime() - createdAt.getTime();
+        
+        // If the user was created more than 10 seconds ago, they already existed
+        if (timeDiff > 10000) {
+          toast({
+            title: "Account Already Exists",
+            description: "This email is already registered. Please check your email for the confirmation link or use the Sign In tab to log in.",
+            variant: "destructive",
+          });
+          
+          // Switch to login tab automatically
+          const loginTab = document.querySelector('[value="login"]') as HTMLElement;
+          if (loginTab) {
+            loginTab.click();
+          }
+          
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Only show success message if no error and user was created or is new
       if (data.user && !error) {
         // Always show success message for new signups since they need to confirm email
         toast({
