@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, TrendingUp, Eye, DollarSign, Globe, MapPin, BarChart3, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import googleLogo from "@/assets/google-logo.png";
+import bingLogo from "@/assets/bing-logo.png";
 
 interface KeywordData {
   keyword: string;
@@ -141,13 +143,13 @@ export const KeywordResearchTool = () => {
     { 
       value: "google", 
       name: "Google", 
-      icon: "🔍",
+      logo: googleLogo,
       color: "text-blue-600"
     },
     { 
       value: "bing", 
       name: "Bing", 
-      icon: "🔎",
+      logo: bingLogo,
       color: "text-orange-600"
     }
   ];
@@ -271,7 +273,11 @@ export const KeywordResearchTool = () => {
                 <SelectValue placeholder="Search Engine">
                   {selectedEngine && (
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">{searchEngines.find(e => e.value === selectedEngine)?.icon}</span>
+                      <img 
+                        src={searchEngines.find(e => e.value === selectedEngine)?.logo} 
+                        alt={searchEngines.find(e => e.value === selectedEngine)?.name}
+                        className="w-4 h-4 object-contain"
+                      />
                       <span className={searchEngines.find(e => e.value === selectedEngine)?.color}>
                         {searchEngines.find(e => e.value === selectedEngine)?.name}
                       </span>
@@ -283,7 +289,11 @@ export const KeywordResearchTool = () => {
                 {searchEngines.map((engine) => (
                   <SelectItem key={engine.value} value={engine.value}>
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">{engine.icon}</span>
+                      <img 
+                        src={engine.logo} 
+                        alt={engine.name}
+                        className="w-4 h-4 object-contain"
+                      />
                       <span className={engine.color}>{engine.name}</span>
                     </div>
                   </SelectItem>
@@ -385,11 +395,16 @@ export const KeywordResearchTool = () => {
                   {keywords.map((keyword, index) => (
                     <div key={index} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
                       <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <h3 className="font-medium text-lg">{keyword.keyword}</h3>
-                          <Badge variant="outline" className="text-xs">
-                            {keyword.searchEngine.toUpperCase()}
-                          </Badge>
+                          <div className="flex items-center gap-3">
+                            <h3 className="font-medium text-lg">{keyword.keyword}</h3>
+                            <Badge variant="outline" className="text-xs flex items-center gap-1">
+                              <img 
+                                src={keyword.searchEngine === 'google' ? googleLogo : bingLogo} 
+                                alt={keyword.searchEngine}
+                                className="w-3 h-3 object-contain"
+                              />
+                              {keyword.searchEngine.toUpperCase()}
+                            </Badge>
                           {keyword.location && (
                             <Badge variant="secondary" className="text-xs">
                               <MapPin className="h-3 w-3 mr-1" />
