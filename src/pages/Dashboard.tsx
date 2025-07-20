@@ -33,6 +33,7 @@ const Dashboard = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log('Dashboard mounted, fetching data...');
     fetchUserData();
     fetchCampaigns();
   }, []);
