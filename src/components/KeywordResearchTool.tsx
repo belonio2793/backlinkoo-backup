@@ -112,16 +112,16 @@ export const KeywordResearchTool = () => {
   };
 
   const countries = [
-    { code: "US", name: "United States" },
-    { code: "UK", name: "United Kingdom" },
-    { code: "CA", name: "Canada" },
-    { code: "AU", name: "Australia" },
-    { code: "DE", name: "Germany" },
-    { code: "FR", name: "France" },
-    { code: "ES", name: "Spain" },
-    { code: "IT", name: "Italy" },
-    { code: "JP", name: "Japan" },
-    { code: "BR", name: "Brazil" },
+    { code: "US", name: "United States", flag: "🇺🇸" },
+    { code: "UK", name: "United Kingdom", flag: "🇬🇧" },
+    { code: "CA", name: "Canada", flag: "🇨🇦" },
+    { code: "AU", name: "Australia", flag: "🇦🇺" },
+    { code: "DE", name: "Germany", flag: "🇩🇪" },
+    { code: "FR", name: "France", flag: "🇫🇷" },
+    { code: "ES", name: "Spain", flag: "🇪🇸" },
+    { code: "IT", name: "Italy", flag: "🇮🇹" },
+    { code: "JP", name: "Japan", flag: "🇯🇵" },
+    { code: "BR", name: "Brazil", flag: "🇧🇷" },
   ];
 
   const cities = {
@@ -136,6 +136,21 @@ export const KeywordResearchTool = () => {
     JP: ["Tokyo", "Osaka", "Nagoya", "Sapporo", "Fukuoka"],
     BR: ["São Paulo", "Rio de Janeiro", "Brasília", "Salvador", "Fortaleza"],
   };
+
+  const searchEngines = [
+    { 
+      value: "google", 
+      name: "Google", 
+      icon: "🔍",
+      color: "text-blue-600"
+    },
+    { 
+      value: "bing", 
+      name: "Bing", 
+      icon: "🔎",
+      color: "text-orange-600"
+    }
+  ];
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
@@ -230,14 +245,21 @@ export const KeywordResearchTool = () => {
               setSelectedCity("");
             }}>
               <SelectTrigger>
-                <SelectValue placeholder="Country" />
+                <SelectValue placeholder="Select Country">
+                  {selectedCountry && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{countries.find(c => c.code === selectedCountry)?.flag}</span>
+                      <span>{countries.find(c => c.code === selectedCountry)?.name}</span>
+                    </div>
+                  )}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {countries.map((country) => (
                   <SelectItem key={country.code} value={country.code}>
                     <div className="flex items-center gap-2">
-                      <Globe className="h-4 w-4" />
-                      {country.name}
+                      <span className="text-lg">{country.flag}</span>
+                      <span>{country.name}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -246,21 +268,26 @@ export const KeywordResearchTool = () => {
 
             <Select value={selectedEngine} onValueChange={setSelectedEngine}>
               <SelectTrigger>
-                <SelectValue placeholder="Search Engine" />
+                <SelectValue placeholder="Search Engine">
+                  {selectedEngine && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{searchEngines.find(e => e.value === selectedEngine)?.icon}</span>
+                      <span className={searchEngines.find(e => e.value === selectedEngine)?.color}>
+                        {searchEngines.find(e => e.value === selectedEngine)?.name}
+                      </span>
+                    </div>
+                  )}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="google">
-                  <div className="flex items-center gap-2">
-                    <Target className="h-4 w-4" />
-                    Google
-                  </div>
-                </SelectItem>
-                <SelectItem value="bing">
-                  <div className="flex items-center gap-2">
-                    <Target className="h-4 w-4" />
-                    Bing
-                  </div>
-                </SelectItem>
+                {searchEngines.map((engine) => (
+                  <SelectItem key={engine.value} value={engine.value}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{engine.icon}</span>
+                      <span className={engine.color}>{engine.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -268,10 +295,22 @@ export const KeywordResearchTool = () => {
           {selectedCountry && cities[selectedCountry as keyof typeof cities] && (
             <Select value={selectedCity} onValueChange={setSelectedCity}>
               <SelectTrigger className="max-w-md">
-                <SelectValue placeholder="City (optional)" />
+                <SelectValue placeholder="City (optional)">
+                  {selectedCity && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      <span>{selectedCity}</span>
+                    </div>
+                  )}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Cities</SelectItem>
+                <SelectItem value="">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-4 w-4" />
+                    <span>All Cities</span>
+                  </div>
+                </SelectItem>
                 {cities[selectedCountry as keyof typeof cities].map((city) => (
                   <SelectItem key={city} value={city}>
                     <div className="flex items-center gap-2">
@@ -286,7 +325,10 @@ export const KeywordResearchTool = () => {
 
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
             {userLocation && (
-              <span>📍 Detected location: {userLocation.city ? `${userLocation.city}, ` : ''}{userLocation.country}</span>
+              <div className="flex items-center gap-1">
+                <span>📍</span>
+                <span>Detected: {userLocation.city ? `${userLocation.city}, ` : ''}{userLocation.country}</span>
+              </div>
             )}
           </div>
           
