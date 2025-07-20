@@ -95,6 +95,33 @@ const Login = () => {
   };
 
 
+  const checkEmailExists = async (email: string): Promise<boolean> => {
+    try {
+      // Try to sign in with the email and a dummy password to check if user exists
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password: 'dummy-password-to-check-existence'
+      });
+      
+      // If we get "Invalid login credentials", the email exists but password is wrong
+      // If we get "Email not confirmed", the email exists but isn't confirmed
+      // If we get "User not found" or similar, the email doesn't exist
+      if (error) {
+        const errorMessage = error.message.toLowerCase();
+        return errorMessage.includes('invalid login credentials') || 
+               errorMessage.includes('email not confirmed') ||
+               errorMessage.includes('signup is disabled') ||
+               !errorMessage.includes('user not found');
+      }
+      
+      // If no error, user exists and we accidentally logged them in (shouldn't happen with dummy password)
+      return true;
+    } catch (error) {
+      // On any error, assume email doesn't exist to be safe
+      return false;
+    }
+  };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -109,8 +136,27 @@ const Login = () => {
       return;
     }
 
-
     try {
+      // First check if email already exists
+      const emailExists = await checkEmailExists(email);
+      
+      if (emailExists) {
+        toast({
+          title: "Email Already Taken",
+          description: "This email address is already registered. Please use the Sign In tab to log into your account.",
+          variant: "destructive",
+        });
+        
+        // Switch to login tab automatically
+        const loginTab = document.querySelector('[value="login"]') as HTMLElement;
+        if (loginTab) {
+          loginTab.click();
+        }
+        
+        setIsLoading(false);
+        return;
+      }
+
       cleanupAuthState();
       try {
         await supabase.auth.signOut({ scope: 'global' });
@@ -129,67 +175,11 @@ const Login = () => {
       });
 
       if (error) {
-        // Check for specific "already registered" error messages from Supabase
-        const errorMessage = error.message.toLowerCase();
-        const isAlreadyRegistered = 
-          errorMessage.includes("user already registered") || 
-          errorMessage.includes("already registered") ||
-          errorMessage.includes("already been registered") ||
-          errorMessage.includes("email address is already registered") ||
-          errorMessage.includes("account with this email already exists");
-        
-        if (isAlreadyRegistered) {
-          toast({
-            title: "Account Already Exists",
-            description: "This email is already registered. Please use the Sign In tab to log into your account.",
-            variant: "destructive",
-          });
-          
-          // Switch to login tab automatically
-          const loginTab = document.querySelector('[value="login"]') as HTMLElement;
-          if (loginTab) {
-            loginTab.click();
-          }
-          
-          setIsLoading(false);
-          return;
-        } else {
-          throw error;
-        }
+        throw error;
       }
 
-      // Check if this is an existing user (Supabase returns user but they already exist)
-      // If signup succeeds but user doesn't have new metadata, they already existed
+      // Show success message for new signups
       if (data.user) {
-        // Try to check if email already exists by attempting to get user info
-        const { data: existingUser } = await supabase.auth.admin.getUserById(data.user.id);
-        
-        // If user exists and was created more than a few seconds ago, they already existed
-        if (data.user.created_at) {
-          const createdAt = new Date(data.user.created_at);
-          const now = new Date();
-          const timeDiff = now.getTime() - createdAt.getTime();
-          
-          // If user was created more than 5 seconds ago, they already existed
-          if (timeDiff > 5000) {
-            toast({
-              title: "Account Already Exists",
-              description: "This email is already registered. Please use the Sign In tab to log into your account.",
-              variant: "destructive",
-            });
-            
-            // Switch to login tab automatically
-            const loginTab = document.querySelector('[value="login"]') as HTMLElement;
-            if (loginTab) {
-              loginTab.click();
-            }
-            
-            setIsLoading(false);
-            return;
-          }
-        }
-        
-        // Show success message for new signups
         toast({
           title: "Check your email!",
           description: "We've sent you a confirmation link to verify your account.",
