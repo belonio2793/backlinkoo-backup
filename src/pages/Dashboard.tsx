@@ -62,8 +62,8 @@ const Dashboard = () => {
         description: "You have been logged out of your account.",
       });
       
-      // Redirect to login page
-      window.location.href = "/auth";
+      // Redirect to home page
+      window.location.href = "/";
     } catch (error) {
       toast({
         title: "Sign out error",
