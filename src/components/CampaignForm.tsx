@@ -241,7 +241,7 @@ export const CampaignForm = ({ onSuccess, onCancel }: CampaignFormProps) => {
                 <Input
                   value={keyword}
                   onChange={(e) => updateKeyword(index, e.target.value)}
-                  placeholder="e.g., SEO tools"
+                  placeholder="∞"
                   required={index === 0}
                   className="flex-1"
                 />
