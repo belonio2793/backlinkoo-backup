@@ -118,7 +118,7 @@ const Login = () => {
         // Continue even if this fails
       }
 
-      const redirectUrl = `${window.location.origin}/dashboard`;
+      const redirectUrl = `https://backlinkoo.com/auth/confirm`;
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -191,7 +191,7 @@ const Login = () => {
         type: 'signup',
         email: resendEmail,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`
+          emailRedirectTo: `https://backlinkoo.com/auth/confirm`
         }
       });
 
