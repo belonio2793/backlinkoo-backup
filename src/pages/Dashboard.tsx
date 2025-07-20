@@ -12,12 +12,18 @@ import {
   Users,
   Infinity,
   Plus,
-  Activity
+  Activity,
+  LogOut
 } from "lucide-react";
+import { PaymentModal } from "@/components/PaymentModal";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const [userType] = useState<"user" | "admin">("user"); // TODO: Get from auth context
   const [credits] = useState(47); // TODO: Get from Supabase
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const { toast } = useToast();
 
   const campaigns = [
     {
@@ -46,6 +52,27 @@ const Dashboard = () => {
     "https://digitalagency.com/resources"
   ];
 
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out of your account.",
+      });
+      
+      // Redirect to login page
+      window.location.href = "/auth";
+    } catch (error) {
+      toast({
+        title: "Sign out error",
+        description: "There was an error signing you out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -61,9 +88,13 @@ const Dashboard = () => {
                 <CreditCard className="h-3 w-3" />
                 {credits} Credits
               </Badge>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setIsPaymentModalOpen(true)}>
                 <Plus className="h-4 w-4 mr-1" />
                 Buy Credits
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-1" />
+                Sign Out
               </Button>
             </div>
           </div>
@@ -277,6 +308,11 @@ const Dashboard = () => {
           </div>
         )}
       </div>
+
+      <PaymentModal 
+        isOpen={isPaymentModalOpen} 
+        onClose={() => setIsPaymentModalOpen(false)} 
+      />
     </div>
   );
 };
