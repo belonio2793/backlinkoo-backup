@@ -133,7 +133,7 @@ export const RankingTracker = () => {
               <Label htmlFor="keyword">Target Keyword</Label>
               <Input
                 id="keyword"
-                placeholder="SEO tools"
+                placeholder="∞"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
               />
