@@ -41,6 +41,8 @@ interface GeographicData {
 }
 
 export const KeywordResearchTool = () => {
+  console.log('KeywordResearchTool: Component rendering started');
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [keywords, setKeywords] = useState<KeywordData[]>([]);
@@ -57,10 +59,13 @@ export const KeywordResearchTool = () => {
 
   // Detect user location on component mount
   useEffect(() => {
+    console.log('KeywordResearchTool: useEffect running for location detection');
     const detectLocation = async () => {
       try {
+        console.log('KeywordResearchTool: Attempting to detect location');
         const response = await fetch('https://ipapi.co/json/');
         const data = await response.json();
+        console.log('KeywordResearchTool: Location data received:', data);
         setUserLocation({
           country: data.country_name || 'United States',
           city: data.city || ''
@@ -68,7 +73,7 @@ export const KeywordResearchTool = () => {
         setSelectedCountry(data.country_code || 'US');
         if (data.city) setSelectedCity(data.city);
       } catch (error) {
-        console.log('Could not detect location, using defaults');
+        console.log('KeywordResearchTool: Could not detect location, using defaults', error);
       }
     };
     detectLocation();
@@ -173,7 +178,10 @@ export const KeywordResearchTool = () => {
     return "Hard";
   };
 
-  return (
+  console.log('KeywordResearchTool: About to render component');
+  
+  try {
+    return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
@@ -520,5 +528,14 @@ export const KeywordResearchTool = () => {
         </Tabs>
       )}
     </div>
-  );
+    );
+  } catch (error) {
+    console.error('KeywordResearchTool: Error rendering component:', error);
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-xl font-semibold mb-4">Keyword Research Tool</h2>
+        <p className="text-muted-foreground">Loading keyword research functionality...</p>
+      </div>
+    );
+  }
 };
