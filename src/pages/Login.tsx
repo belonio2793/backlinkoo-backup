@@ -127,14 +127,16 @@ const Login = () => {
       });
 
       if (error) {
-        // Check if user already exists
-        if (error.message.includes("User already registered") || 
-            error.message.includes("already registered") ||
-            error.message.includes("already been registered") ||
-            error.message.includes("email address is already registered") ||
-            error.message.includes("Account with this email already exists")) {
+        // Check for various "already registered" error messages
+        const errorMessage = error.message.toLowerCase();
+        if (errorMessage.includes("user already registered") || 
+            errorMessage.includes("already registered") ||
+            errorMessage.includes("already been registered") ||
+            errorMessage.includes("email address is already registered") ||
+            errorMessage.includes("account with this email already exists") ||
+            errorMessage.includes("email rate limit exceeded") ||
+            error.status === 422) {
           
-          // Don't allow sending additional confirmation emails
           toast({
             title: "Account Already Registered",
             description: "This email is already registered and verified. Please use the Sign In tab to log into your account.",
@@ -147,17 +149,31 @@ const Login = () => {
             loginTab.click();
           }
           
-          return; // Exit early, don't show resend option
+          setIsLoading(false);
+          return; // Exit early, don't show success message
         } else {
           throw error;
         }
-      } else if (data.user) {
-        toast({
-          title: "Check your email!",
-          description: "We've sent you a confirmation link to verify your account.",
-        });
+      }
+
+      // Only show success message if no error and user was created
+      if (data.user && !error) {
+        // Check if user needs email confirmation
+        if (data.user.email_confirmed_at) {
+          toast({
+            title: "Account created successfully!",
+            description: "Your account is ready to use. Redirecting to dashboard...",
+          });
+          window.location.href = '/dashboard';
+        } else {
+          toast({
+            title: "Check your email!",
+            description: "We've sent you a confirmation link to verify your account.",
+          });
+        }
       }
     } catch (error: any) {
+      console.error("Signup error:", error);
       toast({
         title: "Sign up failed",
         description: error.message || "An error occurred during sign up.",
