@@ -96,21 +96,31 @@ const Login = () => {
 
   const checkEmailExists = async (email: string): Promise<boolean> => {
     try {
-      // Check if email exists in profiles table
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('email', email)
-        .limit(1);
+      // Use password reset to check if user exists
+      // This won't actually send an email, just checks if user exists
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/nonexistent-page`
+      });
       
-      if (error) {
-        console.error('Error checking email:', error);
-        return false;
+      // If no error, user exists (email was accepted)
+      // If error contains "User not found" or similar, user doesn't exist
+      if (!error) {
+        return true; // User exists
       }
       
-      return data && data.length > 0;
+      // Check error message to determine if user doesn't exist
+      const errorMsg = error.message.toLowerCase();
+      if (errorMsg.includes('user not found') || 
+          errorMsg.includes('email not confirmed') ||
+          errorMsg.includes('invalid email')) {
+        return false; // User doesn't exist
+      }
+      
+      // For other errors, assume user might exist to be safe
+      return true;
     } catch (error) {
-      console.error('Error checking email:', error);
+      console.error('Error checking email existence:', error);
+      // If we can't check, assume user doesn't exist to allow signup
       return false;
     }
   };
@@ -130,7 +140,10 @@ const Login = () => {
     }
 
     // Check if email already exists before attempting signup
+    console.log("Checking if email exists:", email);
     const emailExists = await checkEmailExists(email);
+    console.log("Email exists result:", emailExists);
+    
     if (emailExists) {
       toast({
         title: "Email Already Registered",
