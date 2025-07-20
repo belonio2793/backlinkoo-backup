@@ -191,7 +191,7 @@ const Dashboard = () => {
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-              <TabsTrigger value="keyword-research">Keywords</TabsTrigger>
+              <TabsTrigger value="keyword-research">Keyword Research</TabsTrigger>
               <TabsTrigger value="rank-tracker">Rankings</TabsTrigger>
               <TabsTrigger value="seo-tools">SEO Tools</TabsTrigger>
             </TabsList>

@@ -52,6 +52,7 @@ export const KeywordResearchTool = () => {
   const [selectedEngine, setSelectedEngine] = useState("google");
   const [geographicData, setGeographicData] = useState<GeographicData[]>([]);
   const [userLocation, setUserLocation] = useState<{country: string; city: string} | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   const [aiInsights, setAiInsights] = useState<string>("");
@@ -74,6 +75,12 @@ export const KeywordResearchTool = () => {
         if (data.city) setSelectedCity(data.city);
       } catch (error) {
         console.log('KeywordResearchTool: Could not detect location, using defaults', error);
+      } finally {
+        // Add a small delay to show the loading animation
+        setTimeout(() => {
+          setIsLoading(false);
+          console.log('KeywordResearchTool: Loading complete');
+        }, 1000);
       }
     };
     detectLocation();
@@ -178,7 +185,23 @@ export const KeywordResearchTool = () => {
     return "Hard";
   };
 
-  console.log('KeywordResearchTool: About to render component');
+  console.log('KeywordResearchTool: About to render component', { isLoading });
+  
+  // Show loading animation while initializing
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+          <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-primary/40 rounded-full animate-spin" style={{ animationDelay: '-0.15s' }}></div>
+        </div>
+        <div className="text-center space-y-2">
+          <h3 className="text-lg font-semibold">Loading Keyword Research Tool</h3>
+          <p className="text-sm text-muted-foreground">Initializing advanced keyword analysis...</p>
+        </div>
+      </div>
+    );
+  }
   
   try {
     return (
