@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { Infinity, Eye, EyeOff, Mail } from "lucide-react";
+import { Infinity, Eye, EyeOff, Mail, RefreshCw } from "lucide-react";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -18,6 +18,8 @@ const Login = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [showResendConfirmation, setShowResendConfirmation] = useState(false);
+  const [resendEmail, setResendEmail] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -124,9 +126,22 @@ const Login = () => {
         }
       });
 
-      if (error) throw error;
-
-      if (data.user) {
+      if (error) {
+        // Check if user already exists
+        if (error.message.includes("User already registered") || 
+            error.message.includes("already registered") ||
+            error.message.includes("already been registered")) {
+          setResendEmail(email);
+          setShowResendConfirmation(true);
+          toast({
+            title: "Account already exists",
+            description: "This email is already registered. You can resend the confirmation email below if needed.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+      } else if (data.user) {
         toast({
           title: "Check your email!",
           description: "We've sent you a confirmation link to verify your account.",
@@ -136,6 +151,37 @@ const Login = () => {
       toast({
         title: "Sign up failed",
         description: error.message || "An error occurred during sign up.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: resendEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Confirmation email sent!",
+        description: "We've sent you a new confirmation link. Please check your email.",
+      });
+      
+      setShowResendConfirmation(false);
+    } catch (error: any) {
+      toast({
+        title: "Failed to resend confirmation",
+        description: error.message || "An error occurred while sending the confirmation email.",
         variant: "destructive",
       });
     } finally {
@@ -352,6 +398,33 @@ const Login = () => {
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Creating account..." : "Create Account"}
                   </Button>
+                  
+                  {showResendConfirmation && (
+                    <div className="mt-4 p-4 border border-border rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                        <Mail className="h-4 w-4" />
+                        <span>Account already exists for: {resendEmail}</span>
+                      </div>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        className="w-full" 
+                        onClick={handleResendConfirmation}
+                        disabled={isLoading}
+                      >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        {isLoading ? "Sending..." : "Resend Confirmation Email"}
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        className="w-full mt-2" 
+                        onClick={() => setShowResendConfirmation(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
                   
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Mail className="h-4 w-4" />
