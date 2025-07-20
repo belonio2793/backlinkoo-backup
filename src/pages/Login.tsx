@@ -142,6 +142,7 @@ const Login = () => {
           errorMessage.includes("account with this email already exists") ||
           errorMessage.includes("email rate limit exceeded") ||
           errorMessage.includes("signup is disabled") ||
+          errorMessage.includes("unable to validate email address") ||
           error.status === 422 ||
           error.status === 429;
         
