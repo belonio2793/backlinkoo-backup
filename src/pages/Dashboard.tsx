@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,41 +16,96 @@ import {
   LogOut
 } from "lucide-react";
 import { PaymentModal } from "@/components/PaymentModal";
+import { CampaignForm } from "@/components/CampaignForm";
+import { KeywordResearchTool } from "@/components/KeywordResearchTool";
+import { RankingTracker } from "@/components/RankingTracker";
+import { SEOTools } from "@/components/SEOTools";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
-  const [userType] = useState<"user" | "admin">("user"); // TODO: Get from auth context
-  const [credits] = useState(47); // TODO: Get from Supabase
+  const [userType, setUserType] = useState<"user" | "admin">("user");
+  const [credits, setCredits] = useState(0);
+  const [campaigns, setCampaigns] = useState<any[]>([]);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [showCampaignForm, setShowCampaignForm] = useState(false);
+  const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   const { toast } = useToast();
 
-  const campaigns = [
-    {
-      id: "BL-001",
-      targetUrl: "example.com",
-      keywords: "SEO, backlinks, digital marketing",
-      requestedLinks: 10,
-      deliveredLinks: 8,
-      status: "In Progress",
-      createdAt: "2024-01-15"
-    },
-    {
-      id: "BL-002",
-      targetUrl: "mysite.com/blog",
-      keywords: "content marketing, blog",
-      requestedLinks: 5,
-      deliveredLinks: 5,
-      status: "Completed",
-      createdAt: "2024-01-10"
-    }
-  ];
+  useEffect(() => {
+    fetchUserData();
+    fetchCampaigns();
+  }, []);
 
-  const deliveredLinks = [
-    "https://techblog.com/seo-guide",
-    "https://marketingsite.com/backlink-strategies",
-    "https://digitalagency.com/resources"
-  ];
+  const fetchUserData = async () => {
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) return;
+
+      // Get user profile and role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profile?.role === 'admin') {
+        setUserType('admin');
+      }
+
+      // Get user credits
+      const { data: creditsData } = await supabase
+        .from('credits')
+        .select('amount')
+        .eq('user_id', user.id)
+        .single();
+
+      if (creditsData) {
+        setCredits(creditsData.amount);
+      }
+
+      // Check if user has any campaigns (first time user check)
+      const { data: campaignsData } = await supabase
+        .from('campaigns')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1);
+
+      setIsFirstTimeUser(!campaignsData || campaignsData.length === 0);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  const fetchCampaigns = async () => {
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) return;
+
+      const { data: campaignsData, error } = await supabase
+        .from('campaigns')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching campaigns:', error);
+        return;
+      }
+
+      setCampaigns(campaignsData || []);
+    } catch (error) {
+      console.error('Error fetching campaigns:', error);
+    }
+  };
+
+  const handleCampaignSuccess = () => {
+    setShowCampaignForm(false);
+    fetchUserData(); // Refresh credits
+    fetchCampaigns(); // Refresh campaigns
+    setIsFirstTimeUser(false);
+  };
+
 
   const handleSignOut = async () => {
     try {
@@ -129,6 +184,24 @@ const Dashboard = () => {
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
+              {isFirstTimeUser && credits === 0 && (
+                <Card className="border-blue-200 bg-blue-50">
+                  <CardHeader>
+                    <CardTitle className="text-blue-800">Welcome to Backlink ∞!</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-blue-700 mb-4">
+                      Get started by purchasing credits to create your first backlink campaign. 
+                      Our high-quality backlinks will help improve your website's search engine rankings.
+                    </p>
+                    <Button onClick={() => setIsPaymentModalOpen(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Buy Your First Credits
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -143,12 +216,14 @@ const Dashboard = () => {
                 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Active Campaigns</CardTitle>
+                    <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
                     <Activity className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">3</div>
-                    <p className="text-xs text-muted-foreground">2 in progress</p>
+                    <div className="text-2xl font-bold">{campaigns.length}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {campaigns.filter(c => c.status === 'pending' || c.status === 'in_progress').length} active
+                    </p>
                   </CardContent>
                 </Card>
                 
@@ -158,8 +233,10 @@ const Dashboard = () => {
                     <Link className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">127</div>
-                    <p className="text-xs text-muted-foreground">+23 this month</p>
+                    <div className="text-2xl font-bold">
+                      {campaigns.reduce((sum, c) => sum + (c.links_delivered || 0), 0)}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Delivered links</p>
                   </CardContent>
                 </Card>
                 
@@ -169,136 +246,161 @@ const Dashboard = () => {
                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">94%</div>
-                    <p className="text-xs text-muted-foreground">Campaign delivery</p>
+                    <div className="text-2xl font-bold">
+                      {campaigns.length > 0 
+                        ? Math.round((campaigns.filter(c => c.status === 'completed').length / campaigns.length) * 100)
+                        : 0}%
+                    </div>
+                    <p className="text-xs text-muted-foreground">Campaign completion</p>
                   </CardContent>
                 </Card>
               </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Campaigns</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {campaigns.slice(0, 3).map((campaign) => (
-                      <div key={campaign.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <p className="font-medium">{campaign.targetUrl}</p>
-                          <p className="text-sm text-muted-foreground">{campaign.keywords}</p>
+              {campaigns.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Campaigns</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {campaigns.slice(0, 3).map((campaign) => (
+                        <div key={campaign.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">{campaign.target_url}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {Array.isArray(campaign.keywords) ? campaign.keywords.join(', ') : campaign.keywords}
+                            </p>
+                          </div>
+                          <Badge variant={campaign.status === "completed" ? "default" : "secondary"}>
+                            {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
+                          </Badge>
                         </div>
-                        <Badge variant={campaign.status === "Completed" ? "default" : "secondary"}>
-                          {campaign.status}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {campaigns.length === 0 && credits > 0 && (
+                <Card className="border-green-200 bg-green-50">
+                  <CardHeader>
+                    <CardTitle className="text-green-800">Ready to Create Your First Campaign?</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-green-700 mb-4">
+                      You have {credits} credits available. Create your first backlink campaign to start building authority for your website.
+                    </p>
+                    <Button onClick={() => setShowCampaignForm(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Your First Campaign
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="campaigns" className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Campaign Management</h2>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Campaign
-                </Button>
-              </div>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Campaign History</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {campaigns.map((campaign) => (
-                      <div key={campaign.id} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <p className="font-medium">Campaign {campaign.id}</p>
-                            <p className="text-sm text-muted-foreground">Created: {campaign.createdAt}</p>
-                          </div>
-                          <Badge variant={campaign.status === "Completed" ? "default" : "secondary"}>
-                            {campaign.status}
-                          </Badge>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                          <div>
-                            <p className="text-muted-foreground">Target URL</p>
-                            <p className="font-medium">{campaign.targetUrl}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Keywords</p>
-                            <p className="font-medium">{campaign.keywords}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Progress</p>
-                            <p className="font-medium">{campaign.deliveredLinks}/{campaign.requestedLinks} links</p>
-                          </div>
-                        </div>
-                        {campaign.status === "Completed" && (
-                          <div className="mt-4">
-                            <p className="text-sm font-medium mb-2">Delivered Backlinks:</p>
-                            <div className="space-y-1">
-                              {deliveredLinks.map((link, index) => (
-                                <p key={index} className="text-sm text-primary hover:underline cursor-pointer">
-                                  {link}
-                                </p>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+              {showCampaignForm ? (
+                <CampaignForm 
+                  onSuccess={handleCampaignSuccess}
+                  onCancel={() => setShowCampaignForm(false)}
+                />
+              ) : (
+                <>
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-2xl font-bold">Campaign Management</h2>
+                    <Button onClick={() => setShowCampaignForm(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      New Campaign
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
+                  
+                  {campaigns.length > 0 ? (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Campaign History</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {campaigns.map((campaign) => (
+                            <div key={campaign.id} className="border rounded-lg p-4">
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <p className="font-medium">{campaign.name}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    Created: {new Date(campaign.created_at).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                <Badge variant={campaign.status === "completed" ? "default" : "secondary"}>
+                                  {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
+                                </Badge>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                <div>
+                                  <p className="text-muted-foreground">Target URL</p>
+                                  <p className="font-medium">{campaign.target_url}</p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">Keywords</p>
+                                  <p className="font-medium">
+                                    {Array.isArray(campaign.keywords) 
+                                      ? campaign.keywords.join(', ') 
+                                      : campaign.keywords}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">Progress</p>
+                                  <p className="font-medium">
+                                    {campaign.links_delivered}/{campaign.links_requested} links
+                                  </p>
+                                </div>
+                              </div>
+                              {campaign.completed_backlinks && campaign.completed_backlinks.length > 0 && (
+                                <div className="mt-4">
+                                  <p className="text-sm font-medium mb-2">Delivered Backlinks:</p>
+                                  <div className="space-y-1">
+                                    {campaign.completed_backlinks.map((link: string, index: number) => (
+                                      <p key={index} className="text-sm text-primary hover:underline cursor-pointer">
+                                        {link}
+                                      </p>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <Card>
+                      <CardContent className="text-center py-12">
+                        <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg font-medium mb-2">No Campaigns Yet</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Create your first campaign to start building high-quality backlinks
+                        </p>
+                        <Button onClick={() => setShowCampaignForm(true)}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Your First Campaign
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              )}
             </TabsContent>
 
             <TabsContent value="keyword-research">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Search className="h-5 w-5" />
-                    Keyword Research Tool
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Search for profitable keywords with low competition</p>
-                  {/* TODO: Implement keyword research tool */}
-                </CardContent>
-              </Card>
+              <KeywordResearchTool />
             </TabsContent>
 
             <TabsContent value="rank-tracker">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    Ranking Tracker
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Track your keyword rankings on Google and Bing</p>
-                  {/* TODO: Implement rank tracker */}
-                </CardContent>
-              </Card>
+              <RankingTracker />
             </TabsContent>
 
             <TabsContent value="seo-tools">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Globe className="h-5 w-5" />
-                    SEO Analysis Tools
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Analyze domain authority, page authority, and indexing status</p>
-                  {/* TODO: Implement SEO tools */}
-                </CardContent>
-              </Card>
+              <SEOTools />
             </TabsContent>
           </Tabs>
         ) : (
