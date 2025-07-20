@@ -30,6 +30,7 @@ const Dashboard = () => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -186,7 +187,7 @@ const Dashboard = () => {
 
       <div className="container mx-auto px-4 py-8">
         {userType === "user" ? (
-          <Tabs defaultValue="overview" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
@@ -303,7 +304,8 @@ const Dashboard = () => {
                       You have {credits} credits available. Create your first backlink campaign to start building authority for your website.
                     </p>
                     <Button onClick={() => {
-                      console.log('Creating first campaign...');
+                      console.log('Navigating to campaigns tab...');
+                      setActiveTab('campaigns');
                       setShowCampaignForm(true);
                     }}>
                       <Plus className="h-4 w-4 mr-2" />
