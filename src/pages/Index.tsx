@@ -194,7 +194,7 @@ const Index = () => {
             <span className="text-lg font-semibold">Backlink ∞</span>
           </div>
           <p className="text-muted-foreground">
-            © 2024 Backlinkoo. All rights reserved.
+            © Backlinkoo.com. All rights reserved.
           </p>
         </div>
       </footer>
