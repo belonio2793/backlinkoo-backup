@@ -130,14 +130,24 @@ const Login = () => {
         // Check if user already exists
         if (error.message.includes("User already registered") || 
             error.message.includes("already registered") ||
-            error.message.includes("already been registered")) {
-          setResendEmail(email);
-          setShowResendConfirmation(true);
+            error.message.includes("already been registered") ||
+            error.message.includes("email address is already registered") ||
+            error.message.includes("Account with this email already exists")) {
+          
+          // Don't allow sending additional confirmation emails
           toast({
-            title: "Account already exists",
-            description: "This email is already registered. You can resend the confirmation email below if needed.",
+            title: "Account Already Registered",
+            description: "This email is already registered and verified. Please use the Sign In tab to log into your account.",
             variant: "destructive",
           });
+          
+          // Switch to login tab automatically
+          const loginTab = document.querySelector('[value="login"]') as HTMLElement;
+          if (loginTab) {
+            loginTab.click();
+          }
+          
+          return; // Exit early, don't show resend option
         } else {
           throw error;
         }
