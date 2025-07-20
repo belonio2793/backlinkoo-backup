@@ -94,6 +94,27 @@ const Login = () => {
     }
   };
 
+  const checkEmailExists = async (email: string): Promise<boolean> => {
+    try {
+      // Check if email exists in profiles table
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('email', email)
+        .limit(1);
+      
+      if (error) {
+        console.error('Error checking email:', error);
+        return false;
+      }
+      
+      return data && data.length > 0;
+    } catch (error) {
+      console.error('Error checking email:', error);
+      return false;
+    }
+  };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -104,6 +125,25 @@ const Login = () => {
         description: "Please make sure your passwords match.",
         variant: "destructive",
       });
+      setIsLoading(false);
+      return;
+    }
+
+    // Check if email already exists before attempting signup
+    const emailExists = await checkEmailExists(email);
+    if (emailExists) {
+      toast({
+        title: "Email Already Registered",
+        description: "This email address is already registered. Please use the Sign In tab to log into your account.",
+        variant: "destructive",
+      });
+      
+      // Switch to login tab automatically
+      const loginTab = document.querySelector('[value="login"]') as HTMLElement;
+      if (loginTab) {
+        loginTab.click();
+      }
+      
       setIsLoading(false);
       return;
     }
