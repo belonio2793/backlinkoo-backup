@@ -20,28 +20,27 @@ export const KeywordResearchTool = () => {
   const [keywords, setKeywords] = useState<KeywordData[]>([]);
   const { toast } = useToast();
 
-  // Mock data generator for demonstration
-  const generateMockKeywords = (baseTerm: string): KeywordData[] => {
-    const variations = [
-      baseTerm,
-      `${baseTerm} tools`,
-      `${baseTerm} software`,
-      `best ${baseTerm}`,
-      `${baseTerm} guide`,
-      `${baseTerm} tips`,
-      `free ${baseTerm}`,
-      `${baseTerm} strategy`,
-      `${baseTerm} services`,
-      `${baseTerm} agency`
-    ];
+  const [aiInsights, setAiInsights] = useState<string>("");
+  const [showInsights, setShowInsights] = useState(false);
 
-    return variations.map(keyword => ({
-      keyword,
-      searchVolume: Math.floor(Math.random() * 10000) + 100,
-      difficulty: Math.floor(Math.random() * 100) + 1,
-      cpc: parseFloat((Math.random() * 5 + 0.1).toFixed(2)),
-      trend: ['up', 'down', 'stable'][Math.floor(Math.random() * 3)] as 'up' | 'down' | 'stable'
-    }));
+  // Real keyword research with AI insights
+  const performKeywordResearch = async (searchTerm: string) => {
+    const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/functions/v1/seo-analysis', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'keyword_research',
+        data: { keyword: searchTerm }
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to perform keyword research');
+    }
+
+    return await response.json();
   };
 
   const handleSearch = async () => {
@@ -56,17 +55,26 @@ export const KeywordResearchTool = () => {
 
     setIsSearching(true);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const mockResults = generateMockKeywords(searchTerm.trim());
-    setKeywords(mockResults);
-    setIsSearching(false);
+    try {
+      const results = await performKeywordResearch(searchTerm.trim());
+      setKeywords(results.keywords);
+      setAiInsights(results.aiInsights);
+      setShowInsights(true);
 
-    toast({
-      title: "Search Complete",
-      description: `Found ${mockResults.length} keyword variations`,
-    });
+      toast({
+        title: "Research Complete",
+        description: `Found ${results.keywords.length} keyword variations with AI insights`,
+      });
+    } catch (error) {
+      console.error('Keyword research failed:', error);
+      toast({
+        title: "Error",
+        description: "Failed to perform keyword research. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const getDifficultyColor = (difficulty: number) => {
@@ -113,10 +121,27 @@ export const KeywordResearchTool = () => {
         </CardContent>
       </Card>
 
+      {showInsights && aiInsights && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              🤖 AI SEO Insights
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="prose prose-sm max-w-none">
+              <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-lg">
+                {aiInsights}
+              </pre>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {keywords.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Keyword Results</CardTitle>
+            <CardTitle>Keyword Research Results</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

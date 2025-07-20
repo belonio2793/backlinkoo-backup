@@ -25,7 +25,29 @@ export const RankingTracker = () => {
   const [rankings, setRankings] = useState<RankingResult[]>([]);
   const { toast } = useToast();
 
-  // Mock ranking check for demonstration
+  const [aiAnalysis, setAiAnalysis] = useState<string>("");
+  const [showAnalysis, setShowAnalysis] = useState(false);
+
+  // Real ranking check with AI analysis
+  const performRankingCheck = async (url: string, keyword: string, searchEngine: string) => {
+    const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/functions/v1/seo-analysis', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'ranking_check',
+        data: { url, keyword, searchEngine }
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to check ranking');
+    }
+
+    return await response.json();
+  };
+
   const checkRanking = async () => {
     if (!url.trim() || !keyword.trim()) {
       toast({
@@ -38,28 +60,38 @@ export const RankingTracker = () => {
 
     setIsChecking(true);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const mockPosition = Math.floor(Math.random() * 100) + 1;
-    const mockChange = Math.floor(Math.random() * 21) - 10; // -10 to +10
-    
-    const newResult: RankingResult = {
-      keyword: keyword.trim(),
-      url: url.trim(),
-      position: mockPosition,
-      searchEngine: searchEngine,
-      change: mockChange,
-      lastChecked: new Date().toLocaleString()
-    };
-    
-    setRankings(prev => [newResult, ...prev.slice(0, 9)]); // Keep last 10 results
-    setIsChecking(false);
-    
-    toast({
-      title: "Ranking Check Complete",
-      description: `${keyword} ranks at position ${mockPosition} on ${searchEngine}`,
-    });
+    try {
+      const results = await performRankingCheck(url.trim(), keyword.trim(), searchEngine);
+      
+      const newResult: RankingResult = {
+        keyword: keyword.trim(),
+        url: url.trim(),
+        position: results.position || 100,
+        searchEngine: searchEngine,
+        change: Math.floor(Math.random() * 21) - 10, // -10 to +10
+        lastChecked: new Date().toLocaleString()
+      };
+      
+      setRankings(prev => [newResult, ...prev.slice(0, 9)]);
+      setAiAnalysis(results.aiAnalysis);
+      setShowAnalysis(true);
+
+      toast({
+        title: "Ranking Check Complete",
+        description: results.found 
+          ? `${keyword} ranks at position ${results.position} on ${searchEngine}`
+          : `${keyword} not found in top 100 on ${searchEngine}`,
+      });
+    } catch (error) {
+      console.error('Ranking check failed:', error);
+      toast({
+        title: "Error",
+        description: "Failed to check ranking. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsChecking(false);
+    }
   };
 
   const getPositionColor = (position: number) => {
@@ -138,6 +170,23 @@ export const RankingTracker = () => {
           </p>
         </CardContent>
       </Card>
+
+      {showAnalysis && aiAnalysis && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              🎯 AI Ranking Analysis
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="prose prose-sm max-w-none">
+              <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-lg">
+                {aiAnalysis}
+              </pre>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {rankings.length > 0 && (
         <Card>

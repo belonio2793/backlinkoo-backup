@@ -41,7 +41,29 @@ export const SEOTools = () => {
   const [indexResults, setIndexResults] = useState<IndexStatus[]>([]);
   const { toast } = useToast();
 
-  // Mock domain analysis
+  const [aiAnalysis, setAiAnalysis] = useState<string>("");
+  const [showDomainAnalysis, setShowDomainAnalysis] = useState(false);
+
+  // Real domain analysis with AI insights
+  const performDomainAnalysis = async (domain: string) => {
+    const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/functions/v1/seo-analysis', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'domain_analysis',
+        data: { domain }
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to analyze domain');
+    }
+
+    return await response.json();
+  };
+
   const analyzeDomain = async () => {
     if (!domainUrl.trim()) {
       toast({
@@ -54,29 +76,51 @@ export const SEOTools = () => {
 
     setIsAnalyzing(true);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const mockMetrics: DomainMetrics = {
-      domain: domainUrl.replace(/^https?:\/\//, '').replace(/\/$/, ''),
-      domainAuthority: Math.floor(Math.random() * 100) + 1,
-      pageAuthority: Math.floor(Math.random() * 100) + 1,
-      backlinks: Math.floor(Math.random() * 100000) + 1000,
-      referringDomains: Math.floor(Math.random() * 10000) + 100,
-      organicKeywords: Math.floor(Math.random() * 50000) + 500,
-      monthlyTraffic: Math.floor(Math.random() * 1000000) + 10000
-    };
-    
-    setDomainMetrics(mockMetrics);
-    setIsAnalyzing(false);
-    
-    toast({
-      title: "Analysis Complete",
-      description: `Domain metrics retrieved for ${mockMetrics.domain}`,
-    });
+    try {
+      const results = await performDomainAnalysis(domainUrl.trim());
+      setDomainMetrics(results.metrics);
+      setAiAnalysis(results.aiAnalysis);
+      setShowDomainAnalysis(true);
+      
+      toast({
+        title: "Analysis Complete",
+        description: `Domain analysis completed for ${results.metrics.domain}`,
+      });
+    } catch (error) {
+      console.error('Domain analysis failed:', error);
+      toast({
+        title: "Error",
+        description: "Failed to analyze domain. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
-  // Mock index checking
+  const [indexAnalysis, setIndexAnalysis] = useState<string>("");
+  const [showIndexAnalysis, setShowIndexAnalysis] = useState(false);
+
+  // Real index checking with AI recommendations
+  const performIndexCheck = async (url: string) => {
+    const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/functions/v1/seo-analysis', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'index_check',
+        data: { url }
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to check index status');
+    }
+
+    return await response.json();
+  };
+
   const checkIndexStatus = async () => {
     if (!indexUrl.trim()) {
       toast({
@@ -89,26 +133,34 @@ export const SEOTools = () => {
 
     setIsCheckingIndex(true);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const statuses: ('indexed' | 'not-indexed' | 'error' | 'pending')[] = ['indexed', 'not-indexed', 'pending'];
-    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-    
-    const newResult: IndexStatus = {
-      url: indexUrl.trim(),
-      isIndexed: randomStatus === 'indexed',
-      lastCrawled: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-      status: randomStatus
-    };
-    
-    setIndexResults(prev => [newResult, ...prev.slice(0, 9)]);
-    setIsCheckingIndex(false);
-    
-    toast({
-      title: "Index Check Complete",
-      description: `URL is ${randomStatus === 'indexed' ? 'indexed' : 'not indexed'} by Google`,
-    });
+    try {
+      const results = await performIndexCheck(indexUrl.trim());
+      
+      const newResult: IndexStatus = {
+        url: indexUrl.trim(),
+        isIndexed: results.google.indexed || results.bing.indexed,
+        lastCrawled: new Date(results.lastChecked).toLocaleDateString(),
+        status: results.google.indexed ? 'indexed' : 'not-indexed'
+      };
+      
+      setIndexResults(prev => [newResult, ...prev.slice(0, 9)]);
+      setIndexAnalysis(results.aiRecommendations);
+      setShowIndexAnalysis(true);
+      
+      toast({
+        title: "Index Check Complete",
+        description: `Google: ${results.google.indexed ? 'Indexed' : 'Not Indexed'}, Bing: ${results.bing.indexed ? 'Indexed' : 'Not Indexed'}`,
+      });
+    } catch (error) {
+      console.error('Index check failed:', error);
+      toast({
+        title: "Error",
+        description: "Failed to check index status. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCheckingIndex(false);
+    }
   };
 
   const getAuthorityColor = (score: number) => {
@@ -167,6 +219,23 @@ export const SEOTools = () => {
               </p>
             </CardContent>
           </Card>
+
+          {showDomainAnalysis && aiAnalysis && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  🧠 AI Domain Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm max-w-none">
+                  <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-lg">
+                    {aiAnalysis}
+                  </pre>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {domainMetrics && (
             <Card>
@@ -250,6 +319,23 @@ export const SEOTools = () => {
               </p>
             </CardContent>
           </Card>
+
+          {showIndexAnalysis && indexAnalysis && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  🔍 AI Index Recommendations
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm max-w-none">
+                  <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-lg">
+                    {indexAnalysis}
+                  </pre>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {indexResults.length > 0 && (
             <Card>
