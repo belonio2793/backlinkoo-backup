@@ -86,7 +86,7 @@ const Index = () => {
             <span className="text-primary block">Premium Backlinks</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Professional SEO platform offering high-quality backlinks, advanced keyword research, 
+            Powerful SEO platform offering high-quality backlinks, advanced keyword research, 
             and comprehensive ranking analysis tools.
           </p>
           <div className="flex items-center justify-center gap-4">
