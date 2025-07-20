@@ -16,12 +16,41 @@ interface CampaignFormProps {
 export const CampaignForm = ({ onSuccess, onCancel }: CampaignFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    targetUrl: "",
+    targetUrls: [""],
     keywords: "",
     linksRequested: 5
   });
   const { toast } = useToast();
+
+  const normalizeUrl = (url: string): string => {
+    let normalized = url.trim();
+    
+    // If it doesn't start with http:// or https://, add https://
+    if (!normalized.match(/^https?:\/\//)) {
+      // Remove www. if it's at the beginning
+      if (normalized.startsWith('www.')) {
+        normalized = normalized.substring(4);
+      }
+      normalized = `https://${normalized}`;
+    }
+    
+    return normalized;
+  };
+
+  const addTargetUrl = () => {
+    setFormData({ ...formData, targetUrls: [...formData.targetUrls, ""] });
+  };
+
+  const removeTargetUrl = (index: number) => {
+    const newUrls = formData.targetUrls.filter((_, i) => i !== index);
+    setFormData({ ...formData, targetUrls: newUrls });
+  };
+
+  const updateTargetUrl = (index: number, value: string) => {
+    const newUrls = [...formData.targetUrls];
+    newUrls[index] = value;
+    setFormData({ ...formData, targetUrls: newUrls });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +61,15 @@ export const CampaignForm = ({ onSuccess, onCancel }: CampaignFormProps) => {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
         throw new Error("Please log in to create a campaign");
+      }
+
+      // Validate and normalize URLs
+      const validUrls = formData.targetUrls
+        .filter(url => url.trim())
+        .map(url => normalizeUrl(url));
+
+      if (validUrls.length === 0) {
+        throw new Error("Please provide at least one target URL");
       }
 
       // Check if user has enough credits
@@ -55,28 +93,31 @@ export const CampaignForm = ({ onSuccess, onCancel }: CampaignFormProps) => {
         .map(k => k.trim())
         .filter(k => k.length > 0);
 
-      // Create campaign
-      const { error: campaignError } = await supabase
-        .from('campaigns')
-        .insert({
-          user_id: user.id,
-          name: formData.name,
-          target_url: formData.targetUrl,
-          keywords: keywordsArray,
-          links_requested: formData.linksRequested,
-          status: 'pending'
-        });
+      // Create campaigns for each URL
+      for (const url of validUrls) {
+        const { error: campaignError } = await supabase
+          .from('campaigns')
+          .insert({
+            user_id: user.id,
+            name: `Campaign for ${url}`,
+            target_url: url,
+            keywords: keywordsArray,
+            links_requested: formData.linksRequested,
+            status: 'pending'
+          });
 
-      if (campaignError) {
-        throw campaignError;
+        if (campaignError) {
+          throw campaignError;
+        }
       }
 
-      // Deduct credits
+      // Deduct credits (total for all campaigns)
+      const totalCredits = formData.linksRequested * validUrls.length;
       const { error: updateCreditsError } = await supabase
         .from('credits')
         .update({ 
-          amount: creditsData.amount - formData.linksRequested,
-          total_used: (creditsData.amount - formData.linksRequested)
+          amount: creditsData.amount - totalCredits,
+          total_used: (creditsData.amount - totalCredits)
         })
         .eq('user_id', user.id);
 
@@ -89,20 +130,19 @@ export const CampaignForm = ({ onSuccess, onCancel }: CampaignFormProps) => {
         .from('credit_transactions')
         .insert({
           user_id: user.id,
-          amount: -formData.linksRequested,
+          amount: -totalCredits,
           type: 'campaign_creation',
-          description: `Campaign: ${formData.name}`
+          description: `Campaigns for ${validUrls.length} URL(s)`
         });
 
       toast({
-        title: "Campaign Created",
-        description: `Your campaign "${formData.name}" has been created successfully.`,
+        title: "Campaign(s) Created",
+        description: `${validUrls.length} campaign(s) created successfully.`,
       });
 
       // Reset form
       setFormData({
-        name: "",
-        targetUrl: "",
+        targetUrls: [""],
         keywords: "",
         linksRequested: 5
       });
@@ -138,28 +178,40 @@ export const CampaignForm = ({ onSuccess, onCancel }: CampaignFormProps) => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Campaign Name</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="e.g., Q1 2024 Blog Outreach"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="targetUrl">Target URL</Label>
-            <Input
-              id="targetUrl"
-              type="url"
-              value={formData.targetUrl}
-              onChange={(e) => setFormData({ ...formData, targetUrl: e.target.value })}
-              placeholder="https://example.com/page"
-              required
-            />
+            <Label>Target URLs</Label>
+            {formData.targetUrls.map((url, index) => (
+              <div key={index} className="flex gap-2">
+                <Input
+                  value={url}
+                  onChange={(e) => updateTargetUrl(index, e.target.value)}
+                  placeholder="example.com, www.example.com, https://example.com"
+                  required={index === 0}
+                  className="flex-1"
+                />
+                {formData.targetUrls.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeTargetUrl(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addTargetUrl}
+              className="w-full"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Another URL
+            </Button>
             <p className="text-xs text-muted-foreground">
-              The page you want to build backlinks to
+              The pages you want to build backlinks to. All URL formats accepted.
             </p>
           </div>
 
@@ -190,7 +242,7 @@ export const CampaignForm = ({ onSuccess, onCancel }: CampaignFormProps) => {
               required
             />
             <p className="text-xs text-muted-foreground">
-              Each backlink costs 1 credit. Quality high-authority links.
+              Each backlink costs 1 credit.
             </p>
           </div>
 
@@ -203,7 +255,7 @@ export const CampaignForm = ({ onSuccess, onCancel }: CampaignFormProps) => {
                 </>
               ) : (
                 <>
-                  Create Campaign ({formData.linksRequested} credits)
+                  Create Campaign ({formData.linksRequested * formData.targetUrls.filter(url => url.trim()).length} credits)
                 </>
               )}
             </Button>
