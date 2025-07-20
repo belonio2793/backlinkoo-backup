@@ -54,22 +54,38 @@ const Dashboard = () => {
 
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      // Clean up auth state first
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) throw error;
       
       toast({
-        title: "Signed out successfully",
-        description: "You have been logged out of your account.",
+        title: "You have signed out",
+        description: "You have been successfully logged out of your account.",
       });
       
-      // Redirect to home page
-      window.location.href = "/";
+      // Force redirect to home page with a slight delay to ensure toast shows
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
+      
     } catch (error) {
+      console.error("Sign out error:", error);
       toast({
         title: "Sign out error",
         description: "There was an error signing you out. Please try again.",
         variant: "destructive",
       });
+      
+      // Still redirect even if there's an error
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
     }
   };
 
