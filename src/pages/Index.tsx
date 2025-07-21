@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PaymentModal } from "@/components/PaymentModal";
+import { AnimatedHeadline } from "@/components/AnimatedHeadline";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
 
@@ -37,6 +38,18 @@ const Index = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Animated headline variations
+  const headlineVariations = [
+    "Premium Backlinks",
+    "Authority Backlinks", 
+    "Competition Similar Backlinks",
+    "High-DA Backlinks",
+    "Niche-Relevant Backlinks",
+    "White-Hat Backlinks",
+    "Editorial Backlinks",
+    "Contextual Backlinks"
+  ];
 
   const features = [
     {
@@ -107,10 +120,11 @@ const Index = () => {
           <Badge variant="outline" className="mb-6">
             Powerful SEO & Backlink Management
           </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-foreground">
-            Boost Your Rankings with
-            <span className="text-primary block">Premium Backlinks</span>
-          </h1>
+          <AnimatedHeadline
+            baseText="Boost Your Rankings with"
+            animatedTexts={headlineVariations}
+            className="text-4xl md:text-6xl font-bold mb-6 text-foreground"
+          />
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Powerful SEO platform offering high-quality backlinks, advanced keyword research, 
             and comprehensive ranking analysis tools.
