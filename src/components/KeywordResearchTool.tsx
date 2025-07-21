@@ -613,257 +613,291 @@ export const KeywordResearchTool = () => {
         </CardContent>
       </Card>
 
-      {showInsights && aiInsights && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              🤖 AI SEO Insights
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm max-w-none">
-              <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-lg">
-                {aiInsights}
-              </pre>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {keywords.length > 0 && (
-        <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Keywords</TabsTrigger>
-            <TabsTrigger value="rankings">Top 10 Rankings</TabsTrigger>
-            <TabsTrigger value="competition">Competition</TabsTrigger>
-            <TabsTrigger value="geographic">Geographic</TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
+          {/* Keyword Analysis Results Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Keyword Analysis Results
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="search-volumes" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="search-volumes">Search Volumes</TabsTrigger>
+                  <TabsTrigger value="rankings">Top 10 Rankings</TabsTrigger>
+                  <TabsTrigger value="competition">Competition</TabsTrigger>
+                  <TabsTrigger value="geographic">Geographic</TabsTrigger>
+                </TabsList>
 
-          <TabsContent value="overview">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  Keyword Analysis Results
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {keywords.map((keyword, index) => (
-                    <div key={index} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <h3 className="font-medium text-lg">{keyword.keyword}</h3>
-                            <Badge variant="outline" className="text-xs flex items-center gap-1">
-                              <img 
-                                src={keyword.searchEngine === 'google' ? googleLogo : bingLogo} 
-                                alt={keyword.searchEngine}
-                                className="w-3 h-3 object-contain"
-                              />
-                              {keyword.searchEngine.toUpperCase()}
-                            </Badge>
-                          {keyword.location && (
-                            <Badge variant="secondary" className="text-xs">
-                              <MapPin className="h-3 w-3 mr-1" />
-                              {keyword.location}
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <TrendingUp 
-                            className={`h-4 w-4 ${
-                              keyword.trend === 'up' ? 'text-green-500' : 
-                              keyword.trend === 'down' ? 'text-red-500' : 
-                              'text-gray-500'
-                            }`} 
-                          />
-                          <Badge className={getDifficultyColor(keyword.difficulty)}>
-                            {getDifficultyLabel(keyword.difficulty)}
-                          </Badge>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Volume:</span>
-                          <span className="font-medium">{keyword.searchVolume.toLocaleString()}/mo</span>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Difficulty:</span>
-                          <span className="font-medium">{keyword.difficulty}/100</span>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">CPC:</span>
-                          <span className="font-medium">${keyword.cpc}</span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Target className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Competition:</span>
-                          <span className="font-medium capitalize">{keyword.competition}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="rankings">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
-                  Top 10 Ranking URLs
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {rankingUrls.length > 0 ? (
+                <TabsContent value="search-volumes">
                   <div className="space-y-4">
-                    {rankingUrls.map((ranking, index) => (
+                    {keywords.map((keyword, index) => (
                       <div key={index} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
-                              {ranking.position}
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="font-medium text-lg mb-1">{ranking.title}</h3>
-                              <a 
-                                href={ranking.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline text-sm"
-                              >
-                                {ranking.domain}
-                              </a>
-                            </div>
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <h3 className="font-medium text-lg">{keyword.keyword}</h3>
+                              <Badge variant="outline" className="text-xs flex items-center gap-1">
+                                <img 
+                                  src={keyword.searchEngine === 'google' ? googleLogo : bingLogo} 
+                                  alt={keyword.searchEngine}
+                                  className="w-3 h-3 object-contain"
+                                />
+                                {keyword.searchEngine.toUpperCase()}
+                              </Badge>
+                            {keyword.location && (
+                              <Badge variant="secondary" className="text-xs">
+                                <MapPin className="h-3 w-3 mr-1" />
+                                {keyword.location}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <TrendingUp 
+                              className={`h-4 w-4 ${
+                                keyword.trend === 'up' ? 'text-green-500' : 
+                                keyword.trend === 'down' ? 'text-red-500' : 
+                                'text-gray-500'
+                              }`} 
+                            />
+                            <Badge className={getDifficultyColor(keyword.difficulty)}>
+                              {getDifficultyLabel(keyword.difficulty)}
+                            </Badge>
                           </div>
                         </div>
                         
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                          {ranking.description}
-                        </p>
-                        
-                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-xs">
-                          <div className="flex flex-col">
-                            <span className="text-muted-foreground">Domain Authority</span>
-                            <span className="font-medium">{ranking.domainAuthority || 'N/A'}</span>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-muted-foreground">Volume:</span>
+                            <span className="font-medium">{keyword.searchVolume.toLocaleString()}/mo</span>
                           </div>
-                          <div className="flex flex-col">
-                            <span className="text-muted-foreground">Page Authority</span>
-                            <span className="font-medium">{ranking.pageAuthority || 'N/A'}</span>
+                          
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-muted-foreground">Difficulty:</span>
+                            <span className="font-medium">{keyword.difficulty}/100</span>
                           </div>
-                          <div className="flex flex-col">
-                            <span className="text-muted-foreground">Backlinks</span>
-                            <span className="font-medium">{ranking.backlinks?.toLocaleString() || 'N/A'}</span>
+                          
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-muted-foreground">CPC:</span>
+                            <span className="font-medium">${keyword.cpc}</span>
                           </div>
-                          <div className="flex flex-col">
-                            <span className="text-muted-foreground">Est. Traffic</span>
-                            <span className="font-medium">{ranking.estimatedTraffic?.toLocaleString() || 'N/A'}/mo</span>
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-muted-foreground">Social Shares</span>
-                            <span className="font-medium">{ranking.socialShares?.toLocaleString() || 'N/A'}</span>
+
+                          <div className="flex items-center gap-2">
+                            <Target className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-muted-foreground">Competition:</span>
+                            <span className="font-medium capitalize">{keyword.competition}</span>
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Ranking URLs will appear here after running a search</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+                </TabsContent>
 
-          <TabsContent value="competition">
+                <TabsContent value="rankings">
+                  {rankingUrls.length > 0 ? (
+                    <div className="space-y-4">
+                      {rankingUrls.map((ranking, index) => (
+                        <div key={index} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
+                                {ranking.position}
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-medium text-lg mb-1">{ranking.title}</h3>
+                                <a 
+                                  href={ranking.url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline text-sm"
+                                >
+                                  {ranking.domain}
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                            {ranking.description}
+                          </p>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-xs">
+                            <div className="flex flex-col">
+                              <span className="text-muted-foreground">Domain Authority</span>
+                              <span className="font-medium">{ranking.domainAuthority || 'N/A'}</span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-muted-foreground">Page Authority</span>
+                              <span className="font-medium">{ranking.pageAuthority || 'N/A'}</span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-muted-foreground">Backlinks</span>
+                              <span className="font-medium text-primary font-bold">
+                                {ranking.backlinks ? ranking.backlinks.toLocaleString() : 'N/A'}
+                              </span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-muted-foreground">Est. Traffic</span>
+                              <span className="font-medium">{ranking.estimatedTraffic?.toLocaleString() || 'N/A'}/mo</span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-muted-foreground">Social Shares</span>
+                              <span className="font-medium">{ranking.socialShares?.toLocaleString() || 'N/A'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>Top 10 ranking URLs will appear here after running a search</p>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="competition">
+                  <div className="space-y-4">
+                    {keywords.map((keyword, index) => (
+                      <div key={index} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-medium text-lg">{keyword.keyword}</h3>
+                          <Badge className={getDifficultyColor(keyword.difficulty)}>
+                            {keyword.competitorCount || 10} Competitors
+                          </Badge>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                          <div className="p-3 bg-muted rounded-lg">
+                            <div className="text-sm text-muted-foreground">Competition Level</div>
+                            <div className="font-medium text-lg capitalize">{keyword.competition}</div>
+                          </div>
+                          <div className="p-3 bg-muted rounded-lg">
+                            <div className="text-sm text-muted-foreground">Difficulty Score</div>
+                            <div className="font-medium text-lg">{keyword.difficulty}/100</div>
+                          </div>
+                          <div className="p-3 bg-muted rounded-lg">
+                            <div className="text-sm text-muted-foreground">Avg. CPC</div>
+                            <div className="font-medium text-lg">${keyword.cpc}</div>
+                          </div>
+                        </div>
+                        
+                        {keyword.topCompetitors && keyword.topCompetitors.length > 0 && (
+                          <div>
+                            <h4 className="font-medium mb-3 text-base">Top Ranking Competitors & Backlink Analysis:</h4>
+                            <div className="grid grid-cols-1 gap-3">
+                              {keyword.topCompetitors.map((competitor, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                                  <div className="flex items-center gap-3">
+                                    <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                                      #{idx + 1}
+                                    </span>
+                                    <span className="text-blue-600 hover:underline cursor-pointer font-medium">{competitor}</span>
+                                  </div>
+                                  <div className="text-sm">
+                                    <span className="text-muted-foreground mr-2">Estimated Backlinks:</span>
+                                    <span className="font-bold text-primary">
+                                      {rankingUrls[idx]?.backlinks ? rankingUrls[idx].backlinks.toLocaleString() : 'Analyzing...'}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="geographic">
+                  {geographicData.length > 0 ? (
+                    <div className="space-y-6">
+                      {geographicData.map((country, index) => (
+                        <div key={index} className="border rounded-lg p-4">
+                          <h3 className="font-medium text-lg mb-4 flex items-center gap-2">
+                            <Globe className="h-4 w-4" />
+                            {country.country}
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {country.cities.length > 0 ? (
+                              country.cities.map((city, cityIndex) => (
+                                <div key={cityIndex} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                                  <span className="text-sm font-medium">{city.name}</span>
+                                  <span className="font-bold text-primary text-sm">{city.searchVolume.toLocaleString()}/mo</span>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="col-span-3 text-center py-4 text-muted-foreground">
+                                <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                <p>No results found for this specific area</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Globe className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>Geographic data will appear here after running a search</p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+
+          {/* Backlink ∞ Insights Section */}
+          {showInsights && aiInsights && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="h-5 w-5" />
-                  Competition Analysis
+                  Backlink ∞ Insights
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {keywords.map((keyword, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-medium text-lg">{keyword.keyword}</h3>
-                        <Badge className={getDifficultyColor(keyword.difficulty)}>
-                          {keyword.competitorCount || 10} Competitors
-                        </Badge>
-                      </div>
-                      
-                      {keyword.topCompetitors && keyword.topCompetitors.length > 0 && (
-                        <div>
-                          <h4 className="font-medium mb-2 text-sm text-muted-foreground">Top Ranking Competitors:</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {keyword.topCompetitors.map((competitor, idx) => (
-                              <div key={idx} className="flex items-center gap-2 text-sm">
-                                <span className="bg-muted rounded px-2 py-1 text-xs font-mono">#{idx + 1}</span>
-                                <span className="text-blue-600 hover:underline cursor-pointer">{competitor}</span>
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-lg border">
+                    <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                      🎯 Strategic Insights
+                    </h3>
+                    <div className="prose prose-sm max-w-none">
+                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                        {aiInsights.split('\n\n').map((paragraph, index) => (
+                          <div key={index} className="mb-4 last:mb-0">
+                            {paragraph.includes('**') ? (
+                              <div className="font-semibold text-base text-primary mb-2">
+                                {paragraph.replace(/\*\*/g, '')}
                               </div>
-                            ))}
+                            ) : paragraph.includes('•') || paragraph.includes('-') ? (
+                              <ul className="list-disc list-inside space-y-1 ml-4">
+                                {paragraph.split('\n').filter(line => line.trim()).map((item, idx) => (
+                                  <li key={idx} className="text-sm">
+                                    {item.replace(/^[•\-\*]\s*/, '')}
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-sm text-muted-foreground">{paragraph}</p>
+                            )}
                           </div>
-                        </div>
-                      )}
+                        ))}
+                      </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="geographic">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
-                  Geographic Performance
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {geographicData.length > 0 ? (
-                  <div className="space-y-6">
-                    {geographicData.map((country, index) => (
-                      <div key={index} className="border rounded-lg p-4">
-                        <h3 className="font-medium text-lg mb-3 flex items-center gap-2">
-                          <Globe className="h-4 w-4" />
-                          {country.country}
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {country.cities.map((city, cityIndex) => (
-                            <div key={cityIndex} className="flex items-center justify-between p-2 bg-muted rounded">
-                              <span className="text-sm">{city.name}</span>
-                              <span className="font-medium text-sm">{city.searchVolume.toLocaleString()}/mo</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Globe className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Geographic data will appear here after running a search</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
       )}
     </div>
-    );
+  );
 };
