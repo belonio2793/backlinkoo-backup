@@ -27,7 +27,7 @@ import { PaymentModal } from "@/components/PaymentModal";
 import { CampaignForm } from "@/components/CampaignForm";
 import { KeywordResearchTool } from "@/components/KeywordResearchTool";
 import { RankingTracker } from "@/components/RankingTracker";
-import { SEOTools } from "@/components/SEOTools";
+import { Community } from "@/components/Community";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -201,7 +201,7 @@ const Dashboard = () => {
               <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
               <TabsTrigger value="keyword-research">Keyword Research</TabsTrigger>
               <TabsTrigger value="rank-tracker">Rankings</TabsTrigger>
-              <TabsTrigger value="seo-tools">SEO Tools</TabsTrigger>
+              <TabsTrigger value="community">Community</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -625,8 +625,8 @@ const Dashboard = () => {
               <RankingTracker />
             </TabsContent>
 
-            <TabsContent value="seo-tools">
-              <SEOTools />
+            <TabsContent value="community">
+              <Community />
             </TabsContent>
           </Tabs>
         ) : (

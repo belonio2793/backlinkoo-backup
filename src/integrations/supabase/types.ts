@@ -137,6 +137,45 @@ export type Database = {
         }
         Relationships: []
       }
+      global_campaign_ledger: {
+        Row: {
+          backlinks_delivered: number
+          campaign_id: string
+          campaign_name: string
+          completed_at: string
+          created_at: string
+          id: string
+          keyword_difficulty_avg: number | null
+          keywords_count: number
+          user_location_country: string
+          user_location_country_code: string
+        }
+        Insert: {
+          backlinks_delivered: number
+          campaign_id: string
+          campaign_name: string
+          completed_at?: string
+          created_at?: string
+          id?: string
+          keyword_difficulty_avg?: number | null
+          keywords_count: number
+          user_location_country: string
+          user_location_country_code: string
+        }
+        Update: {
+          backlinks_delivered?: number
+          campaign_id?: string
+          campaign_name?: string
+          completed_at?: string
+          created_at?: string
+          id?: string
+          keyword_difficulty_avg?: number | null
+          keywords_count?: number
+          user_location_country?: string
+          user_location_country_code?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           amount: number
