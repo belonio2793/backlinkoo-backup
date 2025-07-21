@@ -22,9 +22,6 @@ import { PaymentModal } from "@/components/PaymentModal";
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
-import heroSpaceNebula from "@/assets/hero-space-nebula.jpg";
-import heroGalaxySpiral from "@/assets/hero-galaxy-spiral.jpg";
-import heroSupernova from "@/assets/hero-supernova.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
