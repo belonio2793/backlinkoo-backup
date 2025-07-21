@@ -673,7 +673,7 @@ export const KeywordResearchTool = () => {
               <Tabs defaultValue="search-volumes" className="space-y-4">
                 <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="search-volumes">Search Volumes</TabsTrigger>
-                  <TabsTrigger value="rankings">Top 10 Rankings</TabsTrigger>
+                  <TabsTrigger value="rankings">Top Rankings</TabsTrigger>
                   <TabsTrigger value="competition">Competition</TabsTrigger>
                   <TabsTrigger value="geographic">Geographic</TabsTrigger>
                 </TabsList>
