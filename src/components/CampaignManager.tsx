@@ -392,84 +392,133 @@ export function CampaignManager() {
             const StatusIcon = config.icon;
             
             return (
-              <Card key={campaign.id} className="group hover:shadow-xl transition-all duration-300 hover-scale overflow-hidden">
-                <CardHeader className="pb-3">
+              <Card key={campaign.id} className="group hover:shadow-2xl transition-all duration-500 hover-scale overflow-hidden border-0 bg-gradient-to-br from-card via-card to-card/50 relative">
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                {/* Status indicator line */}
+                <div className={`absolute top-0 left-0 right-0 h-1 ${config.color} opacity-60 group-hover:opacity-100 transition-opacity`}></div>
+                
+                <CardHeader className="pb-4 relative">
                   <div className="flex items-start justify-between">
-                    <div className="space-y-2 flex-1">
-                      <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">
+                    <div className="space-y-3 flex-1">
+                      <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors duration-300 font-semibold">
                         {campaign.name}
                       </CardTitle>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <Badge 
                           variant="secondary" 
-                          className={`${config.bgColor} ${config.textColor} ${config.borderColor} border`}
+                          className={`${config.bgColor} ${config.textColor} ${config.borderColor} border shadow-sm group-hover:shadow-md transition-all duration-300`}
                         >
-                          <StatusIcon className="h-3 w-3 mr-1" />
+                          <StatusIcon className="h-3 w-3 mr-1.5" />
                           {config.label}
                         </Badge>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs bg-background/50 group-hover:bg-primary/10 transition-all duration-300">
+                          <Target className="h-2.5 w-2.5 mr-1" />
                           {campaign.keywords.length} keywords
                         </Badge>
                       </div>
                     </div>
                     
-                    <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-primary/10">
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </div>
+                  
+                  {/* Keywords preview */}
+                  <div className="mt-3 p-3 rounded-lg bg-muted/30 group-hover:bg-muted/50 transition-all duration-300">
+                    <div className="flex flex-wrap gap-1.5">
+                      {campaign.keywords.slice(0, 3).map((keyword, idx) => (
+                        <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary font-medium">
+                          {keyword}
+                        </span>
+                      ))}
+                      {campaign.keywords.length > 3 && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-muted text-muted-foreground">
+                          +{campaign.keywords.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </CardHeader>
                 
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Globe className="h-4 w-4" />
-                    <span className="truncate">{campaign.target_url}</span>
-                    <Button variant="ghost" size="sm" className="p-0 h-auto">
+                <CardContent className="space-y-5 relative">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300">
+                    <div className="p-1.5 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-all duration-300">
+                      <Globe className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    <span className="truncate font-medium">{campaign.target_url}</span>
+                    <Button variant="ghost" size="sm" className="p-1 h-auto hover:bg-primary/20 transition-colors">
                       <ExternalLink className="h-3 w-3" />
                     </Button>
                   </div>
                   
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="font-medium">
-                        {campaign.links_delivered}/{campaign.links_requested} links
+                  {/* Enhanced Progress Section */}
+                  <div className="space-y-3 p-4 rounded-xl bg-gradient-to-r from-muted/30 to-muted/10 group-hover:from-primary/5 group-hover:to-primary/10 transition-all duration-500">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1.5 rounded-full bg-primary/10">
+                          <BarChart3 className="h-3.5 w-3.5 text-primary" />
+                        </div>
+                        <span className="text-sm font-medium">Campaign Progress</span>
+                      </div>
+                      <span className="text-sm font-bold text-primary">
+                        {campaign.links_delivered}/{campaign.links_requested}
                       </span>
                     </div>
-                    <Progress value={progress} className="h-2" />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>{progress}% complete</span>
-                      <span>{campaign.links_requested - campaign.links_delivered} remaining</span>
+                    
+                    <div className="relative">
+                      <Progress value={progress} className="h-3 bg-muted" />
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse"></div>
+                    </div>
+                    
+                    <div className="flex justify-between text-xs">
+                      <span className={`font-medium ${progress >= 100 ? 'text-green-600' : progress >= 50 ? 'text-blue-600' : 'text-yellow-600'}`}>
+                        {progress}% complete
+                      </span>
+                      <span className="text-muted-foreground">
+                        {campaign.links_requested - campaign.links_delivered} remaining
+                      </span>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-3 gap-4 pt-2 border-t">
-                    <div className="text-center">
-                      <div className="text-sm font-semibold text-primary">{campaign.credits_used || 0}</div>
-                      <div className="text-xs text-muted-foreground">Credits</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-sm font-semibold text-green-600">{campaign.links_delivered}</div>
-                      <div className="text-xs text-muted-foreground">Delivered</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-sm font-semibold text-blue-600">
-                        {formatDistanceToNow(new Date(campaign.created_at), { addSuffix: false })}
+                  {/* Enhanced Stats Grid */}
+                  <div className="grid grid-cols-3 gap-4 pt-3 border-t border-border/60 group-hover:border-primary/30 transition-colors duration-300">
+                    <div className="text-center p-2 rounded-lg group-hover:bg-primary/5 transition-all duration-300">
+                      <div className="flex items-center justify-center gap-1 text-sm font-bold text-primary">
+                        <DollarSign className="h-3.5 w-3.5" />
+                        {campaign.credits_used || 0}
                       </div>
-                      <div className="text-xs text-muted-foreground">Age</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">Credits Used</div>
+                    </div>
+                    <div className="text-center p-2 rounded-lg group-hover:bg-green-50 dark:group-hover:bg-green-950/20 transition-all duration-300">
+                      <div className="flex items-center justify-center gap-1 text-sm font-bold text-green-600">
+                        <CheckCircle className="h-3.5 w-3.5" />
+                        {campaign.links_delivered}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">Links Live</div>
+                    </div>
+                    <div className="text-center p-2 rounded-lg group-hover:bg-blue-50 dark:group-hover:bg-blue-950/20 transition-all duration-300">
+                      <div className="flex items-center justify-center gap-1 text-sm font-bold text-blue-600">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {Math.ceil((new Date().getTime() - new Date(campaign.created_at).getTime()) / (1000 * 60 * 60 * 24))}d
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">Days Active</div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2 pt-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Eye className="h-3 w-3 mr-1" />
-                      View
+                  {/* Enhanced Action Buttons */}
+                  <div className="flex items-center gap-2 pt-3">
+                    <Button variant="outline" size="sm" className="flex-1 group-hover:border-primary/40 hover:bg-primary/10 hover:text-primary transition-all duration-300">
+                      <Eye className="h-3.5 w-3.5 mr-1.5" />
+                      View Details
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Edit3 className="h-3 w-3 mr-1" />
+                    <Button variant="outline" size="sm" className="flex-1 group-hover:border-primary/40 hover:bg-primary/10 hover:text-primary transition-all duration-300">
+                      <Edit3 className="h-3.5 w-3.5 mr-1.5" />
                       Edit
                     </Button>
-                    <Button variant="outline" size="sm" className="px-2">
-                      <ArrowUpRight className="h-3 w-3" />
+                    <Button variant="outline" size="sm" className="px-3 group-hover:border-primary/40 hover:bg-primary/10 hover:text-primary transition-all duration-300">
+                      <ArrowUpRight className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </CardContent>
@@ -479,84 +528,137 @@ export function CampaignManager() {
         </div>
       )}
 
-      {/* Create Campaign Modal/Form */}
+      {/* Enhanced Create Campaign Modal */}
       {showCreateForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-scale-in">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5" />
-                Create New Campaign
-              </CardTitle>
-              <p className="text-muted-foreground">
-                Launch a new backlink campaign to boost your search rankings
-              </p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-scale-in border-0 shadow-2xl bg-gradient-to-br from-card via-card to-card/90">
+            {/* Gradient header */}
+            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-primary via-primary/80 to-primary rounded-t-lg"></div>
+            
+            <CardHeader className="pb-6 pt-8">
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+                  <Rocket className="h-6 w-6 text-primary" />
+                </div>
+                <div className="space-y-2 flex-1">
+                  <CardTitle className="text-2xl font-bold">Create New Campaign</CardTitle>
+                  <p className="text-muted-foreground">
+                    Launch a targeted backlink campaign to accelerate your SEO growth and search rankings
+                  </p>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="campaign-name">Campaign Name</Label>
+            
+            <CardContent className="space-y-8">
+              <div className="grid gap-6">
+                <div className="space-y-3">
+                  <Label htmlFor="campaign-name" className="text-sm font-semibold flex items-center gap-2">
+                    <Target className="h-4 w-4 text-primary" />
+                    Campaign Name
+                  </Label>
                   <Input
                     id="campaign-name"
-                    placeholder="e.g., Q1 SEO Campaign"
+                    placeholder="e.g., Q1 Brand Authority Campaign"
                     value={newCampaign.name}
                     onChange={(e) => setNewCampaign(prev => ({ ...prev, name: e.target.value }))}
+                    className="h-12 border-2 focus:border-primary transition-all duration-300"
                   />
+                  <p className="text-xs text-muted-foreground">Choose a descriptive name that identifies this campaign</p>
                 </div>
                 
-                <div>
-                  <Label htmlFor="target-url">Target URL</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="target-url" className="text-sm font-semibold flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-primary" />
+                    Target URL
+                  </Label>
                   <Input
                     id="target-url"
-                    placeholder="https://example.com"
+                    placeholder="https://your-website.com/target-page"
                     value={newCampaign.target_url}
                     onChange={(e) => setNewCampaign(prev => ({ ...prev, target_url: e.target.value }))}
+                    className="h-12 border-2 focus:border-primary transition-all duration-300"
                   />
+                  <p className="text-xs text-muted-foreground">The specific page you want to build backlinks to</p>
                 </div>
                 
-                <div>
-                  <Label htmlFor="keywords">Keywords (comma-separated)</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="keywords" className="text-sm font-semibold flex items-center gap-2">
+                    <Star className="h-4 w-4 text-primary" />
+                    Target Keywords
+                  </Label>
                   <Textarea
                     id="keywords"
-                    placeholder="seo services, digital marketing, backlink building"
+                    placeholder="digital marketing agency, seo services, content marketing, brand strategy"
                     value={newCampaign.keywords}
                     onChange={(e) => setNewCampaign(prev => ({ ...prev, keywords: e.target.value }))}
-                    rows={3}
+                    rows={4}
+                    className="border-2 focus:border-primary transition-all duration-300 resize-none"
                   />
+                  <p className="text-xs text-muted-foreground">Separate keywords with commas. These will guide anchor text selection</p>
                 </div>
                 
-                <div>
-                  <Label htmlFor="links-requested">Links Requested</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="links-requested" className="text-sm font-semibold flex items-center gap-2">
+                    <LinkIcon className="h-4 w-4 text-primary" />
+                    Campaign Scale
+                  </Label>
                   <Select 
                     value={newCampaign.links_requested.toString()} 
                     onValueChange={(value) => setNewCampaign(prev => ({ ...prev, links_requested: parseInt(value) }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 border-2 focus:border-primary">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="5">5 Links</SelectItem>
-                      <SelectItem value="10">10 Links</SelectItem>
-                      <SelectItem value="15">15 Links</SelectItem>
-                      <SelectItem value="20">20 Links</SelectItem>
-                      <SelectItem value="25">25 Links</SelectItem>
-                      <SelectItem value="50">50 Links</SelectItem>
+                      <SelectItem value="5">5 Links - Starter Package</SelectItem>
+                      <SelectItem value="10">10 Links - Standard Campaign</SelectItem>
+                      <SelectItem value="15">15 Links - Growth Focus</SelectItem>
+                      <SelectItem value="20">20 Links - Authority Building</SelectItem>
+                      <SelectItem value="25">25 Links - Premium Campaign</SelectItem>
+                      <SelectItem value="50">50 Links - Enterprise Scale</SelectItem>
                     </SelectContent>
                   </Select>
+                  <p className="text-xs text-muted-foreground">Higher volumes provide better ranking impact but require more credits</p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-3 pt-4 border-t">
+              {/* Enhanced Preview Section */}
+              <div className="p-4 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20">
+                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  <Eye className="h-4 w-4" />
+                  Campaign Preview
+                </h4>
+                <div className="grid grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <span className="text-muted-foreground">Keywords:</span>
+                    <p className="font-medium">{newCampaign.keywords ? newCampaign.keywords.split(',').length : 0} keywords</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Estimated Credits:</span>
+                    <p className="font-medium text-primary">{newCampaign.links_requested * 2} credits</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Expected Timeline:</span>
+                    <p className="font-medium">2-4 weeks</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Quality Score:</span>
+                    <p className="font-medium text-green-600">High Quality</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4 pt-6 border-t">
                 <Button 
                   variant="outline" 
                   onClick={() => setShowCreateForm(false)}
-                  className="flex-1"
+                  className="flex-1 h-12 hover:bg-muted transition-all duration-300"
                 >
                   Cancel
                 </Button>
                 <Button 
                   onClick={createCampaign}
-                  className="flex-1"
+                  className="flex-1 h-12 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   <Rocket className="h-4 w-4 mr-2" />
                   Launch Campaign
