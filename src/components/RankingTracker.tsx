@@ -209,7 +209,7 @@ export const RankingTracker = () => {
         }
 
         // Simulate enhanced data analysis
-        const backlinksCount = Math.floor(Math.random() * 10000);
+        const backlinksCount = data.backlinksCount !== undefined ? data.backlinksCount : Math.floor(Math.random() * 10000);
         const hasSSL = url.startsWith('https://');
         const domainAge = Math.floor(Math.random() * 10) + 1;
         
@@ -218,7 +218,22 @@ export const RankingTracker = () => {
           errors.push('No SSL certificate detected');
           technicalIssues.push('SSL certificate missing');
         }
-        if (backlinksCount === 0) {
+        
+        // Handle indexing errors
+        if (data.indexingError || (data.indexed === false)) {
+          const indexingMessage = `Not indexed on ${engine}`;
+          errors.push(indexingMessage);
+          technicalIssues.push(indexingMessage);
+          
+          // Show specific indexing error notification
+          toast({
+            title: `Indexing Issue - ${engine.charAt(0).toUpperCase() + engine.slice(1)}`,
+            description: `Website is not indexed on ${engine} - showing 0 links`,
+            variant: "destructive",
+          });
+        }
+        
+        if (backlinksCount === 0 && !data.indexingError) {
           errors.push('No backlinks found');
           technicalIssues.push('Zero backlink count detected');
         }
@@ -236,8 +251,9 @@ export const RankingTracker = () => {
           competitorAnalysis: data.competitorAnalysis || [],
           domainAge,
           sslStatus: hasSSL ? 'Valid' : 'Missing',
-          indexingStatus: data.found ? 'Indexed' : 'Not Indexed',
-          websiteStatus: 'active'
+          indexingStatus: data.indexed !== false ? (data.found ? 'Indexed' : 'Not Indexed') : 'Not Indexed',
+          websiteStatus: data.indexed === false ? 'not_indexed' : 'active',
+          indexedPages: data.indexedPages || 0
         };
 
         await new Promise(resolve => setTimeout(resolve, 1500));
@@ -957,7 +973,7 @@ export const RankingTracker = () => {
                               <Badge variant="secondary">-</Badge>
                             )}
                             <div className="text-xs text-muted-foreground">
-                              {result.searchEngines.google.backlinks} links
+                              {result.searchEngines.google.backlinks === 0 ? "0 links" : `${result.searchEngines.google.backlinks} links`}
                             </div>
                           </div>
                         </TableCell>
@@ -971,7 +987,7 @@ export const RankingTracker = () => {
                               <Badge variant="secondary">-</Badge>
                             )}
                             <div className="text-xs text-muted-foreground">
-                              {result.searchEngines.bing.backlinks} links
+                              {result.searchEngines.bing.backlinks === 0 ? "0 links" : `${result.searchEngines.bing.backlinks} links`}
                             </div>
                           </div>
                         </TableCell>
@@ -985,7 +1001,7 @@ export const RankingTracker = () => {
                               <Badge variant="secondary">-</Badge>
                             )}
                             <div className="text-xs text-muted-foreground">
-                              {result.searchEngines.yahoo.backlinks} links
+                              {result.searchEngines.yahoo.backlinks === 0 ? "0 links" : `${result.searchEngines.yahoo.backlinks} links`}
                             </div>
                           </div>
                         </TableCell>
