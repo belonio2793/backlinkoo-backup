@@ -488,7 +488,7 @@ const Index = () => {
 
           <div className="text-center mt-12">
             <p className="text-gray-600 font-light">
-              Need more credits? <Button variant="link" className="pperiodic-texture p-0 text-gray-900 font-medium hover:text-gray-700">Contact us</Button> for custom enterprise packages.
+              Need more credits? <Button variant="link" className="pperiodic-texture p-0 text-gray-900 font-medium hover:text-gray-700"><a href="mailto:support@backlinkoo.com">Contact us</a></Button> for custom enterprise packages.
             </p>
           </div>
         </div>
