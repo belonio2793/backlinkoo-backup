@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SecurityDashboard } from "@/components/SecurityDashboard";
 import { 
   Users, 
   Activity, 
@@ -13,7 +15,8 @@ import {
   CheckCircle,
   Clock,
   Infinity,
-  ExternalLink
+  ExternalLink,
+  Shield
 } from "lucide-react";
 
 const AdminDashboard = () => {
@@ -137,7 +140,14 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <Tabs defaultValue="campaigns" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
+            <TabsTrigger value="security">Security & Roles</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="campaigns">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Campaign Queue */}
           <div className="lg:col-span-2">
             <Card>
@@ -298,7 +308,13 @@ https://example3.com/resource"
               </CardContent>
             </Card>
           </div>
-        </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="security">
+            <SecurityDashboard />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

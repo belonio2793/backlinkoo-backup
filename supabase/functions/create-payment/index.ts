@@ -15,6 +15,32 @@ interface PaymentRequest {
   paymentMethod: 'stripe' | 'paypal';
 }
 
+// Rate limiting map (in production, use Redis or similar)
+const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
+
+function checkRateLimit(identifier: string): boolean {
+  const now = Date.now();
+  const windowMs = 60000; // 1 minute
+  const maxRequests = 10;
+  
+  const record = rateLimitMap.get(identifier);
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(identifier, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+  
+  if (record.count >= maxRequests) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+}
+
+function sanitizeInput(input: string): string {
+  return input.replace(/[<>'"&]/g, '').trim();
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -27,7 +53,29 @@ serve(async (req) => {
   );
 
   try {
-    const { amount, productName, isGuest = false, guestEmail, paymentMethod }: PaymentRequest = await req.json();
+    // Rate limiting check
+    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    if (!checkRateLimit(clientIP)) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const body: PaymentRequest = await req.json();
+    
+    // Input validation
+    if (!body.amount || body.amount <= 0 || body.amount > 1000000) {
+      throw new Error('Invalid amount');
+    }
+    
+    if (!body.productName || body.productName.length > 200) {
+      throw new Error('Invalid product name');
+    }
+    
+    const { amount, isGuest = false, paymentMethod } = body;
+    const productName = sanitizeInput(body.productName);
+    let guestEmail = body.guestEmail ? sanitizeInput(body.guestEmail) : '';
     
     let user = null;
     let email = guestEmail;
@@ -43,6 +91,11 @@ serve(async (req) => {
       }
       user = userData.user;
       email = user.email;
+    } else {
+      if (!guestEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
+        throw new Error('Valid guest email is required for guest checkout');
+      }
+      email = guestEmail;
     }
 
     if (!email) {

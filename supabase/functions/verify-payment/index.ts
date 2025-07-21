@@ -13,6 +13,28 @@ interface VerifyRequest {
   type: 'payment' | 'subscription';
 }
 
+// Rate limiting map
+const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
+
+function checkRateLimit(identifier: string): boolean {
+  const now = Date.now();
+  const windowMs = 60000; // 1 minute
+  const maxRequests = 20; // Higher limit for verification
+  
+  const record = rateLimitMap.get(identifier);
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(identifier, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+  
+  if (record.count >= maxRequests) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -25,7 +47,27 @@ serve(async (req) => {
   );
 
   try {
-    const { sessionId, paypalOrderId, type }: VerifyRequest = await req.json();
+    // Rate limiting check
+    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    if (!checkRateLimit(clientIP)) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const body: VerifyRequest = await req.json();
+    
+    // Input validation
+    if (!body.type || !['payment', 'subscription'].includes(body.type)) {
+      throw new Error('Invalid verification type');
+    }
+    
+    if (!body.sessionId && !body.paypalOrderId) {
+      throw new Error('Missing session ID or PayPal order ID');
+    }
+    
+    const { sessionId, paypalOrderId, type } = body;
 
     if (sessionId) {
       // Verify Stripe payment/subscription

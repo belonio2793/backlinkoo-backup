@@ -14,6 +14,32 @@ interface SubscriptionRequest {
   guestEmail?: string;
 }
 
+// Rate limiting map
+const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
+
+function checkRateLimit(identifier: string): boolean {
+  const now = Date.now();
+  const windowMs = 60000; // 1 minute
+  const maxRequests = 5; // Lower limit for subscriptions
+  
+  const record = rateLimitMap.get(identifier);
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(identifier, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+  
+  if (record.count >= maxRequests) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+}
+
+function sanitizeInput(input: string): string {
+  return input.replace(/[<>'"&]/g, '').trim();
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -26,7 +52,29 @@ serve(async (req) => {
   );
 
   try {
-    const { priceId, tier, isGuest = false, guestEmail }: SubscriptionRequest = await req.json();
+    // Rate limiting check
+    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    if (!checkRateLimit(clientIP)) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const body: SubscriptionRequest = await req.json();
+    
+    // Input validation
+    if (!body.priceId || typeof body.priceId !== 'string' || body.priceId.length > 100) {
+      throw new Error('Invalid price ID');
+    }
+    
+    if (!body.tier || body.tier.length > 50) {
+      throw new Error('Invalid tier');
+    }
+    
+    const { priceId, isGuest = false } = body;
+    const tier = sanitizeInput(body.tier);
+    let guestEmail = body.guestEmail ? sanitizeInput(body.guestEmail) : '';
     
     let user = null;
     let email = guestEmail;
