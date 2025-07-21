@@ -631,7 +631,7 @@ export const KeywordResearchTool = () => {
                 <span>📍</span>
                 <span>
                   {selectedCity && selectedCity !== userLocation.city ? 
-                    `Selected: ${selectedCity}, ${userLocation.country}` : 
+                    `Selected: ${selectedCity}, ${countries.find(c => c.code === selectedCountry)?.name || userLocation.country}` : 
                     `Detected: ${userLocation.city ? `${userLocation.city}, ` : ''}${userLocation.country}`
                   }
                 </span>
