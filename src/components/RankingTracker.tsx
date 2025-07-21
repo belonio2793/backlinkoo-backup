@@ -58,6 +58,7 @@ export const RankingTracker = () => {
   const [checkingProgress, setCheckingProgress] = useState<string[]>([]);
   const [currentProgressIndex, setCurrentProgressIndex] = useState(0);
   const [isLoadingSaved, setIsLoadingSaved] = useState(true);
+  const [recheckingTargets, setRecheckingTargets] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   const [aiAnalysis, setAiAnalysis] = useState<string>("");
@@ -513,34 +514,43 @@ export const RankingTracker = () => {
   };
 
   const recheckTarget = async (target: SavedTarget) => {
-    if (isChecking) return;
+    if (recheckingTargets.has(target.target_id)) return;
     
-    setIsChecking(true);
-    setCheckingProgress(['Rechecking target...']);
+    // Add target to rechecking set
+    setRecheckingTargets(prev => new Set([...prev, target.target_id]));
     
     try {
       console.log(`Rechecking target: ${target.keyword} for ${target.domain}`);
       
-      // Perform the ranking check for this specific target
-      const analysisData = await performEnhancedRankingCheck(target.url, target.keyword);
-      
-      if (analysisData.websiteError) {
+      // Call the SEO analysis API function directly
+      const { data, error } = await supabase.functions.invoke('seo-analysis', {
+        body: {
+          url: target.url,
+          keyword: target.keyword
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Failed to analyze target');
+      }
+
+      if (!data || data.websiteError) {
         toast({
           title: "Recheck Failed",
-          description: `Unable to analyze ${target.domain}: ${analysisData.errorMessage}`,
+          description: `Unable to analyze ${target.domain}: ${data?.errorMessage || 'Website is not accessible'}`,
           variant: "destructive",
         });
         return;
       }
 
-      const results = analysisData.results || {};
-      const googleData = (results as any)['google'] || {};
-      const bingData = (results as any)['bing'] || {};
-      const yahooData = (results as any)['yahoo'] || {};
+      const results = data.results || {};
+      const googleData = results.google || {};
+      const bingData = results.bing || {};
+      const yahooData = results.yahoo || {};
 
       // Calculate best and average positions
       const positions = [googleData.position, bingData.position, yahooData.position]
-        .filter(p => p !== null) as number[];
+        .filter(p => p !== null && p !== undefined) as number[];
       const bestPosition = positions.length > 0 ? Math.min(...positions) : 999;
       const averagePosition = positions.length > 0 
         ? Math.round(positions.reduce((a, b) => a + b, 0) / positions.length)
@@ -597,8 +607,12 @@ export const RankingTracker = () => {
         variant: "destructive",
       });
     } finally {
-      setIsChecking(false);
-      setCheckingProgress([]);
+      // Remove target from rechecking set
+      setRecheckingTargets(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(target.target_id);
+        return newSet;
+      });
     }
   };
 
@@ -953,11 +967,11 @@ export const RankingTracker = () => {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => recheckTarget(target)}
-                                  disabled={isChecking}
+                                  disabled={recheckingTargets.has(target.target_id)}
                                   className="text-xs"
                                 >
                                   <Eye className="h-3 w-3 mr-1" />
-                                  {isChecking ? "Fetching..." : "Recheck"}
+                                  {recheckingTargets.has(target.target_id) ? "Fetching..." : "Recheck"}
                                 </Button>
                                 <Button
                                   size="sm"
