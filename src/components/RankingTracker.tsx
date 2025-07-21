@@ -937,7 +937,7 @@ export const RankingTracker = () => {
                                   className="text-xs"
                                 >
                                   <Eye className="h-3 w-3 mr-1" />
-                                  Recheck
+                                  {isChecking ? "Fetching..." : "Recheck"}
                                 </Button>
                                 <Button
                                   size="sm"

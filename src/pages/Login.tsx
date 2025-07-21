@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Infinity, Eye, EyeOff, Mail, RefreshCw } from "lucide-react";
@@ -16,11 +17,13 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showResendConfirmation, setShowResendConfirmation] = useState(false);
   const [resendEmail, setResendEmail] = useState("");
   const { toast } = useToast();
+  const { broadcastNewUser } = useGlobalNotifications();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -136,6 +139,16 @@ const Login = () => {
       return;
     }
 
+    if (!firstName.trim()) {
+      toast({
+        title: "First name required",
+        description: "Please enter your first name.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // First check if email already exists
       const emailExists = await checkEmailExists(email);
@@ -170,7 +183,10 @@ const Login = () => {
         email,
         password,
         options: {
-          emailRedirectTo: redirectUrl
+          emailRedirectTo: redirectUrl,
+          data: {
+            first_name: firstName.trim()
+          }
         }
       });
 
@@ -184,6 +200,11 @@ const Login = () => {
           title: "Check your email!",
           description: "We've sent you a confirmation link to verify your account.",
         });
+        
+        // Broadcast new user notification globally
+        setTimeout(() => {
+          broadcastNewUser(firstName.trim());
+        }, 1000);
       }
     } catch (error: any) {
       console.error("Signup error:", error);
@@ -300,6 +321,17 @@ const Login = () => {
               
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="first-name">First Name</Label>
+                    <Input
+                      id="first-name"
+                      type="text"
+                      placeholder="John"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      required
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
                     <Input
