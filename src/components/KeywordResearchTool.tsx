@@ -485,8 +485,7 @@ export const KeywordResearchTool = () => {
     );
   }
   
-  try {
-    return (
+  return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
@@ -509,8 +508,17 @@ export const KeywordResearchTool = () => {
             
             <Select value={selectedCountry} onValueChange={(value) => {
               console.log('Country changed to:', value);
-              setSelectedCountry(value);
-              setSelectedCity(""); // Always reset city when country changes
+              try {
+                setSelectedCountry(value);
+                setSelectedCity(""); // Always reset city when country changes
+              } catch (error) {
+                console.error('Error changing country:', error);
+                toast({
+                  title: "Error",
+                  description: "Failed to change country. Please try again.",
+                  variant: "destructive",
+                });
+              }
             }}>
               <SelectTrigger>
                 <SelectValue placeholder="Select Country">
@@ -568,7 +576,7 @@ export const KeywordResearchTool = () => {
             </Select>
           </div>
 
-          {selectedCountry && cities[selectedCountry as keyof typeof cities] && (
+          {selectedCountry && cities[selectedCountry as keyof typeof cities] && cities[selectedCountry as keyof typeof cities].length > 0 && (
             <Select value={selectedCity} onValueChange={setSelectedCity}>
               <SelectTrigger className="max-w-md">
                 <SelectValue placeholder="City (optional)">
@@ -875,13 +883,4 @@ export const KeywordResearchTool = () => {
       )}
     </div>
     );
-  } catch (error) {
-    console.error('KeywordResearchTool: Error rendering component:', error);
-    return (
-      <div className="p-8 text-center">
-        <h2 className="text-xl font-semibold mb-4">Keyword Research Tool</h2>
-        <p className="text-muted-foreground">Loading keyword research functionality...</p>
-      </div>
-    );
-  }
 };
