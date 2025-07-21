@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,10 +15,28 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PaymentModal } from "@/components/PaymentModal";
+import { supabase } from "@/integrations/supabase/client";
+import type { User } from '@supabase/supabase-js';
 
 const Index = () => {
   const navigate = useNavigate();
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  // Check for authenticated user on component mount
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const features = [
     {
@@ -64,12 +82,20 @@ const Index = () => {
               <h1 className="text-2xl font-bold text-foreground">Backlink ∞</h1>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" onClick={() => navigate("/login")}>
-                Sign In
-              </Button>
-              <Button onClick={() => navigate("/login")}>
-                Get Started
-              </Button>
+              {user ? (
+                <Button onClick={() => navigate("/dashboard")}>
+                  Dashboard
+                </Button>
+              ) : (
+                <>
+                  <Button variant="outline" onClick={() => navigate("/login")}>
+                    Sign In
+                  </Button>
+                  <Button onClick={() => navigate("/login")}>
+                    Get Started
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
