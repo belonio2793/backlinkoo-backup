@@ -95,19 +95,7 @@ export const RankingTracker = () => {
     const results: { [key: string]: any } = {};
     const technicalIssues: string[] = [];
     
-    const progressMessages = [
-      'Validating website availability...',
-      'Checking SSL certificate status...',
-      'Searching Google SERP for target keyword...',
-      'Analyzing Bing search results and rankings...',
-      'Checking Yahoo search engine positions...',
-      'Extracting competitor data and backlink profiles...',
-      'Processing domain authority metrics...',
-      'Compiling comprehensive SEO performance report...'
-    ];
-    
-    let progressIndex = 0;
-    setCheckingProgress([progressMessages[progressIndex]]);
+    setCheckingProgress(['Fetching results...']);
     setCurrentProgressIndex(0);
     
     // First validate website availability with comprehensive checks
@@ -188,12 +176,8 @@ export const RankingTracker = () => {
       };
     }
     
-    // Simulate rotating progress messages
-    const progressInterval = setInterval(() => {
-      progressIndex = (progressIndex + 1) % progressMessages.length;
-      setCheckingProgress([progressMessages[progressIndex]]);
-      setCurrentProgressIndex(progressIndex);
-    }, 2000);
+    // Keep static progress message
+    setCheckingProgress(['Fetching results...']);
     
     for (const engine of searchEngines) {
       try {
@@ -276,7 +260,6 @@ export const RankingTracker = () => {
       }
     }
 
-    clearInterval(progressInterval);
     setCheckingProgress([]);
     setCurrentProgressIndex(0);
     return { results, technicalIssues: [...new Set(technicalIssues)] };
