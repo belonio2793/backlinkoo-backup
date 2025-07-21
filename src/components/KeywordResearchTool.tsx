@@ -69,14 +69,38 @@ export const KeywordResearchTool = () => {
         const response = await fetch('https://ipapi.co/json/');
         const data = await response.json();
         console.log('KeywordResearchTool: Location data received:', data);
+        
+        // Validate that the detected country exists in our countries list
+        const detectedCountryCode = data.country_code || 'US';
+        const countryExists = countries.find(c => c.code === detectedCountryCode);
+        const finalCountryCode = countryExists ? detectedCountryCode : 'US';
+        
+        // Validate that the detected city exists in the selected country's cities list
+        const detectedCity = data.city || '';
+        const countryCities = cities[finalCountryCode as keyof typeof cities] || [];
+        const cityExists = countryCities.includes(detectedCity);
+        
         setUserLocation({
           country: data.country_name || 'United States',
-          city: data.city || ''
+          city: detectedCity
         });
-        setSelectedCountry(data.country_code || 'US');
-        if (data.city) setSelectedCity(data.city);
+        setSelectedCountry(finalCountryCode);
+        
+        // Only set the city if it exists in our predefined list for that country
+        if (cityExists) {
+          setSelectedCity(detectedCity);
+        } else {
+          setSelectedCity(''); // Default to "All Cities"
+        }
       } catch (error) {
         console.log('KeywordResearchTool: Could not detect location, using defaults', error);
+        // Set safe defaults on error
+        setUserLocation({
+          country: 'United States',
+          city: ''
+        });
+        setSelectedCountry('US');
+        setSelectedCity('');
       } finally {
         // Add a small delay to show the loading animation
         setTimeout(() => {
@@ -243,8 +267,9 @@ export const KeywordResearchTool = () => {
             </div>
             
             <Select value={selectedCountry} onValueChange={(value) => {
+              console.log('Country changed to:', value);
               setSelectedCountry(value);
-              setSelectedCity("");
+              setSelectedCity(""); // Always reset city when country changes
             }}>
               <SelectTrigger>
                 <SelectValue placeholder="Select Country">
