@@ -848,30 +848,27 @@ export const RankingTracker = () => {
           <CardContent>
             {/* SE Scout-style table */}
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="grid grid-cols-3 gap-4 text-center">
                 <div className="p-4 border rounded-lg">
                   <div className="text-2xl font-bold text-primary">
                     {rankings.reduce((acc, r) => acc + Object.values(r.searchEngines).filter(se => se.found).length, 0)}
                   </div>
                   <div className="text-sm text-muted-foreground">Keywords Ranking</div>
-                  <div className="text-xs text-green-600">+2.3%</div>
                 </div>
                 <div className="p-4 border rounded-lg">
                   <div className="text-2xl font-bold text-primary">
                     {Math.round(rankings.reduce((acc, r) => {
                       const positions = Object.values(r.searchEngines).map(se => se.position).filter(p => p !== null) as number[];
                       return acc + (positions.length > 0 ? positions.reduce((sum, pos) => sum + pos, 0) / positions.length : 0);
-                    }, 0) / Math.max(rankings.length, 1))}
+                    }, 0) / Math.max(rankings.length, 1)) || 0}
                   </div>
                   <div className="text-sm text-muted-foreground">Avg Position</div>
-                  <div className="text-xs text-green-600">+5.2%</div>
                 </div>
                 <div className="p-4 border rounded-lg">
                   <div className="text-2xl font-bold text-primary">
                     {rankings.reduce((acc, r) => acc + Object.values(r.searchEngines).reduce((sum, se) => sum + se.backlinks, 0), 0)}
                   </div>
                   <div className="text-sm text-muted-foreground">Total Backlinks</div>
-                  <div className="text-xs text-green-600">+12.7%</div>
                 </div>
               </div>
 
@@ -1086,12 +1083,12 @@ export const RankingTracker = () => {
                             Priority actions: Ensure proper indexing, build quality backlinks, optimize on-page SEO, and improve content relevance for target keyword.
                           </div>
                         </div>
-                        <div className="p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                          <div className="font-medium text-yellow-800 dark:text-yellow-300 mb-2">⚡ Immediate Actions</div>
-                          <div className="text-sm text-yellow-700 dark:text-yellow-400">
-                            Start with technical SEO audit, then focus on acquiring 30-50 relevant backlinks over the next 3-6 months.
-                          </div>
-                        </div>
+                         <div className="p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                           <div className="font-medium text-yellow-800 dark:text-yellow-300 mb-2">⚡ Immediate Actions</div>
+                           <div className="text-sm text-yellow-700 dark:text-yellow-400">
+                             Start with technical SEO audit, then focus on acquiring 30 - 50 relevant backlinks with Backlink ∞
+                           </div>
+                         </div>
                       </>
                     )}
                   </div>
