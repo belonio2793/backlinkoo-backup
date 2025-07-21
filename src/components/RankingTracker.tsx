@@ -856,9 +856,13 @@ export const RankingTracker = () => {
                                 ) : (
                                   <Badge variant="secondary">-</Badge>
                                 )}
-                            <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                <div className="text-xs text-muted-foreground flex items-center gap-1">
                                    <Link className="h-3 w-3" />
-                                   {target.google_backlinks === 0 ? "0 links" : `${target.google_backlinks} links`}
+                                   {(!target.google_position || !target.google_found) 
+                                     ? "0 links" 
+                                     : target.google_backlinks === 0 
+                                       ? "0 links" 
+                                       : `${target.google_backlinks} links`}
                                  </div>
                                 {target.google_checked_at && (
                                   <div className="text-xs text-muted-foreground">
@@ -879,7 +883,11 @@ export const RankingTracker = () => {
                                 )}
                                 <div className="text-xs text-muted-foreground flex items-center gap-1">
                                    <Link className="h-3 w-3" />
-                                   {target.bing_backlinks === 0 ? "0 links" : `${target.bing_backlinks} links`}
+                                   {(!target.bing_position || !target.bing_found) 
+                                     ? "0 links" 
+                                     : target.bing_backlinks === 0 
+                                       ? "0 links" 
+                                       : `${target.bing_backlinks} links`}
                                  </div>
                                 {target.bing_checked_at && (
                                   <div className="text-xs text-muted-foreground">
@@ -900,7 +908,11 @@ export const RankingTracker = () => {
                                 )}
                                 <div className="text-xs text-muted-foreground flex items-center gap-1">
                                    <Link className="h-3 w-3" />
-                                   {target.yahoo_backlinks === 0 ? "0 links" : `${target.yahoo_backlinks} links`}
+                                   {(!target.yahoo_position || !target.yahoo_found) 
+                                     ? "0 links" 
+                                     : target.yahoo_backlinks === 0 
+                                       ? "0 links" 
+                                       : `${target.yahoo_backlinks} links`}
                                  </div>
                                 {target.yahoo_checked_at && (
                                   <div className="text-xs text-muted-foreground">
@@ -923,7 +935,15 @@ export const RankingTracker = () => {
                             <TableCell className="text-center">
                               <div className="flex items-center justify-center gap-1">
                                 <Link className="h-4 w-4 text-primary" />
-                                <span className="font-semibold text-primary">{totalBacklinks.toLocaleString()}</span>
+                                <span className="font-semibold text-primary">
+                                  {(() => {
+                                    const validBacklinks = 
+                                      (target.google_position && target.google_found ? target.google_backlinks || 0 : 0) +
+                                      (target.bing_position && target.bing_found ? target.bing_backlinks || 0 : 0) +
+                                      (target.yahoo_position && target.yahoo_found ? target.yahoo_backlinks || 0 : 0);
+                                    return validBacklinks.toLocaleString();
+                                  })()}
+                                </span>
                               </div>
                             </TableCell>
                             
@@ -1002,7 +1022,9 @@ export const RankingTracker = () => {
                 </div>
                 <div className="p-4 border rounded-lg">
                   <div className="text-2xl font-bold text-primary">
-                    {rankings.reduce((acc, r) => acc + Object.values(r.searchEngines).reduce((sum, se) => sum + se.backlinks, 0), 0)}
+                    {rankings.reduce((acc, r) => acc + Object.values(r.searchEngines).reduce((sum, se) => {
+                      return sum + ((!se.position || !se.found) ? 0 : se.backlinks);
+                    }, 0), 0)}
                   </div>
                   <div className="text-sm text-muted-foreground">Total Backlinks</div>
                 </div>
@@ -1054,7 +1076,11 @@ export const RankingTracker = () => {
                               <Badge variant="secondary">-</Badge>
                             )}
                             <div className="text-xs text-muted-foreground">
-                              {result.searchEngines.google.backlinks === 0 ? "0 links" : `${result.searchEngines.google.backlinks} links`}
+                              {(!result.searchEngines.google.position || !result.searchEngines.google.found) 
+                                ? "0 links" 
+                                : result.searchEngines.google.backlinks === 0 
+                                  ? "0 links" 
+                                  : `${result.searchEngines.google.backlinks} links`}
                             </div>
                           </div>
                         </TableCell>
@@ -1068,7 +1094,11 @@ export const RankingTracker = () => {
                               <Badge variant="secondary">-</Badge>
                             )}
                             <div className="text-xs text-muted-foreground">
-                              {result.searchEngines.bing.backlinks === 0 ? "0 links" : `${result.searchEngines.bing.backlinks} links`}
+                              {(!result.searchEngines.bing.position || !result.searchEngines.bing.found) 
+                                ? "0 links" 
+                                : result.searchEngines.bing.backlinks === 0 
+                                  ? "0 links" 
+                                  : `${result.searchEngines.bing.backlinks} links`}
                             </div>
                           </div>
                         </TableCell>
@@ -1082,7 +1112,11 @@ export const RankingTracker = () => {
                               <Badge variant="secondary">-</Badge>
                             )}
                             <div className="text-xs text-muted-foreground">
-                              {result.searchEngines.yahoo.backlinks === 0 ? "0 links" : `${result.searchEngines.yahoo.backlinks} links`}
+                              {(!result.searchEngines.yahoo.position || !result.searchEngines.yahoo.found) 
+                                ? "0 links" 
+                                : result.searchEngines.yahoo.backlinks === 0 
+                                  ? "0 links" 
+                                  : `${result.searchEngines.yahoo.backlinks} links`}
                             </div>
                           </div>
                         </TableCell>
@@ -1090,7 +1124,9 @@ export const RankingTracker = () => {
                           <div className="flex items-center justify-center gap-1">
                             <Link className="h-4 w-4" />
                             <span className="font-medium">
-                              {Object.values(result.searchEngines).reduce((sum, se) => sum + se.backlinks, 0)}
+                              {Object.values(result.searchEngines).reduce((sum, se) => {
+                                return sum + ((!se.position || !se.found) ? 0 : se.backlinks);
+                              }, 0)}
                             </span>
                           </div>
                         </TableCell>
@@ -1159,7 +1195,9 @@ export const RankingTracker = () => {
                   </div>
                   <div className="text-center p-4 bg-white/50 dark:bg-black/20 rounded-lg">
                     <div className="text-2xl font-bold text-orange-600">
-                      {Object.values(rankings[0].searchEngines).reduce((sum, se) => sum + se.backlinks, 0).toLocaleString()}
+                      {Object.values(rankings[0].searchEngines).reduce((sum, se) => {
+                        return sum + ((!se.position || !se.found) ? 0 : se.backlinks);
+                      }, 0).toLocaleString()}
                     </div>
                     <div className="text-sm text-muted-foreground">Total Backlinks</div>
                   </div>
@@ -1189,7 +1227,9 @@ export const RankingTracker = () => {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">Backlinks:</span>
-                          <span className="font-semibold text-primary">{data.backlinks.toLocaleString()}</span>
+                          <span className="font-semibold text-primary">
+                            {(!data.position || !data.found) ? "0" : data.backlinks.toLocaleString()}
+                          </span>
                         </div>
                       </div>
                     </div>
