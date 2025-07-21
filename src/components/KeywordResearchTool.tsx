@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, TrendingUp, Eye, DollarSign, Globe, MapPin, BarChart3, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { SearchableSelect } from "@/components/SearchableSelect";
 import googleLogo from "@/assets/google-g-logo.png";
 import bingLogo from "@/assets/bing-logo.png";
@@ -115,27 +116,36 @@ export const KeywordResearchTool = () => {
 
   // Advanced keyword research with geographic and competition analysis
   const performKeywordResearch = async (searchTerm: string) => {
-    const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/functions/v1/seo-analysis', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        type: 'advanced_keyword_research',
-        data: { 
-          keyword: searchTerm,
-          country: selectedCountry,
-          city: selectedCity,
-          searchEngine: selectedEngine
+    console.log('Starting keyword research for:', searchTerm);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('seo-analysis', {
+        body: {
+          type: 'advanced_keyword_research',
+          data: { 
+            keyword: searchTerm,
+            country: selectedCountry,
+            city: selectedCity,
+            searchEngine: selectedEngine
+          }
         }
-      }),
-    });
+      });
 
-    if (!response.ok) {
-      throw new Error('Failed to perform keyword research');
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(error.message || 'Failed to perform keyword research');
+      }
+
+      if (!data) {
+        throw new Error('No data returned from keyword research');
+      }
+
+      console.log('Keyword research successful:', data);
+      return data;
+    } catch (error) {
+      console.error('Error in performKeywordResearch:', error);
+      throw error;
     }
-
-    return await response.json();
   };
 
   const countries = [
