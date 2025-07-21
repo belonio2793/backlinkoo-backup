@@ -51,7 +51,7 @@ interface SavedTarget {
 export const RankingTracker = () => {
   const [url, setUrl] = useState("");
   const [keyword, setKeyword] = useState("");
-  const [targetName, setTargetName] = useState("");
+  
   const [isChecking, setIsChecking] = useState(false);
   const [rankings, setRankings] = useState<RankingResult[]>([]);
   const [savedTargets, setSavedTargets] = useState<SavedTarget[]>([]);
@@ -285,15 +285,7 @@ export const RankingTracker = () => {
       
       const analysisData = await performEnhancedRankingCheck(cleanUrl, keyword.trim());
       
-      // Save target and results if name provided
-      let targetId = null;
-      if (targetName.trim()) {
-        targetId = await saveRankingTarget(cleanUrl, keyword.trim(), targetName.trim());
-        if (targetId) {
-          await saveRankingResults(targetId, analysisData);
-          loadSavedTargets();
-        }
-      }
+      // Analysis is now just for display, saving is done via the Save Target button
 
       // Process results for display
       const positions = Object.values(analysisData.results)
@@ -344,7 +336,7 @@ export const RankingTracker = () => {
       
       setShowAnalysis(true);
 
-      const successMessage = targetId ? "Analysis Complete & Saved" : "Analysis Complete";
+      const successMessage = "Analysis Complete";
       const foundSummary = Object.values(analysisData.results)
         .filter((r: any) => r.found)
         .map((r: any) => `${r.engine} (#${r.position})`)
@@ -400,7 +392,6 @@ export const RankingTracker = () => {
   const recheckTarget = async (target: SavedTarget) => {
     setUrl(target.url);
     setKeyword(target.keyword);
-    setTargetName(target.name || '');
     await checkRanking();
   };
 
@@ -418,6 +409,67 @@ export const RankingTracker = () => {
       case 'bing': return '🌐';
       case 'yahoo': return '🟣';
       default: return '⚪';
+    }
+  };
+
+  const saveCurrentAnalysis = async () => {
+    if (rankings.length === 0) {
+      toast({
+        title: "Error",
+        description: "No analysis results to save",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const result = rankings[0]; // Get the most recent result
+      const targetId = await saveRankingTarget(result.url, result.keyword, `${result.keyword} - ${result.domain}`);
+      
+      if (targetId) {
+        // Create analysis data in the expected format
+        const analysisData = {
+          results: {
+            google: {
+              engine: 'google',
+              position: result.searchEngines.google.position,
+              found: result.searchEngines.google.found,
+              backlinks: result.searchEngines.google.backlinks,
+              errors: result.searchEngines.google.errors || []
+            },
+            bing: {
+              engine: 'bing', 
+              position: result.searchEngines.bing.position,
+              found: result.searchEngines.bing.found,
+              backlinks: result.searchEngines.bing.backlinks,
+              errors: result.searchEngines.bing.errors || []
+            },
+            yahoo: {
+              engine: 'yahoo',
+              position: result.searchEngines.yahoo.position,
+              found: result.searchEngines.yahoo.found,
+              backlinks: result.searchEngines.yahoo.backlinks,
+              errors: result.searchEngines.yahoo.errors || []
+            }
+          },
+          technicalIssues: result.technicalIssues
+        };
+
+        await saveRankingResults(targetId, analysisData);
+        await loadSavedTargets();
+        
+        toast({
+          title: "Analysis Saved",
+          description: `Saved "${result.keyword}" analysis to your targets`,
+        });
+      }
+    } catch (error) {
+      console.error('Error saving analysis:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save analysis results",
+        variant: "destructive",
+      });
     }
   };
 
@@ -449,7 +501,7 @@ export const RankingTracker = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="url">Website URL</Label>
                   <Input
@@ -471,15 +523,6 @@ export const RankingTracker = () => {
                   />
                 </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="target-name">Campaign Name (Optional)</Label>
-                <Input
-                  id="target-name"
-                  placeholder="Enter campaign name to auto-save"
-                  value={targetName}
-                  onChange={(e) => setTargetName(e.target.value)}
-                />
-              </div>
               
               <div className="space-y-2">
                 <Label>&nbsp;</Label>
@@ -707,18 +750,7 @@ export const RankingTracker = () => {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => {
-                    if (rankings.length > 0) {
-                      const result = rankings[0];
-                      setUrl(result.url);
-                      setKeyword(result.keyword);
-                      setTargetName(`${result.keyword} - ${result.domain}`);
-                      toast({
-                        title: "Ready to Save",
-                        description: "Enter a campaign name and analyze to save this target",
-                      });
-                    }
-                  }}
+                  onClick={saveCurrentAnalysis}
                 >
                   <Save className="h-4 w-4 mr-1" />
                   Save Target
