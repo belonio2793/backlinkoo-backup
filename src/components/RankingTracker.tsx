@@ -1209,7 +1209,7 @@ export const RankingTracker = () => {
                         <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
                           <div className="font-medium text-green-800 dark:text-green-300 mb-2">✅ Currently Ranking</div>
                           <div className="text-sm text-green-700 dark:text-green-400">
-                            Great job! You're ranking at position #{rankings[0].overallBest}. Focus on improving to top 3 through content optimization and strategic backlink building.
+                            Great job! You're ranking at position #{rankings[0].overallBest}. Continue ordering more backlinks to maintain and strengthen your current rankings.
                           </div>
                         </div>
                         <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
