@@ -58,7 +58,7 @@ export const RankingTracker = () => {
   const [checkingProgress, setCheckingProgress] = useState<string[]>([]);
   const [currentProgressIndex, setCurrentProgressIndex] = useState(0);
   const [isLoadingSaved, setIsLoadingSaved] = useState(true);
-  const [recheckingTargets, setRecheckingTargets] = useState<Set<string>>(new Set());
+  const [recheckingTargets, setRecheckingTargets] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
   const [aiAnalysis, setAiAnalysis] = useState<string>("");
@@ -514,10 +514,10 @@ export const RankingTracker = () => {
   };
 
   const recheckTarget = async (target: SavedTarget) => {
-    if (recheckingTargets.has(target.target_id)) return;
+    if (recheckingTargets[target.target_id]) return;
     
-    // Add target to rechecking set
-    setRecheckingTargets(prev => new Set([...prev, target.target_id]));
+    // Add target to rechecking state
+    setRecheckingTargets(prev => ({ ...prev, [target.target_id]: true }));
     
     try {
       console.log(`Rechecking target: ${target.keyword} for ${target.domain}`);
@@ -607,11 +607,11 @@ export const RankingTracker = () => {
         variant: "destructive",
       });
     } finally {
-      // Remove target from rechecking set
+      // Remove target from rechecking state
       setRecheckingTargets(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(target.target_id);
-        return newSet;
+        const newState = { ...prev };
+        delete newState[target.target_id];
+        return newState;
       });
     }
   };
@@ -967,11 +967,11 @@ export const RankingTracker = () => {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => recheckTarget(target)}
-                                  disabled={recheckingTargets.has(target.target_id)}
+                                  disabled={recheckingTargets[target.target_id] || false}
                                   className="text-xs"
                                 >
                                   <Eye className="h-3 w-3 mr-1" />
-                                  {recheckingTargets.has(target.target_id) ? "Fetching..." : "Recheck"}
+                                  {recheckingTargets[target.target_id] ? "Fetching..." : "Recheck"}
                                 </Button>
                                 <Button
                                   size="sm"
