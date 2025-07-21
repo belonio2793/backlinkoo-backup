@@ -68,25 +68,42 @@ export const RankingTracker = () => {
   useEffect(() => {
     loadSavedTargets();
     
-    // Set up real-time subscription for ranking dashboard updates
-    const channel = supabase
-      .channel('ranking-dashboard-changes')
+    // Set up real-time subscriptions for both ranking tables
+    const targetsChannel = supabase
+      .channel('ranking-targets-changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'ranking_dashboard'
+          table: 'ranking_targets'
         },
         (payload) => {
-          console.log('Real-time ranking dashboard update:', payload);
+          console.log('Real-time ranking targets update:', payload);
+          loadSavedTargets(); // Refresh the data
+        }
+      )
+      .subscribe();
+
+    const resultsChannel = supabase
+      .channel('ranking-results-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'ranking_results'
+        },
+        (payload) => {
+          console.log('Real-time ranking results update:', payload);
           loadSavedTargets(); // Refresh the data
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(targetsChannel);
+      supabase.removeChannel(resultsChannel);
     };
   }, []);
 
