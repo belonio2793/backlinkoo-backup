@@ -580,7 +580,7 @@ export const KeywordResearchTool = () => {
       {/* Enhanced Search Interface */}
       <Card className="border-0 shadow-sm">
         <CardContent className="p-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Search Term</label>
               <Input
@@ -624,13 +624,11 @@ export const KeywordResearchTool = () => {
                 placeholder="Select city..."
               />
             </div>
-          </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 mt-6 pt-6 border-t">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Search Engine</label>
               <Select value={selectedEngine} onValueChange={setSelectedEngine}>
-                <SelectTrigger className="w-40 h-11">
+                <SelectTrigger className="h-11">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -650,11 +648,11 @@ export const KeywordResearchTool = () => {
               </Select>
             </div>
             
-            <div className="flex-1 flex items-end">
+            <div className="flex items-end">
               <Button 
                 onClick={performSearch} 
                 disabled={isSearching || !searchTerm.trim()}
-                className="w-full sm:w-auto min-w-[180px] h-11 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
+                className="w-full h-11 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
               >
                 {isSearching ? "Researching..." : "Research Keywords"}
                 <Search className="h-4 w-4 ml-2" />

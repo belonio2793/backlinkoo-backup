@@ -354,88 +354,88 @@ export const RankingTracker = () => {
         </div>
       </div>
 
-      {/* Enhanced Input Section */}
-      <Card className="border-0 shadow-sm">
-        <CardContent className="p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="url" className="text-sm font-semibold">Target Website URL</Label>
-              <Input
-                id="url"
-                placeholder="https://example.com"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                className="h-11 border-2 focus:border-primary transition-colors"
-              />
-              <div className="text-xs text-muted-foreground">
-                Enter the complete URL you want to track
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="keyword" className="text-sm font-semibold">Target Keyword</Label>
-              <Input
-                id="keyword"
-                placeholder="your target keyword"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                className="h-11 border-2 focus:border-primary transition-colors"
-              />
-              <div className="text-xs text-muted-foreground">
-                The keyword you want to rank for
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 mt-6 pt-6 border-t">
-            <Button 
-              onClick={checkRanking} 
-              disabled={isChecking || !url.trim() || !keyword.trim()}
-              className="min-w-[180px] h-11 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
-            >
-              {isChecking ? "Analyzing Rankings..." : "Check Rankings"}
-              <Search className="h-4 w-4 ml-2" />
-            </Button>
-            
-            {rankings.length > 0 && (
-              <Button 
-                variant="outline"
-                onClick={() => saveRankingTarget(url, keyword)}
-                disabled={!url.trim() || !keyword.trim()}
-                className="min-w-[140px] h-11"
-              >
-                <Save className="h-4 w-4 mr-2" />
-                Save Target
-              </Button>
-            )}
-          </div>
-
-          {isChecking && checkingProgress.length > 0 && (
-            <Card className="mt-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-              <CardContent className="py-6">
-                <div className="flex items-center gap-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-primary mb-1">
-                      {checkingProgress[0]}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Checking Google, Bing, and Yahoo rankings with technical analysis...
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </CardContent>
-      </Card>
-
       {/* Enhanced Results Display */}
       <Tabs defaultValue="recent" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="recent">Recent Checks ({rankings.length})</TabsTrigger>
           <TabsTrigger value="saved">Saved Targets ({savedTargets.length})</TabsTrigger>
         </TabsList>
+
+        {/* Enhanced Input Section */}
+        <Card className="border-0 shadow-sm mt-6">
+          <CardContent className="p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="url" className="text-sm font-semibold">Target Website URL</Label>
+                <Input
+                  id="url"
+                  placeholder="https://example.com"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  className="h-11 border-2 focus:border-primary transition-colors"
+                />
+                <div className="text-xs text-muted-foreground">
+                  Enter the complete URL you want to track
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="keyword" className="text-sm font-semibold">Target Keyword</Label>
+                <Input
+                  id="keyword"
+                  placeholder="your target keyword"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  className="h-11 border-2 focus:border-primary transition-colors"
+                />
+                <div className="text-xs text-muted-foreground">
+                  The keyword you want to rank for
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4 mt-6 pt-6 border-t">
+              <Button 
+                onClick={checkRanking} 
+                disabled={isChecking || !url.trim() || !keyword.trim()}
+                className="min-w-[180px] h-11 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
+              >
+                {isChecking ? "Analyzing Rankings..." : "Check Rankings"}
+                <Search className="h-4 w-4 ml-2" />
+              </Button>
+              
+              {rankings.length > 0 && (
+                <Button 
+                  variant="outline"
+                  onClick={() => saveRankingTarget(url, keyword)}
+                  disabled={!url.trim() || !keyword.trim()}
+                  className="min-w-[140px] h-11"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Target
+                </Button>
+              )}
+            </div>
+
+            {isChecking && checkingProgress.length > 0 && (
+              <Card className="mt-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+                <CardContent className="py-6">
+                  <div className="flex items-center gap-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-primary mb-1">
+                        {checkingProgress[0]}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Checking Google, Bing, and Yahoo rankings with technical analysis...
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </CardContent>
+        </Card>
 
         <TabsContent value="recent" className="space-y-6">
           {rankings.length === 0 ? (
