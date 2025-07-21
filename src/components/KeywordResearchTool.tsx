@@ -594,12 +594,12 @@ export const KeywordResearchTool = () => {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Target Country</label>
               <SearchableSelect
-                items={countries.map(country => ({
+                options={countries.map(country => ({
                   value: country.code,
                   label: `${country.flag} ${country.name}`,
-                  searchText: `${country.name} ${country.code}`
+                  searchableText: `${country.name} ${country.code}`
                 }))}
-                selectedValue={selectedCountry}
+                value={selectedCountry}
                 onValueChange={(value: string) => {
                   setSelectedCountry(value);
                   setSelectedCity("");
@@ -611,15 +611,15 @@ export const KeywordResearchTool = () => {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">City (Optional)</label>
               <SearchableSelect
-                items={[
-                  { value: "", label: "All Cities", searchText: "all cities nationwide" },
+                options={[
+                  { value: "", label: "All Cities", searchableText: "all cities nationwide" },
                   ...(cities[selectedCountry as keyof typeof cities] || []).map(city => ({
                     value: city,
                     label: city,
-                    searchText: city.toLowerCase()
+                    searchableText: city.toLowerCase()
                   }))
                 ]}
-                selectedValue={selectedCity}
+                value={selectedCity}
                 onValueChange={setSelectedCity}
                 placeholder="Select city..."
               />
