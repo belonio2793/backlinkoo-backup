@@ -47,7 +47,12 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   });
 
   // Sort filtered options alphabetically by label
-  const sortedOptions = filteredOptions.sort((a, b) => a.label.localeCompare(b.label));
+  const sortedOptions = filteredOptions.sort((a, b) => {
+    // Keep "All Cities" at the top
+    if (a.label === "All Cities") return -1;
+    if (b.label === "All Cities") return 1;
+    return a.label.localeCompare(b.label);
+  });
 
   const handleSelect = (optionValue: string) => {
     onValueChange(optionValue);
