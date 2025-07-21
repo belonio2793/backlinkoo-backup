@@ -54,7 +54,7 @@ const Index = () => {
     "Low Outbound Links (OBL)",
     "Unique C-Class IP Addresses",
     "99.99% Indexing Rate Guaranteed",
-    "24/7 SERP Monitoring"
+    "24/7 SERP Monitoring",
     "High-DA Networks",
     "Permanent Links",
     "Strategic Placements",
