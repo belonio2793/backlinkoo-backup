@@ -59,7 +59,7 @@ const Index = () => {
     "Permanent Links",
     "Strategic Placements",
     "Editorial Links",
-    "Private Block Networks",
+    "Private Blog Networks",
     "Contextual Authority"
   ];
 
