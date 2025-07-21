@@ -22,9 +22,6 @@ import { PaymentModal } from "@/components/PaymentModal";
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
-import heroSpaceNebula from "@/assets/hero-space-nebula.jpg";
-import heroGalaxySpiral from "@/assets/hero-galaxy-spiral.jpg";
-import heroSupernova from "@/assets/hero-supernova.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -172,30 +169,25 @@ const Index = () => {
 
       {/* Hero Section */}
       <section 
-        className="relative py-32 px-6 bg-gradient-to-b from-background/90 to-muted/20 overflow-hidden"
-        style={{ 
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url(${heroSpaceNebula})`, 
-          backgroundSize: 'cover', 
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
-        }}
+        className="relative py-32 px-6 bg-white"
+        style={{ backgroundColor: '#ffffff' }}
       >
         <div className="container mx-auto text-center relative z-10">
-          <Badge variant="outline" className="mb-8 bg-white/10 border-white/30 text-white font-mono text-xs px-4 py-2 backdrop-blur-sm">
+          <Badge variant="outline" className="mb-8 bg-gray-100 border-gray-300 text-gray-900 font-mono text-xs px-4 py-2">
             ENTERPRISE BACKLINK PLATFORM
           </Badge>
           
           <AnimatedHeadline
             baseText="Professional SEO with"
             animatedTexts={headlineVariations}
-            className="text-5xl md:text-7xl font-light mb-8 text-white tracking-tight drop-shadow-lg"
+            className="text-5xl md:text-7xl font-light mb-8 text-gray-900 tracking-tight"
           />
           
-          <p className="text-xl md:text-2xl text-white/90 mb-6 max-w-4xl mx-auto leading-relaxed font-light drop-shadow-md">
+          <p className="text-xl md:text-2xl text-gray-700 mb-6 max-w-4xl mx-auto leading-relaxed font-light">
             The backlink platform that SEO professionals rely on for consistent, measurable results.
           </p>
           
-          <p className="text-lg text-white/80 mb-12 font-medium max-w-3xl mx-auto drop-shadow-md">
+          <p className="text-lg text-gray-600 mb-12 font-medium max-w-3xl mx-auto">
             High-authority links • Competitive intelligence • Guaranteed results or full refund
           </p>
           
@@ -222,9 +214,9 @@ const Index = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-semibold text-white mb-2 drop-shadow-lg">{stat.value}</div>
-                <div className="text-sm font-medium text-white/90 mb-1 drop-shadow-md">{stat.label}</div>
-                <div className="text-xs text-white/70 drop-shadow-sm">{stat.description}</div>
+                <div className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2">{stat.value}</div>
+                <div className="text-sm font-medium text-gray-700 mb-1">{stat.label}</div>
+                <div className="text-xs text-gray-500">{stat.description}</div>
               </div>
             ))}
           </div>
@@ -434,18 +426,13 @@ const Index = () => {
       {/* Pricing Section */}
       <section 
         id="pricing" 
-        className="relative py-24 px-6 overflow-hidden"
-        style={{ 
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url(${heroGalaxySpiral})`, 
-          backgroundSize: 'cover', 
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
-        }}
+        className="relative py-24 px-6 bg-white"
+        style={{ backgroundColor: '#ffffff' }}
       >
         <div className="container mx-auto relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-white drop-shadow-lg">Starter Packages</h2>
-            <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed font-light drop-shadow-md">
+            <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">Starter Packages</h2>
+            <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed font-light">
               Begin your journey with our proven backlink platform. All starter packages include full access to our professional tools.
             </p>
           </div>
@@ -454,43 +441,41 @@ const Index = () => {
             {pricingPlans.map((plan) => (
               <Card 
                 key={plan.id} 
-                className={`p-8 text-center border-0 shadow-lg hover:shadow-xl transition-all relative backdrop-blur-sm ${
-                  plan.popular ? 'bg-white/20 border-white/30 border-2' : 'bg-white/10 border-white/20 border'
-                }`}
+                className={`p-8 text-center border-0 shadow-lg hover:shadow-xl transition-all relative bg-white`}
               >
                 {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white text-primary font-mono text-xs">
+                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gray-100 text-primary font-mono text-xs">
                     MOST POPULAR
                   </Badge>
                 )}
                 
                 <CardHeader className="pb-6">
-                  <CardTitle className="text-2xl font-semibold mb-2 text-white">{plan.name}</CardTitle>
-                  <div className="text-4xl font-light mb-2 text-white">
+                  <CardTitle className="text-2xl font-semibold mb-2 text-gray-900">{plan.name}</CardTitle>
+                  <div className="text-4xl font-light mb-2 text-gray-900">
                     <span className="text-2xl font-mono">$</span>{plan.price}
                   </div>
-                  <div className="text-sm text-white/70 font-mono">
+                  <div className="text-sm text-gray-500 font-mono">
                     ${plan.pricePerLink} per link
                   </div>
-                  <p className="text-white/80 font-light">{plan.description}</p>
+                  <p className="text-gray-600 font-light">{plan.description}</p>
                 </CardHeader>
                 
                 <CardContent className="space-y-6">
-                  <div className="text-3xl font-semibold text-white mb-4">
+                  <div className="text-3xl font-semibold text-gray-900 mb-4">
                     {plan.credits} Credits
                   </div>
                   
                   <ul className="space-y-3 text-left">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="flex items-center gap-3">
-                        <CheckCircle className="h-4 w-4 text-white shrink-0" />
-                        <span className="font-light text-white/90">{feature}</span>
+                        <CheckCircle className="h-4 w-4 text-primary shrink-0" />
+                        <span className="font-light text-gray-700">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   
                   <Button 
-                    className={`w-full font-medium ${plan.popular ? 'bg-white text-primary hover:bg-white/90' : 'bg-white/20 text-white hover:bg-white/30 border border-white/30'}`}
+                    className={`w-full font-medium ${plan.popular ? 'bg-primary text-white hover:bg-primary/90' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}
                     variant={plan.popular ? 'default' : 'outline'}
                     onClick={() => handleGetStarted(plan.id)}
                   >
@@ -502,8 +487,8 @@ const Index = () => {
           </div>
 
           <div className="text-center mt-12">
-            <p className="text-white/70 font-light">
-              Need more credits? <Button variant="link" className="p-0 text-white font-medium hover:text-white/80">Contact us</Button> for custom enterprise packages.
+            <p className="text-gray-600 font-light">
+              Need more credits? <Button variant="link" className="pperiodic-texture p-0 text-gray-900 font-medium hover:text-gray-700">Contact us</Button> for custom enterprise packages.
             </p>
           </div>
         </div>
@@ -511,23 +496,18 @@ const Index = () => {
 
       {/* Final CTA */}
       <section 
-        className="relative py-24 px-6 overflow-hidden"
-        style={{ 
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url(${heroSupernova})`, 
-          backgroundSize: 'cover', 
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
-        }}
+        className="relative py-24 px-6 bg-white"
+        style={{ backgroundColor: '#ffffff' }}
       >
         <div className="container mx-auto text-center relative z-10">
-          <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-white drop-shadow-lg">
+          <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">
             Ready to Dominate Search Results?
           </h2>
-          <p className="text-xl text-white/80 mb-12 max-w-3xl mx-auto leading-relaxed font-light drop-shadow-md">
+          <p className="text-xl text-gray-700 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
             Join the professionals who trust Backlink ∞ for their most important SEO campaigns. 
             Start with our risk-free guarantee today.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+          <div className="flex flex-colrı sm:flex-row items-center justify-center gap-6">
             <Button 
               size="lg" 
               className="text-lg px-10 py-6 font-medium" 
@@ -536,7 +516,7 @@ const Index = () => {
               Start Your Campaign
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <div className="text-sm text-white/60 font-light drop-shadow-sm">
+            <div className="text-sm text-gray-500 font-light">
               Money-back guarantee • No setup fees • Cancel anytime
             </div>
           </div>
