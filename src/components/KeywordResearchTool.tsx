@@ -580,7 +580,7 @@ export const KeywordResearchTool = () => {
       {/* Enhanced Search Interface */}
       <Card className="border-0 shadow-sm">
         <CardContent className="p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Search Term</label>
               <Input
@@ -593,36 +593,40 @@ export const KeywordResearchTool = () => {
             
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Target Country</label>
-              <SearchableSelect
-                options={countries.map(country => ({
-                  value: country.code,
-                  label: `${country.flag} ${country.name}`,
-                  searchableText: `${country.name} ${country.code}`
-                }))}
-                value={selectedCountry}
-                onValueChange={(value: string) => {
-                  setSelectedCountry(value);
-                  setSelectedCity("");
-                }}
-                placeholder="Select country..."
-              />
+              <div className="h-11">
+                <SearchableSelect
+                  options={countries.map(country => ({
+                    value: country.code,
+                    label: `${country.flag} ${country.name}`,
+                    searchableText: `${country.name} ${country.code}`
+                  }))}
+                  value={selectedCountry}
+                  onValueChange={(value: string) => {
+                    setSelectedCountry(value);
+                    setSelectedCity("");
+                  }}
+                  placeholder="Select country..."
+                />
+              </div>
             </div>
             
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">City (Optional)</label>
-              <SearchableSelect
-                options={[
-                  { value: "", label: "All Cities", searchableText: "all cities nationwide" },
-                  ...(cities[selectedCountry as keyof typeof cities] || []).map(city => ({
-                    value: city,
-                    label: city,
-                    searchableText: city.toLowerCase()
-                  }))
-                ]}
-                value={selectedCity}
-                onValueChange={setSelectedCity}
-                placeholder="Select city..."
-              />
+              <div className="h-11">
+                <SearchableSelect
+                  options={[
+                    { value: "", label: "All Cities", searchableText: "all cities nationwide" },
+                    ...(cities[selectedCountry as keyof typeof cities] || []).map(city => ({
+                      value: city,
+                      label: city,
+                      searchableText: city.toLowerCase()
+                    }))
+                  ]}
+                  value={selectedCity}
+                  onValueChange={setSelectedCity}
+                  placeholder="Select city..."
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -631,7 +635,7 @@ export const KeywordResearchTool = () => {
                 <SelectTrigger className="h-11">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background border shadow-lg z-50">
                   <SelectItem value="google">
                     <div className="flex items-center gap-2">
                       <img src={googleLogo} alt="Google" className="w-4 h-4" />
