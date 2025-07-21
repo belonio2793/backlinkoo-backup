@@ -61,6 +61,41 @@ export const KeywordResearchTool = () => {
 
   const [aiInsights, setAiInsights] = useState<string>("");
   const [showInsights, setShowInsights] = useState(false);
+  const [currentStatusMessage, setCurrentStatusMessage] = useState(0);
+
+  // Status messages for rotating display during search
+  const statusMessages = [
+    "Fetching search volumes...",
+    "Analyzing keyword difficulty...",
+    "Scanning top competitors...",
+    "Gathering ranking data...",
+    "Processing competition metrics...",
+    "Geographically isolating results...",
+    "Extracting backlink profiles...",
+    "Evaluating traffic potential...",
+    "Calculating cost-per-click data...",
+    "Mapping regional variations...",
+    "Identifying content gaps...",
+    "Assessing SERP features...",
+    "Building competitor landscape...",
+    "Generating SEO insights...",
+    "Finalizing recommendations..."
+  ];
+
+  // Rotate status messages while searching
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isSearching) {
+      interval = setInterval(() => {
+        setCurrentStatusMessage((prev) => (prev + 1) % statusMessages.length);
+      }, 1500); // Change message every 1.5 seconds
+    }
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isSearching, statusMessages.length]);
 
   // Detect user location on component mount
   useEffect(() => {
@@ -599,17 +634,29 @@ export const KeywordResearchTool = () => {
             )}
           </div>
           
-          <Button
-            onClick={handleSearch} 
-            disabled={isSearching}
-            className="w-full md:w-auto"
-          >
-            {isSearching ? "Analyzing..." : "Research Keywords"}
-          </Button>
-          
-          <p className="text-sm text-muted-foreground">
-            Get comprehensive keyword data with competition analysis from top search engines
-          </p>
+          <div className="space-y-3">
+            <Button
+              onClick={handleSearch} 
+              disabled={isSearching}
+              className="w-full md:w-auto"
+            >
+              {isSearching ? "Analyzing..." : "Research Keywords"}
+            </Button>
+            
+            {isSearching && (
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground animate-fade-in">
+                <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                <span className="font-medium">{statusMessages[currentStatusMessage]}</span>
+                <div className="w-2 h-2 bg-primary rounded-full animate-pulse delay-300"></div>
+              </div>
+            )}
+            
+            {!isSearching && (
+              <p className="text-sm text-muted-foreground">
+                Get comprehensive keyword data with competition analysis from top search engines
+              </p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
