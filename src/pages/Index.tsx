@@ -22,6 +22,9 @@ import { PaymentModal } from "@/components/PaymentModal";
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
+import heroSpaceNebula from "@/assets/hero-space-nebula.jpg";
+import heroGalaxySpiral from "@/assets/hero-galaxy-spiral.jpg";
+import heroSupernova from "@/assets/hero-supernova.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -57,8 +60,8 @@ const Index = () => {
       id: 'starter_100' as const,
       name: 'Starter 100',
       credits: 100,
-      price: 65,
-      pricePerLink: 0.65,
+      price: 70,
+      pricePerLink: 0.70,
       description: 'Perfect for testing our platform',
       features: [
         'High DA backlinks',
@@ -71,8 +74,8 @@ const Index = () => {
       id: 'starter_200' as const,
       name: 'Starter 200',
       credits: 200,
-      price: 130,
-      pricePerLink: 0.65,
+      price: 140,
+      pricePerLink: 0.70,
       description: 'Most popular starting package',
       features: [
         'High DA backlinks',
@@ -86,8 +89,8 @@ const Index = () => {
       id: 'starter_300' as const,
       name: 'Starter 300',
       credits: 300,
-      price: 195,
-      pricePerLink: 0.65,
+      price: 210,
+      pricePerLink: 0.70,
       description: 'Maximum starter value',
       features: [
         'High DA backlinks',
@@ -168,23 +171,31 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="py-32 px-6 bg-gradient-to-b from-background to-muted/20">
-        <div className="container mx-auto text-center">
-          <Badge variant="outline" className="mb-8 bg-primary/5 border-primary/20 text-primary font-mono text-xs px-4 py-2">
+      <section 
+        className="relative py-32 px-6 bg-gradient-to-b from-background/90 to-muted/20 overflow-hidden"
+        style={{ 
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url(${heroSpaceNebula})`, 
+          backgroundSize: 'cover', 
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="container mx-auto text-center relative z-10">
+          <Badge variant="outline" className="mb-8 bg-white/10 border-white/30 text-white font-mono text-xs px-4 py-2 backdrop-blur-sm">
             ENTERPRISE BACKLINK PLATFORM
           </Badge>
           
           <AnimatedHeadline
             baseText="Professional SEO with"
             animatedTexts={headlineVariations}
-            className="text-5xl md:text-7xl font-light mb-8 text-foreground tracking-tight"
+            className="text-5xl md:text-7xl font-light mb-8 text-white tracking-tight drop-shadow-lg"
           />
           
-          <p className="text-xl md:text-2xl text-muted-foreground mb-6 max-w-4xl mx-auto leading-relaxed font-light">
+          <p className="text-xl md:text-2xl text-white/90 mb-6 max-w-4xl mx-auto leading-relaxed font-light drop-shadow-md">
             The backlink platform that SEO professionals rely on for consistent, measurable results.
           </p>
           
-          <p className="text-lg text-primary/80 mb-12 font-medium max-w-3xl mx-auto">
+          <p className="text-lg text-white/80 mb-12 font-medium max-w-3xl mx-auto drop-shadow-md">
             High-authority links • Competitive intelligence • Guaranteed results or full refund
           </p>
           
@@ -211,9 +222,9 @@ const Index = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-semibold text-primary mb-2">{stat.value}</div>
-                <div className="text-sm font-medium text-foreground mb-1">{stat.label}</div>
-                <div className="text-xs text-muted-foreground">{stat.description}</div>
+                <div className="text-3xl md:text-4xl font-semibold text-white mb-2 drop-shadow-lg">{stat.value}</div>
+                <div className="text-sm font-medium text-white/90 mb-1 drop-shadow-md">{stat.label}</div>
+                <div className="text-xs text-white/70 drop-shadow-sm">{stat.description}</div>
               </div>
             ))}
           </div>
@@ -421,11 +432,20 @@ const Index = () => {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-24 px-6 bg-muted/30">
-        <div className="container mx-auto">
+      <section 
+        id="pricing" 
+        className="relative py-24 px-6 overflow-hidden"
+        style={{ 
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url(${heroGalaxySpiral})`, 
+          backgroundSize: 'cover', 
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="container mx-auto relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight">Starter Packages</h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-light">
+            <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-white drop-shadow-lg">Starter Packages</h2>
+            <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed font-light drop-shadow-md">
               Begin your journey with our proven backlink platform. All starter packages include full access to our professional tools.
             </p>
           </div>
@@ -434,43 +454,43 @@ const Index = () => {
             {pricingPlans.map((plan) => (
               <Card 
                 key={plan.id} 
-                className={`p-8 text-center border-0 shadow-sm hover:shadow-lg transition-all relative ${
-                  plan.popular ? 'bg-primary/5 border-primary/20 border' : 'bg-background'
+                className={`p-8 text-center border-0 shadow-lg hover:shadow-xl transition-all relative backdrop-blur-sm ${
+                  plan.popular ? 'bg-white/20 border-white/30 border-2' : 'bg-white/10 border-white/20 border'
                 }`}
               >
                 {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground font-mono text-xs">
+                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white text-primary font-mono text-xs">
                     MOST POPULAR
                   </Badge>
                 )}
                 
                 <CardHeader className="pb-6">
-                  <CardTitle className="text-2xl font-semibold mb-2">{plan.name}</CardTitle>
-                  <div className="text-4xl font-light mb-2">
+                  <CardTitle className="text-2xl font-semibold mb-2 text-white">{plan.name}</CardTitle>
+                  <div className="text-4xl font-light mb-2 text-white">
                     <span className="text-2xl font-mono">$</span>{plan.price}
                   </div>
-                  <div className="text-sm text-muted-foreground font-mono">
+                  <div className="text-sm text-white/70 font-mono">
                     ${plan.pricePerLink} per link
                   </div>
-                  <p className="text-muted-foreground font-light">{plan.description}</p>
+                  <p className="text-white/80 font-light">{plan.description}</p>
                 </CardHeader>
                 
                 <CardContent className="space-y-6">
-                  <div className="text-3xl font-semibold text-primary mb-4">
+                  <div className="text-3xl font-semibold text-white mb-4">
                     {plan.credits} Credits
                   </div>
                   
                   <ul className="space-y-3 text-left">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="flex items-center gap-3">
-                        <CheckCircle className="h-4 w-4 text-primary shrink-0" />
-                        <span className="font-light">{feature}</span>
+                        <CheckCircle className="h-4 w-4 text-white shrink-0" />
+                        <span className="font-light text-white/90">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   
                   <Button 
-                    className={`w-full font-medium ${plan.popular ? 'bg-primary text-primary-foreground' : ''}`}
+                    className={`w-full font-medium ${plan.popular ? 'bg-white text-primary hover:bg-white/90' : 'bg-white/20 text-white hover:bg-white/30 border border-white/30'}`}
                     variant={plan.popular ? 'default' : 'outline'}
                     onClick={() => handleGetStarted(plan.id)}
                   >
@@ -482,20 +502,28 @@ const Index = () => {
           </div>
 
           <div className="text-center mt-12">
-            <p className="text-muted-foreground font-light">
-              Need more credits? <Button variant="link" className="p-0 text-primary font-medium">Contact us</Button> for custom enterprise packages.
+            <p className="text-white/70 font-light">
+              Need more credits? <Button variant="link" className="p-0 text-white font-medium hover:text-white/80">Contact us</Button> for custom enterprise packages.
             </p>
           </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="py-24 px-6 bg-gradient-to-t from-primary/5 to-background">
-        <div className="container mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight">
+      <section 
+        className="relative py-24 px-6 overflow-hidden"
+        style={{ 
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url(${heroSupernova})`, 
+          backgroundSize: 'cover', 
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="container mx-auto text-center relative z-10">
+          <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-white drop-shadow-lg">
             Ready to Dominate Search Results?
           </h2>
-          <p className="text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed font-light">
+          <p className="text-xl text-white/80 mb-12 max-w-3xl mx-auto leading-relaxed font-light drop-shadow-md">
             Join the professionals who trust Backlink ∞ for their most important SEO campaigns. 
             Start with our risk-free guarantee today.
           </p>
@@ -508,7 +536,7 @@ const Index = () => {
               Start Your Campaign
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <div className="text-sm text-muted-foreground font-light">
+            <div className="text-sm text-white/60 font-light drop-shadow-sm">
               Money-back guarantee • No setup fees • Cancel anytime
             </div>
           </div>
