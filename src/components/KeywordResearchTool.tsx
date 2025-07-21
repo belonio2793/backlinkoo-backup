@@ -629,7 +629,12 @@ export const KeywordResearchTool = () => {
             {userLocation && (
               <div className="flex items-center gap-1">
                 <span>📍</span>
-                <span>Detected: {userLocation.city ? `${userLocation.city}, ` : ''}{userLocation.country}</span>
+                <span>
+                  {selectedCity && selectedCity !== userLocation.city ? 
+                    `Selected: ${selectedCity}, ${userLocation.country}` : 
+                    `Detected: ${userLocation.city ? `${userLocation.city}, ` : ''}${userLocation.country}`
+                  }
+                </span>
               </div>
             )}
           </div>
