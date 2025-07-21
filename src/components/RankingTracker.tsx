@@ -64,9 +64,30 @@ export const RankingTracker = () => {
   const [aiAnalysis, setAiAnalysis] = useState<string>("");
   const [showAnalysis, setShowAnalysis] = useState(false);
 
-  // Load saved targets on component mount
+  // Load saved targets on component mount and set up real-time updates
   useEffect(() => {
     loadSavedTargets();
+    
+    // Set up real-time subscription for ranking dashboard updates
+    const channel = supabase
+      .channel('ranking-dashboard-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'ranking_dashboard'
+        },
+        (payload) => {
+          console.log('Real-time ranking dashboard update:', payload);
+          loadSavedTargets(); // Refresh the data
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadSavedTargets = async () => {
@@ -310,6 +331,47 @@ export const RankingTracker = () => {
         variant: "destructive",
       });
     }
+  };
+
+  // Recheck a specific ranking target
+  const recheckTarget = async (target: SavedTarget) => {
+    setRecheckingTargets(prev => ({ ...prev, [target.target_id]: true }));
+    
+    try {
+      const analysisData = await performEnhancedRankingCheck(target.url, target.keyword);
+      
+      toast({
+        title: "Rankings Updated",
+        description: `Updated rankings for "${target.keyword}"`,
+      });
+    } catch (error) {
+      console.error('Error rechecking target:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update rankings",
+        variant: "destructive",
+      });
+    } finally {
+      setRecheckingTargets(prev => ({ ...prev, [target.target_id]: false }));
+    }
+  };
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Get trend indicator
+  const getTrendIcon = (current: number | null, previous: number | null) => {
+    if (!current || !previous) return null;
+    if (current < previous) return <TrendingUp className="h-3 w-3 text-green-500" />;
+    if (current > previous) return <TrendingUp className="h-3 w-3 text-red-500 rotate-180" />;
+    return <div className="h-3 w-3 rounded-full bg-muted-foreground/30" />;
   };
 
   return (
@@ -566,35 +628,192 @@ export const RankingTracker = () => {
                   <p className="text-muted-foreground">Save ranking targets to track them over time</p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {savedTargets.slice(0, 10).map((target) => (
-                    <div key={target.target_id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-medium">{target.keyword}</h4>
-                          <p className="text-sm text-muted-foreground">{target.domain}</p>
-                        </div>
-                        
-                        <div className="flex items-center gap-4">
-                          <div className="text-right">
-                            <div className="text-sm font-medium">
-                              Best: {target.best_position ? `#${target.best_position}` : 'Not ranked'}
+                <div className="space-y-6">
+                  {savedTargets.slice(0, 20).map((target) => (
+                    <Card key={target.target_id} className="group hover:shadow-lg transition-all duration-300">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between mb-6">
+                          <div className="flex-1 space-y-2">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+                                <Target className="h-4 w-4 text-primary" />
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">
+                                  {target.keyword}
+                                </h3>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="text-xs">
+                                    <Link className="w-3 h-3 mr-1" />
+                                    {target.domain}
+                                  </Badge>
+                                  {target.name && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {target.name}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                            <div className="text-xs text-muted-foreground">
-                              Avg: {target.average_position ? `#${target.average_position}` : 'Not ranked'}
+                            
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Eye className="h-3 w-3" />
+                              <span>Tracking since {formatDate(target.target_created_at || '')}</span>
                             </div>
                           </div>
                           
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => deleteTarget(target.target_id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => recheckTarget(target)}
+                              disabled={recheckingTargets[target.target_id]}
+                              className="hover-scale"
+                            >
+                              {recheckingTargets[target.target_id] ? (
+                                <div className="animate-spin rounded-full h-3 w-3 border-b border-current mr-1" />
+                              ) : (
+                                <Search className="h-3 w-3 mr-1" />
+                              )}
+                              {recheckingTargets[target.target_id] ? 'Updating...' : 'Update'}
+                            </Button>
+                            
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => deleteTarget(target.target_id)}
+                              className="hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    </div>
+
+                        {/* Search Engine Results Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                          {/* Google */}
+                          <Card className="border-green-200 bg-green-50/50 dark:bg-green-900/10 dark:border-green-800">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                                    <span className="text-xs font-bold text-google-blue">G</span>
+                                  </div>
+                                  <span className="text-sm font-medium">Google</span>
+                                </div>
+                                {getTrendIcon(target.google_position, target.best_position)}
+                              </div>
+                              
+                              <div className="space-y-1">
+                                {target.google_found ? (
+                                  <div className="text-lg font-bold text-green-600">
+                                    #{target.google_position}
+                                  </div>
+                                ) : (
+                                  <div className="text-sm text-muted-foreground">
+                                    Not in top 100
+                                  </div>
+                                )}
+                                <div className="text-xs text-muted-foreground">
+                                  {target.google_backlinks?.toLocaleString() || 0} backlinks
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {target.google_checked_at ? formatDate(target.google_checked_at) : 'Never'}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Bing */}
+                          <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-800">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                                    <span className="text-xs font-bold text-white">B</span>
+                                  </div>
+                                  <span className="text-sm font-medium">Bing</span>
+                                </div>
+                                {getTrendIcon(target.bing_position, target.best_position)}
+                              </div>
+                              
+                              <div className="space-y-1">
+                                {target.bing_found ? (
+                                  <div className="text-lg font-bold text-blue-600">
+                                    #{target.bing_position}
+                                  </div>
+                                ) : (
+                                  <div className="text-sm text-muted-foreground">
+                                    Not in top 100
+                                  </div>
+                                )}
+                                <div className="text-xs text-muted-foreground">
+                                  {target.bing_backlinks?.toLocaleString() || 0} backlinks
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {target.bing_checked_at ? formatDate(target.bing_checked_at) : 'Never'}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Yahoo */}
+                          <Card className="border-purple-200 bg-purple-50/50 dark:bg-purple-900/10 dark:border-purple-800">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
+                                    <span className="text-xs font-bold text-white">Y</span>
+                                  </div>
+                                  <span className="text-sm font-medium">Yahoo</span>
+                                </div>
+                                {getTrendIcon(target.yahoo_position, target.best_position)}
+                              </div>
+                              
+                              <div className="space-y-1">
+                                {target.yahoo_found ? (
+                                  <div className="text-lg font-bold text-purple-600">
+                                    #{target.yahoo_position}
+                                  </div>
+                                ) : (
+                                  <div className="text-sm text-muted-foreground">
+                                    Not in top 100
+                                  </div>
+                                )}
+                                <div className="text-xs text-muted-foreground">
+                                  {target.yahoo_backlinks?.toLocaleString() || 0} backlinks
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {target.yahoo_checked_at ? formatDate(target.yahoo_checked_at) : 'Never'}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        {/* Summary Stats */}
+                        <div className="flex items-center justify-between pt-4 border-t">
+                          <div className="flex items-center gap-6">
+                            <div className="text-center">
+                              <div className="text-lg font-bold text-primary">
+                                {target.best_position ? `#${target.best_position}` : '--'}
+                              </div>
+                              <div className="text-xs text-muted-foreground">Best Position</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-bold text-muted-foreground">
+                                {target.average_position ? `#${target.average_position}` : '--'}
+                              </div>
+                              <div className="text-xs text-muted-foreground">Avg Position</div>
+                            </div>
+                          </div>
+                          
+                          <div className="text-xs text-muted-foreground">
+                            Last updated: {target.target_updated_at ? formatDate(target.target_updated_at) : 'Never'}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               )}
