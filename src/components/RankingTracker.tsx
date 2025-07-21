@@ -44,6 +44,8 @@ interface SavedTarget {
   yahoo_backlinks: number;
   best_position: number;
   average_position: number;
+  target_created_at?: string;
+  target_updated_at?: string;
 }
 
 export const RankingTracker = () => {
@@ -337,45 +339,8 @@ export const RankingTracker = () => {
       
       setRankings(prev => [newResult, ...prev.slice(0, 4)]);
 
-      // Generate comprehensive analysis report
-      const foundEngines = Object.entries(analysisData.results)
-        .filter(([_, result]: [string, any]) => result.found)
-        .map(([engine, result]: [string, any]) => `${engine}: #${result.position} (${result.backlinks} backlinks)`)
-        .join('\n');
-
-      const technicalReport = analysisData.technicalIssues.length > 0 
-        ? `⚠️ TECHNICAL ISSUES DETECTED:\n${analysisData.technicalIssues.map(issue => `- ${issue}`).join('\n')}\n`
-        : '✅ No critical technical issues detected\n';
-
-      const backlinkReport = Object.entries(analysisData.results)
-        .map(([engine, result]: [string, any]) => `${engine.toUpperCase()}: ${result.backlinks || 0} backlinks`)
-        .join('\n');
-
-      setAiAnalysis(`🎯 COMPREHENSIVE RANKING ANALYSIS REPORT
-
-📊 SEARCH ENGINE RANKINGS:
-${foundEngines || 'Not found in top 100 on any search engine'}
-
-${technicalReport}
-
-🔗 BACKLINK PROFILE ANALYSIS:
-${backlinkReport}
-
-🛡️ SECURITY & TECHNICAL STATUS:
-${Object.entries(analysisData.results).map(([engine, result]: [string, any]) => 
-  `${engine.toUpperCase()}: SSL ${result.sslStatus}, Indexing ${result.indexingStatus}`
-).join('\n')}
-
-💡 STRATEGIC RECOMMENDATIONS:
-${overallBest 
-  ? `✅ Currently ranking! Focus on improving from position ${overallBest}. Consider content optimization and backlink building.`
-  : `❌ Not ranking in top 100. Priority actions:\n- Ensure proper indexing across all search engines\n- Build quality backlinks\n- Optimize on-page SEO\n- Improve content relevance for target keyword`
-}
-
-${analysisData.technicalIssues.length > 0 
-  ? `⚡ URGENT: Fix technical issues first - ${analysisData.technicalIssues.join(', ')}`
-  : ''
-}`);
+      // Store analysis data for the new visual report
+      setAiAnalysis(JSON.stringify(analysisData));
       
       setShowAnalysis(true);
 
@@ -506,21 +471,26 @@ ${analysisData.technicalIssues.length > 0
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label>&nbsp;</Label>
-                  <div className="h-10"></div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>&nbsp;</Label>
-                  <Button 
-                    onClick={checkRanking} 
-                    disabled={isChecking}
-                    className="w-full"
-                  >
-                    {isChecking ? "Analyzing..." : "Analyze Rankings"}
-                  </Button>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="target-name">Campaign Name (Optional)</Label>
+                <Input
+                  id="target-name"
+                  placeholder="Enter campaign name to auto-save"
+                  value={targetName}
+                  onChange={(e) => setTargetName(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>&nbsp;</Label>
+                <Button 
+                  onClick={checkRanking} 
+                  disabled={isChecking}
+                  className="w-full"
+                >
+                  {isChecking ? "Analyzing..." : "Analyze Rankings"}
+                </Button>
+              </div>
               </div>
               
               {isChecking && checkingProgress.length > 0 && (
@@ -568,119 +538,158 @@ ${analysisData.technicalIssues.length > 0
                   <p className="text-sm text-muted-foreground mt-2">Use the tracker above to analyze and save your first target</p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {savedTargets.map((target) => {
-                    const healthIssues = getHealthStatus(target);
-                    return (
-                      <div key={target.target_id} className="border rounded-lg p-6 hover:bg-muted/50 transition-colors">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-lg">{target.keyword}</h3>
-                              {healthIssues.length > 0 && (
-                                <Badge variant="destructive" className="text-xs">
-                                  <AlertTriangle className="h-3 w-3 mr-1" />
-                                  Issues
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="text-sm text-muted-foreground">{target.domain}</p>
-                            {target.name && (
-                              <p className="text-xs text-muted-foreground mt-1">Campaign: {target.name}</p>
-                            )}
-                          </div>
-                          
-                          <div className="flex items-center gap-4">
-                            {target.best_position && target.best_position < 999 && (
-                              <div className="text-right">
-                                <p className="text-xs text-muted-foreground">Best Position</p>
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/50">
+                        <TableHead className="font-semibold">Campaign & Keyword</TableHead>
+                        <TableHead className="text-center font-semibold">Google</TableHead>
+                        <TableHead className="text-center font-semibold">Bing</TableHead>
+                        <TableHead className="text-center font-semibold">Yahoo</TableHead>
+                        <TableHead className="text-center font-semibold">Best Position</TableHead>
+                        <TableHead className="text-center font-semibold">Total Backlinks</TableHead>
+                        <TableHead className="text-center font-semibold">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {savedTargets.map((target) => {
+                        const healthIssues = getHealthStatus(target);
+                        const totalBacklinks = (target.google_backlinks || 0) + (target.bing_backlinks || 0) + (target.yahoo_backlinks || 0);
+                        
+                        return (
+                          <TableRow key={target.target_id} className="hover:bg-muted/30">
+                            <TableCell className="max-w-xs">
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-base">{target.keyword}</span>
+                                  {healthIssues.length > 0 && (
+                                    <Badge variant="destructive" className="text-xs">
+                                      <AlertTriangle className="h-3 w-3 mr-1" />
+                                      {healthIssues.length}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="text-sm text-muted-foreground">{target.domain}</div>
+                                {target.name && (
+                                  <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-md inline-block">
+                                    {target.name}
+                                  </div>
+                                )}
+                                {target.target_created_at && (
+                                  <div className="text-xs text-muted-foreground">
+                                    Added: {new Date(target.target_created_at).toLocaleDateString()}
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                            
+                            <TableCell className="text-center">
+                              <div className="flex flex-col items-center gap-1">
+                                {target.google_position ? (
+                                  <Badge className={getPositionColor(target.google_position)}>
+                                    #{target.google_position}
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="secondary">-</Badge>
+                                )}
+                                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Link className="h-3 w-3" />
+                                  {target.google_backlinks || 0}
+                                </div>
+                                {target.google_checked_at && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {new Date(target.google_checked_at).toLocaleDateString()}
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                            
+                            <TableCell className="text-center">
+                              <div className="flex flex-col items-center gap-1">
+                                {target.bing_position ? (
+                                  <Badge className={getPositionColor(target.bing_position)}>
+                                    #{target.bing_position}
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="secondary">-</Badge>
+                                )}
+                                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Link className="h-3 w-3" />
+                                  {target.bing_backlinks || 0}
+                                </div>
+                                {target.bing_checked_at && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {new Date(target.bing_checked_at).toLocaleDateString()}
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                            
+                            <TableCell className="text-center">
+                              <div className="flex flex-col items-center gap-1">
+                                {target.yahoo_position ? (
+                                  <Badge className={getPositionColor(target.yahoo_position)}>
+                                    #{target.yahoo_position}
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="secondary">-</Badge>
+                                )}
+                                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Link className="h-3 w-3" />
+                                  {target.yahoo_backlinks || 0}
+                                </div>
+                                {target.yahoo_checked_at && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {new Date(target.yahoo_checked_at).toLocaleDateString()}
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                            
+                            <TableCell className="text-center">
+                              {target.best_position && target.best_position < 999 ? (
                                 <Badge className={getPositionColor(target.best_position)}>
                                   #{target.best_position}
                                 </Badge>
+                              ) : (
+                                <Badge variant="secondary">Not Ranking</Badge>
+                              )}
+                            </TableCell>
+                            
+                            <TableCell className="text-center">
+                              <div className="flex items-center justify-center gap-1">
+                                <Link className="h-4 w-4 text-primary" />
+                                <span className="font-semibold text-primary">{totalBacklinks.toLocaleString()}</span>
                               </div>
-                            )}
-                            <div className="flex items-center gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => recheckTarget(target)}
-                                disabled={isChecking}
-                              >
-                                <Eye className="h-4 w-4 mr-1" />
-                                Recheck
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => deleteTarget(target.target_id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {[
-                            { engine: 'google', position: target.google_position, found: target.google_found, checked: target.google_checked_at, backlinks: target.google_backlinks },
-                            { engine: 'bing', position: target.bing_position, found: target.bing_found, checked: target.bing_checked_at, backlinks: target.bing_backlinks },
-                            { engine: 'yahoo', position: target.yahoo_position, found: target.yahoo_found, checked: target.yahoo_checked_at, backlinks: target.yahoo_backlinks }
-                          ].map((data) => (
-                            <div key={data.engine} className="border rounded-lg p-4 bg-background">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-lg">{getEngineIcon(data.engine)}</span>
-                                  <span className="font-medium capitalize">{data.engine}</span>
-                                </div>
-                                {data.found ? (
-                                  <CheckCircle className="h-4 w-4 text-green-500" />
-                                ) : (
-                                  <XCircle className="h-4 w-4 text-red-500" />
-                                )}
+                            </TableCell>
+                            
+                            <TableCell className="text-center">
+                              <div className="flex items-center justify-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => recheckTarget(target)}
+                                  disabled={isChecking}
+                                  className="text-xs"
+                                >
+                                  <Eye className="h-3 w-3 mr-1" />
+                                  Recheck
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => deleteTarget(target.target_id)}
+                                  className="text-xs"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
                               </div>
-                              
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-sm text-muted-foreground">Position:</span>
-                                  {data.position ? (
-                                    <Badge className={getPositionColor(data.position)}>
-                                      #{data.position}
-                                    </Badge>
-                                  ) : (
-                                    <Badge variant="secondary">Not Found</Badge>
-                                  )}
-                                </div>
-                                
-                                <div className="flex items-center justify-between">
-                                  <span className="text-sm text-muted-foreground">Backlinks:</span>
-                                  <div className="flex items-center gap-1">
-                                    <Link className="h-3 w-3" />
-                                    <span className="text-sm font-medium">{data.backlinks || 0}</span>
-                                  </div>
-                                </div>
-                                
-                                <div className="text-xs text-muted-foreground">
-                                  {data.checked ? `Last: ${new Date(data.checked).toLocaleDateString()}` : 'Never checked'}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        
-                        {healthIssues.length > 0 && (
-                          <div className="mt-4 p-3 bg-destructive/10 rounded-lg">
-                            <div className="flex items-center gap-2 text-sm">
-                              <AlertTriangle className="h-4 w-4 text-destructive" />
-                              <span className="font-medium text-destructive">Health Issues:</span>
-                            </div>
-                            <div className="mt-1 text-sm text-destructive/80">
-                              {healthIssues.join(', ')}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
                 </div>
               )}
             </CardContent>
@@ -853,18 +862,141 @@ ${analysisData.technicalIssues.length > 0
         </Card>
       )}
 
-      {showAnalysis && aiAnalysis && (
+      {showAnalysis && aiAnalysis && rankings.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
               ∞ Backlink ∞ SEO Analysis Report
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="prose prose-sm max-w-none">
-              <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-lg">
-                {aiAnalysis}
-              </pre>
+            <div className="space-y-6">
+              {/* Backlink Strategy Card */}
+              <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-primary/10 rounded-full">
+                    <TrendingUp className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-xl text-primary">SEO Performance Analysis</h3>
+                    <p className="text-sm text-muted-foreground">Comprehensive ranking and backlink strategy</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="text-center p-4 bg-white/50 dark:bg-black/20 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">
+                      {Object.values(rankings[0].searchEngines).filter(se => se.found).length}/3
+                    </div>
+                    <div className="text-sm text-muted-foreground">Search Engines Ranking</div>
+                  </div>
+                  <div className="text-center p-4 bg-white/50 dark:bg-black/20 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">
+                      {rankings[0].overallBest || 'N/A'}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Best Position Found</div>
+                  </div>
+                  <div className="text-center p-4 bg-white/50 dark:bg-black/20 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-600">
+                      {Object.values(rankings[0].searchEngines).reduce((sum, se) => sum + se.backlinks, 0).toLocaleString()}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Total Backlinks</div>
+                  </div>
+                </div>
+
+                {/* Search Engine Breakdown */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  {Object.entries(rankings[0].searchEngines).map(([engine, data]) => (
+                    <div key={engine} className="p-4 bg-white/70 dark:bg-black/30 rounded-lg border">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{getEngineIcon(engine)}</span>
+                          <span className="font-semibold capitalize">{engine}</span>
+                        </div>
+                        {data.found ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-red-500" />
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Position:</span>
+                          <span className="font-semibold">
+                            {data.position ? `#${data.position}` : 'Not Found'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Backlinks:</span>
+                          <span className="font-semibold text-primary">{data.backlinks.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Strategic Recommendations */}
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-lg flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Strategic Recommendations
+                  </h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {rankings[0].overallBest ? (
+                      <>
+                        <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                          <div className="font-medium text-green-800 dark:text-green-300 mb-2">✅ Currently Ranking</div>
+                          <div className="text-sm text-green-700 dark:text-green-400">
+                            Great job! You're ranking at position #{rankings[0].overallBest}. Focus on improving to top 3 through content optimization and strategic backlink building.
+                          </div>
+                        </div>
+                        <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <div className="font-medium text-blue-800 dark:text-blue-300 mb-2">🎯 Optimization Focus</div>
+                          <div className="text-sm text-blue-700 dark:text-blue-400">
+                            Target 15-25 additional high-quality backlinks to improve rankings. Consider competitor analysis and content gap identification.
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="p-4 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div className="font-medium text-red-800 dark:text-red-300 mb-2">❌ Not Currently Ranking</div>
+                          <div className="text-sm text-red-700 dark:text-red-400">
+                            Priority actions: Ensure proper indexing, build quality backlinks, optimize on-page SEO, and improve content relevance for target keyword.
+                          </div>
+                        </div>
+                        <div className="p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                          <div className="font-medium text-yellow-800 dark:text-yellow-300 mb-2">⚡ Immediate Actions</div>
+                          <div className="text-sm text-yellow-700 dark:text-yellow-400">
+                            Start with technical SEO audit, then focus on acquiring 30-50 relevant backlinks over the next 3-6 months.
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {rankings[0].technicalIssues.length > 0 && (
+                  <div className="mt-6 p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5" />
+                      <div>
+                        <h5 className="font-semibold text-orange-800 dark:text-orange-300 mb-2">Technical Issues Detected</h5>
+                        <div className="space-y-1">
+                          {rankings[0].technicalIssues.map((issue, index) => (
+                            <div key={index} className="text-sm text-orange-700 dark:text-orange-400 flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
+                              {issue}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
