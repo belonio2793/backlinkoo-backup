@@ -220,7 +220,7 @@ export function CampaignManager() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Hero Section */}
+      {/* Hero Section - Enhanced to match other pages */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative p-8">
@@ -233,14 +233,14 @@ export function CampaignManager() {
                 <div>
                   <h1 className="text-4xl font-bold tracking-tight">Campaign Management</h1>
                   <p className="text-lg text-muted-foreground mt-1">
-                    Orchestrate your backlink campaigns with precision
+                    Orchestrate your backlink campaigns with precision and intelligence
                   </p>
                 </div>
               </div>
               
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-yellow-500" />
+                  <CheckCircle className="h-5 w-5 text-green-500" />
                   <span className="text-sm font-medium">{stats.completed} Completed</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -248,20 +248,26 @@ export function CampaignManager() {
                   <span className="text-sm font-medium">{stats.totalLinks} Links Delivered</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-green-500" />
-                  <span className="text-sm font-medium">{stats.totalCredits} Credits Used</span>
+                  <Activity className="h-5 w-5 text-blue-500" />
+                  <span className="text-sm font-medium">{stats.inProgress} Active</span>
                 </div>
               </div>
             </div>
             
-            <Button 
-              size="lg" 
-              onClick={() => setShowCreateForm(true)}
-              className="bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              New Campaign
-            </Button>
+            <div className="hidden md:flex items-center gap-4">
+              <div className="text-center p-4 rounded-lg bg-primary/10">
+                <div className="text-2xl font-bold text-primary">{stats.total}</div>
+                <div className="text-xs text-muted-foreground">Total Campaigns</div>
+              </div>
+              <Button 
+                size="lg" 
+                onClick={() => setShowCreateForm(true)}
+                className="bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                New Campaign
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -324,39 +330,72 @@ export function CampaignManager() {
         ))}
       </div>
 
-      {/* Filters and Search */}
+      {/* Enhanced Filters and Search Section - Matching other pages */}
       <Card className="border-0 shadow-sm">
-        <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="flex items-center gap-4 flex-1">
-              <div className="relative flex-1 max-w-sm">
+        <CardContent className="p-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm font-semibold text-foreground">Search Campaigns</label>
+              <div className="relative">
                 <Input
-                  placeholder="Search campaigns..."
+                  placeholder="Search by name, URL, or keywords..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="h-11 border-2 focus:border-primary transition-colors pl-10"
                 />
                 <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               </div>
-              
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground">Campaign Status</label>
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter status" />
+                <SelectTrigger className="h-11 border-2 focus:border-primary">
+                  <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="in_progress">In Progress</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="paused">Paused</SelectItem>
+                <SelectContent className="bg-background border shadow-lg z-50">
+                  <SelectItem value="all">All Campaigns</SelectItem>
+                  <SelectItem value="pending">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-3 w-3 text-yellow-500" />
+                      Pending
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="in_progress">
+                    <div className="flex items-center gap-2">
+                      <Activity className="h-3 w-3 text-blue-500" />
+                      In Progress
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="completed">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                      Completed
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="paused">
+                    <div className="flex items-center gap-2">
+                      <Pause className="h-3 w-3 text-gray-500" />
+                      Paused
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
-                {filteredCampaigns.length} campaigns
-              </Badge>
+            <div className="flex items-end">
+              <div className="w-full flex items-center justify-between">
+                <Badge variant="outline" className="text-sm">
+                  {filteredCampaigns.length} campaigns
+                </Badge>
+                <Button 
+                  onClick={() => setShowCreateForm(true)}
+                  className="md:hidden h-11 bg-primary hover:bg-primary/90"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  New
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>
