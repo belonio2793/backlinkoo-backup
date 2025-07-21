@@ -321,7 +321,7 @@ export const KeywordResearchTool = () => {
                     <span>All Cities</span>
                   </div>
                 </SelectItem>
-                {cities[selectedCountry as keyof typeof cities].map((city) => (
+                {(cities[selectedCountry as keyof typeof cities] || []).map((city) => (
                   <SelectItem key={city} value={city}>
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
