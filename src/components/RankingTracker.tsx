@@ -513,10 +513,95 @@ export const RankingTracker = () => {
   };
 
   const recheckTarget = async (target: SavedTarget) => {
-    setUrl(target.url);
-    setKeyword(target.keyword);
-    await checkRanking();
+    if (isChecking) return;
+    
+    setIsChecking(true);
+    setCheckingProgress(['Rechecking target...']);
+    
+    try {
+      console.log(`Rechecking target: ${target.keyword} for ${target.domain}`);
+      
+      // Perform the ranking check for this specific target
+      const analysisData = await performEnhancedRankingCheck(target.url, target.keyword);
+      
+      if (analysisData.websiteError) {
+        toast({
+          title: "Recheck Failed",
+          description: `Unable to analyze ${target.domain}: ${analysisData.errorMessage}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const results = analysisData.results || {};
+      const googleData = (results as any)['google'] || {};
+      const bingData = (results as any)['bing'] || {};
+      const yahooData = (results as any)['yahoo'] || {};
+
+      // Calculate best and average positions
+      const positions = [googleData.position, bingData.position, yahooData.position]
+        .filter(p => p !== null) as number[];
+      const bestPosition = positions.length > 0 ? Math.min(...positions) : 999;
+      const averagePosition = positions.length > 0 
+        ? Math.round(positions.reduce((a, b) => a + b, 0) / positions.length)
+        : 999;
+
+      // Save new ranking results to the database
+      if (target.target_id) {
+        const resultEntries = Object.values(results).map((result: any) => ({
+          target_id: target.target_id,
+          search_engine: result.engine,
+          position: result.position,
+          found: result.found,
+          error_details: result.errors && result.errors.length > 0 ? { errors: result.errors } : {},
+          backlinks_count: result.backlinks || 0,
+          competitor_analysis: result.competitorAnalysis || [],
+          serp_features: {
+            ssl_status: result.sslStatus,
+            indexing_status: result.indexingStatus,
+            domain_age: result.domainAge
+          }
+        }));
+
+        if (resultEntries.length > 0) {
+          const { error: insertError } = await supabase
+            .from('ranking_results')
+            .insert(resultEntries);
+
+          if (insertError) {
+            console.error('Error saving ranking results:', insertError);
+          }
+        }
+      }
+
+      // Reload saved targets to reflect the update
+      await loadSavedTargets();
+
+      const foundSummary = Object.values(results)
+        .filter((r: any) => r.found)
+        .map((r: any) => `${r.engine} (#${r.position})`)
+        .join(', ');
+
+      toast({
+        title: "Target Rechecked",
+        description: foundSummary 
+          ? `Updated ${target.keyword}: ${foundSummary}`
+          : `Updated ${target.keyword}: No rankings found`,
+      });
+
+    } catch (error) {
+      console.error('Error rechecking target:', error);
+      toast({
+        title: "Error",
+        description: "Failed to recheck ranking target",
+        variant: "destructive",
+      });
+    } finally {
+      setIsChecking(false);
+      setCheckingProgress([]);
+    }
   };
+
 
   const getPositionColor = (position: number | null) => {
     if (!position) return "text-gray-500 bg-gray-50";
@@ -1042,7 +1127,7 @@ export const RankingTracker = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
-              ∞ Backlink ∞ SEO Analysis Report
+              Backlink ∞ SEO Analysis Report
             </CardTitle>
           </CardHeader>
           <CardContent>
