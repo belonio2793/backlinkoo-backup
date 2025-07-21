@@ -751,6 +751,7 @@ export const RankingTracker = () => {
                   size="sm"
                   variant="outline"
                   onClick={saveCurrentAnalysis}
+                  disabled={rankings.length === 0}
                 >
                   <Save className="h-4 w-4 mr-1" />
                   Save Target
