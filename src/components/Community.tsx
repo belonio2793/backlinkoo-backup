@@ -275,56 +275,67 @@ export function Community() {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {ledgerEntries.map((entry, index) => (
-                <div 
-                  key={entry.id} 
-                  className="group p-4 rounded-xl bg-gradient-to-r from-card via-card to-card/50 border hover:shadow-md transition-all duration-300 hover-scale"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 flex-1">
-                      {/* Country Flag */}
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-2xl" title={entry.user_location_country}>
-                          {countryFlags[entry.user_location_country_code] || '🌍'}
-                        </span>
-                        <div className="min-w-0">
-                          <p className="font-medium text-sm text-muted-foreground truncate">
-                            {entry.user_location_country}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      {/* Campaign Details */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-base truncate group-hover:text-primary transition-colors">
-                          {entry.campaign_name}
-                        </h3>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {formatDistanceToNow(new Date(entry.completed_at), { addSuffix: true })}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Target className="h-3 w-3" />
-                            {entry.keywords_count} keywords
-                          </span>
-                        </div>
+            <div className="overflow-x-auto">
+              {/* Table Header */}
+              <div className="grid grid-cols-12 gap-4 p-4 border-b bg-muted/30 rounded-t-lg font-medium text-sm text-muted-foreground">
+                <div className="col-span-2">Country</div>
+                <div className="col-span-4">Campaign Details</div>
+                <div className="col-span-2">Time</div>
+                <div className="col-span-2 text-center">Backlinks</div>
+                <div className="col-span-2 text-center">Difficulty</div>
+              </div>
+              
+              {/* Table Rows */}
+              <div className="space-y-1">
+                {ledgerEntries.map((entry, index) => (
+                  <div 
+                    key={entry.id} 
+                    className="group grid grid-cols-12 gap-4 p-4 rounded-lg bg-gradient-to-r from-card via-card to-card/50 border hover:shadow-md transition-all duration-300 hover-scale items-center"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    {/* Country Column */}
+                    <div className="col-span-2 flex items-center gap-2">
+                      <span className="text-xl" title={entry.user_location_country}>
+                        {countryFlags[entry.user_location_country_code] || '🌍'}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm text-muted-foreground truncate">
+                          {entry.user_location_country}
+                        </p>
                       </div>
                     </div>
                     
-                    {/* Stats */}
-                    <div className="flex items-center gap-4">
-                      {/* Backlinks */}
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-primary">
-                          {entry.backlinks_delivered}
-                        </div>
-                        <div className="text-xs text-muted-foreground">Links</div>
+                    {/* Campaign Details Column */}
+                    <div className="col-span-4">
+                      <h3 className="font-semibold text-base truncate group-hover:text-primary transition-colors">
+                        {entry.campaign_name}
+                      </h3>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Target className="h-3 w-3" />
+                          {entry.keywords_count} keywords
+                        </span>
                       </div>
-                      
-                      {/* Difficulty Badge */}
+                    </div>
+                    
+                    {/* Time Column */}
+                    <div className="col-span-2">
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Calendar className="h-3 w-3" />
+                        {formatDistanceToNow(new Date(entry.completed_at), { addSuffix: true })}
+                      </span>
+                    </div>
+                    
+                    {/* Backlinks Column */}
+                    <div className="col-span-2 text-center">
+                      <div className="text-lg font-bold text-primary">
+                        {entry.backlinks_delivered}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Links</div>
+                    </div>
+                    
+                    {/* Difficulty Column */}
+                    <div className="col-span-2 text-center">
                       <Badge 
                         variant="secondary" 
                         className={`${getDifficultyColor(entry.keyword_difficulty_avg)} font-semibold text-xs px-3 py-1`}
@@ -336,8 +347,8 @@ export function Community() {
                       </Badge>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </CardContent>
