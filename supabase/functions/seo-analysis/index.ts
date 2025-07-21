@@ -730,21 +730,63 @@ async function handleWebsiteValidation(data: { url: string }) {
   const { url } = data;
   
   try {
+    console.log(`Website validation starting for: ${url}`);
+    
     // First, validate URL format
     const urlObj = new URL(url);
     const domain = urlObj.hostname;
     
-    // Check if the website is accessible
-    const response = await fetch(url, {
-      method: 'HEAD',
-      redirect: 'follow',
-      signal: AbortSignal.timeout(10000) // 10 second timeout
-    });
+    // Check if domain is obviously invalid
+    if (domain.includes('localhost') || domain.includes('127.0.0.1') || domain.includes('0.0.0.0')) {
+      return new Response(JSON.stringify({
+        error: 'Invalid domain - localhost addresses not supported',
+        status: 'invalid_domain',
+        description: 'Local development addresses cannot be analyzed'
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     
-    const status = response.status;
+    // First attempt with HEAD request for faster validation
+    let response;
+    let status;
+    
+    try {
+      console.log(`Attempting HEAD request to: ${url}`);
+      response = await fetch(url, {
+        method: 'HEAD',
+        redirect: 'follow',
+        signal: AbortSignal.timeout(15000), // 15 second timeout
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; SEO-Analysis-Bot/1.0)'
+        }
+      });
+      status = response.status;
+      console.log(`HEAD request completed with status: ${status}`);
+    } catch (headError) {
+      console.log(`HEAD request failed, trying GET request: ${headError.message}`);
+      
+      // If HEAD fails, try GET request
+      try {
+        response = await fetch(url, {
+          method: 'GET',
+          redirect: 'follow',
+          signal: AbortSignal.timeout(15000),
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; SEO-Analysis-Bot/1.0)'
+          }
+        });
+        status = response.status;
+        console.log(`GET request completed with status: ${status}`);
+      } catch (getError) {
+        throw getError; // This will be caught by the outer catch block
+      }
+    }
     
     // Check for various error conditions
     if (status === 404) {
+      console.log('404 Not Found detected');
       return new Response(JSON.stringify({
         error: 'Website not found (404 error)',
         status: 'not_found',
@@ -756,6 +798,7 @@ async function handleWebsiteValidation(data: { url: string }) {
     }
     
     if (status === 403) {
+      console.log('403 Forbidden detected');
       return new Response(JSON.stringify({
         error: 'Website access forbidden (403 error)',
         status: 'forbidden',
@@ -766,11 +809,24 @@ async function handleWebsiteValidation(data: { url: string }) {
       });
     }
     
+    if (status === 410) {
+      console.log('410 Gone detected');
+      return new Response(JSON.stringify({
+        error: 'Website permanently removed (410 error)',
+        status: 'gone',
+        description: 'This website has been permanently removed and is no longer available'
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
     if (status === 500 || status === 502 || status === 503 || status === 504) {
+      console.log(`Server error detected: ${status}`);
       return new Response(JSON.stringify({
         error: `Website server error (${status})`,
         status: 'server_error',
-        description: 'The website is currently experiencing server issues'
+        description: 'The website is currently experiencing server issues and is not accessible'
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -778,50 +834,85 @@ async function handleWebsiteValidation(data: { url: string }) {
     }
     
     if (status >= 400) {
+      console.log(`HTTP error detected: ${status}`);
       return new Response(JSON.stringify({
         error: `Website error (HTTP ${status})`,
         status: 'http_error',
-        description: `The website returned an HTTP ${status} error`
+        description: `The website returned an HTTP ${status} error and cannot be analyzed`
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
     
-    // Get a small portion of the content to check for parked domains
-    const contentResponse = await fetch(url, {
-      method: 'GET',
-      signal: AbortSignal.timeout(10000)
-    });
+    // Get content to check for parked domains and other issues
+    let text = '';
+    try {
+      console.log('Fetching website content for validation');
+      const contentResponse = await fetch(url, {
+        method: 'GET',
+        signal: AbortSignal.timeout(10000),
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; SEO-Analysis-Bot/1.0)'
+        }
+      });
+      
+      text = await contentResponse.text();
+      console.log(`Content fetched, length: ${text.length} characters`);
+    } catch (contentError) {
+      console.log(`Content fetch failed: ${contentError.message}`);
+      // If content fetch fails but HEAD/GET succeeded, website might still be valid
+      if (status >= 200 && status < 300) {
+        return new Response(JSON.stringify({
+          status: 'active',
+          valid: true,
+          httpStatus: status,
+          description: 'Website is accessible but content could not be analyzed'
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
     
-    const text = await contentResponse.text();
     const lowercaseText = text.toLowerCase();
     
-    // Check for common parked domain indicators
+    // Enhanced parked domain detection
     const parkedDomainIndicators = [
       'this domain is for sale',
       'domain for sale',
       'parked domain',
+      'domain parking',
       'coming soon',
       'under construction',
       'page not found',
       'suspended domain',
       'expired domain',
-      'registrar',
       'buy this domain',
-      'domain parking',
-      'godaddy.com parking'
+      'purchase this domain',
+      'registrar',
+      'godaddy.com parking',
+      'namecheap parking',
+      'sedo.com',
+      'domain expired',
+      'renewal required',
+      'hosted by',
+      'default web site page',
+      'this site is temporarily unavailable',
+      'account suspended',
+      'bandwidth limit exceeded',
+      'site not configured'
     ];
     
-    const isParkedDomain = parkedDomainIndicators.some(indicator => 
+    const parkedIndicatorFound = parkedDomainIndicators.find(indicator => 
       lowercaseText.includes(indicator)
     );
     
-    if (isParkedDomain) {
+    if (parkedIndicatorFound) {
+      console.log(`Parked domain indicator found: ${parkedIndicatorFound}`);
       return new Response(JSON.stringify({
         error: 'Parked or inactive domain detected',
         status: 'parked_domain',
-        description: 'This appears to be a parked domain or placeholder page with no active content'
+        description: `This appears to be a parked domain or placeholder page (detected: "${parkedIndicatorFound}")`
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -829,11 +920,51 @@ async function handleWebsiteValidation(data: { url: string }) {
     }
     
     // Check for minimal content (likely inactive site)
-    if (text.length < 500) {
+    if (text.length < 200) {
+      console.log(`Minimal content detected: ${text.length} characters`);
       return new Response(JSON.stringify({
         error: 'Website appears to have minimal content',
         status: 'minimal_content',
-        description: 'The website appears to be inactive or has very little content'
+        description: 'The website appears to be inactive or has very little content (less than 200 characters)'
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    // Check for basic HTML structure
+    if (!lowercaseText.includes('<html') && !lowercaseText.includes('<!doctype')) {
+      console.log('Invalid HTML structure detected');
+      return new Response(JSON.stringify({
+        error: 'Website does not appear to be a valid HTML page',
+        status: 'invalid_html',
+        description: 'The website content does not contain valid HTML structure'
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    // Additional check for common error pages
+    const errorPageIndicators = [
+      '404 not found',
+      '403 forbidden',
+      '500 internal server error',
+      'this page cannot be found',
+      'the page you requested could not be found',
+      'sorry, the page you are looking for could not be found'
+    ];
+    
+    const errorIndicatorFound = errorPageIndicators.find(indicator => 
+      lowercaseText.includes(indicator)
+    );
+    
+    if (errorIndicatorFound) {
+      console.log(`Error page content detected: ${errorIndicatorFound}`);
+      return new Response(JSON.stringify({
+        error: 'Website displays error page content',
+        status: 'error_page',
+        description: `The website appears to be showing an error page (detected: "${errorIndicatorFound}")`
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -841,11 +972,13 @@ async function handleWebsiteValidation(data: { url: string }) {
     }
     
     // If we get here, the website seems valid
+    console.log('Website validation passed - site appears active and valid');
     return new Response(JSON.stringify({
       status: 'active',
       valid: true,
       httpStatus: status,
-      description: 'Website is active and accessible'
+      contentLength: text.length,
+      description: 'Website is active, accessible, and contains valid content'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -853,56 +986,78 @@ async function handleWebsiteValidation(data: { url: string }) {
   } catch (error: any) {
     console.error('Website validation error:', error);
     
-    // Handle specific error types
-    if (error.name === 'TypeError' && error.message.includes('Invalid URL')) {
+    // Handle specific error types with more detail
+    if (error.name === 'TypeError' && (error.message.includes('Invalid URL') || error.message.includes('Failed to parse URL'))) {
       return new Response(JSON.stringify({
         error: 'Invalid URL format',
         status: 'invalid_url',
-        description: 'The provided URL is not in a valid format'
+        description: 'The provided URL is not in a valid format. Please check the URL and try again.'
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
     
-    if (error.name === 'TimeoutError' || error.message.includes('timeout')) {
+    if (error.name === 'TimeoutError' || error.message.includes('timeout') || error.message.includes('timed out')) {
       return new Response(JSON.stringify({
-        error: 'Website timeout - site may be down or very slow',
+        error: 'Website timeout - site appears down or very slow',
         status: 'timeout',
-        description: 'The website did not respond within the timeout period'
+        description: 'The website did not respond within 15 seconds. It may be down or experiencing issues.'
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
     
-    if (error.message.includes('ENOTFOUND') || error.message.includes('DNS')) {
+    if (error.message.includes('ENOTFOUND') || error.message.includes('getaddrinfo ENOTFOUND') || error.message.includes('DNS')) {
       return new Response(JSON.stringify({
         error: 'Domain not found or DNS error',
         status: 'dns_error',
-        description: 'The domain name could not be resolved - it may not exist'
+        description: 'The domain name could not be resolved. The domain may not exist or DNS is misconfigured.'
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
     
-    if (error.message.includes('ECONNREFUSED')) {
+    if (error.message.includes('ECONNREFUSED') || error.message.includes('connection refused')) {
       return new Response(JSON.stringify({
-        error: 'Connection refused - website may be down',
+        error: 'Connection refused - website server not responding',
         status: 'connection_refused',
-        description: 'The website server refused the connection'
+        description: 'The website server refused the connection. The site may be down or blocking requests.'
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
     
-    // Generic network error
+    if (error.message.includes('ECONNRESET') || error.message.includes('connection reset')) {
+      return new Response(JSON.stringify({
+        error: 'Connection reset by server',
+        status: 'connection_reset',
+        description: 'The server closed the connection unexpectedly. The website may be experiencing issues.'
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    if (error.message.includes('certificate') || error.message.includes('SSL') || error.message.includes('TLS')) {
+      return new Response(JSON.stringify({
+        error: 'SSL certificate error',
+        status: 'ssl_error',
+        description: 'There is an issue with the website\'s SSL certificate. The site may not be secure.'
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    // Generic network error with more context
     return new Response(JSON.stringify({
       error: 'Unable to connect to website',
       status: 'network_error',
-      description: 'Could not establish a connection to the website'
+      description: `Could not establish a connection to the website. Error: ${error.message.substring(0, 100)}`
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -110,9 +110,11 @@ export const RankingTracker = () => {
     setCheckingProgress([progressMessages[progressIndex]]);
     setCurrentProgressIndex(0);
     
-    // First validate website availability
+    // First validate website availability with comprehensive checks
     try {
-      setCheckingProgress(['Validating website availability...']);
+      setCheckingProgress(['Validating website accessibility and status...']);
+      console.log(`Starting website validation for: ${url}`);
+      
       const { data: validationData, error: validationError } = await supabase.functions.invoke('seo-analysis', {
         body: {
           type: 'website_validation',
@@ -120,12 +122,35 @@ export const RankingTracker = () => {
         }
       });
 
-      if (validationError || validationData?.error) {
+      console.log('Validation response:', { validationData, validationError });
+
+      if (validationError) {
+        const errorMessage = `Validation service error: ${validationError.message || 'Unknown error'}`;
+        console.error('Validation service error:', validationError);
+        
+        toast({
+          title: "Service Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        
+        return { 
+          results: {}, 
+          technicalIssues: [errorMessage],
+          websiteError: true,
+          errorMessage: errorMessage
+        };
+      }
+
+      if (validationData?.error || validationData?.status !== 'active') {
+        const errorTitle = getErrorTitle(validationData?.status);
         const errorMessage = validationData?.error || validationData?.description || 'Website validation failed';
         
-        // Show error toast and clear results
+        console.log(`Website validation failed: ${errorMessage} (Status: ${validationData?.status})`);
+        
+        // Show specific error toast based on the error type
         toast({
-          title: "Analysis Error",
+          title: errorTitle,
           description: errorMessage,
           variant: "destructive",
         });
@@ -135,24 +160,31 @@ export const RankingTracker = () => {
           results: {}, 
           technicalIssues: [errorMessage],
           websiteError: true,
-          errorMessage: errorMessage
+          errorMessage: errorMessage,
+          validationStatus: validationData?.status || 'unknown'
         };
       }
+
+      console.log('Website validation passed - proceeding with analysis');
+      setCheckingProgress(['Website validation passed - starting comprehensive analysis...']);
+      
     } catch (error) {
-      console.error('Website validation failed:', error);
+      console.error('Website validation failed with exception:', error);
+      
+      const errorMessage = `Website validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
       
       // Show error toast and clear results
       toast({
-        title: "Analysis Error", 
-        description: "Website validation failed - unable to analyze invalid or inaccessible website",
+        title: "Website Validation Failed", 
+        description: "Unable to analyze website - please check URL and try again",
         variant: "destructive",
       });
 
       return { 
         results: {}, 
-        technicalIssues: ['Website validation failed'],
+        technicalIssues: [errorMessage],
         websiteError: true,
-        errorMessage: 'Website validation failed'
+        errorMessage: errorMessage
       };
     }
     
@@ -366,15 +398,21 @@ export const RankingTracker = () => {
       // Check if this is a website error case first
       if (analysisData.websiteError) {
         const errorMessage = analysisData.technicalIssues[0] || analysisData.errorMessage || 'Website unavailable';
+        const errorTitle = getErrorTitle(analysisData.validationStatus);
+        
+        console.log(`Analysis failed due to website error: ${errorMessage}`);
+        
+        // Show detailed error notification
         toast({
-          title: "Website Error",
-          description: errorMessage,
+          title: errorTitle,
+          description: `No analysis possible: ${errorMessage}`,
           variant: "destructive",
         });
         
-        // Don't create any ranking results for invalid websites
+        // Clear all results and show "No results found" state
         setRankings([]);
         setShowAnalysis(false);
+        setAiAnalysis("");
         return;
       }
 
@@ -487,6 +525,23 @@ export const RankingTracker = () => {
     if (position <= 10) return "text-blue-600 bg-blue-50";
     if (position <= 30) return "text-yellow-600 bg-yellow-50";
     return "text-red-600 bg-red-50";
+  };
+
+  const getErrorTitle = (status: string) => {
+    switch (status) {
+      case 'not_found': return 'Website Not Found (404)';
+      case 'forbidden': return 'Access Forbidden (403)';
+      case 'server_error': return 'Server Error';
+      case 'parked_domain': return 'Parked Domain Detected';
+      case 'minimal_content': return 'Inactive Website';
+      case 'timeout': return 'Website Timeout';
+      case 'dns_error': return 'Domain Not Found';
+      case 'connection_refused': return 'Connection Refused';
+      case 'invalid_url': return 'Invalid URL';
+      case 'ssl_error': return 'SSL Certificate Error';
+      case 'network_error': return 'Network Error';
+      default: return 'Website Error';
+    }
   };
 
   const getEngineIcon = (engine: string) => {
@@ -848,6 +903,7 @@ export const RankingTracker = () => {
           <CardContent>
             {/* SE Scout-style table */}
             <div className="space-y-4">
+                {rankings.length > 0 ? (
                 <div className="grid grid-cols-3 gap-4 text-center">
                 <div className="p-4 border rounded-lg">
                   <div className="text-2xl font-bold text-primary">
@@ -871,6 +927,14 @@ export const RankingTracker = () => {
                   <div className="text-sm text-muted-foreground">Total Backlinks</div>
                 </div>
               </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-2xl font-bold text-muted-foreground mb-2">No Results Found</div>
+                  <div className="text-sm text-muted-foreground">
+                    Unable to analyze the website. Please check the URL and try again.
+                  </div>
+                </div>
+              )}
 
               <div className="border rounded-lg overflow-hidden">
                 <Table>
