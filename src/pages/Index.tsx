@@ -45,8 +45,13 @@ const Index = () => {
   const headlineVariations = [
     "Enterprise Backlinks",
     "Authority Links", 
+    "Industry Leading SEO Tools",
     "Competitive Intelligence",
+    "Low Outbound Links (OBL)",
+    "Unique C-Class IP Addresses",
+    "99.99% Indexing Rate Guaranteed",,
     "High-DA Networks",
+    "Permanent Links or No Questions Asked Replacements",
     "Strategic Placements",
     "Editorial Links",
     "Contextual Authority"
