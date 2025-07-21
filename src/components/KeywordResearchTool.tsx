@@ -644,10 +644,9 @@ export const KeywordResearchTool = () => {
             </Button>
             
             {isSearching && (
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground animate-fade-in">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground animate-fade-in">
                 <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
                 <span className="font-medium">{statusMessages[currentStatusMessage]}</span>
-                <div className="w-2 h-2 bg-primary rounded-full animate-pulse delay-300"></div>
               </div>
             )}
             
