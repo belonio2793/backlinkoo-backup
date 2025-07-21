@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import { 
   CreditCard, 
   Link, 
@@ -13,7 +14,14 @@ import {
   Infinity,
   Plus,
   Activity,
-  LogOut
+  LogOut,
+  Calendar,
+  Target,
+  BarChart3,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  ExternalLink
 } from "lucide-react";
 import { PaymentModal } from "@/components/PaymentModal";
 import { CampaignForm } from "@/components/CampaignForm";
@@ -270,25 +278,226 @@ const Dashboard = () => {
               </div>
 
               {campaigns.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Recent Campaigns</CardTitle>
+                <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/50">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <BarChart3 className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl">Recent Campaigns</CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Monitor your latest backlink campaigns and their performance
+                        </p>
+                      </div>
+                    </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {campaigns.slice(0, 3).map((campaign) => (
-                        <div key={campaign.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <p className="font-medium">{campaign.target_url}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {Array.isArray(campaign.keywords) ? campaign.keywords.join(', ') : campaign.keywords}
-                            </p>
+                  <CardContent className="space-y-6">
+                    {campaigns.slice(0, 3).map((campaign, index) => {
+                      const progressPercentage = campaign.links_requested > 0 
+                        ? Math.round((campaign.links_delivered / campaign.links_requested) * 100)
+                        : 0;
+                      
+                      const getStatusConfig = (status: string) => {
+                        switch (status) {
+                          case 'completed':
+                            return {
+                              icon: CheckCircle2,
+                              color: 'text-green-600',
+                              bgColor: 'bg-green-50',
+                              borderColor: 'border-green-200',
+                              badge: 'default'
+                            };
+                          case 'in_progress':
+                            return {
+                              icon: Clock,
+                              color: 'text-blue-600',
+                              bgColor: 'bg-blue-50',
+                              borderColor: 'border-blue-200',
+                              badge: 'secondary'
+                            };
+                          case 'pending':
+                            return {
+                              icon: AlertCircle,
+                              color: 'text-yellow-600',
+                              bgColor: 'bg-yellow-50',
+                              borderColor: 'border-yellow-200',
+                              badge: 'outline'
+                            };
+                          default:
+                            return {
+                              icon: Activity,
+                              color: 'text-gray-600',
+                              bgColor: 'bg-gray-50',
+                              borderColor: 'border-gray-200',
+                              badge: 'secondary'
+                            };
+                        }
+                      };
+
+                      const statusConfig = getStatusConfig(campaign.status);
+                      const StatusIcon = statusConfig.icon;
+                      const daysAgo = Math.floor((Date.now() - new Date(campaign.created_at).getTime()) / (1000 * 60 * 60 * 24));
+
+                      return (
+                        <div 
+                          key={campaign.id} 
+                          className={`relative overflow-hidden rounded-xl border-2 ${statusConfig.borderColor} ${statusConfig.bgColor} p-6 transition-all duration-300 hover:shadow-md animate-fade-in`}
+                          style={{ animationDelay: `${index * 100}ms` }}
+                        >
+                          {/* Campaign Header */}
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg ${statusConfig.bgColor} border ${statusConfig.borderColor}`}>
+                                <StatusIcon className={`h-5 w-5 ${statusConfig.color}`} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h3 className="font-semibold text-lg truncate">
+                                    {campaign.name || 'Unnamed Campaign'}
+                                  </h3>
+                                  <Badge variant={statusConfig.badge as any} className="text-xs font-medium">
+                                    {campaign.status.replace('_', ' ').charAt(0).toUpperCase() + campaign.status.replace('_', ' ').slice(1)}
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    <span>
+                                      {daysAgo === 0 ? 'Today' : daysAgo === 1 ? '1 day ago' : `${daysAgo} days ago`}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <ExternalLink className="h-3 w-3" />
+                                    <span className="truncate max-w-[200px]">{campaign.target_url}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <Badge variant={campaign.status === "completed" ? "default" : "secondary"}>
-                            {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
-                          </Badge>
+
+                          {/* Campaign Details Grid */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <Target className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm font-medium">Keywords</span>
+                              </div>
+                              <div className="pl-6">
+                                <div className="flex flex-wrap gap-1">
+                                  {(Array.isArray(campaign.keywords) ? campaign.keywords : [campaign.keywords])
+                                    .slice(0, 3).map((keyword: string, idx: number) => (
+                                    <Badge key={idx} variant="outline" className="text-xs">
+                                      {keyword}
+                                    </Badge>
+                                  ))}
+                                  {(Array.isArray(campaign.keywords) ? campaign.keywords : [campaign.keywords]).length > 3 && (
+                                    <Badge variant="outline" className="text-xs">
+                                      +{(Array.isArray(campaign.keywords) ? campaign.keywords : [campaign.keywords]).length - 3} more
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <Link className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm font-medium">Progress</span>
+                              </div>
+                              <div className="pl-6">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-lg font-bold text-primary">
+                                    {campaign.links_delivered}/{campaign.links_requested}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">backlinks</span>
+                                </div>
+                                <Progress value={progressPercentage} className="h-2" />
+                                <span className="text-xs text-muted-foreground mt-1 block">
+                                  {progressPercentage}% completed
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <CreditCard className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm font-medium">Investment</span>
+                              </div>
+                              <div className="pl-6">
+                                <div className="text-lg font-bold">
+                                  {campaign.credits_used || campaign.links_requested} credits
+                                </div>
+                                <span className="text-xs text-muted-foreground">
+                                  ${((campaign.credits_used || campaign.links_requested) * 0.70).toFixed(2)} value
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Delivered Backlinks Preview */}
+                          {campaign.completed_backlinks && campaign.completed_backlinks.length > 0 && (
+                            <div className="pt-4 border-t border-border/50">
+                              <div className="flex items-center gap-2 mb-2">
+                                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                <span className="text-sm font-medium">Recent Backlinks</span>
+                                <Badge variant="secondary" className="text-xs">
+                                  {campaign.completed_backlinks.length} delivered
+                                </Badge>
+                              </div>
+                              <div className="pl-6 space-y-1">
+                                {campaign.completed_backlinks.slice(0, 2).map((link: string, idx: number) => (
+                                  <div key={idx} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <div className="h-1 w-1 rounded-full bg-green-500"></div>
+                                    <a 
+                                      href={link} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="hover:text-primary transition-colors truncate max-w-[300px]"
+                                    >
+                                      {link}
+                                    </a>
+                                    <ExternalLink className="h-3 w-3 opacity-50" />
+                                  </div>
+                                ))}
+                                {campaign.completed_backlinks.length > 2 && (
+                                  <div className="text-xs text-muted-foreground pl-3">
+                                    +{campaign.completed_backlinks.length - 2} more backlinks
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Performance Indicator */}
+                          <div className="absolute top-6 right-6">
+                            {campaign.status === 'completed' && (
+                              <div className="flex items-center gap-1 text-xs font-medium text-green-600">
+                                <TrendingUp className="h-3 w-3" />
+                                Complete
+                              </div>
+                            )}
+                            {campaign.status === 'in_progress' && progressPercentage > 50 && (
+                              <div className="flex items-center gap-1 text-xs font-medium text-blue-600">
+                                <TrendingUp className="h-3 w-3" />
+                                On Track
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      ))}
+                      );
+                    })}
+
+                    {/* View All Button */}
+                    <div className="pt-4 border-t">
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => setActiveTab('campaigns')}
+                      >
+                        <Activity className="h-4 w-4 mr-2" />
+                        View All Campaigns ({campaigns.length})
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
