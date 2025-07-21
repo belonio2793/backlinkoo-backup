@@ -215,6 +215,102 @@ export type Database = {
         }
         Relationships: []
       }
+      ranking_results: {
+        Row: {
+          backlinks_count: number | null
+          checked_at: string
+          competitor_analysis: Json | null
+          created_at: string
+          error_details: Json | null
+          found: boolean
+          id: string
+          position: number | null
+          search_engine: string
+          serp_features: Json | null
+          target_id: string
+          total_results: number | null
+        }
+        Insert: {
+          backlinks_count?: number | null
+          checked_at?: string
+          competitor_analysis?: Json | null
+          created_at?: string
+          error_details?: Json | null
+          found?: boolean
+          id?: string
+          position?: number | null
+          search_engine: string
+          serp_features?: Json | null
+          target_id: string
+          total_results?: number | null
+        }
+        Update: {
+          backlinks_count?: number | null
+          checked_at?: string
+          competitor_analysis?: Json | null
+          created_at?: string
+          error_details?: Json | null
+          found?: boolean
+          id?: string
+          position?: number | null
+          search_engine?: string
+          serp_features?: Json | null
+          target_id?: string
+          total_results?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ranking_results_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_dashboard"
+            referencedColumns: ["target_id"]
+          },
+          {
+            foreignKeyName: "ranking_results_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_targets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ranking_targets: {
+        Row: {
+          created_at: string
+          domain: string
+          id: string
+          is_active: boolean
+          keyword: string
+          name: string | null
+          updated_at: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          id?: string
+          is_active?: boolean
+          keyword: string
+          name?: string | null
+          updated_at?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          id?: string
+          is_active?: boolean
+          keyword?: string
+          name?: string | null
+          updated_at?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscribers: {
         Row: {
           created_at: string
@@ -262,7 +358,34 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      ranking_dashboard: {
+        Row: {
+          average_position: number | null
+          best_position: number | null
+          bing_backlinks: number | null
+          bing_checked_at: string | null
+          bing_found: boolean | null
+          bing_position: number | null
+          domain: string | null
+          google_backlinks: number | null
+          google_checked_at: string | null
+          google_found: boolean | null
+          google_position: number | null
+          is_active: boolean | null
+          keyword: string | null
+          name: string | null
+          target_created_at: string | null
+          target_id: string | null
+          target_updated_at: string | null
+          url: string | null
+          user_id: string | null
+          yahoo_backlinks: number | null
+          yahoo_checked_at: string | null
+          yahoo_found: boolean | null
+          yahoo_position: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_current_user_role: {
