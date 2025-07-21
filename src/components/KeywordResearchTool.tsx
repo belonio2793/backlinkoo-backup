@@ -910,32 +910,61 @@ export const KeywordResearchTool = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-lg border">
-                    <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                      🎯 Strategic Insights
-                    </h3>
-                    <div className="prose prose-sm max-w-none">
-                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                        {aiInsights.split('\n\n').map((paragraph, index) => (
-                          <div key={index} className="mb-4 last:mb-0">
-                            {paragraph.includes('**') ? (
-                              <div className="font-semibold text-base text-primary mb-2">
-                                {paragraph.replace(/\*\*/g, '')}
-                              </div>
-                            ) : paragraph.includes('•') || paragraph.includes('-') ? (
-                              <ul className="list-disc list-inside space-y-1 ml-4">
-                                {paragraph.split('\n').filter(line => line.trim()).map((item, idx) => (
-                                  <li key={idx} className="text-sm">
-                                    {item.replace(/^[•\-\*]\s*/, '')}
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <p className="text-sm text-muted-foreground">{paragraph}</p>
-                            )}
+                <div className="space-y-6">
+                  {/* Backlink Estimate Card */}
+                  <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-primary/10 rounded-full">
+                        <Target className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-xl text-primary">Backlink Strategy Required</h3>
+                        <p className="text-sm text-muted-foreground">Based on competitor analysis</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-4 bg-white/50 dark:bg-black/20 rounded-lg">
+                        <div className="text-2xl font-bold text-primary">{getEstimatedBacklinks()}</div>
+                        <div className="text-sm text-muted-foreground">Estimated Backlinks Needed</div>
+                      </div>
+                      <div className="text-center p-4 bg-white/50 dark:bg-black/20 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">{getCompetitorAverage()}</div>
+                        <div className="text-sm text-muted-foreground">Competitor Average</div>
+                      </div>
+                      <div className="text-center p-4 bg-white/50 dark:bg-black/20 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">{getDifficultyRating()}</div>
+                        <div className="text-sm text-muted-foreground">Campaign Difficulty</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-lg">Recommended Link Types:</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {getRecommendedLinkTypes().map((linkType, index) => (
+                          <div key={index} className="flex items-center gap-3 p-3 bg-white/70 dark:bg-black/30 rounded-lg">
+                            <div className="w-2 h-2 bg-primary rounded-full"></div>
+                            <div className="flex-1">
+                              <div className="font-medium">{linkType.type}</div>
+                              <div className="text-sm text-muted-foreground">{linkType.quantity} links recommended</div>
+                            </div>
+                            <div className="text-sm font-semibold text-primary">{linkType.priority}</div>
                           </div>
                         ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                      <div className="flex items-start gap-3">
+                        <div className="p-1 bg-primary/10 rounded-full mt-1">
+                          <Target className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <h5 className="font-semibold text-primary mb-1">Strategic Recommendation</h5>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {getStrategicRecommendation()}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -947,4 +976,68 @@ export const KeywordResearchTool = () => {
       )}
     </div>
   );
+
+  // Helper functions for backlink calculations
+  function getEstimatedBacklinks(): string {
+    if (keywords.length === 0) return "0";
+    const avgDifficulty = keywords.reduce((sum, k) => sum + k.difficulty, 0) / keywords.length;
+    const baseEstimate = Math.round(avgDifficulty * 1.5 + 10);
+    return baseEstimate.toString();
+  }
+
+  function getCompetitorAverage(): string {
+    if (rankingUrls.length === 0) return "0";
+    const avgBacklinks = rankingUrls
+      .filter(url => url.backlinks)
+      .reduce((sum, url) => sum + (url.backlinks || 0), 0) / rankingUrls.length;
+    return Math.round(avgBacklinks).toLocaleString();
+  }
+
+  function getDifficultyRating(): string {
+    if (keywords.length === 0) return "Low";
+    const avgDifficulty = keywords.reduce((sum, k) => sum + k.difficulty, 0) / keywords.length;
+    if (avgDifficulty < 30) return "Low";
+    if (avgDifficulty < 70) return "Medium";
+    return "High";
+  }
+
+  function getRecommendedLinkTypes() {
+    const difficulty = keywords.length > 0 ? keywords[0].difficulty : 50;
+    
+    if (difficulty < 30) {
+      return [
+        { type: "Guest Posts", quantity: "15-20", priority: "High" },
+        { type: "Resource Pages", quantity: "10-15", priority: "Medium" },
+        { type: "Directory Listings", quantity: "5-10", priority: "Low" }
+      ];
+    } else if (difficulty < 70) {
+      return [
+        { type: "High-Authority Guest Posts", quantity: "25-35", priority: "High" },
+        { type: "Niche Edits", quantity: "15-20", priority: "High" },
+        { type: "Resource & Tool Pages", quantity: "10-15", priority: "Medium" },
+        { type: "Industry Citations", quantity: "8-12", priority: "Medium" }
+      ];
+    } else {
+      return [
+        { type: "Premium Guest Posts", quantity: "40-60", priority: "Critical" },
+        { type: "High-DR Niche Edits", quantity: "25-35", priority: "Critical" },
+        { type: "Authority Resource Links", quantity: "15-25", priority: "High" },
+        { type: "Industry Publications", quantity: "10-15", priority: "High" },
+        { type: "Strategic Partnerships", quantity: "5-8", priority: "Medium" }
+      ];
+    }
+  }
+
+  function getStrategicRecommendation(): string {
+    const difficulty = keywords.length > 0 ? keywords[0].difficulty : 50;
+    const searchVolume = keywords.length > 0 ? keywords[0].searchVolume : 0;
+    
+    if (difficulty < 30) {
+      return `For this low-competition keyword with ${searchVolume.toLocaleString()} monthly searches, focus on building 25-35 high-quality backlinks over 3-4 months. Start with guest posting and resource page outreach for quick wins.`;
+    } else if (difficulty < 70) {
+      return `This medium-competition keyword requires a sustained 6-month campaign with 50-70 strategic backlinks. Prioritize high-authority guest posts and niche edits from relevant industry sites.`;
+    } else {
+      return `High-competition keyword detected. Implement an aggressive 8-12 month strategy with 80-120 premium backlinks. Focus on high-DR sites (60+) and consider strategic partnerships for maximum impact.`;
+    }
+  }
 };
