@@ -144,6 +144,9 @@ const Index = () => {
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto">
           <div className="text-center mb-16">
+            <Badge variant="outline" className="mb-4">
+              Comprehensive SEO Platform
+            </Badge>
             <h2 className="text-3xl font-bold mb-4">Everything You Need for SEO Success</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Comprehensive SEO tools and premium backlink services in one platform
@@ -152,17 +155,34 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="border-0 shadow-sm">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
+              <Card key={index} className="group hover:shadow-xl transition-all duration-300 hover-scale border-0 shadow-sm">
+                <CardHeader className="pb-4">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 bg-primary/10 rounded-xl border border-primary/20 group-hover:bg-primary/20 transition-colors">
                       <feature.icon className="h-6 w-6 text-primary" />
                     </div>
-                    <CardTitle className="text-lg">{feature.title}</CardTitle>
+                    <div className="flex-1">
+                      <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                        {feature.title}
+                      </CardTitle>
+                      <Badge variant="outline" className="mt-2 text-xs">
+                        {index === 0 ? 'Core Feature' : 
+                         index === 1 ? 'Research Tool' : 
+                         index === 2 ? 'Analytics' :
+                         index === 3 ? 'Analysis' :
+                         index === 4 ? 'Intelligence' : 'Security'}
+                      </Badge>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">{feature.description}</p>
+                  <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                  <div className="mt-4 pt-4 border-t">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                      <span>Professional Grade</span>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             ))}

@@ -11,7 +11,8 @@ import {
   CheckCircle, 
   XCircle, 
   AlertCircle,
-  ExternalLink 
+  ExternalLink,
+  BarChart3
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -183,40 +184,98 @@ export const SEOTools = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20">
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        <div className="relative p-8">
+          <div className="flex items-center justify-between">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+                  <Globe className="h-8 w-8 text-primary" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold tracking-tight">Professional SEO Tools</h1>
+                  <p className="text-lg text-muted-foreground mt-1">
+                    Comprehensive domain analysis and indexing verification tools
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-green-500" />
+                  <span className="text-sm font-medium">Domain Authority Analysis</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Search className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium">Index Status Monitoring</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="hidden md:flex items-center gap-4">
+              <div className="text-center p-4 rounded-lg bg-primary/10">
+                <div className="text-2xl font-bold text-primary">{domainMetrics ? '1' : '0'}</div>
+                <div className="text-xs text-muted-foreground">Domains Analyzed</div>
+              </div>
+              <div className="text-center p-4 rounded-lg bg-green-100 dark:bg-green-950/20">
+                <div className="text-2xl font-bold text-green-600">{indexResults.length}</div>
+                <div className="text-xs text-muted-foreground">Pages Checked</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <Tabs defaultValue="domain-analysis" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="domain-analysis">Domain Analysis</TabsTrigger>
-          <TabsTrigger value="index-checker">Index Checker</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 h-12">
+          <TabsTrigger value="domain-analysis" className="text-sm font-medium">Domain Analysis</TabsTrigger>
+          <TabsTrigger value="index-checker" className="text-sm font-medium">Index Checker</TabsTrigger>
         </TabsList>
 
         <TabsContent value="domain-analysis" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5" />
-                Domain Authority Checker
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-6">
+              <CardTitle className="flex items-center gap-3 text-xl">
+                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-950/20">
+                  <Globe className="h-5 w-5 text-blue-600" />
+                </div>
+                Domain Authority Analyzer
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   placeholder="https://example.com"
                   value={domainUrl}
                   onChange={(e) => setDomainUrl(e.target.value)}
-                  className="flex-1"
+                  className="flex-1 h-11 border-2 focus:border-primary transition-colors"
                 />
                 <Button 
                   onClick={analyzeDomain} 
                   disabled={isAnalyzing}
-                  className="min-w-[120px]"
+                  className="min-w-[160px] h-11 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
                 >
-                  {isAnalyzing ? "Analyzing..." : "Analyze"}
+                  {isAnalyzing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      Analyze Domain
+                    </>
+                  )}
                 </Button>
               </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                Get comprehensive domain metrics including authority scores and backlink data
-              </p>
+              <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  🔍 Get comprehensive domain metrics including authority scores, backlink profiles, and traffic estimates
+                </p>
+              </div>
             </CardContent>
           </Card>
 
@@ -238,52 +297,93 @@ export const SEOTools = () => {
           )}
 
           {domainMetrics && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Domain Metrics</span>
-                  <Badge variant="outline">{domainMetrics.domain}</Badge>
-                </CardTitle>
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="pb-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl">Domain Performance Metrics</CardTitle>
+                  <Badge variant="outline" className="text-sm font-medium px-3 py-1">
+                    <Globe className="h-3 w-3 mr-1" />
+                    {domainMetrics.domain}
+                  </Badge>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold mb-1">
-                      <Badge className={getAuthorityColor(domainMetrics.domainAuthority)}>
-                        {domainMetrics.domainAuthority}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Domain Authority</p>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <Card className="group hover:shadow-lg transition-all duration-300 hover-scale">
+                    <CardContent className="p-6 text-center">
+                      <div className="mb-4">
+                        <Badge className={`text-lg px-4 py-2 ${getAuthorityColor(domainMetrics.domainAuthority)}`}>
+                          {domainMetrics.domainAuthority}/100
+                        </Badge>
+                      </div>
+                      <h4 className="font-semibold mb-2">Domain Authority</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Overall domain strength score
+                      </p>
+                    </CardContent>
+                  </Card>
                   
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold mb-1">
-                      <Badge className={getAuthorityColor(domainMetrics.pageAuthority)}>
-                        {domainMetrics.pageAuthority}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Page Authority</p>
-                  </div>
+                  <Card className="group hover:shadow-lg transition-all duration-300 hover-scale">
+                    <CardContent className="p-6 text-center">
+                      <div className="mb-4">
+                        <Badge className={`text-lg px-4 py-2 ${getAuthorityColor(domainMetrics.pageAuthority)}`}>
+                          {domainMetrics.pageAuthority}/100
+                        </Badge>
+                      </div>
+                      <h4 className="font-semibold mb-2">Page Authority</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Individual page ranking power
+                      </p>
+                    </CardContent>
+                  </Card>
                   
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold mb-1">{domainMetrics.backlinks.toLocaleString()}</div>
-                    <p className="text-sm text-muted-foreground">Total Backlinks</p>
-                  </div>
+                  <Card className="group hover:shadow-lg transition-all duration-300 hover-scale">
+                    <CardContent className="p-6 text-center">
+                      <div className="text-3xl font-bold text-primary mb-2">
+                        {domainMetrics.backlinks.toLocaleString()}
+                      </div>
+                      <h4 className="font-semibold mb-2">Total Backlinks</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Inbound links pointing to domain
+                      </p>
+                    </CardContent>
+                  </Card>
                   
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold mb-1">{domainMetrics.referringDomains.toLocaleString()}</div>
-                    <p className="text-sm text-muted-foreground">Referring Domains</p>
-                  </div>
+                  <Card className="group hover:shadow-lg transition-all duration-300 hover-scale">
+                    <CardContent className="p-6 text-center">
+                      <div className="text-3xl font-bold text-green-600 mb-2">
+                        {domainMetrics.referringDomains.toLocaleString()}
+                      </div>
+                      <h4 className="font-semibold mb-2">Referring Domains</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Unique domains linking to site
+                      </p>
+                    </CardContent>
+                  </Card>
                   
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold mb-1">{domainMetrics.organicKeywords.toLocaleString()}</div>
-                    <p className="text-sm text-muted-foreground">Organic Keywords</p>
-                  </div>
+                  <Card className="group hover:shadow-lg transition-all duration-300 hover-scale">
+                    <CardContent className="p-6 text-center">
+                      <div className="text-3xl font-bold text-blue-600 mb-2">
+                        {domainMetrics.organicKeywords.toLocaleString()}
+                      </div>
+                      <h4 className="font-semibold mb-2">Organic Keywords</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Keywords ranking organically
+                      </p>
+                    </CardContent>
+                  </Card>
                   
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold mb-1">{domainMetrics.monthlyTraffic.toLocaleString()}</div>
-                    <p className="text-sm text-muted-foreground">Monthly Traffic</p>
-                  </div>
+                  <Card className="group hover:shadow-lg transition-all duration-300 hover-scale">
+                    <CardContent className="p-6 text-center">
+                      <div className="text-3xl font-bold text-orange-600 mb-2">
+                        {domainMetrics.monthlyTraffic.toLocaleString()}
+                      </div>
+                      <h4 className="font-semibold mb-2">Monthly Traffic</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Estimated monthly visitors
+                      </p>
+                    </CardContent>
+                  </Card>
                 </div>
               </CardContent>
             </Card>
