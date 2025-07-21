@@ -94,14 +94,14 @@ export const RankingTracker = () => {
     const technicalIssues: string[] = [];
     
     const progressMessages = [
-      'Starting comprehensive ranking and technical analysis...',
-      'Analyzing GOOGLE - checking SSL, backlinks, and ranking...',
-      'Performing deep crawl analysis for indexing status...',
-      'Analyzing BING - checking SSL, backlinks, and ranking...',
-      'Examining competitor backlink profiles...',
-      'Analyzing YAHOO - checking SSL, backlinks, and ranking...',
-      'Processing technical SEO audit results...',
-      'Finalizing comprehensive analysis report...'
+      'Initializing keyword ranking analysis...',
+      'Searching Google SERP for target keyword...',
+      'Extracting competitor data and backlink profiles...',
+      'Analyzing Bing search results and rankings...',
+      'Evaluating domain authority and page metrics...',
+      'Checking Yahoo search engine positions...',
+      'Processing SSL certificate and security status...',
+      'Compiling comprehensive SEO performance report...'
     ];
     
     let progressIndex = 0;
@@ -541,7 +541,7 @@ ${analysisData.technicalIssues.length > 0
               )}
               
               <p className="text-sm text-muted-foreground mt-4">
-                Complete ranking analysis with SSL checks, backlink analysis, indexing status, and technical SEO reporting across all major search engines
+                Track your website's keyword rankings across Google, Bing, and Yahoo. Get instant position data, competitor analysis, and backlink insights to optimize your SEO strategy.
               </p>
             </CardContent>
           </Card>
