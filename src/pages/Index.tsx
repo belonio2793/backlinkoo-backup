@@ -22,9 +22,6 @@ import { PaymentModal } from "@/components/PaymentModal";
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
-import heroSpaceNebula from "@/assets/hero-space-nebula.jpg";
-import heroGalaxySpiral from "@/assets/hero-galaxy-spiral.jpg";
-import heroSupernova from "@/assets/hero-supernova.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -174,10 +171,7 @@ const Index = () => {
       <section 
         className="relative py-32 px-6 bg-gradient-to-b from-background/90 to-muted/20 overflow-hidden"
         style={{ 
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url(${heroSpaceNebula})`, 
-          backgroundSize: 'cover', 
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))`
         }}
       >
         <div className="container mx-auto text-center relative z-10">
@@ -436,10 +430,7 @@ const Index = () => {
         id="pricing" 
         className="relative py-24 px-6 overflow-hidden"
         style={{ 
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url(${heroGalaxySpiral})`, 
-          backgroundSize: 'cover', 
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8))`
         }}
       >
         <div className="container mx-auto relative z-10">
@@ -451,7 +442,7 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {pricingPlans.map((plan) => (
+            {pricingPlans.map((plan icingPlans.map((plan) => (
               <Card 
                 key={plan.id} 
                 className={`p-8 text-center border-0 shadow-lg hover:shadow-xl transition-all relative backdrop-blur-sm ${
@@ -513,10 +504,7 @@ const Index = () => {
       <section 
         className="relative py-24 px-6 overflow-hidden"
         style={{ 
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url(${heroSupernova})`, 
-          backgroundSize: 'cover', 
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8))`
         }}
       >
         <div className="container mx-auto text-center relative z-10">
