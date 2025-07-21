@@ -96,19 +96,80 @@ export const RankingTracker = () => {
     const technicalIssues: string[] = [];
     
     const progressMessages = [
-      'Initializing keyword ranking analysis...',
+      'Validating website availability...',
+      'Checking SSL certificate status...',
       'Searching Google SERP for target keyword...',
-      'Extracting competitor data and backlink profiles...',
       'Analyzing Bing search results and rankings...',
-      'Evaluating domain authority and page metrics...',
       'Checking Yahoo search engine positions...',
-      'Processing SSL certificate and security status...',
+      'Extracting competitor data and backlink profiles...',
+      'Processing domain authority metrics...',
       'Compiling comprehensive SEO performance report...'
     ];
     
     let progressIndex = 0;
     setCheckingProgress([progressMessages[progressIndex]]);
     setCurrentProgressIndex(0);
+    
+    // First validate website availability
+    try {
+      setCheckingProgress(['Validating website availability...']);
+      const { data: validationData, error: validationError } = await supabase.functions.invoke('seo-analysis', {
+        body: {
+          type: 'website_validation',
+          data: { url }
+        }
+      });
+
+      if (validationError || validationData?.error) {
+        const errorMessage = validationData?.error || 'Website validation failed';
+        const allEngineResults: { [key: string]: any } = {};
+        
+        searchEngines.forEach(engine => {
+          allEngineResults[engine] = {
+            engine,
+            position: null,
+            found: false,
+            backlinks: 0,
+            errors: [errorMessage],
+            competitorAnalysis: [],
+            domainAge: 0,
+            sslStatus: 'Unknown',
+            indexingStatus: 'Error',
+            websiteStatus: validationData?.status || 'unavailable'
+          };
+        });
+
+        return { 
+          results: allEngineResults, 
+          technicalIssues: [errorMessage],
+          websiteError: true
+        };
+      }
+    } catch (error) {
+      console.error('Website validation failed:', error);
+      const allEngineResults: { [key: string]: any } = {};
+      
+      searchEngines.forEach(engine => {
+        allEngineResults[engine] = {
+          engine,
+          position: null,
+          found: false,
+          backlinks: 0,
+          errors: ['Website validation failed'],
+          competitorAnalysis: [],
+          domainAge: 0,
+          sslStatus: 'Unknown',
+          indexingStatus: 'Error',
+          websiteStatus: 'validation_error'
+        };
+      });
+
+      return { 
+        results: allEngineResults, 
+        technicalIssues: ['Website validation failed'],
+        websiteError: true
+      };
+    }
     
     // Simulate rotating progress messages
     const progressInterval = setInterval(() => {
@@ -127,6 +188,24 @@ export const RankingTracker = () => {
         });
 
         if (error) throw error;
+
+        // Check for website-specific errors in the response
+        if (data.websiteError) {
+          results[engine] = {
+            engine,
+            position: null,
+            found: false,
+            backlinks: 0,
+            errors: [data.error || 'Website unavailable'],
+            competitorAnalysis: [],
+            domainAge: 0,
+            sslStatus: 'Unknown',
+            indexingStatus: 'Error',
+            websiteStatus: data.status || 'unavailable'
+          };
+          technicalIssues.push(data.error || 'Website unavailable');
+          continue;
+        }
 
         // Simulate enhanced data analysis
         const backlinksCount = Math.floor(Math.random() * 10000);
@@ -156,7 +235,8 @@ export const RankingTracker = () => {
           competitorAnalysis: data.competitorAnalysis || [],
           domainAge,
           sslStatus: hasSSL ? 'Valid' : 'Missing',
-          indexingStatus: data.found ? 'Indexed' : 'Not Indexed'
+          indexingStatus: data.found ? 'Indexed' : 'Not Indexed',
+          websiteStatus: 'active'
         };
 
         await new Promise(resolve => setTimeout(resolve, 1500));
@@ -172,7 +252,8 @@ export const RankingTracker = () => {
           competitorAnalysis: [],
           domainAge: 0,
           sslStatus: 'Unknown',
-          indexingStatus: 'Error'
+          indexingStatus: 'Error',
+          websiteStatus: 'api_error'
         };
         technicalIssues.push(`${engine} API error`);
       }
@@ -335,6 +416,17 @@ export const RankingTracker = () => {
       setAiAnalysis(JSON.stringify(analysisData));
       
       setShowAnalysis(true);
+
+      // Check if this is a website error case
+      if (analysisData.websiteError) {
+        const errorMessage = analysisData.technicalIssues[0] || 'Website unavailable';
+        toast({
+          title: "Website Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        return;
+      }
 
       const successMessage = "Analysis Complete";
       const foundSummary = Object.values(analysisData.results)
