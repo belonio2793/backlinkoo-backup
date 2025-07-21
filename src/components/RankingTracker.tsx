@@ -686,16 +686,12 @@ export const RankingTracker = () => {
                     {checkingProgress.map((progress, index) => (
                       <div key={index} className="text-sm text-muted-foreground flex items-center gap-2">
                         <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                        {progress}
+                        <span className="animate-pulse">{progress}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-              
-              <p className="text-sm text-muted-foreground mt-4">
-                Track your website's keyword rankings across Google, Bing, and Yahoo. Get instant position data, competitor analysis, and backlink insights to optimize your SEO strategy.
-              </p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -775,10 +771,10 @@ export const RankingTracker = () => {
                                 ) : (
                                   <Badge variant="secondary">-</Badge>
                                 )}
-                                <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <Link className="h-3 w-3" />
-                                  {target.google_backlinks || 0}
-                                </div>
+                            <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                   <Link className="h-3 w-3" />
+                                   {target.google_backlinks === 0 ? "0 links" : `${target.google_backlinks} links`}
+                                 </div>
                                 {target.google_checked_at && (
                                   <div className="text-xs text-muted-foreground">
                                     {new Date(target.google_checked_at).toLocaleDateString()}
@@ -797,9 +793,9 @@ export const RankingTracker = () => {
                                   <Badge variant="secondary">-</Badge>
                                 )}
                                 <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <Link className="h-3 w-3" />
-                                  {target.bing_backlinks || 0}
-                                </div>
+                                   <Link className="h-3 w-3" />
+                                   {target.bing_backlinks === 0 ? "0 links" : `${target.bing_backlinks} links`}
+                                 </div>
                                 {target.bing_checked_at && (
                                   <div className="text-xs text-muted-foreground">
                                     {new Date(target.bing_checked_at).toLocaleDateString()}
@@ -818,9 +814,9 @@ export const RankingTracker = () => {
                                   <Badge variant="secondary">-</Badge>
                                 )}
                                 <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <Link className="h-3 w-3" />
-                                  {target.yahoo_backlinks || 0}
-                                </div>
+                                   <Link className="h-3 w-3" />
+                                   {target.yahoo_backlinks === 0 ? "0 links" : `${target.yahoo_backlinks} links`}
+                                 </div>
                                 {target.yahoo_checked_at && (
                                   <div className="text-xs text-muted-foreground">
                                     {new Date(target.yahoo_checked_at).toLocaleDateString()}
