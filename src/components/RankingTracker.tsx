@@ -121,53 +121,38 @@ export const RankingTracker = () => {
       });
 
       if (validationError || validationData?.error) {
-        const errorMessage = validationData?.error || 'Website validation failed';
-        const allEngineResults: { [key: string]: any } = {};
+        const errorMessage = validationData?.error || validationData?.description || 'Website validation failed';
         
-        searchEngines.forEach(engine => {
-          allEngineResults[engine] = {
-            engine,
-            position: null,
-            found: false,
-            backlinks: 0,
-            errors: [errorMessage],
-            competitorAnalysis: [],
-            domainAge: 0,
-            sslStatus: 'Unknown',
-            indexingStatus: 'Error',
-            websiteStatus: validationData?.status || 'unavailable'
-          };
+        // Show error toast and clear results
+        toast({
+          title: "Analysis Error",
+          description: errorMessage,
+          variant: "destructive",
         });
-
+        
+        // Return empty results to show "No results found"
         return { 
-          results: allEngineResults, 
+          results: {}, 
           technicalIssues: [errorMessage],
-          websiteError: true
+          websiteError: true,
+          errorMessage: errorMessage
         };
       }
     } catch (error) {
       console.error('Website validation failed:', error);
-      const allEngineResults: { [key: string]: any } = {};
       
-      searchEngines.forEach(engine => {
-        allEngineResults[engine] = {
-          engine,
-          position: null,
-          found: false,
-          backlinks: 0,
-          errors: ['Website validation failed'],
-          competitorAnalysis: [],
-          domainAge: 0,
-          sslStatus: 'Unknown',
-          indexingStatus: 'Error',
-          websiteStatus: 'validation_error'
-        };
+      // Show error toast and clear results
+      toast({
+        title: "Analysis Error", 
+        description: "Website validation failed - unable to analyze invalid or inaccessible website",
+        variant: "destructive",
       });
 
       return { 
-        results: allEngineResults, 
+        results: {}, 
         technicalIssues: ['Website validation failed'],
-        websiteError: true
+        websiteError: true,
+        errorMessage: 'Website validation failed'
       };
     }
     
@@ -378,31 +363,51 @@ export const RankingTracker = () => {
         ? Math.round(positions.reduce((a, b) => a + b, 0) / positions.length)
         : null;
 
+      // Check if this is a website error case first
+      if (analysisData.websiteError) {
+        const errorMessage = analysisData.technicalIssues[0] || analysisData.errorMessage || 'Website unavailable';
+        toast({
+          title: "Website Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        
+        // Don't create any ranking results for invalid websites
+        setRankings([]);
+        setShowAnalysis(false);
+        return;
+      }
+
+      const resultsData = analysisData.results || {};
+      const googleData = (resultsData as any)['google'] || {};
+      const bingData = (resultsData as any)['bing'] || {};
+      const yahooData = (resultsData as any)['yahoo'] || {};
+
       const newResult: RankingResult = {
         keyword: keyword.trim(),
         url: cleanUrl,
         domain: domain,
         searchEngines: {
           google: {
-            position: analysisData.results.google?.position || null,
-            found: analysisData.results.google?.found || false,
+            position: googleData.position || null,
+            found: googleData.found || false,
             lastChecked: new Date().toLocaleString(),
-            backlinks: analysisData.results.google?.backlinks || 0,
-            errors: analysisData.results.google?.errors || []
+            backlinks: googleData.backlinks || 0,
+            errors: googleData.errors || []
           },
           bing: {
-            position: analysisData.results.bing?.position || null,
-            found: analysisData.results.bing?.found || false,
+            position: bingData.position || null,
+            found: bingData.found || false,
             lastChecked: new Date().toLocaleString(),
-            backlinks: analysisData.results.bing?.backlinks || 0,
-            errors: analysisData.results.bing?.errors || []
+            backlinks: bingData.backlinks || 0,
+            errors: bingData.errors || []
           },
           yahoo: {
-            position: analysisData.results.yahoo?.position || null,
-            found: analysisData.results.yahoo?.found || false,
+            position: yahooData.position || null,
+            found: yahooData.found || false,
             lastChecked: new Date().toLocaleString(),
-            backlinks: analysisData.results.yahoo?.backlinks || 0,
-            errors: analysisData.results.yahoo?.errors || []
+            backlinks: yahooData.backlinks || 0,
+            errors: yahooData.errors || []
           }
         },
         overallBest,
@@ -416,17 +421,6 @@ export const RankingTracker = () => {
       setAiAnalysis(JSON.stringify(analysisData));
       
       setShowAnalysis(true);
-
-      // Check if this is a website error case
-      if (analysisData.websiteError) {
-        const errorMessage = analysisData.technicalIssues[0] || 'Website unavailable';
-        toast({
-          title: "Website Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
-        return;
-      }
 
       const successMessage = "Analysis Complete";
       const foundSummary = Object.values(analysisData.results)
