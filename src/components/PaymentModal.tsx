@@ -12,20 +12,21 @@ import { supabase } from "@/integrations/supabase/client";
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialCredits?: number;
 }
 
-export const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
+export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalProps) => {
+  const CREDIT_PRICE = 0.65;
+  
   const [paymentType, setPaymentType] = useState<"payment" | "subscription">("payment");
   const [paymentMethod, setPaymentMethod] = useState<"stripe" | "paypal">("stripe");
   const [isGuest, setIsGuest] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
-  const [amount, setAmount] = useState("");
-  const [credits, setCredits] = useState("");
+  const [amount, setAmount] = useState(() => initialCredits ? (initialCredits * CREDIT_PRICE).toFixed(2) : "");
+  const [credits, setCredits] = useState(() => initialCredits ? initialCredits.toString() : "");
   const [subscriptionTier, setSubscriptionTier] = useState("keyword-research");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-
-  const CREDIT_PRICE = 0.70;
 
   const subscriptionPlans = {
     "keyword-research": { price: 29.99, priceId: "price_keyword_research", name: "Keyword Research Tool" },
@@ -224,9 +225,9 @@ export const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
                     onChange={(e) => handleCreditsChange(e.target.value)}
                     placeholder="Enter number of credits"
                   />
-                  <p className="text-sm text-muted-foreground">
-                    $0.70 per credit • 1 credit = 1 premium backlink
-                  </p>
+                   <p className="text-sm text-muted-foreground">
+                     $0.65 per credit • 1 credit = 1 premium backlink
+                   </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="total">Total Amount</Label>
@@ -236,9 +237,9 @@ export const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
                     readOnly
                     className="bg-muted"
                   />
-                  <p className="text-sm text-muted-foreground">
-                    {credits ? `${credits} credits × $0.70 = $${amount}` : 'Enter credits to see total'}
-                  </p>
+                   <p className="text-sm text-muted-foreground">
+                     {credits ? `${credits} credits × $0.65 = $${amount}` : 'Enter credits to see total'}
+                   </p>
                 </div>
               </div>
               <Button 
