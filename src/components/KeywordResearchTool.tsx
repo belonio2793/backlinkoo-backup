@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, TrendingUp, Eye, DollarSign, Globe, MapPin, BarChart3, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { SearchableSelect } from "@/components/SearchableSelect";
 import googleLogo from "@/assets/google-g-logo.png";
 import bingLogo from "@/assets/bing-logo.png";
 
@@ -506,105 +507,77 @@ export const KeywordResearchTool = () => {
               />
             </div>
             
-            <Select value={selectedCountry} onValueChange={(value) => {
-              console.log('Country changed to:', value);
-              try {
-                setSelectedCountry(value);
-                setSelectedCity(""); // Always reset city when country changes
-              } catch (error) {
-                console.error('Error changing country:', error);
-                toast({
-                  title: "Error",
-                  description: "Failed to change country. Please try again.",
-                  variant: "destructive",
-                });
-              }
-            }}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Country">
-                  {selectedCountry && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{countries.find(c => c.code === selectedCountry)?.flag}</span>
-                      <span>{countries.find(c => c.code === selectedCountry)?.name}</span>
-                    </div>
-                  )}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {countries.map((country) => (
-                  <SelectItem key={country.code} value={country.code}>
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{country.flag}</span>
-                      <span>{country.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              options={countries.map(country => ({
+                value: country.code,
+                label: country.name,
+                searchableText: `${country.name} ${country.code}`,
+                flag: country.flag
+              }))}
+              value={selectedCountry}
+              onValueChange={(value) => {
+                console.log('Country changed to:', value);
+                try {
+                  setSelectedCountry(value);
+                  setSelectedCity(""); // Always reset city when country changes
+                } catch (error) {
+                  console.error('Error changing country:', error);
+                  toast({
+                    title: "Error",
+                    description: "Failed to change country. Please try again.",
+                    variant: "destructive",
+                  });
+                }
+              }}
+              placeholder="Select Country"
+              searchPlaceholder="Type to search countries..."
+              emptyMessage="No countries found."
+              className="w-full"
+            />
 
-            <Select value={selectedEngine} onValueChange={setSelectedEngine}>
-              <SelectTrigger>
-                <SelectValue placeholder="Search Engine">
-                  {selectedEngine && (
-                    <div className="flex items-center gap-2">
-                      <img 
-                        src={searchEngines.find(e => e.value === selectedEngine)?.logo} 
-                        alt={searchEngines.find(e => e.value === selectedEngine)?.name}
-                        className="w-4 h-4 object-contain"
-                      />
-                      <span className={searchEngines.find(e => e.value === selectedEngine)?.color}>
-                        {searchEngines.find(e => e.value === selectedEngine)?.name}
-                      </span>
-                    </div>
-                  )}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {searchEngines.map((engine) => (
-                  <SelectItem key={engine.value} value={engine.value}>
-                    <div className="flex items-center gap-2">
-                      <img 
-                        src={engine.logo} 
-                        alt={engine.name}
-                        className="w-4 h-4 object-contain"
-                      />
-                      <span className={engine.color}>{engine.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              options={searchEngines.map(engine => ({
+                value: engine.value,
+                label: engine.name,
+                searchableText: engine.name,
+                icon: <img 
+                  src={engine.logo} 
+                  alt={engine.name}
+                  className="w-4 h-4 object-contain"
+                />
+              }))}
+              value={selectedEngine}
+              onValueChange={setSelectedEngine}
+              placeholder="Search Engine"
+              searchPlaceholder="Type to search engines..."
+              emptyMessage="No search engines found."
+              className="w-full"
+            />
           </div>
 
           {selectedCountry && cities[selectedCountry as keyof typeof cities] && cities[selectedCountry as keyof typeof cities].length > 0 && (
-            <Select value={selectedCity} onValueChange={setSelectedCity}>
-              <SelectTrigger className="max-w-md">
-                <SelectValue placeholder="City (optional)">
-                  {selectedCity && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      <span>{selectedCity}</span>
-                    </div>
-                  )}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-4 w-4" />
-                    <span>All Cities</span>
-                  </div>
-                </SelectItem>
-                {(cities[selectedCountry as keyof typeof cities] || []).map((city) => (
-                  <SelectItem key={city} value={city}>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      {city}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              options={[
+                {
+                  value: "",
+                  label: "All Cities",
+                  searchableText: "all cities",
+                  icon: <Globe className="h-4 w-4" />
+                },
+                ...(cities[selectedCountry as keyof typeof cities] || []).map(city => ({
+                  value: city,
+                  label: city,
+                  searchableText: city,
+                  icon: <MapPin className="h-4 w-4" />
+                }))
+              ]}
+              value={selectedCity}
+              onValueChange={setSelectedCity}
+              placeholder="City (optional)"
+              searchPlaceholder="Type to search cities..."
+              emptyMessage="No cities found."
+              className="max-w-md"
+            />
           )}
 
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
