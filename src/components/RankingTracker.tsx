@@ -5,47 +5,84 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrendingUp, TrendingDown, Minus, Search, Globe } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Search, Globe, CheckCircle, XCircle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface RankingResult {
   keyword: string;
   url: string;
-  position: number;
-  searchEngine: string;
-  change: number;
-  lastChecked: string;
+  domain: string;
+  searchEngines: {
+    google: { position: number | null; found: boolean; lastChecked: string };
+    bing: { position: number | null; found: boolean; lastChecked: string };
+    yahoo: { position: number | null; found: boolean; lastChecked: string };
+  };
+  overallBest: number | null;
+  averagePosition: number | null;
+}
+
+interface SearchEngineResult {
+  engine: string;
+  position: number | null;
+  found: boolean;
+  competitorAnalysis: any[];
 }
 
 export const RankingTracker = () => {
   const [url, setUrl] = useState("");
   const [keyword, setKeyword] = useState("");
-  const [searchEngine, setSearchEngine] = useState("google");
   const [isChecking, setIsChecking] = useState(false);
   const [rankings, setRankings] = useState<RankingResult[]>([]);
+  const [checkingProgress, setCheckingProgress] = useState<string[]>([]);
   const { toast } = useToast();
 
   const [aiAnalysis, setAiAnalysis] = useState<string>("");
   const [showAnalysis, setShowAnalysis] = useState(false);
 
-  // Real ranking check with AI analysis
-  const performRankingCheck = async (url: string, keyword: string, searchEngine: string) => {
-    const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/functions/v1/seo-analysis', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        type: 'ranking_check',
-        data: { url, keyword, searchEngine }
-      }),
-    });
+  // Enhanced ranking check across multiple search engines
+  const performMultiEngineRankingCheck = async (url: string, keyword: string) => {
+    const searchEngines = ['google', 'bing', 'yahoo'];
+    const results: { [key: string]: SearchEngineResult } = {};
+    
+    for (const engine of searchEngines) {
+      setCheckingProgress(prev => [...prev, `Checking ${engine.toUpperCase()}...`]);
+      
+      try {
+        const { data, error } = await supabase.functions.invoke('seo-analysis', {
+          body: {
+            type: 'ranking_check',
+            data: { url, keyword, searchEngine: engine }
+          }
+        });
 
-    if (!response.ok) {
-      throw new Error('Failed to check ranking');
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        results[engine] = {
+          engine,
+          position: data.position,
+          found: data.found,
+          competitorAnalysis: data.competitorAnalysis || []
+        };
+
+        // Add small delay to prevent rate limiting
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+      } catch (error) {
+        console.error(`Error checking ${engine}:`, error);
+        results[engine] = {
+          engine,
+          position: null,
+          found: false,
+          competitorAnalysis: []
+        };
+      }
     }
 
-    return await response.json();
+    setCheckingProgress([]);
+    return results;
   };
 
   const checkRanking = async () => {
@@ -58,30 +95,106 @@ export const RankingTracker = () => {
       return;
     }
 
+    // Validate URL format
+    try {
+      new URL(url.trim().startsWith('http') ? url.trim() : `https://${url.trim()}`);
+    } catch {
+      toast({
+        title: "Error", 
+        description: "Please enter a valid URL",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsChecking(true);
+    setCheckingProgress([]);
     
     try {
-      const results = await performRankingCheck(url.trim(), keyword.trim(), searchEngine);
+      const cleanUrl = url.trim().startsWith('http') ? url.trim() : `https://${url.trim()}`;
+      const domain = new URL(cleanUrl).hostname;
       
+      setCheckingProgress(['Starting multi-engine ranking check...']);
+      
+      const results = await performMultiEngineRankingCheck(cleanUrl, keyword.trim());
+      
+      // Calculate overall metrics
+      const positions = Object.values(results)
+        .map(r => r.position)
+        .filter(p => p !== null) as number[];
+      
+      const overallBest = positions.length > 0 ? Math.min(...positions) : null;
+      const averagePosition = positions.length > 0 
+        ? Math.round(positions.reduce((a, b) => a + b, 0) / positions.length)
+        : null;
+
       const newResult: RankingResult = {
         keyword: keyword.trim(),
-        url: url.trim(),
-        position: results.position || 100,
-        searchEngine: searchEngine,
-        change: Math.floor(Math.random() * 21) - 10, // -10 to +10
-        lastChecked: new Date().toLocaleString()
+        url: cleanUrl,
+        domain: domain,
+        searchEngines: {
+          google: {
+            position: results.google?.position || null,
+            found: results.google?.found || false,
+            lastChecked: new Date().toLocaleString()
+          },
+          bing: {
+            position: results.bing?.position || null,
+            found: results.bing?.found || false,
+            lastChecked: new Date().toLocaleString()
+          },
+          yahoo: {
+            position: results.yahoo?.position || null,
+            found: results.yahoo?.found || false,
+            lastChecked: new Date().toLocaleString()
+          }
+        },
+        overallBest,
+        averagePosition
       };
       
       setRankings(prev => [newResult, ...prev.slice(0, 9)]);
-      setAiAnalysis(results.aiAnalysis);
-      setShowAnalysis(true);
+
+      // Generate AI analysis based on multi-engine results
+      const analysisData = Object.values(results)
+        .filter(r => r.found)
+        .map(r => `${r.engine}: position ${r.position}`)
+        .join(', ');
+
+      const analysisPrompt = `
+        Website: ${domain}
+        Keyword: "${keyword.trim()}"
+        Results: ${analysisData || 'Not found in top 100 on any search engine'}
+        
+        Provide comprehensive ranking analysis and improvement recommendations.
+      `;
+
+      try {
+        const { data: aiData } = await supabase.functions.invoke('seo-analysis', {
+          body: {
+            type: 'ranking_analysis',
+            data: { prompt: analysisPrompt, results }
+          }
+        });
+        
+        setAiAnalysis(aiData?.aiAnalysis || 'Analysis not available');
+        setShowAnalysis(true);
+      } catch (error) {
+        console.error('AI analysis failed:', error);
+      }
+
+      const foundEngines = Object.entries(results)
+        .filter(([_, result]) => result.found)
+        .map(([engine, result]) => `${engine} (#${result.position})`)
+        .join(', ');
 
       toast({
         title: "Ranking Check Complete",
-        description: results.found 
-          ? `${keyword} ranks at position ${results.position} on ${searchEngine}`
-          : `${keyword} not found in top 100 on ${searchEngine}`,
+        description: foundEngines 
+          ? `Found on: ${foundEngines}`
+          : "Not found in top 100 on any search engine",
       });
+
     } catch (error) {
       console.error('Ranking check failed:', error);
       toast({
@@ -91,20 +204,25 @@ export const RankingTracker = () => {
       });
     } finally {
       setIsChecking(false);
+      setCheckingProgress([]);
     }
   };
 
-  const getPositionColor = (position: number) => {
+  const getPositionColor = (position: number | null) => {
+    if (!position) return "text-gray-500 bg-gray-50";
     if (position <= 3) return "text-green-600 bg-green-50";
     if (position <= 10) return "text-blue-600 bg-blue-50";
     if (position <= 30) return "text-yellow-600 bg-yellow-50";
     return "text-red-600 bg-red-50";
   };
 
-  const getChangeIcon = (change: number) => {
-    if (change > 0) return <TrendingUp className="h-4 w-4 text-green-500" />;
-    if (change < 0) return <TrendingDown className="h-4 w-4 text-red-500" />;
-    return <Minus className="h-4 w-4 text-gray-500" />;
+  const getEngineIcon = (engine: string) => {
+    switch (engine) {
+      case 'google': return '🔍';
+      case 'bing': return '🌐';
+      case 'yahoo': return '🟣';
+      default: return '⚪';
+    }
   };
 
   return (
@@ -117,13 +235,13 @@ export const RankingTracker = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="url">Website URL</Label>
               <Input
                 id="url"
                 type="url"
-                placeholder="https://example.com"
+                placeholder="https://example.com or example.com"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
               />
@@ -133,24 +251,10 @@ export const RankingTracker = () => {
               <Label htmlFor="keyword">Target Keyword</Label>
               <Input
                 id="keyword"
-                placeholder="∞"
+                placeholder="Enter keyword to track"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
               />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="search-engine">Search Engine</Label>
-              <Select value={searchEngine} onValueChange={setSearchEngine}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="google">Google</SelectItem>
-                  <SelectItem value="bing">Bing</SelectItem>
-                  <SelectItem value="yahoo">Yahoo</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
             
             <div className="space-y-2">
@@ -160,13 +264,30 @@ export const RankingTracker = () => {
                 disabled={isChecking}
                 className="w-full"
               >
-                {isChecking ? "Checking..." : "Check Ranking"}
+                {isChecking ? "Checking..." : "Check All Engines"}
               </Button>
             </div>
           </div>
           
+          {isChecking && checkingProgress.length > 0 && (
+            <div className="mt-4 p-3 bg-muted rounded-lg">
+              <div className="flex items-center gap-2 text-sm">
+                <Clock className="h-4 w-4 animate-spin" />
+                <span className="font-medium">Progress:</span>
+              </div>
+              <div className="mt-2 space-y-1">
+                {checkingProgress.map((progress, index) => (
+                  <div key={index} className="text-sm text-muted-foreground flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                    {progress}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
           <p className="text-sm text-muted-foreground mt-4">
-            Track your website's position for specific keywords on major search engines
+            Track your website's position across Google, Bing, and Yahoo search engines for comprehensive SERP analysis
           </p>
         </CardContent>
       </Card>
@@ -191,47 +312,72 @@ export const RankingTracker = () => {
       {rankings.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Ranking History</CardTitle>
+            <CardTitle>Multi-Engine Ranking Results</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {rankings.map((result, index) => (
-                <div key={index} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <Badge className={getPositionColor(result.position)}>
-                        #{result.position}
-                      </Badge>
-                      <div>
-                        <p className="font-medium">{result.keyword}</p>
-                        <p className="text-sm text-muted-foreground">{result.url}</p>
-                      </div>
+                <div key={index} className="border rounded-lg p-6 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="font-medium text-lg">{result.keyword}</h3>
+                      <p className="text-sm text-muted-foreground">{result.domain}</p>
                     </div>
                     
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1">
-                        {getChangeIcon(result.change)}
-                        <span className={`text-sm ${
-                          result.change > 0 ? 'text-green-600' : 
-                          result.change < 0 ? 'text-red-600' : 
-                          'text-gray-600'
-                        }`}>
-                          {result.change > 0 ? `+${result.change}` : result.change}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground capitalize">
-                          {result.searchEngine}
-                        </span>
-                      </div>
+                    <div className="flex items-center gap-4">
+                      {result.overallBest && (
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">Best Position</p>
+                          <Badge className={getPositionColor(result.overallBest)}>
+                            #{result.overallBest}
+                          </Badge>
+                        </div>
+                      )}
+                      {result.averagePosition && (
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">Average</p>
+                          <Badge variant="outline">
+                            #{result.averagePosition}
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
-                  <p className="text-xs text-muted-foreground">
-                    Last checked: {result.lastChecked}
-                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {Object.entries(result.searchEngines).map(([engine, data]) => (
+                      <div key={engine} className="border rounded-lg p-4 bg-background">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{getEngineIcon(engine)}</span>
+                            <span className="font-medium capitalize">{engine}</span>
+                          </div>
+                          {data.found ? (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <XCircle className="h-4 w-4 text-red-500" />
+                          )}
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Position:</span>
+                            {data.position ? (
+                              <Badge className={getPositionColor(data.position)}>
+                                #{data.position}
+                              </Badge>
+                            ) : (
+                              <Badge variant="secondary">Not Found</Badge>
+                            )}
+                          </div>
+                          
+                          <div className="text-xs text-muted-foreground">
+                            Last checked: {data.lastChecked}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>

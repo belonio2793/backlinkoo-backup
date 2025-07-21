@@ -26,6 +26,8 @@ serve(async (req) => {
         return await handleAdvancedKeywordResearch(data);
       case 'ranking_check':
         return await handleRankingCheck(data);
+      case 'ranking_analysis':
+        return await handleRankingAnalysis(data);
       case 'index_check':
         return await handleIndexCheck(data);
       case 'domain_analysis':
@@ -439,61 +441,172 @@ async function handleKeywordResearch(data: { keyword: string }) {
 async function handleRankingCheck(data: { url: string; keyword: string; searchEngine: string }) {
   const { url, keyword, searchEngine } = data;
   
-  // Check actual ranking using SERP API
-  const serpResponse = await fetch(`https://serpapi.com/search.json?engine=${searchEngine}&q=${encodeURIComponent(keyword)}&num=100&api_key=${serpApiKey}`);
-  const serpData = await serpResponse.json();
+  // Normalize the search engine (Yahoo uses Bing's results)
+  const actualEngine = searchEngine === 'yahoo' ? 'bing' : searchEngine;
   
-  let position = 0;
-  let found = false;
-  
-  if (serpData.organic_results) {
-    for (let i = 0; i < serpData.organic_results.length; i++) {
-      const result = serpData.organic_results[i];
-      if (result.link && result.link.includes(new URL(url).hostname)) {
-        position = i + 1;
-        found = true;
-        break;
+  try {
+    // Check actual ranking using SERP API
+    const serpResponse = await fetch(`https://serpapi.com/search.json?engine=${actualEngine}&q=${encodeURIComponent(keyword)}&num=100&api_key=${serpApiKey}`);
+    const serpData = await serpResponse.json();
+    
+    let position = null;
+    let found = false;
+    const targetDomain = new URL(url).hostname.replace('www.', '');
+    
+    if (serpData.organic_results) {
+      for (let i = 0; i < serpData.organic_results.length; i++) {
+        const result = serpData.organic_results[i];
+        if (result.link) {
+          try {
+            const resultDomain = new URL(result.link).hostname.replace('www.', '');
+            if (resultDomain === targetDomain) {
+              position = i + 1;
+              found = true;
+              break;
+            }
+          } catch (err) {
+            // Skip invalid URLs
+            continue;
+          }
+        }
       }
     }
+    
+    // Get competitor analysis from top 10 results
+    const competitorAnalysis = (serpData.organic_results || []).slice(0, 10).map((result: any, index: number) => ({
+      position: index + 1,
+      title: result.title || 'Untitled',
+      url: result.link || '',
+      domain: result.link ? new URL(result.link).hostname : 'unknown.com',
+      snippet: result.snippet || 'No description available'
+    }));
+    
+    // Generate AI analysis of ranking factors
+    const aiPrompt = `Analyze the ranking results for "${url}" targeting keyword "${keyword}" on ${searchEngine}:
+    
+    Status: ${found ? `Found at position ${position}` : 'Not found in top 100'}
+    Search Engine: ${searchEngine}
+    
+    Top 10 Competitors:
+    ${competitorAnalysis.slice(0, 5).map((comp: any) => `${comp.position}. ${comp.domain} - ${comp.title}`).join('\n')}
+    
+    Provide specific recommendations to improve ranking:
+    1. On-page optimization suggestions
+    2. Content improvements needed
+    3. Technical SEO factors
+    4. Backlink strategy recommendations
+    5. Competitive analysis insights
+    
+    Be specific and actionable.`;
+
+    const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: 'You are an expert SEO consultant. Provide detailed ranking analysis and actionable recommendations.' },
+          { role: 'user', content: aiPrompt }
+        ],
+        temperature: 0.3,
+        max_tokens: 1500
+      }),
+    });
+
+    const aiData = await aiResponse.json();
+
+    return new Response(JSON.stringify({
+      position,
+      found,
+      searchEngine,
+      competitorAnalysis,
+      aiAnalysis: aiData.choices?.[0]?.message?.content || 'Analysis not available',
+      totalResults: serpData.search_information?.total_results || 0,
+      searchMetadata: {
+        query: keyword,
+        engine: searchEngine,
+        timestamp: new Date().toISOString()
+      }
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error: any) {
+    console.error('Error in ranking check:', error);
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      position: null,
+      found: false,
+      searchEngine,
+      aiAnalysis: 'Unable to analyze ranking due to API error'
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
+}
+
+async function handleRankingAnalysis(data: { prompt: string; results: any }) {
+  const { prompt, results } = data;
   
-  // Generate AI analysis of ranking factors
-  const aiPrompt = `Analyze why the URL "${url}" ${found ? `ranks at position ${position}` : 'does not rank in top 100'} for keyword "${keyword}". 
-  Provide specific recommendations to improve ranking including:
-  1. On-page optimization suggestions
-  2. Content improvements needed
-  3. Technical SEO factors
-  4. Backlink strategy recommendations
-  
-  Be specific and actionable.`;
+  try {
+    const detailedPrompt = `${prompt}
+    
+    Additional Context:
+    - Multi-engine search results analysis
+    - Consider search engine algorithm differences
+    - Focus on actionable SEO improvements
+    - Provide specific optimization strategies
+    
+    Analysis Results: ${JSON.stringify(results, null, 2)}
+    
+    Provide comprehensive analysis including:
+    1. Cross-engine ranking comparison
+    2. Search engine specific optimization tips
+    3. Content strategy recommendations
+    4. Technical improvements needed
+    5. Competitive positioning analysis`;
 
-  const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${openAIApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'You are an expert SEO consultant. Provide detailed ranking analysis.' },
-        { role: 'user', content: aiPrompt }
-      ],
-      temperature: 0.3,
-    }),
-  });
+    const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { 
+            role: 'system', 
+            content: 'You are an expert SEO analyst specializing in multi-engine ranking analysis. Provide detailed, actionable insights.' 
+          },
+          { role: 'user', content: detailedPrompt }
+        ],
+        temperature: 0.4,
+        max_tokens: 2000
+      }),
+    });
 
-  const aiData = await aiResponse.json();
+    const aiData = await aiResponse.json();
 
-  return new Response(JSON.stringify({
-    position: found ? position : null,
-    found,
-    aiAnalysis: aiData.choices[0].message.content,
-    competitorCount: serpData.search_information?.total_results || 0,
-    searchEngine
-  }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });
+    return new Response(JSON.stringify({
+      aiAnalysis: aiData.choices?.[0]?.message?.content || 'Analysis not available'
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error: any) {
+    console.error('Error in ranking analysis:', error);
+    return new Response(JSON.stringify({ 
+      aiAnalysis: 'Unable to generate analysis due to API error'
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
 }
 
 async function handleIndexCheck(data: { url: string }) {
