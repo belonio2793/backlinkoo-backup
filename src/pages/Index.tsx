@@ -22,6 +22,7 @@ import { PaymentModal } from "@/components/PaymentModal";
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
+import { Footer } from "@/components/Footer";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -44,8 +45,8 @@ const Index = () => {
 
   const headlineVariations = [
     "Enterprise Backlinks",
-    "Expert Professional Oversight",
-    "Authority Links", 
+    "Expert Professional Oversight", 
+    "Authority Links",
     "Full User & Client Controls",
     "Industry Leading Tools",
     "Competitive Intelligence",

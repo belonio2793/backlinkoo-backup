@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +13,8 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancelled from "./pages/PaymentCancelled";
 import EmailConfirmation from "./pages/EmailConfirmation";
 import NotFound from "./pages/NotFound";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +34,8 @@ const App = () => (
           <Route path="/payment-cancelled" element={<PaymentCancelled />} />
           <Route path="/auth/confirm" element={<EmailConfirmation />} />
           <Route path="/auth/callback" element={<EmailConfirmation />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
