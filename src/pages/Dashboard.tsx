@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -38,7 +39,7 @@ import {
   Edit,
   Trash2
 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -105,7 +106,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-import Autocomplete from 'react-google-autocomplete';
 import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
@@ -176,22 +176,38 @@ const Dashboard = () => {
           <nav>
             <ul className="flex space-x-6">
               <li>
-                <Button variant="ghost" onClick={() => navigateToTab('overview')} active={activeTab === 'overview'}>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => navigateToTab('overview')}
+                  className={activeTab === 'overview' ? 'bg-white/10' : ''}
+                >
                   Overview
                 </Button>
               </li>
               <li>
-                <Button variant="ghost" onClick={() => navigateToTab('projects')} active={activeTab === 'projects'}>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => navigateToTab('projects')}
+                  className={activeTab === 'projects' ? 'bg-white/10' : ''}
+                >
                   Projects
                 </Button>
               </li>
               <li>
-                <Button variant="ghost" onClick={() => navigateToTab('tasks')} active={activeTab === 'tasks'}>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => navigateToTab('tasks')}
+                  className={activeTab === 'tasks' ? 'bg-white/10' : ''}
+                >
                   Tasks
                 </Button>
               </li>
               <li>
-                <Button variant="ghost" onClick={() => navigateToTab('settings')} active={activeTab === 'settings'}>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => navigateToTab('settings')}
+                  className={activeTab === 'settings' ? 'bg-white/10' : ''}
+                >
                   Settings
                 </Button>
               </li>

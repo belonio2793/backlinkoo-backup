@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
@@ -5,9 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { toast } from "@/components/ui/use-toast"
-import { useToast } from "@/components/ui/use-toast"
-import { signIn } from 'next-auth/react';
+import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { Icons } from "@/components/icons"
 import { useSearchParams } from 'react-router-dom';
@@ -24,10 +23,10 @@ const Login = () => {
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
   const { setUser } = useAuth();
 
-  const loginMutation = useMutation(
-    async () => {
+  const loginMutation = useMutation({
+    mutationFn: async () => {
       setIsLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -43,27 +42,25 @@ const Login = () => {
 
       return data;
     },
-    {
-      onSuccess: (data) => {
-        setIsLoading(false);
-        localStorage.setItem('token', data.token);
-        setUser(data.user);
-        toast({
-          title: "Login successful!",
-          description: "You have successfully logged in.",
-        })
-        navigate(callbackUrl);
-      },
-      onError: (error: any) => {
-        setIsLoading(false);
-        toast({
-          variant: "destructive",
-          title: "Login failed.",
-          description: error.message || "Invalid credentials.",
-        })
-      },
-    }
-  );
+    onSuccess: (data) => {
+      setIsLoading(false);
+      localStorage.setItem('token', data.token);
+      setUser(data.user);
+      toast({
+        title: "Login successful!",
+        description: "You have successfully logged in.",
+      })
+      navigate(callbackUrl);
+    },
+    onError: (error: any) => {
+      setIsLoading(false);
+      toast({
+        variant: "destructive",
+        title: "Login failed.",
+        description: error.message || "Invalid credentials.",
+      })
+    },
+  });
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
