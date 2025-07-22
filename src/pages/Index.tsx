@@ -541,6 +541,9 @@ const Index = () => {
         onClose={() => setPaymentModalOpen(false)}
         initialCredits={pricingPlans.find(p => p.id === selectedPlan)?.credits}
       />
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
