@@ -136,22 +136,16 @@ export class LiveBlogPublisher {
 
   async getBlogPost(slug: string): Promise<LiveBlogPost | null> {
     try {
-      const { data, error } = await supabase
-        .from('live_blog_posts')
-        .select('*')
-        .eq('slug', slug)
-        .eq('status', 'published')
-        .single();
-
-      if (error) return null;
-
-      // Increment view count
-      await supabase
-        .from('live_blog_posts')
-        .update({ viewCount: (data.viewCount || 0) + 1 })
-        .eq('id', data.id);
-
-      return data;
+      // Find post by slug in memory
+      for (const [id, post] of this.inMemoryPosts.entries()) {
+        if (post.slug === slug && post.status === 'published') {
+          // Increment view count
+          post.viewCount = (post.viewCount || 0) + 1;
+          this.inMemoryPosts.set(id, post);
+          return post;
+        }
+      }
+      return null;
     } catch (error) {
       console.error('Failed to get blog post:', error);
       return null;
