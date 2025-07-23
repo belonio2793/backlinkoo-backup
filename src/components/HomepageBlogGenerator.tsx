@@ -142,7 +142,19 @@ export function HomepageBlogGenerator() {
       <div className="relative z-10">
         <div className="text-center mb-12">
           <Badge variant="outline" className="mb-6 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border-blue-200 font-mono text-xs">
-            FREE AI BLOG GENERATOR
+            <RotatingText
+              phrases={[
+                "HIGH RANKING AUTHORITY",
+                "DOMINATE THE COMPETITION",
+                "GOOGLE EFFECTIVE",
+                "SKYROCKET YOUR RANKINGS",
+                "INSTANT SEO BOOST",
+                "OUTRANK COMPETITORS",
+                "TRAFFIC EXPLOSION",
+                "AUTHORITY BUILDER"
+              ]}
+              interval={2500}
+            />
           </Badge>
           <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
             Create Your First Backlink For Free
