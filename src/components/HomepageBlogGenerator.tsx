@@ -271,10 +271,10 @@ export function HomepageBlogGenerator() {
                     <CheckCircle2 className="h-10 w-10 text-white" />
                   </div>
                   <h3 className="text-3xl font-bold mb-4 text-gray-900">
-                    Trial Backlink Created Successfully!
+                    Live Backlink Created Successfully!
                   </h3>
                   <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-                    Your contextual blog post about "{primaryKeyword}" has been published with a natural backlink to your website.
+                    Your SEO-optimized blog post about "{primaryKeyword}" is now live with {generatedPost?.contextualLinks?.length || 1} contextual backlinks to your website.
                   </p>
 
                   {/* Trial Backlink Notice - Only shown after completion */}
