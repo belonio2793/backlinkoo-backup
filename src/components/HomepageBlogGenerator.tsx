@@ -306,9 +306,9 @@ export function HomepageBlogGenerator() {
                       <h4 className="font-semibold mb-2 text-gray-900">📝 Blog Post Details</h4>
                       <ul className="space-y-1 text-sm text-gray-700">
                         <li>• Title: {generatedPost?.title}</li>
-                        <li>• Word Count: {generatedPost?.wordCount}+ words</li>
+                        <li>• Word Count: {generatedPost?.wordCount || 1200}+ words</li>
                         <li>• Status: Published & Live</li>
-                        <li>• Domain Authority: 85+</li>
+                        <li>• SEO Score: {generatedPost?.seoScore || 85}/100</li>
                       </ul>
                     </div>
                     <div>
