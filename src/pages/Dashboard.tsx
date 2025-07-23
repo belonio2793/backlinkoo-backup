@@ -21,15 +21,13 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
-  ExternalLink,
-  Sparkles
+  ExternalLink
 } from "lucide-react";
 import { PaymentModal } from "@/components/PaymentModal";
 import { CampaignForm } from "@/components/CampaignForm";
 import { KeywordResearchTool } from "@/components/KeywordResearchTool";
 import { RankingTracker } from "@/components/RankingTracker";
 import { Community } from "@/components/Community";
-import { BlogGenerator } from "@/components/blog/BlogGenerator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -198,15 +196,11 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 py-8">
         {userType === "user" ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
               <TabsTrigger value="keyword-research">Keyword Research</TabsTrigger>
               <TabsTrigger value="rank-tracker">Rankings</TabsTrigger>
-              <TabsTrigger value="blog-generator" className="flex items-center gap-1">
-                <Sparkles className="h-4 w-4" />
-                Blog AI
-              </TabsTrigger>
               <TabsTrigger value="community">Community</TabsTrigger>
             </TabsList>
 
@@ -629,10 +623,6 @@ const Dashboard = () => {
 
             <TabsContent value="rank-tracker">
               <RankingTracker />
-            </TabsContent>
-
-            <TabsContent value="blog-generator">
-              <BlogGenerator />
             </TabsContent>
 
             <TabsContent value="community">
