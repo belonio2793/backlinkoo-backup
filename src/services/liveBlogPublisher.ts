@@ -166,15 +166,11 @@ export class LiveBlogPublisher {
 
   async getAllBlogPosts(limit = 50): Promise<LiveBlogPost[]> {
     try {
-      const { data, error } = await supabase
-        .from('live_blog_posts')
-        .select('*')
-        .eq('status', 'published')
-        .order('createdAt', { ascending: false })
-        .limit(limit);
-
-      if (error) throw error;
-      return data || [];
+      const allPosts = Array.from(this.inMemoryPosts.values())
+        .filter(post => post.status === 'published')
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, limit);
+      return allPosts;
     } catch (error) {
       console.error('Failed to get all blog posts:', error);
       return [];
