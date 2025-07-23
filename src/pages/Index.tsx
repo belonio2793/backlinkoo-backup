@@ -20,6 +20,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { PaymentModal } from "@/components/PaymentModal";
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
+import { HomepageBlogGenerator } from "@/components/HomepageBlogGenerator";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
 import { Footer } from "@/components/Footer";
@@ -178,6 +179,13 @@ const Index = () => {
         </div>
       </header>
 
+      {/* Free Blog Generator - Top Feature */}
+      <section className="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
+        <div className="container mx-auto">
+          <HomepageBlogGenerator />
+        </div>
+      </section>
+
       {/* Hero Section */}
       <section 
         className="relative py-32 px-6 bg-white"
@@ -185,7 +193,7 @@ const Index = () => {
       >
         <div className="container mx-auto text-center relative z-10">
           <Badge variant="outline" className="mb-8 bg-gray-100 border-gray-300 text-gray-900 font-mono text-xs px-4 py-2">
-            ENTERPRISE BACKLINK PLATFORM
+            THE NUMBER ONE PLACE TO BUY BACKLINKS
           </Badge>
           
           <AnimatedHeadline
