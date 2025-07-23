@@ -173,7 +173,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = 'https://backlinkoo.com/dashboard'}>
               <Infinity className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-semibold">Backlink ∞</h1>
+              <h1 className="text-xl font-semibold">Backlink</h1>
             </div>
             <div className="flex items-center gap-4">
               <Badge variant="outline" className="gap-1">
