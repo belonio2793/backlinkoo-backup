@@ -212,11 +212,7 @@ export function EnhancedCampaignForm() {
           </Badge>
           <Badge variant="secondary" className="gap-2">
             <Zap className="h-3 w-3" />
-            Multi-API Enhanced
-          </Badge>
-          <Badge variant="secondary" className="gap-2">
-            <Clock className="h-3 w-3" />
-            24h Auto-Delete
+            Instant Publishing
           </Badge>
         </div>
       </div>
