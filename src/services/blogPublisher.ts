@@ -299,7 +299,7 @@ export class BlogPublisher {
   generateSitemapEntry(post: BlogPost): string {
     const postUrl = `https://${this.domain}${this.blogPath}/${post.slug}`;
     const lastmod = post.publishedAt || post.createdAt;
-    
+
     return `
   <url>
     <loc>${postUrl}</loc>
@@ -307,6 +307,48 @@ export class BlogPublisher {
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>`;
+  }
+
+  // Create a sample campaign for dashboard display
+  async createSampleCampaign(blogPost: BlogPost): Promise<any> {
+    const sampleCampaign = {
+      id: blogPost.id || this.generateId(),
+      target_url: blogPost.targetUrl,
+      keywords: blogPost.keywords.join(', '),
+      links_requested: 1,
+      links_delivered: 1,
+      status: blogPost.isTrial ? 'trial' : 'completed',
+      created_at: blogPost.createdAt,
+      completed_at: blogPost.publishedAt,
+      campaign_type: 'Blog Post Backlink',
+      domain_rating: 85,
+      traffic_estimated: Math.floor(Math.random() * 500) + 100,
+      backlink_url: `https://${this.domain}${this.blogPath}/${blogPost.slug}`,
+      anchor_text: this.extractAnchorText(blogPost.content),
+      is_trial: blogPost.isTrial || false,
+      trial_expires_at: blogPost.trialExpiresAt,
+      blog_post_title: blogPost.title,
+      word_count: blogPost.content.split(' ').length
+    };
+
+    // Store sample campaign
+    try {
+      const existingCampaigns = JSON.parse(localStorage.getItem('sample_campaigns') || '[]');
+      existingCampaigns.push(sampleCampaign);
+      localStorage.setItem('sample_campaigns', JSON.stringify(existingCampaigns));
+      return sampleCampaign;
+    } catch (error) {
+      console.error('Failed to save sample campaign:', error);
+      return null;
+    }
+  }
+
+  getSampleCampaigns(): any[] {
+    try {
+      return JSON.parse(localStorage.getItem('sample_campaigns') || '[]');
+    } catch {
+      return [];
+    }
   }
 }
 
