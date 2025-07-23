@@ -36,6 +36,7 @@ const App = () => (
           <Route path="/auth/callback" element={<EmailConfirmation />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/campaign/:campaignId" element={<CampaignDeliverables />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
