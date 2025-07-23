@@ -206,29 +206,18 @@ export class LiveBlogPublisher {
 
   async deleteBlogPost(postId: string, userId?: string): Promise<boolean> {
     try {
-      // Verify ownership if userId provided
-      if (userId) {
-        const { data: post } = await supabase
-          .from('live_blog_posts')
-          .select('userId')
-          .eq('id', postId)
-          .single();
+      const post = this.inMemoryPosts.get(postId);
+      if (!post) return false;
 
-        if (!post || post.userId !== userId) {
-          throw new Error('Unauthorized delete attempt');
-        }
+      // Verify ownership if userId provided
+      if (userId && post.userId !== userId) {
+        throw new Error('Unauthorized delete attempt');
       }
 
       // Soft delete - mark as deleted
-      const { error } = await supabase
-        .from('live_blog_posts')
-        .update({ 
-          status: 'scheduled_deletion',
-          updatedAt: new Date().toISOString()
-        })
-        .eq('id', postId);
-
-      if (error) throw error;
+      post.status = 'scheduled_deletion';
+      post.updatedAt = new Date().toISOString();
+      this.inMemoryPosts.set(postId, post);
 
       // In production, this would remove from live blog
       await this.removeLiveBlog(postId);
