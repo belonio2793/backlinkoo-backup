@@ -292,19 +292,14 @@ export class LiveBlogPublisher {
     contextualLinks: number;
   } | null> {
     try {
-      const { data, error } = await supabase
-        .from('live_blog_posts')
-        .select('viewCount, seoScore, contextualLinks')
-        .eq('id', postId)
-        .single();
-
-      if (error) return null;
+      const post = this.inMemoryPosts.get(postId);
+      if (!post) return null;
 
       return {
-        viewCount: data.viewCount || 0,
+        viewCount: post.viewCount || 0,
         clicks: 0, // Would be tracked separately in production
-        seoScore: data.seoScore || 0,
-        contextualLinks: data.contextualLinks?.length || 0
+        seoScore: post.seoScore || 0,
+        contextualLinks: post.contextualLinks?.length || 0
       };
     } catch (error) {
       console.error('Failed to get post stats:', error);
