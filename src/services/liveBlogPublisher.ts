@@ -45,7 +45,7 @@ export class LiveBlogPublisher {
       
       // Create unique slug with timestamp to ensure uniqueness
       const uniqueSlug = `${generatedPost.slug}-${Date.now()}`;
-      const publishedUrl = `${this.tempBaseUrl}/${uniqueSlug}`;
+      const publishedUrl = `${this.tempBaseUrl}/preview/${uniqueSlug}`;
       
       // Create blog post data structure
       const blogPostId = `live_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
