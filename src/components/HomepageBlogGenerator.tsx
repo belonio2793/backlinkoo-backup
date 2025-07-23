@@ -334,7 +334,17 @@ export function HomepageBlogGenerator() {
                     <ExternalLink className="mr-2 h-5 w-5" />
                     View Your Live Blog Post
                   </Button>
-                  <Button 
+                  {!currentUser && (
+                    <Button
+                      onClick={() => setShowSignupPopup(true)}
+                      size="lg"
+                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                    >
+                      <Save className="mr-2 h-5 w-5" />
+                      Save Post Forever
+                    </Button>
+                  )}
+                  <Button
                     onClick={resetForm}
                     variant="outline"
                     size="lg"
