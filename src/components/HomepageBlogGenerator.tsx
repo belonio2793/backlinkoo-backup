@@ -289,13 +289,13 @@ export function HomepageBlogGenerator() {
                       </div>
                       <div className="text-left">
                         <p className="text-sm font-medium text-amber-800 mb-1">
-                          ⚠️ Trial Backlink Notice
+                          ⚠️ Demo Preview Notice
                         </p>
                         <p className="text-sm text-amber-700">
-                          <strong>This trial backlink is temporary</strong> and will be automatically removed after 24 hours.
-                          To keep your backlink permanent and active indefinitely, simply{' '}
+                          <strong>This is a demo preview</strong> of your generated blog post content.
+                          To publish this as a live backlink on high-authority domains, simply{' '}
                           <span className="font-semibold">create an account and purchase any number of credits</span>.
-                          Your trial backlink will then be converted to a permanent campaign in your dashboard.
+                          Your content will then be published as a permanent campaign with real SEO value.
                         </p>
                       </div>
                     </div>
