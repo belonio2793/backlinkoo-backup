@@ -326,7 +326,7 @@ export function HomepageBlogGenerator() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <Button 
+                  <Button
                     onClick={() => window.open(publishedUrl, '_blank')}
                     size="lg"
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
