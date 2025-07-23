@@ -329,10 +329,29 @@ export function HomepageBlogGenerator() {
                   </Button>
                 </div>
 
-                <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-sm text-blue-800 font-medium">
-                    🎉 Love this free tool? Consider our premium backlink packages for even more powerful SEO results!
-                  </p>
+                <div className="mt-8 space-y-4">
+                  <div className="p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+                    <p className="text-sm text-green-800 font-medium mb-2">
+                      💎 <strong>Want to keep this backlink forever?</strong>
+                    </p>
+                    <p className="text-sm text-green-700 mb-3">
+                      Create an account and purchase any credit package to convert this trial into a permanent campaign.
+                      Your backlink will remain active indefinitely and appear in your dashboard!
+                    </p>
+                    <Button
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    >
+                      View Credit Packages Above
+                    </Button>
+                  </div>
+
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm text-blue-800 font-medium">
+                      🚀 Ready for more? Our premium packages include unlimited backlinks, advanced targeting, and priority support!
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
