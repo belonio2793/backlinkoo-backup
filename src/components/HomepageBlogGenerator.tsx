@@ -228,16 +228,16 @@ export function HomepageBlogGenerator() {
                       <span>1,200+ word SEO-optimized blog post</span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                      <span>Contextual backlink to your website</span>
+                      <CheckCircle2 className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
+                      <span>24-hour trial backlink (upgrade to keep forever)</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
                       <span>Published on backlinkoo.com (DA 85+)</span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                      <span>Permanent dofollow backlink</span>
+                      <CheckCircle2 className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
+                      <span>Dofollow backlink (trial period)</span>
                     </div>
                   </div>
                 </div>
