@@ -43,18 +43,48 @@ export function BlogPreview({ content }: BlogPreviewProps) {
   }
 
   const publishPost = async () => {
+    if (!content) return;
+
+    setIsPublishing(true);
+
     toast({
       title: "Publishing Blog Post",
       description: "Your blog post is being published and backlink created...",
     });
 
-    // Simulate publishing process
-    setTimeout(() => {
-      toast({
-        title: "Blog Post Published",
-        description: "Your post is live and backlink has been created successfully!",
+    try {
+      const result = await blogPublisher.publishPost({
+        title: content.title,
+        slug: content.slug,
+        content: content.content,
+        metaDescription: content.metaDescription,
+        keywords: content.keywords,
+        targetUrl: content.targetUrl,
+        status: 'published',
+        createdAt: content.createdAt
       });
-    }, 2000);
+
+      if (result.success) {
+        toast({
+          title: "Blog Post Published Successfully",
+          description: `Your post is live at ${result.publishedUrl} and backlink created!`,
+        });
+
+        // Update content status
+        content.status = 'published';
+        content.publishedAt = new Date().toISOString();
+      } else {
+        throw new Error(result.error || 'Publishing failed');
+      }
+    } catch (error) {
+      toast({
+        title: "Publishing Failed",
+        description: error instanceof Error ? error.message : "Failed to publish blog post",
+        variant: "destructive"
+      });
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   const exportPost = () => {
