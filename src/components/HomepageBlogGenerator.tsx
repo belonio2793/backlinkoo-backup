@@ -198,7 +198,7 @@ export function HomepageBlogGenerator() {
                       onChange={(e) => setPrimaryKeyword(e.target.value)}
                       className="text-base py-3 px-4 border-gray-200 focus:border-purple-400 focus:ring-purple-400"
                     />
-                    <p className="text-sm text-gray-500">The main topic for your blog post</p>
+                    <p className="text-sm text-gray-500">The keyword you're ranking for (used as anchor text)</p>
                   </div>
                 </div>
 
@@ -218,7 +218,7 @@ export function HomepageBlogGenerator() {
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                      <span>Published on backlinkoo.com (DA 85+)</span>
+                      <span>Published, viewable and indexed link within private networks</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
