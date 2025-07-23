@@ -185,7 +185,7 @@ const Index = () => {
       >
         <div className="container mx-auto text-center relative z-10">
           <Badge variant="outline" className="mb-8 bg-gray-100 border-gray-300 text-gray-900 font-mono text-xs px-4 py-2">
-            ENTERPRISE BACKLINK PLATFORM
+            THE NUMBER ONE PLACE TO BUY BACKLINKS
           </Badge>
           
           <AnimatedHeadline
