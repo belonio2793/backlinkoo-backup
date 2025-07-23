@@ -154,14 +154,10 @@ export class LiveBlogPublisher {
 
   async getUserBlogPosts(userId: string): Promise<LiveBlogPost[]> {
     try {
-      const { data, error } = await supabase
-        .from('live_blog_posts')
-        .select('*')
-        .eq('userId', userId)
-        .order('createdAt', { ascending: false });
-
-      if (error) throw error;
-      return data || [];
+      const userPosts = Array.from(this.inMemoryPosts.values())
+        .filter(post => post.userId === userId)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      return userPosts;
     } catch (error) {
       console.error('Failed to get user blog posts:', error);
       return [];
