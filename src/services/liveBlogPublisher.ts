@@ -178,19 +178,21 @@ export class LiveBlogPublisher {
   }
 
   async updateBlogPost(
-    postId: string, 
+    postId: string,
     updates: Partial<Pick<LiveBlogPost, 'title' | 'content' | 'metaDescription' | 'keywords'>>
   ): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('live_blog_posts')
-        .update({
-          ...updates,
-          updatedAt: new Date().toISOString()
-        })
-        .eq('id', postId);
+      const post = this.inMemoryPosts.get(postId);
+      if (!post) return false;
 
-      if (error) throw error;
+      // Update the post
+      const updatedPost = {
+        ...post,
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+
+      this.inMemoryPosts.set(postId, updatedPost);
 
       // In production, this would also update the live blog
       await this.updateLiveBlog(postId, updates);
