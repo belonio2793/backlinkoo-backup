@@ -45,7 +45,6 @@ const Index = () => {
 
   const headlineVariations = [
     "Enterprise Backlinks",
-    "Expert Professional Oversight", 
     "Authority Links",
     "Full User & Client Controls",
     "Industry Leading Tools",
