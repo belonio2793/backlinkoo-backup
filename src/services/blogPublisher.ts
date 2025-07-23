@@ -49,11 +49,17 @@ export class BlogPublisher {
       // 4. Create backlink entry
       // 5. Submit to search engines
 
+      // Set trial expiration for free posts
+      const trialExpiresAt = new Date();
+      trialExpiresAt.setHours(trialExpiresAt.getHours() + 24);
+
       const publishedPost = {
         ...post,
         id: post.id || this.generateId(),
         status: 'published' as const,
-        publishedAt: new Date().toISOString()
+        publishedAt: new Date().toISOString(),
+        isTrial: true,
+        trialExpiresAt: trialExpiresAt.toISOString()
       };
 
       // Store in local storage for demo purposes
