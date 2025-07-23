@@ -121,18 +121,17 @@ export class LiveBlogPublisher {
     // 2. Update your sitemap
     // 3. Submit to search engines
     // 4. Setup monitoring
-    
+
     // For now, we'll simulate this with a delay
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Update view count and indexing status
-    await supabase
-      .from('live_blog_posts')
-      .update({ 
-        updatedAt: new Date().toISOString(),
-        status: 'published'
-      })
-      .eq('id', blogPost.id);
+
+    // Update in memory storage
+    const stored = this.inMemoryPosts.get(blogPost.id);
+    if (stored) {
+      stored.updatedAt = new Date().toISOString();
+      stored.status = 'published';
+      this.inMemoryPosts.set(blogPost.id, stored);
+    }
   }
 
   async getBlogPost(slug: string): Promise<LiveBlogPost | null> {
