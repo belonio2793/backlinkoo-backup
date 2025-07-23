@@ -179,6 +179,13 @@ const Index = () => {
         </div>
       </header>
 
+      {/* Free Blog Generator - Top Feature */}
+      <section className="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
+        <div className="container mx-auto">
+          <HomepageBlogGenerator />
+        </div>
+      </section>
+
       {/* Hero Section */}
       <section 
         className="relative py-32 px-6 bg-white"
