@@ -97,9 +97,10 @@ export function HomepageBlogGenerator() {
       }
 
     } catch (error) {
+      console.error('Blog generation error:', error);
       toast({
         title: "Generation Failed",
-        description: "Failed to generate blog post. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate blog post. Please try again.",
         variant: "destructive"
       });
     } finally {
