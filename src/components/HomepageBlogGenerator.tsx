@@ -334,7 +334,7 @@ export function HomepageBlogGenerator() {
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
                   >
                     <ExternalLink className="mr-2 h-5 w-5" />
-                    View Your Live Blog Post
+                    Preview Your Blog Post
                   </Button>
                   {!currentUser && (
                     <Button
