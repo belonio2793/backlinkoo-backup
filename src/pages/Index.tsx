@@ -156,7 +156,7 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.location.href = 'https://backlinkoo.com'}>
               <Infinity className="h-7 w-7 text-primary" />
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink ∞</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
             </div>
             <div className="flex items-center gap-4">
               {user ? (
