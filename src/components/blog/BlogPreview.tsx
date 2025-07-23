@@ -232,9 +232,22 @@ export function BlogPreview({ content }: BlogPreviewProps) {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3">
-            <Button onClick={publishPost} className="flex items-center gap-2">
-              <Share className="h-4 w-4" />
-              Publish & Create Backlink
+            <Button
+              onClick={publishPost}
+              disabled={isPublishing}
+              className="flex items-center gap-2"
+            >
+              {isPublishing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Publishing...
+                </>
+              ) : (
+                <>
+                  <Share className="h-4 w-4" />
+                  Publish & Create Backlink
+                </>
+              )}
             </Button>
             <Button variant="outline" onClick={copyToClipboard}>
               <Code className="h-4 w-4 mr-2" />
