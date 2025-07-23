@@ -32,6 +32,9 @@ export function HomepageBlogGenerator() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [generatedPost, setGeneratedPost] = useState<any>(null);
   const [publishedUrl, setPublishedUrl] = useState('');
+  const [blogPostId, setBlogPostId] = useState<string>('');
+  const [showSignupPopup, setShowSignupPopup] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const { toast } = useToast();
 
   const handleGenerate = async () => {
