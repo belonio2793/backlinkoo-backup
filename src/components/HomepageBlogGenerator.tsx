@@ -9,11 +9,11 @@ import { aiContentGenerator } from '@/services/aiContentGenerator';
 import { blogPublisher } from '@/services/blogPublisher';
 import { multiApiContentGenerator } from '@/services/multiApiContentGenerator';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  Sparkles, 
-  Link2, 
-  Loader2, 
-  CheckCircle2, 
+import {
+  Sparkles,
+  Link2,
+  Loader2,
+  CheckCircle2,
   ExternalLink,
   Star,
   Zap,
@@ -21,6 +21,7 @@ import {
   Target,
   TrendingUp
 } from 'lucide-react';
+import { RotatingText } from './RotatingText';
 
 export function HomepageBlogGenerator() {
   const [targetUrl, setTargetUrl] = useState('');
