@@ -319,7 +319,7 @@ export class LiveBlogPublisher {
 
   // Generate a realistic demo URL for the blog post
   generateDemoUrl(slug: string): string {
-    return `${this.tempBaseUrl}/${slug}`;
+    return `${this.tempBaseUrl}/preview/${slug}`;
   }
 
   // Simulate indexing check (in production would check Google/Bing)
