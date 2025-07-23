@@ -71,7 +71,7 @@ export class LiveBlogPublisher {
       };
 
       // Store in memory for demo purposes (in production, this would use a proper database)
-      // For now, we'll simulate the database insert
+      this.inMemoryPosts.set(blogPostId, blogPost);
       const insertedPost = blogPost;
 
       // Create corresponding campaign entry using existing campaigns table
