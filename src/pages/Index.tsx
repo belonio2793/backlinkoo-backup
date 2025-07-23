@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +41,11 @@ const Index = () => {
       <section className="py-20 px-4">
         <div className="container mx-auto text-center">
           <div className="max-w-4xl mx-auto">
-            <AnimatedHeadline />
+            <AnimatedHeadline 
+              baseText="Build High-Quality Backlinks with"
+              animatedTexts={["AI-Powered Automation", "Expert Outreach", "Data-Driven Insights"]}
+              className="text-5xl font-bold text-foreground mb-6"
+            />
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               Build high-quality backlinks that boost your search rankings and drive organic traffic to your website.
             </p>

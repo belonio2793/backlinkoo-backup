@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,8 @@ import {
   Target,
   Activity,
   Infinity,
-  LogOut
+  LogOut,
+  Shield
 } from "lucide-react";
 import { CampaignManager } from "@/components/CampaignManager";
 import { RankingTracker } from "@/components/RankingTracker";
