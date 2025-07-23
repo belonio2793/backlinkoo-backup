@@ -25,6 +25,7 @@ interface BlogPreviewProps {
 
 export function BlogPreview({ content }: BlogPreviewProps) {
   const [viewMode, setViewMode] = useState<'preview' | 'html'>('preview');
+  const [isPublishing, setIsPublishing] = useState(false);
   const { toast } = useToast();
 
   if (!content) {
