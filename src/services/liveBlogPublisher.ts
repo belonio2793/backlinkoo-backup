@@ -112,30 +112,7 @@ export class LiveBlogPublisher {
     }
   }
 
-  private async createCampaignEntry(
-    blogPost: LiveBlogPost,
-    keyword: string,
-    targetUrl: string,
-    userId: string
-  ): Promise<void> {
-    try {
-      await supabase
-        .from('campaigns')
-        .insert({
-          name: `Live Blog: ${blogPost.title}`,
-          target_url: targetUrl,
-          keywords: [keyword],
-          status: 'completed',
-          links_requested: blogPost.contextualLinks.length,
-          links_delivered: blogPost.contextualLinks.length,
-          completed_backlinks: [blogPost.publishedUrl],
-          user_id: userId,
-          credits_used: 1
-        });
-    } catch (error) {
-      console.warn('Failed to create campaign entry:', error);
-    }
-  }
+
 
   private async simulatePublishToBlog(blogPost: LiveBlogPost): Promise<void> {
     // In production, this would:
