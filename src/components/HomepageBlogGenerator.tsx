@@ -299,12 +299,12 @@ export function HomepageBlogGenerator() {
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-2 text-gray-900">🔗 Backlink Details</h4>
+                      <h4 className="font-semibold mb-2 text-gray-900">🔗 Trial Backlink Details</h4>
                       <ul className="space-y-1 text-sm text-gray-700">
                         <li>• Target: {targetUrl}</li>
                         <li>• Type: Contextual, Dofollow</li>
                         <li>• Anchor: Natural keyword placement</li>
-                        <li>• Status: Active & Indexed</li>
+                        <li className="text-amber-600 font-medium">• Status: Trial (24h remaining)</li>
                       </ul>
                     </div>
                   </div>
