@@ -10,6 +10,8 @@ interface BlogPost {
   publishedAt?: string;
   createdAt: string;
   authorId?: string;
+  isTrial?: boolean;
+  trialExpiresAt?: string;
 }
 
 interface PublishingResult {
