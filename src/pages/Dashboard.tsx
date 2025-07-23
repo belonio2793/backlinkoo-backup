@@ -631,6 +631,10 @@ const Dashboard = () => {
               <RankingTracker />
             </TabsContent>
 
+            <TabsContent value="blog-generator">
+              <BlogGenerator />
+            </TabsContent>
+
             <TabsContent value="community">
               <Community />
             </TabsContent>
