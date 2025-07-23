@@ -62,50 +62,35 @@ export function HomepageBlogGenerator() {
     try {
       // Check if user is logged in
       const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
 
-      // Generate enhanced content using multi-API system
-      const campaign = await multiApiContentGenerator.generateCampaignContent({
-        targetUrl,
+      // Publish live blog post using the new system
+      const publishResult = await liveBlogPublisher.publishLiveBlogPost(
         primaryKeyword,
-        secondaryKeywords: [],
-        contentType: 'blog-post',
-        wordCount: 1200,
-        tone: 'professional',
-        autoDelete: !user, // Auto-delete if not logged in
-        userId: user?.id
-      });
+        targetUrl,
+        user?.id,
+        1200 // word count
+      );
 
-      setGeneratedPost(campaign.content);
-
-      // Automatically publish the post
-      const publishResult = await blogPublisher.publishPost({
-        title: campaign.content.title,
-        slug: campaign.content.slug,
-        content: campaign.content.content,
-        metaDescription: campaign.content.metaDescription,
-        keywords: campaign.content.keywords,
-        targetUrl: campaign.content.targetUrl,
-        status: 'published',
-        createdAt: campaign.createdAt
-      });
-
-      if (publishResult.success && publishResult.publishedUrl) {
+      if (publishResult.success && publishResult.blogPost && publishResult.publishedUrl) {
+        setGeneratedPost(publishResult.blogPost);
         setPublishedUrl(publishResult.publishedUrl);
+        setBlogPostId(publishResult.blogPost.id);
         setIsCompleted(true);
 
-        // Create sample campaign for dashboard
-        await blogPublisher.createSampleCampaign({
-          ...campaign.content,
-          isTrial: true,
-          trialExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-        });
-
         toast({
-          title: "Free Backlink Created!",
-          description: campaign.isRegistered
-            ? "Your backlink has been created and saved to your dashboard!"
+          title: "Live Backlink Created!",
+          description: user
+            ? "Your backlink is now live and saved to your dashboard!"
             : "Your trial backlink is live for 24 hours. Register to keep it forever!",
         });
+
+        // Show signup popup for guest users after a delay
+        if (!user) {
+          setTimeout(() => {
+            setShowSignupPopup(true);
+          }, 3000); // Show popup after 3 seconds
+        }
       } else {
         throw new Error(publishResult.error || 'Publishing failed');
       }
