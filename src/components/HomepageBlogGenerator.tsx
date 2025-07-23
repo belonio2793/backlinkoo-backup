@@ -80,10 +80,17 @@ export function HomepageBlogGenerator() {
       if (publishResult.success && publishResult.publishedUrl) {
         setPublishedUrl(publishResult.publishedUrl);
         setIsCompleted(true);
-        
+
+        // Create sample campaign for dashboard
+        await blogPublisher.createSampleCampaign({
+          ...content,
+          isTrial: true,
+          trialExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+        });
+
         toast({
-          title: "Blog Post Generated & Published!",
-          description: "Your contextual blog post is now live with your backlink",
+          title: "Trial Backlink Created!",
+          description: "Your trial backlink is live for 24 hours. Upgrade to keep it forever!",
         });
       } else {
         throw new Error(publishResult.error || 'Publishing failed');
