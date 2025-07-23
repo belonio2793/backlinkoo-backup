@@ -73,9 +73,25 @@ export class LiveBlogPublisher {
       // For now, we'll simulate the database insert
       const insertedPost = blogPost;
 
-      // Create corresponding campaign entry
+      // Create corresponding campaign entry using existing campaigns table
       if (userId) {
-        await this.createCampaignEntry(insertedPost, keyword, targetUrl, userId);
+        try {
+          await supabase
+            .from('campaigns')
+            .insert({
+              name: `Live Blog: ${generatedPost.title}`,
+              target_url: targetUrl,
+              keywords: [keyword],
+              status: 'completed',
+              links_requested: generatedPost.contextualLinks.length,
+              links_delivered: generatedPost.contextualLinks.length,
+              completed_backlinks: [publishedUrl],
+              user_id: userId,
+              credits_used: 1
+            });
+        } catch (error) {
+          console.warn('Failed to create campaign entry:', error);
+        }
       }
 
       // Simulate actual blog publishing (in production, this would write to your blog CMS)
