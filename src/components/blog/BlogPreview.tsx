@@ -4,17 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Eye, 
-  Code, 
-  Share, 
-  Download, 
+import { blogPublisher } from '@/services/blogPublisher';
+import {
+  Eye,
+  Code,
+  Share,
+  Download,
   Edit,
   Globe,
   Calendar,
   Hash,
   FileText,
-  ExternalLink
+  ExternalLink,
+  Loader2
 } from 'lucide-react';
 
 interface BlogPreviewProps {
