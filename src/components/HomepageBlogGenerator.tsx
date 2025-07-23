@@ -314,13 +314,13 @@ export function HomepageBlogGenerator() {
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-2 text-gray-900">🔗 Live Backlink Details</h4>
+                      <h4 className="font-semibold mb-2 text-gray-900">🔗 Backlink Preview Details</h4>
                       <ul className="space-y-1 text-sm text-gray-700">
                         <li>• Target: {targetUrl}</li>
                         <li>• Contextual Links: {generatedPost?.contextualLinks?.length || 1}</li>
                         <li>• Type: Natural, Contextual</li>
-                        <li className={`font-medium ${currentUser ? 'text-green-600' : 'text-amber-600'}`}>
-                          • Status: {currentUser ? 'Permanent' : 'Trial (24h remaining)'}
+                        <li className="font-medium text-blue-600">
+                          • Status: Demo Preview (Ready for Publishing)
                         </li>
                       </ul>
                     </div>
