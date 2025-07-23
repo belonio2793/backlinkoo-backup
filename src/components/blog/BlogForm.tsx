@@ -50,8 +50,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
     setIsGenerating(true);
     
     try {
-      // Simulate AI content generation with realistic structure
-      const mockContent = await generateMockContent({
+      // Generate content using AI service
+      const generatedContent = await aiContentGenerator.generateContent({
         targetUrl,
         primaryKeyword,
         secondaryKeywords,
@@ -61,7 +61,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
         customInstructions
       });
 
-      onContentGenerated(mockContent);
+      onContentGenerated(generatedContent);
       
       toast({
         title: "Content Generated Successfully",
