@@ -152,7 +152,7 @@ export function HomepageBlogGenerator() {
                   <div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500">
                     <Sparkles className="h-6 w-6 text-white" />
                   </div>
-                  <CardTitle className="text-2xl font-semibold">Enter Your Campaign Details Below</CardTitle>
+                  <CardTitle className="text-2xl font-semibold">Enter Campaign Details</CardTitle>
                 </div>
                 <div className="flex items-center justify-center gap-6 text-sm text-gray-600">
                   <div className="flex items-center gap-2">
