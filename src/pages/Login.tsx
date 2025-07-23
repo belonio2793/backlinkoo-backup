@@ -60,7 +60,7 @@ const Login = () => {
     });
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     
@@ -86,7 +86,7 @@ const Login = () => {
         });
         window.location.href = '/dashboard';
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Sign in failed",
         description: error.message || "An error occurred during sign in.",
@@ -97,35 +97,7 @@ const Login = () => {
     }
   };
 
-
-  const checkEmailExists = async (email: string): Promise<boolean> => {
-    try {
-      // Try to sign in with the email and a dummy password to check if user exists
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password: 'dummy-password-to-check-existence'
-      });
-      
-      // If we get "Invalid login credentials", the email exists but password is wrong
-      // If we get "Email not confirmed", the email exists but isn't confirmed
-      // If we get "User not found" or similar, the email doesn't exist
-      if (error) {
-        const errorMessage = error.message.toLowerCase();
-        return errorMessage.includes('invalid login credentials') || 
-               errorMessage.includes('email not confirmed') ||
-               errorMessage.includes('signup is disabled') ||
-               !errorMessage.includes('user not found');
-      }
-      
-      // If no error, user exists and we accidentally logged them in (shouldn't happen with dummy password)
-      return true;
-    } catch (error) {
-      // On any error, assume email doesn't exist to be safe
-      return false;
-    }
-  };
-
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -150,26 +122,6 @@ const Login = () => {
     }
 
     try {
-      // First check if email already exists
-      const emailExists = await checkEmailExists(email);
-      
-      if (emailExists) {
-        toast({
-          title: "Email Already Taken",
-          description: "This email address is already registered. Please use the Sign In tab to log into your account.",
-          variant: "destructive",
-        });
-        
-        // Switch to login tab automatically
-        const loginTab = document.querySelector('[value="login"]') as HTMLElement;
-        if (loginTab) {
-          loginTab.click();
-        }
-        
-        setIsLoading(false);
-        return;
-      }
-
       cleanupAuthState();
       try {
         await supabase.auth.signOut({ scope: 'global' });
@@ -191,10 +143,24 @@ const Login = () => {
       });
 
       if (error) {
+        if (error.message.includes('Email address already registered')) {
+          setResendEmail(email);
+          setShowResendConfirmation(true);
+          toast({
+            title: "Email Already Registered",
+            description: "This email is already registered. Please verify your email or sign in.",
+            variant: "destructive",
+          });
+          // Switch to login tab
+          const loginTab = document.querySelector('[value="login"]');
+          if (loginTab) {
+            loginTab.click();
+          }
+          return;
+        }
         throw error;
       }
 
-      // Show success message for new signups
       if (data.user) {
         toast({
           title: "Check your email!",
@@ -206,7 +172,7 @@ const Login = () => {
           broadcastNewUser(firstName.trim());
         }, 1000);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Signup error:", error);
       toast({
         title: "Sign up failed",
@@ -238,7 +204,7 @@ const Login = () => {
       });
       
       setShowResendConfirmation(false);
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Failed to resend confirmation",
         description: error.message || "An error occurred while sending the confirmation email.",
@@ -248,7 +214,6 @@ const Login = () => {
       setIsLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -416,7 +381,6 @@ const Login = () => {
                     <span>You'll receive a confirmation email to verify your account</span>
                   </div>
                 </form>
-
               </TabsContent>
             </Tabs>
           </CardContent>
