@@ -54,29 +54,33 @@ export function HomepageBlogGenerator() {
     setIsCompleted(false);
 
     try {
-      // Generate the blog post
-      const content = await aiContentGenerator.generateContent({
+      // Check if user is logged in
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // Generate enhanced content using multi-API system
+      const campaign = await multiApiContentGenerator.generateCampaignContent({
         targetUrl,
         primaryKeyword,
         secondaryKeywords: [],
-        contentType: 'how-to',
+        contentType: 'blog-post',
         wordCount: 1200,
         tone: 'professional',
-        customInstructions: 'Create a contextual blog post that naturally includes the target URL as a valuable resource'
+        autoDelete: !user, // Auto-delete if not logged in
+        userId: user?.id
       });
 
-      setGeneratedPost(content);
+      setGeneratedPost(campaign.content);
 
       // Automatically publish the post
       const publishResult = await blogPublisher.publishPost({
-        title: content.title,
-        slug: content.slug,
-        content: content.content,
-        metaDescription: content.metaDescription,
-        keywords: content.keywords,
-        targetUrl: content.targetUrl,
+        title: campaign.content.title,
+        slug: campaign.content.slug,
+        content: campaign.content.content,
+        metaDescription: campaign.content.metaDescription,
+        keywords: campaign.content.keywords,
+        targetUrl: campaign.content.targetUrl,
         status: 'published',
-        createdAt: content.createdAt
+        createdAt: campaign.createdAt
       });
 
       if (publishResult.success && publishResult.publishedUrl) {
@@ -85,14 +89,16 @@ export function HomepageBlogGenerator() {
 
         // Create sample campaign for dashboard
         await blogPublisher.createSampleCampaign({
-          ...content,
+          ...campaign.content,
           isTrial: true,
           trialExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
         });
 
         toast({
-          title: "Trial Backlink Created!",
-          description: "Your trial backlink is live for 24 hours. Upgrade to keep it forever!",
+          title: "Free Backlink Created!",
+          description: campaign.isRegistered
+            ? "Your backlink has been created and saved to your dashboard!"
+            : "Your trial backlink is live for 24 hours. Register to keep it forever!",
         });
       } else {
         throw new Error(publishResult.error || 'Publishing failed');
