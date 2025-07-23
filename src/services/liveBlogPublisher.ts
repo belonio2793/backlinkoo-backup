@@ -268,18 +268,16 @@ export class LiveBlogPublisher {
 
   async extendTrialPost(postId: string, userId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('live_blog_posts')
-        .update({
-          userId,
-          isTrialPost: false,
-          expiresAt: null,
-          updatedAt: new Date().toISOString()
-        })
-        .eq('id', postId)
-        .eq('isTrialPost', true);
+      const post = this.inMemoryPosts.get(postId);
+      if (!post || !post.isTrialPost) return false;
 
-      if (error) throw error;
+      // Convert trial to permanent
+      post.userId = userId;
+      post.isTrialPost = false;
+      post.expiresAt = undefined;
+      post.updatedAt = new Date().toISOString();
+
+      this.inMemoryPosts.set(postId, post);
       return true;
     } catch (error) {
       console.error('Failed to extend trial post:', error);
