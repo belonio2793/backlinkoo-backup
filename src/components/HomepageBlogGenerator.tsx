@@ -129,12 +129,34 @@ export function HomepageBlogGenerator() {
             FREE AI BLOG GENERATOR
           </Badge>
           <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
-            Get Your Free Contextual Backlink
+            Create Your First Backlink For Free
           </h2>
-          <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed font-light">
-            Enter your URL and keyword to generate a high-quality blog post with a natural backlink. 
+          <p className="text-xl text-gray-700 mb-6 max-w-3xl mx-auto leading-relaxed font-light">
+            Enter your URL and keyword to generate a high-quality blog post with a natural backlink.
             Powered by advanced AI and published instantly on our high-authority domain.
           </p>
+
+          {/* Disclaimer */}
+          <div className="max-w-4xl mx-auto mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 mt-0.5">
+                <svg className="h-5 w-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-medium text-amber-800 mb-1">
+                  ⚠️ Trial Backlink Notice
+                </p>
+                <p className="text-sm text-amber-700">
+                  <strong>Free trial backlinks are temporary</strong> and will be automatically removed after 24 hours.
+                  To keep your backlink permanent and active indefinitely, simply{' '}
+                  <span className="font-semibold">create an account and purchase any number of credits</span>.
+                  Your trial backlink will then be converted to a permanent campaign in your dashboard.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="max-w-4xl mx-auto">
