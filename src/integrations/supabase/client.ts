@@ -8,10 +8,55 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
-});
+// Create a mock client for development when Supabase project is not available
+const createMockSupabaseClient = () => {
+  const mockAuth = {
+    getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+    getUser: () => Promise.resolve({ data: { user: null }, error: null }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+    signInWithPassword: () => Promise.resolve({ data: { user: null, session: null }, error: { message: 'Mock mode - authentication disabled' } }),
+    signUp: () => Promise.resolve({ data: { user: null, session: null }, error: { message: 'Mock mode - authentication disabled' } }),
+    signOut: () => Promise.resolve({ error: null }),
+    resend: () => Promise.resolve({ error: { message: 'Mock mode - resend disabled' } }),
+    verifyOtp: () => Promise.resolve({ data: { user: null, session: null }, error: { message: 'Mock mode - OTP verification disabled' } }),
+  };
+
+  const mockFrom = () => ({
+    select: () => ({ data: [], error: null }),
+    insert: () => ({ data: null, error: null }),
+    update: () => ({ data: null, error: null }),
+    delete: () => ({ data: null, error: null }),
+    upsert: () => ({ data: null, error: null }),
+  });
+
+  const mockFunctions = {
+    invoke: () => Promise.resolve({ data: null, error: { message: 'Mock mode - functions disabled' } }),
+  };
+
+  const mockChannel = () => ({
+    on: () => mockChannel(),
+    subscribe: () => {},
+  });
+
+  return {
+    auth: mockAuth,
+    from: mockFrom,
+    functions: mockFunctions,
+    channel: mockChannel,
+    removeChannel: () => {},
+    rpc: () => Promise.resolve({ data: null, error: { message: 'Mock mode - RPC disabled' } }),
+  };
+};
+
+// Check if we're in development and if the Supabase URL is accessible
+const isDevelopment = import.meta.env.DEV;
+
+export const supabase = isDevelopment
+  ? createMockSupabaseClient()
+  : createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: {
+        storage: localStorage,
+        persistSession: true,
+        autoRefreshToken: true,
+      }
+    });
