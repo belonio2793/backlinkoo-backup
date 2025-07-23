@@ -305,11 +305,11 @@ export function HomepageBlogGenerator() {
                 <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 mb-8 border border-green-100">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                     <div>
-                      <h4 className="font-semibold mb-2 text-gray-900">📝 Blog Post Details</h4>
+                      <h4 className="font-semibold mb-2 text-gray-900">📝 Generated Content Details</h4>
                       <ul className="space-y-1 text-sm text-gray-700">
                         <li>• Title: {generatedPost?.title}</li>
                         <li>• Word Count: {generatedPost?.wordCount || 1200}+ words</li>
-                        <li>• Status: Published & Live</li>
+                        <li>• Status: Demo Preview Ready</li>
                         <li>• SEO Score: {generatedPost?.seoScore || 85}/100</li>
                       </ul>
                     </div>
