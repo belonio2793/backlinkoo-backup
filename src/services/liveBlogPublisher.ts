@@ -231,35 +231,31 @@ export class LiveBlogPublisher {
 
   async cleanupExpiredPosts(): Promise<number> {
     try {
-      const now = new Date().toISOString();
-      
+      const now = new Date();
+
       // Find expired trial posts
-      const { data: expiredPosts, error: selectError } = await supabase
-        .from('live_blog_posts')
-        .select('id, slug, publishedUrl')
-        .eq('isTrialPost', true)
-        .eq('status', 'published')
-        .lt('expiresAt', now);
+      const expiredPosts: LiveBlogPost[] = [];
 
-      if (selectError) throw selectError;
+      for (const [id, post] of this.inMemoryPosts.entries()) {
+        if (post.isTrialPost &&
+            post.status === 'published' &&
+            post.expiresAt &&
+            new Date(post.expiresAt) < now) {
+          expiredPosts.push(post);
+        }
+      }
 
-      if (!expiredPosts || expiredPosts.length === 0) {
+      if (expiredPosts.length === 0) {
         return 0;
       }
 
       // Mark as deleted
-      const { error: updateError } = await supabase
-        .from('live_blog_posts')
-        .update({ 
-          status: 'scheduled_deletion',
-          updatedAt: new Date().toISOString()
-        })
-        .in('id', expiredPosts.map(p => p.id));
-
-      if (updateError) throw updateError;
-
-      // Remove from live blog
       for (const post of expiredPosts) {
+        post.status = 'scheduled_deletion';
+        post.updatedAt = new Date().toISOString();
+        this.inMemoryPosts.set(post.id, post);
+
+        // Remove from live blog
         await this.removeLiveBlog(post.id);
       }
 
