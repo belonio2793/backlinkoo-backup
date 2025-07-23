@@ -513,13 +513,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Free Blog Generator */}
-      <section className="py-24 px-6">
-        <div className="container mx-auto">
-          <HomepageBlogGenerator />
-        </div>
-      </section>
-
       {/* Final CTA */}
       <section 
         className="relative py-24 px-6 bg-white"
