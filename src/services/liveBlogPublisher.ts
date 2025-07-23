@@ -31,6 +31,7 @@ interface PublishResult {
 export class LiveBlogPublisher {
   private baseUrl = 'https://content.backlinkoo.com'; // This would be your actual content domain
   private tempBaseUrl = 'https://demo-content.backlinkoo.com'; // Temporary demo URL for now
+  private inMemoryPosts: Map<string, LiveBlogPost> = new Map(); // Demo storage
 
   async publishLiveBlogPost(
     keyword: string, 
