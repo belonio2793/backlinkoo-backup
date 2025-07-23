@@ -384,6 +384,20 @@ export function HomepageBlogGenerator() {
           )}
         </div>
       </div>
+
+      {/* Signup Popup for Saving Posts */}
+      <SavePostSignupPopup
+        isOpen={showSignupPopup}
+        onClose={() => setShowSignupPopup(false)}
+        blogPostId={blogPostId}
+        blogPostUrl={publishedUrl}
+        blogPostTitle={generatedPost?.title}
+        onSignupSuccess={(user) => {
+          setCurrentUser(user);
+          setShowSignupPopup(false);
+        }}
+        timeRemaining={86400} // 24 hours
+      />
     </div>
   );
 }
