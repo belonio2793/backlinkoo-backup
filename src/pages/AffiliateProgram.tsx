@@ -293,19 +293,141 @@ const AffiliateProgram = () => {
           </div>
         </section>
 
-        {/* CTA */}
+        {/* FAQ Section */}
+        <section className="py-24 px-6">
+          <div className="container mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-light mb-6 tracking-tight">Frequently Asked Questions</h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Everything you need to know about our affiliate program
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              <Card className="p-6">
+                <h3 className="font-semibold mb-3">How much can I earn?</h3>
+                <p className="text-muted-foreground">
+                  There's no limit to your earnings. You earn 50% of everything your referred customers spend. Top affiliates earn $5,000+ per month.
+                </p>
+              </Card>
+
+              <Card className="p-6">
+                <h3 className="font-semibold mb-3">When do I get paid?</h3>
+                <p className="text-muted-foreground">
+                  Payments are processed monthly when your balance reaches $100. We support PayPal, bank transfers, and cryptocurrency.
+                </p>
+              </Card>
+
+              <Card className="p-6">
+                <h3 className="font-semibold mb-3">How long do referrals last?</h3>
+                <p className="text-muted-foreground">
+                  Forever! Once someone signs up through your link, they're permanently tied to your account. You earn from all their future purchases.
+                </p>
+              </Card>
+
+              <Card className="p-6">
+                <h3 className="font-semibold mb-3">Do I need technical skills?</h3>
+                <p className="text-muted-foreground">
+                  Not at all! We provide you with ready-to-use links, banners, and marketing materials. Just share and start earning.
+                </p>
+              </Card>
+
+              <Card className="p-6">
+                <h3 className="font-semibold mb-3">What marketing materials do you provide?</h3>
+                <p className="text-muted-foreground">
+                  We provide banners, email templates, landing pages, and social media content. Plus detailed analytics to track performance.
+                </p>
+              </Card>
+
+              <Card className="p-6">
+                <h3 className="font-semibold mb-3">Can I promote on social media?</h3>
+                <p className="text-muted-foreground">
+                  Absolutely! Share on Facebook, Twitter, LinkedIn, YouTube, or any platform. We encourage honest, value-driven promotion.
+                </p>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Success Stories */}
+        <section className="py-24 px-6 bg-muted/30">
+          <div className="container mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-light mb-6 tracking-tight">Success Stories</h2>
+              <p className="text-xl text-muted-foreground">
+                See what our top-performing affiliates are saying
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <Card className="p-6 text-center">
+                <div className="text-3xl font-bold text-primary mb-2">$8,400</div>
+                <div className="text-sm text-muted-foreground mb-4">Monthly earnings</div>
+                <p className="text-muted-foreground italic mb-4">
+                  "I started promoting Backlink ∞ to my SEO clients and now earn more from referrals than my consulting work!"
+                </p>
+                <div className="font-medium">Sarah K.</div>
+                <div className="text-sm text-muted-foreground">SEO Consultant</div>
+              </Card>
+
+              <Card className="p-6 text-center">
+                <div className="text-3xl font-bold text-primary mb-2">$3,200</div>
+                <div className="text-sm text-muted-foreground mb-4">First month earnings</div>
+                <p className="text-muted-foreground italic mb-4">
+                  "The 50% commission rate is incredible. I shared with my email list and earned $3,200 in my first month."
+                </p>
+                <div className="font-medium">Mike R.</div>
+                <div className="text-sm text-muted-foreground">Digital Marketer</div>
+              </Card>
+
+              <Card className="p-6 text-center">
+                <div className="text-3xl font-bold text-primary mb-2">$12,000</div>
+                <div className="text-sm text-muted-foreground mb-4">Best month so far</div>
+                <p className="text-muted-foreground italic mb-4">
+                  "The lifetime value is amazing. Customers I referred 6 months ago are still generating commissions!"
+                </p>
+                <div className="font-medium">Alex M.</div>
+                <div className="text-sm text-muted-foreground">Agency Owner</div>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Final CTA */}
         <section className="py-24 px-6">
           <div className="container mx-auto text-center">
-            <h2 className="text-4xl font-light mb-6 tracking-tight">
-              Ready to Start Earning?
-            </h2>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Join thousands of affiliates earning substantial commissions with our program.
-            </p>
-            <Button size="lg" onClick={() => navigate("/login")} className="text-lg px-8 py-6">
-              Get Started Today
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <div className="bg-gradient-to-br from-primary/10 to-blue-50 rounded-3xl p-12 max-w-4xl mx-auto">
+              <h2 className="text-4xl font-light mb-6 tracking-tight">
+                Ready to Start Earning?
+              </h2>
+              <p className="text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
+                Join thousands of marketers earning substantial commissions with our industry-leading affiliate program.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+                <Button size="lg" onClick={() => navigate("/login")} className="text-lg px-8 py-6">
+                  Start Earning Today - Free
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+                <div className="text-sm text-muted-foreground">
+                  ✓ No cost to join ✓ Instant approval ✓ Start earning immediately
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-8 max-w-md mx-auto text-center">
+                <div>
+                  <div className="text-2xl font-bold text-primary mb-1">50%</div>
+                  <div className="text-sm text-muted-foreground">Commission</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-primary mb-1">∞</div>
+                  <div className="text-sm text-muted-foreground">Lifetime Value</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-primary mb-1">$0</div>
+                  <div className="text-sm text-muted-foreground">Join Cost</div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </div>
