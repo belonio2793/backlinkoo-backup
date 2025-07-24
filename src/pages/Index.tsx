@@ -415,9 +415,50 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Community */}
+          {/* Backlink Verification */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
+              <Badge variant="outline" className="mb-6 bg-green-50 text-green-600 border-green-200 font-mono text-xs">
+                VERIFICATION TOOL
+              </Badge>
+              <h2 className="text-4xl font-light mb-6 tracking-tight">Link Verification Reports</h2>
+              <p className="text-xl text-muted-foreground mb-8 leading-relaxed font-light">
+                Generate professional backlink verification reports for clients with domain authority metrics and anchor text analysis.
+              </p>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-primary" />
+                  <span className="font-light">Anchor text verification</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-primary" />
+                  <span className="font-light">Domain & page authority metrics</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-primary" />
+                  <span className="font-light">Public shareable reports</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-primary" />
+                  <span className="font-light">Client-ready presentation</span>
+                </li>
+              </ul>
+              <Button onClick={() => navigate("/backlink-report")} className="font-medium">
+                Create Report
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+            <div className="bg-gradient-to-br from-green-500/5 to-primary/5 p-12 rounded-2xl">
+              <BarChart3 className="h-32 w-32 text-primary mx-auto" />
+            </div>
+          </div>
+
+          {/* Community */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="bg-gradient-to-br from-pink-500/5 to-primary/5 p-12 rounded-2xl order-2 lg:order-1">
+              <Users className="h-32 w-32 text-primary mx-auto" />
+            </div>
+            <div className="order-1 lg:order-2">
               <Badge variant="outline" className="mb-6 bg-pink-50 text-pink-600 border-pink-200 font-mono text-xs">
                 GLOBAL NETWORK
               </Badge>
