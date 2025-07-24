@@ -26,7 +26,7 @@ import {
   Settings,
   CreditCard,
   Crown,
-  User,
+  User as UserIcon,
   Mail,
   Phone,
   MapPin,
