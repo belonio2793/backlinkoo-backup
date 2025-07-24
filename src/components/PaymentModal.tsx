@@ -36,31 +36,10 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
     ]
   };
 
-  // Calculate total amount based on credits
-  const calculateAmount = (creditCount: string) => {
-    const numCredits = parseFloat(creditCount) || 0;
-    return (numCredits * CREDIT_PRICE).toFixed(2);
-  };
-
-  // Update amount when credits change
-  const handleCreditsChange = (newCredits: string) => {
-    setCredits(newCredits);
-    setAmount(calculateAmount(newCredits));
-  };
-
-  const handlePayment = async () => {
-    if (!credits || parseFloat(credits) <= 0) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid number of credits",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleSubscription = async () => {
     if (isGuest && !guestEmail) {
       toast({
-        title: "Error", 
+        title: "Error",
         description: "Email is required for guest checkout",
         variant: "destructive",
       });
@@ -70,53 +49,10 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {
-          amount: parseFloat(amount),
-          productName: `${credits} Backlink Credits`,
-          isGuest,
-          guestEmail: isGuest ? guestEmail : undefined,
-          paymentMethod
-        }
-      });
-
-      if (error) throw error;
-
-      if (data.url) {
-        window.open(data.url, '_blank');
-        onClose();
-      }
-    } catch (error) {
-      console.error('Payment error:', error);
-      toast({
-        title: "Payment Error",
-        description: "Failed to create payment session",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubscription = async () => {
-    if (isGuest && !guestEmail) {
-      toast({
-        title: "Error",
-        description: "Email is required for guest checkout", 
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const plan = subscriptionPlans[subscriptionTier as keyof typeof subscriptionPlans];
-      
       const { data, error } = await supabase.functions.invoke('create-subscription', {
         body: {
-          priceId: plan.priceId,
-          tier: subscriptionTier,
+          priceId: subscriptionPlan.priceId,
+          tier: "premium_seo_tools",
           isGuest,
           guestEmail: isGuest ? guestEmail : undefined
         }
