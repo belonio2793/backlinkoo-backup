@@ -139,6 +139,17 @@ CREATE POLICY "Affiliates can create payment requests" ON affiliate_payments
         )
     );
 
+-- RLS Policies for affiliate_clicks
+CREATE POLICY "Affiliates can view their own clicks" ON affiliate_clicks
+    FOR SELECT USING (
+        affiliate_id IN (
+            SELECT id FROM affiliate_programs WHERE user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "System can create click records" ON affiliate_clicks
+    FOR INSERT WITH CHECK (true);
+
 -- Admin policies (for users with admin role)
 CREATE POLICY "Admins can view all affiliate programs" ON affiliate_programs
     FOR ALL USING (
