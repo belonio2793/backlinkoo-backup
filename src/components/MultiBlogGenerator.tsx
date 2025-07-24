@@ -685,27 +685,27 @@ export function MultiBlogGenerator({
           </div>
 
           {/* Registration CTA */}
-          <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+          <div className="p-6 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
             <div className="text-center space-y-3">
-              <h4 className="text-lg font-semibold text-blue-800">
-                🎉 Amazing! You Just Got 5 Free Backlink Posts!
+              <h4 className="text-lg font-semibold text-red-800">
+                ⚠️ These 5 Backlinks Will Auto-Delete in 24 Hours!
               </h4>
-              <p className="text-blue-700">
-                Each post above contains live backlinks to your website. Click "View Live Post" on any of them to see your backlinks in action!
-                Register now to keep these backlinks forever and create unlimited campaigns.
+              <p className="text-red-700">
+                Each post above contains live backlinks to your website and is building SEO value right now!
+                But they will automatically delete in 24 hours unless you create an account to keep them forever.
               </p>
-              <div className="flex items-center justify-center gap-6 text-sm text-blue-600 mt-4">
+              <div className="flex items-center justify-center gap-6 text-sm text-red-600 mt-4">
                 <div className="flex items-center gap-1">
                   <CheckCircle className="h-4 w-4" />
-                  <span>Live Backlinks Active</span>
+                  <span>Live & Active Now</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <CheckCircle className="h-4 w-4" />
-                  <span>SEO Value Building</span>
+                  <span>Building SEO Value</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <CheckCircle className="h-4 w-4" />
-                  <span>Free Trial Active</span>
+                  <span>24hr Timer Started</span>
                 </div>
               </div>
             </div>
