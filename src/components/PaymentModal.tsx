@@ -28,30 +28,19 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Update state when initialCredits prop changes or modal opens
+  // Update state when modal opens or initialCredits changes
   useEffect(() => {
-    console.log('PaymentModal useEffect - isOpen:', isOpen, 'initialCredits:', initialCredits);
-    if (isOpen && initialCredits && initialCredits > 0) {
-      console.log('Setting credits to:', initialCredits, 'amount to:', (initialCredits * CREDIT_PRICE).toFixed(2));
-      setCredits(initialCredits.toString());
-      setAmount((initialCredits * CREDIT_PRICE).toFixed(2));
-    } else if (isOpen && !initialCredits) {
-      // Reset to empty if no initial credits provided
-      console.log('Resetting credits and amount to empty');
-      setCredits("");
-      setAmount("");
+    if (isOpen) {
+      if (initialCredits && initialCredits > 0) {
+        setCredits(initialCredits.toString());
+        setAmount((initialCredits * CREDIT_PRICE).toFixed(2));
+      } else {
+        // Reset for new payment if no initial credits
+        setCredits("");
+        setAmount("");
+      }
     }
-  }, [initialCredits, isOpen]);
-
-  // Additional effect to handle prop changes when modal is already open
-  useEffect(() => {
-    console.log('PaymentModal second useEffect - initialCredits:', initialCredits);
-    if (initialCredits && initialCredits > 0) {
-      console.log('Setting credits to:', initialCredits, 'amount to:', (initialCredits * CREDIT_PRICE).toFixed(2));
-      setCredits(initialCredits.toString());
-      setAmount((initialCredits * CREDIT_PRICE).toFixed(2));
-    }
-  }, [initialCredits]);
+  }, [isOpen, initialCredits]);
 
   const subscriptionPlans = {
     "keyword-research": { price: 29.99, priceId: "price_keyword_research", name: "Keyword Research Tool" },
