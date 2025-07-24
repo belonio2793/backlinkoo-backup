@@ -361,21 +361,6 @@ export default function ReportViewer() {
           </div>
         </div>
 
-        {/* Link Finder */}
-        <div className="mb-8 p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Search & Filter</h3>
-          <input
-            type="text"
-            placeholder="Search URLs or anchor text..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full p-3 border border-gray-300 bg-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-          />
-          <div className="mt-3 text-sm text-gray-600">
-            Showing <span className="font-medium">{filteredResults.length}</span> of <span className="font-medium">{reportData.totalBacklinks}</span> URLs
-          </div>
-        </div>
-
         {/* Results Table */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
           <div className="bg-gray-50 p-4 border-b border-gray-200">
