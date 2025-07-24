@@ -43,10 +43,7 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
   }, [isOpen, initialCredits]);
 
   const subscriptionPlans = {
-    "keyword-research": { price: 29.99, priceId: "price_keyword_research", name: "Keyword Research Tool" },
-    "rank-tracker": { price: 39.99, priceId: "price_rank_tracker", name: "Search Engine Rank Tracker" },
-    "seo-competition": { price: 49.99, priceId: "price_seo_competition", name: "SEO Competition Tool" },
-    "indexing-service": { price: 19.99, priceId: "price_indexing_service", name: "Indexing Service" }
+    "premium-seo-tools": { price: 29, priceId: "price_premium_seo_tools", name: "Premium SEO Tools" }
   };
 
   // Calculate total amount based on credits
