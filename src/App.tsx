@@ -20,6 +20,7 @@ import EmailMarketing from "./pages/EmailMarketing";
 import BacklinkReport from "./pages/BacklinkReport";
 import ReportViewer from "./pages/ReportViewer";
 import NoHandsSEO from "./pages/NoHandsSEO";
+import AffiliateProgram from "./pages/AffiliateProgram";
 
 const queryClient = new QueryClient();
 
