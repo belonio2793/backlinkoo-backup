@@ -267,9 +267,9 @@ export function MultiBlogGenerator({
         const uniqueSlug = `${generatedContent.slug}-${Date.now()}-${index}`;
         const previewUrl = `${window.location.origin}/preview/${uniqueSlug}`;
 
-        // Store in live blog publisher
+        // Store in live blog publisher using slug as key for preview access
         const blogPost = {
-          id: `live_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          id: uniqueSlug,
           slug: uniqueSlug,
           title: generatedContent.title,
           content: generatedContent.content,
@@ -288,8 +288,9 @@ export function MultiBlogGenerator({
           contextualLinks: generatedContent.contextualLinks
         };
 
+        // Store by slug so BlogPreview can find it
         if (liveBlogPublisher.inMemoryPosts) {
-          liveBlogPublisher.inMemoryPosts.set(blogPost.id, blogPost);
+          liveBlogPublisher.inMemoryPosts.set(uniqueSlug, blogPost);
         }
 
         currentPost = {
