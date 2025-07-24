@@ -110,19 +110,33 @@ export const RankingTracker = () => {
   const loadSavedTargets = async () => {
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        console.log('No authenticated user found');
+      if (authError) {
+        console.error('Authentication error:', authError);
         setSavedTargets([]);
+        setIsLoadingSaved(false);
         return;
       }
 
-      const { data, error } = await supabase
+      if (!user) {
+        console.log('No authenticated user found');
+        setSavedTargets([]);
+        setIsLoadingSaved(false);
+        return;
+      }
+
+      const query = supabase
         .from('ranking_dashboard')
         .select('*')
-        .eq('user_id', user.id)
-        .order('target_created_at', { ascending: false });
+        .eq('user_id', user.id);
 
-      if (error) throw error;
+      // Add ordering if the column exists, otherwise use a fallback
+      const { data, error } = await query.order('target_created_at', { ascending: false });
+
+      if (error) {
+        console.error('Supabase query error:', error);
+        throw error;
+      }
+
       setSavedTargets(data || []);
     } catch (error) {
       console.error('Error loading saved targets:', error);
@@ -131,6 +145,7 @@ export const RankingTracker = () => {
         description: "Failed to load saved ranking targets",
         variant: "destructive",
       });
+      setSavedTargets([]);
     } finally {
       setIsLoadingSaved(false);
     }
