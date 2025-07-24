@@ -88,16 +88,22 @@ export default function ReportViewer() {
 
     return {
       id: reportId,
-      campaignName: `Demo Report ${reportId}`,
+      campaignName: reportId === 'demo_preview_12345' ? 'High Authority Media Campaign' : `Demo Report ${reportId}`,
       backlinks: backlinks,
       createdAt: new Date().toISOString(),
       totalBacklinks: backlinks.length,
-      results: backlinks.map(bl => ({
+      results: backlinks.map((bl, index) => ({
         ...bl,
-        status: Math.random() > 0.3 ? 'found' : 'not_found',
-        domainAuthority: Math.floor(Math.random() * 40) + 40,
-        pageAuthority: Math.floor(Math.random() * 50) + 20,
-        responseTime: Math.floor(Math.random() * 2000) + 500,
+        status: reportId === 'demo_preview_12345' ?
+          (index < 8 ? 'found' : 'not_found') : // First 8 found for preview
+          (Math.random() > 0.3 ? 'found' : 'not_found'),
+        domainAuthority: reportId === 'demo_preview_12345' ?
+          [85, 90, 88, 82, 87, 91, 89, 86, 84, 83][index] || 80 : // High DA for preview
+          Math.floor(Math.random() * 40) + 40,
+        pageAuthority: reportId === 'demo_preview_12345' ?
+          [75, 80, 78, 72, 77, 81, 79, 76, 74, 73][index] || 70 : // High PA for preview
+          Math.floor(Math.random() * 50) + 20,
+        responseTime: Math.floor(Math.random() * 1000) + 300,
         lastChecked: new Date().toISOString()
       }))
     };
