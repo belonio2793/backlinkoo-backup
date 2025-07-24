@@ -20,15 +20,15 @@ export default function BacklinkReport() {
   const parseUrls = (text: string): BacklinkEntry[] => {
     const lines = text.split('\n').filter(line => line.trim());
     const backlinks: BacklinkEntry[] = [];
-    
+
     lines.forEach((line, index) => {
-      const parts = line.split('\t').map(p => p.trim());
-      if (parts.length >= 3) {
+      const url = line.trim();
+      if (url && url.startsWith('http')) {
         backlinks.push({
           id: `entry_${Date.now()}_${index}`,
-          sourceUrl: parts[0] || '',
-          targetUrl: parts[1] || '',
-          anchorText: parts[2] || ''
+          sourceUrl: url,
+          targetUrl: '', // Will be determined during verification
+          anchorText: '' // Will be found during verification
         });
       }
     });
@@ -41,8 +41,17 @@ export default function BacklinkReport() {
 
     if (backlinks.length === 0) {
       toast({
-        title: 'No Valid Backlinks',
-        description: 'Please add backlink data in the correct format.',
+        title: 'No Valid URLs',
+        description: 'Please add URLs in the correct format.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (backlinks.length > 10000) {
+      toast({
+        title: 'Too Many URLs',
+        description: 'Maximum 10,000 URLs allowed per report.',
         variant: 'destructive'
       });
       return;
@@ -127,29 +136,30 @@ export default function BacklinkReport() {
         <div className="mb-6 p-4 bg-gray-50 border border-gray-300">
           <h2 className="font-bold mb-2">Instructions:</h2>
           <p className="text-sm text-gray-700 mb-2">
-            Paste your backlink data in the format below (tab-separated):
+            Paste your list of URLs and click generate report.
           </p>
           <pre className="text-xs bg-white p-2 border border-gray-200 text-gray-600">
-{`source_url	target_url	anchor_text
-https://example.com/page1	https://yoursite.com	best SEO services
-https://another.com/blog	https://yoursite.com/about	top marketing agency`}
+{`https://example.com/page1
+https://another.com/blog
+https://website.com/article
+https://domain.com/content`}
           </pre>
         </div>
 
         {/* Input Area */}
         <div className="mb-6">
           <label className="block font-bold mb-2">
-            Backlink Data:
+            URL List:
           </label>
           <textarea
             value={urlList}
             onChange={(e) => setUrlList(e.target.value)}
-            placeholder="Paste your backlink data here (tab-separated format)..."
+            placeholder="Paste your URLs here (one per line)...\nhttps://example.com/page1\nhttps://another.com/blog\nhttps://website.com/article"
             className="w-full h-64 p-4 border border-gray-300 bg-white text-black font-mono text-sm resize-none focus:outline-none focus:border-gray-500"
             spellCheck={false}
           />
           <div className="mt-2 text-sm text-gray-600">
-            {parseUrls(urlList).length} backlinks detected
+            {parseUrls(urlList).length} URLs detected (max 10,000)
           </div>
         </div>
 
