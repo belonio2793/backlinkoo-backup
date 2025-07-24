@@ -16,15 +16,9 @@ interface PaymentModalProps {
 }
 
 export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalProps) => {
-  const CREDIT_PRICE = 0.70;
-  
-  const [paymentType, setPaymentType] = useState<"payment" | "subscription">("payment");
   const [paymentMethod, setPaymentMethod] = useState<"stripe" | "paypal">("stripe");
   const [isGuest, setIsGuest] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
-  const [amount, setAmount] = useState(() => initialCredits ? (initialCredits * CREDIT_PRICE).toFixed(2) : "");
-  const [credits, setCredits] = useState(() => initialCredits ? initialCredits.toString() : "");
-  const [subscriptionTier, setSubscriptionTier] = useState("keyword-research");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
