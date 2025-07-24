@@ -114,31 +114,34 @@ export default function BacklinkReport() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black font-mono">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white text-gray-900">
       {/* Header */}
-      <div className="border-b border-gray-300 bg-gray-50 p-4">
-        <div className="max-w-4xl mx-auto">
+      <div className="border-b border-gray-200 bg-white shadow-sm p-6">
+        <div className="max-w-5xl mx-auto">
           <button
             onClick={() => navigate('/')}
-            className="text-blue-600 hover:underline mb-2 block"
+            className="inline-flex items-center text-primary hover:text-primary/80 transition-colors mb-4 text-sm font-medium"
           >
-            ← Back to Home
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Home
           </button>
-          <h1 className="text-2xl font-bold">Backlink Reporting</h1>
-          <p className="text-gray-600 mt-1">
-            Generate verification reports for backlink campaigns
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Backlink Reporting</h1>
+          <p className="text-gray-600 text-lg">
+            Generate professional verification reports for backlink campaigns
           </p>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="max-w-5xl mx-auto p-8">
         {/* Instructions */}
-        <div className="mb-6 p-4 bg-gray-50 border border-gray-300">
-          <h2 className="font-bold mb-2">Instructions:</h2>
-          <p className="text-sm text-gray-700 mb-2">
-            Paste your list of URLs and click generate report.
+        <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-xl">
+          <h2 className="text-lg font-semibold text-blue-900 mb-3">Instructions</h2>
+          <p className="text-blue-800 mb-4">
+            Paste your list of URLs below and click generate report to create a professional verification report.
           </p>
-          <pre className="text-xs bg-white p-2 border border-gray-200 text-gray-600">
+          <pre className="text-sm bg-white p-4 border border-blue-200 text-gray-700 rounded-lg">
 {`https://example.com/page1
 https://another.com/blog
 https://website.com/article
@@ -147,56 +150,84 @@ https://domain.com/content`}
         </div>
 
         {/* Input Area */}
-        <div className="mb-6">
-          <label className="block font-bold mb-2">
-            URL List:
+        <div className="mb-8">
+          <label className="block text-lg font-semibold text-gray-900 mb-3">
+            URL List
           </label>
           <textarea
             value={urlList}
             onChange={(e) => setUrlList(e.target.value)}
             placeholder="Paste your URLs here (one per line)..."
-            className="w-full h-64 p-4 border border-gray-300 bg-white text-black font-mono text-sm resize-none focus:outline-none focus:border-gray-500"
+            className="w-full h-64 p-4 border border-gray-300 bg-white text-gray-900 text-sm resize-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
             spellCheck={false}
           />
-          <div className="mt-2 text-sm text-gray-600">
-            {parseUrls(urlList).length} URLs detected (max 10,000)
+          <div className="mt-3 flex items-center justify-between">
+            <div className="text-sm text-gray-600">
+              <span className="font-medium">{parseUrls(urlList).length}</span> URLs detected (max 10,000)
+            </div>
+            {parseUrls(urlList).length > 0 && (
+              <div className="text-xs text-green-600 font-medium">
+                ✓ Ready to generate
+              </div>
+            )}
           </div>
         </div>
 
         {/* Generate Button */}
-        <div className="mb-6">
+        <div className="mb-8">
           <button
             onClick={generateReport}
             disabled={isGenerating || !urlList.trim()}
-            className="px-6 py-3 bg-black text-white font-bold border border-black hover:bg-gray-800 disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-300"
+            className="inline-flex items-center px-8 py-4 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 disabled:bg-gray-300 disabled:text-gray-500 transition-colors text-lg shadow-md"
           >
-            {isGenerating ? 'Generating Report...' : 'Generate Report'}
+            {isGenerating ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Generating Report...
+              </>
+            ) : (
+              'Generate Report'
+            )}
           </button>
         </div>
 
         {/* Report URL */}
         {reportUrl && (
-          <div className="mb-6 p-4 bg-gray-50 border border-gray-300">
-            <h3 className="font-bold mb-2">Report Generated:</h3>
-            <div className="mb-3">
+          <div className="mb-8 p-6 bg-green-50 border border-green-200 rounded-xl">
+            <div className="flex items-center mb-4">
+              <svg className="w-6 h-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 className="text-lg font-semibold text-green-900">Report Generated Successfully!</h3>
+            </div>
+            <div className="mb-4">
               <input
                 type="text"
                 value={reportUrl}
                 readOnly
-                className="w-full p-2 border border-gray-300 bg-white font-mono text-sm"
+                className="w-full p-3 border border-green-300 bg-white text-sm rounded-lg focus:outline-none"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <button
                 onClick={copyReportUrl}
-                className="px-4 py-2 bg-gray-200 text-black border border-gray-300 hover:bg-gray-300"
+                className="inline-flex items-center px-4 py-2 bg-white text-green-700 border border-green-300 hover:bg-green-50 rounded-lg transition-colors font-medium"
               >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
                 Copy URL
               </button>
               <button
                 onClick={() => window.open(reportUrl, '_blank')}
-                className="px-4 py-2 bg-black text-white border border-black hover:bg-gray-800"
+                className="inline-flex items-center px-4 py-2 bg-primary text-white hover:bg-primary/90 rounded-lg transition-colors font-medium"
               >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
                 View Report
               </button>
             </div>
@@ -204,11 +235,19 @@ https://domain.com/content`}
         )}
 
         {/* Footer Note */}
-        <div className="mt-8 p-4 bg-gray-50 border border-gray-300 text-sm text-gray-600">
-          <p>
-            Reports are generated instantly and can be shared publicly. 
-            No registration required for basic reporting functionality.
-          </p>
+        <div className="mt-12 p-6 bg-gray-50 border border-gray-200 rounded-xl">
+          <div className="flex items-start">
+            <svg className="w-5 h-5 text-blue-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-1">Important Information</h4>
+              <p className="text-gray-600">
+                Reports are generated instantly and can be shared publicly.
+                No registration required for basic reporting functionality.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
