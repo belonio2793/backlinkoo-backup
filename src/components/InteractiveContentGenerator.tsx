@@ -493,8 +493,8 @@ export function InteractiveContentGenerator({
               Generate Different Version
             </Button>
             
-            <Button 
-              onClick={() => window.open(`/preview/${Date.now()}-preview`, '_blank')}
+            <Button
+              onClick={() => setShowEnhancedPreview(true)}
               variant="outline"
               className="flex-1"
             >
