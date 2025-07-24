@@ -172,8 +172,17 @@ CREATE POLICY "Admins can view all affiliate referrals" ON affiliate_referrals
 CREATE POLICY "Admins can manage all affiliate payments" ON affiliate_payments
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE profiles.user_id = auth.uid() 
+            SELECT 1 FROM profiles
+            WHERE profiles.user_id = auth.uid()
+            AND profiles.role = 'admin'
+        )
+    );
+
+CREATE POLICY "Admins can view all affiliate clicks" ON affiliate_clicks
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE profiles.user_id = auth.uid()
             AND profiles.role = 'admin'
         )
     );
