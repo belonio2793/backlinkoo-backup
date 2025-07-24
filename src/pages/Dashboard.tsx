@@ -550,11 +550,12 @@ const Dashboard = () => {
                 />
               ) : (
                 <>
-                  <div className="flex justify-between items-center">
-                    <h2 className="text-2xl font-bold">Campaign Management</h2>
-                    <Button onClick={() => setShowCampaignForm(true)}>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                    <h2 className="text-xl sm:text-2xl font-bold">Campaign Management</h2>
+                    <Button onClick={() => setShowCampaignForm(true)} className="w-full sm:w-auto">
                       <Plus className="h-4 w-4 mr-2" />
-                      New Campaign
+                      <span className="hidden sm:inline">New Campaign</span>
+                      <span className="sm:hidden">New</span>
                     </Button>
                   </div>
                   
