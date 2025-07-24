@@ -154,7 +154,7 @@ https://domain.com/content`}
           <textarea
             value={urlList}
             onChange={(e) => setUrlList(e.target.value)}
-            placeholder="Paste your URLs here (one per line)...\nhttps://example.com/page1\nhttps://another.com/blog\nhttps://website.com/article"
+            placeholder="Paste your URLs here (one per line)..."
             className="w-full h-64 p-4 border border-gray-300 bg-white text-black font-mono text-sm resize-none focus:outline-none focus:border-gray-500"
             spellCheck={false}
           />
