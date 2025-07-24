@@ -94,6 +94,7 @@ CREATE TRIGGER update_affiliate_payments_updated_at
 ALTER TABLE affiliate_programs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE affiliate_referrals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE affiliate_payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE affiliate_clicks ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for affiliate_programs
 CREATE POLICY "Users can view their own affiliate programs" ON affiliate_programs
