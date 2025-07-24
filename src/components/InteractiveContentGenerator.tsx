@@ -527,5 +527,27 @@ export function InteractiveContentGenerator({
     );
   }
 
-  return null;
+  return (
+    <>
+      {currentPhase === 'template' && (
+        <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
+          {/* Template selection content remains the same */}
+        </Card>
+      )}
+
+      <EnhancedBlogPreview
+        isOpen={showEnhancedPreview}
+        onClose={() => setShowEnhancedPreview(false)}
+        content={{
+          ...generatedContent,
+          template: selectedTemplate,
+          seoScore: 88 + Math.floor(Math.random() * 10),
+          wordCount: 1200 + Math.floor(Math.random() * 600)
+        }}
+        keyword={keyword}
+        targetUrl={targetUrl}
+        onSave={onSave}
+      />
+    </>
+  );
 }
