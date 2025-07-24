@@ -74,6 +74,9 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("no-hands-seo");
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [isCancellingSubscription, setIsCancellingSubscription] = useState(false);
+  const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
