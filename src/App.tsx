@@ -48,6 +48,7 @@ const App = () => (
           <Route path="/backlink-report" element={<BacklinkReport />} />
           <Route path="/report/:reportId" element={<ReportViewer />} />
           <Route path="/no-hands-seo" element={<NoHandsSEO />} />
+          <Route path="/affiliate" element={<AffiliateProgram />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
