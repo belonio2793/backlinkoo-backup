@@ -622,16 +622,16 @@ const Index = () => {
             Join the professionals who trust Backlink ∞ for their most important SEO campaigns. 
             Start with our risk-free guarantee today.
           </p>
-          <div className="flex flex-colrı sm:flex-row items-center justify-center gap-6">
-            <Button 
-              size="lg" 
-              className="text-lg px-10 py-6 font-medium" 
+          <div className="flex flex-col items-center justify-center gap-4">
+            <Button
+              size="lg"
+              className="text-lg px-10 py-6 font-medium"
               onClick={() => handleGetStarted('starter_200')}
             >
               Start Your Campaign
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <div className="text-sm text-gray-500 font-light">
+            <div className="text-sm text-gray-500 font-light text-center">
               Money-back guarantee • No setup fees • Cancel anytime
             </div>
           </div>
