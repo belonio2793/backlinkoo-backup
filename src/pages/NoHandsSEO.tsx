@@ -35,7 +35,6 @@ const NoHandsSEO = () => {
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const [campaignNotes, setCampaignNotes] = useState("");
   const [showVerificationSuccess, setShowVerificationSuccess] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   // Check for authenticated user on component mount
   useEffect(() => {
