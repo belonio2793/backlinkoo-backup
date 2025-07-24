@@ -70,12 +70,17 @@ const NoHandsSEODashboard = () => {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) return;
 
-      const { data: campaignsData, error } = await supabase
+      // Build query step by step to avoid chaining issues
+      let query = supabase
         .from('campaigns')
         .select('*')
-        .eq('user_id', user.id)
-        .or('name.ilike.%NO Hands SEO%,campaign_type.eq.no_hands_seo')
-        .order('created_at', { ascending: false });
+        .eq('user_id', user.id);
+
+      // Filter for NO Hands SEO campaigns
+      query = query.or('name.ilike.%NO Hands SEO%,campaign_type.eq.no_hands_seo');
+
+      // Order by created_at
+      const { data: campaignsData, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching NO Hands SEO campaigns:', error);
