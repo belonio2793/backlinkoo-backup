@@ -87,11 +87,18 @@ export default function ReportViewer() {
       anchorText: ''
     }));
 
+    const createdDate = new Date();
+    const formattedDate = createdDate.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
     return {
       id: reportId,
-      campaignName: reportId === 'demo_preview_12345' ? 'High Authority Media Campaign' : `Demo Report ${reportId}`,
+      campaignName: `Report Generated ${formattedDate}`,
       backlinks: backlinks,
-      createdAt: new Date().toISOString(),
+      createdAt: createdDate.toISOString(),
       totalBacklinks: backlinks.length,
       results: backlinks.map((bl, index) => ({
         ...bl,
