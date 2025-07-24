@@ -16,6 +16,7 @@ import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { CampaignDeliverables } from "./pages/CampaignDeliverables";
 import BlogPreview from "./pages/BlogPreview";
+import EmailMarketing from "./pages/EmailMarketing";
 
 const queryClient = new QueryClient();
 
