@@ -70,33 +70,55 @@ export function MultiBlogGenerator({
   const [codeStreamLines, setCodeStreamLines] = useState<string[]>([]);
   const [aiThoughts, setAiThoughts] = useState<string[]>([]);
 
-  const experts = [
-    {
-      name: "Dr. Sarah Chen",
-      expertise: "SEO Strategy & Content Optimization",
-      avatar: "👩‍💼"
-    },
-    {
-      name: "Michael Rodriguez",
-      expertise: "Technical Writing & Analysis",
-      avatar: "👨‍💻"
-    },
-    {
-      name: "Emma Thompson",
-      expertise: "Industry Research & Insights",
-      avatar: "👩‍🔬"
-    },
-    {
-      name: "David Kim",
-      expertise: "Business Strategy & Marketing",
-      avatar: "👨‍💼"
-    },
-    {
-      name: "Lisa Wang",
-      expertise: "Content Creation & Storytelling",
-      avatar: "👩‍🎨"
-    }
-  ];
+  // Generate random expert names each time
+  const generateRandomExperts = () => {
+    const firstNames = [
+      "Sarah", "Michael", "Emma", "David", "Lisa", "James", "Maria", "Alex", "Jessica", "Ryan",
+      "Amanda", "Christopher", "Nicole", "Daniel", "Ashley", "Matthew", "Rachel", "Andrew", "Jennifer", "Kevin",
+      "Samantha", "Brandon", "Natalie", "Jason", "Michelle", "Tyler", "Rebecca", "Eric", "Laura", "Jacob",
+      "Stephanie", "Nathan", "Amy", "Brian", "Melissa", "Jonathan", "Kimberly", "Anthony", "Angela", "Justin"
+    ];
+
+    const lastNames = [
+      "Chen", "Rodriguez", "Thompson", "Kim", "Wang", "Johnson", "Williams", "Brown", "Davis", "Miller",
+      "Wilson", "Moore", "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Garcia",
+      "Martinez", "Robinson", "Clark", "Lewis", "Lee", "Walker", "Hall", "Allen", "Young", "Hernandez",
+      "King", "Wright", "Lopez", "Hill", "Scott", "Green", "Adams", "Baker", "Gonzalez", "Nelson"
+    ];
+
+    const titles = ["Dr.", "Prof.", "", "", "", "Ms.", "Mr.", "", "", ""];
+    const avatars = ["👩‍💼", "👨‍💻", "👩‍🔬", "👨‍💼", "👩‍🎨", "👨‍🔬", "👩‍💻", "👨‍🎨", "👩‍🏫", "👨‍🏫"];
+
+    const expertises = [
+      "SEO Strategy & Content Optimization",
+      "Technical Writing & Analysis",
+      "Industry Research & Insights",
+      "Business Strategy & Marketing",
+      "Content Creation & Storytelling",
+      "Digital Marketing & Analytics",
+      "Content Strategy & Planning",
+      "Market Research & Analysis",
+      "Creative Writing & Branding",
+      "Performance Marketing & Growth"
+    ];
+
+    const shuffledExpertises = [...expertises].sort(() => Math.random() - 0.5);
+
+    return Array.from({ length: 5 }, (_, index) => {
+      const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+      const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+      const title = titles[Math.floor(Math.random() * titles.length)];
+      const fullName = title ? `${title} ${firstName} ${lastName}` : `${firstName} ${lastName}`;
+
+      return {
+        name: fullName,
+        expertise: shuffledExpertises[index],
+        avatar: avatars[Math.floor(Math.random() * avatars.length)]
+      };
+    });
+  };
+
+  const experts = generateRandomExperts();
 
   const generationSteps = [
     "Analyzing keyword intent and market positioning",
