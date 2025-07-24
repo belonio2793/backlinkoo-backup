@@ -390,10 +390,10 @@ export function MultiBlogGenerator({
             <div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500">
               <Cpu className="h-6 w-6 text-white animate-pulse" />
             </div>
-            <CardTitle className="text-2xl font-semibold">AI System Initialization</CardTitle>
+            <CardTitle className="text-2xl font-semibold">Backlink ∞ Is Working</CardTitle>
           </div>
           <p className="text-muted-foreground">
-            Preparing advanced AI systems for simultaneous blog generation...
+            Our advanced backlink generation system is preparing your 5-post campaign...
           </p>
         </CardHeader>
         
