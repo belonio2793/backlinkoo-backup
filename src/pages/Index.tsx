@@ -566,15 +566,12 @@ const Index = () => {
                     type="number"
                     min="1"
                     max="10000"
+                    value={customCredits || ''}
                     placeholder="Enter credits (min: 1)"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors text-center text-lg font-semibold"
                     onChange={(e) => {
                       const credits = parseInt(e.target.value) || 0;
-                      const price = credits * 0.70;
-                      const priceDisplay = document.getElementById('custom-price');
-                      if (priceDisplay) {
-                        priceDisplay.textContent = credits > 0 ? `$${price.toFixed(2)}` : '$0.00';
-                      }
+                      setCustomCredits(credits);
                     }}
                   />
                 </div>
@@ -582,7 +579,7 @@ const Index = () => {
                 <div className="text-center">
                   <div className="text-3xl font-semibold text-gray-900 mb-2">
                     <span className="text-xl font-mono">Total: </span>
-                    <span id="custom-price">$0.00</span>
+                    <span>${customCredits > 0 ? (customCredits * 0.70).toFixed(2) : '0.00'}</span>
                   </div>
                   <div className="text-sm text-gray-500 font-mono">
                     $0.70 per credit
@@ -591,15 +588,16 @@ const Index = () => {
 
                 <Button
                   className="w-full font-medium bg-primary text-white hover:bg-primary/90"
+                  disabled={customCredits < 1}
                   onClick={() => {
-                    const input = document.querySelector('input[type="number"]') as HTMLInputElement;
-                    const credits = parseInt(input?.value || '0');
-                    if (credits >= 1) {
-                      // For now, use starter_200 as placeholder - in real implementation you'd handle custom credits
-                      handleGetStarted('starter_200');
+                    if (customCredits >= 1) {
+                      handleGetStarted('custom');
                     } else {
-                      // You could show an error toast here
-                      console.log('Please enter at least 1 credit');
+                      toast({
+                        title: 'Invalid Credit Amount',
+                        description: 'Please enter at least 1 credit to proceed.',
+                        variant: 'destructive'
+                      });
                     }
                   }}
                 >
