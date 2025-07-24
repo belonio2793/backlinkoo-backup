@@ -74,9 +74,9 @@ export const Footer = () => {
             <div className="space-y-2">
               <Link
                 to="/affiliate"
-                className="block text-gray-600 hover:text-gray-900 text-sm font-medium"
+                className="block text-gray-600 hover:text-gray-900 text-sm"
               >
-                🎯 Affiliate Program - Earn 50%
+                Affiliate Program
               </Link>
               <a
                 href="mailto:support@backlinkoo.com"
