@@ -24,7 +24,7 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
   const [guestEmail, setGuestEmail] = useState("");
   const [amount, setAmount] = useState(() => initialCredits ? (initialCredits * CREDIT_PRICE).toFixed(2) : "");
   const [credits, setCredits] = useState(() => initialCredits ? initialCredits.toString() : "");
-  const [subscriptionTier, setSubscriptionTier] = useState("keyword-research");
+  const [subscriptionTier, setSubscriptionTier] = useState("premium-seo-tools");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
