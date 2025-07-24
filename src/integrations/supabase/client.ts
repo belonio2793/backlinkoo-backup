@@ -44,13 +44,29 @@ const createMockSupabaseClient = () => {
     }),
   };
 
-  const mockFrom = () => ({
-    select: () => ({ data: [], error: null }),
-    insert: () => ({ data: null, error: null }),
-    update: () => ({ data: null, error: null }),
-    delete: () => ({ data: null, error: null }),
-    upsert: () => ({ data: null, error: null }),
-  });
+  const mockFrom = (table: string) => {
+    const mockMethods = {
+      select: (columns?: string) => mockMethods,
+      insert: (data: any) => mockMethods,
+      update: (data: any) => mockMethods,
+      delete: () => mockMethods,
+      upsert: (data: any) => mockMethods,
+      eq: (column: string, value: any) => mockMethods,
+      single: () => Promise.resolve({ data: { id: 'mock-id', ...mockUser }, error: null }),
+      then: (callback: any) => {
+        // Return mock data based on table
+        if (table === 'profiles') {
+          return callback({ data: { user_id: mockUser.id, email: mockUser.email }, error: null });
+        } else if (table === 'credits') {
+          return callback({ data: { user_id: mockUser.id, amount: 10 }, error: null });
+        } else if (table === 'campaigns') {
+          return callback({ data: { id: 'mock-campaign-id' }, error: null });
+        }
+        return callback({ data: [], error: null });
+      }
+    };
+    return mockMethods;
+  };
 
   const mockFunctions = {
     invoke: () => Promise.resolve({ data: null, error: { message: 'Mock mode - functions disabled' } }),
