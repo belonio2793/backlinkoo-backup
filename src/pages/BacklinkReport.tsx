@@ -127,7 +127,7 @@ export default function BacklinkReport() {
             </svg>
             Back to Home
           </button>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Backlink Reporting</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Backlink Reports</h1>
           <p className="text-gray-600 text-lg">
             Generate professional verification reports for backlink campaigns
           </p>
