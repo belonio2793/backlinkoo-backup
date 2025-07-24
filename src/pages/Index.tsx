@@ -30,6 +30,8 @@ const Index = () => {
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<'starter_100' | 'starter_200' | 'starter_300'>('starter_200');
+  const [customCredits, setCustomCredits] = useState<number>(0);
+  const [isCustomPackage, setIsCustomPackage] = useState(false);
 
   // Check for authenticated user on component mount
   useEffect(() => {
