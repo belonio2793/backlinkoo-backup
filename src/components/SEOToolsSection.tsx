@@ -27,6 +27,9 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from '@supabase/supabase-js';
+import { KeywordResearchTool } from "@/components/KeywordResearchTool";
+import { RankingTracker } from "@/components/RankingTracker";
+import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
 
 interface SEOToolsSectionProps {
   user: User | null;
