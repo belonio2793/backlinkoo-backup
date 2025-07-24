@@ -530,7 +530,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
                         </div>
                         <Switch
                           checked={billingEmailNotifications}
-                          onCheckedChange={setBillingEmailNotifications}
+                          onCheckedChange={updateBillingEmailPreferences}
                         />
                       </div>
                     </CardContent>
