@@ -416,7 +416,7 @@ export default function ReportViewer() {
         </div>
 
         {/* Link Finder */}
-        <div className="mb-8 p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div className="mt-8 mb-6 p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Search & Filter</h3>
           <input
             type="text"
