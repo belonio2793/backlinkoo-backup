@@ -231,6 +231,47 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
     });
   };
 
+  const loadBillingEmailPreferences = async () => {
+    try {
+      // For now, we'll use localStorage. In production, this would be stored in the database
+      const savedPreference = localStorage.getItem(`billing_email_notifications_${user?.id}`);
+      if (savedPreference !== null) {
+        setBillingEmailNotifications(savedPreference === 'true');
+      }
+    } catch (error) {
+      console.error('Error loading billing email preferences:', error);
+    }
+  };
+
+  const updateBillingEmailPreferences = async (enabled: boolean) => {
+    try {
+      // For now, we'll use localStorage. In production, this would update the database
+      localStorage.setItem(`billing_email_notifications_${user?.id}`, enabled.toString());
+
+      // Future implementation would call an API to update user preferences
+      // const { error } = await supabase
+      //   .from('user_preferences')
+      //   .upsert({
+      //     user_id: user?.id,
+      //     billing_email_notifications: enabled,
+      //     updated_at: new Date().toISOString()
+      //   });
+
+      setBillingEmailNotifications(enabled);
+      toast({
+        title: enabled ? "Notifications Enabled" : "Notifications Disabled",
+        description: `You will ${enabled ? 'now' : 'no longer'} receive billing email notifications.`,
+      });
+    } catch (error) {
+      console.error('Error updating billing email preferences:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update email notification preferences. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (!isSubscribed) {
     return (
       <div className="space-y-6">
