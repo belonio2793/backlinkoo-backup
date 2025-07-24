@@ -90,7 +90,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
       //   setIsSubscribed(true);
       // }
 
-      setIsSubscribed(false);
+      setIsSubscribed(true);
     } catch (error) {
       console.error('Error checking subscription:', error);
       setIsSubscribed(false);
