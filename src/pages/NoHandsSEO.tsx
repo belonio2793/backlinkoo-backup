@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Zap, 
   Link2, 
@@ -14,7 +16,14 @@ import {
   Globe,
   TrendingUp,
   Shield,
-  Clock
+  Clock,
+  AlertCircle,
+  FileText,
+  Send,
+  Menu,
+  X,
+  ChevronRight,
+  Sparkles
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +39,9 @@ const NoHandsSEO = () => {
   const [keyword, setKeyword] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [campaignNotes, setCampaignNotes] = useState("");
+  const [showVerificationSuccess, setShowVerificationSuccess] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   // Check for authenticated user on component mount
   useEffect(() => {
@@ -93,7 +105,7 @@ const NoHandsSEO = () => {
       const domain = new URL(targetUrl).hostname.replace('www.', '');
       const campaignName = `NO Hands SEO - ${domain} - ${keyword}`;
 
-      // Create the campaign in Supabase
+      // Create the campaign in Supabase with verification workflow
       const { data, error } = await supabase
         .from('campaigns')
         .insert([{
@@ -102,7 +114,10 @@ const NoHandsSEO = () => {
           target_url: targetUrl,
           keywords: [keyword],
           links_requested: 10, // Default to 10 links for NO Hands SEO
-          status: 'pending'
+          status: 'pending',
+          verification_status: 'pending',
+          verification_notes: campaignNotes || null,
+          campaign_type: 'no_hands_seo'
         }])
         .select()
         .single();
@@ -151,15 +166,21 @@ const NoHandsSEO = () => {
           description: `NO Hands SEO Campaign: ${campaignName}`
         });
 
+      setShowVerificationSuccess(true);
+      
       toast({
-        title: "Campaign Created Successfully!",
-        description: `Your NO Hands SEO campaign for "${keyword}" has been created and will be processed within 24 hours.`,
+        title: "Campaign Submitted for Verification!",
+        description: `Your NO Hands SEO campaign for "${keyword}" has been submitted and will be reviewed within 24-48 hours.`,
       });
 
-      // Redirect to dashboard after successful creation
+      // Reset form and redirect to dashboard
+      setTargetUrl("");
+      setKeyword("");
+      setCampaignNotes("");
+      
       setTimeout(() => {
-        navigate('/dashboard');
-      }, 2000);
+        navigate('/dashboard?tab=no-hands-seo');
+      }, 3000);
 
     } catch (error) {
       console.error('Error creating campaign:', error);
@@ -196,65 +217,198 @@ const NoHandsSEO = () => {
     }
   ];
 
+  const navItems = [
+    { name: "Dashboard", path: "/dashboard", icon: Target },
+    { name: "Tools", path: "#", icon: Sparkles, hasDropdown: true },
+    { name: "Reports", path: "/backlink-report", icon: FileText },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-      {/* Header */}
-      <header className="border-b border-gray-200 bg-white shadow-sm">
-        <div className="container mx-auto px-6 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Enhanced Header */}
+      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
+            {/* Logo */}
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-              <Infinity className="h-7 w-7 text-primary" />
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
+              <div className="relative">
+                <Infinity className="h-7 w-7 text-primary" />
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">Backlink</h1>
+                <span className="text-xs text-muted-foreground font-medium">SEO Tools Suite</span>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
+
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center gap-8">
+              {navItems.map((item) => (
+                <div key={item.name} className="relative group">
+                  <button
+                    onClick={() => item.path !== '#' && navigate(item.path)}
+                    className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors font-medium"
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.name}
+                    {item.hasDropdown && <ChevronRight className="h-3 w-3 group-hover:rotate-90 transition-transform" />}
+                  </button>
+                  
+                  {item.hasDropdown && (
+                    <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                      <div className="p-2">
+                        <div 
+                          onClick={() => navigate('/no-hands-seo')}
+                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer group"
+                        >
+                          <div className="p-2 rounded-lg bg-blue-100 group-hover:bg-blue-200 transition-colors">
+                            <Zap className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-900">NO Hands SEO</div>
+                            <div className="text-sm text-gray-500">Automated link building</div>
+                          </div>
+                          <Badge variant="secondary" className="ml-auto text-xs">Active</Badge>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer opacity-50">
+                          <div className="p-2 rounded-lg bg-gray-100">
+                            <Target className="h-4 w-4 text-gray-400" />
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-400">Content Generator</div>
+                            <div className="text-sm text-gray-400">Coming soon</div>
+                          </div>
+                          <Badge variant="outline" className="ml-auto text-xs">Soon</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </nav>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3">
               {user ? (
-                <Button onClick={() => navigate("/dashboard")} className="font-medium">
-                  Dashboard
-                </Button>
+                <div className="flex items-center gap-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate("/dashboard")} 
+                    className="hidden sm:flex items-center gap-2"
+                  >
+                    <Target className="h-4 w-4" />
+                    Dashboard
+                  </Button>
+                  <Button onClick={() => navigate("/dashboard")} className="sm:hidden">
+                    <Target className="h-4 w-4" />
+                  </Button>
+                </div>
               ) : (
                 <Button onClick={() => navigate("/login")} className="font-medium">
                   Sign In
                 </Button>
               )}
+
+              {/* Mobile menu button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="lg:hidden"
+              >
+                {showMobileMenu ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
             </div>
           </div>
+
+          {/* Mobile Navigation */}
+          {showMobileMenu && (
+            <div className="lg:hidden mt-4 pb-4 border-t pt-4">
+              <nav className="space-y-2">
+                {navItems.map((item) => (
+                  <div key={item.name}>
+                    <button
+                      onClick={() => {
+                        if (item.path !== '#') {
+                          navigate(item.path);
+                          setShowMobileMenu(false);
+                        }
+                      }}
+                      className="flex items-center gap-3 w-full text-left p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {item.name}
+                    </button>
+                    {item.hasDropdown && (
+                      <div className="ml-6 space-y-1 border-l pl-4">
+                        <button
+                          onClick={() => {
+                            navigate('/no-hands-seo');
+                            setShowMobileMenu(false);
+                          }}
+                          className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-gray-50"
+                        >
+                          <Zap className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm">NO Hands SEO</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </nav>
+            </div>
+          )}
         </div>
       </header>
 
-      <div className="container mx-auto px-6 py-12">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Hero Section */}
-        <div className="text-center mb-16">
-          <Badge variant="outline" className="mb-6 bg-blue-50 text-blue-600 border-blue-200 font-mono text-xs px-4 py-2">
-            <Zap className="h-3 w-3 mr-2" />
-            NO HANDS SEO TOOL
-          </Badge>
+        <div className="text-center mb-12 sm:mb-16">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200 font-mono text-xs px-4 py-2">
+              <Zap className="h-3 w-3 mr-2" />
+              NO HANDS SEO TOOL
+            </Badge>
+            <Badge variant="secondary" className="text-xs">v2.0</Badge>
+          </div>
           
-          <h1 className="text-5xl md:text-6xl font-light mb-8 text-gray-900 tracking-tight">
-            Automated <span className="text-primary">Link Building</span>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-light mb-6 sm:mb-8 text-gray-900 tracking-tight">
+            Automated <span className="text-primary bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">Link Building</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-700 mb-6 max-w-4xl mx-auto leading-relaxed font-light">
-            Enter your URL and keyword. We'll automatically create and execute a premium backlink campaign for you.
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-700 mb-4 sm:mb-6 max-w-4xl mx-auto leading-relaxed font-light">
+            Submit your URL and keyword. Our expert team verifies and executes premium backlink campaigns automatically.
           </p>
           
-          <p className="text-lg text-gray-600 mb-12 font-medium max-w-3xl mx-auto">
-            10 high-quality backlinks • DA 50+ domains • Delivered in 7-14 days
-          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm sm:text-base text-gray-600 font-medium">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span>10 Premium Backlinks</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span>DA 50+ Domains</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span>Quality Verification</span>
+            </div>
+          </div>
         </div>
 
         {/* Main Tool Section */}
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
             
             {/* Form Section */}
-            <Card className="p-8 shadow-xl border-0 bg-white">
+            <Card className="p-6 sm:p-8 shadow-xl border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader className="pb-6">
-                <CardTitle className="text-2xl font-semibold mb-2 text-gray-900 flex items-center gap-3">
-                  <Link2 className="h-6 w-6 text-primary" />
+                <CardTitle className="text-xl sm:text-2xl font-semibold mb-2 text-gray-900 flex items-center gap-3">
+                  <Link2 className="h-5 sm:h-6 w-5 sm:w-6 text-primary" />
                   Create Your Campaign
                 </CardTitle>
                 <p className="text-gray-600 font-light">
-                  Automatic campaign creation with premium backlink placement
+                  Submit for verification and automated premium backlink placement
                 </p>
               </CardHeader>
               
@@ -269,6 +423,7 @@ const NoHandsSEO = () => {
                     </AlertDescription>
                   </Alert>
                 )}
+
                 <div>
                   <Label htmlFor="targetUrl" className="text-base font-medium text-gray-700 mb-3 block">
                     Target URL *
@@ -279,7 +434,7 @@ const NoHandsSEO = () => {
                     value={targetUrl}
                     onChange={(e) => setTargetUrl(e.target.value)}
                     placeholder="https://yourwebsite.com/target-page"
-                    className="h-12 text-lg"
+                    className="h-12 text-base sm:text-lg"
                   />
                   <p className="text-sm text-gray-500 mt-2">
                     The specific page you want to rank higher in search results
@@ -296,7 +451,7 @@ const NoHandsSEO = () => {
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
                     placeholder="your target keyword"
-                    className="h-12 text-lg"
+                    className="h-12 text-base sm:text-lg"
                   />
                   <p className="text-sm text-gray-500 mt-2">
                     The keyword you want to rank for (use your primary target keyword)
@@ -322,7 +477,7 @@ const NoHandsSEO = () => {
 
                 {/* Campaign Details */}
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h4 className="text-sm font-semibold text-blue-900 mb-2">Campaign Details</h4>
+                  <h4 className="text-sm font-semibold text-blue-900 mb-2">Campaign Package</h4>
                   <div className="space-y-2 text-sm text-blue-800">
                     <div className="flex justify-between">
                       <span>Backlinks:</span>
@@ -341,7 +496,7 @@ const NoHandsSEO = () => {
                       <span className="font-medium">7-14 Days*</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Cost:</span>
+                      <span>Investment:</span>
                       <span className="font-medium">10 Credits ($7.00)</span>
                     </div>
                   </div>
@@ -363,10 +518,10 @@ const NoHandsSEO = () => {
                   </div>
                 </div>
                 
-                <Button
+                <Button 
                   onClick={handleCreateCampaign}
                   disabled={isCreating || !targetUrl.trim() || !keyword.trim() || showVerificationSuccess}
-                  className="w-full h-12 text-lg font-medium"
+                  className="w-full h-12 text-base sm:text-lg font-medium"
                 >
                   {isCreating ? (
                     <>
@@ -398,11 +553,11 @@ const NoHandsSEO = () => {
             {/* Features Section */}
             <div className="space-y-6">
               <div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-6">Why Choose NO Hands SEO?</h3>
+                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">Why Choose NO Hands SEO?</h3>
                 
                 <div className="space-y-4">
                   {features.map((feature, index) => (
-                    <div key={index} className="flex items-start gap-4 p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+                    <div key={index} className="flex items-start gap-4 p-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                       <div className="p-2 rounded-lg bg-primary/10">
                         <feature.icon className="h-5 w-5 text-primary" />
                       </div>
@@ -415,32 +570,47 @@ const NoHandsSEO = () => {
                 </div>
               </div>
 
-              {/* Process Steps */}
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+              {/* Enhanced Process Steps */}
+              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-sm border border-gray-100">
                 <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <CheckCircle className="h-5 w-5 text-green-600" />
-                  How It Works
+                  Enhanced Workflow
                 </h4>
-                <div className="space-y-3 text-sm text-gray-600">
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium">1</div>
-                    <span>Submit your target URL, keyword, and campaign notes</span>
+                <div className="space-y-4 text-sm text-gray-600">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium flex-shrink-0 mt-0.5">1</div>
+                    <div>
+                      <div className="font-medium text-gray-800">Submit Campaign</div>
+                      <div>Enter your target URL, keyword, and campaign preferences</div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center font-medium">2</div>
-                    <span>Our team verifies and approves your campaign (24-48 hours)</span>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center font-medium flex-shrink-0 mt-0.5">2</div>
+                    <div>
+                      <div className="font-medium text-gray-800">Quality Verification</div>
+                      <div>Our experts review and approve your campaign (24-48 hours)</div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium">3</div>
-                    <span>We automatically find relevant, high-authority domains</span>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium flex-shrink-0 mt-0.5">3</div>
+                    <div>
+                      <div className="font-medium text-gray-800">Automated Execution</div>
+                      <div>We find relevant, high-authority domains automatically</div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium">4</div>
-                    <span>Premium backlinks are created and published</span>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium flex-shrink-0 mt-0.5">4</div>
+                    <div>
+                      <div className="font-medium text-gray-800">Backlink Creation</div>
+                      <div>Premium backlinks are created and published</div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-green-600 text-white text-xs flex items-center justify-center font-medium">5</div>
-                    <span>Monitor progress and watch your rankings improve</span>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-green-600 text-white text-xs flex items-center justify-center font-medium flex-shrink-0 mt-0.5">5</div>
+                    <div>
+                      <div className="font-medium text-gray-800">Monitor & Report</div>
+                      <div>Track progress and watch your rankings improve</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -449,9 +619,9 @@ const NoHandsSEO = () => {
         </div>
 
         {/* Bottom CTA */}
-        <div className="text-center mt-16 p-8 bg-white rounded-xl shadow-sm border border-gray-100 max-w-3xl mx-auto">
-          <Globe className="h-12 w-12 text-primary mx-auto mb-4" />
-          <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+        <div className="text-center mt-12 sm:mt-16 p-6 sm:p-8 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 max-w-3xl mx-auto">
+          <Globe className="h-10 sm:h-12 w-10 sm:w-12 text-primary mx-auto mb-4" />
+          <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4">
             Ready to Automate Your Link Building?
           </h3>
           <p className="text-gray-600 mb-6">
@@ -460,10 +630,10 @@ const NoHandsSEO = () => {
           <Button 
             onClick={() => !user ? navigate('/login') : document.getElementById('targetUrl')?.focus()}
             size="lg"
-            className="text-lg px-8 py-3"
+            className="text-base sm:text-lg px-6 sm:px-8 py-3"
           >
             Get Started Today
-            <ArrowRight className="h-5 w-5 ml-2" />
+            <ArrowRight className="h-4 sm:h-5 w-4 sm:w-5 ml-2" />
           </Button>
         </div>
       </div>
