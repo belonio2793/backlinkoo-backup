@@ -420,7 +420,7 @@ export default function RegistrationModal({ isOpen, onClose, serviceType }: Regi
                   Creating Account...
                 </div>
               ) : (
-                'Create Account & Get Quote'
+                'Create Account & Get Started'
               )}
             </button>
           </div>
