@@ -166,6 +166,7 @@ export function HomepageBlogGenerator() {
     setPrimaryKeyword('');
     setIsCompleted(false);
     setGeneratedPost(null);
+    setAllGeneratedPosts([]);
     setPublishedUrl('');
   };
 
