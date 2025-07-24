@@ -654,7 +654,11 @@ const Index = () => {
           setPaymentModalOpen(false);
           setIsCustomPackage(false);
         }}
-        initialCredits={isCustomPackage ? customCredits : pricingPlans.find(p => p.id === selectedPlan)?.credits}
+        initialCredits={(() => {
+          const credits = isCustomPackage ? customCredits : pricingPlans.find(p => p.id === selectedPlan)?.credits;
+          console.log('PaymentModal initialCredits:', credits, 'isCustomPackage:', isCustomPackage, 'customCredits:', customCredits);
+          return credits;
+        })()}
       />
 
       {/* Footer */}
