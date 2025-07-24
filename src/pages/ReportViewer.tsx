@@ -41,6 +41,43 @@ export default function ReportViewer() {
     loadReport();
   }, [reportId]);
 
+  const generateDemoData = (reportId: string) => {
+    // Sample URLs for demo
+    const sampleUrls = [
+      'https://example.com/page1',
+      'https://another.com/blog',
+      'https://website.com/article',
+      'https://domain.com/content',
+      'https://sample.org/news',
+      'https://test.net/info',
+      'https://demo.io/features',
+      'https://site.co/about'
+    ];
+
+    const backlinks = sampleUrls.map((url, index) => ({
+      id: `entry_${Date.now()}_${index}`,
+      sourceUrl: url,
+      targetUrl: '',
+      anchorText: ''
+    }));
+
+    return {
+      id: reportId,
+      campaignName: `Demo Report ${reportId}`,
+      backlinks: backlinks,
+      createdAt: new Date().toISOString(),
+      totalBacklinks: backlinks.length,
+      results: backlinks.map(bl => ({
+        ...bl,
+        status: Math.random() > 0.3 ? 'found' : 'not_found',
+        domainAuthority: Math.floor(Math.random() * 40) + 40,
+        pageAuthority: Math.floor(Math.random() * 50) + 20,
+        responseTime: Math.floor(Math.random() * 2000) + 500,
+        lastChecked: new Date().toISOString()
+      }))
+    };
+  };
+
   const loadReport = async () => {
     try {
       // Load from localStorage for demo
@@ -49,11 +86,25 @@ export default function ReportViewer() {
         const data = JSON.parse(stored);
         setReportData(data);
       } else {
-        toast({
-          title: 'Report Not Found',
-          description: 'The requested report could not be found or may have expired.',
-          variant: 'destructive'
-        });
+        // Generate demo data for preview URLs when localStorage data not found
+        if (reportId) {
+          const demoData = generateDemoData(reportId);
+          setReportData(demoData);
+
+          // Optionally store the demo data in localStorage for this session
+          localStorage.setItem(`report_${reportId}`, JSON.stringify(demoData));
+
+          toast({
+            title: 'Demo Report Loaded',
+            description: 'This is a demo report with sample data for preview purposes.',
+          });
+        } else {
+          toast({
+            title: 'Report Not Found',
+            description: 'The requested report could not be found or may have expired.',
+            variant: 'destructive'
+          });
+        }
       }
     } catch (error) {
       toast({
