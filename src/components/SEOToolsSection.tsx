@@ -260,11 +260,10 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="projects">Projects</TabsTrigger>
-          <TabsTrigger value="reporting">Reporting</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="no-hands-seo">NO Hands SEO</TabsTrigger>
+          <TabsTrigger value="keyword-research">Keyword Research</TabsTrigger>
+          <TabsTrigger value="rank-tracker">Rankings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
