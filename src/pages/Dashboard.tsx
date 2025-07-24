@@ -4,12 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { 
-  CreditCard, 
-  Link, 
-  Search, 
-  TrendingUp, 
-  Globe, 
+import {
+  CreditCard,
+  Link,
+  Search,
+  TrendingUp,
+  Globe,
   Users,
   Infinity,
   Plus,
@@ -21,7 +21,8 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
-  ExternalLink
+  ExternalLink,
+  Zap
 } from "lucide-react";
 import { PaymentModal } from "@/components/PaymentModal";
 import { CampaignForm } from "@/components/CampaignForm";
