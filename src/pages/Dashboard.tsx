@@ -694,6 +694,25 @@ const Dashboard = () => {
               </Tabs>
             ) : activeSection === "seo-tools" ? (
               <SEOToolsSection user={user} />
+            ) : activeSection === "affiliate" ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold">Affiliate Program</h2>
+                    <p className="text-muted-foreground">Earn 50% commission on every referral</p>
+                  </div>
+                </div>
+                <AffiliateRegistration
+                  userId={user?.id || ''}
+                  onRegistrationComplete={() => {
+                    toast({
+                      title: "Welcome to our Affiliate Program!",
+                      description: "You can now start earning commissions.",
+                    });
+                  }}
+                />
+                <AffiliateDashboard userId={user?.id || ''} />
+              </div>
             ) : null}
           </>
         ) : (
