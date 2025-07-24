@@ -369,7 +369,7 @@ export const KeywordResearchTool = () => {
     { code: "NR", name: "Nauru", flag: "🇳🇷" },
     { code: "NU", name: "Niue", flag: "🇳🇺" },
     { code: "NZ", name: "New Zealand", flag: "🇳🇿" },
-    { code: "OM", name: "Oman", flag: "🇴🇲" },
+    { code: "OM", name: "Oman", flag: "🇴���" },
     { code: "PA", name: "Panama", flag: "🇵🇦" },
     { code: "PE", name: "Peru", flag: "🇵🇪" },
     { code: "PF", name: "French Polynesia", flag: "🇵🇫" },
@@ -390,7 +390,7 @@ export const KeywordResearchTool = () => {
     { code: "RS", name: "Serbia", flag: "🇷🇸" },
     { code: "RU", name: "Russia", flag: "🇷🇺" },
     { code: "RW", name: "Rwanda", flag: "🇷🇼" },
-    { code: "SA", name: "Saudi Arabia", flag: "🇸🇦" },
+    { code: "SA", name: "Saudi Arabia", flag: "🇸���" },
     { code: "SB", name: "Solomon Islands", flag: "🇸🇧" },
     { code: "SC", name: "Seychelles", flag: "🇸🇨" },
     { code: "SD", name: "Sudan", flag: "🇸🇩" },
@@ -615,36 +615,41 @@ export const KeywordResearchTool = () => {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Search Engine</label>
-              <Select value={selectedEngine} onValueChange={setSelectedEngine}>
-                <SelectTrigger className="h-11">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-background border shadow-lg z-50">
-                  <SelectItem value="google">
-                    <div className="flex items-center gap-2">
-                      <img src={googleLogo} alt="Google" className="w-4 h-4" />
-                      Google
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="bing">
-                    <div className="flex items-center gap-2">
-                      <img src={bingLogo} alt="Bing" className="w-4 h-4" />
-                      Bing
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="h-11">
+                <Select value={selectedEngine} onValueChange={setSelectedEngine}>
+                  <SelectTrigger className="h-11">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-lg z-50">
+                    <SelectItem value="google">
+                      <div className="flex items-center gap-2">
+                        <img src={googleLogo} alt="Google" className="w-4 h-4" />
+                        Google
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="bing">
+                      <div className="flex items-center gap-2">
+                        <img src={bingLogo} alt="Bing" className="w-4 h-4" />
+                        Bing
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            
-            <div className="flex items-end">
-              <Button 
-                onClick={performSearch} 
-                disabled={isSearching || !searchTerm.trim()}
-                className="w-full h-11 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
-              >
-                {isSearching ? "Researching..." : "Research Keywords"}
-                <Search className="h-4 w-4 ml-2" />
-              </Button>
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground opacity-0">Action</label>
+              <div className="h-11">
+                <Button
+                  onClick={performSearch}
+                  disabled={isSearching || !searchTerm.trim()}
+                  className="w-full h-11 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
+                >
+                  {isSearching ? "Researching..." : "Research Keywords"}
+                  <Search className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
             </div>
           </div>
 
