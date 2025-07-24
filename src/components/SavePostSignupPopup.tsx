@@ -148,9 +148,25 @@ export function SavePostSignupPopup({
       }
     } catch (error: any) {
       console.error('Signup failed:', error);
+
+      // Handle different error types properly
+      let errorMessage = 'There was an error creating your account';
+
+      if (error && typeof error === 'object') {
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error.error_description) {
+          errorMessage = error.error_description;
+        } else if (typeof error.toString === 'function') {
+          errorMessage = error.toString();
+        }
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
       toast({
         title: 'Signup Failed',
-        description: error.message || 'There was an error creating your account',
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {
