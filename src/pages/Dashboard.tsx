@@ -188,21 +188,49 @@ const Dashboard = () => {
               <h1 className="text-xl font-semibold hidden sm:block">Backlink</h1>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
-              <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
-                <CreditCard className="h-3 w-3" />
-                <span className="hidden xs:inline">{credits}</span>
-                <span className="xs:hidden">{credits}</span>
-                <span className="hidden sm:inline">Credits</span>
-              </Badge>
-              <Button variant="outline" size="sm" onClick={() => setIsPaymentModalOpen(true)} className="px-2 sm:px-4">
-                <Plus className="h-4 w-4 sm:mr-1" />
-                <span className="hidden sm:inline">Buy Credits</span>
-              </Button>
+              {activeSection === "dashboard" && (
+                <>
+                  <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
+                    <CreditCard className="h-3 w-3" />
+                    <span className="hidden xs:inline">{credits}</span>
+                    <span className="xs:hidden">{credits}</span>
+                    <span className="hidden sm:inline">Credits</span>
+                  </Badge>
+                  <Button variant="outline" size="sm" onClick={() => setIsPaymentModalOpen(true)} className="px-2 sm:px-4">
+                    <Plus className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Buy Credits</span>
+                  </Button>
+                </>
+              )}
               <Button variant="outline" size="sm" onClick={handleSignOut} className="px-2 sm:px-4">
                 <LogOut className="h-4 w-4 sm:mr-1" />
                 <span className="hidden sm:inline">Sign Out</span>
               </Button>
             </div>
+          </div>
+        </div>
+
+        {/* Main Navigation */}
+        <div className="border-b bg-muted/30">
+          <div className="container mx-auto px-4">
+            <nav className="flex items-center gap-1">
+              <Button
+                variant={activeSection === "dashboard" ? "secondary" : "ghost"}
+                onClick={() => setActiveSection("dashboard")}
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3"
+              >
+                <Target className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Dashboard</span>
+              </Button>
+              <Button
+                variant={activeSection === "seo-tools" ? "secondary" : "ghost"}
+                onClick={() => setActiveSection("seo-tools")}
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3"
+              >
+                <Zap className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">SEO Tools</span>
+              </Button>
+            </nav>
           </div>
         </div>
       </header>
