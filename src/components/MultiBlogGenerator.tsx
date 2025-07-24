@@ -666,24 +666,24 @@ export function MultiBlogGenerator({
           <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
             <div className="text-center space-y-3">
               <h4 className="text-lg font-semibold text-blue-800">
-                🚀 Ready to Launch Your Content Campaign?
+                🎉 Amazing! You Just Got 5 Free Backlink Posts!
               </h4>
               <p className="text-blue-700">
-                Register now to permanently save these 5 professional blog posts, get them published on high-authority domains, 
-                and start building powerful backlinks to boost your search rankings!
+                Each post above contains live backlinks to your website. Click "View Live Post" on any of them to see your backlinks in action!
+                Register now to keep these backlinks forever and create unlimited campaigns.
               </p>
               <div className="flex items-center justify-center gap-6 text-sm text-blue-600 mt-4">
                 <div className="flex items-center gap-1">
                   <CheckCircle className="h-4 w-4" />
-                  <span>High-Authority Publishing</span>
+                  <span>Live Backlinks Active</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <CheckCircle className="h-4 w-4" />
-                  <span>Permanent Backlinks</span>
+                  <span>SEO Value Building</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <CheckCircle className="h-4 w-4" />
-                  <span>Campaign Management</span>
+                  <span>Free Trial Active</span>
                 </div>
               </div>
             </div>
