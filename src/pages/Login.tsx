@@ -235,10 +235,25 @@ const Login = () => {
       });
       
       setShowResendConfirmation(false);
-    } catch (error) {
+    } catch (error: any) {
+      // Handle different error types properly
+      let errorMessage = 'An error occurred while sending the confirmation email.';
+
+      if (error && typeof error === 'object') {
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error.error_description) {
+          errorMessage = error.error_description;
+        } else if (typeof error.toString === 'function') {
+          errorMessage = error.toString();
+        }
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
       toast({
         title: "Failed to resend confirmation",
-        description: error.message || "An error occurred while sending the confirmation email.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -382,7 +397,7 @@ const Login = () => {
                     <Input
                       id="confirm-password"
                       type="password"
-                      placeholder="••••••••"
+                      placeholder="••���•••••"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
