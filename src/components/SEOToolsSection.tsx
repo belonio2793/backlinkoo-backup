@@ -116,18 +116,23 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
 
   const fetchRecentPosts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('posted_at', { ascending: false })
-        .limit(10);
+      // For now, set empty posts since the table doesn't exist yet
+      setRecentPosts([]);
 
-      if (!error && data) {
-        setRecentPosts(data);
-      }
+      // Uncomment when the table is created:
+      // const { data, error } = await supabase
+      //   .from('blog_posts')
+      //   .select('*')
+      //   .eq('user_id', user?.id)
+      //   .order('posted_at', { ascending: false })
+      //   .limit(10);
+      //
+      // if (!error && data) {
+      //   setRecentPosts(data);
+      // }
     } catch (error) {
       console.error('Error fetching recent posts:', error);
+      setRecentPosts([]);
     } finally {
       setIsLoading(false);
     }
