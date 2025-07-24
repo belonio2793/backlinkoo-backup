@@ -429,7 +429,7 @@ export function MultiBlogGenerator({
             <div className="space-y-3">
               <h4 className="font-semibold flex items-center gap-2">
                 <Code className="h-4 w-4" />
-                System Commands
+                Platform Operations
               </h4>
               <div className="bg-gray-900 text-green-400 p-3 rounded font-mono text-xs max-h-32 overflow-y-auto">
                 {codeStreamLines.map((line, index) => (
