@@ -202,11 +202,11 @@ export function HomepageBlogGenerator() {
         <div className="max-w-4xl mx-auto">
           {!isCompleted ? (
             isGenerating ? (
-              <GenerationSequence
-                isGenerating={isGenerating}
-                onComplete={handleGenerationComplete}
+              <InteractiveContentGenerator
                 keyword={primaryKeyword}
                 targetUrl={targetUrl}
+                onComplete={handleGenerationComplete}
+                onSave={() => setShowSignupPopup(true)}
               />
             ) : (
               <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
