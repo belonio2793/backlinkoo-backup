@@ -103,7 +103,7 @@ export function HomepageBlogGenerator() {
       // Create campaign entry for registered users
       if (user) {
         try {
-          await supabase
+          const { data: campaignData, error: campaignError } = await supabase
             .from('campaigns')
             .insert({
               name: `Live Blog: ${generatedContent.title}`,
@@ -115,7 +115,15 @@ export function HomepageBlogGenerator() {
               completed_backlinks: [publishedUrl],
               user_id: user.id,
               credits_used: 1
-            });
+            })
+            .select()
+            .single();
+
+          if (campaignError) {
+            console.warn('Failed to create campaign entry:', campaignError);
+          } else {
+            console.log('✅ Campaign created successfully:', campaignData);
+          }
         } catch (error) {
           console.warn('Failed to create campaign entry:', error);
         }
