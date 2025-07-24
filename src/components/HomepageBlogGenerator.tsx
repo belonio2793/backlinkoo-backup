@@ -93,7 +93,9 @@ export function HomepageBlogGenerator() {
       };
 
       // Store in live blog publisher
-      await liveBlogPublisher.inMemoryPosts?.set(blogPost.id, blogPost);
+      if (liveBlogPublisher.inMemoryPosts) {
+        liveBlogPublisher.inMemoryPosts.set(blogPost.id, blogPost);
+      }
 
       // Create campaign entry for registered users
       if (user) {
