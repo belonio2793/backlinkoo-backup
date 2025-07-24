@@ -80,144 +80,99 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Choose Payment Option</DialogTitle>
+          <DialogTitle>Premium SEO Tools Subscription</DialogTitle>
         </DialogHeader>
 
-        <Tabs value={paymentType} onValueChange={(value) => setPaymentType(value as "payment" | "subscription")}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="payment" className="flex items-center gap-2">
-              <CreditCard className="w-4 h-4" />
-              One-time Payment
-            </TabsTrigger>
-            <TabsTrigger value="subscription" className="flex items-center gap-2">
-              <Repeat className="w-4 h-4" />
-              Subscription
-            </TabsTrigger>
-          </TabsList>
-
-          <div className="space-y-4 mt-4">
-            {/* Guest/User Toggle */}
-            <div className="space-y-2">
-              <Label>Checkout Type</Label>
-              <RadioGroup
-                value={isGuest ? "guest" : "user"}
-                onValueChange={(value) => setIsGuest(value === "guest")}
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="user" id="user" />
-                  <Label htmlFor="user">User Account</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="guest" id="guest" />
-                  <Label htmlFor="guest">Guest Checkout</Label>
-                </div>
-              </RadioGroup>
+        <div className="space-y-6">
+          {/* Subscription Plan Details */}
+          <div className="p-4 border rounded-lg bg-gradient-to-br from-primary/5 to-purple-50">
+            <div className="flex items-center gap-2 mb-3">
+              <Repeat className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold text-lg">{subscriptionPlan.name}</h3>
             </div>
-
-            {/* Guest Email */}
-            {isGuest && (
-              <div className="space-y-2">
-                <Label htmlFor="guestEmail">Email Address</Label>
-                <Input
-                  id="guestEmail"
-                  type="email"
-                  value={guestEmail}
-                  onChange={(e) => setGuestEmail(e.target.value)}
-                  placeholder="Enter your email"
-                />
-              </div>
-            )}
-
-            {/* Payment Method */}
-            <div className="space-y-2">
-              <Label>Payment Method</Label>
-              <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as "stripe" | "paypal")}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="stripe" id="stripe" />
-                  <Label htmlFor="stripe" className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4" />
-                    Credit Card (Stripe)
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="paypal" id="paypal" />
-                  <Label htmlFor="paypal" className="flex items-center gap-2">
-                    <Wallet className="w-4 h-4" />
-                    PayPal
-                  </Label>
-                </div>
-              </RadioGroup>
+            <div className="text-2xl font-bold text-primary mb-2">
+              ${subscriptionPlan.price}/month
             </div>
-
-            <TabsContent value="payment" className="space-y-4">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="credits">Number of Credits</Label>
-                  <Input
-                    id="credits"
-                    type="number"
-                    min="1"
-                    step="1"
-                    value={credits}
-                    onChange={(e) => handleCreditsChange(e.target.value)}
-                    placeholder="Enter number of credits"
-                  />
-                   <p className="text-sm text-muted-foreground">
-                     $0.70 per credit • 1 credit = 1 premium backlink
-                   </p>
+            <p className="text-sm text-muted-foreground mb-4">
+              Get access to all SEO tools and features
+            </p>
+            <div className="space-y-2">
+              {subscriptionPlan.features.map((feature, index) => (
+                <div key={index} className="flex items-center gap-2 text-sm">
+                  <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
+                  {feature}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="total">Total Amount</Label>
-                  <Input
-                    id="total"
-                    value={`$${amount}`}
-                    readOnly
-                    className="bg-muted"
-                  />
-                   <p className="text-sm text-muted-foreground">
-                     {credits ? `${credits} credits × $0.70 = $${amount}` : 'Enter credits to see total'}
-                   </p>
-                </div>
-              </div>
-              <Button 
-                onClick={handlePayment} 
-                disabled={loading || !credits || parseFloat(credits) <= 0}
-                className="w-full"
-              >
-                {loading ? "Processing..." : `Buy ${credits || 0} Credits for $${amount || "0.00"}`}
-              </Button>
-            </TabsContent>
-
-            <TabsContent value="subscription" className="space-y-4">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>SEO Tool Subscriptions</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Subscribe to powerful SEO tools for ongoing campaigns
-                  </p>
-                  <RadioGroup value={subscriptionTier} onValueChange={setSubscriptionTier}>
-                    {Object.entries(subscriptionPlans).map(([key, plan]) => (
-                      <div key={key} className="flex items-center space-x-2 p-3 border rounded-lg">
-                        <RadioGroupItem value={key} id={key} />
-                        <Label htmlFor={key} className="flex-1 cursor-pointer">
-                          <div className="font-medium">{plan.name}</div>
-                          <div className="text-sm text-muted-foreground">${plan.price}/month</div>
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-              </div>
-              <Button 
-                onClick={handleSubscription} 
-                disabled={loading}
-                className="w-full"
-              >
-                {loading ? "Processing..." : `Subscribe to ${subscriptionPlans[subscriptionTier as keyof typeof subscriptionPlans].name}`}
-              </Button>
-            </TabsContent>
+              ))}
+            </div>
           </div>
-        </Tabs>
+
+          {/* Guest/User Toggle */}
+          <div className="space-y-2">
+            <Label>Checkout Type</Label>
+            <RadioGroup
+              value={isGuest ? "guest" : "user"}
+              onValueChange={(value) => setIsGuest(value === "guest")}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="user" id="user" />
+                <Label htmlFor="user">User Account</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="guest" id="guest" />
+                <Label htmlFor="guest">Guest Checkout</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {/* Guest Email */}
+          {isGuest && (
+            <div className="space-y-2">
+              <Label htmlFor="guestEmail">Email Address</Label>
+              <Input
+                id="guestEmail"
+                type="email"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                placeholder="Enter your email"
+              />
+            </div>
+          )}
+
+          {/* Payment Method */}
+          <div className="space-y-2">
+            <Label>Payment Method</Label>
+            <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as "stripe" | "paypal")}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="stripe" id="stripe" />
+                <Label htmlFor="stripe" className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4" />
+                  Credit Card (Stripe)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="paypal" id="paypal" />
+                <Label htmlFor="paypal" className="flex items-center gap-2">
+                  <Wallet className="w-4 h-4" />
+                  PayPal
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {/* Subscribe Button */}
+          <Button
+            onClick={handleSubscription}
+            disabled={loading}
+            className="w-full"
+            size="lg"
+          >
+            {loading ? "Processing..." : `Subscribe for $${subscriptionPlan.price}/month`}
+          </Button>
+
+          <p className="text-xs text-muted-foreground text-center">
+            Cancel anytime • No setup fees • 30-day money back guarantee
+          </p>
+        </div>
       </DialogContent>
     </Dialog>
   );
