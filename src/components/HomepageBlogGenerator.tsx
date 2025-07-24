@@ -466,7 +466,7 @@ export function HomepageBlogGenerator() {
 
                   <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <p className="text-sm text-blue-800 font-medium">
-                      🚀 Ready for more? Our premium packages include unlimited backlinks, advanced targeting, and priority support!
+                      🚀 Ready for more? Our premium packages include unlimited 5-post campaigns, advanced targeting, and priority support!
                     </p>
                   </div>
                 </div>
