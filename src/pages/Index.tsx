@@ -112,8 +112,14 @@ const Index = () => {
     }
   ];
 
-  const handleGetStarted = (planId: 'starter_100' | 'starter_200' | 'starter_300') => {
-    setSelectedPlan(planId);
+  const handleGetStarted = (planId: 'starter_100' | 'starter_200' | 'starter_300' | 'custom') => {
+    if (planId === 'custom') {
+      setIsCustomPackage(true);
+    } else {
+      setIsCustomPackage(false);
+      setSelectedPlan(planId as 'starter_100' | 'starter_200' | 'starter_300');
+    }
+
     if (user) {
       setPaymentModalOpen(true);
     } else {
