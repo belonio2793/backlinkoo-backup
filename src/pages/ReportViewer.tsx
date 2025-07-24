@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import RegistrationModal from '@/components/RegistrationModal';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
+import { Infinity } from 'lucide-react';
 
 interface BacklinkResult {
   id: string;
