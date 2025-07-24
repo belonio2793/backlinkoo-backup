@@ -28,6 +28,14 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  // Update state when initialCredits prop changes
+  useEffect(() => {
+    if (initialCredits && initialCredits > 0) {
+      setCredits(initialCredits.toString());
+      setAmount((initialCredits * CREDIT_PRICE).toFixed(2));
+    }
+  }, [initialCredits]);
+
   const subscriptionPlans = {
     "keyword-research": { price: 29.99, priceId: "price_keyword_research", name: "Keyword Research Tool" },
     "rank-tracker": { price: 39.99, priceId: "price_rank_tracker", name: "Search Engine Rank Tracker" },
