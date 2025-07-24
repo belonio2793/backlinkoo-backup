@@ -26,7 +26,8 @@ import {
   ArrowLeft,
   Loader2,
   Download,
-  Save
+  Save,
+  Upload
 } from 'lucide-react';
 
 interface BacklinkEntry {
