@@ -301,31 +301,31 @@ const NoHandsSEO = () => {
 
                 {/* Campaign Details */}
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h4 className="text-sm font-semibold text-blue-900 mb-2">Campaign Package</h4>
+                  <h4 className="text-sm font-semibold text-blue-900 mb-2">SEO Tools Project</h4>
                   <div className="space-y-2 text-sm text-blue-800">
                     <div className="flex justify-between">
-                      <span>Backlinks:</span>
-                      <span className="font-medium">10 Premium Links</span>
+                      <span>Blog Scraping:</span>
+                      <span className="font-medium">Unlimited</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Domain Authority:</span>
-                      <span className="font-medium">DA 50+ Average</span>
+                      <span>Keywords:</span>
+                      <span className="font-medium">Unlimited</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Verification Time:</span>
-                      <span className="font-medium">24-48 Hours</span>
+                      <span>Auto Posting:</span>
+                      <span className="font-medium">24/7 Active</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Delivery Time:</span>
-                      <span className="font-medium">7-14 Days*</span>
+                      <span>Real-time Reports:</span>
+                      <span className="font-medium">Live Updates</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Investment:</span>
-                      <span className="font-medium">10 Credits ($7.00)</span>
+                      <span>Monthly Fee:</span>
+                      <span className="font-medium">$29/month</span>
                     </div>
                   </div>
                   <p className="text-xs text-blue-700 mt-2">
-                    *After verification approval
+                    Subscription required for unlimited access
                   </p>
                 </div>
 
