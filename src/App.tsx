@@ -19,6 +19,7 @@ import BlogPreview from "./pages/BlogPreview";
 import EmailMarketing from "./pages/EmailMarketing";
 import BacklinkReport from "./pages/BacklinkReport";
 import ReportViewer from "./pages/ReportViewer";
+import NoHandsSEO from "./pages/NoHandsSEO";
 
 const queryClient = new QueryClient();
 
