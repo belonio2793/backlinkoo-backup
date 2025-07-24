@@ -390,7 +390,7 @@ export default function RegistrationModal({ isOpen, onClose, serviceType }: Regi
               <ul className="text-xs text-green-800 space-y-1">
                 <li>• Your account will be created instantly</li>
                 <li>• We'll analyze your requirements within 24 hours</li>
-                <li>• You'll receive a custom quote via email</li>
+                <li>• You'll receive service details via email</li>
                 <li>• Full access to all platform features immediately</li>
                 <li>• Dedicated account manager assigned</li>
               </ul>
