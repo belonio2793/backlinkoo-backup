@@ -330,10 +330,10 @@ export function HomepageBlogGenerator() {
                     <CheckCircle2 className="h-10 w-10 text-white" />
                   </div>
                   <h3 className="text-3xl font-bold mb-4 text-gray-900">
-                    Blog Post Preview Ready!
+                    5 Professional Blog Posts Ready!
                   </h3>
                   <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-                    Your SEO-optimized blog post about "{primaryKeyword}" has been generated with {generatedPost?.contextualLinks?.length || 1} contextual backlinks to your website.
+                    Your expert-crafted content portfolio about "{primaryKeyword}" has been generated with multiple contextual backlinks to boost your website's authority.
                   </p>
 
                   {/* Trial Backlink Notice - Only shown after completion */}
