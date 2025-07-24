@@ -14,14 +14,7 @@ export default function RegistrationModal({ isOpen, onClose, serviceType }: Regi
     lastName: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    company: '',
-    website: '',
-    phone: '',
-    country: '',
-    industry: '',
-    monthlyBudget: '',
-    projectDescription: ''
+    confirmPassword: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -38,17 +31,15 @@ export default function RegistrationModal({ isOpen, onClose, serviceType }: Regi
   };
 
   const validateForm = () => {
-    const { firstName, lastName, email, password, confirmPassword, company, website } = formData;
-    
+    const { firstName, lastName, email, password, confirmPassword } = formData;
+
     if (!firstName.trim()) return 'First name is required';
     if (!lastName.trim()) return 'Last name is required';
     if (!email.trim()) return 'Email address is required';
     if (!email.includes('@')) return 'Please enter a valid email address';
     if (password.length < 8) return 'Password must be at least 8 characters';
     if (password !== confirmPassword) return 'Passwords do not match';
-    if (!company.trim()) return 'Company name is required';
-    if (!website.trim()) return 'Website URL is required';
-    
+
     return null;
   };
 
@@ -81,14 +72,7 @@ export default function RegistrationModal({ isOpen, onClose, serviceType }: Regi
       lastName: '',
       email: '',
       password: '',
-      confirmPassword: '',
-      company: '',
-      website: '',
-      phone: '',
-      country: '',
-      industry: '',
-      monthlyBudget: '',
-      projectDescription: ''
+      confirmPassword: ''
     });
     onClose();
   };
@@ -246,141 +230,6 @@ export default function RegistrationModal({ isOpen, onClose, serviceType }: Regi
                       </button>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Business Information */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Business Information</h3>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Company Name *
-                    </label>
-                    <input
-                      type="text"
-                      name="company"
-                      value={formData.company}
-                      onChange={handleInputChange}
-                      placeholder="Your Company Inc."
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Website URL *
-                    </label>
-                    <input
-                      type="url"
-                      name="website"
-                      value={formData.website}
-                      onChange={handleInputChange}
-                      placeholder="https://yourwebsite.com"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      placeholder="+1 (555) 123-4567"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Country
-                    </label>
-                    <select
-                      name="country"
-                      value={formData.country}
-                      onChange={handleInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-                    >
-                      <option value="">Select country</option>
-                      <option value="US">United States</option>
-                      <option value="CA">Canada</option>
-                      <option value="GB">United Kingdom</option>
-                      <option value="AU">Australia</option>
-                      <option value="DE">Germany</option>
-                      <option value="FR">France</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Project Details */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Details</h3>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Industry
-                    </label>
-                    <select
-                      name="industry"
-                      value={formData.industry}
-                      onChange={handleInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-                    >
-                      <option value="">Select industry</option>
-                      <option value="ecommerce">E-commerce</option>
-                      <option value="saas">SaaS</option>
-                      <option value="finance">Finance</option>
-                      <option value="healthcare">Healthcare</option>
-                      <option value="education">Education</option>
-                      <option value="marketing">Marketing</option>
-                      <option value="realestate">Real Estate</option>
-                      <option value="technology">Technology</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Monthly SEO Budget
-                    </label>
-                    <select
-                      name="monthlyBudget"
-                      value={formData.monthlyBudget}
-                      onChange={handleInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-                    >
-                      <option value="">Select budget range</option>
-                      <option value="under1k">Under $1,000</option>
-                      <option value="1k-5k">$1,000 - $5,000</option>
-                      <option value="5k-10k">$5,000 - $10,000</option>
-                      <option value="10k-25k">$10,000 - $25,000</option>
-                      <option value="25k-50k">$25,000 - $50,000</option>
-                      <option value="over50k">Over $50,000</option>
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Project Description
-                  </label>
-                  <textarea
-                    name="projectDescription"
-                    value={formData.projectDescription}
-                    onChange={handleInputChange}
-                    placeholder="Tell us about your SEO goals, target keywords, or specific requirements..."
-                    rows={4}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors resize-none"
-                  />
                 </div>
               </div>
             </div>
