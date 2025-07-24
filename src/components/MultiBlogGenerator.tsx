@@ -558,10 +558,10 @@ export function MultiBlogGenerator({
             <div className="p-3 rounded-full bg-gradient-to-r from-green-500 to-emerald-500">
               <CheckCircle className="h-6 w-6 text-white" />
             </div>
-            <CardTitle className="text-2xl font-semibold">5 Professional Blog Posts Ready</CardTitle>
+            <CardTitle className="text-2xl font-semibold">🎊 Bonus Complete! 5 Professional Blog Posts Ready</CardTitle>
           </div>
           <p className="text-muted-foreground">
-            Your expert-crafted content portfolio is ready for preview and publication
+            You asked for 1 blog post, but we delivered 5! Your expert-crafted content portfolio is ready for preview and publication
           </p>
         </CardHeader>
         
