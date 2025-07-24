@@ -653,7 +653,10 @@ export function MultiBlogGenerator({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => window.open(post.previewUrl, '_blank')}
+                        onClick={() => {
+                          console.log('Opening preview URL:', post.previewUrl);
+                          window.open(post.previewUrl, '_blank');
+                        }}
                       >
                         <Eye className="h-3 w-3 mr-1" />
                         View Live Post
