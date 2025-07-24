@@ -416,46 +416,6 @@ export const RankingTracker = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20">
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        <div className="relative p-8">
-          <div className="flex items-center justify-between">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
-                  <TrendingUp className="h-8 w-8 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-4xl font-bold tracking-tight">SERP Position Analyzer</h1>
-                  <p className="text-lg text-muted-foreground mt-1">
-                    Track your keyword rankings across all major search engines
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                  <span className="text-sm font-medium">{rankings.length} Recent Checks</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Target className="h-5 w-5 text-primary" />
-                  <span className="text-sm font-medium">{savedTargets.length} Saved Targets</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="hidden md:flex items-center gap-4">
-              <div className="text-center p-4 rounded-lg bg-primary/10">
-                <div className="text-2xl font-bold text-primary">{rankings.filter(r => r.overallBest).length}</div>
-                <div className="text-xs text-muted-foreground">Found Rankings</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Enhanced Results Display */}
       <Tabs defaultValue="recent" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
