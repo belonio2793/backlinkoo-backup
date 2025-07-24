@@ -178,19 +178,13 @@ export default function ReportViewer() {
   ) || [];
 
   const handleIndexingService = () => {
+    setModalService('indexing');
     setShowRegistration(true);
-    toast({
-      title: 'Indexing Service',
-      description: 'Register to get your URLs indexed faster.',
-    });
   };
 
   const handleLinkBuilding = () => {
+    setModalService('linkbuilding');
     setShowRegistration(true);
-    toast({
-      title: 'Link Building Service',
-      description: 'Register to build high-quality links to your URLs.',
-    });
   };
 
   if (isLoading) {
