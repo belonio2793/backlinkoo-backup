@@ -430,6 +430,35 @@ export default function ReportViewer() {
           </div>
         </div>
 
+        {/* Services */}
+        <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
+          <h3 className="text-lg font-semibold text-blue-900 mb-3">Premium Services Available</h3>
+          <p className="text-blue-800 mb-4">Enhance your SEO efforts with our professional services</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              onClick={handleIndexingService}
+              className="flex items-center justify-center px-6 py-4 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors font-medium shadow-md"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Get URLs Indexed
+            </button>
+            <button
+              onClick={handleLinkBuilding}
+              className="flex items-center justify-center px-6 py-4 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors font-medium shadow-md"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+              Get Tier 2 and Tier 3 Links
+            </button>
+          </div>
+          <p className="text-xs text-blue-700 mt-3 text-center">
+            ✨ Supports up to 10,000 URLs per service • Professional results guaranteed
+          </p>
+        </div>
+
         {/* Footer */}
         <div className="mt-12 p-8 bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl text-center">
           <h3 className="text-xl font-bold text-gray-900 mb-2">Powered by Backlink ∞</h3>
