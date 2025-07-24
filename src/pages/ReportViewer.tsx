@@ -431,7 +431,7 @@ export default function ReportViewer() {
         </div>
 
         {/* Footer */}
-        <div className="mt-12 p-8 bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl text-center">
+        <div className="mt-6 p-8 bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl text-center">
           <h3 className="text-xl font-bold text-gray-900 mb-2">Powered by Backlink ∞</h3>
           <p className="text-gray-600 mb-6">
             Professional URL analysis and SEO reporting tools for modern businesses
