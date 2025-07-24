@@ -242,7 +242,9 @@ const Dashboard = () => {
 
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {userType === "user" ? (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <>
+            {activeSection === "dashboard" ? (
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 h-auto">
               <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Overview</span>
@@ -679,7 +681,11 @@ const Dashboard = () => {
             <TabsContent value="rank-tracker">
               <RankingTracker />
             </TabsContent>
-          </Tabs>
+              </Tabs>
+            ) : activeSection === "seo-tools" ? (
+              <SEOToolsSection user={user} />
+            ) : null}
+          </>
         ) : (
           // Admin Dashboard
           <Tabs defaultValue="verification" className="w-full">
