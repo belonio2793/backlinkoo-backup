@@ -393,8 +393,10 @@ export function MultiBlogGenerator({
             <CardTitle className="text-2xl font-semibold">
               <span className="inline-flex items-center">
                 Backlink ∞ Is Working
-                <span className="ml-1 animate-pulse">
-                  <span className="inline-block w-2 h-6 bg-blue-500 animate-blink"></span>
+                <span className="ml-1 inline-flex">
+                  <span className="animate-bounce" style={{animationDelay: '0ms'}}>.</span>
+                  <span className="animate-bounce" style={{animationDelay: '150ms'}}>.</span>
+                  <span className="animate-bounce" style={{animationDelay: '300ms'}}>.</span>
                 </span>
               </span>
             </CardTitle>
