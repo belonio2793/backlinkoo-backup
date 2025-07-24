@@ -283,7 +283,7 @@ export function HomepageBlogGenerator() {
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
-                      <span>24-hour trial backlink (upgrade to keep forever)</span>
+                      <span>Permanent link</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
@@ -371,7 +371,7 @@ export function HomepageBlogGenerator() {
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-2 text-gray-900">���� Backlink Preview Details</h4>
+                      <h4 className="font-semibold mb-2 text-gray-900">🔗 Backlink Preview Details</h4>
                       <ul className="space-y-1 text-sm text-gray-700">
                         <li>• Target: {targetUrl}</li>
                         <li>• Contextual Links: {generatedPost?.contextualLinks?.length || 1}</li>
