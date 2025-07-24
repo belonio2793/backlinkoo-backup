@@ -267,7 +267,7 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
                 <div className="space-y-2">
                   <Label>SEO Tool Subscriptions</Label>
                   <p className="text-sm text-muted-foreground">
-                    Subscribe to powerful SEO tools for ongoing campaigns
+                    Get access to all SEO tools and features with one monthly subscription
                   </p>
                   <RadioGroup value={subscriptionTier} onValueChange={setSubscriptionTier}>
                     {Object.entries(subscriptionPlans).map(([key, plan]) => (
