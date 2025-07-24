@@ -215,7 +215,7 @@ export function HomepageBlogGenerator() {
               <MultiBlogGenerator
                 keyword={primaryKeyword}
                 targetUrl={targetUrl}
-                onComplete={(posts) => {
+                onComplete={async (posts) => {
                   // Handle multiple posts completion - MultiBlogGenerator already stored all posts
                   console.log(`✅ MultiBlogGenerator completed with ${posts.length} posts`);
                   setAllGeneratedPosts(posts);
@@ -228,10 +228,43 @@ export function HomepageBlogGenerator() {
                     setGeneratedPost({
                       title: firstPost.title,
                       content: firstPost.content,
-                      contextualLinks: firstPost.content.contextualLinks || [],
+                      contextualLinks: firstPost.content?.contextualLinks || [],
                       seoScore: firstPost.stats.seoScore
                     });
                     setPublishedUrl(firstPost.previewUrl || '');
+                  }
+
+                  // Create campaign entry for registered users with all preview URLs
+                  const { data: { user } } = await supabase.auth.getUser();
+                  if (user) {
+                    try {
+                      const allPreviewUrls = posts.filter(p => p.previewUrl).map(p => p.previewUrl);
+                      const totalBacklinks = posts.reduce((sum, p) => sum + (p.stats.backlinks || 1), 0);
+
+                      const { data: campaignData, error: campaignError } = await supabase
+                        .from('campaigns')
+                        .insert({
+                          name: `5-Post Campaign: ${primaryKeyword}`,
+                          target_url: targetUrl,
+                          keywords: [primaryKeyword],
+                          status: 'completed',
+                          links_requested: posts.length,
+                          links_delivered: posts.length,
+                          completed_backlinks: allPreviewUrls,
+                          user_id: user.id,
+                          credits_used: posts.length
+                        })
+                        .select()
+                        .single();
+
+                      if (campaignError) {
+                        console.warn('Failed to create multi-post campaign:', campaignError);
+                      } else {
+                        console.log('✅ Multi-post campaign created successfully:', campaignData);
+                      }
+                    } catch (error) {
+                      console.warn('Failed to create multi-post campaign:', error);
+                    }
                   }
 
                   toast({
