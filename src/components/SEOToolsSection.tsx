@@ -3,11 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Zap, 
-  Target, 
-  Activity, 
-  Clock, 
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import {
+  Zap,
+  Target,
+  Activity,
+  Clock,
   CheckCircle2,
   AlertTriangle,
   Plus,
@@ -22,7 +24,14 @@ import {
   Filter,
   Settings,
   CreditCard,
-  Crown
+  Crown,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Download,
+  X,
+  AlertCircle
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
