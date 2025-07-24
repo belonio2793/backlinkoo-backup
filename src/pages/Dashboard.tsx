@@ -30,6 +30,7 @@ import { KeywordResearchTool } from "@/components/KeywordResearchTool";
 import { RankingTracker } from "@/components/RankingTracker";
 import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
 import AdminVerificationQueue from "@/components/AdminVerificationQueue";
+import SEOToolsSection from "@/components/SEOToolsSection";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
