@@ -116,3 +116,14 @@ All colors MUST be HSL.
     font-family: 'Roboto Mono', 'Consolas', 'Monaco', monospace;
   }
 }
+
+@layer utilities {
+  .animate-blink {
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+}
