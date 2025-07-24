@@ -553,48 +553,6 @@ export const KeywordResearchTool = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20">
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        <div className="relative p-8">
-          <div className="flex items-center justify-between">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
-                  <Search className="h-8 w-8 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-4xl font-bold tracking-tight">Advanced Keyword Research</h1>
-                  <p className="text-lg text-muted-foreground mt-1">
-                    Discover high-impact keywords with comprehensive market intelligence
-                  </p>
-                </div>
-              </div>
-              
-              {userLocation && (
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    Auto-detected: {userLocation.city && userLocation.city + ', '}{userLocation.country}
-                  </span>
-                </div>
-              )}
-            </div>
-            
-            <div className="hidden md:flex items-center gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">{keywords.length}</div>
-                <div className="text-xs text-muted-foreground">Keywords Found</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{selectedEngine.charAt(0).toUpperCase() + selectedEngine.slice(1)}</div>
-                <div className="text-xs text-muted-foreground">Engine</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Enhanced Search Interface */}
       <Card className="border-0 shadow-sm">
         <CardContent className="p-8">
@@ -607,6 +565,14 @@ export const KeywordResearchTool = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="h-11 border-2 focus:border-primary transition-colors"
               />
+              {userLocation && (
+                <div className="flex items-center gap-2 text-xs">
+                  <MapPin className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-muted-foreground">
+                    Auto-detected: {userLocation.city && userLocation.city + ', '}{userLocation.country}
+                  </span>
+                </div>
+              )}
             </div>
             
             <div className="space-y-2">
