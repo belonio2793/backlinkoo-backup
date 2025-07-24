@@ -386,7 +386,7 @@ const Dashboard = () => {
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <ExternalLink className="h-3 w-3" />
-                                    <span className="truncate max-w-[200px]">{campaign.target_url}</span>
+                                    <span className="truncate max-w-[120px] sm:max-w-[200px]">{campaign.target_url}</span>
                                   </div>
                                 </div>
                               </div>
