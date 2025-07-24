@@ -24,6 +24,7 @@ import { HomepageBlogGenerator } from "@/components/HomepageBlogGenerator";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
 import { Footer } from "@/components/Footer";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const navigate = useNavigate();
