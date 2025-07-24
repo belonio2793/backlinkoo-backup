@@ -136,14 +136,13 @@ export class LiveBlogPublisher {
 
   async getBlogPost(slug: string): Promise<LiveBlogPost | null> {
     try {
-      // Find post by slug in memory
-      for (const [id, post] of this.inMemoryPosts.entries()) {
-        if (post.slug === slug && post.status === 'published') {
-          // Increment view count
-          post.viewCount = (post.viewCount || 0) + 1;
-          this.inMemoryPosts.set(id, post);
-          return post;
-        }
+      // Direct lookup by slug since we store by slug
+      const post = this.inMemoryPosts.get(slug);
+      if (post && post.status === 'published') {
+        // Increment view count
+        post.viewCount = (post.viewCount || 0) + 1;
+        this.inMemoryPosts.set(slug, post);
+        return post;
       }
       return null;
     } catch (error) {
