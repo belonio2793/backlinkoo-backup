@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { SavePostSignupPopup } from './SavePostSignupPopup';
 import { GenerationSequence } from './GenerationSequence';
 import { InteractiveContentGenerator } from './InteractiveContentGenerator';
+import { MultiBlogGenerator } from './MultiBlogGenerator';
 import {
   Sparkles,
   Link2,
