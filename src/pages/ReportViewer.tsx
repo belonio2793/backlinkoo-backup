@@ -56,8 +56,19 @@ export default function ReportViewer() {
   }, [reportId]);
 
   const generateDemoData = (reportId: string) => {
-    // Sample URLs for demo
-    const sampleUrls = [
+    // Enhanced sample URLs for demo preview
+    const sampleUrls = reportId === 'demo_preview_12345' ? [
+      'https://techcrunch.com/article-example',
+      'https://forbes.com/business-insights',
+      'https://mashable.com/tech-review',
+      'https://entrepreneur.com/startup-guide',
+      'https://wired.com/innovation-story',
+      'https://theverge.com/product-launch',
+      'https://arstechnica.com/deep-dive',
+      'https://engadget.com/gadget-review',
+      'https://venturebeat.com/industry-news',
+      'https://recode.net/market-analysis'
+    ] : [
       'https://example.com/page1',
       'https://another.com/blog',
       'https://website.com/article',
