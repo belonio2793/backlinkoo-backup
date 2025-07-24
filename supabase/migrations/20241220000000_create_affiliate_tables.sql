@@ -43,6 +43,17 @@ CREATE TABLE IF NOT EXISTS affiliate_payments (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Create affiliate_clicks table for tracking
+CREATE TABLE IF NOT EXISTS affiliate_clicks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    affiliate_id UUID NOT NULL REFERENCES affiliate_programs(id) ON DELETE CASCADE,
+    source_url TEXT,
+    user_agent TEXT,
+    ip_address INET,
+    clicked_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_affiliate_programs_user_id ON affiliate_programs(user_id);
 CREATE INDEX IF NOT EXISTS idx_affiliate_programs_affiliate_code ON affiliate_programs(affiliate_code);
