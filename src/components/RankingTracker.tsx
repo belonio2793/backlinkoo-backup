@@ -109,9 +109,17 @@ export const RankingTracker = () => {
 
   const loadSavedTargets = async () => {
     try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        console.log('No authenticated user found');
+        setSavedTargets([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('ranking_dashboard')
         .select('*')
+        .eq('user_id', user.id)
         .order('target_created_at', { ascending: false });
 
       if (error) throw error;
