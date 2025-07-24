@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<'starter_100' | 'starter_200' | 'starter_300'>('starter_200');
