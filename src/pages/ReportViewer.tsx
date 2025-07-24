@@ -393,8 +393,17 @@ export default function ReportViewer() {
 
         {/* Results Table */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-          <div className="bg-gray-50 p-4 border-b border-gray-200">
+          <div className="bg-gray-50 p-4 border-b border-gray-200 flex justify-between items-center">
             <h3 className="text-lg font-semibold text-gray-900">URL Analysis Results</h3>
+            <button
+              onClick={handleRunIndexing}
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors font-medium text-sm shadow-sm"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Run Indexing
+            </button>
           </div>
           
           <div className="max-h-[600px] overflow-y-auto">
