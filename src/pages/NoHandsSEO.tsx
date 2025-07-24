@@ -109,19 +109,47 @@ const NoHandsSEO = () => {
 
       if (error) throw error;
 
-      // Deduct credits (10 credits for 10 links)
-      const { error: creditError } = await supabase.rpc('spend_credits', {
-        user_id: user.id,
-        amount: 10,
-        campaign_id: data.id,
-        description: `NO Hands SEO Campaign: ${campaignName}`
-      });
+      // Check and deduct credits (10 credits for 10 links)
+      const { data: creditsData, error: creditsError } = await supabase
+        .from('credits')
+        .select('amount')
+        .eq('user_id', user.id)
+        .single();
 
-      if (creditError) {
-        // If credit deduction fails, delete the campaign
+      if (creditsError || !creditsData) {
         await supabase.from('campaigns').delete().eq('id', data.id);
-        throw new Error('Insufficient credits. Please purchase more credits to create this campaign.');
+        throw new Error('Unable to verify credit balance. Please try again.');
       }
+
+      if (creditsData.amount < 10) {
+        await supabase.from('campaigns').delete().eq('id', data.id);
+        throw new Error('Insufficient credits. You need 10 credits to create this campaign. Please purchase more credits.');
+      }
+
+      // Deduct credits
+      const { error: updateCreditsError } = await supabase
+        .from('credits')
+        .update({
+          amount: creditsData.amount - 10,
+          total_used: creditsData.amount - 10
+        })
+        .eq('user_id', user.id);
+
+      if (updateCreditsError) {
+        await supabase.from('campaigns').delete().eq('id', data.id);
+        throw updateCreditsError;
+      }
+
+      // Record transaction
+      await supabase
+        .from('credit_transactions')
+        .insert({
+          user_id: user.id,
+          amount: -10,
+          type: 'campaign_creation',
+          campaign_id: data.id,
+          description: `NO Hands SEO Campaign: ${campaignName}`
+        });
 
       toast({
         title: "Campaign Created Successfully!",
