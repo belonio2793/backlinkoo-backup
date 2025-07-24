@@ -69,11 +69,18 @@ export default function BacklinkReport() {
       const generatedUrl = `${window.location.origin}/report/${reportId}`;
       
       // Store report data in localStorage for demo
+      const createdDate = new Date();
+      const formattedDate = createdDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
       const reportData = {
         id: reportId,
-        campaignName: `Report ${reportId}`,
+        campaignName: `Report Generated ${formattedDate}`,
         backlinks: backlinks,
-        createdAt: new Date().toISOString(),
+        createdAt: createdDate.toISOString(),
         totalBacklinks: backlinks.length,
         // Mock verification results
         results: backlinks.map(bl => ({
