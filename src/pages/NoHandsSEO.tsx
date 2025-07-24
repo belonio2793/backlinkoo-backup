@@ -6,30 +6,24 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Zap, 
-  Link2, 
-  Target, 
-  ArrowRight, 
-  CheckCircle, 
-  Infinity,
+import {
+  Zap,
+  Link2,
+  Target,
+  ArrowRight,
+  CheckCircle,
   Globe,
   TrendingUp,
   Shield,
   Clock,
-  AlertCircle,
-  FileText,
-  Send,
-  Menu,
-  X,
-  ChevronRight,
-  Sparkles
+  Send
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
 import RegistrationModal from "@/components/RegistrationModal";
+import ToolsHeader from "@/components/shared/ToolsHeader";
 
 const NoHandsSEO = () => {
   const navigate = useNavigate();
