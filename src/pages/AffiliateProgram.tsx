@@ -89,15 +89,44 @@ const AffiliateProgram = () => {
         <section className="py-24 px-6 bg-gradient-to-br from-primary/5 to-blue-50/30">
           <div className="container mx-auto text-center">
             <h1 className="text-5xl md:text-6xl font-light mb-6 tracking-tight">
-              Earn 50% Commission
+              Partner with Us & Earn 50%
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-              Join our affiliate program and earn substantial commissions by referring customers to our premium backlink platform.
+            <p className="text-xl md:text-2xl text-muted-foreground mb-6 max-w-3xl mx-auto leading-relaxed">
+              Join thousands of marketers earning substantial commissions by referring clients to our premium SEO platform.
             </p>
-            <Button size="lg" onClick={() => navigate("/login")} className="text-lg px-8 py-6">
-              Join Now - Sign Up Free
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Get your unique tracking link, share it with your audience, and earn 50% of everything they spend — forever.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+              <Button size="lg" onClick={() => navigate("/login")} className="text-lg px-8 py-6">
+                Join Now - It's Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-lg px-8 py-6"
+              >
+                Learn How It Works
+              </Button>
+            </div>
+
+            {/* Trust Indicators */}
+            <div className="grid grid-cols-3 gap-8 max-w-lg mx-auto text-center">
+              <div>
+                <div className="text-2xl font-bold text-primary mb-1">50%</div>
+                <div className="text-sm text-muted-foreground">Commission Rate</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-primary mb-1">$100</div>
+                <div className="text-sm text-muted-foreground">Min. Payout</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-primary mb-1">∞</div>
+                <div className="text-sm text-muted-foreground">Lifetime Value</div>
+              </div>
+            </div>
           </div>
         </section>
 
