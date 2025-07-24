@@ -87,6 +87,29 @@ export class AffiliateService {
       timestamp: Date.now(),
       sourceUrl: sourceUrl || document.referrer
     }));
+
+    // Also track click in database for analytics
+    try {
+      const affiliate = await this.getAffiliateByCode(affiliateCode);
+      if (affiliate) {
+        // Create a click tracking record
+        const { error } = await supabase
+          .from('affiliate_clicks')
+          .insert({
+            affiliate_id: affiliate.id,
+            source_url: sourceUrl || document.referrer,
+            user_agent: navigator.userAgent,
+            ip_address: null, // Will be set by database trigger if available
+            clicked_at: new Date().toISOString()
+          });
+
+        if (error) {
+          console.error('Error tracking click:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error in click tracking:', error);
+    }
   }
 
   // Convert referral when user makes purchase
