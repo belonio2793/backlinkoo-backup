@@ -280,7 +280,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
           <TabsTrigger value="rank-tracker">Rankings</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="dashboard" className="space-y-6">
+        <TabsContent value="no-hands-seo" className="space-y-6">
           {/* Stats Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card>
