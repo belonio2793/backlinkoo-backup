@@ -202,11 +202,11 @@ export function MultiBlogGenerator({
       
       // Add some code stream effects
       const codeLines = [
-        `initialize_content_engine(keyword="${keyword}")`,
-        `load_expert_knowledge_base(experts=${experts.length})`,
-        `configure_seo_optimizer(target="${targetUrl}")`,
-        `allocate_processing_power(cores=128, gpu=true)`,
-        `start_parallel_generation(blogs=5, concurrent=true)`
+        `backlink_infinity.init_content_engine(keyword="${keyword}")`,
+        `backlink_infinity.load_expert_writers(count=${experts.length})`,
+        `backlink_infinity.configure_seo_targeting(url="${targetUrl}")`,
+        `backlink_infinity.allocate_resources(cores=128, priority=high)`,
+        `backlink_infinity.start_campaign_generation(posts=5, parallel=true)`
       ];
       
       if (i < codeLines.length) {
