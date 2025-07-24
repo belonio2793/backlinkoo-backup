@@ -86,6 +86,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
       checkSubscriptionStatus();
       fetchProjects();
       fetchRecentPosts();
+      loadBillingEmailPreferences();
     }
   }, [user]);
 
