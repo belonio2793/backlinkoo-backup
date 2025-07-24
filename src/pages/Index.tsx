@@ -647,8 +647,11 @@ const Index = () => {
       {/* Payment Modal */}
       <PaymentModal
         isOpen={paymentModalOpen}
-        onClose={() => setPaymentModalOpen(false)}
-        initialCredits={pricingPlans.find(p => p.id === selectedPlan)?.credits}
+        onClose={() => {
+          setPaymentModalOpen(false);
+          setIsCustomPackage(false);
+        }}
+        initialCredits={isCustomPackage ? customCredits : pricingPlans.find(p => p.id === selectedPlan)?.credits}
       />
 
       {/* Footer */}
