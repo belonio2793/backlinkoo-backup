@@ -87,7 +87,7 @@ const Dashboard = () => {
       const { data: creditsData, error: creditsError } = await supabase
         .from('credits')
         .select('amount')
-        .eq('user_id', user.id)
+        .eq('user_id', authUser.id)
         .single();
 
       console.log('Credits data:', creditsData, 'Credits error:', creditsError);
