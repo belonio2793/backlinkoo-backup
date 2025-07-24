@@ -402,15 +402,30 @@ export function HomepageBlogGenerator() {
                   </div>
                 </div>
 
+                {/* Show all generated blog posts */}
+                {allGeneratedPosts.length > 0 && (
+                  <div className="space-y-4 mb-6">
+                    <h4 className="text-lg font-semibold text-center">🎉 Your 5 Live Backlink Posts:</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {allGeneratedPosts.map((post, index) => (
+                        <div key={post.id} className="p-3 border rounded-lg bg-white">
+                          <div className="text-sm font-medium mb-1">{post.expert.avatar} {post.expert.name}</div>
+                          <div className="text-xs text-gray-600 mb-2 truncate">{post.title}</div>
+                          <Button
+                            size="sm"
+                            onClick={() => window.open(post.previewUrl, '_blank')}
+                            className="w-full text-xs"
+                          >
+                            <ExternalLink className="mr-1 h-3 w-3" />
+                            View Live Post
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <Button
-                    onClick={() => window.open(publishedUrl, '_blank')}
-                    size="lg"
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-                  >
-                    <ExternalLink className="mr-2 h-5 w-5" />
-                    View Live Backlinks
-                  </Button>
                   {!currentUser && (
                     <Button
                       onClick={() => setShowSignupPopup(true)}
@@ -418,7 +433,7 @@ export function HomepageBlogGenerator() {
                       className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
                     >
                       <Save className="mr-2 h-5 w-5" />
-                      Keep Links Forever
+                      Keep All 5 Links Forever
                     </Button>
                   )}
                   <Button
