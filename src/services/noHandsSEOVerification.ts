@@ -217,7 +217,13 @@ export class NoHandsSEOVerificationService {
         return { pending: 0, approved: 0, rejected: 0, avgVerificationTime: 0 };
       }
 
-      const pending = data.filter(c => c.verification_status === 'pending').length;
+      // Filter for NO Hands SEO campaigns client-side
+      const noHandsSEOData = data.filter(campaign =>
+        campaign.name?.includes('NO Hands SEO') ||
+        campaign.campaign_type === 'no_hands_seo'
+      );
+
+      const pending = noHandsSEOData.filter(c => c.verification_status === 'pending').length;
       const approved = data.filter(c => c.verification_status === 'approved').length;
       const rejected = data.filter(c => c.verification_status === 'rejected').length;
 
