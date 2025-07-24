@@ -305,12 +305,12 @@ export function HomepageBlogGenerator() {
                   {isGenerating ? (
                     <>
                       <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                      Generating Your Trial Backlink...
+                      Generating 5 Professional Blog Posts...
                     </>
                   ) : (
                     <>
                       <Sparkles className="mr-3 h-5 w-5" />
-                      Claim Now
+                      Generate 5 Blog Posts
                     </>
                   )}
                 </Button>
