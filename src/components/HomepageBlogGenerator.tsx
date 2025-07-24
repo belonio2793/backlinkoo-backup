@@ -195,7 +195,6 @@ export function HomepageBlogGenerator() {
           </h2>
           <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed font-light">
             Enter your URL and keyword to generate a high-quality blog post with a natural backlink.
-            Powered by advanced AI and published instantly on our high-authority domain.
           </p>
         </div>
 
@@ -356,7 +355,7 @@ export function HomepageBlogGenerator() {
                 <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 mb-8 border border-green-100">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                     <div>
-                      <h4 className="font-semibold mb-2 text-gray-900">📝 Generated Content Details</h4>
+                      <h4 className="font-semibold mb-2 text-gray-900">���� Generated Content Details</h4>
                       <ul className="space-y-1 text-sm text-gray-700">
                         <li>• Title: {generatedPost?.title}</li>
                         <li>• Word Count: {generatedPost?.wordCount || 1200}+ words</li>
