@@ -350,7 +350,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
 
       {/* Subscription Management Modal */}
       <Dialog open={isSubscriptionModalOpen} onOpenChange={setIsSubscriptionModalOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CreditCard className="h-5 w-5" />
@@ -361,172 +361,202 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-6">
-            {/* Current Plan */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Current Plan</h3>
-                <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
-                  <CheckCircle2 className="h-3 w-3 mr-1" />
-                  {subscriptionData.status}
-                </Badge>
-              </div>
+          <Tabs defaultValue="subscription" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="subscription">Plan</TabsTrigger>
+              <TabsTrigger value="billing">Billing</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
 
-              <Card>
-                <CardContent className="p-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Plan</p>
-                      <p className="font-medium">{subscriptionData.plan}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Price</p>
-                      <p className="font-medium">{subscriptionData.price}/{subscriptionData.billing.toLowerCase()}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Next Billing</p>
-                      <p className="font-medium">{subscriptionData.nextBillingDate}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Email</p>
-                      <p className="font-medium">{subscriptionData.email}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Separator />
-
-            {/* Features Included */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold">Features Included</h3>
-              <div className="grid grid-cols-1 gap-2">
-                {subscriptionData.features.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <span className="text-sm">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Payment Method */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold">Payment Method</h3>
-              <Card>
-                <CardContent className="p-4">
+            <div className="overflow-y-auto max-h-[50vh] mt-4">
+              <TabsContent value="subscription" className="space-y-4 mt-0">
+                {/* Current Plan */}
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <CreditCard className="h-8 w-8 text-muted-foreground" />
-                      <div>
-                        <p className="font-medium">{subscriptionData.cardBrand} ••••{subscriptionData.cardLast4}</p>
-                        <p className="text-sm text-muted-foreground">Expires 12/2027</p>
+                    <h3 className="text-lg font-semibold">Current Plan</h3>
+                    <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      {subscriptionData.status}
+                    </Badge>
+                  </div>
+
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Plan</p>
+                          <p className="font-medium">{subscriptionData.plan}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Price</p>
+                          <p className="font-medium">{subscriptionData.price}/{subscriptionData.billing.toLowerCase()}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Next Billing</p>
+                          <p className="font-medium">{subscriptionData.nextBillingDate}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Email</p>
+                          <p className="font-medium">{subscriptionData.email}</p>
+                        </div>
                       </div>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Update
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Features Included */}
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold">Features Included</h3>
+                  <div className="grid grid-cols-1 gap-2">
+                    {subscriptionData.features.map((feature, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        <span className="text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="billing" className="space-y-4 mt-0">
+                {/* Payment Method */}
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold">Payment Method</h3>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <CreditCard className="h-8 w-8 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium">{subscriptionData.cardBrand} ••••{subscriptionData.cardLast4}</p>
+                            <p className="text-sm text-muted-foreground">Expires 12/2027</p>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          Update
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Billing History */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Recent Invoices</h3>
+                    <Button variant="outline" size="sm" onClick={downloadInvoice}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Feb 15, 2024</span>
+                          <span className="font-medium">$29.00</span>
+                          <Badge variant="outline" className="text-xs">Paid</Badge>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Jan 15, 2024</span>
+                          <span className="font-medium">$29.00</span>
+                          <Badge variant="outline" className="text-xs">Paid</Badge>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Dec 15, 2023</span>
+                          <span className="font-medium">$29.00</span>
+                          <Badge variant="outline" className="text-xs">Paid</Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
 
-            <Separator />
+              <TabsContent value="settings" className="space-y-4 mt-0">
+                {/* Account Settings */}
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold">Account Settings</h3>
+                  <Card>
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Email Notifications</p>
+                          <p className="text-sm text-muted-foreground">Receive billing and usage alerts</p>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          <Mail className="h-4 w-4 mr-2" />
+                          Configure
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
 
-            {/* Billing History */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Recent Invoices</h3>
-                <Button variant="outline" size="sm" onClick={downloadInvoice}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Download Latest
-                </Button>
-              </div>
-              <Card>
-                <CardContent className="p-4">
+                {/* Cancellation */}
+                {!showCancelConfirmation ? (
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>February 15, 2024</span>
-                      <span className="font-medium">$29.00</span>
-                      <Badge variant="outline" className="text-xs">Paid</Badge>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span>January 15, 2024</span>
-                      <span className="font-medium">$29.00</span>
-                      <Badge variant="outline" className="text-xs">Paid</Badge>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span>December 15, 2023</span>
-                      <span className="font-medium">$29.00</span>
-                      <Badge variant="outline" className="text-xs">Paid</Badge>
-                    </div>
+                    <h3 className="text-lg font-semibold text-red-600">Danger Zone</h3>
+                    <Card className="border-red-200">
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
+                          <div>
+                            <p className="font-medium text-red-800">Cancel Subscription</p>
+                            <p className="text-sm text-red-600">You'll continue to have access until your current billing period ends.</p>
+                          </div>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => setShowCancelConfirmation(true)}
+                            className="w-full"
+                          >
+                            Cancel Plan
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
+                ) : (
+                  <div className="space-y-3">
+                    <Card className="border-red-200 bg-red-50">
+                      <CardContent className="p-4">
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="h-5 w-5 text-red-600" />
+                            <h3 className="font-semibold text-red-800">Confirm Cancellation</h3>
+                          </div>
+                          <p className="text-sm text-red-700">
+                            Are you sure you want to cancel your subscription? You'll lose access to all premium features
+                            after {subscriptionData.nextBillingDate}.
+                          </p>
+                          <div className="space-y-2">
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={handleCancelSubscription}
+                              disabled={isCancellingSubscription}
+                              className="w-full"
+                            >
+                              {isCancellingSubscription ? "Cancelling..." : "Yes, Cancel Subscription"}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowCancelConfirmation(false)}
+                              disabled={isCancellingSubscription}
+                              className="w-full"
+                            >
+                              Keep Subscription
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </TabsContent>
             </div>
-
-            {/* Cancellation */}
-            {!showCancelConfirmation ? (
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-red-600">Danger Zone</h3>
-                <Card className="border-red-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-red-800">Cancel Subscription</p>
-                        <p className="text-sm text-red-600">You'll continue to have access until your current billing period ends.</p>
-                      </div>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => setShowCancelConfirmation(true)}
-                      >
-                        Cancel Plan
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <Card className="border-red-200 bg-red-50">
-                  <CardContent className="p-4">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <AlertCircle className="h-5 w-5 text-red-600" />
-                        <h3 className="font-semibold text-red-800">Confirm Cancellation</h3>
-                      </div>
-                      <p className="text-sm text-red-700">
-                        Are you sure you want to cancel your subscription? You'll lose access to all premium features
-                        after {subscriptionData.nextBillingDate}.
-                      </p>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={handleCancelSubscription}
-                          disabled={isCancellingSubscription}
-                        >
-                          {isCancellingSubscription ? "Cancelling..." : "Yes, Cancel Subscription"}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setShowCancelConfirmation(false)}
-                          disabled={isCancellingSubscription}
-                        >
-                          Keep Subscription
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-          </div>
+          </Tabs>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsSubscriptionModalOpen(false)}>
