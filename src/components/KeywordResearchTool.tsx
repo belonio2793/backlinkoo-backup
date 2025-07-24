@@ -102,26 +102,44 @@ export const KeywordResearchTool = () => {
     const detectLocation = async () => {
       try {
         console.log('KeywordResearchTool: Attempting to detect location');
-        const response = await fetch('https://ipapi.co/json/');
+
+        // Use a timeout to prevent hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+        const response = await fetch('https://ipapi.co/json/', {
+          signal: controller.signal,
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (compatible; KeywordTool/1.0)'
+          }
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
         console.log('KeywordResearchTool: Location data received:', data);
-        
+
         // Validate that the detected country exists in our countries list
         const detectedCountryCode = data.country_code || 'US';
         const countryExists = countries.find(c => c.code === detectedCountryCode);
         const finalCountryCode = countryExists ? detectedCountryCode : 'US';
-        
+
         // Validate that the detected city exists in the selected country's cities list
         const detectedCity = data.city || '';
         const countryCities = cities[finalCountryCode as keyof typeof cities] || [];
         const cityExists = countryCities.includes(detectedCity);
-        
+
         setUserLocation({
           country: data.country_name || 'United States',
           city: detectedCity
         });
         setSelectedCountry(finalCountryCode);
-        
+
         // Only set the city if it exists in our predefined list for that country
         if (cityExists) {
           setSelectedCity(detectedCity);
@@ -130,7 +148,7 @@ export const KeywordResearchTool = () => {
         }
       } catch (error) {
         console.log('KeywordResearchTool: Could not detect location, using defaults', error);
-        // Set safe defaults on error
+        // Set safe defaults on error - this handles network errors, timeouts, CORS issues, etc.
         setUserLocation({
           country: 'United States',
           city: ''
@@ -390,7 +408,7 @@ export const KeywordResearchTool = () => {
     { code: "SS", name: "South Sudan", flag: "🇸🇸" },
     { code: "ST", name: "São Tomé and Príncipe", flag: "🇸🇹" },
     { code: "SV", name: "El Salvador", flag: "🇸🇻" },
-    { code: "SX", name: "Sint Maarten", flag: "🇸🇽" },
+    { code: "SX", name: "Sint Maarten", flag: "���🇽" },
     { code: "SY", name: "Syria", flag: "🇸🇾" },
     { code: "SZ", name: "Eswatini", flag: "🇸🇿" },
     { code: "TC", name: "Turks and Caicos Islands", flag: "🇹🇨" },
