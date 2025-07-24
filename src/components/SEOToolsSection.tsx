@@ -77,19 +77,23 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
 
   const checkSubscriptionStatus = async () => {
     try {
-      // Check if user has active subscription for SEO Tools
-      const { data, error } = await supabase
-        .from('seo_subscriptions')
-        .select('*')
-        .eq('user_id', user?.id)
-        .eq('status', 'active')
-        .single();
+      // For development, set to false to show subscription UI
+      // When tables are created, uncomment below:
+      // const { data, error } = await supabase
+      //   .from('seo_subscriptions')
+      //   .select('*')
+      //   .eq('user_id', user?.id)
+      //   .eq('status', 'active')
+      //   .single();
+      //
+      // if (!error && data) {
+      //   setIsSubscribed(true);
+      // }
 
-      if (!error && data) {
-        setIsSubscribed(true);
-      }
+      setIsSubscribed(false);
     } catch (error) {
       console.error('Error checking subscription:', error);
+      setIsSubscribed(false);
     }
   };
 
