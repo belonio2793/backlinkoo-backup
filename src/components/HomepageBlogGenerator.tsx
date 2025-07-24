@@ -198,7 +198,15 @@ export function HomepageBlogGenerator() {
 
         <div className="max-w-4xl mx-auto">
           {!isCompleted ? (
-            <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
+            isGenerating ? (
+              <GenerationSequence
+                isGenerating={isGenerating}
+                onComplete={handleGenerationComplete}
+                keyword={primaryKeyword}
+                targetUrl={targetUrl}
+              />
+            ) : (
+              <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
               <CardHeader className="text-center pb-6">
                 <div className="flex items-center justify-center gap-3 mb-4">
                   <div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500">
@@ -303,6 +311,7 @@ export function HomepageBlogGenerator() {
                 </p>
               </CardContent>
             </Card>
+            )
           ) : (
             // Success state
             <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
