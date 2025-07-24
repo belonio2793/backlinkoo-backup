@@ -199,7 +199,7 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {userType === "user" ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 h-auto">
+            <TabsList className="grid w-full grid-cols-5 h-auto">
               <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Overview</span>
                 <span className="sm:hidden">Home</span>
@@ -207,6 +207,10 @@ const Dashboard = () => {
               <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Campaigns</span>
                 <span className="sm:hidden">Camps</span>
+              </TabsTrigger>
+              <TabsTrigger value="no-hands-seo" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
+                <span className="hidden sm:inline">NO Hands SEO</span>
+                <span className="sm:hidden">NHS</span>
               </TabsTrigger>
               <TabsTrigger value="keyword-research" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Keyword Research</span>
