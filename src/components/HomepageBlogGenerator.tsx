@@ -206,11 +206,27 @@ export function HomepageBlogGenerator() {
                 keyword={primaryKeyword}
                 targetUrl={targetUrl}
                 onComplete={(posts) => {
-                  // Handle multiple posts completion
+                  // Handle multiple posts completion - MultiBlogGenerator already stored all posts
+                  console.log(`✅ MultiBlogGenerator completed with ${posts.length} posts`);
+                  setIsCompleted(true);
+                  setIsGenerating(false);
+
+                  // Set the first post as the main generated post for display
                   const firstPost = posts[0];
                   if (firstPost?.content) {
-                    handleGenerationComplete(firstPost.content);
+                    setGeneratedPost({
+                      title: firstPost.title,
+                      content: firstPost.content,
+                      contextualLinks: firstPost.content.contextualLinks || [],
+                      seoScore: firstPost.stats.seoScore
+                    });
+                    setPublishedUrl(firstPost.previewUrl || '');
                   }
+
+                  toast({
+                    title: "🎉 5 Blog Posts Generated!",
+                    description: "Your backlink campaign is ready! Click the buttons below to view your live posts.",
+                  });
                 }}
                 onSaveCampaign={() => setShowSignupPopup(true)}
               />
