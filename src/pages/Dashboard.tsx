@@ -74,7 +74,7 @@ const Dashboard = () => {
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
-        .eq('user_id', user.id)
+        .eq('user_id', authUser.id)
         .single();
 
       console.log('Profile data:', profile, 'Profile error:', profileError);
