@@ -483,13 +483,13 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
                     <CardContent className="p-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium">Email Notifications</p>
-                          <p className="text-sm text-muted-foreground">Receive billing and usage alerts</p>
+                          <p className="font-medium">Billing Email Notifications</p>
+                          <p className="text-sm text-muted-foreground">Receive billing and payment alerts</p>
                         </div>
-                        <Button variant="outline" size="sm">
-                          <Mail className="h-4 w-4 mr-2" />
-                          Configure
-                        </Button>
+                        <Switch
+                          checked={billingEmailNotifications}
+                          onCheckedChange={setBillingEmailNotifications}
+                        />
                       </div>
                     </CardContent>
                   </Card>
