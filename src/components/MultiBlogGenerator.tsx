@@ -307,7 +307,8 @@ export function MultiBlogGenerator({
           expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           viewCount: 0,
           seoScore: generatedContent.seoScore,
-          contextualLinks: generatedContent.contextualLinks
+          contextualLinks: generatedContent.contextualLinks,
+          wordCount: generatedContent.wordCount
         };
 
         // Store by slug so BlogPreview can find it
