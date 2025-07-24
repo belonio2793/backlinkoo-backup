@@ -11,6 +11,7 @@ import { multiApiContentGenerator } from '@/services/multiApiContentGenerator';
 import { liveBlogPublisher } from '@/services/liveBlogPublisher';
 import { supabase } from '@/integrations/supabase/client';
 import { SavePostSignupPopup } from './SavePostSignupPopup';
+import { GenerationSequence } from './GenerationSequence';
 import {
   Sparkles,
   Link2,
