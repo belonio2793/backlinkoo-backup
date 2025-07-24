@@ -4,12 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { 
-  CreditCard, 
-  Link, 
-  Search, 
-  TrendingUp, 
-  Globe, 
+import {
+  CreditCard,
+  Link,
+  Search,
+  TrendingUp,
+  Globe,
   Users,
   Infinity,
   Plus,
@@ -21,24 +21,37 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
-  ExternalLink
+  ExternalLink,
+  Zap
 } from "lucide-react";
 import { PaymentModal } from "@/components/PaymentModal";
 import { CampaignForm } from "@/components/CampaignForm";
 import { KeywordResearchTool } from "@/components/KeywordResearchTool";
 import { RankingTracker } from "@/components/RankingTracker";
+import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
+import AdminVerificationQueue from "@/components/AdminVerificationQueue";
+import SEOToolsSection from "@/components/SEOToolsSection";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { User } from '@supabase/supabase-js';
 
 const Dashboard = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [userType, setUserType] = useState<"user" | "admin">("user");
   const [credits, setCredits] = useState(0);
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('tab') || "overview";
+  });
+  const [activeSection, setActiveSection] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('section') || "dashboard";
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -49,18 +62,20 @@ const Dashboard = () => {
 
   const fetchUserData = async () => {
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      console.log('Auth user:', user, 'Auth error:', authError);
-      if (authError || !user) {
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+      console.log('Auth user:', authUser, 'Auth error:', authError);
+      if (authError || !authUser) {
         console.log('No authenticated user found');
         return;
       }
+
+      setUser(authUser);
 
       // Get user profile and role
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
-        .eq('user_id', user.id)
+        .eq('user_id', authUser.id)
         .single();
 
       console.log('Profile data:', profile, 'Profile error:', profileError);
@@ -73,7 +88,7 @@ const Dashboard = () => {
       const { data: creditsData, error: creditsError } = await supabase
         .from('credits')
         .select('amount')
-        .eq('user_id', user.id)
+        .eq('user_id', authUser.id)
         .single();
 
       console.log('Credits data:', creditsData, 'Credits error:', creditsError);
@@ -89,7 +104,7 @@ const Dashboard = () => {
       const { data: campaignsData } = await supabase
         .from('campaigns')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('user_id', authUser.id)
         .limit(1);
 
       setIsFirstTimeUser(!campaignsData || campaignsData.length === 0);
@@ -100,13 +115,14 @@ const Dashboard = () => {
 
   const fetchCampaigns = async () => {
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) return;
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+      if (authError || !authUser) return;
 
+      // Fetch campaigns with proper query structure
       const { data: campaignsData, error } = await supabase
         .from('campaigns')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', authUser.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -176,16 +192,20 @@ const Dashboard = () => {
               <h1 className="text-xl font-semibold hidden sm:block">Backlink</h1>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
-              <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
-                <CreditCard className="h-3 w-3" />
-                <span className="hidden xs:inline">{credits}</span>
-                <span className="xs:hidden">{credits}</span>
-                <span className="hidden sm:inline">Credits</span>
-              </Badge>
-              <Button variant="outline" size="sm" onClick={() => setIsPaymentModalOpen(true)} className="px-2 sm:px-4">
-                <Plus className="h-4 w-4 sm:mr-1" />
-                <span className="hidden sm:inline">Buy Credits</span>
-              </Button>
+              {activeSection === "dashboard" && (
+                <>
+                  <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
+                    <CreditCard className="h-3 w-3" />
+                    <span className="hidden xs:inline">{credits}</span>
+                    <span className="xs:hidden">{credits}</span>
+                    <span className="hidden sm:inline">Credits</span>
+                  </Badge>
+                  <Button variant="outline" size="sm" onClick={() => setIsPaymentModalOpen(true)} className="px-2 sm:px-4">
+                    <Plus className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Buy Credits</span>
+                  </Button>
+                </>
+              )}
               <Button variant="outline" size="sm" onClick={handleSignOut} className="px-2 sm:px-4">
                 <LogOut className="h-4 w-4 sm:mr-1" />
                 <span className="hidden sm:inline">Sign Out</span>
@@ -193,12 +213,38 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* Main Navigation */}
+        <div className="border-b bg-muted/30">
+          <div className="container mx-auto px-4">
+            <nav className="flex items-center gap-1">
+              <Button
+                variant={activeSection === "dashboard" ? "secondary" : "ghost"}
+                onClick={() => setActiveSection("dashboard")}
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3"
+              >
+                <Target className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Dashboard</span>
+              </Button>
+              <Button
+                variant={activeSection === "seo-tools" ? "secondary" : "ghost"}
+                onClick={() => setActiveSection("seo-tools")}
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3"
+              >
+                <Zap className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">SEO Tools</span>
+              </Button>
+            </nav>
+          </div>
+        </div>
       </header>
 
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {userType === "user" ? (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 h-auto">
+          <>
+            {activeSection === "dashboard" ? (
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 h-auto">
               <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Overview</span>
                 <span className="sm:hidden">Home</span>
@@ -206,14 +252,6 @@ const Dashboard = () => {
               <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Campaigns</span>
                 <span className="sm:hidden">Camps</span>
-              </TabsTrigger>
-              <TabsTrigger value="keyword-research" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
-                <span className="hidden sm:inline">Keyword Research</span>
-                <span className="sm:hidden">Keywords</span>
-              </TabsTrigger>
-              <TabsTrigger value="rank-tracker" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
-                <span className="hidden sm:inline">Rankings</span>
-                <span className="sm:hidden">Ranks</span>
               </TabsTrigger>
             </TabsList>
 
@@ -635,31 +673,66 @@ const Dashboard = () => {
               <KeywordResearchTool />
             </TabsContent>
 
+            <TabsContent value="no-hands-seo">
+              <NoHandsSEODashboard />
+            </TabsContent>
+
             <TabsContent value="rank-tracker">
               <RankingTracker />
             </TabsContent>
-          </Tabs>
+              </Tabs>
+            ) : activeSection === "seo-tools" ? (
+              <SEOToolsSection user={user} />
+            ) : null}
+          </>
         ) : (
           // Admin Dashboard
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Admin Dashboard</h2>
+          <Tabs defaultValue="verification" className="w-full">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-2xl font-bold">Admin Dashboard</h2>
+                <p className="text-muted-foreground">Manage campaigns and verification queue</p>
+              </div>
               <Badge variant="outline" className="gap-1">
                 <Users className="h-3 w-3" />
                 Administrator
               </Badge>
             </div>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Live Campaign Queue</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Manage incoming campaign orders</p>
-                {/* TODO: Implement admin campaign queue */}
-              </CardContent>
-            </Card>
-          </div>
+
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="verification">Verification Queue</TabsTrigger>
+              <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="verification" className="space-y-6">
+              <AdminVerificationQueue />
+            </TabsContent>
+
+            <TabsContent value="campaigns" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Live Campaign Queue</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">Manage incoming campaign orders and track progress</p>
+                  {/* TODO: Implement admin campaign management */}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="analytics" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Performance Analytics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">View system performance and user metrics</p>
+                  {/* TODO: Implement analytics dashboard */}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         )}
       </div>
 
