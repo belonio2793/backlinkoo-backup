@@ -108,11 +108,13 @@ const Dashboard = () => {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) return;
 
-      const { data: campaignsData, error } = await supabase
+      // Build query step by step to avoid chaining issues
+      let query = supabase
         .from('campaigns')
         .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .eq('user_id', user.id);
+
+      const { data: campaignsData, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching campaigns:', error);
