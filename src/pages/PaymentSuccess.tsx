@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
+import { AffiliateService } from "@/services/affiliateService";
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
