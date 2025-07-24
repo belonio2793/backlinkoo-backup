@@ -42,6 +42,17 @@ export default function ReportViewer() {
 
   useEffect(() => {
     loadReport();
+
+    // Check for authenticated user
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, [reportId]);
 
   const generateDemoData = (reportId: string) => {
