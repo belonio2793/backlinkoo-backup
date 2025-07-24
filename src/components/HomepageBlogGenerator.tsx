@@ -391,7 +391,7 @@ export function HomepageBlogGenerator() {
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
                   >
                     <ExternalLink className="mr-2 h-5 w-5" />
-                    Preview Your Blog Post
+                    View Live Backlinks
                   </Button>
                   {!currentUser && (
                     <Button
@@ -400,7 +400,7 @@ export function HomepageBlogGenerator() {
                       className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
                     >
                       <Save className="mr-2 h-5 w-5" />
-                      Save Post Forever
+                      Keep Links Forever
                     </Button>
                   )}
                   <Button
@@ -409,7 +409,7 @@ export function HomepageBlogGenerator() {
                     size="lg"
                     className="border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
-                    Generate Another Post
+                    Create More Backlinks
                   </Button>
                 </div>
 
