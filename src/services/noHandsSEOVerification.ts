@@ -174,12 +174,13 @@ export class NoHandsSEOVerificationService {
    */
   static async hasPendingVerifications(userId: string): Promise<boolean> {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('campaigns')
         .select('id')
         .eq('user_id', userId)
-        .eq('verification_status', 'pending')
-        .limit(1);
+        .eq('verification_status', 'pending');
+
+      const { data, error } = await query.limit(1);
 
       if (error) {
         console.error('Error checking pending verifications:', error);
