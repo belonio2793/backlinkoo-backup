@@ -74,7 +74,7 @@ export function MultiBlogGenerator({
     {
       name: "Dr. Sarah Chen",
       expertise: "SEO Strategy & Content Optimization",
-      avatar: "���‍💼"
+      avatar: "👩‍💼"
     },
     {
       name: "Michael Rodriguez",
@@ -114,7 +114,7 @@ export function MultiBlogGenerator({
   const systemMessages = [
     "🧠 AI Neural Networks: Initializing content generation algorithms...",
     "🔍 Data Mining: Scanning 50M+ web pages for keyword insights...",
-    "�� Processing Power: Allocating GPU clusters for parallel generation...",
+    "⚡ Processing Power: Allocating GPU clusters for parallel generation...",
     "🎯 Targeting Engine: Analyzing user intent and search patterns...",
     "🔗 Link Intelligence: Mapping contextual placement opportunities...",
     "📊 SEO Analyzer: Evaluating ranking factors and optimization...",
@@ -643,15 +643,15 @@ export function MultiBlogGenerator({
               className="flex-1"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
-              Generate New Set
+              Try Another Keyword
             </Button>
-            
-            <Button 
+
+            <Button
               onClick={onSaveCampaign}
               className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
             >
               <Save className="h-4 w-4 mr-2" />
-              Save Campaign & Register
+              Keep These Links Forever
             </Button>
           </div>
 
