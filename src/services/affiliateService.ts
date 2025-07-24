@@ -174,7 +174,14 @@ export class AffiliateService {
   // Get affiliate stats
   static async getAffiliateStats(affiliateId: string): Promise<any> {
     const referrals = await this.getAffiliateReferrals(affiliateId);
-    
+
+    // Get click data
+    const { data: clicks } = await supabase
+      .from('affiliate_clicks')
+      .select('*')
+      .eq('affiliate_id', affiliateId);
+
+    const totalClicks = clicks?.length || 0;
     const totalConversions = referrals.filter(r => r.conversion_date).length;
     const totalCommission = referrals.reduce((sum, r) => sum + r.commission_earned, 0);
     const paidCommission = referrals
@@ -183,9 +190,10 @@ export class AffiliateService {
     const pendingCommission = totalCommission - paidCommission;
 
     return {
+      total_clicks: totalClicks,
       total_referrals: referrals.length,
       total_conversions: totalConversions,
-      conversion_rate: referrals.length > 0 ? (totalConversions / referrals.length) * 100 : 0,
+      conversion_rate: totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0,
       total_commission: totalCommission,
       pending_commission: pendingCommission,
       paid_commission: paidCommission
