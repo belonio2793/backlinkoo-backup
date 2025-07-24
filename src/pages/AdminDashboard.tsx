@@ -153,6 +153,10 @@ const AdminDashboard = () => {
             <CampaignManager />
           </TabsContent>
 
+          <TabsContent value="affiliates">
+            <AdminAffiliateManager />
+          </TabsContent>
+
           <TabsContent value="security">
             <SecurityDashboard />
           </TabsContent>
