@@ -354,7 +354,7 @@ export const KeywordResearchTool = () => {
     { code: "MU", name: "Mauritius", flag: "🇲🇺" },
     { code: "MV", name: "Maldives", flag: "🇲🇻" },
     { code: "MW", name: "Malawi", flag: "🇲🇼" },
-    { code: "MX", name: "Mexico", flag: "🇲🇽" },
+    { code: "MX", name: "Mexico", flag: "🇲����" },
     { code: "MY", name: "Malaysia", flag: "🇲🇾" },
     { code: "MZ", name: "Mozambique", flag: "🇲🇿" },
     { code: "NA", name: "Namibia", flag: "🇳🇦" },
@@ -555,8 +555,8 @@ export const KeywordResearchTool = () => {
     <div className="space-y-8 animate-fade-in">
       {/* Enhanced Search Interface */}
       <Card className="border-0 shadow-sm">
-        <CardContent className="p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Search Term</label>
               <Input
