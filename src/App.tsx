@@ -2,26 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { GlobalNotifications } from "@/components/GlobalNotifications";
-import { useReferralTracking } from "@/hooks/useReferralTracking";
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import PaymentCancelled from "./pages/PaymentCancelled";
-import EmailConfirmation from "./pages/EmailConfirmation";
-import NotFound from "./pages/NotFound";
-import TermsOfService from "./pages/TermsOfService";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import { CampaignDeliverables } from "./pages/CampaignDeliverables";
-import BlogPreview from "./pages/BlogPreview";
-import EmailMarketing from "./pages/EmailMarketing";
-import BacklinkReport from "./pages/BacklinkReport";
-import ReportViewer from "./pages/ReportViewer";
-import NoHandsSEO from "./pages/NoHandsSEO";
-import AffiliateProgram from "./pages/AffiliateProgram";
+import { AppWrapper } from "@/components/AppWrapper";
 
 const queryClient = new QueryClient();
 
