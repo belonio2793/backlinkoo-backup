@@ -330,10 +330,10 @@ export function HomepageBlogGenerator() {
                     <CheckCircle2 className="h-10 w-10 text-white" />
                   </div>
                   <h3 className="text-3xl font-bold mb-4 text-gray-900">
-                    5 Professional Blog Posts Ready!
+                    🎉 Surprise! 5 Live Backlink Posts Ready!
                   </h3>
                   <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-                    Your expert-crafted content portfolio about "{primaryKeyword}" has been generated with multiple contextual backlinks to boost your website's authority.
+                    Instead of 1 blog post, we created 5 professional articles about "{primaryKeyword}" with live backlinks pointing to your website. Click below to see them in action!
                   </p>
 
                   {/* Trial Backlink Notice - Only shown after completion */}
