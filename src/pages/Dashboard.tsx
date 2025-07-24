@@ -61,12 +61,14 @@ const Dashboard = () => {
 
   const fetchUserData = async () => {
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      console.log('Auth user:', user, 'Auth error:', authError);
-      if (authError || !user) {
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+      console.log('Auth user:', authUser, 'Auth error:', authError);
+      if (authError || !authUser) {
         console.log('No authenticated user found');
         return;
       }
+
+      setUser(authUser);
 
       // Get user profile and role
       const { data: profile, error: profileError } = await supabase
