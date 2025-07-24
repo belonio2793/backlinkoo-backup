@@ -322,7 +322,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
           </Badge>
           <span className="text-sm text-muted-foreground">$29/month</span>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" onClick={() => setIsSubscriptionModalOpen(true)}>
           <Settings className="h-4 w-4 mr-2" />
           Manage Subscription
         </Button>
