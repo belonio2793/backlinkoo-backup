@@ -177,6 +177,57 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
     }
   };
 
+  // Mock subscription data - replace with real data from your billing system
+  const subscriptionData = {
+    plan: "Premium SEO Tools",
+    price: "$29.00",
+    billing: "Monthly",
+    nextBillingDate: "March 15, 2024",
+    cardLast4: "4242",
+    cardBrand: "Visa",
+    email: user?.email || "user@example.com",
+    status: "Active",
+    features: [
+      "Unlimited keyword research",
+      "Advanced SERP analysis",
+      "Campaign monitoring",
+      "Priority support",
+      "Export capabilities"
+    ]
+  };
+
+  const handleCancelSubscription = async () => {
+    setIsCancellingSubscription(true);
+    try {
+      // Simulate API call to cancel subscription
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      toast({
+        title: "Subscription Cancelled",
+        description: "Your subscription has been cancelled. You'll continue to have access until March 15, 2024.",
+      });
+
+      setIsSubscriptionModalOpen(false);
+      setShowCancelConfirmation(false);
+      setIsSubscribed(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to cancel subscription. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCancellingSubscription(false);
+    }
+  };
+
+  const downloadInvoice = () => {
+    toast({
+      title: "Invoice Downloaded",
+      description: "Your latest invoice has been downloaded to your device.",
+    });
+  };
+
   if (!isSubscribed) {
     return (
       <div className="space-y-6">
