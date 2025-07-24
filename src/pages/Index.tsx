@@ -117,7 +117,6 @@ const Index = () => {
   const handleGetStarted = (planId: 'starter_100' | 'starter_200' | 'starter_300' | 'custom') => {
     if (planId === 'custom') {
       setIsCustomPackage(true);
-      console.log('Custom package selected with credits:', customCredits);
     } else {
       setIsCustomPackage(false);
       setSelectedPlan(planId as 'starter_100' | 'starter_200' | 'starter_300');
