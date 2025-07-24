@@ -343,7 +343,7 @@ export const KeywordResearchTool = () => {
     { code: "MH", name: "Marshall Islands", flag: "🇲🇭" },
     { code: "MK", name: "North Macedonia", flag: "🇲🇰" },
     { code: "ML", name: "Mali", flag: "🇲🇱" },
-    { code: "MM", name: "Myanmar", flag: "🇲🇲" },
+    { code: "MM", name: "Myanmar", flag: "🇲����" },
     { code: "MN", name: "Mongolia", flag: "🇲🇳" },
     { code: "MO", name: "Macao", flag: "🇲🇴" },
     { code: "MP", name: "Northern Mariana Islands", flag: "🇲🇵" },
@@ -354,7 +354,7 @@ export const KeywordResearchTool = () => {
     { code: "MU", name: "Mauritius", flag: "🇲🇺" },
     { code: "MV", name: "Maldives", flag: "🇲🇻" },
     { code: "MW", name: "Malawi", flag: "🇲🇼" },
-    { code: "MX", name: "Mexico", flag: "🇲����" },
+    { code: "MX", name: "Mexico", flag: "🇲🇽" },
     { code: "MY", name: "Malaysia", flag: "🇲🇾" },
     { code: "MZ", name: "Mozambique", flag: "🇲🇿" },
     { code: "NA", name: "Namibia", flag: "🇳🇦" },
@@ -364,7 +364,7 @@ export const KeywordResearchTool = () => {
     { code: "NG", name: "Nigeria", flag: "🇳🇬" },
     { code: "NI", name: "Nicaragua", flag: "🇳🇮" },
     { code: "NL", name: "Netherlands", flag: "🇳🇱" },
-    { code: "NO", name: "Norway", flag: "🇳🇴" },
+    { code: "NO", name: "Norway", flag: "🇳����" },
     { code: "NP", name: "Nepal", flag: "🇳🇵" },
     { code: "NR", name: "Nauru", flag: "🇳🇷" },
     { code: "NU", name: "Niue", flag: "🇳🇺" },
@@ -556,100 +556,99 @@ export const KeywordResearchTool = () => {
       {/* Enhanced Search Interface */}
       <Card className="border-0 shadow-sm">
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Search Term</label>
-              <Input
-                placeholder="Enter keyword or phrase..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-11 border-2 focus:border-primary transition-colors"
-              />
-              {userLocation && (
-                <div className="flex items-center gap-2 text-xs">
-                  <MapPin className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    Auto-detected: {userLocation.city && userLocation.city + ', '}{userLocation.country}
-                  </span>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Search Term</label>
+                <Input
+                  placeholder="Enter keyword or phrase..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="h-11 border-2 focus:border-primary transition-colors"
+                />
+                {userLocation && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <MapPin className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      Auto-detected: {userLocation.city && userLocation.city + ', '}{userLocation.country}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Target Country</label>
+                <div className="h-11">
+                  <SearchableSelect
+                    options={countries.map(country => ({
+                      value: country.code,
+                      label: `${country.flag} ${country.name}`,
+                      searchableText: `${country.name} ${country.code}`
+                    }))}
+                    value={selectedCountry}
+                    onValueChange={(value: string) => {
+                      setSelectedCountry(value);
+                      setSelectedCity("");
+                    }}
+                    placeholder="Select country..."
+                  />
                 </div>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Target Country</label>
-              <div className="h-11">
-                <SearchableSelect
-                  options={countries.map(country => ({
-                    value: country.code,
-                    label: `${country.flag} ${country.name}`,
-                    searchableText: `${country.name} ${country.code}`
-                  }))}
-                  value={selectedCountry}
-                  onValueChange={(value: string) => {
-                    setSelectedCountry(value);
-                    setSelectedCity("");
-                  }}
-                  placeholder="Select country..."
-                />
               </div>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">City (Optional)</label>
-              <div className="h-11">
-                <SearchableSelect
-                  options={[
-                    { value: "", label: "All Cities", searchableText: "all cities nationwide" },
-                    ...(cities[selectedCountry as keyof typeof cities] || []).map(city => ({
-                      value: city,
-                      label: city,
-                      searchableText: city.toLowerCase()
-                    }))
-                  ]}
-                  value={selectedCity}
-                  onValueChange={setSelectedCity}
-                  placeholder="Select city..."
-                />
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">City (Optional)</label>
+                <div className="h-11">
+                  <SearchableSelect
+                    options={[
+                      { value: "", label: "All Cities", searchableText: "all cities nationwide" },
+                      ...(cities[selectedCountry as keyof typeof cities] || []).map(city => ({
+                        value: city,
+                        label: city,
+                        searchableText: city.toLowerCase()
+                      }))
+                    ]}
+                    value={selectedCity}
+                    onValueChange={setSelectedCity}
+                    placeholder="Select city..."
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Search Engine</label>
+                <div className="h-11">
+                  <Select value={selectedEngine} onValueChange={setSelectedEngine}>
+                    <SelectTrigger className="h-11">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border shadow-lg z-50">
+                      <SelectItem value="google">
+                        <div className="flex items-center gap-2">
+                          <img src={googleLogo} alt="Google" className="w-4 h-4" />
+                          Google
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="bing">
+                        <div className="flex items-center gap-2">
+                          <img src={bingLogo} alt="Bing" className="w-4 h-4" />
+                          Bing
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Search Engine</label>
-              <div className="h-11">
-                <Select value={selectedEngine} onValueChange={setSelectedEngine}>
-                  <SelectTrigger className="h-11">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border shadow-lg z-50">
-                    <SelectItem value="google">
-                      <div className="flex items-center gap-2">
-                        <img src={googleLogo} alt="Google" className="w-4 h-4" />
-                        Google
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="bing">
-                      <div className="flex items-center gap-2">
-                        <img src={bingLogo} alt="Bing" className="w-4 h-4" />
-                        Bing
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground opacity-0">Action</label>
-              <div className="h-11">
-                <Button
-                  onClick={performSearch}
-                  disabled={isSearching || !searchTerm.trim()}
-                  className="w-full h-11 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
-                >
-                  {isSearching ? "Researching..." : "Research Keywords"}
-                  <Search className="h-4 w-4 ml-2" />
-                </Button>
-              </div>
+            <div className="flex justify-end">
+              <Button
+                onClick={performSearch}
+                disabled={isSearching || !searchTerm.trim()}
+                className="h-11 px-8 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
+              >
+                {isSearching ? "Researching..." : "Research Keywords"}
+                <Search className="h-4 w-4 ml-2" />
+              </Button>
             </div>
           </div>
 
