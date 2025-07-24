@@ -40,6 +40,7 @@ const App = () => (
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/campaign/:campaignId" element={<CampaignDeliverables />} />
           <Route path="/preview/:slug" element={<BlogPreview />} />
+          <Route path="/email" element={<EmailMarketing />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
