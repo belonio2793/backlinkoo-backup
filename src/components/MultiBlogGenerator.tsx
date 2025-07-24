@@ -74,7 +74,7 @@ export function MultiBlogGenerator({
     {
       name: "Dr. Sarah Chen",
       expertise: "SEO Strategy & Content Optimization",
-      avatar: "👩‍💼"
+      avatar: "���‍💼"
     },
     {
       name: "Michael Rodriguez",
@@ -114,7 +114,7 @@ export function MultiBlogGenerator({
   const systemMessages = [
     "🧠 AI Neural Networks: Initializing content generation algorithms...",
     "🔍 Data Mining: Scanning 50M+ web pages for keyword insights...",
-    "⚡ Processing Power: Allocating GPU clusters for parallel generation...",
+    "�� Processing Power: Allocating GPU clusters for parallel generation...",
     "🎯 Targeting Engine: Analyzing user intent and search patterns...",
     "🔗 Link Intelligence: Mapping contextual placement opportunities...",
     "📊 SEO Analyzer: Evaluating ranking factors and optimization...",
@@ -626,7 +626,7 @@ export function MultiBlogGenerator({
                         onClick={() => window.open(post.previewUrl, '_blank')}
                       >
                         <Eye className="h-3 w-3 mr-1" />
-                        Preview
+                        View Live Post
                       </Button>
                     </div>
                   </div>
