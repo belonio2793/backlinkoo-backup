@@ -224,11 +224,11 @@ export class NoHandsSEOVerificationService {
       );
 
       const pending = noHandsSEOData.filter(c => c.verification_status === 'pending').length;
-      const approved = data.filter(c => c.verification_status === 'approved').length;
-      const rejected = data.filter(c => c.verification_status === 'rejected').length;
+      const approved = noHandsSEOData.filter(c => c.verification_status === 'approved').length;
+      const rejected = noHandsSEOData.filter(c => c.verification_status === 'rejected').length;
 
       // Calculate average verification time for completed verifications
-      const completedVerifications = data.filter(c => 
+      const completedVerifications = noHandsSEOData.filter(c =>
         c.verification_approved_at || c.verification_rejected_at
       );
 
