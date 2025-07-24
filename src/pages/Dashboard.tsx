@@ -91,11 +91,12 @@ const Dashboard = () => {
       }
 
       // Check if user has any campaigns (first time user check)
-      const { data: campaignsData } = await supabase
+      let campaignQuery = supabase
         .from('campaigns')
         .select('id')
-        .eq('user_id', user.id)
-        .limit(1);
+        .eq('user_id', user.id);
+
+      const { data: campaignsData } = await campaignQuery.limit(1);
 
       setIsFirstTimeUser(!campaignsData || campaignsData.length === 0);
     } catch (error) {
