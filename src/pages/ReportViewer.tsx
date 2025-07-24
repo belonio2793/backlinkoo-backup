@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import RegistrationModal from '@/components/RegistrationModal';
+import { supabase } from '@/integrations/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 interface BacklinkResult {
   id: string;
