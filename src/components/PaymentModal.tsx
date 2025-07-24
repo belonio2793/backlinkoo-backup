@@ -28,7 +28,19 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Update state when initialCredits prop changes
+  // Update state when initialCredits prop changes or modal opens
+  useEffect(() => {
+    if (isOpen && initialCredits && initialCredits > 0) {
+      setCredits(initialCredits.toString());
+      setAmount((initialCredits * CREDIT_PRICE).toFixed(2));
+    } else if (isOpen && !initialCredits) {
+      // Reset to empty if no initial credits provided
+      setCredits("");
+      setAmount("");
+    }
+  }, [initialCredits, isOpen]);
+
+  // Additional effect to handle prop changes when modal is already open
   useEffect(() => {
     if (initialCredits && initialCredits > 0) {
       setCredits(initialCredits.toString());
