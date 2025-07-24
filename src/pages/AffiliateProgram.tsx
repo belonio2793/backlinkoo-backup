@@ -136,34 +136,64 @@ const AffiliateProgram = () => {
             <div className="text-center mb-16">
               <h2 className="text-4xl font-light mb-6 tracking-tight">Why Join Our Program?</h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                We offer one of the most generous affiliate programs in the SEO industry.
+                We offer one of the most generous affiliate programs in the SEO industry with industry-leading commission rates and lifetime customer value.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="text-center p-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+              <Card className="text-center p-8 border-0 shadow-lg">
                 <DollarSign className="h-12 w-12 text-primary mx-auto mb-4" />
                 <h3 className="text-2xl font-semibold mb-4">50% Commission</h3>
-                <p className="text-muted-foreground">
-                  Earn 50% of all spending from customers you refer. No caps, no limits.
+                <p className="text-muted-foreground mb-4">
+                  Earn 50% of all spending from customers you refer. No caps, no limits on your earnings potential.
                 </p>
+                <div className="text-sm text-primary font-medium">Industry-leading rate</div>
               </Card>
 
-              <Card className="text-center p-8">
+              <Card className="text-center p-8 border-0 shadow-lg">
                 <TrendingUp className="h-12 w-12 text-primary mx-auto mb-4" />
                 <h3 className="text-2xl font-semibold mb-4">Monthly Payouts</h3>
-                <p className="text-muted-foreground">
-                  Get paid monthly when your earnings reach $100 minimum threshold.
+                <p className="text-muted-foreground mb-4">
+                  Get paid monthly when your earnings reach $100 minimum threshold via PayPal or bank transfer.
                 </p>
+                <div className="text-sm text-primary font-medium">Fast & reliable payments</div>
               </Card>
 
-              <Card className="text-center p-8">
+              <Card className="text-center p-8 border-0 shadow-lg">
                 <Shield className="h-12 w-12 text-primary mx-auto mb-4" />
-                <h3 className="text-2xl font-semibold mb-4">Lifetime Tracking</h3>
-                <p className="text-muted-foreground">
-                  Once referred, customers are permanently tied to your account.
+                <h3 className="text-2xl font-semibold mb-4">Lifetime Value</h3>
+                <p className="text-muted-foreground mb-4">
+                  Once referred, customers are permanently tied to your account. Earn from all their future purchases.
                 </p>
+                <div className="text-sm text-primary font-medium">Recurring income potential</div>
               </Card>
+            </div>
+
+            {/* Additional Benefits */}
+            <div className="bg-muted/50 rounded-2xl p-8">
+              <h3 className="text-2xl font-semibold text-center mb-8">Additional Benefits</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <CheckCircle className="h-8 w-8 text-primary mx-auto mb-3" />
+                  <div className="font-medium">Real-time Tracking</div>
+                  <div className="text-sm text-muted-foreground">Monitor clicks, conversions & earnings live</div>
+                </div>
+                <div className="text-center">
+                  <CheckCircle className="h-8 w-8 text-primary mx-auto mb-3" />
+                  <div className="font-medium">Marketing Materials</div>
+                  <div className="text-sm text-muted-foreground">Banners, email templates & landing pages</div>
+                </div>
+                <div className="text-center">
+                  <CheckCircle className="h-8 w-8 text-primary mx-auto mb-3" />
+                  <div className="font-medium">Dedicated Support</div>
+                  <div className="text-sm text-muted-foreground">Personal affiliate manager for top performers</div>
+                </div>
+                <div className="text-center">
+                  <CheckCircle className="h-8 w-8 text-primary mx-auto mb-3" />
+                  <div className="font-medium">No Minimum Traffic</div>
+                  <div className="text-sm text-muted-foreground">Start earning regardless of audience size</div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
