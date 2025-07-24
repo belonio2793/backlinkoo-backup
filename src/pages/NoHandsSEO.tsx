@@ -343,20 +343,25 @@ const NoHandsSEO = () => {
                   </div>
                 </div>
                 
-                <Button 
+                <Button
                   onClick={handleCreateCampaign}
-                  disabled={isCreating || !targetUrl.trim() || !keyword.trim()}
+                  disabled={isCreating || !targetUrl.trim() || !keyword.trim() || showVerificationSuccess}
                   className="w-full h-12 text-lg font-medium"
                 >
                   {isCreating ? (
                     <>
                       <Clock className="h-5 w-5 mr-2 animate-spin" />
-                      Creating Campaign...
+                      Submitting for Verification...
+                    </>
+                  ) : showVerificationSuccess ? (
+                    <>
+                      <Send className="h-5 w-5 mr-2" />
+                      Campaign Submitted!
                     </>
                   ) : (
                     <>
-                      <Zap className="h-5 w-5 mr-2" />
-                      Create NO Hands SEO Campaign
+                      <Send className="h-5 w-5 mr-2" />
+                      Submit Campaign for Verification
                       <ArrowRight className="h-5 w-5 ml-2" />
                     </>
                   )}
