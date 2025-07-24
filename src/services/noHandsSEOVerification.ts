@@ -138,7 +138,13 @@ export class NoHandsSEOVerificationService {
         return [];
       }
 
-      return data || [];
+      // Filter for NO Hands SEO campaigns client-side
+      const noHandsSEOCampaigns = data?.filter(campaign =>
+        campaign.name?.includes('NO Hands SEO') ||
+        campaign.campaign_type === 'no_hands_seo'
+      ) || [];
+
+      return noHandsSEOCampaigns;
     } catch (error) {
       console.error('Pending verifications error:', error);
       return [];
