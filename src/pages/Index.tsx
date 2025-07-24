@@ -121,8 +121,6 @@ const Index = () => {
 
   const stats = [
     { value: "99%", label: "Success Rate", description: "Proven ranking improvements" },
-    { value: "2,800+", label: "Agencies", description: "Trust our platform" },
-    { value: "500K+", label: "Links Delivered", description: "Across all campaigns" },
     { value: "High DA", label: "Average Authority", description: "Premium domain quality" }
   ];
 
