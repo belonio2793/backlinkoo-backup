@@ -4,11 +4,17 @@ export const Footer = () => {
   return (
     <footer className="bg-gray-50 border-t border-gray-200 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Features Section */}
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Features</h3>
             <div className="space-y-2">
+              <Link
+                to="/dashboard"
+                className="block text-gray-600 hover:text-gray-900 text-sm"
+              >
+                Campaign Management
+              </Link>
               <Link
                 to="/no-hands-seo"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
@@ -16,10 +22,29 @@ export const Footer = () => {
                 NO Hands SEO
               </Link>
               <Link
+                to="/dashboard"
+                className="block text-gray-600 hover:text-gray-900 text-sm"
+              >
+                Keyword Research
+              </Link>
+              <Link
+                to="/dashboard"
+                className="block text-gray-600 hover:text-gray-900 text-sm"
+              >
+                Rank Tracker
+              </Link>
+            </div>
+          </div>
+
+          {/* Merchant Tools Section */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">Merchant Tools</h3>
+            <div className="space-y-2">
+              <Link
                 to="/backlink-report"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
               >
-                Backlink Reporting
+                Backlink Reports
               </Link>
             </div>
           </div>
