@@ -123,19 +123,15 @@ export class NoHandsSEOVerificationService {
    */
   static async getPendingVerifications(): Promise<any[]> {
     try {
-      // Build query step by step to avoid chaining issues
-      let query = supabase
+      // Fetch pending campaigns and filter client-side
+      const { data, error } = await supabase
         .from('campaigns')
         .select(`
           *,
           profiles!inner(email, role)
         `)
-        .eq('verification_status', 'pending');
-
-      // Filter for NO Hands SEO campaigns
-      query = query.or('name.ilike.%NO Hands SEO%,campaign_type.eq.no_hands_seo');
-
-      const { data, error } = await query.order('created_at', { ascending: true });
+        .eq('verification_status', 'pending')
+        .order('created_at', { ascending: true });
 
       if (error) {
         console.error('Error getting pending verifications:', error);
