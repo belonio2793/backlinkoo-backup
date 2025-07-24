@@ -638,10 +638,6 @@ const Dashboard = () => {
             <TabsContent value="rank-tracker">
               <RankingTracker />
             </TabsContent>
-
-            <TabsContent value="community">
-              <Community />
-            </TabsContent>
           </Tabs>
         ) : (
           // Admin Dashboard
