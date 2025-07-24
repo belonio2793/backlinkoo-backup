@@ -206,12 +206,11 @@ export class NoHandsSEOVerificationService {
     avgVerificationTime: number;
   }> {
     try {
-      let query = supabase
+      // Fetch all campaigns with verification status and filter client-side
+      const { data, error } = await supabase
         .from('campaigns')
-        .select('verification_status, created_at, verification_approved_at, verification_rejected_at')
-        .or('name.ilike.%NO Hands SEO%,campaign_type.eq.no_hands_seo');
-
-      const { data, error } = await query.not('verification_status', 'is', null);
+        .select('verification_status, created_at, verification_approved_at, verification_rejected_at, name, campaign_type')
+        .not('verification_status', 'is', null);
 
       if (error) {
         console.error('Error getting verification metrics:', error);
