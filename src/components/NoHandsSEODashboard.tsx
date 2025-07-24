@@ -74,7 +74,7 @@ const NoHandsSEODashboard = () => {
         .from('campaigns')
         .select('*')
         .eq('user_id', user.id)
-        .ilike('name', '%NO Hands SEO%')
+        .or('name.ilike.%NO Hands SEO%,campaign_type.eq.no_hands_seo')
         .order('created_at', { ascending: false });
 
       if (error) {
