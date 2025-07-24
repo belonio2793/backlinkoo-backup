@@ -36,6 +36,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { User } from '@supabase/supabase-js';
 
 const Dashboard = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [userType, setUserType] = useState<"user" | "admin">("user");
   const [credits, setCredits] = useState(0);
   const [campaigns, setCampaigns] = useState<any[]>([]);
