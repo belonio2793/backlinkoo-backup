@@ -40,6 +40,18 @@ const PaymentSuccess = () => {
 
         if (data.paid) {
           setPaymentVerified(true);
+
+          // Process affiliate referral conversion if applicable
+          try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user && data.amount) {
+              await AffiliateService.convertReferral(user.id, data.amount);
+            }
+          } catch (affiliateError) {
+            console.error('Affiliate conversion error:', affiliateError);
+            // Don't show error to user as this is background processing
+          }
+
           toast({
             title: "Payment Successful!",
             description: "Your payment has been processed successfully.",
