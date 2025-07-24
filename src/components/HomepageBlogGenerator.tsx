@@ -431,10 +431,10 @@ export function HomepageBlogGenerator() {
                     <Button
                       onClick={() => setShowSignupPopup(true)}
                       size="lg"
-                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                      className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white animate-pulse"
                     >
                       <Save className="mr-2 h-5 w-5" />
-                      Keep All 5 Links Forever
+                      Save Now - Deletes in 24hrs!
                     </Button>
                   )}
                   <Button
