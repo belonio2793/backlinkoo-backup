@@ -257,7 +257,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
             <Zap className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">NO Hands SEO Tools</h2>
+            <h2 className="text-2xl font-bold">SEO Tools</h2>
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="text-xs">
                 <Crown className="h-3 w-3 mr-1" />
