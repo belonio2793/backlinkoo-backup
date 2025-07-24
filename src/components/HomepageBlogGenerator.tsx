@@ -202,11 +202,17 @@ export function HomepageBlogGenerator() {
         <div className="max-w-4xl mx-auto">
           {!isCompleted ? (
             isGenerating ? (
-              <InteractiveContentGenerator
+              <MultiBlogGenerator
                 keyword={primaryKeyword}
                 targetUrl={targetUrl}
-                onComplete={handleGenerationComplete}
-                onSave={() => setShowSignupPopup(true)}
+                onComplete={(posts) => {
+                  // Handle multiple posts completion
+                  const firstPost = posts[0];
+                  if (firstPost?.content) {
+                    handleGenerationComplete(firstPost.content);
+                  }
+                }}
+                onSaveCampaign={() => setShowSignupPopup(true)}
               />
             ) : (
               <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
