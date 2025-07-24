@@ -259,6 +259,16 @@ const NoHandsSEO = () => {
               </CardHeader>
               
               <CardContent className="space-y-6">
+                {showVerificationSuccess && (
+                  <Alert className="border-green-200 bg-green-50">
+                    <Send className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-800">
+                      <strong>Campaign Submitted Successfully!</strong>
+                      <br />
+                      Your NO Hands SEO campaign has been submitted for verification. Our team will review your requirements and begin processing within 24-48 hours. You'll receive an email notification once verification is complete.
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <div>
                   <Label htmlFor="targetUrl" className="text-base font-medium text-gray-700 mb-3 block">
                     Target URL *
