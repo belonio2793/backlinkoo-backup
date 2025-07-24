@@ -341,21 +341,28 @@ export default function ReportViewer() {
       {/* Header */}
       <div className="border-b border-gray-200 bg-white shadow-sm p-6">
         <div className="max-w-7xl mx-auto">
-          <button
-            onClick={() => navigate('/')}
-            className="inline-flex items-center text-primary hover:text-primary/80 transition-colors mb-4 text-sm font-medium"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Home
-          </button>
-          
+          {/* Top Navigation */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <Infinity className="h-7 w-7 text-primary" />
+              <span className="text-2xl font-semibold tracking-tight text-foreground">Backlink</span>
+            </div>
+            <button
+              onClick={() => navigate('/')}
+              className="inline-flex items-center text-primary hover:text-primary/80 transition-colors text-sm font-medium"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Home
+            </button>
+          </div>
+
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">URL Report</h1>
               <p className="text-gray-600 text-lg">
-                {reportData.campaignName} - Generated {new Date(reportData.createdAt).toLocaleDateString()}
+                {reportData.campaignName}
               </p>
             </div>
             
