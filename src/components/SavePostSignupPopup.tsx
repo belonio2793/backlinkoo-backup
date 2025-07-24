@@ -259,7 +259,7 @@ export function SavePostSignupPopup({
                 className="h-2" 
               />
               {blogPostTitle && (
-                <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
                   "{blogPostTitle.substring(0, 50)}..."
                 </p>
               )}
