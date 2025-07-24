@@ -44,6 +44,10 @@ const Dashboard = () => {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('tab') || "overview";
   });
+  const [activeSection, setActiveSection] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('section') || "dashboard";
+  });
   const { toast } = useToast();
 
   useEffect(() => {
