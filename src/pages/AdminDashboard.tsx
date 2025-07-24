@@ -145,6 +145,7 @@ const AdminDashboard = () => {
         <Tabs defaultValue="campaigns" className="space-y-6">
           <TabsList>
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
+            <TabsTrigger value="affiliates">Affiliate Program</TabsTrigger>
             <TabsTrigger value="security">Security & Roles</TabsTrigger>
           </TabsList>
 
