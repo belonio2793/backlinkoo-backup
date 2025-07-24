@@ -343,7 +343,7 @@ export function HomepageBlogGenerator() {
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
-                      <span>Permanent link</span>
+                      <span>Permanent links</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
@@ -351,7 +351,7 @@ export function HomepageBlogGenerator() {
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
-                      <span>Dofollow backlink</span>
+                      <span>Dofollow backlinks</span>
                     </div>
                   </div>
                 </div>
