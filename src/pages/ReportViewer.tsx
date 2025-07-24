@@ -142,11 +142,11 @@ export default function ReportViewer() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'found':
-        return 'text-green-600 bg-green-100';
+        return 'text-green-700 bg-green-100 border-green-200';
       case 'not_found':
-        return 'text-red-600 bg-red-100';
+        return 'text-red-700 bg-red-100 border-red-200';
       default:
-        return 'text-yellow-600 bg-yellow-100';
+        return 'text-yellow-700 bg-yellow-100 border-yellow-200';
     }
   };
 
@@ -189,10 +189,10 @@ export default function ReportViewer() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center font-mono">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto mb-4"></div>
-          <p>Loading report...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading report...</p>
         </div>
       </div>
     );
@@ -200,9 +200,9 @@ export default function ReportViewer() {
 
   if (!reportData) {
     return (
-      <div className="min-h-screen bg-white font-mono">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
         <div className="max-w-4xl mx-auto p-6">
-          <div className="border border-gray-300 p-8 text-center">
+          <div className="bg-white border border-gray-200 p-8 text-center rounded-xl shadow-sm">
             <h2 className="text-2xl font-bold mb-4">Report Not Found</h2>
             <p className="text-gray-600 mb-6">
               The requested URL report could not be found or may have expired.
@@ -210,13 +210,13 @@ export default function ReportViewer() {
             <div className="flex gap-4 justify-center">
               <button 
                 onClick={() => navigate('/')}
-                className="px-4 py-2 bg-gray-200 text-black border border-gray-300 hover:bg-gray-300"
+                className="px-4 py-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors font-medium"
               >
                 ← Back to Home
               </button>
               <button 
                 onClick={() => navigate('/backlink-report')}
-                className="px-4 py-2 bg-black text-white border border-black hover:bg-gray-800"
+                className="px-4 py-2 bg-primary text-white hover:bg-primary/90 rounded-lg transition-colors font-medium"
               >
                 Create New Report
               </button>
@@ -230,45 +230,58 @@ export default function ReportViewer() {
   const stats = calculateStats();
 
   return (
-    <div className="min-h-screen bg-white text-black font-mono">
+    <>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white text-gray-900">
       {/* Header */}
-      <div className="border-b border-gray-300 bg-gray-50 p-4">
-        <div className="max-w-6xl mx-auto">
+      <div className="border-b border-gray-200 bg-white shadow-sm p-6">
+        <div className="max-w-7xl mx-auto">
           <button
             onClick={() => navigate('/')}
-            className="text-blue-600 hover:underline mb-2 block"
+            className="inline-flex items-center text-primary hover:text-primary/80 transition-colors mb-4 text-sm font-medium"
           >
-            ← Back to Home
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Home
           </button>
           
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold">URL Report</h1>
-              <p className="text-gray-600 mt-1">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">URL Report</h1>
+              <p className="text-gray-600 text-lg">
                 {reportData.campaignName} - Generated {new Date(reportData.createdAt).toLocaleDateString()}
               </p>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <button
                 onClick={refreshReport}
                 disabled={isRefreshing}
-                className="px-4 py-2 bg-gray-200 text-black border border-gray-300 hover:bg-gray-300 disabled:opacity-50"
+                className="inline-flex items-center px-4 py-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 disabled:opacity-50 rounded-lg transition-colors font-medium"
               >
+                <svg className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
                 {isRefreshing ? 'Refreshing...' : 'Refresh'}
               </button>
               
               <button 
                 onClick={shareReport}
-                className="px-4 py-2 bg-gray-200 text-black border border-gray-300 hover:bg-gray-300"
+                className="inline-flex items-center px-4 py-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors font-medium"
               >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
                 Copy URL
               </button>
               
               <button 
                 onClick={downloadReport}
-                className="px-4 py-2 bg-black text-white border border-black hover:bg-gray-800"
+                className="inline-flex items-center px-4 py-2 bg-primary text-white hover:bg-primary/90 rounded-lg transition-colors font-medium"
               >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
                 Download CSV
               </button>
             </div>
@@ -276,135 +289,118 @@ export default function ReportViewer() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-8">
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="border border-gray-300 p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{stats.found}</div>
-            <div className="text-sm text-gray-600">Active Links</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white border border-gray-200 p-6 text-center rounded-xl shadow-sm">
+            <div className="text-3xl font-bold text-green-600 mb-2">{stats.found}</div>
+            <div className="text-sm font-medium text-gray-600">Active Links</div>
           </div>
-          <div className="border border-gray-300 p-4 text-center">
-            <div className="text-2xl font-bold text-red-600">{stats.notFound}</div>
-            <div className="text-sm text-gray-600">Not Found</div>
+          <div className="bg-white border border-gray-200 p-6 text-center rounded-xl shadow-sm">
+            <div className="text-3xl font-bold text-red-600 mb-2">{stats.notFound}</div>
+            <div className="text-sm font-medium text-gray-600">Not Found</div>
           </div>
-          <div className="border border-gray-300 p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{stats.avgDA}</div>
-            <div className="text-sm text-gray-600">Avg Domain Authority</div>
+          <div className="bg-white border border-gray-200 p-6 text-center rounded-xl shadow-sm">
+            <div className="text-3xl font-bold text-blue-600 mb-2">{stats.avgDA}</div>
+            <div className="text-sm font-medium text-gray-600">Avg Domain Authority</div>
           </div>
-          <div className="border border-gray-300 p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600">{stats.avgPA}</div>
-            <div className="text-sm text-gray-600">Avg Page Authority</div>
+          <div className="bg-white border border-gray-200 p-6 text-center rounded-xl shadow-sm">
+            <div className="text-3xl font-bold text-purple-600 mb-2">{stats.avgPA}</div>
+            <div className="text-sm font-medium text-gray-600">Avg Page Authority</div>
           </div>
         </div>
 
         {/* Link Finder */}
-        <div className="mb-6 p-4 bg-gray-50 border border-gray-300">
-          <h3 className="font-bold mb-2">Link Finder:</h3>
+        <div className="mb-8 p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Search & Filter</h3>
           <input
             type="text"
             placeholder="Search URLs or anchor text..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full p-2 border border-gray-300 bg-white font-mono text-sm"
+            className="w-full p-3 border border-gray-300 bg-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
           />
-          <div className="mt-2 text-sm text-gray-600">
-            {filteredResults.length} of {reportData.totalBacklinks} URLs shown
+          <div className="mt-3 text-sm text-gray-600">
+            Showing <span className="font-medium">{filteredResults.length}</span> of <span className="font-medium">{reportData.totalBacklinks}</span> URLs
           </div>
         </div>
 
         {/* Services */}
-        {!showRegistration && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-300">
-            <h3 className="font-bold mb-2">Available Services:</h3>
-            <div className="flex gap-4">
-              <button
-                onClick={handleIndexingService}
-                className="px-4 py-2 bg-blue-600 text-white border border-blue-600 hover:bg-blue-700"
-              >
-                Get URLs Indexed
-              </button>
-              <button
-                onClick={handleLinkBuilding}
-                className="px-4 py-2 bg-green-600 text-white border border-green-600 hover:bg-green-700"
-              >
-                Build Links to URLs
-              </button>
-            </div>
-            <p className="text-xs text-gray-600 mt-2">
-              Supports up to 10,000 URLs per service
-            </p>
+        <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
+          <h3 className="text-lg font-semibold text-blue-900 mb-3">Premium Services Available</h3>
+          <p className="text-blue-800 mb-4">Enhance your SEO efforts with our professional services</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              onClick={handleIndexingService}
+              className="flex items-center justify-center px-6 py-4 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors font-medium shadow-md"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Get URLs Indexed
+            </button>
+            <button
+              onClick={handleLinkBuilding}
+              className="flex items-center justify-center px-6 py-4 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors font-medium shadow-md"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+              Build High-Quality Links
+            </button>
           </div>
-        )}
-
-        {/* Registration Form */}
-        {showRegistration && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-300">
-            <h3 className="font-bold mb-2">Register for Premium Services:</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <input
-                type="email"
-                placeholder="Email address"
-                className="p-2 border border-gray-300 bg-white font-mono text-sm"
-              />
-              <input
-                type="text"
-                placeholder="Company name (optional)"
-                className="p-2 border border-gray-300 bg-white font-mono text-sm"
-              />
-            </div>
-            <div className="flex gap-2">
-              <button className="px-4 py-2 bg-black text-white border border-black hover:bg-gray-800">
-                Register & Get Quote
-              </button>
-              <button 
-                onClick={() => setShowRegistration(false)}
-                className="px-4 py-2 bg-gray-200 text-black border border-gray-300 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
+          <p className="text-xs text-blue-700 mt-3 text-center">
+            ✨ Supports up to 10,000 URLs per service • Professional results guaranteed
+          </p>
+        </div>
 
         {/* Results Table */}
-        <div className="border border-gray-300">
-          <div className="bg-gray-100 p-2 border-b border-gray-300 font-bold">
-            URL Analysis Results
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-gray-50 p-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">URL Analysis Results</h3>
           </div>
           
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-[600px] overflow-y-auto">
             {filteredResults.map((result, index) => (
-              <div key={result.id} className="border-b border-gray-200 p-3 hover:bg-gray-50">
-                <div className="flex items-start justify-between mb-2">
+              <div key={result.id} className="border-b border-gray-100 p-4 hover:bg-gray-50 transition-colors">
+                <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="font-bold text-sm">#{index + 1}</div>
-                    <a 
-                      href={result.sourceUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline text-sm break-all"
-                    >
-                      {result.sourceUrl}
-                    </a>
+                    <div className="flex items-center mb-2">
+                      <span className="inline-flex items-center justify-center w-6 h-6 bg-gray-100 text-gray-600 text-xs font-medium rounded-full mr-3">
+                        {index + 1}
+                      </span>
+                      <a 
+                        href={result.sourceUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:text-primary/80 text-sm break-all font-medium transition-colors"
+                      >
+                        {result.sourceUrl}
+                      </a>
+                    </div>
                   </div>
                   
-                  <div className={`px-2 py-1 text-xs border ${getStatusColor(result.status)}`}>
+                  <div className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(result.status)}`}>
                     {getStatusText(result.status)}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-4 text-xs text-gray-600">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 ml-9">
                   <div>
-                    <div className="font-bold">DA: {result.domainAuthority}</div>
+                    <span className="text-xs text-gray-500 block">Domain Authority</span>
+                    <span className="font-semibold text-gray-900">{result.domainAuthority}</span>
                   </div>
                   <div>
-                    <div className="font-bold">PA: {result.pageAuthority}</div>
+                    <span className="text-xs text-gray-500 block">Page Authority</span>
+                    <span className="font-semibold text-gray-900">{result.pageAuthority}</span>
                   </div>
                   <div>
-                    <div className="font-bold">{result.responseTime}ms</div>
+                    <span className="text-xs text-gray-500 block">Response Time</span>
+                    <span className="font-semibold text-gray-900">{result.responseTime}ms</span>
                   </div>
                   <div>
-                    <div>{new Date(result.lastChecked).toLocaleString()}</div>
+                    <span className="text-xs text-gray-500 block">Last Checked</span>
+                    <span className="font-semibold text-gray-900">{new Date(result.lastChecked).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -413,27 +409,40 @@ export default function ReportViewer() {
         </div>
 
         {/* Footer */}
-        <div className="mt-8 p-4 bg-gray-50 border border-gray-300 text-center">
-          <h3 className="font-bold mb-2">Powered by Backlink ∞</h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Professional URL analysis and SEO reporting tools
+        <div className="mt-12 p-8 bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl text-center">
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Powered by Backlink ∞</h3>
+          <p className="text-gray-600 mb-6">
+            Professional URL analysis and SEO reporting tools for modern businesses
           </p>
-          <div className="flex justify-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
             <button 
               onClick={() => navigate('/backlink-report')}
-              className="px-4 py-2 bg-black text-white border border-black hover:bg-gray-800"
+              className="inline-flex items-center justify-center px-6 py-3 bg-primary text-white hover:bg-primary/90 rounded-lg transition-colors font-medium"
             >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
               Create New Report
             </button>
             <button 
               onClick={() => navigate('/')}
-              className="px-4 py-2 bg-gray-200 text-black border border-gray-300 hover:bg-gray-300"
+              className="inline-flex items-center justify-center px-6 py-3 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors font-medium"
             >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-1a1 1 0 011-1h2a1 1 0 011 1v1a1 1 0 001 1m-6 0h6" />
+              </svg>
               Visit Backlink ∞
             </button>
           </div>
         </div>
       </div>
     </div>
+    
+    <RegistrationModal
+      isOpen={showRegistration}
+      onClose={() => setShowRegistration(false)}
+      serviceType={modalService}
+    />
+    </>
   );
 }
