@@ -440,10 +440,10 @@ export function MultiBlogGenerator({
             <div className="p-3 rounded-full bg-gradient-to-r from-green-500 to-blue-500">
               <Zap className="h-6 w-6 text-white animate-pulse" />
             </div>
-            <CardTitle className="text-2xl font-semibold">Generating 5 Professional Blog Posts</CardTitle>
+            <CardTitle className="text-2xl font-semibold">🎉 Surprise! Generating 5 Professional Blog Posts</CardTitle>
           </div>
           <p className="text-muted-foreground">
-            Our AI experts are crafting high-quality content optimized for "{keyword}"
+            We're overdelivering! Instead of 1 blog post, our AI experts are crafting 5 high-quality pieces optimized for "{keyword}"
           </p>
         </CardHeader>
         
