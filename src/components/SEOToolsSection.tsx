@@ -64,7 +64,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
   const [projects, setProjects] = useState<NoHandsSEOProject[]>([]);
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("no-hands-seo");
   const { toast } = useToast();
 
   useEffect(() => {
