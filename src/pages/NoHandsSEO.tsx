@@ -172,7 +172,7 @@ const NoHandsSEO = () => {
       setCampaignNotes("");
       
       setTimeout(() => {
-        navigate('/dashboard?tab=no-hands-seo');
+        navigate('/dashboard?section=seo-tools');
       }, 3000);
 
     } catch (error) {
