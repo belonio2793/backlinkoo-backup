@@ -35,6 +35,7 @@ export default function ReportViewer() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showRegistration, setShowRegistration] = useState(false);
+  const [modalService, setModalService] = useState<'indexing' | 'linkbuilding'>('indexing');
 
   useEffect(() => {
     loadReport();
