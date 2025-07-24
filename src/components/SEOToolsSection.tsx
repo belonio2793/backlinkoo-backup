@@ -95,17 +95,22 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
 
   const fetchProjects = async () => {
     try {
-      const { data, error } = await supabase
-        .from('no_hands_seo_projects')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+      // For now, set empty projects since the table doesn't exist yet
+      setProjects([]);
 
-      if (!error && data) {
-        setProjects(data);
-      }
+      // Uncomment when the table is created:
+      // const { data, error } = await supabase
+      //   .from('no_hands_seo_projects')
+      //   .select('*')
+      //   .eq('user_id', user?.id)
+      //   .order('created_at', { ascending: false });
+      //
+      // if (!error && data) {
+      //   setProjects(data);
+      // }
     } catch (error) {
       console.error('Error fetching projects:', error);
+      setProjects([]);
     }
   };
 
