@@ -43,6 +43,8 @@ const App = () => (
           <Route path="/campaign/:campaignId" element={<CampaignDeliverables />} />
           <Route path="/preview/:slug" element={<BlogPreview />} />
           <Route path="/email" element={<EmailMarketing />} />
+          <Route path="/backlink-report" element={<BacklinkReport />} />
+          <Route path="/report/:reportId" element={<ReportViewer />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
