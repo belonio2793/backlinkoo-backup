@@ -448,20 +448,20 @@ export function HomepageBlogGenerator() {
                 </div>
 
                 <div className="mt-8 space-y-4">
-                  <div className="p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
-                    <p className="text-sm text-green-800 font-medium mb-2">
-                      💎 <strong>Want to keep all 5 backlinks forever?</strong>
+                  <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
+                    <p className="text-sm text-red-800 font-medium mb-2">
+                      ⏰ <strong>WARNING: These backlinks will auto-delete in 24 hours!</strong>
                     </p>
-                    <p className="text-sm text-green-700 mb-3">
-                      Create an account and purchase any credit package to convert this trial campaign into a permanent one.
-                      All 5 backlinks will remain active indefinitely and appear in your dashboard!
+                    <p className="text-sm text-red-700 mb-3">
+                      Your 5 backlinks are live and building SEO value right now, but they're on a 24-hour trial timer.
+                      Create an account now to keep them forever and stop the deletion countdown!
                     </p>
                     <Button
                       size="sm"
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                      className="bg-red-600 hover:bg-red-700 text-white animate-pulse"
+                      onClick={() => setShowSignupPopup(true)}
                     >
-                      View Credit Packages Above
+                      Stop Deletion Timer Now
                     </Button>
                   </div>
 
