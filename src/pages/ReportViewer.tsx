@@ -388,6 +388,21 @@ export default function ReportViewer() {
       </div>
 
       <div className="max-w-7xl mx-auto p-8">
+        {/* Preview Banner for Demo Reports */}
+        {reportData.id === 'demo_preview_12345' && (
+          <div className="mb-8 p-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl">
+            <div className="flex items-center justify-center">
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <span className="font-semibold">Preview Mode</span>
+              <span className="mx-2">•</span>
+              <span>This is a sample report showcasing our professional backlink verification capabilities</span>
+            </div>
+          </div>
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white border border-gray-200 p-6 text-center rounded-xl shadow-sm">
