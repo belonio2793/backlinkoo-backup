@@ -415,6 +415,18 @@ export default function RegistrationModal({ isOpen, onClose, serviceType }: Regi
               )}
             </button>
           </div>
+
+          {/* What happens next - moved below buttons */}
+          <div className="mt-6 bg-green-50 p-4 rounded-lg">
+            <h4 className="text-sm font-semibold text-green-900 mb-2">What happens next?</h4>
+            <ul className="text-xs text-green-800 space-y-1">
+              <li>• Your account will be created instantly</li>
+              <li>• We'll analyze your requirements within 24 hours</li>
+              <li>• You'll receive service details via email</li>
+              <li>• Full access to all platform features immediately</li>
+              <li>• Dedicated account manager assigned</li>
+            </ul>
+          </div>
         </form>
       </div>
     </div>
