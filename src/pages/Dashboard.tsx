@@ -651,25 +651,52 @@ const Dashboard = () => {
           </Tabs>
         ) : (
           // Admin Dashboard
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Admin Dashboard</h2>
+          <Tabs defaultValue="verification" className="w-full">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-2xl font-bold">Admin Dashboard</h2>
+                <p className="text-muted-foreground">Manage campaigns and verification queue</p>
+              </div>
               <Badge variant="outline" className="gap-1">
                 <Users className="h-3 w-3" />
                 Administrator
               </Badge>
             </div>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Live Campaign Queue</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Manage incoming campaign orders</p>
-                {/* TODO: Implement admin campaign queue */}
-              </CardContent>
-            </Card>
-          </div>
+
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="verification">Verification Queue</TabsTrigger>
+              <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="verification" className="space-y-6">
+              <AdminVerificationQueue />
+            </TabsContent>
+
+            <TabsContent value="campaigns" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Live Campaign Queue</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">Manage incoming campaign orders and track progress</p>
+                  {/* TODO: Implement admin campaign management */}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="analytics" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Performance Analytics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">View system performance and user metrics</p>
+                  {/* TODO: Implement analytics dashboard */}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         )}
       </div>
 
