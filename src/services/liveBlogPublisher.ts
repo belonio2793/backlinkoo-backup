@@ -70,8 +70,8 @@ export class LiveBlogPublisher {
         contextualLinks: generatedPost.contextualLinks
       };
 
-      // Store in memory for demo purposes (in production, this would use a proper database)
-      this.inMemoryPosts.set(blogPostId, blogPost);
+      // Store in memory for demo purposes using slug as key (in production, this would use a proper database)
+      this.inMemoryPosts.set(uniqueSlug, blogPost);
       const insertedPost = blogPost;
 
       // Create corresponding campaign entry using existing campaigns table
