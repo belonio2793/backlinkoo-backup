@@ -33,10 +33,16 @@ export function BlogPreview() {
 
   const loadBlogPost = async (slug: string) => {
     try {
+      console.log(`🔍 Trying to load blog post with slug: "${slug}"`);
+      console.log(`📝 Available posts in memory:`, Array.from(liveBlogPublisher.inMemoryPosts.keys()));
+      console.log(`📊 Total posts stored:`, liveBlogPublisher.inMemoryPosts.size);
+
       const post = await liveBlogPublisher.getBlogPost(slug);
       if (post) {
+        console.log(`✅ Blog post found:`, post.title);
         setBlogPost(post);
       } else {
+        console.log(`❌ Blog post not found for slug: "${slug}"`);
         toast({
           title: 'Post Not Found',
           description: 'The requested blog post could not be found',
