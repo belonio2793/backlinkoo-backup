@@ -55,6 +55,7 @@ export function InteractiveContentGenerator({
   const [currentSection, setCurrentSection] = useState('');
   const [typewriterText, setTypewriterText] = useState('');
   const [showPreview, setShowPreview] = useState(false);
+  const [showEnhancedPreview, setShowEnhancedPreview] = useState(false);
 
   const templates: Template[] = [
     {
