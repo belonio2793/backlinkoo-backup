@@ -17,6 +17,8 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { CampaignDeliverables } from "./pages/CampaignDeliverables";
 import BlogPreview from "./pages/BlogPreview";
 import EmailMarketing from "./pages/EmailMarketing";
+import BacklinkReport from "./pages/BacklinkReport";
+import ReportViewer from "./pages/ReportViewer";
 
 const queryClient = new QueryClient();
 
