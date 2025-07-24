@@ -60,41 +60,79 @@ export function HomepageBlogGenerator() {
 
     setIsGenerating(true);
     setIsCompleted(false);
+  };
 
+  const handleGenerationComplete = async (generatedContent: any) => {
     try {
       // Check if user is logged in
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
 
-      // Publish live blog post using the new system
-      const publishResult = await liveBlogPublisher.publishLiveBlogPost(
-        primaryKeyword,
+      // Create blog post from generated content
+      const uniqueSlug = `${generatedContent.slug}-${Date.now()}`;
+      const publishedUrl = `${window.location.origin}/preview/${uniqueSlug}`;
+
+      const blogPost = {
+        id: `live_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        slug: uniqueSlug,
+        title: generatedContent.title,
+        content: generatedContent.content,
+        metaDescription: generatedContent.metaDescription,
+        keywords: [primaryKeyword],
         targetUrl,
-        user?.id,
-        1200 // word count
-      );
+        publishedUrl,
+        status: 'published',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        userId: user?.id,
+        isTrialPost: !user,
+        expiresAt: !user ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : undefined,
+        viewCount: 0,
+        seoScore: generatedContent.seoScore,
+        contextualLinks: generatedContent.contextualLinks
+      };
 
-      if (publishResult.success && publishResult.blogPost && publishResult.publishedUrl) {
-        setGeneratedPost(publishResult.blogPost);
-        setPublishedUrl(publishResult.publishedUrl);
-        setBlogPostId(publishResult.blogPost.id);
-        setIsCompleted(true);
+      // Store in live blog publisher
+      await liveBlogPublisher.inMemoryPosts?.set(blogPost.id, blogPost);
 
-        toast({
-          title: "Live Backlink Created!",
-          description: user
-            ? "Your backlink is now live and saved to your dashboard!"
-            : "Your trial backlink is live for 24 hours. Register to keep it forever!",
-        });
-
-        // Show signup popup for guest users after a delay
-        if (!user) {
-          setTimeout(() => {
-            setShowSignupPopup(true);
-          }, 3000); // Show popup after 3 seconds
+      // Create campaign entry for registered users
+      if (user) {
+        try {
+          await supabase
+            .from('campaigns')
+            .insert({
+              name: `Live Blog: ${generatedContent.title}`,
+              target_url: targetUrl,
+              keywords: [primaryKeyword],
+              status: 'completed',
+              links_requested: generatedContent.contextualLinks?.length || 1,
+              links_delivered: generatedContent.contextualLinks?.length || 1,
+              completed_backlinks: [publishedUrl],
+              user_id: user.id,
+              credits_used: 1
+            });
+        } catch (error) {
+          console.warn('Failed to create campaign entry:', error);
         }
-      } else {
-        throw new Error(publishResult.error || 'Publishing failed');
+      }
+
+      setGeneratedPost(blogPost);
+      setPublishedUrl(publishedUrl);
+      setBlogPostId(blogPost.id);
+      setIsCompleted(true);
+
+      toast({
+        title: "Blog Post Generated!",
+        description: user
+          ? "Your content is ready and saved to your dashboard!"
+          : "Your demo preview is ready. Register to keep it forever!",
+      });
+
+      // Show signup popup for guest users after a delay
+      if (!user) {
+        setTimeout(() => {
+          setShowSignupPopup(true);
+        }, 3000); // Show popup after 3 seconds
       }
 
     } catch (error) {
