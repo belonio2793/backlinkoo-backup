@@ -279,19 +279,19 @@ export function HomepageBlogGenerator() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                      <span>1,200+ word SEO-optimized blog post</span>
+                      <span>5 unique 1,200+ word SEO-optimized blog posts</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
-                      <span>24-hour trial backlink (upgrade to keep forever)</span>
+                      <span>Multiple high-quality dofollow backlinks</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                      <span>Published, viewable and indexed link within private networks</span>
+                      <span>Expert-crafted content by AI specialists</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
-                      <span>Dofollow backlink</span>
+                      <span>Real-time generation with live preview</span>
                     </div>
                   </div>
                 </div>
