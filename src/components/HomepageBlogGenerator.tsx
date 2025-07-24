@@ -209,6 +209,7 @@ export function HomepageBlogGenerator() {
                 onComplete={(posts) => {
                   // Handle multiple posts completion - MultiBlogGenerator already stored all posts
                   console.log(`✅ MultiBlogGenerator completed with ${posts.length} posts`);
+                  setAllGeneratedPosts(posts);
                   setIsCompleted(true);
                   setIsGenerating(false);
 
