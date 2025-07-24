@@ -88,12 +88,7 @@ const NoHandsSEODashboard = () => {
         campaign.campaign_type === 'no_hands_seo'
       ) || [];
 
-      if (error) {
-        console.error('Error fetching NO Hands SEO campaigns:', error);
-        return;
-      }
-
-      setCampaigns(campaignsData || []);
+      setCampaigns(campaignsData);
     } catch (error) {
       console.error('Error fetching campaigns:', error);
       toast({
