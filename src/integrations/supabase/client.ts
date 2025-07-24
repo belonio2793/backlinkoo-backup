@@ -52,15 +52,30 @@ const createMockSupabaseClient = () => {
       delete: () => mockMethods,
       upsert: (data: any) => mockMethods,
       eq: (column: string, value: any) => mockMethods,
+      order: (column: string, options?: any) => mockMethods,
+      limit: (count: number) => mockMethods,
+      filter: (column: string, operator: string, value: any) => mockMethods,
+      gte: (column: string, value: any) => mockMethods,
+      lte: (column: string, value: any) => mockMethods,
+      gt: (column: string, value: any) => mockMethods,
+      lt: (column: string, value: any) => mockMethods,
+      in: (column: string, values: any[]) => mockMethods,
+      is: (column: string, value: any) => mockMethods,
+      neq: (column: string, value: any) => mockMethods,
+      ilike: (column: string, pattern: string) => mockMethods,
+      like: (column: string, pattern: string) => mockMethods,
+      range: (from: number, to: number) => mockMethods,
       single: () => Promise.resolve({ data: { id: 'mock-id', ...mockUser }, error: null }),
       then: (callback: any) => {
         // Return mock data based on table
         if (table === 'profiles') {
-          return callback({ data: { user_id: mockUser.id, email: mockUser.email }, error: null });
+          return callback({ data: { user_id: mockUser.id, email: mockUser.email, role: 'user' }, error: null });
         } else if (table === 'credits') {
           return callback({ data: { user_id: mockUser.id, amount: 10 }, error: null });
         } else if (table === 'campaigns') {
-          return callback({ data: { id: 'mock-campaign-id' }, error: null });
+          return callback({ data: [], error: null });
+        } else if (table === 'ranking_targets' || table === 'ranking_dashboard') {
+          return callback({ data: [], error: null });
         }
         return callback({ data: [], error: null });
       }

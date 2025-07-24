@@ -3,11 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Zap, 
-  Target, 
-  Activity, 
-  Clock, 
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import {
+  Zap,
+  Target,
+  Activity,
+  Clock,
   CheckCircle2,
   AlertTriangle,
   Plus,
@@ -22,7 +24,14 @@ import {
   Filter,
   Settings,
   CreditCard,
-  Crown
+  Crown,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Download,
+  X,
+  AlertCircle
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -65,6 +74,9 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("no-hands-seo");
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [isCancellingSubscription, setIsCancellingSubscription] = useState(false);
+  const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -165,6 +177,57 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
     }
   };
 
+  // Mock subscription data - replace with real data from your billing system
+  const subscriptionData = {
+    plan: "Premium SEO Tools",
+    price: "$29.00",
+    billing: "Monthly",
+    nextBillingDate: "March 15, 2024",
+    cardLast4: "4242",
+    cardBrand: "Visa",
+    email: user?.email || "user@example.com",
+    status: "Active",
+    features: [
+      "Unlimited keyword research",
+      "Advanced SERP analysis",
+      "Campaign monitoring",
+      "Priority support",
+      "Export capabilities"
+    ]
+  };
+
+  const handleCancelSubscription = async () => {
+    setIsCancellingSubscription(true);
+    try {
+      // Simulate API call to cancel subscription
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      toast({
+        title: "Subscription Cancelled",
+        description: "Your subscription has been cancelled. You'll continue to have access until March 15, 2024.",
+      });
+
+      setIsSubscriptionModalOpen(false);
+      setShowCancelConfirmation(false);
+      setIsSubscribed(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to cancel subscription. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCancellingSubscription(false);
+    }
+  };
+
+  const downloadInvoice = () => {
+    toast({
+      title: "Invoice Downloaded",
+      description: "Your latest invoice has been downloaded to your device.",
+    });
+  };
+
   if (!isSubscribed) {
     return (
       <div className="space-y-6">
@@ -259,7 +322,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
           </Badge>
           <span className="text-sm text-muted-foreground">$29/month</span>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" onClick={() => setIsSubscriptionModalOpen(true)}>
           <Settings className="h-4 w-4 mr-2" />
           Manage Subscription
         </Button>
@@ -284,6 +347,224 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
           <RankingTracker />
         </TabsContent>
       </Tabs>
+
+      {/* Subscription Management Modal */}
+      <Dialog open={isSubscriptionModalOpen} onOpenChange={setIsSubscriptionModalOpen}>
+        <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Subscription Management
+            </DialogTitle>
+            <DialogDescription>
+              Manage your subscription, billing information, and payment settings.
+            </DialogDescription>
+          </DialogHeader>
+
+          <Tabs defaultValue="subscription" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="subscription">Plan</TabsTrigger>
+              <TabsTrigger value="billing">Billing</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
+
+            <div className="overflow-y-auto max-h-[50vh] mt-4">
+              <TabsContent value="subscription" className="space-y-4 mt-0">
+                {/* Current Plan */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Current Plan</h3>
+                    <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      {subscriptionData.status}
+                    </Badge>
+                  </div>
+
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Plan</p>
+                          <p className="font-medium">{subscriptionData.plan}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Price</p>
+                          <p className="font-medium">{subscriptionData.price}/{subscriptionData.billing.toLowerCase()}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Next Billing</p>
+                          <p className="font-medium">{subscriptionData.nextBillingDate}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Email</p>
+                          <p className="font-medium">{subscriptionData.email}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Features Included */}
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold">Features Included</h3>
+                  <div className="grid grid-cols-1 gap-2">
+                    {subscriptionData.features.map((feature, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        <span className="text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="billing" className="space-y-4 mt-0">
+                {/* Payment Method */}
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold">Payment Method</h3>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <CreditCard className="h-8 w-8 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium">{subscriptionData.cardBrand} ••••{subscriptionData.cardLast4}</p>
+                            <p className="text-sm text-muted-foreground">Expires 12/2027</p>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          Update
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Billing History */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Recent Invoices</h3>
+                    <Button variant="outline" size="sm" onClick={downloadInvoice}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Feb 15, 2024</span>
+                          <span className="font-medium">$29.00</span>
+                          <Badge variant="outline" className="text-xs">Paid</Badge>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Jan 15, 2024</span>
+                          <span className="font-medium">$29.00</span>
+                          <Badge variant="outline" className="text-xs">Paid</Badge>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Dec 15, 2023</span>
+                          <span className="font-medium">$29.00</span>
+                          <Badge variant="outline" className="text-xs">Paid</Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="settings" className="space-y-4 mt-0">
+                {/* Account Settings */}
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold">Account Settings</h3>
+                  <Card>
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Email Notifications</p>
+                          <p className="text-sm text-muted-foreground">Receive billing and usage alerts</p>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          <Mail className="h-4 w-4 mr-2" />
+                          Configure
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Cancellation */}
+                {!showCancelConfirmation ? (
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-red-600">Danger Zone</h3>
+                    <Card className="border-red-200">
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
+                          <div>
+                            <p className="font-medium text-red-800">Cancel Subscription</p>
+                            <p className="text-sm text-red-600">You'll continue to have access until your current billing period ends.</p>
+                          </div>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => setShowCancelConfirmation(true)}
+                            className="w-full"
+                          >
+                            Cancel Plan
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <Card className="border-red-200 bg-red-50">
+                      <CardContent className="p-4">
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="h-5 w-5 text-red-600" />
+                            <h3 className="font-semibold text-red-800">Confirm Cancellation</h3>
+                          </div>
+                          <p className="text-sm text-red-700">
+                            Are you sure you want to cancel your subscription? You'll lose access to all premium features
+                            after {subscriptionData.nextBillingDate}.
+                          </p>
+                          <div className="space-y-2">
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={handleCancelSubscription}
+                              disabled={isCancellingSubscription}
+                              className="w-full"
+                            >
+                              {isCancellingSubscription ? "Cancelling..." : "Yes, Cancel Subscription"}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowCancelConfirmation(false)}
+                              disabled={isCancellingSubscription}
+                              className="w-full"
+                            >
+                              Keep Subscription
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </TabsContent>
+            </div>
+          </Tabs>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsSubscriptionModalOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -102,26 +102,44 @@ export const KeywordResearchTool = () => {
     const detectLocation = async () => {
       try {
         console.log('KeywordResearchTool: Attempting to detect location');
-        const response = await fetch('https://ipapi.co/json/');
+
+        // Use a timeout to prevent hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+        const response = await fetch('https://ipapi.co/json/', {
+          signal: controller.signal,
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (compatible; KeywordTool/1.0)'
+          }
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
         console.log('KeywordResearchTool: Location data received:', data);
-        
+
         // Validate that the detected country exists in our countries list
         const detectedCountryCode = data.country_code || 'US';
         const countryExists = countries.find(c => c.code === detectedCountryCode);
         const finalCountryCode = countryExists ? detectedCountryCode : 'US';
-        
+
         // Validate that the detected city exists in the selected country's cities list
         const detectedCity = data.city || '';
         const countryCities = cities[finalCountryCode as keyof typeof cities] || [];
         const cityExists = countryCities.includes(detectedCity);
-        
+
         setUserLocation({
           country: data.country_name || 'United States',
           city: detectedCity
         });
         setSelectedCountry(finalCountryCode);
-        
+
         // Only set the city if it exists in our predefined list for that country
         if (cityExists) {
           setSelectedCity(detectedCity);
@@ -130,7 +148,7 @@ export const KeywordResearchTool = () => {
         }
       } catch (error) {
         console.log('KeywordResearchTool: Could not detect location, using defaults', error);
-        // Set safe defaults on error
+        // Set safe defaults on error - this handles network errors, timeouts, CORS issues, etc.
         setUserLocation({
           country: 'United States',
           city: ''
@@ -325,7 +343,7 @@ export const KeywordResearchTool = () => {
     { code: "MH", name: "Marshall Islands", flag: "🇲🇭" },
     { code: "MK", name: "North Macedonia", flag: "🇲🇰" },
     { code: "ML", name: "Mali", flag: "🇲🇱" },
-    { code: "MM", name: "Myanmar", flag: "🇲🇲" },
+    { code: "MM", name: "Myanmar", flag: "🇲����" },
     { code: "MN", name: "Mongolia", flag: "🇲🇳" },
     { code: "MO", name: "Macao", flag: "🇲🇴" },
     { code: "MP", name: "Northern Mariana Islands", flag: "🇲🇵" },
@@ -346,12 +364,12 @@ export const KeywordResearchTool = () => {
     { code: "NG", name: "Nigeria", flag: "🇳🇬" },
     { code: "NI", name: "Nicaragua", flag: "🇳🇮" },
     { code: "NL", name: "Netherlands", flag: "🇳🇱" },
-    { code: "NO", name: "Norway", flag: "🇳🇴" },
+    { code: "NO", name: "Norway", flag: "🇳����" },
     { code: "NP", name: "Nepal", flag: "🇳🇵" },
     { code: "NR", name: "Nauru", flag: "🇳🇷" },
     { code: "NU", name: "Niue", flag: "🇳🇺" },
     { code: "NZ", name: "New Zealand", flag: "🇳🇿" },
-    { code: "OM", name: "Oman", flag: "🇴🇲" },
+    { code: "OM", name: "Oman", flag: "🇴���" },
     { code: "PA", name: "Panama", flag: "🇵🇦" },
     { code: "PE", name: "Peru", flag: "🇵🇪" },
     { code: "PF", name: "French Polynesia", flag: "🇵🇫" },
@@ -372,7 +390,7 @@ export const KeywordResearchTool = () => {
     { code: "RS", name: "Serbia", flag: "🇷🇸" },
     { code: "RU", name: "Russia", flag: "🇷🇺" },
     { code: "RW", name: "Rwanda", flag: "🇷🇼" },
-    { code: "SA", name: "Saudi Arabia", flag: "🇸🇦" },
+    { code: "SA", name: "Saudi Arabia", flag: "🇸���" },
     { code: "SB", name: "Solomon Islands", flag: "🇸🇧" },
     { code: "SC", name: "Seychelles", flag: "🇸🇨" },
     { code: "SD", name: "Sudan", flag: "🇸🇩" },
@@ -390,7 +408,7 @@ export const KeywordResearchTool = () => {
     { code: "SS", name: "South Sudan", flag: "🇸🇸" },
     { code: "ST", name: "São Tomé and Príncipe", flag: "🇸🇹" },
     { code: "SV", name: "El Salvador", flag: "🇸🇻" },
-    { code: "SX", name: "Sint Maarten", flag: "🇸🇽" },
+    { code: "SX", name: "Sint Maarten", flag: "���🇽" },
     { code: "SY", name: "Syria", flag: "🇸🇾" },
     { code: "SZ", name: "Eswatini", flag: "🇸🇿" },
     { code: "TC", name: "Turks and Caicos Islands", flag: "🇹🇨" },
@@ -535,128 +553,98 @@ export const KeywordResearchTool = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20">
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        <div className="relative p-8">
-          <div className="flex items-center justify-between">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
-                  <Search className="h-8 w-8 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-4xl font-bold tracking-tight">Advanced Keyword Research</h1>
-                  <p className="text-lg text-muted-foreground mt-1">
-                    Discover high-impact keywords with comprehensive market intelligence
-                  </p>
-                </div>
-              </div>
-              
-              {userLocation && (
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    Auto-detected: {userLocation.city && userLocation.city + ', '}{userLocation.country}
-                  </span>
-                </div>
-              )}
-            </div>
-            
-            <div className="hidden md:flex items-center gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">{keywords.length}</div>
-                <div className="text-xs text-muted-foreground">Keywords Found</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{selectedEngine.charAt(0).toUpperCase() + selectedEngine.slice(1)}</div>
-                <div className="text-xs text-muted-foreground">Engine</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Enhanced Search Interface */}
       <Card className="border-0 shadow-sm">
-        <CardContent className="p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Search Term</label>
-              <Input
-                placeholder="Enter keyword or phrase..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-11 border-2 focus:border-primary transition-colors"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Target Country</label>
-              <div className="h-11">
-                <SearchableSelect
-                  options={countries.map(country => ({
-                    value: country.code,
-                    label: `${country.flag} ${country.name}`,
-                    searchableText: `${country.name} ${country.code}`
-                  }))}
-                  value={selectedCountry}
-                  onValueChange={(value: string) => {
-                    setSelectedCountry(value);
-                    setSelectedCity("");
-                  }}
-                  placeholder="Select country..."
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Search Term</label>
+                <Input
+                  placeholder="Enter keyword or phrase..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="h-11 border-2 focus:border-primary transition-colors"
                 />
+                {userLocation && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <MapPin className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      Auto-detected: {userLocation.city && userLocation.city + ', '}{userLocation.country}
+                    </span>
+                  </div>
+                )}
               </div>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">City (Optional)</label>
-              <div className="h-11">
-                <SearchableSelect
-                  options={[
-                    { value: "", label: "All Cities", searchableText: "all cities nationwide" },
-                    ...(cities[selectedCountry as keyof typeof cities] || []).map(city => ({
-                      value: city,
-                      label: city,
-                      searchableText: city.toLowerCase()
-                    }))
-                  ]}
-                  value={selectedCity}
-                  onValueChange={setSelectedCity}
-                  placeholder="Select city..."
-                />
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Target Country</label>
+                <div className="h-11">
+                  <SearchableSelect
+                    options={countries.map(country => ({
+                      value: country.code,
+                      label: `${country.flag} ${country.name}`,
+                      searchableText: `${country.name} ${country.code}`
+                    }))}
+                    value={selectedCountry}
+                    onValueChange={(value: string) => {
+                      setSelectedCountry(value);
+                      setSelectedCity("");
+                    }}
+                    placeholder="Select country..."
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">City (Optional)</label>
+                <div className="h-11">
+                  <SearchableSelect
+                    options={[
+                      { value: "", label: "All Cities", searchableText: "all cities nationwide" },
+                      ...(cities[selectedCountry as keyof typeof cities] || []).map(city => ({
+                        value: city,
+                        label: city,
+                        searchableText: city.toLowerCase()
+                      }))
+                    ]}
+                    value={selectedCity}
+                    onValueChange={setSelectedCity}
+                    placeholder="Select city..."
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Search Engine</label>
+                <div className="h-11">
+                  <Select value={selectedEngine} onValueChange={setSelectedEngine}>
+                    <SelectTrigger className="h-11">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border shadow-lg z-50">
+                      <SelectItem value="google">
+                        <div className="flex items-center gap-2">
+                          <img src={googleLogo} alt="Google" className="w-4 h-4" />
+                          Google
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="bing">
+                        <div className="flex items-center gap-2">
+                          <img src={bingLogo} alt="Bing" className="w-4 h-4" />
+                          Bing
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Search Engine</label>
-              <Select value={selectedEngine} onValueChange={setSelectedEngine}>
-                <SelectTrigger className="h-11">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-background border shadow-lg z-50">
-                  <SelectItem value="google">
-                    <div className="flex items-center gap-2">
-                      <img src={googleLogo} alt="Google" className="w-4 h-4" />
-                      Google
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="bing">
-                    <div className="flex items-center gap-2">
-                      <img src={bingLogo} alt="Bing" className="w-4 h-4" />
-                      Bing
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex items-end">
-              <Button 
-                onClick={performSearch} 
+            <div className="flex justify-end">
+              <Button
+                onClick={performSearch}
                 disabled={isSearching || !searchTerm.trim()}
-                className="w-full h-11 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
+                className="h-11 px-8 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
               >
                 {isSearching ? "Researching..." : "Research Keywords"}
                 <Search className="h-4 w-4 ml-2" />
