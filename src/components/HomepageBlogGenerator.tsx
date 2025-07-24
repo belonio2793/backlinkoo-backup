@@ -305,12 +305,12 @@ export function HomepageBlogGenerator() {
                   {isGenerating ? (
                     <>
                       <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                      Generating Your Backlink...
+                      Generating Your Trial Backlink...
                     </>
                   ) : (
                     <>
                       <Sparkles className="mr-3 h-5 w-5" />
-                      Generate My Blog Post
+                      Claim Now
                     </>
                   )}
                 </Button>
@@ -371,7 +371,7 @@ export function HomepageBlogGenerator() {
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-2 text-gray-900">🔗 Backlink Preview Details</h4>
+                      <h4 className="font-semibold mb-2 text-gray-900">���� Backlink Preview Details</h4>
                       <ul className="space-y-1 text-sm text-gray-700">
                         <li>• Target: {targetUrl}</li>
                         <li>• Contextual Links: {generatedPost?.contextualLinks?.length || 1}</li>
