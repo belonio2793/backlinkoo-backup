@@ -160,15 +160,6 @@ const Index = () => {
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
             </div>
             <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                onClick={() => navigate("/backlink-report")}
-                className="font-medium"
-              >
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Verify Links
-              </Button>
-
               {user ? (
                 <Button onClick={() => navigate("/dashboard")} className="font-medium">
                   Dashboard
