@@ -411,7 +411,7 @@ export function MultiBlogGenerator({
           <div className="space-y-3">
             <h4 className="font-semibold flex items-center gap-2">
               <Monitor className="h-4 w-4" />
-              Active Processes
+              Backlink ∞ Processes
             </h4>
             <div className="space-y-2 max-h-32 overflow-y-auto">
               {activeProcesses.map((process, index) => (
