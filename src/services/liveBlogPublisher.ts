@@ -125,12 +125,12 @@ export class LiveBlogPublisher {
     // For now, we'll simulate this with a delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Update in memory storage
-    const stored = this.inMemoryPosts.get(blogPost.id);
+    // Update in memory storage using slug
+    const stored = this.inMemoryPosts.get(blogPost.slug);
     if (stored) {
       stored.updatedAt = new Date().toISOString();
       stored.status = 'published';
-      this.inMemoryPosts.set(blogPost.id, stored);
+      this.inMemoryPosts.set(blogPost.slug, stored);
     }
   }
 
