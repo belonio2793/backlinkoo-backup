@@ -62,6 +62,8 @@ CREATE INDEX IF NOT EXISTS idx_affiliate_referrals_affiliate_id ON affiliate_ref
 CREATE INDEX IF NOT EXISTS idx_affiliate_referrals_referred_user_id ON affiliate_referrals(referred_user_id);
 CREATE INDEX IF NOT EXISTS idx_affiliate_referrals_referral_code ON affiliate_referrals(referral_code);
 CREATE INDEX IF NOT EXISTS idx_affiliate_payments_affiliate_id ON affiliate_payments(affiliate_id);
+CREATE INDEX IF NOT EXISTS idx_affiliate_clicks_affiliate_id ON affiliate_clicks(affiliate_id);
+CREATE INDEX IF NOT EXISTS idx_affiliate_clicks_clicked_at ON affiliate_clicks(clicked_at);
 
 -- Create updated_at trigger function if it doesn't exist
 CREATE OR REPLACE FUNCTION update_updated_at_column()
