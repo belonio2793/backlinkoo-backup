@@ -333,12 +333,32 @@ const NoHandsSEO = () => {
                       <span className="font-medium">DA 50+ Average</span>
                     </div>
                     <div className="flex justify-between">
+                      <span>Verification Time:</span>
+                      <span className="font-medium">24-48 Hours</span>
+                    </div>
+                    <div className="flex justify-between">
                       <span>Delivery Time:</span>
-                      <span className="font-medium">7-14 Days</span>
+                      <span className="font-medium">7-14 Days*</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Cost:</span>
                       <span className="font-medium">10 Credits ($7.00)</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-blue-700 mt-2">
+                    *After verification approval
+                  </p>
+                </div>
+
+                {/* Verification Process Info */}
+                <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                  <div className="flex items-start gap-3">
+                    <Shield className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-semibold text-amber-900 mb-1">Quality Verification Process</h4>
+                      <p className="text-sm text-amber-800">
+                        All campaigns undergo verification to ensure compliance with quality standards and search engine guidelines. This helps guarantee the best results for your investment.
+                      </p>
                     </div>
                   </div>
                 </div>
