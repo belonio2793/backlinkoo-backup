@@ -117,47 +117,18 @@ const NoHandsSEO = () => {
 
       if (error) throw error;
 
-      // Check and deduct credits (10 credits for 10 links)
-      const { data: creditsData, error: creditsError } = await supabase
-        .from('credits')
-        .select('amount')
+      // Check if user has active SEO Tools subscription
+      const { data: subscription, error: subError } = await supabase
+        .from('seo_subscriptions')
+        .select('*')
         .eq('user_id', user.id)
+        .eq('status', 'active')
         .single();
 
-      if (creditsError || !creditsData) {
+      if (subError || !subscription) {
         await supabase.from('campaigns').delete().eq('id', data.id);
-        throw new Error('Unable to verify credit balance. Please try again.');
+        throw new Error('Active SEO Tools subscription required. Please subscribe to continue.');
       }
-
-      if (creditsData.amount < 10) {
-        await supabase.from('campaigns').delete().eq('id', data.id);
-        throw new Error('Insufficient credits. You need 10 credits to create this campaign. Please purchase more credits.');
-      }
-
-      // Deduct credits
-      const { error: updateCreditsError } = await supabase
-        .from('credits')
-        .update({
-          amount: creditsData.amount - 10,
-          total_used: creditsData.amount - 10
-        })
-        .eq('user_id', user.id);
-
-      if (updateCreditsError) {
-        await supabase.from('campaigns').delete().eq('id', data.id);
-        throw updateCreditsError;
-      }
-
-      // Record transaction
-      await supabase
-        .from('credit_transactions')
-        .insert({
-          user_id: user.id,
-          amount: -10,
-          type: 'campaign_creation',
-          campaign_id: data.id,
-          description: `NO Hands SEO Campaign: ${campaignName}`
-        });
 
       setShowVerificationSuccess(true);
       
