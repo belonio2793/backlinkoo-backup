@@ -485,9 +485,6 @@ const Index = () => {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
-            <div className="bg-gradient-to-br from-pink-500/5 to-primary/5 p-12 rounded-2xl">
-              <Users className="h-32 w-32 text-primary mx-auto" />
-            </div>
           </div>
         </div>
       </section>
