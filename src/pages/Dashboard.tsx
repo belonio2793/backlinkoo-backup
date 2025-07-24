@@ -103,7 +103,7 @@ const Dashboard = () => {
       let campaignQuery = supabase
         .from('campaigns')
         .select('id')
-        .eq('user_id', user.id);
+        .eq('user_id', authUser.id);
 
       const { data: campaignsData } = await campaignQuery.limit(1);
 
