@@ -578,7 +578,7 @@ const Dashboard = () => {
                                   {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
                                 </Badge>
                               </div>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                                 <div>
                                   <p className="text-muted-foreground">Target URL</p>
                                   <p className="font-medium">{campaign.target_url}</p>
