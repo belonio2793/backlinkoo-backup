@@ -22,7 +22,8 @@ import {
   Clock,
   AlertCircle,
   ExternalLink,
-  Zap
+  Zap,
+  DollarSign
 } from "lucide-react";
 import { PaymentModal } from "@/components/PaymentModal";
 import { CampaignForm } from "@/components/CampaignForm";
