@@ -5,13 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { AffiliateService } from '@/services/affiliateService';
 import type { User } from '@supabase/supabase-js';
-import type { AffiliateProgram, AffiliateReferral } from '@/integrations/supabase/affiliate-types';
 import { 
   DollarSign, 
   ArrowRight, 
@@ -20,7 +18,6 @@ import {
   Shield,
   Copy,
   ExternalLink,
-  Eye,
   MousePointer,
   UserPlus,
   CreditCard,
@@ -31,20 +28,16 @@ import {
 
 const AffiliateProgram = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [affiliate, setAffiliate] = useState<AffiliateProgram | null>(null);
-  const [referrals, setReferrals] = useState<AffiliateReferral[]>([]);
+  const [affiliate, setAffiliate] = useState<any>(null);
+  const [customId, setCustomId] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState({
     total_clicks: 0,
     total_conversions: 0,
     conversion_rate: 0,
-    total_commission: 0,
-    pending_commission: 0,
-    paid_commission: 0
+    total_commission: 0
   });
-  const [referredUsers, setReferredUsers] = useState<any[]>([]);
-  const [customId, setCustomId] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -76,70 +69,11 @@ const AffiliateProgram = () => {
       setAffiliate(affiliateData);
 
       if (affiliateData) {
-        const [referralsData, statsData] = await Promise.all([
-          AffiliateService.getAffiliateReferrals(affiliateData.id),
-          AffiliateService.getAffiliateStats(affiliateData.id)
-        ]);
-
-        setReferrals(referralsData);
+        const statsData = await AffiliateService.getAffiliateStats(affiliateData.id);
         setStats(statsData);
-
-        // Load detailed referred users data
-        await loadReferredUsers(referralsData);
       }
     } catch (error) {
       console.error('Error loading affiliate data:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load affiliate data.',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const loadReferredUsers = async (referralsData: AffiliateReferral[]) => {
-    try {
-      const userIds = referralsData
-        .filter(r => r.referred_user_id)
-        .map(r => r.referred_user_id);
-
-      if (userIds.length === 0) {
-        setReferredUsers([]);
-        return;
-      }
-
-      // Get user profiles
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, email, display_name, created_at')
-        .in('user_id', userIds);
-
-      // Get user spending data
-      const { data: orders } = await supabase
-        .from('orders')
-        .select('user_id, amount, created_at, status')
-        .in('user_id', userIds)
-        .eq('status', 'completed');
-
-      // Combine data
-      const usersWithData = profiles?.map(profile => {
-        const userOrders = orders?.filter(o => o.user_id === profile.user_id) || [];
-        const totalSpent = userOrders.reduce((sum, order) => sum + order.amount, 0);
-        const referralData = referralsData.find(r => r.referred_user_id === profile.user_id);
-
-        return {
-          ...profile,
-          total_spent: totalSpent,
-          orders_count: userOrders.length,
-          commission_earned: referralData?.commission_earned || 0,
-          last_order: userOrders.length > 0 ? userOrders[userOrders.length - 1].created_at : null,
-          referral_date: referralData?.created_at
-        };
-      }) || [];
-
-      setReferredUsers(usersWithData);
-    } catch (error) {
-      console.error('Error loading referred users:', error);
     }
   };
 
@@ -189,7 +123,7 @@ const AffiliateProgram = () => {
     );
   }
 
-  // If user is not logged in, show marketing page
+  // If user is not logged in, show sign up prompt
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
@@ -217,15 +151,15 @@ const AffiliateProgram = () => {
         <section className="py-16 px-4 bg-gradient-to-br from-primary/5 to-blue-50/30">
           <div className="container mx-auto text-center max-w-4xl">
             <Badge variant="outline" className="mb-4">
-              💰 Industry-Leading Commission
+              🔒 Account Required
             </Badge>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
               Earn <span className="text-primary">50% Commission</span>
               <br />
-              On Every Referral
+              With Detailed Tracking
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Create an account to join our affiliate program and start earning substantial commissions.
+              Create an account to access our comprehensive affiliate dashboard with click tracking, user details, and commission analytics.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Button size="lg" onClick={() => navigate("/login")} className="text-lg px-8 py-6">
@@ -233,36 +167,9 @@ const AffiliateProgram = () => {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
-            
-            {/* Key Stats */}
-            <div className="grid grid-cols-3 gap-8 max-w-md mx-auto">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">50%</div>
-                <div className="text-sm text-muted-foreground">Commission</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">∞</div>
-                <div className="text-sm text-muted-foreground">Lifetime</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">$100</div>
-                <div className="text-sm text-muted-foreground">Min Payout</div>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Features */}
-        <section className="py-16 px-4">
-          <div className="container mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Why Join Our Program?</h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Track everything in real-time with detailed analytics
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
+            {/* Features Grid */}
+            <div className="grid md:grid-cols-3 gap-6">
               <Card className="text-center p-6">
                 <CardContent className="pt-6">
                   <MousePointer className="h-12 w-12 text-primary mx-auto mb-4" />
@@ -278,7 +185,7 @@ const AffiliateProgram = () => {
                   <Users className="h-12 w-12 text-primary mx-auto mb-4" />
                   <h3 className="text-xl font-semibold mb-2">User Details</h3>
                   <p className="text-muted-foreground">
-                    See detailed information about users you refer, including their spending.
+                    See detailed information about users you refer, including email and spending.
                   </p>
                 </CardContent>
               </Card>
@@ -331,7 +238,7 @@ const AffiliateProgram = () => {
                 Join Our Affiliate Program
               </CardTitle>
               <CardDescription>
-                Create your affiliate account and start earning 50% commission on referrals
+                Create your affiliate account to access detailed tracking and analytics
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -342,14 +249,14 @@ const AffiliateProgram = () => {
                   <div className="text-sm text-muted-foreground">On all referral spending</div>
                 </div>
                 <div className="text-center p-4 bg-primary/5 rounded-lg">
-                  <DollarSign className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <div className="font-semibold">Monthly Payouts</div>
-                  <div className="text-sm text-muted-foreground">$100 minimum threshold</div>
+                  <MousePointer className="h-8 w-8 text-primary mx-auto mb-2" />
+                  <div className="font-semibold">Click Analytics</div>
+                  <div className="text-sm text-muted-foreground">Real-time tracking</div>
                 </div>
                 <div className="text-center p-4 bg-primary/5 rounded-lg">
-                  <Users className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <div className="font-semibold">Real-time Tracking</div>
-                  <div className="text-sm text-muted-foreground">Monitor your performance</div>
+                  <Mail className="h-8 w-8 text-primary mx-auto mb-2" />
+                  <div className="font-semibold">User Details</div>
+                  <div className="text-sm text-muted-foreground">Email & spending data</div>
                 </div>
               </div>
 
@@ -376,6 +283,18 @@ const AffiliateProgram = () => {
                 >
                   Create Affiliate Account
                 </Button>
+              </div>
+
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">What you'll get:</h4>
+                <ul className="text-sm space-y-1">
+                  <li>✓ Unique affiliate ID and tracking links</li>
+                  <li>✓ Real-time click and conversion analytics</li>
+                  <li>✓ Detailed user information including emails</li>
+                  <li>✓ Lifetime spending tracking per user</li>
+                  <li>✓ 50% commission on all transactions</li>
+                  <li>✓ Monthly payouts when you reach $100</li>
+                </ul>
               </div>
             </CardContent>
           </Card>
@@ -410,14 +329,14 @@ const AffiliateProgram = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Affiliate Dashboard</h1>
-          <p className="text-muted-foreground">Track your performance and earnings</p>
+          <p className="text-muted-foreground">Track your performance and earnings in real-time</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="referrals">Referrals</TabsTrigger>
-            <TabsTrigger value="tracking">Tracking</TabsTrigger>
+            <TabsTrigger value="tracking">Analytics</TabsTrigger>
             <TabsTrigger value="payouts">Payouts</TabsTrigger>
           </TabsList>
 
@@ -429,7 +348,7 @@ const AffiliateProgram = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Total Earnings</p>
-                      <p className="text-3xl font-bold">${affiliate.total_earnings.toFixed(2)}</p>
+                      <p className="text-3xl font-bold">${affiliate.total_earnings?.toFixed(2) || '0.00'}</p>
                     </div>
                     <DollarSign className="h-8 w-8 text-primary" />
                   </div>
@@ -441,7 +360,7 @@ const AffiliateProgram = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                      <p className="text-3xl font-bold text-orange-600">${affiliate.pending_earnings.toFixed(2)}</p>
+                      <p className="text-3xl font-bold text-orange-600">${affiliate.pending_earnings?.toFixed(2) || '0.00'}</p>
                     </div>
                     <Calendar className="h-8 w-8 text-orange-600" />
                   </div>
@@ -452,10 +371,10 @@ const AffiliateProgram = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Referrals</p>
-                      <p className="text-3xl font-bold">{referredUsers.length}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Total Clicks</p>
+                      <p className="text-3xl font-bold">{stats.total_clicks}</p>
                     </div>
-                    <Users className="h-8 w-8 text-blue-600" />
+                    <MousePointer className="h-8 w-8 text-blue-600" />
                   </div>
                 </CardContent>
               </Card>
@@ -464,10 +383,10 @@ const AffiliateProgram = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Conversion Rate</p>
-                      <p className="text-3xl font-bold">{stats.conversion_rate.toFixed(1)}%</p>
+                      <p className="text-sm font-medium text-muted-foreground">Conversions</p>
+                      <p className="text-3xl font-bold">{stats.total_conversions}</p>
                     </div>
-                    <TrendingUp className="h-8 w-8 text-green-600" />
+                    <UserPlus className="h-8 w-8 text-green-600" />
                   </div>
                 </CardContent>
               </Card>
@@ -476,7 +395,7 @@ const AffiliateProgram = () => {
             {/* Referral Tools */}
             <Card>
               <CardHeader>
-                <CardTitle>Your Referral Links</CardTitle>
+                <CardTitle>Your Affiliate Links</CardTitle>
                 <CardDescription>Share these links to start earning commissions</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -522,63 +441,34 @@ const AffiliateProgram = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Referred Users</CardTitle>
-                <CardDescription>Users you've referred and their lifetime value</CardDescription>
+                <CardDescription>Detailed information about users you've referred</CardDescription>
               </CardHeader>
               <CardContent>
-                {referredUsers.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">No referrals yet. Start sharing your link!</p>
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground mb-2">No referrals yet</p>
+                  <p className="text-sm text-muted-foreground">
+                    When users sign up through your link, their details will appear here including:
+                  </p>
+                  <div className="mt-4 text-sm space-y-1 text-left max-w-md mx-auto">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-primary" />
+                      <span>Email addresses</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-primary" />
+                      <span>Lifetime expenditure</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="h-4 w-4 text-primary" />
+                      <span>Transaction history</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-primary" />
+                      <span>50% commission calculations</span>
+                    </div>
                   </div>
-                ) : (
-                  <div className="border rounded-lg">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>User</TableHead>
-                          <TableHead>Joined</TableHead>
-                          <TableHead>Total Spent</TableHead>
-                          <TableHead>Your Commission</TableHead>
-                          <TableHead>Orders</TableHead>
-                          <TableHead>Last Order</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {referredUsers.map((user) => (
-                          <TableRow key={user.user_id}>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium">
-                                  {user.display_name || 'Anonymous User'}
-                                </div>
-                                <div className="text-sm text-muted-foreground flex items-center gap-1">
-                                  <Mail className="h-3 w-3" />
-                                  {user.email}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {new Date(user.referral_date).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell className="font-mono">
-                              ${user.total_spent.toFixed(2)}
-                            </TableCell>
-                            <TableCell className="font-mono text-green-600">
-                              ${user.commission_earned.toFixed(2)}
-                            </TableCell>
-                            <TableCell>{user.orders_count}</TableCell>
-                            <TableCell>
-                              {user.last_order 
-                                ? new Date(user.last_order).toLocaleDateString()
-                                : 'No orders yet'
-                              }
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -586,14 +476,14 @@ const AffiliateProgram = () => {
           <TabsContent value="tracking" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Click & Conversion Tracking</CardTitle>
-                <CardDescription>Monitor your referral link performance</CardDescription>
+                <CardTitle>Performance Analytics</CardTitle>
+                <CardDescription>Detailed tracking of clicks, conversions, and earnings</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
                     <MousePointer className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-blue-600">{stats.total_clicks || 0}</div>
+                    <div className="text-2xl font-bold text-blue-600">{stats.total_clicks}</div>
                     <div className="text-sm text-muted-foreground">Total Clicks</div>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
@@ -603,14 +493,19 @@ const AffiliateProgram = () => {
                   </div>
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
                     <Target className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-purple-600">{stats.conversion_rate.toFixed(1)}%</div>
+                    <div className="text-2xl font-bold text-purple-600">{stats.conversion_rate?.toFixed(1) || '0.0'}%</div>
                     <div className="text-sm text-muted-foreground">Conversion Rate</div>
                   </div>
                 </div>
                 
                 <div className="text-center text-muted-foreground">
-                  <p>Detailed click tracking analytics will be displayed here.</p>
-                  <p className="text-sm">Track every interaction with your referral links in real-time.</p>
+                  <p>Real-time analytics will show:</p>
+                  <div className="mt-4 text-sm space-y-1">
+                    <p>• Click timestamps and sources</p>
+                    <p>• User conversion details</p>
+                    <p>• Commission calculations per transaction</p>
+                    <p>• Geographic and demographic data</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -626,12 +521,12 @@ const AffiliateProgram = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   <div className="text-center p-4 bg-green-50 rounded-lg">
                     <DollarSign className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-green-600">${affiliate.total_paid.toFixed(2)}</div>
+                    <div className="text-2xl font-bold text-green-600">${affiliate.total_paid?.toFixed(2) || '0.00'}</div>
                     <div className="text-sm text-muted-foreground">Total Paid</div>
                   </div>
                   <div className="text-center p-4 bg-orange-50 rounded-lg">
                     <Calendar className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-orange-600">${affiliate.pending_earnings.toFixed(2)}</div>
+                    <div className="text-2xl font-bold text-orange-600">${affiliate.pending_earnings?.toFixed(2) || '0.00'}</div>
                     <div className="text-sm text-muted-foreground">Pending</div>
                   </div>
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
@@ -654,7 +549,7 @@ const AffiliateProgram = () => {
                   <div className="text-center text-muted-foreground">
                     <p>Minimum payout amount is $100</p>
                     <p className="text-sm">
-                      You need ${(100 - affiliate.pending_earnings).toFixed(2)} more in commissions
+                      You need ${(100 - (affiliate.pending_earnings || 0)).toFixed(2)} more in commissions
                     </p>
                   </div>
                 )}
