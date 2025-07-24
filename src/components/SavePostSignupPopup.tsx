@@ -148,9 +148,25 @@ export function SavePostSignupPopup({
       }
     } catch (error: any) {
       console.error('Signup failed:', error);
+
+      // Handle different error types properly
+      let errorMessage = 'There was an error creating your account';
+
+      if (error && typeof error === 'object') {
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error.error_description) {
+          errorMessage = error.error_description;
+        } else if (typeof error.toString === 'function') {
+          errorMessage = error.toString();
+        }
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
       toast({
         title: 'Signup Failed',
-        description: error.message || 'There was an error creating your account',
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {
@@ -227,23 +243,23 @@ export function SavePostSignupPopup({
         
         <div className="space-y-6">
           {/* Urgency Section */}
-          <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
             <div className="flex items-center gap-2 mb-3">
-              <Timer className="h-5 w-5 text-red-600" />
-              <span className="font-semibold text-red-800 dark:text-red-200">
-                Auto-Delete Warning
+              <Save className="h-5 w-5 text-blue-600" />
+              <span className="font-semibold text-blue-800 dark:text-blue-200">
+                Create an account to claim these permanent links
               </span>
             </div>
             <div className="space-y-2">
-              <p className="text-sm text-red-700 dark:text-red-300">
-                Your blog post will be deleted in <strong>{formatTimeRemaining(timeRemaining)}</strong>
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Your trial expires in <strong>{formatTimeRemaining(timeRemaining)}</strong> - Save now to keep forever!
               </p>
               <Progress 
                 value={Math.max(0, 100 - ((86400 - timeRemaining) / 86400) * 100)} 
                 className="h-2" 
               />
               {blogPostTitle && (
-                <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
                   "{blogPostTitle.substring(0, 50)}..."
                 </p>
               )}

@@ -37,15 +37,36 @@ export function BlogPreview() {
       console.log(`📝 Available posts in memory:`, Array.from(liveBlogPublisher.inMemoryPosts.keys()));
       console.log(`📊 Total posts stored:`, liveBlogPublisher.inMemoryPosts.size);
 
+      // Log details of all stored posts for debugging
+      liveBlogPublisher.inMemoryPosts.forEach((post, key) => {
+        console.log(`🗂️ Post key: "${key}", title: "${post.title}", id: "${post.id}"`);
+      });
+
       const post = await liveBlogPublisher.getBlogPost(slug);
       if (post) {
-        console.log(`✅ Blog post found:`, post.title);
+        console.log(`✅ Blog post found:`, {
+          title: post.title,
+          slug: post.slug,
+          contentLength: post.content?.length,
+          wordCount: post.wordCount,
+          contextualLinks: post.contextualLinks?.length
+        });
         setBlogPost(post);
       } else {
         console.log(`❌ Blog post not found for slug: "${slug}"`);
+
+        // Try alternative lookups
+        console.log('🔄 Attempting alternative lookups...');
+        const alternativePost = liveBlogPublisher.inMemoryPosts.get(slug);
+        if (alternativePost) {
+          console.log('✅ Found via direct map lookup:', alternativePost.title);
+          setBlogPost(alternativePost);
+          return;
+        }
+
         toast({
           title: 'Post Not Found',
-          description: 'The requested blog post could not be found',
+          description: 'The requested blog post could not be found. It may have expired or been removed.',
           variant: 'destructive'
         });
       }

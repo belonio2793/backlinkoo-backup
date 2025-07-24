@@ -136,14 +136,30 @@ export class LiveBlogPublisher {
 
   async getBlogPost(slug: string): Promise<LiveBlogPost | null> {
     try {
+      console.log(`🔍 Looking for post with slug: "${slug}"`);
+      console.log(`📦 Available slugs:`, Array.from(this.inMemoryPosts.keys()));
+
       // Direct lookup by slug since we store by slug
       const post = this.inMemoryPosts.get(slug);
       if (post && post.status === 'published') {
+        console.log(`✅ Found post: "${post.title}"`);
         // Increment view count
         post.viewCount = (post.viewCount || 0) + 1;
         this.inMemoryPosts.set(slug, post);
         return post;
       }
+
+      // If not found by slug, try to find by matching slug in all posts
+      for (const [key, storedPost] of this.inMemoryPosts.entries()) {
+        if (storedPost.slug === slug && storedPost.status === 'published') {
+          console.log(`✅ Found post via slug match: "${storedPost.title}"`);
+          storedPost.viewCount = (storedPost.viewCount || 0) + 1;
+          this.inMemoryPosts.set(key, storedPost);
+          return storedPost;
+        }
+      }
+
+      console.log(`❌ No post found for slug: "${slug}"`);
       return null;
     } catch (error) {
       console.error('Failed to get blog post:', error);

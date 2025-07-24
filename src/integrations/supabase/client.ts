@@ -10,24 +10,63 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 // Create a mock client for development when Supabase project is not available
 const createMockSupabaseClient = () => {
-  const mockAuth = {
-    getSession: () => Promise.resolve({ data: { session: null }, error: null }),
-    getUser: () => Promise.resolve({ data: { user: null }, error: null }),
-    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-    signInWithPassword: () => Promise.resolve({ data: { user: null, session: null }, error: { message: 'Mock mode - authentication disabled' } }),
-    signUp: () => Promise.resolve({ data: { user: null, session: null }, error: { message: 'Mock mode - authentication disabled' } }),
-    signOut: () => Promise.resolve({ error: null }),
-    resend: () => Promise.resolve({ error: { message: 'Mock mode - resend disabled' } }),
-    verifyOtp: () => Promise.resolve({ data: { user: null, session: null }, error: { message: 'Mock mode - OTP verification disabled' } }),
+  const mockUser = {
+    id: 'mock-user-id',
+    email: 'test@example.com',
+    user_metadata: { display_name: 'Test User' },
+    created_at: new Date().toISOString(),
+    aud: 'authenticated'
   };
 
-  const mockFrom = () => ({
-    select: () => ({ data: [], error: null }),
-    insert: () => ({ data: null, error: null }),
-    update: () => ({ data: null, error: null }),
-    delete: () => ({ data: null, error: null }),
-    upsert: () => ({ data: null, error: null }),
-  });
+  const mockSession = {
+    access_token: 'mock-access-token',
+    refresh_token: 'mock-refresh-token',
+    user: mockUser
+  };
+
+  const mockAuth = {
+    getSession: () => Promise.resolve({ data: { session: mockSession }, error: null }),
+    getUser: () => Promise.resolve({ data: { user: mockUser }, error: null }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+    signInWithPassword: () => Promise.resolve({
+      data: { user: mockUser, session: mockSession },
+      error: null
+    }),
+    signUp: () => Promise.resolve({
+      data: { user: mockUser, session: mockSession },
+      error: null
+    }),
+    signOut: () => Promise.resolve({ error: null }),
+    resend: () => Promise.resolve({ error: null }),
+    verifyOtp: () => Promise.resolve({
+      data: { user: mockUser, session: mockSession },
+      error: null
+    }),
+  };
+
+  const mockFrom = (table: string) => {
+    const mockMethods = {
+      select: (columns?: string) => mockMethods,
+      insert: (data: any) => mockMethods,
+      update: (data: any) => mockMethods,
+      delete: () => mockMethods,
+      upsert: (data: any) => mockMethods,
+      eq: (column: string, value: any) => mockMethods,
+      single: () => Promise.resolve({ data: { id: 'mock-id', ...mockUser }, error: null }),
+      then: (callback: any) => {
+        // Return mock data based on table
+        if (table === 'profiles') {
+          return callback({ data: { user_id: mockUser.id, email: mockUser.email }, error: null });
+        } else if (table === 'credits') {
+          return callback({ data: { user_id: mockUser.id, amount: 10 }, error: null });
+        } else if (table === 'campaigns') {
+          return callback({ data: { id: 'mock-campaign-id' }, error: null });
+        }
+        return callback({ data: [], error: null });
+      }
+    };
+    return mockMethods;
+  };
 
   const mockFunctions = {
     invoke: () => Promise.resolve({ data: null, error: { message: 'Mock mode - functions disabled' } }),

@@ -190,11 +190,11 @@ export function MultiBlogGenerator({
 
   const showSystemInitialization = async (): Promise<void> => {
     const processes = [
-      "Neural Network Initialization",
-      "Content Database Access", 
-      "SEO Algorithm Loading",
-      "Expert Knowledge Synthesis",
-      "Quality Assurance Protocols"
+      "Backlink ∞ Network Initialization",
+      "Content Generation Engine Startup",
+      "SEO Optimization Engine Loading",
+      "Expert Knowledge Base Access",
+      "Quality Assurance Systems Online"
     ];
 
     for (let i = 0; i < processes.length; i++) {
@@ -202,11 +202,11 @@ export function MultiBlogGenerator({
       
       // Add some code stream effects
       const codeLines = [
-        `initialize_content_engine(keyword="${keyword}")`,
-        `load_expert_knowledge_base(experts=${experts.length})`,
-        `configure_seo_optimizer(target="${targetUrl}")`,
-        `allocate_processing_power(cores=128, gpu=true)`,
-        `start_parallel_generation(blogs=5, concurrent=true)`
+        `backlink_infinity.init_content_engine(keyword="${keyword}")`,
+        `backlink_infinity.load_expert_writers(count=${experts.length})`,
+        `backlink_infinity.configure_seo_targeting(url="${targetUrl}")`,
+        `backlink_infinity.allocate_resources(cores=128, priority=high)`,
+        `backlink_infinity.start_campaign_generation(posts=5, parallel=true)`
       ];
       
       if (i < codeLines.length) {
@@ -307,7 +307,8 @@ export function MultiBlogGenerator({
           expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           viewCount: 0,
           seoScore: generatedContent.seoScore,
-          contextualLinks: generatedContent.contextualLinks
+          contextualLinks: generatedContent.contextualLinks,
+          wordCount: generatedContent.wordCount
         };
 
         // Store by slug so BlogPreview can find it
@@ -389,10 +390,10 @@ export function MultiBlogGenerator({
             <div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500">
               <Cpu className="h-6 w-6 text-white animate-pulse" />
             </div>
-            <CardTitle className="text-2xl font-semibold">AI System Initialization</CardTitle>
+            <CardTitle className="text-2xl font-semibold">Backlink ∞ Is Working</CardTitle>
           </div>
           <p className="text-muted-foreground">
-            Preparing advanced AI systems for simultaneous blog generation...
+            Our advanced backlink generation system is preparing your 5-post campaign...
           </p>
         </CardHeader>
         
@@ -400,7 +401,7 @@ export function MultiBlogGenerator({
           {/* System Status */}
           <div className="space-y-4">
             <div className="flex justify-between text-sm">
-              <span className="font-medium">System Initialization</span>
+              <span className="font-medium">Backlink ∞ Platform Status</span>
               <span className="text-muted-foreground">{Math.round((activeProcesses.length / 5) * 100)}%</span>
             </div>
             <Progress value={(activeProcesses.length / 5) * 100} className="h-3" />
@@ -410,7 +411,7 @@ export function MultiBlogGenerator({
           <div className="space-y-3">
             <h4 className="font-semibold flex items-center gap-2">
               <Monitor className="h-4 w-4" />
-              Active Processes
+              Backlink ∞ Processes
             </h4>
             <div className="space-y-2 max-h-32 overflow-y-auto">
               {activeProcesses.map((process, index) => (
@@ -428,7 +429,7 @@ export function MultiBlogGenerator({
             <div className="space-y-3">
               <h4 className="font-semibold flex items-center gap-2">
                 <Code className="h-4 w-4" />
-                System Commands
+                Platform Operations
               </h4>
               <div className="bg-gray-900 text-green-400 p-3 rounded font-mono text-xs max-h-32 overflow-y-auto">
                 {codeStreamLines.map((line, index) => (
@@ -652,7 +653,10 @@ export function MultiBlogGenerator({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => window.open(post.previewUrl, '_blank')}
+                        onClick={() => {
+                          console.log('Opening preview URL:', post.previewUrl);
+                          window.open(post.previewUrl, '_blank');
+                        }}
                       >
                         <Eye className="h-3 w-3 mr-1" />
                         View Live Post

@@ -16,6 +16,9 @@ import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { CampaignDeliverables } from "./pages/CampaignDeliverables";
 import BlogPreview from "./pages/BlogPreview";
+import EmailMarketing from "./pages/EmailMarketing";
+import BacklinkReport from "./pages/BacklinkReport";
+import ReportViewer from "./pages/ReportViewer";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +42,9 @@ const App = () => (
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/campaign/:campaignId" element={<CampaignDeliverables />} />
           <Route path="/preview/:slug" element={<BlogPreview />} />
+          <Route path="/email" element={<EmailMarketing />} />
+          <Route path="/backlink-report" element={<BacklinkReport />} />
+          <Route path="/report/:reportId" element={<ReportViewer />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

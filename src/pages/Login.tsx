@@ -86,10 +86,25 @@ const Login = () => {
         });
         window.location.href = '/dashboard';
       }
-    } catch (error) {
+    } catch (error: any) {
+      // Handle different error types properly
+      let errorMessage = 'An error occurred during sign in.';
+
+      if (error && typeof error === 'object') {
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error.error_description) {
+          errorMessage = error.error_description;
+        } else if (typeof error.toString === 'function') {
+          errorMessage = error.toString();
+        }
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
       toast({
         title: "Sign in failed",
-        description: error.message || "An error occurred during sign in.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -172,11 +187,27 @@ const Login = () => {
           broadcastNewUser(firstName.trim());
         }, 1000);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Signup error:", error);
+
+      // Handle different error types properly
+      let errorMessage = 'An error occurred during sign up.';
+
+      if (error && typeof error === 'object') {
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error.error_description) {
+          errorMessage = error.error_description;
+        } else if (typeof error.toString === 'function') {
+          errorMessage = error.toString();
+        }
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
       toast({
         title: "Sign up failed",
-        description: error.message || "An error occurred during sign up.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -204,10 +235,25 @@ const Login = () => {
       });
       
       setShowResendConfirmation(false);
-    } catch (error) {
+    } catch (error: any) {
+      // Handle different error types properly
+      let errorMessage = 'An error occurred while sending the confirmation email.';
+
+      if (error && typeof error === 'object') {
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error.error_description) {
+          errorMessage = error.error_description;
+        } else if (typeof error.toString === 'function') {
+          errorMessage = error.toString();
+        }
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
       toast({
         title: "Failed to resend confirmation",
-        description: error.message || "An error occurred while sending the confirmation email.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -351,7 +397,7 @@ const Login = () => {
                     <Input
                       id="confirm-password"
                       type="password"
-                      placeholder="••••••••"
+                      placeholder="••���•••••"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
