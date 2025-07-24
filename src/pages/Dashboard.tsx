@@ -237,6 +237,14 @@ const Dashboard = () => {
                 <Zap className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">SEO Tools</span>
               </Button>
+              <Button
+                variant={activeSection === "affiliate" ? "secondary" : "ghost"}
+                onClick={() => setActiveSection("affiliate")}
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3"
+              >
+                <DollarSign className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Affiliate</span>
+              </Button>
             </nav>
           </div>
         </div>
