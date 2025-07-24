@@ -10,15 +10,38 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 // Create a mock client for development when Supabase project is not available
 const createMockSupabaseClient = () => {
+  const mockUser = {
+    id: 'mock-user-id',
+    email: 'test@example.com',
+    user_metadata: { display_name: 'Test User' },
+    created_at: new Date().toISOString(),
+    aud: 'authenticated'
+  };
+
+  const mockSession = {
+    access_token: 'mock-access-token',
+    refresh_token: 'mock-refresh-token',
+    user: mockUser
+  };
+
   const mockAuth = {
-    getSession: () => Promise.resolve({ data: { session: null }, error: null }),
-    getUser: () => Promise.resolve({ data: { user: null }, error: null }),
+    getSession: () => Promise.resolve({ data: { session: mockSession }, error: null }),
+    getUser: () => Promise.resolve({ data: { user: mockUser }, error: null }),
     onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-    signInWithPassword: () => Promise.resolve({ data: { user: null, session: null }, error: { message: 'Mock mode - authentication disabled' } }),
-    signUp: () => Promise.resolve({ data: { user: null, session: null }, error: { message: 'Mock mode - authentication disabled' } }),
+    signInWithPassword: () => Promise.resolve({
+      data: { user: mockUser, session: mockSession },
+      error: null
+    }),
+    signUp: () => Promise.resolve({
+      data: { user: mockUser, session: mockSession },
+      error: null
+    }),
     signOut: () => Promise.resolve({ error: null }),
-    resend: () => Promise.resolve({ error: { message: 'Mock mode - resend disabled' } }),
-    verifyOtp: () => Promise.resolve({ data: { user: null, session: null }, error: { message: 'Mock mode - OTP verification disabled' } }),
+    resend: () => Promise.resolve({ error: null }),
+    verifyOtp: () => Promise.resolve({
+      data: { user: mockUser, session: mockSession },
+      error: null
+    }),
   };
 
   const mockFrom = () => ({
