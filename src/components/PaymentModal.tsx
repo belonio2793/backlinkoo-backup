@@ -30,11 +30,14 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
 
   // Update state when initialCredits prop changes or modal opens
   useEffect(() => {
+    console.log('PaymentModal useEffect - isOpen:', isOpen, 'initialCredits:', initialCredits);
     if (isOpen && initialCredits && initialCredits > 0) {
+      console.log('Setting credits to:', initialCredits, 'amount to:', (initialCredits * CREDIT_PRICE).toFixed(2));
       setCredits(initialCredits.toString());
       setAmount((initialCredits * CREDIT_PRICE).toFixed(2));
     } else if (isOpen && !initialCredits) {
       // Reset to empty if no initial credits provided
+      console.log('Resetting credits and amount to empty');
       setCredits("");
       setAmount("");
     }
@@ -42,7 +45,9 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
 
   // Additional effect to handle prop changes when modal is already open
   useEffect(() => {
+    console.log('PaymentModal second useEffect - initialCredits:', initialCredits);
     if (initialCredits && initialCredits > 0) {
+      console.log('Setting credits to:', initialCredits, 'amount to:', (initialCredits * CREDIT_PRICE).toFixed(2));
       setCredits(initialCredits.toString());
       setAmount((initialCredits * CREDIT_PRICE).toFixed(2));
     }
