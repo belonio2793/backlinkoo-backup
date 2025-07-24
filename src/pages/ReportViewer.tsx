@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import RegistrationModal from '@/components/RegistrationModal';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
+import { Infinity } from 'lucide-react';
 
 interface BacklinkResult {
   id: string;
@@ -56,8 +57,19 @@ export default function ReportViewer() {
   }, [reportId]);
 
   const generateDemoData = (reportId: string) => {
-    // Sample URLs for demo
-    const sampleUrls = [
+    // Enhanced sample URLs for demo preview
+    const sampleUrls = reportId === 'demo_preview_12345' ? [
+      'https://techcrunch.com/article-example',
+      'https://forbes.com/business-insights',
+      'https://mashable.com/tech-review',
+      'https://entrepreneur.com/startup-guide',
+      'https://wired.com/innovation-story',
+      'https://theverge.com/product-launch',
+      'https://arstechnica.com/deep-dive',
+      'https://engadget.com/gadget-review',
+      'https://venturebeat.com/industry-news',
+      'https://recode.net/market-analysis'
+    ] : [
       'https://example.com/page1',
       'https://another.com/blog',
       'https://website.com/article',
@@ -75,18 +87,31 @@ export default function ReportViewer() {
       anchorText: ''
     }));
 
+    const createdDate = new Date();
+    const formattedDate = createdDate.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
     return {
       id: reportId,
-      campaignName: `Demo Report ${reportId}`,
+      campaignName: `Report Generated ${formattedDate}`,
       backlinks: backlinks,
-      createdAt: new Date().toISOString(),
+      createdAt: createdDate.toISOString(),
       totalBacklinks: backlinks.length,
-      results: backlinks.map(bl => ({
+      results: backlinks.map((bl, index) => ({
         ...bl,
-        status: Math.random() > 0.3 ? 'found' : 'not_found',
-        domainAuthority: Math.floor(Math.random() * 40) + 40,
-        pageAuthority: Math.floor(Math.random() * 50) + 20,
-        responseTime: Math.floor(Math.random() * 2000) + 500,
+        status: reportId === 'demo_preview_12345' ?
+          (index < 8 ? 'found' : 'not_found') : // First 8 found for preview
+          (Math.random() > 0.3 ? 'found' : 'not_found'),
+        domainAuthority: reportId === 'demo_preview_12345' ?
+          [85, 90, 88, 82, 87, 91, 89, 86, 84, 83][index] || 80 : // High DA for preview
+          Math.floor(Math.random() * 40) + 40,
+        pageAuthority: reportId === 'demo_preview_12345' ?
+          [75, 80, 78, 72, 77, 81, 79, 76, 74, 73][index] || 70 : // High PA for preview
+          Math.floor(Math.random() * 50) + 20,
+        responseTime: Math.floor(Math.random() * 1000) + 300,
         lastChecked: new Date().toISOString()
       }))
     };
@@ -316,24 +341,24 @@ export default function ReportViewer() {
       {/* Header */}
       <div className="border-b border-gray-200 bg-white shadow-sm p-6">
         <div className="max-w-7xl mx-auto">
-          <button
-            onClick={() => navigate('/')}
-            className="inline-flex items-center text-primary hover:text-primary/80 transition-colors mb-4 text-sm font-medium"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Home
-          </button>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">URL Report</h1>
-              <p className="text-gray-600 text-lg">
-                {reportData.campaignName} - Generated {new Date(reportData.createdAt).toLocaleDateString()}
-              </p>
+          {/* Top Navigation */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <Infinity className="h-7 w-7 text-primary" />
+              <span className="text-2xl font-semibold tracking-tight text-foreground">Backlink</span>
             </div>
-            
+            <button
+              onClick={() => navigate('/')}
+              className="inline-flex items-center text-primary hover:text-primary/80 transition-colors text-sm font-medium"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Home
+            </button>
+          </div>
+
+          <div className="flex items-center justify-end">
             <div className="flex gap-3">
               <button
                 onClick={refreshReport}
@@ -371,6 +396,21 @@ export default function ReportViewer() {
       </div>
 
       <div className="max-w-7xl mx-auto p-8">
+        {/* Preview Banner for Demo Reports */}
+        {reportData.id === 'demo_preview_12345' && (
+          <div className="mb-8 p-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl">
+            <div className="flex items-center justify-center">
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <span className="font-semibold">Preview Mode</span>
+              <span className="mx-2">•</span>
+              <span>This is a sample report showcasing our professional backlink verification capabilities</span>
+            </div>
+          </div>
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white border border-gray-200 p-6 text-center rounded-xl shadow-sm">

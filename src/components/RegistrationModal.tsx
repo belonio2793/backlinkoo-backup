@@ -78,9 +78,9 @@ export default function RegistrationModal({ isOpen, onClose, serviceType }: Regi
   };
 
   const serviceTitle = serviceType === 'indexing' ? 'URL Indexing Service' : 'Tier 2 & 3 Link Building Service';
-  const serviceDescription = serviceType === 'indexing' 
+  const serviceDescription = serviceType === 'indexing'
     ? 'Get your URLs indexed faster by Google and other search engines'
-    : 'Build high-quality tier 2 and tier 3 backlinks to improve your domain authority';
+    : 'Build high-quality tier 2 and tier 3 backlinks to improve your backlink profile and SEO score';
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

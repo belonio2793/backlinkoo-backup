@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import {
   Zap,
   Target,
@@ -25,7 +26,7 @@ import {
   Settings,
   CreditCard,
   Crown,
-  User,
+  User as UserIcon,
   Mail,
   Phone,
   MapPin,
@@ -77,6 +78,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isCancellingSubscription, setIsCancellingSubscription] = useState(false);
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
+  const [billingEmailNotifications, setBillingEmailNotifications] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -84,6 +86,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
       checkSubscriptionStatus();
       fetchProjects();
       fetchRecentPosts();
+      loadBillingEmailPreferences();
     }
   }, [user]);
 
@@ -226,6 +229,47 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
       title: "Invoice Downloaded",
       description: "Your latest invoice has been downloaded to your device.",
     });
+  };
+
+  const loadBillingEmailPreferences = async () => {
+    try {
+      // For now, we'll use localStorage. In production, this would be stored in the database
+      const savedPreference = localStorage.getItem(`billing_email_notifications_${user?.id}`);
+      if (savedPreference !== null) {
+        setBillingEmailNotifications(savedPreference === 'true');
+      }
+    } catch (error) {
+      console.error('Error loading billing email preferences:', error);
+    }
+  };
+
+  const updateBillingEmailPreferences = async (enabled: boolean) => {
+    try {
+      // For now, we'll use localStorage. In production, this would update the database
+      localStorage.setItem(`billing_email_notifications_${user?.id}`, enabled.toString());
+
+      // Future implementation would call an API to update user preferences
+      // const { error } = await supabase
+      //   .from('user_preferences')
+      //   .upsert({
+      //     user_id: user?.id,
+      //     billing_email_notifications: enabled,
+      //     updated_at: new Date().toISOString()
+      //   });
+
+      setBillingEmailNotifications(enabled);
+      toast({
+        title: enabled ? "Notifications Enabled" : "Notifications Disabled",
+        description: `You will ${enabled ? 'now' : 'no longer'} receive billing email notifications.`,
+      });
+    } catch (error) {
+      console.error('Error updating billing email preferences:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update email notification preferences. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!isSubscribed) {
@@ -481,13 +525,13 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
                     <CardContent className="p-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium">Email Notifications</p>
-                          <p className="text-sm text-muted-foreground">Receive billing and usage alerts</p>
+                          <p className="font-medium">Billing Email Notifications</p>
+                          <p className="text-sm text-muted-foreground">Receive billing and payment alerts</p>
                         </div>
-                        <Button variant="outline" size="sm">
-                          <Mail className="h-4 w-4 mr-2" />
-                          Configure
-                        </Button>
+                        <Switch
+                          checked={billingEmailNotifications}
+                          onCheckedChange={updateBillingEmailPreferences}
+                        />
                       </div>
                     </CardContent>
                   </Card>

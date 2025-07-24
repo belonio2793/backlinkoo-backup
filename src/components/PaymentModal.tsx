@@ -24,7 +24,7 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
   const [guestEmail, setGuestEmail] = useState("");
   const [amount, setAmount] = useState(() => initialCredits ? (initialCredits * CREDIT_PRICE).toFixed(2) : "");
   const [credits, setCredits] = useState(() => initialCredits ? initialCredits.toString() : "");
-  const [subscriptionTier, setSubscriptionTier] = useState("keyword-research");
+  const [subscriptionTier, setSubscriptionTier] = useState("premium-seo-tools");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -43,10 +43,7 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
   }, [isOpen, initialCredits]);
 
   const subscriptionPlans = {
-    "keyword-research": { price: 29.99, priceId: "price_keyword_research", name: "Keyword Research Tool" },
-    "rank-tracker": { price: 39.99, priceId: "price_rank_tracker", name: "Search Engine Rank Tracker" },
-    "seo-competition": { price: 49.99, priceId: "price_seo_competition", name: "SEO Competition Tool" },
-    "indexing-service": { price: 19.99, priceId: "price_indexing_service", name: "Indexing Service" }
+    "premium-seo-tools": { price: 29, priceId: "price_premium_seo_tools", name: "Premium SEO Tools" }
   };
 
   // Calculate total amount based on credits
@@ -270,7 +267,7 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
                 <div className="space-y-2">
                   <Label>SEO Tool Subscriptions</Label>
                   <p className="text-sm text-muted-foreground">
-                    Subscribe to powerful SEO tools for ongoing campaigns
+                    Get access to all SEO tools and features with one monthly subscription
                   </p>
                   <RadioGroup value={subscriptionTier} onValueChange={setSubscriptionTier}>
                     {Object.entries(subscriptionPlans).map(([key, plan]) => (
