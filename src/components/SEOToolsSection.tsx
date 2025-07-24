@@ -252,20 +252,12 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Zap className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold">SEO Tools</h2>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-xs">
-                <Crown className="h-3 w-3 mr-1" />
-                Premium Active
-              </Badge>
-              <span className="text-sm text-muted-foreground">$29/month</span>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="text-xs">
+            <Crown className="h-3 w-3 mr-1" />
+            Premium Active
+          </Badge>
+          <span className="text-sm text-muted-foreground">$29/month</span>
         </div>
         <Button variant="outline">
           <Settings className="h-4 w-4 mr-2" />
