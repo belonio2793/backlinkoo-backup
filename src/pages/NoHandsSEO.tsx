@@ -293,6 +293,23 @@ const NoHandsSEO = () => {
                   </p>
                 </div>
 
+                <div>
+                  <Label htmlFor="campaignNotes" className="text-base font-medium text-gray-700 mb-3 block">
+                    Campaign Notes (Optional)
+                  </Label>
+                  <Textarea
+                    id="campaignNotes"
+                    value={campaignNotes}
+                    onChange={(e) => setCampaignNotes(e.target.value)}
+                    placeholder="Any specific requirements, target audience, or content preferences for your backlinks..."
+                    className="min-h-[80px] text-sm"
+                    maxLength={500}
+                  />
+                  <p className="text-sm text-gray-500 mt-2">
+                    Help our team create more targeted backlinks by sharing context about your business, target audience, or content preferences.
+                  </p>
+                </div>
+
                 {/* Campaign Details */}
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                   <h4 className="text-sm font-semibold text-blue-900 mb-2">Campaign Details</h4>
