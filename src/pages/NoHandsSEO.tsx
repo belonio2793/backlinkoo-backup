@@ -207,15 +207,15 @@ const NoHandsSEO = () => {
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm sm:text-base text-gray-600 font-medium">
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <span>10 Premium Backlinks</span>
+              <span>Unlimited Projects</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <span>DA 50+ Domains</span>
+              <span>Unlimited Keywords</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <span>Quality Verification</span>
+              <span>$29/month</span>
             </div>
           </div>
         </div>
