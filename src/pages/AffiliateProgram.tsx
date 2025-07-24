@@ -199,41 +199,95 @@ const AffiliateProgram = () => {
         </section>
 
         {/* How It Works */}
-        <section className="py-24 px-6 bg-muted/30">
+        <section id="how-it-works" className="py-24 px-6 bg-muted/30">
           <div className="container mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-light mb-6 tracking-tight">How It Works</h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Start earning in minutes with our simple 3-step process
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+              <div className="text-center relative">
+                <div className="w-20 h-20 bg-gradient-to-br from-primary to-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg">
                   1
                 </div>
-                <h3 className="text-xl font-semibold mb-4">Sign Up</h3>
-                <p className="text-muted-foreground">
-                  Create your free account and get your unique referral link and custom ID.
+                <h3 className="text-xl font-semibold mb-4">Sign Up & Get Your Links</h3>
+                <p className="text-muted-foreground mb-4">
+                  Create your free account and instantly receive your unique referral link and custom tracking ID.
                 </p>
+                <div className="text-sm bg-background p-3 rounded-lg border">
+                  <code className="text-primary">backlinkoo.com/?ref=YOUR_CODE</code>
+                </div>
+                {/* Connector Line */}
+                <div className="hidden md:block absolute top-10 left-full w-full h-0.5 bg-gradient-to-r from-primary to-transparent -translate-x-1/2 z-0"></div>
               </div>
 
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+              <div className="text-center relative">
+                <div className="w-20 h-20 bg-gradient-to-br from-primary to-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg">
                   2
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Share & Promote</h3>
-                <p className="text-muted-foreground">
-                  Share your referral link through your networks, websites, or marketing channels.
+                <p className="text-muted-foreground mb-4">
+                  Share your link through social media, email, your website, or any marketing channel you prefer.
                 </p>
+                <div className="flex justify-center gap-2 text-sm">
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">Blog Posts</span>
+                  <span className="bg-green-100 text-green-800 px-2 py-1 rounded">Social Media</span>
+                  <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">Email</span>
+                </div>
+                {/* Connector Line */}
+                <div className="hidden md:block absolute top-10 left-full w-full h-0.5 bg-gradient-to-r from-primary to-transparent -translate-x-1/2 z-0"></div>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                <div className="w-20 h-20 bg-gradient-to-br from-primary to-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg">
                   3
                 </div>
-                <h3 className="text-xl font-semibold mb-4">Earn Commission</h3>
-                <p className="text-muted-foreground">
-                  Get paid 50% of all spending from customers you refer, for life.
+                <h3 className="text-xl font-semibold mb-4">Earn Commissions</h3>
+                <p className="text-muted-foreground mb-4">
+                  Get paid 50% of all spending from customers you refer — for their entire lifetime as customers.
                 </p>
+                <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+                  <div className="text-lg font-semibold text-green-800">$350 spent = $175 earned</div>
+                  <div className="text-sm text-green-600">Example commission calculation</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Timeline */}
+            <div className="bg-background rounded-2xl p-8 shadow-lg">
+              <h3 className="text-xl font-semibold text-center mb-6">Payment Timeline</h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold mx-auto mb-3">
+                    Day 1
+                  </div>
+                  <div className="font-medium mb-1">Customer Signs Up</div>
+                  <div className="text-sm text-muted-foreground">Via your referral link</div>
+                </div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-semibold mx-auto mb-3">
+                    Day 2
+                  </div>
+                  <div className="font-medium mb-1">Customer Purchases</div>
+                  <div className="text-sm text-muted-foreground">Credits or subscription</div>
+                </div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-semibold mx-auto mb-3">
+                    Real-time
+                  </div>
+                  <div className="font-medium mb-1">Commission Tracked</div>
+                  <div className="text-sm text-muted-foreground">Instantly in your dashboard</div>
+                </div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-semibold mx-auto mb-3">
+                    Monthly
+                  </div>
+                  <div className="font-medium mb-1">Get Paid</div>
+                  <div className="text-sm text-muted-foreground">When you reach $100</div>
+                </div>
               </div>
             </div>
           </div>
