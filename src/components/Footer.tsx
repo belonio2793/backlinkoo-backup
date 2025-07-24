@@ -9,8 +9,9 @@ export const Footer = () => {
           <div className="flex flex-wrap justify-center md:justify-start space-x-6 mb-4 md:mb-0">
             <Link
               to="/no-hands-seo"
-              className="text-primary hover:text-primary/80 text-sm font-medium"
+              className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1 bg-primary/10 px-3 py-1 rounded-full border border-primary/20 hover:bg-primary/20 transition-colors"
             >
+              <Zap className="h-3 w-3" />
               NO Hands SEO
             </Link>
             <Link
