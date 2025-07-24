@@ -353,7 +353,7 @@ const NoHandsSEODashboard = () => {
       </div>
 
       {/* Metrics Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -391,17 +391,6 @@ const NoHandsSEODashboard = () => {
               <span className="text-sm font-medium">Backlinks</span>
             </div>
             <div className="text-2xl font-bold mt-1">{metrics.totalBacklinks}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-yellow-600" />
-              <span className="text-sm font-medium">Investment</span>
-            </div>
-            <div className="text-2xl font-bold mt-1">{metrics.totalInvestment}</div>
-            <div className="text-xs text-muted-foreground">credits</div>
           </CardContent>
         </Card>
 
