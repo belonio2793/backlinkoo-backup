@@ -424,19 +424,23 @@ const NoHandsSEO = () => {
                 <div className="space-y-3 text-sm text-gray-600">
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium">1</div>
-                    <span>Enter your target URL and keyword</span>
+                    <span>Submit your target URL, keyword, and campaign notes</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium">2</div>
-                    <span>We automatically find relevant, high-authority domains</span>
+                    <div className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center font-medium">2</div>
+                    <span>Our team verifies and approves your campaign (24-48 hours)</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium">3</div>
-                    <span>Premium backlinks are created and published</span>
+                    <span>We automatically find relevant, high-authority domains</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium">4</div>
-                    <span>Watch your rankings improve over 2-4 weeks</span>
+                    <span>Premium backlinks are created and published</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-green-600 text-white text-xs flex items-center justify-center font-medium">5</div>
+                    <span>Monitor progress and watch your rankings improve</span>
                   </div>
                 </div>
               </div>
