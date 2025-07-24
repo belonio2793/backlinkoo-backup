@@ -401,7 +401,7 @@ export function MultiBlogGenerator({
           {/* System Status */}
           <div className="space-y-4">
             <div className="flex justify-between text-sm">
-              <span className="font-medium">System Initialization</span>
+              <span className="font-medium">Backlink ∞ Platform Status</span>
               <span className="text-muted-foreground">{Math.round((activeProcesses.length / 5) * 100)}%</span>
             </div>
             <Progress value={(activeProcesses.length / 5) * 100} className="h-3" />
