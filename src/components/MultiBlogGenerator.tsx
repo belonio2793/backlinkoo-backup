@@ -390,7 +390,14 @@ export function MultiBlogGenerator({
             <div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500">
               <Cpu className="h-6 w-6 text-white animate-pulse" />
             </div>
-            <CardTitle className="text-2xl font-semibold">Backlink ∞ Is Working</CardTitle>
+            <CardTitle className="text-2xl font-semibold">
+              <span className="inline-flex items-center">
+                Backlink ∞ Is Working
+                <span className="ml-1 animate-pulse">
+                  <span className="inline-block w-2 h-6 bg-blue-500 animate-blink"></span>
+                </span>
+              </span>
+            </CardTitle>
           </div>
           <p className="text-muted-foreground">
             Our advanced backlink generation system is preparing your 5-post campaign...
