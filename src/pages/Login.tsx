@@ -86,10 +86,25 @@ const Login = () => {
         });
         window.location.href = '/dashboard';
       }
-    } catch (error) {
+    } catch (error: any) {
+      // Handle different error types properly
+      let errorMessage = 'An error occurred during sign in.';
+
+      if (error && typeof error === 'object') {
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error.error_description) {
+          errorMessage = error.error_description;
+        } else if (typeof error.toString === 'function') {
+          errorMessage = error.toString();
+        }
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
       toast({
         title: "Sign in failed",
-        description: error.message || "An error occurred during sign in.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
