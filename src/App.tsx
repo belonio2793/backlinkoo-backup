@@ -19,6 +19,7 @@ import BlogPreview from "./pages/BlogPreview";
 import EmailMarketing from "./pages/EmailMarketing";
 import BacklinkReport from "./pages/BacklinkReport";
 import ReportViewer from "./pages/ReportViewer";
+import NoHandsSEO from "./pages/NoHandsSEO";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
           <Route path="/email" element={<EmailMarketing />} />
           <Route path="/backlink-report" element={<BacklinkReport />} />
           <Route path="/report/:reportId" element={<ReportViewer />} />
+          <Route path="/no-hands-seo" element={<NoHandsSEO />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -27,7 +27,7 @@ import { PaymentModal } from "@/components/PaymentModal";
 import { CampaignForm } from "@/components/CampaignForm";
 import { KeywordResearchTool } from "@/components/KeywordResearchTool";
 import { RankingTracker } from "@/components/RankingTracker";
-import { Community } from "@/components/Community";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -173,35 +173,48 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = 'https://backlinkoo.com/dashboard'}>
               <Infinity className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-semibold">Backlink</h1>
+              <h1 className="text-xl font-semibold hidden sm:block">Backlink</h1>
             </div>
-            <div className="flex items-center gap-4">
-              <Badge variant="outline" className="gap-1">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
                 <CreditCard className="h-3 w-3" />
-                {credits} Credits
+                <span className="hidden xs:inline">{credits}</span>
+                <span className="xs:hidden">{credits}</span>
+                <span className="hidden sm:inline">Credits</span>
               </Badge>
-              <Button variant="outline" size="sm" onClick={() => setIsPaymentModalOpen(true)}>
-                <Plus className="h-4 w-4 mr-1" />
-                Buy Credits
+              <Button variant="outline" size="sm" onClick={() => setIsPaymentModalOpen(true)} className="px-2 sm:px-4">
+                <Plus className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Buy Credits</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 mr-1" />
-                Sign Out
+              <Button variant="outline" size="sm" onClick={handleSignOut} className="px-2 sm:px-4">
+                <LogOut className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Sign Out</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {userType === "user" ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-              <TabsTrigger value="keyword-research">Keyword Research</TabsTrigger>
-              <TabsTrigger value="rank-tracker">Rankings</TabsTrigger>
-              <TabsTrigger value="community">Community</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4 h-auto">
+              <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
+                <span className="hidden sm:inline">Overview</span>
+                <span className="sm:hidden">Home</span>
+              </TabsTrigger>
+              <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
+                <span className="hidden sm:inline">Campaigns</span>
+                <span className="sm:hidden">Camps</span>
+              </TabsTrigger>
+              <TabsTrigger value="keyword-research" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
+                <span className="hidden sm:inline">Keyword Research</span>
+                <span className="sm:hidden">Keywords</span>
+              </TabsTrigger>
+              <TabsTrigger value="rank-tracker" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
+                <span className="hidden sm:inline">Rankings</span>
+                <span className="sm:hidden">Ranks</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -223,7 +236,7 @@ const Dashboard = () => {
                 </Card>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Available Credits</CardTitle>
@@ -353,7 +366,7 @@ const Dashboard = () => {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <h3 className="font-semibold text-lg truncate">
+                                  <h3 className="font-semibold text-base sm:text-lg truncate">
                                     {campaign.name || 'Unnamed Campaign'}
                                   </h3>
                                   <Badge variant={statusConfig.badge as any} className="text-xs font-medium">
@@ -369,7 +382,7 @@ const Dashboard = () => {
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <ExternalLink className="h-3 w-3" />
-                                    <span className="truncate max-w-[200px]">{campaign.target_url}</span>
+                                    <span className="truncate max-w-[120px] sm:max-w-[200px]">{campaign.target_url}</span>
                                   </div>
                                 </div>
                               </div>
@@ -377,7 +390,7 @@ const Dashboard = () => {
                           </div>
 
                           {/* Campaign Details Grid */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
                                 <Target className="h-4 w-4 text-muted-foreground" />
@@ -533,11 +546,12 @@ const Dashboard = () => {
                 />
               ) : (
                 <>
-                  <div className="flex justify-between items-center">
-                    <h2 className="text-2xl font-bold">Campaign Management</h2>
-                    <Button onClick={() => setShowCampaignForm(true)}>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                    <h2 className="text-xl sm:text-2xl font-bold">Campaign Management</h2>
+                    <Button onClick={() => setShowCampaignForm(true)} className="w-full sm:w-auto">
                       <Plus className="h-4 w-4 mr-2" />
-                      New Campaign
+                      <span className="hidden sm:inline">New Campaign</span>
+                      <span className="sm:hidden">New</span>
                     </Button>
                   </div>
                   
@@ -561,7 +575,7 @@ const Dashboard = () => {
                                   {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
                                 </Badge>
                               </div>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                                 <div>
                                   <p className="text-muted-foreground">Target URL</p>
                                   <p className="font-medium">{campaign.target_url}</p>
@@ -623,10 +637,6 @@ const Dashboard = () => {
 
             <TabsContent value="rank-tracker">
               <RankingTracker />
-            </TabsContent>
-
-            <TabsContent value="community">
-              <Community />
             </TabsContent>
           </Tabs>
         ) : (

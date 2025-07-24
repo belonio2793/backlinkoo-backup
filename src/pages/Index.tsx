@@ -24,12 +24,16 @@ import { HomepageBlogGenerator } from "@/components/HomepageBlogGenerator";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
 import { Footer } from "@/components/Footer";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<'starter_100' | 'starter_200' | 'starter_300'>('starter_200');
+  const [customCredits, setCustomCredits] = useState<number>(0);
+  const [isCustomPackage, setIsCustomPackage] = useState(false);
 
   // Check for authenticated user on component mount
   useEffect(() => {
@@ -110,8 +114,14 @@ const Index = () => {
     }
   ];
 
-  const handleGetStarted = (planId: 'starter_100' | 'starter_200' | 'starter_300') => {
-    setSelectedPlan(planId);
+  const handleGetStarted = (planId: 'starter_100' | 'starter_200' | 'starter_300' | 'custom') => {
+    if (planId === 'custom') {
+      setIsCustomPackage(true);
+    } else {
+      setIsCustomPackage(false);
+      setSelectedPlan(planId as 'starter_100' | 'starter_200' | 'starter_300');
+    }
+
     if (user) {
       setPaymentModalOpen(true);
     } else {
@@ -121,8 +131,6 @@ const Index = () => {
 
   const stats = [
     { value: "99%", label: "Success Rate", description: "Proven ranking improvements" },
-    { value: "2,800+", label: "Agencies", description: "Trust our platform" },
-    { value: "500K+", label: "Links Delivered", description: "Across all campaigns" },
     { value: "High DA", label: "Average Authority", description: "Premium domain quality" }
   ];
 
@@ -230,7 +238,7 @@ const Index = () => {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 gap-8 max-w-2xl mx-auto">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2">{stat.value}</div>
@@ -543,9 +551,67 @@ const Index = () => {
             ))}
           </div>
 
+          {/* Custom Credit Purchase */}
+          <div className="mt-16 max-w-md mx-auto">
+            <Card className="p-8 text-center border-2 border-primary shadow-xl bg-gradient-to-br from-primary/5 to-blue-50">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-2xl font-semibold mb-2 text-gray-900">Custom Package</CardTitle>
+                <p className="text-gray-600 font-light">Choose your exact credit amount</p>
+              </CardHeader>
+
+              <CardContent className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Number of Credits
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="10000"
+                    value={customCredits || ''}
+                    placeholder="Enter credits (min: 1)"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors text-center text-lg font-semibold"
+                    onChange={(e) => {
+                      const credits = parseInt(e.target.value) || 0;
+                      setCustomCredits(credits);
+                    }}
+                  />
+                </div>
+
+                <div className="text-center">
+                  <div className="text-3xl font-semibold text-gray-900 mb-2">
+                    <span className="text-xl font-mono">Total: </span>
+                    <span>${customCredits > 0 ? (customCredits * 0.70).toFixed(2) : '0.00'}</span>
+                  </div>
+                  <div className="text-sm text-gray-500 font-mono">
+                    $0.70 per credit
+                  </div>
+                </div>
+
+                <Button
+                  className="w-full font-medium bg-primary text-white hover:bg-primary/90"
+                  disabled={customCredits < 1}
+                  onClick={() => {
+                    if (customCredits >= 1) {
+                      handleGetStarted('custom');
+                    } else {
+                      toast({
+                        title: 'Invalid Credit Amount',
+                        description: 'Please enter at least 1 credit to proceed.',
+                        variant: 'destructive'
+                      });
+                    }
+                  }}
+                >
+                  Purchase Custom Package
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
           <div className="text-center mt-12">
             <p className="text-gray-600 font-light">
-              Need more credits? <Button variant="link" className="pperiodic-texture p-0 text-gray-900 font-medium hover:text-gray-700"><a href="mailto:support@backlinkoo.com">Contact us</a></Button> for custom enterprise packages.
+              Need enterprise pricing? <Button variant="link" className="p-0 text-gray-900 font-medium hover:text-gray-700"><a href="mailto:support@backlinkoo.com">Contact us</a></Button> for volume discounts.
             </p>
           </div>
         </div>
@@ -564,16 +630,16 @@ const Index = () => {
             Join the professionals who trust Backlink ∞ for their most important SEO campaigns. 
             Start with our risk-free guarantee today.
           </p>
-          <div className="flex flex-colrı sm:flex-row items-center justify-center gap-6">
-            <Button 
-              size="lg" 
-              className="text-lg px-10 py-6 font-medium" 
+          <div className="flex flex-col items-center justify-center gap-4">
+            <Button
+              size="lg"
+              className="text-lg px-10 py-6 font-medium"
               onClick={() => handleGetStarted('starter_200')}
             >
               Start Your Campaign
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <div className="text-sm text-gray-500 font-light">
+            <div className="text-sm text-gray-500 font-light text-center">
               Money-back guarantee • No setup fees • Cancel anytime
             </div>
           </div>
@@ -583,8 +649,11 @@ const Index = () => {
       {/* Payment Modal */}
       <PaymentModal
         isOpen={paymentModalOpen}
-        onClose={() => setPaymentModalOpen(false)}
-        initialCredits={pricingPlans.find(p => p.id === selectedPlan)?.credits}
+        onClose={() => {
+          setPaymentModalOpen(false);
+          setIsCustomPackage(false);
+        }}
+        initialCredits={isCustomPackage ? customCredits : pricingPlans.find(p => p.id === selectedPlan)?.credits}
       />
 
       {/* Footer */}

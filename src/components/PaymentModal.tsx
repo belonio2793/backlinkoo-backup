@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,20 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
   const [subscriptionTier, setSubscriptionTier] = useState("keyword-research");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  // Update state when modal opens or initialCredits changes
+  useEffect(() => {
+    if (isOpen) {
+      if (initialCredits && initialCredits > 0) {
+        setCredits(initialCredits.toString());
+        setAmount((initialCredits * CREDIT_PRICE).toFixed(2));
+      } else {
+        // Reset for new payment if no initial credits
+        setCredits("");
+        setAmount("");
+      }
+    }
+  }, [isOpen, initialCredits]);
 
   const subscriptionPlans = {
     "keyword-research": { price: 29.99, priceId: "price_keyword_research", name: "Keyword Research Tool" },
