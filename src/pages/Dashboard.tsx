@@ -173,20 +173,22 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = 'https://backlinkoo.com/dashboard'}>
               <Infinity className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-semibold">Backlink</h1>
+              <h1 className="text-xl font-semibold hidden sm:block">Backlink</h1>
             </div>
-            <div className="flex items-center gap-4">
-              <Badge variant="outline" className="gap-1">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
                 <CreditCard className="h-3 w-3" />
-                {credits} Credits
+                <span className="hidden xs:inline">{credits}</span>
+                <span className="xs:hidden">{credits}</span>
+                <span className="hidden sm:inline">Credits</span>
               </Badge>
-              <Button variant="outline" size="sm" onClick={() => setIsPaymentModalOpen(true)}>
-                <Plus className="h-4 w-4 mr-1" />
-                Buy Credits
+              <Button variant="outline" size="sm" onClick={() => setIsPaymentModalOpen(true)} className="px-2 sm:px-4">
+                <Plus className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Buy Credits</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 mr-1" />
-                Sign Out
+              <Button variant="outline" size="sm" onClick={handleSignOut} className="px-2 sm:px-4">
+                <LogOut className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Sign Out</span>
               </Button>
             </div>
           </div>
