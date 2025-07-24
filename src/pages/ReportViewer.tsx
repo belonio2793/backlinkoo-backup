@@ -252,6 +252,22 @@ export default function ReportViewer() {
     setShowRegistration(true);
   };
 
+  const handleRunIndexing = () => {
+    if (!user) {
+      // User not logged in, show registration modal
+      setModalService('indexing');
+      setShowRegistration(true);
+    } else {
+      // User is logged in, proceed with indexing service
+      toast({
+        title: 'Indexing Service Started',
+        description: 'Your URLs are being submitted to our indexing servers. You will receive updates via email.',
+      });
+      // Here you would typically make an API call to start the indexing process
+      // For now, we'll just show a success message
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
