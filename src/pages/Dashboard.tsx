@@ -640,6 +640,10 @@ const Dashboard = () => {
               <KeywordResearchTool />
             </TabsContent>
 
+            <TabsContent value="no-hands-seo">
+              <NoHandsSEODashboard />
+            </TabsContent>
+
             <TabsContent value="rank-tracker">
               <RankingTracker />
             </TabsContent>
