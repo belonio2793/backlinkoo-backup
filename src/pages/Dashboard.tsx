@@ -370,7 +370,7 @@ const Dashboard = () => {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <h3 className="font-semibold text-lg truncate">
+                                  <h3 className="font-semibold text-base sm:text-lg truncate">
                                     {campaign.name || 'Unnamed Campaign'}
                                   </h3>
                                   <Badge variant={statusConfig.badge as any} className="text-xs font-medium">
