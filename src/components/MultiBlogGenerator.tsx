@@ -291,6 +291,13 @@ export function MultiBlogGenerator({
         // Store by slug so BlogPreview can find it
         if (liveBlogPublisher.inMemoryPosts) {
           liveBlogPublisher.inMemoryPosts.set(uniqueSlug, blogPost);
+          console.log(`✅ Blog post stored successfully:`, {
+            slug: uniqueSlug,
+            previewUrl,
+            title: blogPost.title,
+            contentLength: blogPost.content.length,
+            totalStoredPosts: liveBlogPublisher.inMemoryPosts.size
+          });
         }
 
         currentPost = {
