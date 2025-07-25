@@ -158,19 +158,23 @@ const Login = () => {
       });
 
       if (error) {
-        if (error.message.includes('Email address already registered')) {
+        // Handle various "user already exists" error messages
+        if (error.message.includes('User already registered') ||
+            error.message.includes('Email address already registered') ||
+            error.message.includes('already been registered')) {
           setResendEmail(email);
           setShowResendConfirmation(true);
           toast({
             title: "Email Already Registered",
-            description: "This email is already registered. Please verify your email or sign in.",
-            variant: "destructive",
+            description: "This email is already registered. Please check your email for confirmation or try signing in instead.",
           });
-          // Switch to login tab
-          const loginTab = document.querySelector('[value="login"]');
-          if (loginTab) {
-            loginTab.click();
-          }
+          // Switch to login tab automatically
+          setTimeout(() => {
+            const loginTab = document.querySelector('[value="login"]') as HTMLElement;
+            if (loginTab) {
+              loginTab.click();
+            }
+          }, 100);
           return;
         }
         throw error;
