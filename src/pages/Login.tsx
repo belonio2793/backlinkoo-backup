@@ -69,22 +69,37 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    console.log('🔑 Starting login process...');
+    console.log('Email:', loginEmail);
+    console.log('Password length:', loginPassword?.length);
+
     try {
       cleanupAuthState();
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
-        // Continue even if this fails
+        console.log('⚠️ Cleanup sign out failed (continuing):', err);
       }
 
+      console.log('🔍 Attempting Supabase sign in...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: loginPassword,
       });
 
-      if (error) throw error;
+      console.log('📊 Supabase response:', { data, error });
+
+      if (error) {
+        console.error('❌ Login error:', error);
+        throw error;
+      }
 
       if (data.user) {
+        console.log('✅ User authenticated:', data.user.id, data.user.email);
+        console.log('📝 Session data:', data.session);
+
+        // Wait a moment for session to be properly stored
+        await new Promise(resolve => setTimeout(resolve, 100));
         // Ensure user has proper profile using migration service
         try {
           const migrationResult = await ProfileMigrationService.ensureUserProfile(
