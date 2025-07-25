@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Mail, Send, CheckCircle, XCircle } from 'lucide-react';
 
 export function EmailVerificationTest() {
-  const [email, setEmail] = useState('support@backlinkoo.com');
+  const [email, setEmail] = useState('belonio2793@gmail.com');
   const [isLoading, setIsLoading] = useState(false);
   const [testResults, setTestResults] = useState<any>(null);
   const { toast } = useToast();
