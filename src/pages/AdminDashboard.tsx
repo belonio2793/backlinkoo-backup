@@ -171,6 +171,10 @@ const AdminDashboard = () => {
             <DeploymentStatus />
           </TabsContent>
 
+          <TabsContent value="smtp-test">
+            <SMTPConfigTest />
+          </TabsContent>
+
           <TabsContent value="email-test">
             <EmailSystemManager />
           </TabsContent>
