@@ -181,21 +181,36 @@ const Dashboard = () => {
 
   const handleSignOut = async () => {
     try {
-      // Clean up auth state first
+      console.log('Dashboard - Starting sign out process...');
+
+      // Clean up all auth-related storage
       Object.keys(localStorage).forEach((key) => {
         if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
           localStorage.removeItem(key);
         }
       });
 
-      const { error } = await supabase.auth.signOut({ scope: 'global' });
-      if (error) throw error;
+      Object.keys(sessionStorage || {}).forEach((key) => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          sessionStorage.removeItem(key);
+        }
+      });
 
-      // Immediate redirect to home page without toast to prevent delays
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      if (error) {
+        console.error('Sign out error:', error);
+      } else {
+        console.log('Dashboard - Sign out successful');
+      }
+
+      // Clear user state
+      setUser(null);
+
+      // Immediate redirect to home page
       window.location.href = "/";
 
     } catch (error) {
-      console.error("Sign out error:", error);
+      console.error("Dashboard - Sign out error:", error);
 
       // Force redirect even if there's an error
       window.location.href = "/";
