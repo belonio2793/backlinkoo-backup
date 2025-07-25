@@ -134,7 +134,7 @@ Email System Manager`
       console.log(`Testing ${provider} provider directly...`);
       
       // For demonstration, we'll use the main service
-      const result = await emailService.sendEmail(testData);
+      const result = await EmailService.sendEmail(testData);
       
       toast({
         title: `${provider.toUpperCase()} Test`,
