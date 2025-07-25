@@ -10,9 +10,10 @@ import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { ResendEmailService } from "@/services/resendEmailService";
 import { ProfileMigrationService } from "@/services/profileMigrationService";
+import LoginDebugger from "@/components/LoginDebugger";
 
 import { useNavigate } from "react-router-dom";
-import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft } from "lucide-react";
+import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft, Bug } from "lucide-react";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
