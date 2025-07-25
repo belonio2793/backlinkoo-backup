@@ -211,18 +211,16 @@ const Login = () => {
       if (data.user) {
         console.log('Signup successful, user created:', data.user.id);
 
-        // Create profile record with display_name for immediate compatibility
+        // Ensure profile is created using migration service
         try {
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert({
-              user_id: data.user.id,
-              email: email,
-              display_name: firstName.trim()
-            });
+          const migrationResult = await ProfileMigrationService.ensureUserProfile(
+            data.user.id,
+            email,
+            { first_name: firstName.trim(), display_name: firstName.trim() }
+          );
 
-          if (profileError) {
-            console.warn('Could not create profile during signup:', profileError);
+          if (!migrationResult.success) {
+            console.warn('Could not create profile during signup:', migrationResult.error);
           }
         } catch (profileErr) {
           console.warn('Profile creation error during signup:', profileErr);
