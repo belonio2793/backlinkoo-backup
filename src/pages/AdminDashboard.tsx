@@ -12,6 +12,7 @@ import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager"
 import { EmailVerificationTest } from "@/components/EmailVerificationTest";
 import { EmailVerificationStatus } from "@/components/EmailVerificationStatus";
 import { ResendConnectionTest } from "@/components/ResendConnectionTest";
+import { DeploymentStatus } from "@/components/DeploymentStatus";
 import {
   Users,
   Activity,
