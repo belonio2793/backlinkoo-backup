@@ -83,43 +83,20 @@ const Login = () => {
       if (error) throw error;
 
       if (data.user) {
-        // Check if user has a profile and create/update if missing display_name
+        // Ensure user has proper profile using migration service
         try {
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', data.user.id)
-            .single();
+          const migrationResult = await ProfileMigrationService.ensureUserProfile(
+            data.user.id,
+            data.user.email || loginEmail,
+            data.user.user_metadata
+          );
 
-          if (profileError && profileError.code === 'PGRST116') {
-            // Profile doesn't exist, create one
-            const { error: insertError } = await supabase
-              .from('profiles')
-              .insert({
-                user_id: data.user.id,
-                email: data.user.email || loginEmail,
-                display_name: data.user.user_metadata?.first_name || data.user.user_metadata?.display_name || data.user.email?.split('@')[0] || 'User'
-              });
-
-            if (insertError) {
-              console.warn('Could not create profile, but continuing login:', insertError);
-            }
-          } else if (!profile?.display_name && !profileError) {
-            // Profile exists but missing display_name, update it
-            const { error: updateError } = await supabase
-              .from('profiles')
-              .update({
-                display_name: data.user.user_metadata?.first_name || data.user.user_metadata?.display_name || data.user.email?.split('@')[0] || 'User'
-              })
-              .eq('user_id', data.user.id);
-
-            if (updateError) {
-              console.warn('Could not update profile display_name, but continuing login:', updateError);
-            }
+          if (!migrationResult.success) {
+            console.warn('Profile migration failed, but continuing login:', migrationResult.error);
           }
         } catch (profileErr) {
           // Don't fail login if profile operations fail
-          console.warn('Profile operations failed, but continuing login:', profileErr);
+          console.warn('Profile migration error, but continuing login:', profileErr);
         }
 
         toast({
