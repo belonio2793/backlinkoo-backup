@@ -46,6 +46,10 @@ const AffiliateProgram = () => {
     conversion_rate: 0,
     total_commission: 0
   });
+  const [trackingPixels, setTrackingPixels] = useState<any[]>([]);
+  const [newPixelName, setNewPixelName] = useState('');
+  const [newPixelCode, setNewPixelCode] = useState('');
+  const [referralSources, setReferralSources] = useState<any[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
 
