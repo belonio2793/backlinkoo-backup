@@ -585,7 +585,7 @@ const AffiliateProgram = () => {
                       <div className="text-center text-muted-foreground">
                         <p className="mb-2">Detailed source tracking includes:</p>
                         <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div>• Exact referring URLs</div>
+                          <div>�� Exact referring URLs</div>
                           <div>• UTM campaign parameters</div>
                           <div>• Social media platforms</div>
                           <div>• Search engines</div>
@@ -768,6 +768,18 @@ const AffiliateProgram = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Promotion Material Link */}
+        <div className="fixed bottom-6 right-6">
+          <Button
+            onClick={() => navigate('/affiliate/promotion-materials')}
+            className="shadow-lg"
+            size="lg"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Promotion Materials
+          </Button>
+        </div>
       </div>
     </div>
   );
