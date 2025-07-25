@@ -6,19 +6,22 @@ import { BrowserRouter } from "react-router-dom";
 import { GlobalNotifications } from "@/components/GlobalNotifications";
 import { BetaNotification } from "@/components/BetaNotification";
 import { AppWrapper } from "@/components/AppWrapper";
+import { AuthProfileChecker } from "@/components/AuthProfileChecker";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
+    <TooltipProvider>
+      <AuthProfileChecker>
         <Toaster />
         <Sonner />
         <GlobalNotifications />
         <BetaNotification />
-      <BrowserRouter>
-        <AppWrapper />
-      </BrowserRouter>
+        <BrowserRouter>
+          <AppWrapper />
+        </BrowserRouter>
+      </AuthProfileChecker>
     </TooltipProvider>
   </QueryClientProvider>
 );

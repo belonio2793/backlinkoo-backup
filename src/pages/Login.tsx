@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { ResendEmailService } from "@/services/resendEmailService";
+import { ProfileMigrationService } from "@/services/profileMigrationService";
 
 import { useNavigate } from "react-router-dom";
 import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft } from "lucide-react";
@@ -65,7 +66,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       cleanupAuthState();
       try {
@@ -80,8 +81,24 @@ const Login = () => {
       });
 
       if (error) throw error;
-      
+
       if (data.user) {
+        // Ensure user has proper profile using migration service
+        try {
+          const migrationResult = await ProfileMigrationService.ensureUserProfile(
+            data.user.id,
+            data.user.email || loginEmail,
+            data.user.user_metadata
+          );
+
+          if (!migrationResult.success) {
+            console.warn('Profile migration failed, but continuing login:', migrationResult.error);
+          }
+        } catch (profileErr) {
+          // Don't fail login if profile operations fail
+          console.warn('Profile migration error, but continuing login:', profileErr);
+        }
+
         toast({
           title: "Welcome back!",
           description: "You have been successfully signed in.",
@@ -95,6 +112,15 @@ const Login = () => {
       if (error && typeof error === 'object') {
         if (error.message) {
           errorMessage = error.message;
+
+          // Handle specific authentication errors
+          if (error.message.includes('fetch')) {
+            errorMessage = 'Network connection failed. Please check your internet connection and try again.';
+          } else if (error.message.includes('Invalid login credentials')) {
+            errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+          } else if (error.message.includes('Email not confirmed')) {
+            errorMessage = 'Please check your email and click the confirmation link before signing in.';
+          }
         } else if (error.error_description) {
           errorMessage = error.error_description;
         } else if (typeof error.toString === 'function') {
@@ -146,14 +172,15 @@ const Login = () => {
         // Continue even if this fails
       }
 
-      // Sign up without sending confirmation email (we'll send our own)
+      // Sign up and save both first_name and display_name for compatibility
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `https://backlinkoo.com/auth/confirm`,
           data: {
-            first_name: firstName.trim()
+            first_name: firstName.trim(),
+            display_name: firstName.trim()
           }
         }
       });
@@ -183,6 +210,21 @@ const Login = () => {
 
       if (data.user) {
         console.log('Signup successful, user created:', data.user.id);
+
+        // Ensure profile is created using migration service
+        try {
+          const migrationResult = await ProfileMigrationService.ensureUserProfile(
+            data.user.id,
+            email,
+            { first_name: firstName.trim(), display_name: firstName.trim() }
+          );
+
+          if (!migrationResult.success) {
+            console.warn('Could not create profile during signup:', migrationResult.error);
+          }
+        } catch (profileErr) {
+          console.warn('Profile creation error during signup:', profileErr);
+        }
 
         // Send custom confirmation email via Resend directly
         try {
