@@ -41,6 +41,7 @@ const Index = () => {
     const getInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('Index page - Initial session check:', { session: !!session, user: !!session?.user, error });
         if (error) {
           console.error('Error getting session:', error);
           setUser(null);
@@ -57,7 +58,7 @@ const Index = () => {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event, session?.user?.id);
+      console.log('Index page - Auth state changed:', { event, hasUser: !!session?.user, userId: session?.user?.id });
       setUser(session?.user ?? null);
     });
 
