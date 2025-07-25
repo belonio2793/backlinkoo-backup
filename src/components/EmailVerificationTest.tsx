@@ -16,8 +16,10 @@ export const EmailVerificationTest = () => {
 
     try {
       console.log('Testing confirmation email to support@backlinkoo.com...');
-      
+
       const result = await EmailService.sendConfirmationEmail('support@backlinkoo.com');
+      console.log('Email test result:', result);
+
       setLastResult(result);
 
       if (result.success) {
@@ -26,15 +28,26 @@ export const EmailVerificationTest = () => {
           description: `Successfully sent to support@backlinkoo.com via Resend. Check your inbox!`,
         });
       } else {
-        throw new Error(result.error || 'Failed to send test email');
+        console.error('Email service returned failure:', result.error);
+        toast({
+          title: "Email test failed",
+          description: result.error || 'Unknown error from email service',
+          variant: "destructive",
+        });
       }
     } catch (error: any) {
       console.error('Email test error:', error);
-      setLastResult({ success: false, error: error.message });
-      
+
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      setLastResult({
+        success: false,
+        error: errorMessage,
+        provider: 'netlify_resend'
+      });
+
       toast({
         title: "Email test failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
