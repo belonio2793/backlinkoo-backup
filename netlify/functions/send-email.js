@@ -49,7 +49,7 @@ exports.handler = async (event, context) => {
 
     // Send email via Resend
     const emailData = {
-      from: from || 'Backlink ∞ <noreply@backlinkoo.com>',
+      from: from || 'Backlink ∞ Support <support@backlinkoo.com>',
       to: [to],
       subject: subject,
       html: `
