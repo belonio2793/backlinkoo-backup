@@ -55,11 +55,11 @@ Email System Manager`
   const [systemHealth, setSystemHealth] = useState<any>(null);
   const [failureLog, setFailureLog] = useState<any[]>([]);
   const [adminConfig, setAdminConfig] = useState({
-    smtp_host: '',
-    smtp_port: '587',
-    smtp_user: '',
-    smtp_pass: '',
-    enabled: false
+    smtp_host: 'smtp.resend.com',
+    smtp_port: '465',
+    smtp_user: 'resend',
+    smtp_pass: 're_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq',
+    enabled: true
   });
 
   const { toast } = useToast();
@@ -396,7 +396,7 @@ Email System Manager`
                 <div className="space-y-2 text-sm">
                   <p>• Uses auth system for email delivery</p>
                   <p>• Automatic fallback mechanism</p>
-                  <p>• Integrated with user management</p>
+                  <p>��� Integrated with user management</p>
                   <p>• Edge Functions for custom emails</p>
                 </div>
               </CardContent>
