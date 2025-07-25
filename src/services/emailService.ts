@@ -20,7 +20,18 @@ export interface EmailResult {
 export class EmailService {
   private static instance: EmailService;
   private failureLog: { provider: string; error: any; timestamp: Date }[] = [];
-  
+
+  // Resend SMTP Configuration
+  private resendConfig = {
+    host: 'smtp.resend.com',
+    port: 465,
+    secure: true, // true for 465, false for other ports
+    auth: {
+      user: 'resend',
+      pass: 're_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq'
+    }
+  };
+
   static getInstance(): EmailService {
     if (!EmailService.instance) {
       EmailService.instance = new EmailService();
@@ -32,9 +43,9 @@ export class EmailService {
     console.log('🚀 EmailService: Starting email delivery process');
     console.log('📧 Target:', emailData.to, '| Subject:', emailData.subject);
 
-    // Try providers in order of preference with automatic fallback
+    // Try providers in order of preference with SMTP as primary
     const providers = [
-      { name: 'resend', method: this.sendViaResend },
+      { name: 'resend', method: this.sendViaResendSMTP },
       { name: 'supabase', method: this.sendViaSupabase },
       { name: 'netlify', method: this.sendViaNetlify },
       { name: 'admin', method: this.sendViaAdminConfig }
