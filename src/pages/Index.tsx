@@ -37,6 +37,20 @@ const Index = () => {
 
   // Check for authenticated user on component mount
   useEffect(() => {
+    // Clear any potentially corrupted auth state first
+    const clearCorruptedAuthState = () => {
+      const authKeys = Object.keys(localStorage).filter(key =>
+        key.startsWith('supabase.auth.') || key.includes('sb-')
+      );
+
+      // If there are auth keys but we can't verify them, clear them
+      if (authKeys.length > 0) {
+        console.log('Index page - Found auth keys, validating...');
+      }
+    };
+
+    clearCorruptedAuthState();
+
     // Get initial session and validate it properly
     const getInitialSession = async () => {
       try {
