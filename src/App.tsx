@@ -15,6 +15,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <GlobalNotifications />
+        <BetaNotification />
       <BrowserRouter>
         <AppWrapper />
       </BrowserRouter>
