@@ -383,6 +383,14 @@ const AffiliateProgram = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
+          <div className="mb-4">
+            <button
+              onClick={() => navigate('/')}
+              className="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+            >
+              ← Home
+            </button>
+          </div>
           <h1 className="text-3xl font-bold mb-2">Affiliate Dashboard</h1>
           <p className="text-muted-foreground">Track your performance and earnings in real-time</p>
         </div>
