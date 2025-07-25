@@ -493,6 +493,34 @@ const AffiliateProgram = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Promotion Materials */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Marketing Resources</CardTitle>
+                <CardDescription>Access professional promotional materials to boost your referrals</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Download className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Promotion Materials</h3>
+                      <p className="text-sm text-muted-foreground">Email templates, banners, social media posts & more</p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => navigate('/affiliate/promotion-materials')}
+                    className="ml-4"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Access Materials
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="referrals" className="space-y-6">
