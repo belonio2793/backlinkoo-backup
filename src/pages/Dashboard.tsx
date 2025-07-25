@@ -186,28 +186,18 @@ const Dashboard = () => {
           localStorage.removeItem(key);
         }
       });
-      
+
       const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) throw error;
-      
-      toast({
-        title: "You have signed out",
-        description: "You have been successfully logged out of your account.",
-      });
-      
-      // Navigate to login page
-      navigate('/login');
-      
+
+      // Immediate redirect to home page without toast to prevent delays
+      window.location.href = "/";
+
     } catch (error) {
       console.error("Sign out error:", error);
-      toast({
-        title: "Sign out error",
-        description: "There was an error signing you out. Please try again.",
-        variant: "destructive",
-      });
-      
-      // Still redirect even if there's an error
-      navigate('/login');
+
+      // Force redirect even if there's an error
+      window.location.href = "/";
     }
   };
 
