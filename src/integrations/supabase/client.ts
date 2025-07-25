@@ -2,8 +2,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://dfhanacsmsvvkpunurnp.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT87Zqa5RY";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "";
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
@@ -102,13 +102,21 @@ const createMockSupabaseClient = () => {
   };
 };
 
-// Check if we're in development and if the Supabase URL is accessible
-const isDevelopment = import.meta.env.DEV;
+// Check if we have valid Supabase credentials
+const hasValidCredentials = SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY &&
+  SUPABASE_URL.trim() !== "" && SUPABASE_PUBLISHABLE_KEY.trim() !== "" &&
+  !SUPABASE_URL.includes('your-project-url') &&
+  !SUPABASE_PUBLISHABLE_KEY.includes('your-anon-key') &&
+  SUPABASE_URL.startsWith('https://') &&
+  SUPABASE_PUBLISHABLE_KEY.length > 20;
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
-});
+// Use mock client if credentials are missing or invalid
+export const supabase = hasValidCredentials ?
+  createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: {
+      storage: localStorage,
+      persistSession: true,
+      autoRefreshToken: true,
+    }
+  }) :
+  createMockSupabaseClient() as any;

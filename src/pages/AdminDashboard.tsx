@@ -12,6 +12,9 @@ import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager"
 import { EmailVerificationTest } from "@/components/EmailVerificationTest";
 import { EmailVerificationStatus } from "@/components/EmailVerificationStatus";
 import { ResendConnectionTest } from "@/components/ResendConnectionTest";
+import { TestEmailSender } from "@/components/TestEmailSender";
+import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
+import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
 import {
   Users,
@@ -151,7 +154,8 @@ const AdminDashboard = () => {
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
             <TabsTrigger value="affiliates">Affiliate Program</TabsTrigger>
             <TabsTrigger value="deployment">Deployment</TabsTrigger>
-            <TabsTrigger value="email-test">Email Testing</TabsTrigger>
+            <TabsTrigger value="smtp-test">SMTP Test</TabsTrigger>
+            <TabsTrigger value="email-test">Email System</TabsTrigger>
             <TabsTrigger value="security">Security & Roles</TabsTrigger>
           </TabsList>
 
@@ -167,12 +171,12 @@ const AdminDashboard = () => {
             <DeploymentStatus />
           </TabsContent>
 
+          <TabsContent value="smtp-test">
+            <SMTPConfigTest />
+          </TabsContent>
+
           <TabsContent value="email-test">
-            <div className="space-y-6">
-              <ResendConnectionTest />
-              <EmailVerificationStatus />
-              <EmailVerificationTest />
-            </div>
+            <EmailSystemManager />
           </TabsContent>
 
           <TabsContent value="security">
