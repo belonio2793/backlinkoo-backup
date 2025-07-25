@@ -110,6 +110,13 @@ const hasValidCredentials = SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY &&
   SUPABASE_URL.startsWith('https://') &&
   SUPABASE_PUBLISHABLE_KEY.length > 20;
 
+console.log('Supabase client initialization:', {
+  hasValidCredentials,
+  url: SUPABASE_URL,
+  keyLength: SUPABASE_PUBLISHABLE_KEY?.length,
+  urlValid: SUPABASE_URL?.startsWith('https://'),
+});
+
 // Use mock client if credentials are missing or invalid
 export const supabase = hasValidCredentials ?
   createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
