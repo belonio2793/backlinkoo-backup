@@ -312,7 +312,7 @@ const AffiliateProgram = () => {
                 </Button>
                 <Button variant="ghost" onClick={async () => {
                   await supabase.auth.signOut();
-                  navigate('/login');
+                  window.location.href = "/";
                 }}>
                   Sign Out
                 </Button>
