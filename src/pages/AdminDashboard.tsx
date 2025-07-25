@@ -161,7 +161,10 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="email-test">
-            <EmailVerificationTest />
+            <div className="space-y-6">
+              <EmailVerificationStatus />
+              <EmailVerificationTest />
+            </div>
           </TabsContent>
 
           <TabsContent value="security">
