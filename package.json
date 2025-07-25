@@ -10,9 +10,12 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "supabase:link": "supabase link --project-ref dfhanacsmsvvkpunurnp",
-    "supabase:pull": "supabase db pull",
-    "supabase:types": "supabase gen types typescript --linked > src/integrations/supabase/types.ts",
-    "supabase:status": "supabase status",
+    "supabase:pull": "node scripts/db-utils.js pull",
+    "supabase:types": "node scripts/db-utils.js types",
+    "supabase:status": "node scripts/db-utils.js status",
+    "supabase:sync": "node scripts/db-utils.js sync",
+    "supabase:create": "node scripts/db-utils.js create",
+    "supabase:push": "node scripts/db-utils.js push",
     "supabase:setup": "bash scripts/setup-supabase-sync.sh"
   },
   "dependencies": {
