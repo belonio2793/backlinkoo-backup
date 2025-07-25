@@ -33,8 +33,8 @@ const createMockSupabaseClient = () => {
       error: null
     }),
     signUp: () => Promise.resolve({
-      data: { user: mockUser, session: mockSession },
-      error: null
+      data: null,
+      error: { message: 'Failed to fetch - Supabase client in mock mode. Check environment variables VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY' }
     }),
     signOut: () => Promise.resolve({ error: null }),
     resend: () => Promise.resolve({ error: null }),
