@@ -105,12 +105,10 @@ const createMockSupabaseClient = () => {
 // Check if we're in development and if the Supabase URL is accessible
 const isDevelopment = import.meta.env.DEV;
 
-export const supabase = isDevelopment
-  ? createMockSupabaseClient()
-  : createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-      auth: {
-        storage: localStorage,
-        persistSession: true,
-        autoRefreshToken: true,
-      }
-    });
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    storage: localStorage,
+    persistSession: true,
+    autoRefreshToken: true,
+  }
+});
