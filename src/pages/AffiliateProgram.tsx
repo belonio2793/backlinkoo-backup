@@ -127,6 +127,51 @@ const AffiliateProgram = () => {
     }
   };
 
+  const addTrackingPixel = () => {
+    if (!newPixelName.trim() || !newPixelCode.trim()) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please provide both name and pixel code.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const newPixel = {
+      id: Date.now().toString(),
+      name: newPixelName,
+      code: newPixelCode,
+      platform: detectPlatform(newPixelCode),
+      created_at: new Date().toISOString()
+    };
+
+    setTrackingPixels([...trackingPixels, newPixel]);
+    setNewPixelName('');
+    setNewPixelCode('');
+
+    toast({
+      title: 'Pixel Added',
+      description: `${newPixel.name} tracking pixel has been saved.`,
+    });
+  };
+
+  const detectPlatform = (code: string) => {
+    if (code.includes('facebook') || code.includes('fbq')) return 'Facebook';
+    if (code.includes('google') || code.includes('gtag')) return 'Google';
+    if (code.includes('twitter') || code.includes('twq')) return 'Twitter';
+    if (code.includes('tiktok')) return 'TikTok';
+    if (code.includes('linkedin')) return 'LinkedIn';
+    return 'Custom';
+  };
+
+  const removeTrackingPixel = (id: string) => {
+    setTrackingPixels(trackingPixels.filter(pixel => pixel.id !== id));
+    toast({
+      title: 'Pixel Removed',
+      description: 'Tracking pixel has been deleted.',
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
