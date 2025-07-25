@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { supabase } from "@/integrations/supabase/client";
+import { EmailTest } from "@/components/EmailTest";
 import { useNavigate } from "react-router-dom";
 import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft } from "lucide-react";
 
@@ -269,7 +270,7 @@ const Login = () => {
           },
           body: JSON.stringify({
             to: resendEmail,
-            subject: 'Confirm Your Backlink ∞ Account',
+            subject: 'Confirm Your Backlink ��� Account',
             message: `Welcome to Backlink ∞!
 
 Please confirm your email address by clicking the link below:
