@@ -79,7 +79,7 @@ Email System Manager`
   };
 
   const loadFailureLog = () => {
-    const failures = EmailService.getFailureLog();
+    const failures = ResendEmailService.getFailureLog();
     setFailureLog(failures);
   };
 
