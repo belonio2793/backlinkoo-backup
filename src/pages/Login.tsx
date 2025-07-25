@@ -549,11 +549,6 @@ The Backlink ∞ Team`,
             </Tabs>
           </CardContent>
         </Card>
-
-        {/* Debug Section */}
-        <div className="mt-8">
-          <AuthDebugger />
-        </div>
       </div>
     </div>
   );
