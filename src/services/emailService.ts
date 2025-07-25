@@ -122,8 +122,8 @@ export class EmailService {
               </div>
             </div>
           `,
-          from: emailData.from || 'noreply@backlinkoo.com',
-          fromName: emailData.fromName || 'Backlink ∞',
+          from: emailData.from || 'support@backlinkoo.com',
+          fromName: emailData.fromName || 'Backlink ∞ Support',
           smtpConfig: this.resendConfig
         }
       });
