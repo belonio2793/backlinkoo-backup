@@ -154,7 +154,8 @@ const AdminDashboard = () => {
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
             <TabsTrigger value="affiliates">Affiliate Program</TabsTrigger>
             <TabsTrigger value="deployment">Deployment</TabsTrigger>
-            <TabsTrigger value="email-test">Email Testing</TabsTrigger>
+            <TabsTrigger value="smtp-test">SMTP Test</TabsTrigger>
+            <TabsTrigger value="email-test">Email System</TabsTrigger>
             <TabsTrigger value="security">Security & Roles</TabsTrigger>
           </TabsList>
 
