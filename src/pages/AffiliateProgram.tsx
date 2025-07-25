@@ -10,11 +10,11 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { AffiliateService } from '@/services/affiliateService';
 import type { User } from '@supabase/supabase-js';
-import { 
-  DollarSign, 
-  ArrowRight, 
-  Users, 
-  TrendingUp, 
+import {
+  DollarSign,
+  ArrowRight,
+  Users,
+  TrendingUp,
   Shield,
   Copy,
   ExternalLink,
@@ -23,7 +23,15 @@ import {
   CreditCard,
   Calendar,
   Mail,
-  Target
+  Target,
+  Infinity,
+  Code,
+  BarChart,
+  Globe,
+  Share2,
+  Download,
+  Image,
+  MessageSquare
 } from 'lucide-react';
 
 const AffiliateProgram = () => {
