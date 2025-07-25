@@ -44,6 +44,10 @@ Backlink Application`
   });
 
   const sendTestEmail = async () => {
+    console.log('📧 Starting email configuration test...');
+    console.log('Target email:', emailData.to);
+    console.log('Subject:', emailData.subject);
+
     setIsLoading(true);
     setTestResults(null);
 
