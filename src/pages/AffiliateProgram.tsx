@@ -50,6 +50,7 @@ const AffiliateProgram = () => {
   const [newPixelName, setNewPixelName] = useState('');
   const [newPixelCode, setNewPixelCode] = useState('');
   const [referralSources, setReferralSources] = useState<any[]>([]);
+  const [previousStats, setPreviousStats] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
