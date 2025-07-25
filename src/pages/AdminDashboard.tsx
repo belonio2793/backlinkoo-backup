@@ -9,11 +9,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SecurityDashboard } from "@/components/SecurityDashboard";
 import { CampaignManager } from "@/components/CampaignManager";
 import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager";
-import { 
-  Users, 
-  Activity, 
-  CreditCard, 
-  Settings, 
+import { EmailVerificationTest } from "@/components/EmailVerificationTest";
+import {
+  Users,
+  Activity,
+  CreditCard,
+  Settings,
   CheckCircle,
   Clock,
   Infinity,
