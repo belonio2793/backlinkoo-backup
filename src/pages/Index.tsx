@@ -235,13 +235,6 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Connection Test - Temporary for debugging */}
-      <section className="py-12 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
-        <div className="container mx-auto">
-          <ConnectionTest />
-        </div>
-      </section>
-
       {/* Free Blog Generator - Top Feature */}
       <section className="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
         <div className="container mx-auto">
