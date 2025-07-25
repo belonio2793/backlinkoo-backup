@@ -78,6 +78,8 @@ const Index = () => {
       } catch (error) {
         console.error('Error in getSession:', error);
         setUser(null);
+      } finally {
+        setAuthChecked(true);
       }
     };
 
