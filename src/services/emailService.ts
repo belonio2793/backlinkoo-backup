@@ -171,4 +171,75 @@ https://backlinkoo.com`,
 
     return await this.sendViaNetlifyFunction(emailData);
   }
+
+  // Legacy methods for EmailSystemManager compatibility
+  static async healthCheck(): Promise<{ status: string; resend: boolean; netlify: boolean }> {
+    try {
+      // Test if we can make a request to our Netlify function
+      const response = await fetch('/.netlify/functions/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: 'test@example.com',
+          subject: 'Health Check',
+          message: 'Test',
+          test: true // Add a test flag to avoid actually sending
+        }),
+      });
+
+      const isHealthy = response.status !== 500;
+
+      return {
+        status: isHealthy ? 'healthy' : 'degraded',
+        resend: isHealthy,
+        netlify: isHealthy
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        resend: false,
+        netlify: false
+      };
+    }
+  }
+
+  static getFailureLog(): Array<{ timestamp: Date; error: string; email: string }> {
+    return this.failureLog;
+  }
+
+  static async sendEmail(emailData: EmailData): Promise<EmailResult> {
+    try {
+      const result = await this.sendViaNetlifyFunction(emailData);
+
+      if (!result.success && result.error) {
+        // Log failure
+        this.failureLog.push({
+          timestamp: new Date(),
+          error: result.error,
+          email: emailData.to
+        });
+
+        // Keep only last 50 failures
+        if (this.failureLog.length > 50) {
+          this.failureLog = this.failureLog.slice(-50);
+        }
+      }
+
+      return result as EmailResult;
+    } catch (error: any) {
+      const failureResult: EmailResult = {
+        success: false,
+        error: error.message,
+        provider: 'netlify_resend'
+      };
+
+      this.failureLog.push({
+        timestamp: new Date(),
+        error: error.message,
+        email: emailData.to
+      });
+
+      return failureResult;
+    }
+  }
 }
