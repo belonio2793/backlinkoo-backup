@@ -181,15 +181,26 @@ const Login = () => {
       }
 
       if (data.user) {
+        console.log('Signup successful, user created:', data.user.id);
+
         toast({
           title: "Check your email!",
-          description: "We've sent you a confirmation link to verify your account.",
+          description: "We've sent you a confirmation link to verify your account. If you don't receive it, you can resend it from the sign in page.",
         });
-        
+
         // Broadcast new user notification globally
         setTimeout(() => {
           broadcastNewUser(firstName.trim());
         }, 1000);
+
+        // Auto-switch to login tab after successful signup
+        setTimeout(() => {
+          const loginTab = document.querySelector('[value="login"]') as HTMLElement;
+          if (loginTab) {
+            loginTab.click();
+            setLoginEmail(email); // Pre-fill email for easy login
+          }
+        }, 2000);
       }
     } catch (error: any) {
       console.error("Signup error:", error);
