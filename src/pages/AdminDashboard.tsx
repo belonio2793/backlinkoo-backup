@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SecurityDashboard } from "@/components/SecurityDashboard";
 import { CampaignManager } from "@/components/CampaignManager";
+import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager";
 import { 
   Users, 
   Activity, 
@@ -144,11 +145,16 @@ const AdminDashboard = () => {
         <Tabs defaultValue="campaigns" className="space-y-6">
           <TabsList>
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
+            <TabsTrigger value="affiliates">Affiliate Program</TabsTrigger>
             <TabsTrigger value="security">Security & Roles</TabsTrigger>
           </TabsList>
 
           <TabsContent value="campaigns">
             <CampaignManager />
+          </TabsContent>
+
+          <TabsContent value="affiliates">
+            <AdminAffiliateManager />
           </TabsContent>
 
           <TabsContent value="security">
