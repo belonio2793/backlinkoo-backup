@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import { GlobalNotifications } from "@/components/GlobalNotifications";
 import { BetaNotification } from "@/components/BetaNotification";
 import { AppWrapper } from "@/components/AppWrapper";
+import { AuthProfileChecker } from "@/components/AuthProfileChecker";
 
 const queryClient = new QueryClient();
 
