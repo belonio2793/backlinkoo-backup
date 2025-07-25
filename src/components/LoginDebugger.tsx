@@ -178,6 +178,9 @@ const LoginDebugger = () => {
                 <div>Supabase Key: <Badge variant={debugInfo.hasSupabaseKey ? "default" : "destructive"}>
                   {debugInfo.hasSupabaseKey ? "✓" : "✗"}
                 </Badge></div>
+                <div>Client Type: <Badge variant={debugInfo.isMockClient ? "destructive" : "default"}>
+                  {debugInfo.isMockClient ? "Mock Client" : "Real Supabase"}
+                </Badge></div>
               </div>
             </div>
             
