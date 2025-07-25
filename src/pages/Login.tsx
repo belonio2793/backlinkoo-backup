@@ -378,11 +378,6 @@ The Backlink ∞ Team`,
           <p className="text-muted-foreground">Powerful SEO & Backlink Management</p>
         </div>
 
-        {/* Email Verification Test - Temporary for debugging */}
-        <div className="mb-6">
-          <EmailVerificationTest />
-        </div>
-
         <Card>
           <CardHeader className="text-center">
             <CardTitle>Welcome Back</CardTitle>
