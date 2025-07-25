@@ -1,0 +1,271 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { Mail, Send, CheckCircle, XCircle, TestTube } from 'lucide-react';
+
+export function TestEmailSender() {
+  const [emailData, setEmailData] = useState({
+    to: 'support@backlinkoo.com',
+    subject: 'Email Configuration Test - ' + new Date().toLocaleString(),
+    message: `Hello Support Team,
+
+This is a test email to verify that our email configuration is working properly.
+
+Test Details:
+- Timestamp: ${new Date().toISOString()}
+- Source: Email Configuration Test Component
+- Environment: ${import.meta.env.MODE || 'development'}
+
+If you receive this email, the email sending functionality is working correctly.
+
+Best regards,
+Backlink Application`
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [testResults, setTestResults] = useState<any>(null);
+  const { toast } = useToast();
+
+  const sendTestEmail = async () => {
+    setIsLoading(true);
+    setTestResults(null);
+
+    try {
+      // Since we're using Supabase, we'll try to send via auth system first
+      // This will test if the email configuration is working
+      const { data, error } = await supabase.auth.signUp({
+        email: emailData.to,
+        password: 'TestPassword123!',
+        options: {
+          data: {
+            display_name: 'Email Configuration Test',
+            test_message: emailData.message
+          },
+          emailRedirectTo: window.location.origin
+        }
+      });
+
+      console.log('Test email response:', data, error);
+
+      if (error && error.message?.includes('already registered')) {
+        // User exists, try resend which will also test email sending
+        const { data: resendData, error: resendError } = await supabase.auth.resend({
+          type: 'signup',
+          email: emailData.to,
+          options: {
+            emailRedirectTo: window.location.origin
+          }
+        });
+
+        setTestResults({
+          success: !resendError,
+          message: resendError ? resendError.message : 'Test email sent successfully via resend',
+          data: resendData,
+          error: resendError,
+          method: 'resend'
+        });
+      } else {
+        setTestResults({
+          success: !error,
+          message: error ? error.message : 'Test email sent successfully via signup',
+          data,
+          error,
+          method: 'signup'
+        });
+      }
+
+      toast({
+        title: testResults?.success ? 'Test Email Sent' : 'Test Email Failed',
+        description: testResults?.message,
+        variant: testResults?.success ? 'default' : 'destructive'
+      });
+
+    } catch (error: any) {
+      console.error('Test email failed:', error);
+      setTestResults({
+        success: false,
+        message: error.message,
+        error,
+        method: 'error'
+      });
+      
+      toast({
+        title: 'Test Failed',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const sendAlternativeTest = async () => {
+    setIsLoading(true);
+    try {
+      // Alternative method using a different approach
+      const { data, error } = await supabase.auth.resetPasswordForEmail(emailData.to, {
+        redirectTo: window.location.origin + '/password-reset-test'
+      });
+
+      setTestResults({
+        success: !error,
+        message: error ? error.message : 'Password reset email sent to test email configuration',
+        data,
+        error,
+        method: 'password_reset'
+      });
+
+      toast({
+        title: !error ? 'Alternative Test Sent' : 'Alternative Test Failed',
+        description: error ? error.message : 'Password reset email sent as configuration test',
+        variant: !error ? 'default' : 'destructive'
+      });
+    } catch (error: any) {
+      console.error('Alternative test failed:', error);
+      toast({
+        title: 'Alternative Test Failed',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Card className="max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <TestTube className="h-5 w-5" />
+          Email Configuration Test
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="test-to">To Email Address</Label>
+            <Input
+              id="test-to"
+              type="email"
+              value={emailData.to}
+              onChange={(e) => setEmailData(prev => ({ ...prev, to: e.target.value }))}
+              placeholder="support@backlinkoo.com"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="test-subject">Subject</Label>
+            <Input
+              id="test-subject"
+              value={emailData.subject}
+              onChange={(e) => setEmailData(prev => ({ ...prev, subject: e.target.value }))}
+              placeholder="Email Configuration Test"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="test-message">Test Message</Label>
+            <Textarea
+              id="test-message"
+              value={emailData.message}
+              onChange={(e) => setEmailData(prev => ({ ...prev, message: e.target.value }))}
+              rows={8}
+              placeholder="Enter test message..."
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <Button 
+            onClick={sendTestEmail}
+            disabled={isLoading}
+            className="flex-1"
+          >
+            <Send className="h-4 w-4 mr-2" />
+            {isLoading ? 'Sending...' : 'Send Test Email'}
+          </Button>
+          
+          <Button 
+            onClick={sendAlternativeTest}
+            disabled={isLoading}
+            variant="outline"
+            className="flex-1"
+          >
+            <Mail className="h-4 w-4 mr-2" />
+            Alternative Test
+          </Button>
+        </div>
+
+        {testResults && (
+          <div className={`p-4 rounded-lg border ${
+            testResults.success 
+              ? 'bg-green-50 border-green-200' 
+              : 'bg-red-50 border-red-200'
+          }`}>
+            <div className="flex items-center gap-2 mb-2">
+              {testResults.success ? (
+                <CheckCircle className="h-5 w-5 text-green-600" />
+              ) : (
+                <XCircle className="h-5 w-5 text-red-600" />
+              )}
+              <span className={`font-medium ${
+                testResults.success ? 'text-green-800' : 'text-red-800'
+              }`}>
+                {testResults.success ? 'Test Email Sent' : 'Test Failed'}
+              </span>
+              <span className="text-xs bg-gray-200 px-2 py-1 rounded">
+                {testResults.method}
+              </span>
+            </div>
+            <p className={`text-sm ${
+              testResults.success ? 'text-green-700' : 'text-red-700'
+            }`}>
+              {testResults.message}
+            </p>
+            
+            <div className="mt-3 text-xs text-gray-600">
+              <strong>Next Steps:</strong> Check the inbox for {emailData.to} to verify the email was received.
+            </div>
+            
+            {testResults.data && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs opacity-70">
+                  View Response Data
+                </summary>
+                <pre className="text-xs mt-2 bg-gray-100 p-2 rounded overflow-auto">
+                  {JSON.stringify(testResults.data, null, 2)}
+                </pre>
+              </details>
+            )}
+            
+            {testResults.error && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs opacity-70">
+                  View Error Details
+                </summary>
+                <pre className="text-xs mt-2 bg-gray-100 p-2 rounded overflow-auto">
+                  {JSON.stringify(testResults.error, null, 2)}
+                </pre>
+              </details>
+            )}
+          </div>
+        )}
+
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h4 className="font-medium text-blue-800 mb-2">Test Methods:</h4>
+          <ul className="text-sm text-blue-700 space-y-1">
+            <li>• <strong>Send Test Email:</strong> Uses signup/resend to trigger verification email</li>
+            <li>• <strong>Alternative Test:</strong> Uses password reset to test email delivery</li>
+            <li>• Both methods will send an email to the specified address</li>
+            <li>• Check support@backlinkoo.com inbox to verify delivery</li>
+            <li>• Response data and errors will be shown below</li>
+          </ul>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
