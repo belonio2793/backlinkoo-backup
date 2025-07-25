@@ -5,9 +5,13 @@
  * Provides helper functions for common database operations
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const DB_PASSWORD = 'sbp_65f13d3ef84fae093dbb2b2d5368574f69b3cea2';
 
@@ -132,7 +136,7 @@ if (require.main === module) {
         break;
       default:
         console.log(`
-📋 Database Management Commands:
+�� Database Management Commands:
 
   pull     - Pull latest schema from remote database
   types    - Generate TypeScript types
