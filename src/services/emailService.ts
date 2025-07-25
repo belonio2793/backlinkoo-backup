@@ -93,26 +93,38 @@ export class EmailService {
     };
   }
 
-  // 1. PRIMARY: Resend Integration
-  private async sendViaResend(emailData: EmailData): Promise<EmailResult> {
+  // 1. PRIMARY: Resend SMTP
+  private async sendViaResendSMTP(emailData: EmailData): Promise<EmailResult> {
     try {
-      // Use Supabase Edge Function for Resend integration
-      const { data, error } = await supabase.functions.invoke('send-email-resend', {
+      console.log('📤 Sending via Resend SMTP:', this.resendConfig.host);
+
+      // Use Supabase Edge Function that implements SMTP
+      const { data, error } = await supabase.functions.invoke('send-email-smtp', {
         body: {
           to: emailData.to,
           subject: emailData.subject,
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #333;">${emailData.subject}</h2>
-              <div style="white-space: pre-wrap; line-height: 1.6;">${emailData.message}</div>
-              <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
-              <p style="font-size: 12px; color: #666;">
-                Sent via Backlink ∞ Email System (Resend) - ${new Date().toISOString()}
-              </p>
+              <div style="background: linear-gradient(135deg, #3B82F6, #8B5CF6); padding: 20px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 24px;">🔗 Backlink ∞</h1>
+              </div>
+              <div style="padding: 30px; background: #ffffff;">
+                <h2 style="color: #333; margin-top: 0;">${emailData.subject}</h2>
+                <div style="white-space: pre-wrap; line-height: 1.6; color: #555;">
+                  ${emailData.message}
+                </div>
+              </div>
+              <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #eee;">
+                <p style="margin: 0; font-size: 12px; color: #666;">
+                  Sent via Backlink ∞ Email System (Resend SMTP)<br>
+                  ${new Date().toISOString()}
+                </p>
+              </div>
             </div>
           `,
           from: emailData.from || 'noreply@backlinkoo.com',
-          fromName: emailData.fromName || 'Backlink ∞'
+          fromName: emailData.fromName || 'Backlink ∞',
+          smtpConfig: this.resendConfig
         }
       });
 
@@ -121,11 +133,11 @@ export class EmailService {
       return {
         success: true,
         provider: 'resend',
-        message: 'Email sent successfully via Resend',
+        message: 'Email sent successfully via Resend SMTP',
         data: data
       };
     } catch (error) {
-      throw new Error(`Resend failed: ${error}`);
+      throw new Error(`Resend SMTP failed: ${error}`);
     }
   }
 
