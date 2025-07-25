@@ -13,6 +13,7 @@ import { EmailVerificationTest } from "@/components/EmailVerificationTest";
 import { EmailVerificationStatus } from "@/components/EmailVerificationStatus";
 import { ResendConnectionTest } from "@/components/ResendConnectionTest";
 import { TestEmailSender } from "@/components/TestEmailSender";
+import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
 import {
   Users,
