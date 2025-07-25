@@ -163,6 +163,10 @@ const AdminDashboard = () => {
             <AdminAffiliateManager />
           </TabsContent>
 
+          <TabsContent value="deployment">
+            <DeploymentStatus />
+          </TabsContent>
+
           <TabsContent value="email-test">
             <div className="space-y-6">
               <ResendConnectionTest />
