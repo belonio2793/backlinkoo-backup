@@ -51,7 +51,7 @@ Email System Manager`
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [testResults, setTestResults] = useState<EmailResult | null>(null);
+  const [testResults, setTestResults] = useState<ResendEmailResponse | null>(null);
   const [systemHealth, setSystemHealth] = useState<any>(null);
   const [failureLog, setFailureLog] = useState<any[]>([]);
   const [adminConfig, setAdminConfig] = useState({
