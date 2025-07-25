@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { EmailService, EmailServiceResponse } from '@/services/emailService';
+import { ResendEmailService, ResendEmailResponse, ResendEmailData } from '@/services/resendEmailService';
 import {
   Mail,
   Send,
