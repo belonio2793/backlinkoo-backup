@@ -20,6 +20,7 @@ Test Details:
 - Timestamp: ${new Date().toISOString()}
 - Source: Email Configuration Test Component
 - Environment: ${import.meta.env.MODE || 'development'}
+- Auto-triggered: ${Date.now()}
 
 If you receive this email, the email sending functionality is working correctly.
 
@@ -28,7 +29,19 @@ Backlink Application`
   });
   const [isLoading, setIsLoading] = useState(false);
   const [testResults, setTestResults] = useState<any>(null);
+  const [autoTestRun, setAutoTestRun] = useState(false);
   const { toast } = useToast();
+
+  // Auto-run test when component mounts (for demonstration)
+  useState(() => {
+    if (!autoTestRun) {
+      setTimeout(() => {
+        console.log('🚀 Auto-running email test...');
+        sendTestEmail();
+        setAutoTestRun(true);
+      }, 2000);
+    }
+  });
 
   const sendTestEmail = async () => {
     setIsLoading(true);
