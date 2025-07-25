@@ -269,7 +269,7 @@ const Login = () => {
           },
           body: JSON.stringify({
             to: resendEmail,
-            subject: 'Confirm Your Backlink ∞ Account',
+            subject: 'Confirm Your Backlink ��� Account',
             message: `Welcome to Backlink ∞!
 
 Please confirm your email address by clicking the link below:
@@ -351,11 +351,6 @@ The Backlink ∞ Team`,
             <h1 className="text-2xl font-bold text-foreground">Backlink</h1>
           </div>
           <p className="text-muted-foreground">Powerful SEO & Backlink Management</p>
-        </div>
-
-        {/* Email Test - Temporary for debugging */}
-        <div className="mb-6">
-          <EmailTest />
         </div>
 
         <Card>
