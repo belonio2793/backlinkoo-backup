@@ -305,7 +305,7 @@ If you didn't create an account with us, please ignore this email.
 
 Best regards,
 The Backlink ∞ Team`,
-            from: 'Backlink �� <support@backlinkoo.com>'
+            from: 'Backlink ∞ <support@backlinkoo.com>'
           }),
         });
 
@@ -378,6 +378,11 @@ The Backlink ∞ Team`,
           <p className="text-muted-foreground">Powerful SEO & Backlink Management</p>
         </div>
 
+        {/* Email Verification Test - Temporary for debugging */}
+        <div className="mb-6">
+          <EmailVerificationTest />
+        </div>
+
         <Card>
           <CardHeader className="text-center">
             <CardTitle>Welcome Back</CardTitle>
@@ -409,7 +414,7 @@ The Backlink ∞ Team`,
                       <Input
                         id="login-password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
+                        placeholder="•••••••���"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
                         required
