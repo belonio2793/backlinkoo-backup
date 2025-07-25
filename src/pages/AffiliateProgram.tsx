@@ -641,26 +641,7 @@ const AffiliateProgram = () => {
                   </div>
                 </div>
 
-                {/* Reset and Undo Controls */}
-                <div className="flex items-center justify-center gap-4 mt-4 text-sm">
-                  <button
-                    onClick={resetAnalytics}
-                    className="text-red-600 hover:text-red-800 hover:underline"
-                  >
-                    Reset to 0
-                  </button>
-                  {previousStats && (
-                    <>
-                      <span className="text-muted-foreground">•</span>
-                      <button
-                        onClick={undoReset}
-                        className="text-blue-600 hover:text-blue-800 hover:underline"
-                      >
-                        Undo Reset
-                      </button>
-                    </>
-                  )}
-                </div>
+
 
                 <Card className="mb-6">
                   <CardHeader>
