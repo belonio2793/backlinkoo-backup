@@ -11,7 +11,7 @@ export const BetaNotification = () => {
     <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 relative z-50">
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm font-medium">
-          <Flask className="h-4 w-4" />
+          <Beaker className="h-4 w-4" />
           <span>
             <strong>BETA</strong> - We're actively developing and building our application live!
           </span>
