@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { supabase } from "@/integrations/supabase/client";
-import { EmailService } from "@/services/emailService";
+import { ResendEmailService } from "@/services/resendEmailService";
 import { EmailVerificationTest } from "@/components/EmailVerificationTest";
 import { useNavigate } from "react-router-dom";
 import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft } from "lucide-react";
@@ -414,7 +414,7 @@ The Backlink ∞ Team`,
                       <Input
                         id="login-password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="•••••••���"
+                        placeholder="••••••••"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
                         required
