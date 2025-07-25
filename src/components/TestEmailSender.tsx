@@ -52,12 +52,22 @@ Backlink Application`
     setTestResults(null);
 
     try {
-      // Use Supabase Edge Function to send email via proper email service
-      const { data, error } = await supabase.functions.invoke('send-test-email', {
+      // Use Supabase Edge Function to send email via Resend SMTP
+      const { data, error } = await supabase.functions.invoke('send-email-smtp', {
         body: {
           to: emailData.to,
           subject: emailData.subject,
-          message: emailData.message
+          message: emailData.message,
+          from: 'noreply@backlinkoo.com',
+          smtpConfig: {
+            host: 'smtp.resend.com',
+            port: 465,
+            secure: true,
+            auth: {
+              user: 'resend',
+              pass: 're_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq'
+            }
+          }
         }
       });
 
