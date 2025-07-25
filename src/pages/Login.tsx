@@ -65,7 +65,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       cleanupAuthState();
       try {
@@ -80,8 +80,47 @@ const Login = () => {
       });
 
       if (error) throw error;
-      
+
       if (data.user) {
+        // Check if user has a profile and create/update if missing display_name
+        try {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', data.user.id)
+            .single();
+
+          if (profileError && profileError.code === 'PGRST116') {
+            // Profile doesn't exist, create one
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert({
+                user_id: data.user.id,
+                email: data.user.email || loginEmail,
+                display_name: data.user.user_metadata?.first_name || data.user.user_metadata?.display_name || data.user.email?.split('@')[0] || 'User'
+              });
+
+            if (insertError) {
+              console.warn('Could not create profile, but continuing login:', insertError);
+            }
+          } else if (!profile?.display_name && !profileError) {
+            // Profile exists but missing display_name, update it
+            const { error: updateError } = await supabase
+              .from('profiles')
+              .update({
+                display_name: data.user.user_metadata?.first_name || data.user.user_metadata?.display_name || data.user.email?.split('@')[0] || 'User'
+              })
+              .eq('user_id', data.user.id);
+
+            if (updateError) {
+              console.warn('Could not update profile display_name, but continuing login:', updateError);
+            }
+          }
+        } catch (profileErr) {
+          // Don't fail login if profile operations fail
+          console.warn('Profile operations failed, but continuing login:', profileErr);
+        }
+
         toast({
           title: "Welcome back!",
           description: "You have been successfully signed in.",
@@ -95,6 +134,15 @@ const Login = () => {
       if (error && typeof error === 'object') {
         if (error.message) {
           errorMessage = error.message;
+
+          // Handle specific authentication errors
+          if (error.message.includes('fetch')) {
+            errorMessage = 'Network connection failed. Please check your internet connection and try again.';
+          } else if (error.message.includes('Invalid login credentials')) {
+            errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+          } else if (error.message.includes('Email not confirmed')) {
+            errorMessage = 'Please check your email and click the confirmation link before signing in.';
+          }
         } else if (error.error_description) {
           errorMessage = error.error_description;
         } else if (typeof error.toString === 'function') {
@@ -146,14 +194,15 @@ const Login = () => {
         // Continue even if this fails
       }
 
-      // Sign up without sending confirmation email (we'll send our own)
+      // Sign up and save both first_name and display_name for compatibility
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `https://backlinkoo.com/auth/confirm`,
           data: {
-            first_name: firstName.trim()
+            first_name: firstName.trim(),
+            display_name: firstName.trim()
           }
         }
       });
@@ -183,6 +232,23 @@ const Login = () => {
 
       if (data.user) {
         console.log('Signup successful, user created:', data.user.id);
+
+        // Create profile record with display_name for immediate compatibility
+        try {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: data.user.id,
+              email: email,
+              display_name: firstName.trim()
+            });
+
+          if (profileError) {
+            console.warn('Could not create profile during signup:', profileError);
+          }
+        } catch (profileErr) {
+          console.warn('Profile creation error during signup:', profileErr);
+        }
 
         // Send custom confirmation email via Resend directly
         try {
