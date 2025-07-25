@@ -159,4 +159,4 @@ Examples:
   }
 }
 
-module.exports = DatabaseManager;
+export default DatabaseManager;
