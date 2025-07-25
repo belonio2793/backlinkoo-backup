@@ -214,7 +214,9 @@ const Index = () => {
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
             </div>
             <div className="flex items-center gap-4">
-              {user ? (
+              {!authChecked ? (
+                <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
+              ) : user ? (
                 <Button onClick={() => navigate("/dashboard")} className="font-medium">
                   Dashboard
                 </Button>
