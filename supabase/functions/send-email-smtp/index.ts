@@ -60,20 +60,20 @@ serve(async (req) => {
         <div style="padding: 30px; background: #ffffff;">
           <h2 style="color: #333; margin-top: 0;">${subject}</h2>
           <div style="white-space: pre-wrap; line-height: 1.6; color: #555;">
-            ${message || 'Email sent via Backlink �� Email System'}
+            ${message || 'Email sent via Backlink ∞ Email System'}
           </div>
         </div>
         <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #eee;">
           <p style="margin: 0; font-size: 12px; color: #666;">
-            Sent via Backlink ∞ Email System (SMTP)<br>
-            ${new Date().toISOString()}
+            Questions? Reply to this email or visit <a href="https://backlinkoo.com">backlinkoo.com</a><br>
+            Backlink ∞ - Professional SEO & Link Building
           </p>
         </div>
       </div>
     `
 
     const emailData = {
-      from: from || 'noreply@backlinkoo.com',
+      from: from || 'Backlink ∞ Support <support@backlinkoo.com>',
       to: to,
       subject: subject,
       content: message || 'Email content',
