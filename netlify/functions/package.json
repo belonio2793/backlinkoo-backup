@@ -1,0 +1,8 @@
+{
+  "name": "netlify-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for Backlink Email System",
+  "dependencies": {
+    "resend": "^2.1.0"
+  }
+}
