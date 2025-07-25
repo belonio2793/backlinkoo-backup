@@ -848,17 +848,7 @@ const AffiliateProgram = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Promotion Material Link */}
-        <div className="fixed bottom-6 right-6">
-          <Button
-            onClick={() => navigate('/affiliate/promotion-materials')}
-            className="shadow-lg"
-            size="lg"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Promotion Materials
-          </Button>
-        </div>
+
       </div>
     </div>
   );
