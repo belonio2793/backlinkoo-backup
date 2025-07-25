@@ -39,7 +39,7 @@ This is a comprehensive test of our multi-provider email delivery system.
 - Providers: Resend → Supabase → Netlify → Admin Config
 
 📊 This test validates:
-�� Primary delivery via Resend
+✅ Primary delivery via Resend
 ✅ Fallback to Supabase Auth
 ✅ Netlify Functions backup
 ✅ Admin panel SMTP failsafe
@@ -71,7 +71,7 @@ Email System Manager`
 
   const loadSystemHealth = async () => {
     try {
-      const health = await emailService.healthCheck();
+      const health = await EmailService.healthCheck();
       setSystemHealth(health);
     } catch (error) {
       console.error('Failed to load system health:', error);
