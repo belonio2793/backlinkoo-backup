@@ -7,7 +7,21 @@ export interface EmailServiceResponse {
   provider: string;
 }
 
+// Legacy interfaces for compatibility
+export interface EmailData {
+  to: string;
+  subject: string;
+  message: string;
+  from?: string;
+}
+
+export interface EmailResult extends EmailServiceResponse {
+  // Additional properties for legacy compatibility
+}
+
 export class EmailService {
+  private static failureLog: Array<{ timestamp: Date; error: string; email: string }> = [];
+
   private static async sendViaNetlifyFunction(emailData: any): Promise<EmailServiceResponse> {
     try {
       const response = await fetch('/.netlify/functions/send-email', {
