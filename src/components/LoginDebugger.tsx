@@ -45,10 +45,13 @@ const LoginDebugger = () => {
         supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
         isLocalhost: window.location.hostname === 'localhost',
         currentPath: window.location.pathname,
-        localStorage: Object.keys(localStorage).filter(key => 
+        isMockClient: !!(supabase as any).from && typeof (supabase as any).from === 'function' &&
+                      (supabase as any).auth.getSession.toString().includes('mock'),
+        clientType: (supabase as any).from ? 'Real Supabase' : 'Unknown',
+        localStorage: Object.keys(localStorage).filter(key =>
           key.includes('supabase') || key.includes('sb-')
         ),
-        sessionStorage: Object.keys(sessionStorage || {}).filter(key => 
+        sessionStorage: Object.keys(sessionStorage || {}).filter(key =>
           key.includes('supabase') || key.includes('sb-')
         )
       };
