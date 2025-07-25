@@ -604,6 +604,13 @@ The Backlink ∞ Team`,
             </Tabs>
           </CardContent>
         </Card>
+
+        {/* Debug Panel */}
+        {showDebugger && (
+          <div className="mt-6">
+            <LoginDebugger />
+          </div>
+        )}
       </div>
     </div>
   );
