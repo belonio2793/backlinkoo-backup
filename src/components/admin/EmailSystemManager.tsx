@@ -279,24 +279,45 @@ Email System Manager`
                 </div>
               </div>
 
-              <Button 
-                onClick={runEmailTest} 
-                disabled={isLoading}
-                className="w-full"
-                size="lg"
-              >
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Testing All Providers...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Run Complete System Test
-                  </>
-                )}
-              </Button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Button
+                  onClick={runEmailTest}
+                  disabled={isLoading}
+                  size="lg"
+                >
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Test All Providers
+                    </>
+                  )}
+                </Button>
+
+                <Button
+                  onClick={() => testSpecificProvider('resend')}
+                  disabled={isLoading}
+                  variant="default"
+                  size="lg"
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="h-4 w-4 mr-2" />
+                      Test Resend SMTP
+                    </>
+                  )}
+                </Button>
+              </div>
 
               {testResults && (
                 <div className={`p-4 rounded-lg border ${
@@ -396,7 +417,7 @@ Email System Manager`
                 <div className="space-y-2 text-sm">
                   <p>• Uses auth system for email delivery</p>
                   <p>• Automatic fallback mechanism</p>
-                  <p>��� Integrated with user management</p>
+                  <p>• Integrated with user management</p>
                   <p>• Edge Functions for custom emails</p>
                 </div>
               </CardContent>
