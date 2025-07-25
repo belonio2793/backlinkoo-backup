@@ -253,12 +253,42 @@ Email System Manager`
             </CardContent>
           </Card>
 
+          {/* Resend SMTP Configuration Status */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                Primary Configuration - Resend SMTP
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="text-sm font-medium text-green-800">Host</div>
+                  <div className="text-xs text-green-600">{adminConfig.smtp_host}</div>
+                </div>
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="text-sm font-medium text-green-800">Port</div>
+                  <div className="text-xs text-green-600">{adminConfig.smtp_port} (SSL)</div>
+                </div>
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="text-sm font-medium text-green-800">Username</div>
+                  <div className="text-xs text-green-600">{adminConfig.smtp_user}</div>
+                </div>
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="text-sm font-medium text-green-800">Status</div>
+                  <div className="text-xs text-green-600">✅ Configured</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Quick Test */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Send className="h-5 w-5" />
-                Quick System Test
+                Email Testing
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
