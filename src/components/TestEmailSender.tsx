@@ -52,67 +52,55 @@ Backlink Application`
     setTestResults(null);
 
     try {
-      // Since we're using Supabase, we'll try to send via auth system first
-      // This will test if the email configuration is working
-      const { data, error } = await supabase.auth.signUp({
-        email: emailData.to,
-        password: 'TestPassword123!',
-        options: {
-          data: {
-            display_name: 'Email Configuration Test',
-            test_message: emailData.message
-          },
-          emailRedirectTo: window.location.origin
+      // Use Supabase Edge Function to send email via proper email service
+      const { data, error } = await supabase.functions.invoke('send-test-email', {
+        body: {
+          to: emailData.to,
+          subject: emailData.subject,
+          message: emailData.message
         }
       });
 
-      console.log('Test email response:', data, error);
+      console.log('Edge function response:', data, error);
 
-      if (error && error.message?.includes('already registered')) {
-        // User exists, try resend which will also test email sending
-        const { data: resendData, error: resendError } = await supabase.auth.resend({
-          type: 'signup',
-          email: emailData.to,
-          options: {
-            emailRedirectTo: window.location.origin
-          }
-        });
-
-        setTestResults({
-          success: !resendError,
-          message: resendError ? resendError.message : 'Test email sent successfully via resend',
-          data: resendData,
-          error: resendError,
-          method: 'resend'
-        });
-      } else {
-        setTestResults({
-          success: !error,
-          message: error ? error.message : 'Test email sent successfully via signup',
-          data,
-          error,
-          method: 'signup'
-        });
+      if (error) {
+        throw new Error(error.message || 'Failed to invoke email function');
       }
 
+      setTestResults({
+        success: data?.success || false,
+        message: data?.message || 'Email sent via Edge Function',
+        data: data,
+        error: error,
+        method: 'edge_function'
+      });
+
       toast({
-        title: testResults?.success ? 'Test Email Sent' : 'Test Email Failed',
-        description: testResults?.message,
-        variant: testResults?.success ? 'default' : 'destructive'
+        title: data?.success ? 'Test Email Sent' : 'Test Email Failed',
+        description: data?.message || 'Email function executed',
+        variant: data?.success ? 'default' : 'destructive'
       });
 
     } catch (error: any) {
       console.error('Test email failed:', error);
+
+      // Fallback: Show what would be sent without actually sending
       setTestResults({
         success: false,
-        message: error.message,
-        error,
-        method: 'error'
+        message: `Email service not configured. Would send to: ${emailData.to}`,
+        error: error.message,
+        method: 'mock',
+        mockData: {
+          to: emailData.to,
+          subject: emailData.subject,
+          message: emailData.message,
+          timestamp: new Date().toISOString()
+        }
       });
-      
+
       toast({
-        title: 'Test Failed',
-        description: error.message,
+        title: 'Email Service Not Configured',
+        description: `Would send test email to ${emailData.to}`,
         variant: 'destructive'
       });
     } finally {
