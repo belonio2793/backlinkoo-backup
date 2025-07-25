@@ -319,7 +319,7 @@ const AffiliateProgram = () => {
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-              <DollarSign className="h-6 w-6 text-primary" />
+              <Infinity className="h-6 w-6 text-primary" />
               <span className="text-xl font-semibold">Affiliate Dashboard</span>
             </div>
             <div className="flex items-center gap-4">
