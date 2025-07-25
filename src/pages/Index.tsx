@@ -37,17 +37,29 @@ const Index = () => {
 
   // Check for authenticated user on component mount
   useEffect(() => {
-    // Get initial session
+    // Get initial session and validate it properly
     const getInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         console.log('Index page - Initial session check:', { session: !!session, user: !!session?.user, error });
-        if (error) {
-          console.error('Error getting session:', error);
+
+        if (error || !session || !session.user) {
+          console.log('Index page - No valid session, clearing user state');
           setUser(null);
-        } else {
-          setUser(session?.user ?? null);
+          return;
         }
+
+        // Verify the session is actually valid by trying to get user
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+          console.log('Index page - Session invalid, clearing auth state');
+          await supabase.auth.signOut({ scope: 'global' });
+          setUser(null);
+          return;
+        }
+
+        console.log('Index page - Valid user session found');
+        setUser(user);
       } catch (error) {
         console.error('Error in getSession:', error);
         setUser(null);
