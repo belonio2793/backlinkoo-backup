@@ -12,7 +12,6 @@ import { ResendEmailService } from "@/services/resendEmailService";
 
 import { useNavigate } from "react-router-dom";
 import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft } from "lucide-react";
-import { AuthDebugger } from "@/components/AuthDebugger";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
