@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 
 export function EmailSystemManager() {
-  const [testEmail, setTestEmail] = useState<EmailData>({
+  const [testEmail, setTestEmail] = useState<ResendEmailData>({
     to: 'support@backlinkoo.com',
     subject: 'Multi-Provider Email System Test - ' + new Date().toLocaleString(),
     message: `Hello Support Team,
