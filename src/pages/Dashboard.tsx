@@ -63,9 +63,13 @@ const Dashboard = () => {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🏠 Dashboard - Auth state change:', { event, hasSession: !!session, hasUser: !!session?.user });
+
       if (event === 'SIGNED_OUT' || !session) {
+        console.log('🏠 Dashboard - User signed out or no session, redirecting to login');
         navigate('/login');
       } else if (event === 'SIGNED_IN' && session) {
+        console.log('🏠 Dashboard - User signed in, updating state');
         setUser(session.user);
         fetchUserData();
         fetchCampaigns();
