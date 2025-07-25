@@ -412,29 +412,42 @@ const Login = () => {
                   </Button>
                   
                   {showResendConfirmation && (
-                    <div className="mt-4 p-4 border border-border rounded-lg bg-muted/50">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                    <div className="mt-4 p-4 border-2 border-blue-200 rounded-lg bg-blue-50">
+                      <div className="flex items-center gap-2 text-sm text-blue-800 mb-3">
                         <Mail className="h-4 w-4" />
-                        <span>Account already exists for: {resendEmail}</span>
+                        <span className="font-medium">Account exists for: {resendEmail}</span>
                       </div>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        className="w-full" 
-                        onClick={handleResendConfirmation}
-                        disabled={isLoading}
-                      >
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        {isLoading ? "Sending..." : "Resend Confirmation Email"}
-                      </Button>
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        className="w-full mt-2" 
-                        onClick={() => setShowResendConfirmation(false)}
-                      >
-                        Cancel
-                      </Button>
+                      <p className="text-sm text-blue-700 mb-4">
+                        This email is already registered. If you haven't verified your account yet,
+                        you can resend the confirmation email. Otherwise, try signing in.
+                      </p>
+                      <div className="space-y-2">
+                        <Button
+                          type="button"
+                          variant="default"
+                          className="w-full bg-blue-600 hover:bg-blue-700"
+                          onClick={handleResendConfirmation}
+                          disabled={isLoading}
+                        >
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          {isLoading ? "Sending..." : "Resend Confirmation Email"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => {
+                            setShowResendConfirmation(false);
+                            setLoginEmail(resendEmail);
+                            const loginTab = document.querySelector('[value="login"]') as HTMLElement;
+                            if (loginTab) {
+                              loginTab.click();
+                            }
+                          }}
+                        >
+                          Go to Sign In Instead
+                        </Button>
+                      </div>
                     </div>
                   )}
                   
