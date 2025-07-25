@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { EmailService } from "@/services/emailService";
+import { EmailVerificationTest } from "@/components/EmailVerificationTest";
 import { useNavigate } from "react-router-dom";
 import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft } from "lucide-react";
 
@@ -304,7 +305,7 @@ If you didn't create an account with us, please ignore this email.
 
 Best regards,
 The Backlink ∞ Team`,
-            from: 'Backlink ∞ <support@backlinkoo.com>'
+            from: 'Backlink �� <support@backlinkoo.com>'
           }),
         });
 
