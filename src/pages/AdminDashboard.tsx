@@ -9,11 +9,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SecurityDashboard } from "@/components/SecurityDashboard";
 import { CampaignManager } from "@/components/CampaignManager";
 import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager";
-import { 
-  Users, 
-  Activity, 
-  CreditCard, 
-  Settings, 
+import { EmailVerificationTest } from "@/components/EmailVerificationTest";
+import { EmailVerificationStatus } from "@/components/EmailVerificationStatus";
+import { ResendConnectionTest } from "@/components/ResendConnectionTest";
+import { DeploymentStatus } from "@/components/DeploymentStatus";
+import {
+  Users,
+  Activity,
+  CreditCard,
+  Settings,
   CheckCircle,
   Clock,
   Infinity,
@@ -146,6 +150,8 @@ const AdminDashboard = () => {
           <TabsList>
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
             <TabsTrigger value="affiliates">Affiliate Program</TabsTrigger>
+            <TabsTrigger value="deployment">Deployment</TabsTrigger>
+            <TabsTrigger value="email-test">Email Testing</TabsTrigger>
             <TabsTrigger value="security">Security & Roles</TabsTrigger>
           </TabsList>
 
@@ -155,6 +161,18 @@ const AdminDashboard = () => {
 
           <TabsContent value="affiliates">
             <AdminAffiliateManager />
+          </TabsContent>
+
+          <TabsContent value="deployment">
+            <DeploymentStatus />
+          </TabsContent>
+
+          <TabsContent value="email-test">
+            <div className="space-y-6">
+              <ResendConnectionTest />
+              <EmailVerificationStatus />
+              <EmailVerificationTest />
+            </div>
           </TabsContent>
 
           <TabsContent value="security">
