@@ -11,6 +11,7 @@ import { CampaignManager } from "@/components/CampaignManager";
 import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager";
 import { EmailVerificationTest } from "@/components/EmailVerificationTest";
 import { EmailVerificationStatus } from "@/components/EmailVerificationStatus";
+import { ResendConnectionTest } from "@/components/ResendConnectionTest";
 import {
   Users,
   Activity,
