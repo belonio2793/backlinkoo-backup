@@ -37,11 +37,27 @@ const Index = () => {
 
   // Check for authenticated user on component mount
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
+    // Get initial session
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Error getting session:', error);
+          setUser(null);
+        } else {
+          setUser(session?.user ?? null);
+        }
+      } catch (error) {
+        console.error('Error in getSession:', error);
+        setUser(null);
+      }
+    };
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    getInitialSession();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
       setUser(session?.user ?? null);
     });
 
