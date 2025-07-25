@@ -1,53 +1,58 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ResendEmailService } from '@/services/resendEmailService';
 import { Mail, Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
-export const EmailVerificationTest = () => {
+export const EmailTest = () => {
+  const [email, setEmail] = useState('support@backlinkoo.com');
   const [isLoading, setIsLoading] = useState(false);
   const [lastResult, setLastResult] = useState<any>(null);
   const { toast } = useToast();
 
-  const testConfirmationEmail = async () => {
+  const testEmail = async () => {
     setIsLoading(true);
     setLastResult(null);
 
     try {
-      console.log('Testing confirmation email to support@backlinkoo.com...');
+      console.log('Testing email send to:', email);
+      
+      const response = await fetch('/.netlify/functions/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: email,
+          subject: 'Test Email from Backlink ∞',
+          message: `This is a test email to verify your Resend configuration.
 
-      const result = await ResendEmailService.sendConfirmationEmail('support@backlinkoo.com');
-      console.log('Email test result:', result);
+Sent at: ${new Date().toLocaleString()}
 
+If you received this email, your Resend API is working correctly!`,
+          from: 'Backlink ∞ Test <support@backlinkoo.com>'
+        }),
+      });
+
+      const result = await response.json();
       setLastResult(result);
 
-      if (result.success) {
+      if (response.ok && result.success) {
         toast({
-          title: "Test confirmation email sent!",
-          description: `Successfully sent to support@backlinkoo.com via Resend. Check your inbox!`,
+          title: "Test email sent!",
+          description: `Successfully sent test email to ${email}. Check your inbox!`,
         });
       } else {
-        console.error('Email service returned failure:', result.error);
-        toast({
-          title: "Email test failed",
-          description: result.error || 'Unknown error from email service',
-          variant: "destructive",
-        });
+        throw new Error(result.error || 'Failed to send test email');
       }
     } catch (error: any) {
       console.error('Email test error:', error);
-
-      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
-      setLastResult({
-        success: false,
-        error: errorMessage,
-        provider: 'netlify_resend'
-      });
-
+      setLastResult({ success: false, error: error.message });
+      
       toast({
         title: "Email test failed",
-        description: errorMessage,
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -60,17 +65,23 @@ export const EmailVerificationTest = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Mail className="h-5 w-5" />
-          Resend Verification Test
+          Email Service Test
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          Test if your Resend email service is working by sending a confirmation email.
-        </p>
+        <div>
+          <label className="text-sm font-medium">Test Email Address:</label>
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter email to test"
+          />
+        </div>
 
         <Button 
-          onClick={testConfirmationEmail} 
-          disabled={isLoading}
+          onClick={testEmail} 
+          disabled={isLoading || !email}
           className="w-full"
         >
           {isLoading ? (
@@ -81,7 +92,7 @@ export const EmailVerificationTest = () => {
           ) : (
             <>
               <Send className="h-4 w-4 mr-2" />
-              Send Test Confirmation Email
+              Send Test Email
             </>
           )}
         </Button>
@@ -116,8 +127,7 @@ export const EmailVerificationTest = () => {
         )}
 
         <div className="text-xs text-muted-foreground">
-          This sends to: support@backlinkoo.com<br/>
-          Using: Direct Resend API (no Netlify/Supabase)
+          This will test the Resend email service via Netlify function.
         </div>
       </CardContent>
     </Card>

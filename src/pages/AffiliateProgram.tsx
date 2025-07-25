@@ -310,7 +310,10 @@ const AffiliateProgram = () => {
                 <Button variant="ghost" onClick={() => navigate("/dashboard")}>
                   Dashboard
                 </Button>
-                <Button variant="ghost" onClick={() => supabase.auth.signOut()}>
+                <Button variant="ghost" onClick={async () => {
+                  await supabase.auth.signOut();
+                  window.location.href = "/";
+                }}>
                   Sign Out
                 </Button>
               </div>
@@ -406,7 +409,10 @@ const AffiliateProgram = () => {
               <Button variant="ghost" onClick={() => navigate("/dashboard")}>
                 Dashboard
               </Button>
-              <Button variant="ghost" onClick={() => supabase.auth.signOut()}>
+              <Button variant="ghost" onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = "/";
+              }}>
                 Sign Out
               </Button>
             </div>

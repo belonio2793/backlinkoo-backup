@@ -8,6 +8,8 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { supabase } from "@/integrations/supabase/client";
+import { ResendEmailService } from "@/services/resendEmailService";
+
 import { useNavigate } from "react-router-dom";
 import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft } from "lucide-react";
 
@@ -144,13 +146,12 @@ const Login = () => {
         // Continue even if this fails
       }
 
-      const redirectUrl = `https://backlinkoo.com/auth/confirm`;
-      
+      // Sign up without sending confirmation email (we'll send our own)
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: redirectUrl,
+          emailRedirectTo: `https://backlinkoo.com/auth/confirm`,
           data: {
             first_name: firstName.trim()
           }
@@ -158,44 +159,96 @@ const Login = () => {
       });
 
       if (error) {
-        if (error.message.includes('Email address already registered')) {
+        // Handle various "user already exists" error messages
+        if (error.message.includes('User already registered') ||
+            error.message.includes('Email address already registered') ||
+            error.message.includes('already been registered')) {
           setResendEmail(email);
           setShowResendConfirmation(true);
           toast({
             title: "Email Already Registered",
-            description: "This email is already registered. Please verify your email or sign in.",
-            variant: "destructive",
+            description: "This email is already registered. Please check your email for confirmation or try signing in instead.",
           });
-          // Switch to login tab
-          const loginTab = document.querySelector('[value="login"]');
-          if (loginTab) {
-            loginTab.click();
-          }
+          // Switch to login tab automatically
+          setTimeout(() => {
+            const loginTab = document.querySelector('[value="login"]') as HTMLElement;
+            if (loginTab) {
+              loginTab.click();
+            }
+          }, 100);
           return;
         }
         throw error;
       }
 
       if (data.user) {
-        toast({
-          title: "Check your email!",
-          description: "We've sent you a confirmation link to verify your account.",
-        });
-        
+        console.log('Signup successful, user created:', data.user.id);
+
+        // Send custom confirmation email via Resend directly
+        try {
+          const emailResult = await ResendEmailService.sendConfirmationEmail(email);
+
+          if (emailResult.success) {
+            console.log('Confirmation email sent successfully via Resend:', emailResult.emailId);
+
+            toast({
+              title: "Check your email!",
+              description: "We've sent you a confirmation link via our secure email system. Please check your email and spam folder.",
+            });
+          } else {
+            console.error('Failed to send confirmation email:', emailResult.error);
+
+            toast({
+              title: "Account created successfully!",
+              description: "Your account has been created, but we couldn't send the confirmation email. Please contact support if needed.",
+              variant: "destructive",
+            });
+          }
+        } catch (emailError) {
+          console.error('Email service error:', emailError);
+
+          toast({
+            title: "Account created!",
+            description: "Your account has been created. If you don't receive a confirmation email, please try the resend option.",
+          });
+        }
+
         // Broadcast new user notification globally
         setTimeout(() => {
           broadcastNewUser(firstName.trim());
         }, 1000);
+
+        // Auto-switch to login tab after successful signup
+        setTimeout(() => {
+          const loginTab = document.querySelector('[value="login"]') as HTMLElement;
+          if (loginTab) {
+            loginTab.click();
+            setLoginEmail(email); // Pre-fill email for easy login
+          }
+        }, 3000);
       }
     } catch (error: any) {
       console.error("Signup error:", error);
 
       // Handle different error types properly
       let errorMessage = 'An error occurred during sign up.';
+      let errorTitle = "Sign up failed";
 
       if (error && typeof error === 'object') {
         if (error.message) {
           errorMessage = error.message;
+
+          // Provide more helpful error messages for common issues
+          if (error.message.includes('Password should be')) {
+            errorTitle = "Password requirements not met";
+            errorMessage = "Password must be at least 6 characters long.";
+          } else if (error.message.includes('Invalid email')) {
+            errorTitle = "Invalid email address";
+            errorMessage = "Please enter a valid email address.";
+          } else if (error.message.includes('User already registered')) {
+            errorTitle = "Account already exists";
+            errorMessage = "An account with this email already exists. Please try signing in instead.";
+          }
         } else if (error.error_description) {
           errorMessage = error.error_description;
         } else if (typeof error.toString === 'function') {
@@ -206,7 +259,7 @@ const Login = () => {
       }
 
       toast({
-        title: "Sign up failed",
+        title: errorTitle,
         description: errorMessage,
         variant: "destructive",
       });
@@ -217,9 +270,10 @@ const Login = () => {
 
   const handleResendConfirmation = async () => {
     setIsLoading(true);
-    
+
     try {
-      const { error } = await supabase.auth.resend({
+      // Try Supabase resend first
+      const { error: supabaseError } = await supabase.auth.resend({
         type: 'signup',
         email: resendEmail,
         options: {
@@ -227,17 +281,56 @@ const Login = () => {
         }
       });
 
-      if (error) throw error;
+      if (supabaseError) {
+        console.log('Supabase resend failed, trying custom Resend service:', supabaseError.message);
 
-      toast({
-        title: "Confirmation email sent!",
-        description: "We've sent you a new confirmation link. Please check your email.",
-      });
-      
+        // Fallback to custom Resend email via Netlify function
+        const confirmationLink = `https://backlinkoo.com/auth/confirm?email=${encodeURIComponent(resendEmail)}`;
+
+        const emailResponse = await fetch('/.netlify/functions/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: resendEmail,
+            subject: 'Confirm Your Backlink ��� Account',
+            message: `Welcome to Backlink ∞!
+
+Please confirm your email address by clicking the link below:
+
+${confirmationLink}
+
+If you didn't create an account with us, please ignore this email.
+
+Best regards,
+The Backlink ∞ Team`,
+            from: 'Backlink ∞ <support@backlinkoo.com>'
+          }),
+        });
+
+        const result = await emailResponse.json();
+
+        if (!emailResponse.ok || !result.success) {
+          throw new Error(result.error || 'Failed to send email via Resend');
+        }
+
+        toast({
+          title: "Confirmation email sent!",
+          description: "We've sent you a confirmation email via our backup system. Please check your email and spam folder.",
+        });
+      } else {
+        toast({
+          title: "Confirmation email sent!",
+          description: "We've sent you a new confirmation link. Please check your email.",
+        });
+      }
+
       setShowResendConfirmation(false);
     } catch (error: any) {
-      // Handle different error types properly
-      let errorMessage = 'An error occurred while sending the confirmation email.';
+      console.error('Email sending error:', error);
+
+      let errorMessage = 'Failed to send confirmation email. Please try again or contact support.';
 
       if (error && typeof error === 'object') {
         if (error.message) {
@@ -408,29 +501,42 @@ const Login = () => {
                   </Button>
                   
                   {showResendConfirmation && (
-                    <div className="mt-4 p-4 border border-border rounded-lg bg-muted/50">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                    <div className="mt-4 p-4 border-2 border-blue-200 rounded-lg bg-blue-50">
+                      <div className="flex items-center gap-2 text-sm text-blue-800 mb-3">
                         <Mail className="h-4 w-4" />
-                        <span>Account already exists for: {resendEmail}</span>
+                        <span className="font-medium">Account exists for: {resendEmail}</span>
                       </div>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        className="w-full" 
-                        onClick={handleResendConfirmation}
-                        disabled={isLoading}
-                      >
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        {isLoading ? "Sending..." : "Resend Confirmation Email"}
-                      </Button>
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        className="w-full mt-2" 
-                        onClick={() => setShowResendConfirmation(false)}
-                      >
-                        Cancel
-                      </Button>
+                      <p className="text-sm text-blue-700 mb-4">
+                        This email is already registered. If you haven't verified your account yet,
+                        you can resend the confirmation email. Otherwise, try signing in.
+                      </p>
+                      <div className="space-y-2">
+                        <Button
+                          type="button"
+                          variant="default"
+                          className="w-full bg-blue-600 hover:bg-blue-700"
+                          onClick={handleResendConfirmation}
+                          disabled={isLoading}
+                        >
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          {isLoading ? "Sending..." : "Resend Confirmation Email"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => {
+                            setShowResendConfirmation(false);
+                            setLoginEmail(resendEmail);
+                            const loginTab = document.querySelector('[value="login"]') as HTMLElement;
+                            if (loginTab) {
+                              loginTab.click();
+                            }
+                          }}
+                        >
+                          Go to Sign In Instead
+                        </Button>
+                      </div>
                     </div>
                   )}
                   

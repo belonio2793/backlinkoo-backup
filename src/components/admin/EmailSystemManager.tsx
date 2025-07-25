@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { emailService, EmailData, EmailResult } from '@/services/emailService';
+import { ResendEmailService, ResendEmailResponse, ResendEmailData } from '@/services/resendEmailService';
 import {
   Mail,
   Send,
@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 
 export function EmailSystemManager() {
-  const [testEmail, setTestEmail] = useState<EmailData>({
+  const [testEmail, setTestEmail] = useState<ResendEmailData>({
     to: 'support@backlinkoo.com',
     subject: 'Multi-Provider Email System Test - ' + new Date().toLocaleString(),
     message: `Hello Support Team,
@@ -51,7 +51,7 @@ Email System Manager`
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [testResults, setTestResults] = useState<EmailResult | null>(null);
+  const [testResults, setTestResults] = useState<ResendEmailResponse | null>(null);
   const [systemHealth, setSystemHealth] = useState<any>(null);
   const [failureLog, setFailureLog] = useState<any[]>([]);
   const [adminConfig, setAdminConfig] = useState({
@@ -71,7 +71,7 @@ Email System Manager`
 
   const loadSystemHealth = async () => {
     try {
-      const health = await emailService.healthCheck();
+      const health = await ResendEmailService.healthCheck();
       setSystemHealth(health);
     } catch (error) {
       console.error('Failed to load system health:', error);
@@ -79,7 +79,7 @@ Email System Manager`
   };
 
   const loadFailureLog = () => {
-    const failures = emailService.getFailureLog();
+    const failures = ResendEmailService.getFailureLog();
     setFailureLog(failures);
   };
 
@@ -89,7 +89,7 @@ Email System Manager`
 
     try {
       console.log('🚀 Running comprehensive email system test...');
-      const result = await emailService.sendEmail(testEmail);
+      const result = await ResendEmailService.sendEmail(testEmail);
       setTestResults(result);
 
       toast({
@@ -134,7 +134,7 @@ Email System Manager`
       console.log(`Testing ${provider} provider directly...`);
       
       // For demonstration, we'll use the main service
-      const result = await emailService.sendEmail(testData);
+      const result = await ResendEmailService.sendEmail(testData);
       
       toast({
         title: `${provider.toUpperCase()} Test`,

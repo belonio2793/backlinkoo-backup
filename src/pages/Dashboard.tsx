@@ -34,6 +34,7 @@ import SEOToolsSection from "@/components/SEOToolsSection";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import type { User } from '@supabase/supabase-js';
 
 const Dashboard = () => {
@@ -44,6 +45,7 @@ const Dashboard = () => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('tab') || "overview";
@@ -53,29 +55,62 @@ const Dashboard = () => {
     return urlParams.get('section') || "dashboard";
   });
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('Dashboard mounted, fetching data...');
-    fetchUserData();
-    fetchCampaigns();
-  }, []);
+    console.log('Dashboard mounted, checking authentication...');
+    checkAuthAndFetchData();
 
-  const fetchUserData = async () => {
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        navigate('/login');
+      } else if (event === 'SIGNED_IN' && session) {
+        setUser(session.user);
+        fetchUserData();
+        fetchCampaigns();
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const checkAuthAndFetchData = async () => {
     try {
-      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-      console.log('Auth user:', authUser, 'Auth error:', authError);
-      if (authError || !authUser) {
-        console.log('No authenticated user found');
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('Dashboard - Session check:', { hasSession: !!session, hasUser: !!session?.user, error: sessionError });
+
+      if (sessionError || !session || !session.user) {
+        console.log('Dashboard - No valid session/user found, redirecting to login');
+        navigate('/login');
         return;
       }
 
-      setUser(authUser);
+      console.log('Dashboard - Valid session found, setting user and fetching data');
+      setUser(session.user);
+      await fetchUserData(session.user);
+      await fetchCampaigns(session.user);
+    } catch (error) {
+      console.error('Dashboard - Error checking auth:', error);
+      navigate('/login');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserData = async (authUser?: User) => {
+    try {
+      const currentUser = authUser || user;
+      if (!currentUser) {
+        navigate('/login');
+        return;
+      }
 
       // Get user profile and role
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
-        .eq('user_id', authUser.id)
+        .eq('user_id', currentUser.id)
         .single();
 
       console.log('Profile data:', profile, 'Profile error:', profileError);
@@ -88,7 +123,7 @@ const Dashboard = () => {
       const { data: creditsData, error: creditsError } = await supabase
         .from('credits')
         .select('amount')
-        .eq('user_id', authUser.id)
+        .eq('user_id', currentUser.id)
         .single();
 
       console.log('Credits data:', creditsData, 'Credits error:', creditsError);
@@ -104,7 +139,7 @@ const Dashboard = () => {
       const { data: campaignsData } = await supabase
         .from('campaigns')
         .select('id')
-        .eq('user_id', authUser.id)
+        .eq('user_id', currentUser.id)
         .limit(1);
 
       setIsFirstTimeUser(!campaignsData || campaignsData.length === 0);
@@ -113,16 +148,16 @@ const Dashboard = () => {
     }
   };
 
-  const fetchCampaigns = async () => {
+  const fetchCampaigns = async (authUser?: User) => {
     try {
-      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-      if (authError || !authUser) return;
+      const currentUser = authUser || user;
+      if (!currentUser) return;
 
       // Fetch campaigns with proper query structure
       const { data: campaignsData, error } = await supabase
         .from('campaigns')
         .select('*')
-        .eq('user_id', authUser.id)
+        .eq('user_id', currentUser.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -146,40 +181,58 @@ const Dashboard = () => {
 
   const handleSignOut = async () => {
     try {
-      // Clean up auth state first
+      console.log('Dashboard - Starting sign out process...');
+
+      // Clean up all auth-related storage
       Object.keys(localStorage).forEach((key) => {
         if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
           localStorage.removeItem(key);
         }
       });
-      
+
+      Object.keys(sessionStorage || {}).forEach((key) => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+
       const { error } = await supabase.auth.signOut({ scope: 'global' });
-      if (error) throw error;
-      
-      toast({
-        title: "You have signed out",
-        description: "You have been successfully logged out of your account.",
-      });
-      
-      // Force redirect to home page with a slight delay to ensure toast shows
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1000);
-      
+      if (error) {
+        console.error('Sign out error:', error);
+      } else {
+        console.log('Dashboard - Sign out successful');
+      }
+
+      // Clear user state
+      setUser(null);
+
+      // Immediate redirect to home page
+      window.location.href = "/";
+
     } catch (error) {
-      console.error("Sign out error:", error);
-      toast({
-        title: "Sign out error",
-        description: "There was an error signing you out. Please try again.",
-        variant: "destructive",
-      });
-      
-      // Still redirect even if there's an error
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1000);
+      console.error("Dashboard - Sign out error:", error);
+
+      // Force redirect even if there's an error
+      window.location.href = "/";
     }
   };
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Infinity className="h-8 w-8 text-primary mx-auto mb-4 animate-spin" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render dashboard if user is not authenticated
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">

@@ -31,17 +31,63 @@ const Index = () => {
   const { toast } = useToast();
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'starter_100' | 'starter_200' | 'starter_300'>('starter_200');
   const [customCredits, setCustomCredits] = useState<number>(0);
   const [isCustomPackage, setIsCustomPackage] = useState(false);
 
   // Check for authenticated user on component mount
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
+    // Clear any potentially corrupted auth state first
+    const clearCorruptedAuthState = () => {
+      const authKeys = Object.keys(localStorage).filter(key =>
+        key.startsWith('supabase.auth.') || key.includes('sb-')
+      );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+      // If there are auth keys but we can't verify them, clear them
+      if (authKeys.length > 0) {
+        console.log('Index page - Found auth keys, validating...');
+      }
+    };
+
+    clearCorruptedAuthState();
+
+    // Get initial session and validate it properly
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('Index page - Initial session check:', { session: !!session, user: !!session?.user, error });
+
+        if (error || !session || !session.user) {
+          console.log('Index page - No valid session, clearing user state');
+          setUser(null);
+          return;
+        }
+
+        // Verify the session is actually valid by trying to get user
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+          console.log('Index page - Session invalid, clearing auth state');
+          await supabase.auth.signOut({ scope: 'global' });
+          setUser(null);
+          return;
+        }
+
+        console.log('Index page - Valid user session found');
+        setUser(user);
+      } catch (error) {
+        console.error('Error in getSession:', error);
+        setUser(null);
+      } finally {
+        setAuthChecked(true);
+      }
+    };
+
+    getInitialSession();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Index page - Auth state changed:', { event, hasUser: !!session?.user, userId: session?.user?.id });
       setUser(session?.user ?? null);
     });
 
@@ -168,7 +214,9 @@ const Index = () => {
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
             </div>
             <div className="flex items-center gap-4">
-              {user ? (
+              {!authChecked ? (
+                <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
+              ) : user ? (
                 <Button onClick={() => navigate("/dashboard")} className="font-medium">
                   Dashboard
                 </Button>
