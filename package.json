@@ -16,7 +16,11 @@
     "supabase:sync": "node scripts/db-utils.js sync",
     "supabase:create": "node scripts/db-utils.js create",
     "supabase:push": "node scripts/db-utils.js push",
-    "supabase:setup": "bash scripts/setup-supabase-sync.sh"
+    "supabase:setup": "bash scripts/setup-supabase-sync.sh",
+    "credentials:list": "node scripts/credential-helper.js list",
+    "credentials:test": "node scripts/credential-helper.js test",
+    "credentials:encode": "node scripts/credential-helper.js encode",
+    "credentials:decode": "node scripts/credential-helper.js decode"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
