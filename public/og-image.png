@@ -1,6 +1,0 @@
-<!-- This would be a binary image file. For now, creating a placeholder SVG -->
-<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1200" height="630" fill="#0f172a"/>
-  <text x="600" y="300" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="white">Backlink ∞</text>
-  <text x="600" y="360" font-family="Arial, sans-serif" font-size="24" text-anchor="middle" fill="#64748b">Professional SEO & Backlink Management Platform</text>
-</svg>
