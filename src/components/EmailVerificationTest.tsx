@@ -17,7 +17,7 @@ export const EmailVerificationTest = () => {
     try {
       console.log('Testing confirmation email to support@backlinkoo.com...');
 
-      const result = await EmailService.sendConfirmationEmail('support@backlinkoo.com');
+      const result = await ResendEmailService.sendConfirmationEmail('support@backlinkoo.com');
       console.log('Email test result:', result);
 
       setLastResult(result);
