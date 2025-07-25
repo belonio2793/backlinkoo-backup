@@ -117,7 +117,7 @@ export const EmailVerificationTest = () => {
 
         <div className="text-xs text-muted-foreground">
           This sends to: support@backlinkoo.com<br/>
-          Using: Netlify Function + Resend API
+          Using: Direct Resend API (no Netlify/Supabase)
         </div>
       </CardContent>
     </Card>
