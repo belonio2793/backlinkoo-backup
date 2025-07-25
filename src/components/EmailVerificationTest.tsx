@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { EmailService } from '@/services/emailService';
+import { ResendEmailService } from '@/services/resendEmailService';
 import { Mail, Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 export const EmailVerificationTest = () => {
