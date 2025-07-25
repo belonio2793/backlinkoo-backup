@@ -173,6 +173,36 @@ const AffiliateProgram = () => {
     });
   };
 
+  const resetAnalytics = () => {
+    // Save current stats for undo
+    setPreviousStats({ ...stats });
+
+    // Reset stats to zero
+    setStats({
+      total_clicks: 0,
+      total_conversions: 0,
+      conversion_rate: 0,
+      total_commission: 0
+    });
+
+    toast({
+      title: 'Analytics Reset',
+      description: 'All analytics values have been reset to 0.',
+    });
+  };
+
+  const undoReset = () => {
+    if (previousStats) {
+      setStats(previousStats);
+      setPreviousStats(null);
+
+      toast({
+        title: 'Reset Undone',
+        description: 'Analytics values have been restored.',
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
