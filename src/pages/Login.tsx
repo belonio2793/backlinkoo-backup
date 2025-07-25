@@ -183,10 +183,34 @@ const Login = () => {
       if (data.user) {
         console.log('Signup successful, user created:', data.user.id);
 
-        toast({
-          title: "Check your email!",
-          description: "We've sent you a confirmation link to verify your account. If you don't receive it, you can resend it from the sign in page.",
-        });
+        // Send custom confirmation email via Resend
+        try {
+          const emailResult = await EmailService.sendConfirmationEmail(email);
+
+          if (emailResult.success) {
+            console.log('Confirmation email sent successfully via Resend:', emailResult.emailId);
+
+            toast({
+              title: "Check your email!",
+              description: "We've sent you a confirmation link via our secure email system. Please check your email and spam folder.",
+            });
+          } else {
+            console.error('Failed to send confirmation email:', emailResult.error);
+
+            toast({
+              title: "Account created successfully!",
+              description: "Your account has been created, but we couldn't send the confirmation email. Please contact support if needed.",
+              variant: "destructive",
+            });
+          }
+        } catch (emailError) {
+          console.error('Email service error:', emailError);
+
+          toast({
+            title: "Account created!",
+            description: "Your account has been created. If you don't receive a confirmation email, please try the resend option.",
+          });
+        }
 
         // Broadcast new user notification globally
         setTimeout(() => {
@@ -200,7 +224,7 @@ const Login = () => {
             loginTab.click();
             setLoginEmail(email); // Pre-fill email for easy login
           }
-        }, 2000);
+        }, 3000);
       }
     } catch (error: any) {
       console.error("Signup error:", error);
