@@ -116,10 +116,26 @@ const Login = () => {
           console.warn('Profile migration error, but continuing login:', profileErr);
         }
 
+        // Verify session is properly stored before redirect
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        console.log('📋 Post-login session check:', { session: !!session, error: sessionError });
+
+        if (!session) {
+          console.error('⚠️ No session found after login - this may cause redirect loop');
+          toast({
+            title: "Login Issue",
+            description: "Authentication succeeded but session not found. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
         toast({
           title: "Welcome back!",
           description: "You have been successfully signed in.",
         });
+
+        console.log('🚀 Redirecting to dashboard...');
         window.location.href = '/dashboard';
       }
     } catch (error: any) {
