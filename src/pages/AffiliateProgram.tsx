@@ -590,7 +590,6 @@ const AffiliateProgram = () => {
                   </div>
                 </div>
 
-                {/* Referral Sources */}
                 <Card className="mb-6">
                   <CardHeader>
                     <CardTitle className="text-lg">Referral Sources</CardTitle>
@@ -598,25 +597,7 @@ const AffiliateProgram = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-                          <Globe className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                          <div className="text-lg font-bold text-blue-600">Direct</div>
-                          <div className="text-sm text-muted-foreground">0 signups</div>
-                        </div>
-                        <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
-                          <Share2 className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                          <div className="text-lg font-bold text-green-600">Social Media</div>
-                          <div className="text-sm text-muted-foreground">0 signups</div>
-                        </div>
-                        <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
-                          <BarChart className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                          <div className="text-lg font-bold text-purple-600">Paid Ads</div>
-                          <div className="text-sm text-muted-foreground">0 signups</div>
-                        </div>
-                      </div>
-
-                      <div className="mt-6">
+                      <div>
                         <h4 className="font-semibold mb-4">Detailed Referral Tracking</h4>
                         <div className="space-y-2">
                           <div className="text-sm text-muted-foreground mb-3">
