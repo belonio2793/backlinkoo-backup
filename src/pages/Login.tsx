@@ -184,9 +184,9 @@ const Login = () => {
       if (data.user) {
         console.log('Signup successful, user created:', data.user.id);
 
-        // Send custom confirmation email via Resend
+        // Send custom confirmation email via Resend directly
         try {
-          const emailResult = await EmailService.sendConfirmationEmail(email);
+          const emailResult = await ResendEmailService.sendConfirmationEmail(email);
 
           if (emailResult.success) {
             console.log('Confirmation email sent successfully via Resend:', emailResult.emailId);
