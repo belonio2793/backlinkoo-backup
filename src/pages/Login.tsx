@@ -196,10 +196,23 @@ const Login = () => {
 
       // Handle different error types properly
       let errorMessage = 'An error occurred during sign up.';
+      let errorTitle = "Sign up failed";
 
       if (error && typeof error === 'object') {
         if (error.message) {
           errorMessage = error.message;
+
+          // Provide more helpful error messages for common issues
+          if (error.message.includes('Password should be')) {
+            errorTitle = "Password requirements not met";
+            errorMessage = "Password must be at least 6 characters long.";
+          } else if (error.message.includes('Invalid email')) {
+            errorTitle = "Invalid email address";
+            errorMessage = "Please enter a valid email address.";
+          } else if (error.message.includes('User already registered')) {
+            errorTitle = "Account already exists";
+            errorMessage = "An account with this email already exists. Please try signing in instead.";
+          }
         } else if (error.error_description) {
           errorMessage = error.error_description;
         } else if (typeof error.toString === 'function') {
@@ -210,7 +223,7 @@ const Login = () => {
       }
 
       toast({
-        title: "Sign up failed",
+        title: errorTitle,
         description: errorMessage,
         variant: "destructive",
       });
