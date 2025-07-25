@@ -159,6 +159,10 @@ const AdminDashboard = () => {
             <AdminAffiliateManager />
           </TabsContent>
 
+          <TabsContent value="email-test">
+            <EmailVerificationTest />
+          </TabsContent>
+
           <TabsContent value="security">
             <SecurityDashboard />
           </TabsContent>
