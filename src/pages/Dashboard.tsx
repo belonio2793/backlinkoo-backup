@@ -78,19 +78,20 @@ const Dashboard = () => {
   const checkAuthAndFetchData = async () => {
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      console.log('Session check:', session, 'Session error:', sessionError);
+      console.log('Dashboard - Session check:', { hasSession: !!session, hasUser: !!session?.user, error: sessionError });
 
-      if (sessionError || !session) {
-        console.log('No valid session found, redirecting to login');
+      if (sessionError || !session || !session.user) {
+        console.log('Dashboard - No valid session/user found, redirecting to login');
         navigate('/login');
         return;
       }
 
+      console.log('Dashboard - Valid session found, setting user and fetching data');
       setUser(session.user);
       await fetchUserData(session.user);
       await fetchCampaigns(session.user);
     } catch (error) {
-      console.error('Error checking auth:', error);
+      console.error('Dashboard - Error checking auth:', error);
       navigate('/login');
     } finally {
       setLoading(false);
