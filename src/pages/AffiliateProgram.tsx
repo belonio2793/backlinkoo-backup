@@ -610,15 +610,66 @@ const AffiliateProgram = () => {
                         </div>
                       </div>
 
-                      <div className="text-center text-muted-foreground">
-                        <p className="mb-2">Detailed source tracking includes:</p>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div>�� Exact referring URLs</div>
-                          <div>• UTM campaign parameters</div>
-                          <div>• Social media platforms</div>
-                          <div>• Search engines</div>
-                          <div>• Email campaigns</div>
-                          <div>• Direct traffic</div>
+                      <div className="mt-6">
+                        <h4 className="font-semibold mb-4 text-center">Detailed Referral Tracking</h4>
+                        <div className="space-y-3">
+                          <Card className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium">Direct Traffic</div>
+                                <div className="text-sm text-muted-foreground">https://yoursite.com?ref={affiliate.custom_id}</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-semibold">0 signups</div>
+                                <div className="text-sm text-muted-foreground">$0.00 total spend</div>
+                              </div>
+                            </div>
+                          </Card>
+
+                          <Card className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium">Social Media Campaigns</div>
+                                <div className="text-sm text-muted-foreground">facebook.com, twitter.com, linkedin.com</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-semibold">0 signups</div>
+                                <div className="text-sm text-muted-foreground">$0.00 total spend</div>
+                              </div>
+                            </div>
+                          </Card>
+
+                          <Card className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium">Paid Advertising</div>
+                                <div className="text-sm text-muted-foreground">Google Ads, Facebook Ads, etc.</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-semibold">0 signups</div>
+                                <div className="text-sm text-muted-foreground">$0.00 total spend</div>
+                              </div>
+                            </div>
+                          </Card>
+
+                          <Card className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium">Email Campaigns</div>
+                                <div className="text-sm text-muted-foreground">Newsletter referrals and email marketing</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-semibold">0 signups</div>
+                                <div className="text-sm text-muted-foreground">$0.00 total spend</div>
+                              </div>
+                            </div>
+                          </Card>
+                        </div>
+
+                        <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                          <p className="text-sm text-muted-foreground text-center">
+                            <strong>Note:</strong> When you start getting referrals, exact URLs, user counts, and spending data will populate automatically here.
+                          </p>
                         </div>
                       </div>
                     </div>
