@@ -42,6 +42,7 @@ export const AppWrapper = () => {
       <Route path="/report/:reportId" element={<ReportViewer />} />
       <Route path="/no-hands-seo" element={<NoHandsSEO />} />
       <Route path="/affiliate" element={<AffiliateProgram />} />
+      <Route path="/affiliate/promotion-materials" element={<PromotionMaterials />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
