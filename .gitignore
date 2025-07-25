@@ -22,3 +22,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Security (backup pattern - secure configs are already encoded)
+**/credentials.json
+**/secrets.json
+**/*-credentials.*
+**/*-secrets.*
