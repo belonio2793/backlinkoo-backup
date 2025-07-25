@@ -102,13 +102,19 @@ const createMockSupabaseClient = () => {
   };
 };
 
-// Check if we're in development and if the Supabase URL is accessible
-const isDevelopment = import.meta.env.DEV;
+// Check if we have valid Supabase credentials
+const hasValidCredentials = SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY &&
+  SUPABASE_URL !== "" && SUPABASE_PUBLISHABLE_KEY !== "" &&
+  !SUPABASE_URL.includes('your-project-url') &&
+  !SUPABASE_PUBLISHABLE_KEY.includes('your-anon-key');
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
-});
+// Use mock client if credentials are missing or invalid
+export const supabase = hasValidCredentials ?
+  createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: {
+      storage: localStorage,
+      persistSession: true,
+      autoRefreshToken: true,
+    }
+  }) :
+  createMockSupabaseClient() as any;
