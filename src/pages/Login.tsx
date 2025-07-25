@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { ResendEmailService } from "@/services/resendEmailService";
-import { EmailVerificationTest } from "@/components/EmailVerificationTest";
+
 import { useNavigate } from "react-router-dom";
 import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft } from "lucide-react";
 
