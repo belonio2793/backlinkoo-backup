@@ -13,7 +13,10 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DB_PASSWORD = 'sbp_65f13d3ef84fae093dbb2b2d5368574f69b3cea2';
+// Import secure configuration
+import { SecureConfig } from '../src/lib/secure-config.js';
+
+const DB_PASSWORD = SecureConfig.DATABASE_PASSWORD;
 
 class DatabaseManager {
   
