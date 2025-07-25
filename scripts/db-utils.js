@@ -14,7 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Import secure configuration
-import { SecureConfig } from '../src/lib/secure-config.js';
+import { SecureConfig } from './secure-config.js';
 
 const DB_PASSWORD = SecureConfig.DATABASE_PASSWORD;
 
