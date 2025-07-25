@@ -401,8 +401,8 @@ The Backlink ∞ Team`,
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Back to Home Button */}
-        <div className="mb-6">
+        {/* Back to Home Button and Debug Toggle */}
+        <div className="mb-6 flex justify-between items-center">
           <Button
             variant="ghost"
             onClick={() => navigate('/')}
@@ -411,6 +411,17 @@ The Backlink ∞ Team`,
             <ArrowLeft className="h-4 w-4" />
             Back to Home
           </Button>
+          {window.location.hostname === 'localhost' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowDebugger(!showDebugger)}
+              className="flex items-center gap-2"
+            >
+              <Bug className="h-4 w-4" />
+              Debug
+            </Button>
+          )}
         </div>
 
         {/* Logo */}
