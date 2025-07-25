@@ -24,6 +24,8 @@ export class EmailService {
 
   private static async sendViaNetlifyFunction(emailData: any): Promise<EmailServiceResponse> {
     try {
+      console.log('Sending email via Netlify function:', { to: emailData.to, subject: emailData.subject });
+
       const response = await fetch('/.netlify/functions/send-email', {
         method: 'POST',
         headers: {
@@ -32,21 +34,37 @@ export class EmailService {
         body: JSON.stringify(emailData),
       });
 
-      const result = await response.json();
-      
-      if (response.ok && result.success) {
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Netlify function error response:', response.status, errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        console.error('Failed to parse JSON response:', jsonError);
+        throw new Error('Invalid JSON response from email service');
+      }
+
+      console.log('Email service response:', result);
+
+      if (result.success) {
         return {
           success: true,
           emailId: result.emailId,
           provider: 'netlify_resend'
         };
       } else {
-        throw new Error(result.error || 'Failed to send email via Netlify function');
+        throw new Error(result.error || 'Email service returned failure');
       }
     } catch (error: any) {
+      console.error('sendViaNetlifyFunction error:', error);
       return {
         success: false,
-        error: error.message,
+        error: error.message || 'Unknown error occurred',
         provider: 'netlify_resend'
       };
     }
