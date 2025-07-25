@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Flask } from "lucide-react";
+import { X, Beaker } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const BetaNotification = () => {
