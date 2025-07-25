@@ -89,7 +89,7 @@ Email System Manager`
 
     try {
       console.log('🚀 Running comprehensive email system test...');
-      const result = await emailService.sendEmail(testEmail);
+      const result = await EmailService.sendEmail(testEmail);
       setTestResults(result);
 
       toast({
