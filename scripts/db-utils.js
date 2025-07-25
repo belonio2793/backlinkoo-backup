@@ -103,7 +103,7 @@ class DatabaseManager {
 }
 
 // CLI interface
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const command = process.argv[2];
   const arg = process.argv[3];
 
@@ -136,7 +136,7 @@ if (require.main === module) {
         break;
       default:
         console.log(`
-�� Database Management Commands:
+📋 Database Management Commands:
 
   pull     - Pull latest schema from remote database
   types    - Generate TypeScript types
