@@ -104,9 +104,11 @@ const createMockSupabaseClient = () => {
 
 // Check if we have valid Supabase credentials
 const hasValidCredentials = SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY &&
-  SUPABASE_URL !== "" && SUPABASE_PUBLISHABLE_KEY !== "" &&
+  SUPABASE_URL.trim() !== "" && SUPABASE_PUBLISHABLE_KEY.trim() !== "" &&
   !SUPABASE_URL.includes('your-project-url') &&
-  !SUPABASE_PUBLISHABLE_KEY.includes('your-anon-key');
+  !SUPABASE_PUBLISHABLE_KEY.includes('your-anon-key') &&
+  SUPABASE_URL.startsWith('https://') &&
+  SUPABASE_PUBLISHABLE_KEY.length > 20;
 
 // Use mock client if credentials are missing or invalid
 export const supabase = hasValidCredentials ?
