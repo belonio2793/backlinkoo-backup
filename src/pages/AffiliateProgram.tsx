@@ -599,8 +599,28 @@ const AffiliateProgram = () => {
           <TabsContent value="analytics" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Performance Analytics</CardTitle>
-                <CardDescription>Detailed tracking of clicks, conversions, and referral sources</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Performance Analytics</CardTitle>
+                    <CardDescription>Detailed tracking of clicks, conversions, and referral sources</CardDescription>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <button
+                      onClick={resetAnalytics}
+                      className="text-primary hover:text-primary/80 hover:underline"
+                    >
+                      Reset to 0
+                    </button>
+                    {previousStats && (
+                      <button
+                        onClick={undoReset}
+                        className="text-primary hover:text-primary/80 hover:underline"
+                      >
+                        Undo Reset
+                      </button>
+                    )}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
