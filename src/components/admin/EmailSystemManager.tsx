@@ -71,7 +71,7 @@ Email System Manager`
 
   const loadSystemHealth = async () => {
     try {
-      const health = await EmailService.healthCheck();
+      const health = await ResendEmailService.healthCheck();
       setSystemHealth(health);
     } catch (error) {
       console.error('Failed to load system health:', error);
