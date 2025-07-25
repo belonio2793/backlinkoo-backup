@@ -261,14 +261,25 @@ Backlink Application`
         )}
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-medium text-blue-800 mb-2">Test Methods:</h4>
+          <h4 className="font-medium text-blue-800 mb-2">Email Service Setup:</h4>
           <ul className="text-sm text-blue-700 space-y-1">
-            <li>• <strong>Send Test Email:</strong> Uses signup/resend to trigger verification email</li>
-            <li>• <strong>Alternative Test:</strong> Uses password reset to test email delivery</li>
-            <li>• Both methods will send an email to the specified address</li>
+            <li>• <strong>Primary:</strong> Uses Supabase Edge Function with Resend/SendGrid</li>
+            <li>• <strong>Alternative:</strong> Direct API call to email service</li>
+            <li>• Set <code>RESEND_API_KEY</code> in Supabase environment variables</li>
+            <li>• Deploy the Edge Function: <code>supabase functions deploy send-test-email</code></li>
             <li>• Check support@backlinkoo.com inbox to verify delivery</li>
-            <li>• Response data and errors will be shown below</li>
           </ul>
+        </div>
+
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <h4 className="font-medium text-amber-800 mb-2">Quick Setup Steps:</h4>
+          <ol className="text-sm text-amber-700 space-y-1">
+            <li>1. Sign up for Resend at <a href="https://resend.com" target="_blank" rel="noopener" className="underline">resend.com</a></li>
+            <li>2. Get your API key from Resend dashboard</li>
+            <li>3. Add <code>RESEND_API_KEY</code> to Supabase project settings</li>
+            <li>4. Deploy the Edge Function: <code>supabase functions deploy send-test-email</code></li>
+            <li>5. Test the email functionality using this component</li>
+          </ol>
         </div>
       </CardContent>
     </Card>
