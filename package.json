@@ -8,7 +8,12 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "supabase:link": "supabase link --project-ref dfhanacsmsvvkpunurnp",
+    "supabase:pull": "supabase db pull",
+    "supabase:types": "supabase gen types typescript --linked > src/integrations/supabase/types.ts",
+    "supabase:status": "supabase status",
+    "supabase:setup": "bash scripts/setup-supabase-sync.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
