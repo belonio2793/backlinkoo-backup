@@ -243,6 +243,17 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Supabase Connection Test */}
+      <section className="py-12 px-6 bg-yellow-50 border-y-2 border-yellow-200">
+        <div className="container mx-auto">
+          <div className="text-center mb-6">
+            <h3 className="text-lg font-semibold text-yellow-800">System Status Check</h3>
+            <p className="text-sm text-yellow-700">Testing Supabase database connection</p>
+          </div>
+          <TestSupabaseConnection />
+        </div>
+      </section>
+
       {/* Hero Section */}
       <section 
         className="relative py-32 px-6 bg-white"
