@@ -145,13 +145,12 @@ const Login = () => {
         // Continue even if this fails
       }
 
-      const redirectUrl = `https://backlinkoo.com/auth/confirm`;
-      
+      // Sign up without sending confirmation email (we'll send our own)
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: redirectUrl,
+          emailRedirectTo: `https://backlinkoo.com/auth/confirm`,
           data: {
             first_name: firstName.trim()
           }
