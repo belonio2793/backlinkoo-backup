@@ -32,13 +32,13 @@ export function EmailVerificationStatus() {
           <div className="p-4 border rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <span className="font-medium">Email Configuration</span>
-              <Badge variant="destructive" className="bg-orange-100 text-orange-700">
-                <AlertTriangle className="h-3 w-3 mr-1" />
-                Needs Setup
+              <Badge variant="default" className="bg-blue-100 text-blue-700">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Resend Configured
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground">
-              SMTP configuration required
+              Sender: belonio2793@gmail.com
             </p>
           </div>
         </div>
