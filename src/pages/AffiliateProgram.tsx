@@ -531,11 +531,11 @@ const AffiliateProgram = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="tracking" className="space-y-6">
+          <TabsContent value="analytics" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Performance Analytics</CardTitle>
-                <CardDescription>Detailed tracking of clicks, conversions, and earnings</CardDescription>
+                <CardDescription>Detailed tracking of clicks, conversions, and referral sources</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -555,16 +555,169 @@ const AffiliateProgram = () => {
                     <div className="text-sm text-muted-foreground">Conversion Rate</div>
                   </div>
                 </div>
-                
-                <div className="text-center text-muted-foreground">
-                  <p>Real-time analytics will show:</p>
-                  <div className="mt-4 text-sm space-y-1">
-                    <p>• Click timestamps and sources</p>
-                    <p>• User conversion details</p>
-                    <p>• Commission calculations per transaction</p>
-                    <p>• Geographic and demographic data</p>
+
+                {/* Referral Sources */}
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Referral Sources</CardTitle>
+                    <CardDescription>Track exactly where your users are coming from</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                          <Globe className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                          <div className="text-lg font-bold text-blue-600">Direct</div>
+                          <div className="text-sm text-muted-foreground">0 signups</div>
+                        </div>
+                        <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+                          <Share2 className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                          <div className="text-lg font-bold text-green-600">Social Media</div>
+                          <div className="text-sm text-muted-foreground">0 signups</div>
+                        </div>
+                        <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+                          <BarChart className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                          <div className="text-lg font-bold text-purple-600">Paid Ads</div>
+                          <div className="text-sm text-muted-foreground">0 signups</div>
+                        </div>
+                      </div>
+
+                      <div className="text-center text-muted-foreground">
+                        <p className="mb-2">Detailed source tracking includes:</p>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>• Exact referring URLs</div>
+                          <div>• UTM campaign parameters</div>
+                          <div>• Social media platforms</div>
+                          <div>• Search engines</div>
+                          <div>• Email campaigns</div>
+                          <div>• Direct traffic</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="tracking" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Tracking Pixels & Conversion Codes</CardTitle>
+                <CardDescription>Manage your tracking pixels for ad spend analysis and conversion optimization</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Add New Pixel */}
+                <div className="border rounded-lg p-6 bg-gradient-to-br from-primary/5 to-blue-50">
+                  <h3 className="text-lg font-semibold mb-4">Add New Tracking Pixel</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <Label htmlFor="pixelName">Pixel Name</Label>
+                      <Input
+                        id="pixelName"
+                        placeholder="e.g., Facebook Conversion Pixel"
+                        value={newPixelName}
+                        onChange={(e) => setNewPixelName(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="pixelCode">Platform</Label>
+                      <Input
+                        placeholder="Auto-detected from code"
+                        value={detectPlatform(newPixelCode)}
+                        readOnly
+                        className="bg-muted"
+                      />
+                    </div>
                   </div>
+                  <div className="mb-4">
+                    <Label htmlFor="pixelCode">Tracking Code</Label>
+                    <textarea
+                      id="pixelCode"
+                      className="w-full p-3 border rounded-lg font-mono text-sm"
+                      rows={4}
+                      placeholder="Paste your tracking pixel code here..."
+                      value={newPixelCode}
+                      onChange={(e) => setNewPixelCode(e.target.value)}
+                    />
+                  </div>
+                  <Button onClick={addTrackingPixel} className="w-full">
+                    <Code className="h-4 w-4 mr-2" />
+                    Save Tracking Pixel
+                  </Button>
                 </div>
+
+                {/* Saved Pixels */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Your Tracking Pixels</h3>
+                  {trackingPixels.length === 0 ? (
+                    <Card>
+                      <CardContent className="text-center py-8">
+                        <Code className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground mb-2">No tracking pixels added yet</p>
+                        <p className="text-sm text-muted-foreground">
+                          Add tracking pixels from platforms like Facebook, Google, Twitter, TikTok, etc.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="space-y-4">
+                      {trackingPixels.map((pixel) => (
+                        <Card key={pixel.id}>
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between mb-3">
+                              <div>
+                                <h4 className="font-semibold">{pixel.name}</h4>
+                                <Badge variant="outline" className="mt-1">
+                                  {pixel.platform}
+                                </Badge>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => removeTrackingPixel(pixel.id)}
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                            <div className="bg-muted p-3 rounded font-mono text-xs overflow-x-auto">
+                              {pixel.code}
+                            </div>
+                            <div className="flex items-center gap-2 mt-3">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => copyToClipboard(pixel.code, 'Pixel code')}
+                              >
+                                <Copy className="h-4 w-4 mr-1" />
+                                Copy Code
+                              </Button>
+                              <span className="text-xs text-muted-foreground">
+                                Added {new Date(pixel.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Conversion Tracking Info */}
+                <Card className="bg-gradient-to-br from-green-50 to-emerald-50">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-green-800">💡 Conversion Tracking Tips</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-green-700">
+                    <div className="space-y-2 text-sm">
+                      <p>• Use these pixels to track the effectiveness of your advertising campaigns</p>
+                      <p>• Monitor which traffic sources convert best for affiliate referrals</p>
+                      <p>• Calculate your customer acquisition cost (CAC) vs commission earned</p>
+                      <p>• Optimize ad spend by focusing on highest-converting sources</p>
+                      <p>• Track lifetime value of referred customers for better ROI analysis</p>
+                    </div>
+                  </CardContent>
+                </Card>
               </CardContent>
             </Card>
           </TabsContent>
