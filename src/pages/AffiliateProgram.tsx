@@ -608,65 +608,27 @@ const AffiliateProgram = () => {
                       </div>
 
                       <div className="mt-6">
-                        <h4 className="font-semibold mb-4 text-center">Detailed Referral Tracking</h4>
-                        <div className="space-y-3">
-                          <Card className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <div className="font-medium">Direct Traffic</div>
-                                <div className="text-sm text-muted-foreground">https://yoursite.com?ref={affiliate.custom_id}</div>
-                              </div>
-                              <div className="text-right">
-                                <div className="font-semibold">0 signups</div>
-                                <div className="text-sm text-muted-foreground">$0.00 total spend</div>
-                              </div>
+                        <h4 className="font-semibold mb-4">Detailed Referral Tracking</h4>
+                        <div className="space-y-2">
+                          <div className="text-sm text-muted-foreground mb-3">
+                            URLs will auto-populate here when users sign up through your referral links:
+                          </div>
+                          <div className="space-y-1 text-sm">
+                            <div className="p-2 bg-muted/30 rounded text-muted-foreground italic">
+                              • https://example.com/signup?ref={affiliate.custom_id} - 0 signups, $0.00 spend
                             </div>
-                          </Card>
-
-                          <Card className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <div className="font-medium">Social Media Campaigns</div>
-                                <div className="text-sm text-muted-foreground">facebook.com, twitter.com, linkedin.com</div>
-                              </div>
-                              <div className="text-right">
-                                <div className="font-semibold">0 signups</div>
-                                <div className="text-sm text-muted-foreground">$0.00 total spend</div>
-                              </div>
+                            <div className="p-2 bg-muted/30 rounded text-muted-foreground italic">
+                              • https://social-media.com/link?ref={affiliate.custom_id} - 0 signups, $0.00 spend
                             </div>
-                          </Card>
-
-                          <Card className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <div className="font-medium">Paid Advertising</div>
-                                <div className="text-sm text-muted-foreground">Google Ads, Facebook Ads, etc.</div>
-                              </div>
-                              <div className="text-right">
-                                <div className="font-semibold">0 signups</div>
-                                <div className="text-sm text-muted-foreground">$0.00 total spend</div>
-                              </div>
+                            <div className="p-2 bg-muted/30 rounded text-muted-foreground italic">
+                              • https://blog-post.com/article?ref={affiliate.custom_id} - 0 signups, $0.00 spend
                             </div>
-                          </Card>
-
-                          <Card className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <div className="font-medium">Email Campaigns</div>
-                                <div className="text-sm text-muted-foreground">Newsletter referrals and email marketing</div>
-                              </div>
-                              <div className="text-right">
-                                <div className="font-semibold">0 signups</div>
-                                <div className="text-sm text-muted-foreground">$0.00 total spend</div>
-                              </div>
-                            </div>
-                          </Card>
-                        </div>
-
-                        <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-                          <p className="text-sm text-muted-foreground text-center">
-                            <strong>Note:</strong> When you start getting referrals, exact URLs, user counts, and spending data will populate automatically here.
-                          </p>
+                          </div>
+                          <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                            <p className="text-sm text-blue-700">
+                              <strong>Auto-Detection:</strong> Each successful signup will automatically detect and list the exact URL where the user clicked your referral link, along with signup count and total spending for that specific URL.
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
