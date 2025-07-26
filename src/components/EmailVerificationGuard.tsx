@@ -141,16 +141,7 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
         } else if (session?.user) {
           setUser(session.user);
 
-          // For development/testing: be more lenient with email verification
-          const isDevelopment = window.location.hostname === 'localhost' ||
-                               window.location.hostname.includes('fly.dev');
-          const isUsingMockClient = session.user.email === 'test@example.com' ||
-                                   session.user.id === 'mock-user-id';
-
-          const isVerified = session.user.email_confirmed_at !== null ||
-                            isUsingMockClient ||
-                            (isDevelopment && session.user.email);
-
+          const isVerified = session.user.email_confirmed_at !== null;
           setIsEmailVerified(isVerified);
         }
       });
