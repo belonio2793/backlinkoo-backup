@@ -233,7 +233,7 @@ const Login = () => {
 
 
       if (result.success) {
-        console.log('✅ Signup successful');
+        console.log('��� Signup successful');
 
         if (result.requiresEmailVerification) {
           toast({
@@ -544,7 +544,12 @@ const Login = () => {
                     </div>
                   </div>
                   
-                  <Button type="submit" className="w-full" disabled={isLoading || !loginEmail || !loginPassword}>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isLoading || !loginEmail || !loginPassword}
+                    aria-label="Sign in to your account"
+                  >
                     {isLoading ? (
                       <>
                         <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
