@@ -7,7 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
-import { AuthService } from "@/services/authService";
+import { AuthService, setupAuthStateListener } from "@/services/authService";
+import { supabase } from "@/integrations/supabase/client";
 
 import { useNavigate } from "react-router-dom";
 import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft, Shield, CheckCircle, AlertCircle } from "lucide-react";
@@ -54,7 +55,7 @@ const Login = () => {
     checkAuth();
 
     // Listen for auth changes with better error handling
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = setupAuthStateListener((event, session) => {
       console.log('🔐 Auth state changed:', event, !!session);
 
       if (event === 'SIGNED_IN' && session && session.user) {
@@ -66,7 +67,11 @@ const Login = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      if (subscription?.unsubscribe) {
+        subscription.unsubscribe();
+      }
+    };
   }, [navigate]);
 
   const cleanupAuthState = () => {
