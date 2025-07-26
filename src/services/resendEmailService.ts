@@ -19,6 +19,13 @@ export class ResendEmailService {
   private static failureLog: Array<{ timestamp: Date; error: string; email: string }> = [];
   private static readonly NETLIFY_FUNCTION_URL = '/.netlify/functions/send-email';
 
+  // Check if we're in development environment
+  private static isDevelopment(): boolean {
+    return window.location.hostname === 'localhost' ||
+           window.location.hostname.includes('127.0.0.1') ||
+           window.location.hostname.includes('.fly.dev');
+  }
+
   private static async sendViaNetlify(emailData: ResendEmailData): Promise<ResendEmailResponse> {
     try {
       console.log('Sending email via Netlify function:', { to: emailData.to, subject: emailData.subject });
