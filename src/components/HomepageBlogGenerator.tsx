@@ -432,11 +432,11 @@ export function HomepageBlogGenerator() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {allGeneratedPosts.map((post, index) => (
                         <div key={post.id} className="p-3 border rounded-lg bg-white">
-                          <div className="text-sm font-medium mb-1">{post.expert.avatar} {post.expert.name}</div>
+                          <div className="text-sm font-medium mb-1">{post.expert?.avatar} {post.expert?.name}</div>
                           <div className="text-xs text-gray-600 mb-2 truncate">{post.title}</div>
                           <Button
                             size="sm"
-                            onClick={() => window.open(post.previewUrl, '_blank')}
+                            onClick={() => window.open(post.previewUrl || `/blog/${post.slug}`, '_blank')}
                             className="w-full text-xs"
                           >
                             <ExternalLink className="mr-1 h-3 w-3" />
