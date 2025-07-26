@@ -491,7 +491,7 @@ const Login = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Back to Home Button */}
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <Button
             variant="ghost"
             onClick={() => navigate('/')}
@@ -500,6 +500,12 @@ const Login = () => {
             <ArrowLeft className="h-4 w-4" />
             Back to Home
           </Button>
+          <PurgeStorageButton
+            variant="ghost"
+            size="sm"
+            showIcon={true}
+            className="text-muted-foreground hover:text-foreground"
+          />
         </div>
 
         {/* Logo and Welcome */}
