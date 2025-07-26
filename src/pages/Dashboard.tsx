@@ -194,6 +194,15 @@ const Dashboard = () => {
       const currentUser = authUser || user;
       if (!currentUser) return;
 
+      const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('.fly.dev');
+
+      if (isDev) {
+        console.log('🧪 Development mode: Using mock campaigns data');
+        // Set mock campaigns for development
+        setCampaigns([]);
+        return;
+      }
+
       // Fetch campaigns with proper query structure
       const { data: campaignsData, error } = await supabase
         .from('campaigns')
@@ -208,6 +217,7 @@ const Dashboard = () => {
           description: `Failed to fetch campaigns: ${error.message || 'Unknown error'}`,
           variant: "destructive",
         });
+        setCampaigns([]); // Set empty array on error
         return;
       }
 
