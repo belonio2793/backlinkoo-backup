@@ -281,11 +281,11 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
           <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
             <AvatarImage src="" />
             <AvatarFallback className="text-xs sm:text-sm">
-              {getInitials(displayName)}
+              {getInitials(fullName)}
             </AvatarFallback>
           </Avatar>
           <div className="hidden sm:flex flex-col items-start">
-            <span className="text-sm font-medium">{displayName}</span>
+            <span className="text-sm font-medium">{fullName}</span>
             <span className="text-xs text-muted-foreground">{userEmail}</span>
           </div>
           <Settings className="h-4 w-4" />
