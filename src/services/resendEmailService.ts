@@ -210,20 +210,9 @@ https://backlinkoo.com`
     return await this.sendViaNetlify(emailData);
   }
 
-  static async healthCheck(): Promise<{ status: string; resend: boolean; environment: string }> {
-    const isDev = this.isDevelopment();
-
-    if (isDev) {
-      console.log('🧪 Development environment - email service will use mock mode');
-      return {
-        status: 'healthy',
-        resend: true,
-        environment: 'development'
-      };
-    }
-
+  static async healthCheck(): Promise<{ status: string; resend: boolean }> {
     try {
-      // Test Netlify function availability in production
+      // Test Netlify function availability
       const response = await fetch(this.NETLIFY_FUNCTION_URL, {
         method: 'OPTIONS', // Preflight request to check availability
         headers: {
@@ -236,15 +225,13 @@ https://backlinkoo.com`
 
       return {
         status: isHealthy ? 'healthy' : 'error',
-        resend: isHealthy,
-        environment: 'production'
+        resend: isHealthy
       };
     } catch (error) {
       console.warn('Email service health check failed:', error);
       return {
         status: 'error',
-        resend: false,
-        environment: 'production'
+        resend: false
       };
     }
   }
