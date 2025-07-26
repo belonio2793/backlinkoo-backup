@@ -165,30 +165,6 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
 
     setIsSaving(true);
 
-    // Check if we're in demo mode
-    const isDevelopment = window.location.hostname === 'localhost' ||
-                         window.location.hostname.includes('fly.dev');
-    const isMockUser = user.id === 'mock-user-id' ||
-                      user.id === 'dev-fallback-user' ||
-                      user.id === 'dev-bypass-user' ||
-                      user.email === 'test@example.com' ||
-                      user.email === 'dev@example.com';
-
-    if (isMockUser || isDevelopment) {
-      console.log('🔧 ProfileSettings: Demo mode save - simulating success');
-      // Simulate save delay for demo
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      toast({
-        title: "Demo Mode",
-        description: "Profile updated successfully (demo mode - changes are not persisted to database)",
-      });
-      setHasChanges(false);
-      onClose?.();
-      setIsSaving(false);
-      return;
-    }
-
     try {
       const profileData = {
         user_id: user.id,
