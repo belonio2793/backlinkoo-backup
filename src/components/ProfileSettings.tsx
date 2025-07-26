@@ -38,12 +38,17 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [profile, setProfile] = useState({
+    displayName: '',
+    email: '',
+  });
+  const [additionalInfo, setAdditionalInfo] = useState({
     firstName: '',
     lastName: '',
-    displayName: '',
     bio: '',
     website: '',
     phone: '',
+    company: '',
+    location: '',
   });
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
