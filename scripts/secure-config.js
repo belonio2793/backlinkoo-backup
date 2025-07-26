@@ -18,6 +18,9 @@ const SECURE_STORE = {
   
   // Access tokens
   supabase_access_token: 'c2JwXzY1ZjEzZDNlZjg0ZmFlMDkzZGJiMmIyZDUzNjg1NzRmNjliM2NlYTI=', // sbp_65f13d3ef84fae093dbb2b2d5368574f69b3cea2
+
+  // Email service credentials
+  resend_api_key: 'cmVfZjJpeHlSQXdfRUExZHRRQ285S25BTmZKZ3JncWZYRkVx', // re_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq
 };
 
 /**
