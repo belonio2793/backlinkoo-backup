@@ -312,6 +312,43 @@ const Login = () => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!forgotPasswordEmail.trim()) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+        redirectTo: `https://backlinkoo.com/auth/reset-password`
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Password reset email sent!",
+        description: "Check your email for a link to reset your password.",
+      });
+
+      setShowForgotPassword(false);
+      setForgotPasswordEmail("");
+    } catch (error: any) {
+      toast({
+        title: "Password reset failed",
+        description: error.message || "Failed to send password reset email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleResendConfirmation = async () => {
     setIsLoading(true);
 
