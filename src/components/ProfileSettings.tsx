@@ -489,18 +489,29 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"
-                      onClick={() => setIsEditing(false)}
+                      onClick={() => {
+                        setIsEditing(false);
+                        // Reset to original values
+                        loadUserProfile();
+                      }}
+                      disabled={isLoading}
                     >
                       Cancel
                     </Button>
                     <Button
                       onClick={handleProfileSave}
-                      disabled={isLoading}
+                      disabled={isLoading || !profile.displayName.trim()}
                       className="gap-2"
                     >
                       <Save className="h-4 w-4" />
                       {isLoading ? 'Saving...' : 'Save Changes'}
                     </Button>
+                  </div>
+                )}
+
+                {isEditing && (
+                  <div className="text-xs text-muted-foreground">
+                    * Required fields must be filled out
                   </div>
                 )}
               </CardContent>
