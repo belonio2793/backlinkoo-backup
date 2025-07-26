@@ -281,7 +281,26 @@ const Dashboard = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Infinity className="h-8 w-8 text-primary mx-auto mb-4 animate-spin" />
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground mb-4">Loading...</p>
+          <div className="space-y-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                console.log('🏠 Force stop loading...');
+                setLoading(false);
+              }}
+            >
+              Skip Loading
+            </Button>
+            <br />
+            <Button
+              variant="ghost"
+              onClick={() => window.location.href = '/'}
+              className="text-sm"
+            >
+              Go to Home Page
+            </Button>
+          </div>
         </div>
       </div>
     );
