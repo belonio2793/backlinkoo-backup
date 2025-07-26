@@ -20,4 +20,22 @@ try {
   console.warn('Ethereum property conflict handled:', error);
 }
 
+// Global error handler for uncaught ethereum conflicts
+window.addEventListener('error', (event) => {
+  if (event.error?.message?.includes('Cannot redefine property: ethereum') ||
+      event.error?.message?.includes('evmAsk')) {
+    console.warn('Prevented ethereum conflict error:', event.error.message);
+    event.preventDefault();
+    return false;
+  }
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  if (event.reason?.message?.includes('Cannot redefine property: ethereum') ||
+      event.reason?.message?.includes('evmAsk')) {
+    console.warn('Prevented ethereum promise rejection:', event.reason.message);
+    event.preventDefault();
+  }
+});
+
 createRoot(document.getElementById("root")!).render(<App />);
