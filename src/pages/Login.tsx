@@ -260,10 +260,21 @@ const Login = () => {
       });
 
       if (error) {
+        console.log('Signup error details:', error);
+
         // Handle various "user already exists" error messages
-        if (error.message.includes('User already registered') ||
-            error.message.includes('Email address already registered') ||
-            error.message.includes('already been registered')) {
+        // Check both message and error code for more reliable detection
+        const errorMessage = error.message?.toLowerCase() || '';
+        const isUserExists = errorMessage.includes('user already registered') ||
+                            errorMessage.includes('email address already registered') ||
+                            errorMessage.includes('already been registered') ||
+                            errorMessage.includes('email already exists') ||
+                            errorMessage.includes('user with this email already exists') ||
+                            error.status === 422 || // Common status for user exists
+                            error.code === 'user_already_exists';
+
+        if (isUserExists) {
+          console.log('User already exists, showing resend option');
           setIsLoading(false); // Reset loading state
           setResendEmail(email);
           setShowResendConfirmation(true);
