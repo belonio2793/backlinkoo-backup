@@ -97,17 +97,8 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
 
         setUser(session.user);
 
-        // For development/testing: skip email verification in certain cases
-        const isDevelopment = window.location.hostname === 'localhost' ||
-                             window.location.hostname.includes('fly.dev');
-        const isUsingMockClient = session.user.email === 'test@example.com' ||
-                                 session.user.id === 'mock-user-id';
-
-        // Check if email is verified - be more lenient in development
-        const isVerified = session.user.email_confirmed_at !== null ||
-                          isUsingMockClient ||
-                          (isDevelopment && session.user.email);
-
+        // Check if email is verified
+        const isVerified = session.user.email_confirmed_at !== null;
         setIsEmailVerified(isVerified);
 
         console.log('EmailVerificationGuard: Email verification status:', {
