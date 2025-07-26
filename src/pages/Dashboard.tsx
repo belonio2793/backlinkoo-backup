@@ -372,7 +372,7 @@ const Dashboard = () => {
               <Infinity className="h-6 w-6 text-primary" />
               <h1 className="text-xl font-semibold hidden sm:block">Backlink</h1>
             </div>
-            <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
               {(activeSection === "dashboard" || activeSection === "seo-tools") && (
                 <>
                   <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
@@ -387,10 +387,11 @@ const Dashboard = () => {
                   </Button>
                 </>
               )}
+              <div className="border-l border-border h-6 mx-1 sm:mx-2" />
               <ProfileSettings user={user} userType={userType} onUserUpdate={setUser} />
-              <Button variant="outline" size="sm" onClick={handleSignOut} className="px-2 sm:px-4">
-                <LogOut className="h-4 w-4 sm:mr-1" />
-                <span className="hidden sm:inline">Sign Out</span>
+              <Button variant="ghost" size="sm" onClick={handleSignOut} className="px-2 sm:px-3 text-muted-foreground hover:text-destructive">
+                <LogOut className="h-4 w-4" />
+                <span className="hidden lg:inline ml-1">Sign Out</span>
               </Button>
             </div>
           </div>
