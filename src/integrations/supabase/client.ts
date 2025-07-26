@@ -27,12 +27,18 @@ const createMockSupabaseClient = () => {
 
   const mockAuth = {
     getSession: () => {
-      console.warn('⚠️ Mock auth getSession called - using fake session');
-      return Promise.resolve({ data: { session: null }, error: { message: 'Mock mode: Please configure real Supabase credentials' } });
+      console.warn('⚠️ Mock auth getSession called - returning mock session for development');
+      return Promise.resolve({
+        data: { session: mockSession },
+        error: null
+      });
     },
     getUser: () => {
-      console.warn('⚠️ Mock auth getUser called');
-      return Promise.resolve({ data: { user: null }, error: { message: 'Mock mode: Please configure real Supabase credentials' } });
+      console.warn('⚠️ Mock auth getUser called - returning mock user for development');
+      return Promise.resolve({
+        data: { user: mockUser },
+        error: null
+      });
     },
     onAuthStateChange: (callback: any) => {
       console.warn('⚠️ Mock auth onAuthStateChange called');
