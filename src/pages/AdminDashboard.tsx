@@ -16,12 +16,15 @@ import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
 
 import { SystemStatusCheck } from "@/components/SystemStatusCheck";
+import { PurgeStorageButton } from "@/components/PurgeStorageButton";
+import { AdminAuthService } from "@/services/adminAuthService";
 import {
   Users,
   Activity,
   CreditCard,
   Clock,
-  Infinity
+  Infinity,
+  LogOut
 } from "lucide-react";
 
 const AdminDashboard = () => {
