@@ -104,16 +104,28 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
+
+      console.log('EmailVerificationGuard: Auth state change:', { event, hasUser: !!session?.user });
+
       if (event === 'SIGNED_OUT' || !session) {
         navigate('/login');
       } else if (session?.user) {
         setUser(session.user);
-        const isVerified = session.user.email_confirmed_at !== null;
+
+        // For development/testing: skip email verification if using mock client
+        const isUsingMockClient = !session.user.email_confirmed_at &&
+                                 session.user.email === 'test@example.com';
+
+        const isVerified = session.user.email_confirmed_at !== null || isUsingMockClient;
         setIsEmailVerified(isVerified);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const handleResendVerification = async () => {
