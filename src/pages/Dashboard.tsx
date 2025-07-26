@@ -336,7 +336,7 @@ const Dashboard = () => {
 
       const { data: campaignsData, error } = await Promise.race([
         campaignsPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Campaigns fetch timeout')), 3000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Campaigns fetch timeout')), 2000))
       ]) as any;
 
       if (error) {
