@@ -191,7 +191,7 @@ const Dashboard = () => {
         console.log('🏠 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
 
         if (event === 'SIGNED_OUT' || !session) {
-          console.log('🏠 Dashboard - User signed out, redirecting to login...');
+          console.log('��� Dashboard - User signed out, redirecting to login...');
           navigate('/login');
         } else if (event === 'SIGNED_IN' && session) {
           console.log('🏠 Dashboard - User signed in, updating user state');
@@ -274,7 +274,7 @@ const Dashboard = () => {
           console.log('🔍 Credits error (non-critical):', result.error);
         }
       } catch (creditsError) {
-        console.warn('🔍 Credits fetch failed:', creditsError);
+        console.warn('���� Credits fetch failed:', creditsError);
       }
 
       if (creditsData) {
@@ -404,6 +404,7 @@ const Dashboard = () => {
 
       if (isDevelopment) {
         console.log('📊 Using demo campaigns for development');
+        setIsDemoMode(true);
         const mockCampaigns = [
           {
             id: 'demo-fallback-1',
