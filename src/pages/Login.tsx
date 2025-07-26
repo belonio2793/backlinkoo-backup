@@ -187,12 +187,24 @@ const Login = () => {
             errorMessage = 'Network connection failed. Please check your internet connection and try again.';
           } else if (error.message.includes('Invalid login credentials')) {
             errorMessage = 'Invalid email or password. Please check your credentials and try again.';
-          } else if (error.message.includes('Email not confirmed')) {
-            errorMessage = 'Please check your email and click the confirmation link before signing in.';
+          } else if (error.message.includes('Email not confirmed') ||
+                     error.message.includes('not verified') ||
+                     error.message.includes('confirmation')) {
+            errorMessage = 'Your email address needs to be verified. Please check your email for a confirmation link.';
             setShowResendConfirmation(true);
             setResendEmail(loginEmail);
-          } else if (error.message.includes('Too many requests')) {
-            errorMessage = 'Too many login attempts. Please wait a moment and try again.';
+
+            // Provide additional guidance
+            setTimeout(() => {
+              toast({
+                title: "Need to verify your email?",
+                description: "Click the 'Resend Confirmation Email' button below if you need a new verification link.",
+              });
+            }, 3000);
+          } else if (error.message.includes('Too many requests') || error.message.includes('rate limit')) {
+            errorMessage = 'Too many login attempts. Please wait a few minutes and try again.';
+          } else if (error.message.includes('account') && error.message.includes('disabled')) {
+            errorMessage = 'Your account has been disabled. Please contact support for assistance.';
           }
         } else if (error.error_description) {
           errorMessage = error.error_description;
