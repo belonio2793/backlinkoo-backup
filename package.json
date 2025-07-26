@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --mode production",
     "build:dev": "vite build --mode development",
+    "build:staging": "vite build --mode staging",
     "lint": "eslint .",
     "preview": "vite preview",
     "supabase:link": "supabase link --project-ref dfhanacsmsvvkpunurnp",
@@ -53,7 +54,6 @@
     "@radix-ui/react-tooltip": "^1.1.4",
     "@supabase/supabase-js": "^2.52.0",
     "@tanstack/react-query": "^5.56.2",
-    "caniuse-lite": "^1.0.30001727",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
@@ -90,7 +90,6 @@
     "postcss": "^8.4.47",
     "supabase": "^2.31.8",
     "tailwindcss": "^3.4.11",
-    "terser": "^5.43.1",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1"
