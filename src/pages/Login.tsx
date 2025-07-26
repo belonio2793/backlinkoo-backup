@@ -36,11 +36,7 @@ const Login = () => {
     // Check if user is already logged in
     const checkAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.warn('Auth session check failed:', error);
-          return;
-        }
+        const { session } = await AuthService.getCurrentSession();
 
         if (session && session.user) {
           console.log('🔐 User already authenticated, redirecting...');
