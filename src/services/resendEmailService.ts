@@ -215,29 +215,23 @@ https://backlinkoo.com`
 
   static async healthCheck(): Promise<{ status: string; resend: boolean }> {
     try {
-      // Test Resend API with a minimal request
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
+      // Test Netlify function availability
+      const response = await fetch(this.NETLIFY_FUNCTION_URL, {
+        method: 'OPTIONS', // Preflight request to check availability
         headers: {
-          'Authorization': `Bearer ${this.API_KEY}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          from: this.FROM_EMAIL,
-          to: ['test@test.com'],
-          subject: 'Health Check',
-          html: '<p>Health check</p>'
-        }),
       });
 
-      // Even if this fails, if we get a proper response (not network error), Resend is working
-      const isHealthy = response.status !== 0; // Network errors return 0
-      
+      // If we get any response (even error), the function is available
+      const isHealthy = response.status !== 0;
+
       return {
         status: isHealthy ? 'healthy' : 'error',
         resend: isHealthy
       };
     } catch (error) {
+      console.warn('Email service health check failed:', error);
       return {
         status: 'error',
         resend: false
