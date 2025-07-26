@@ -9,9 +9,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileMigrationService } from "@/services/profileMigrationService";
+import { EmailService } from "@/services/emailService";
 
 import { useNavigate } from "react-router-dom";
-import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft } from "lucide-react";
+import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft, Shield, CheckCircle, AlertCircle } from "lucide-react";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,6 +28,7 @@ const Login = () => {
   const [resendEmail, setResendEmail] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [activeTab, setActiveTab] = useState("login");
   const { toast } = useToast();
   const { broadcastNewUser } = useGlobalNotifications();
   const navigate = useNavigate();
@@ -96,6 +98,27 @@ const Login = () => {
     }
   };
 
+  const validateEmailFormat = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePasswordStrength = (password: string): { isValid: boolean; message: string } => {
+    if (password.length < 8) {
+      return { isValid: false, message: "Password must be at least 8 characters long" };
+    }
+    if (!/(?=.*[a-z])/.test(password)) {
+      return { isValid: false, message: "Password must contain at least one lowercase letter" };
+    }
+    if (!/(?=.*[A-Z])/.test(password)) {
+      return { isValid: false, message: "Password must contain at least one uppercase letter" };
+    }
+    if (!/(?=.*\d)/.test(password)) {
+      return { isValid: false, message: "Password must contain at least one number" };
+    }
+    return { isValid: true, message: "Password strength is good" };
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -108,6 +131,15 @@ const Login = () => {
       toast({
         title: "Missing credentials",
         description: "Please enter both email and password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!validateEmailFormat(loginEmail)) {
+      toast({
+        title: "Invalid email format",
+        description: "Please enter a valid email address.",
         variant: "destructive",
       });
       return;
@@ -148,6 +180,24 @@ const Login = () => {
       if (data.user && data.session) {
         console.log('🔐 Sign in successful:', data.user.id);
         setDebugInfo(prev => [...prev, `Login successful! User ID: ${data.user.id}`]);
+
+        // Check if email is verified
+        if (!data.user.email_confirmed_at) {
+          console.warn('🔐 User email not verified, showing verification prompt');
+          setShowResendConfirmation(true);
+          setResendEmail(loginEmail);
+          
+          toast({
+            title: "Email verification required",
+            description: "Please verify your email address before signing in. Check your email for a verification link.",
+            variant: "destructive",
+          });
+
+          // Sign out the user since they need to verify email first
+          await supabase.auth.signOut();
+          setIsLoading(false);
+          return;
+        }
 
         // Profile migration in background - don't wait for it
         ProfileMigrationService.ensureUserProfile(
@@ -242,6 +292,29 @@ const Login = () => {
     setDebugInfo(prev => [...prev, 'Starting signup process...']);
     setIsLoading(true);
 
+    // Validate email format
+    if (!validateEmailFormat(email)) {
+      toast({
+        title: "Invalid email format",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate password strength
+    const passwordValidation = validatePasswordStrength(password);
+    if (!passwordValidation.isValid) {
+      toast({
+        title: "Password requirements not met",
+        description: passwordValidation.message,
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast({
         title: "Passwords don't match",
@@ -270,12 +343,12 @@ const Login = () => {
         // Continue even if this fails
       }
 
-      // Sign up with email confirmation disabled (we'll use our custom Resend service)
+      // Sign up with email confirmation required
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
         options: {
-          emailRedirectTo: `https://backlinkoo.com/auth/confirm`,
+          emailRedirectTo: `${window.location.origin}/auth/confirm`,
           data: {
             first_name: firstName.trim(),
             display_name: firstName.trim()
@@ -287,14 +360,13 @@ const Login = () => {
         console.log('Signup error details:', error);
 
         // Handle various "user already exists" error messages
-        // Check both message and error code for more reliable detection
         const errorMessage = error.message?.toLowerCase() || '';
         const isUserExists = errorMessage.includes('user already registered') ||
                             errorMessage.includes('email address already registered') ||
                             errorMessage.includes('already been registered') ||
                             errorMessage.includes('email already exists') ||
                             errorMessage.includes('user with this email already exists') ||
-                            error.status === 422 || // Common status for user exists
+                            error.status === 422 ||
                             error.code === 'user_already_exists';
 
         if (isUserExists) {
@@ -303,12 +375,11 @@ const Login = () => {
 
           // Try to determine if user needs email verification
           try {
-            // Attempt to get user status by trying to resend confirmation
             const { error: testResendError } = await supabase.auth.resend({
               type: 'signup',
               email: email.trim(),
               options: {
-                emailRedirectTo: `https://backlinkoo.com/auth/confirm`
+                emailRedirectTo: `${window.location.origin}/auth/confirm`
               }
             });
 
@@ -324,11 +395,8 @@ const Login = () => {
                 });
                 // Switch to login tab and pre-fill email
                 setTimeout(() => {
-                  const loginTab = document.querySelector('[value="login"]') as HTMLElement;
-                  if (loginTab) {
-                    loginTab.click();
-                    setLoginEmail(email);
-                  }
+                  setActiveTab("login");
+                  setLoginEmail(email);
                 }, 100);
                 return;
               } else {
@@ -351,8 +419,6 @@ const Login = () => {
           setResendEmail(email);
           setShowResendConfirmation(true);
           setIsLoading(false);
-
-          // Don't auto-switch to login for unverified users
           return;
         }
         throw error;
@@ -387,6 +453,18 @@ const Login = () => {
         } else {
           // Email confirmation needed - Supabase will send via configured SMTP
           console.log('📧 Confirmation email will be sent via Supabase SMTP');
+          
+          // Send additional confirmation email via our custom service for better UX
+          try {
+            await EmailService.sendConfirmationEmail(
+              email,
+              `${window.location.origin}/auth/confirm?email=${encodeURIComponent(email)}`
+            );
+            console.log('✅ Additional confirmation email sent via custom service');
+          } catch (emailError) {
+            console.warn('Custom confirmation email failed (non-blocking):', emailError);
+          }
+
           toast({
             title: "Account created! Check your email",
             description: "We've sent you a confirmation link to verify your account. Please check your email and spam folder.",
@@ -398,7 +476,7 @@ const Login = () => {
               title: "Email not received?",
               description: "Check your spam folder or use the resend button below if needed.",
             });
-          }, 10000); // Show after 10 seconds
+          }, 10000);
         }
 
         // Broadcast new user notification globally
@@ -408,17 +486,13 @@ const Login = () => {
 
         // Auto-switch to login tab after successful signup
         setTimeout(() => {
-          const loginTab = document.querySelector('[value="login"]') as HTMLElement;
-          if (loginTab) {
-            loginTab.click();
-            setLoginEmail(email); // Pre-fill email for easy login
-          }
-        }, 5000); // Increased time to 5 seconds so users can read the message
+          setActiveTab("login");
+          setLoginEmail(email); // Pre-fill email for easy login
+        }, 5000);
       }
     } catch (error: any) {
       console.error("Signup error:", error);
 
-      // Handle different error types properly
       let errorMessage = 'An error occurred during sign up.';
       let errorTitle = "Sign up failed";
 
@@ -426,10 +500,9 @@ const Login = () => {
         if (error.message) {
           errorMessage = error.message;
 
-          // Provide more helpful error messages for common issues
           if (error.message.includes('Password should be')) {
             errorTitle = "Password requirements not met";
-            errorMessage = "Password must be at least 6 characters long.";
+            errorMessage = "Password must be at least 8 characters long with uppercase, lowercase, and numbers.";
           } else if (error.message.includes('Invalid email')) {
             errorTitle = "Invalid email address";
             errorMessage = "Please enter a valid email address.";
@@ -473,13 +546,22 @@ const Login = () => {
       return;
     }
 
+    if (!validateEmailFormat(forgotPasswordEmail)) {
+      toast({
+        title: "Invalid email format",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       console.log('🔑 Requesting password reset for:', forgotPasswordEmail);
 
       const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail.trim(), {
-        redirectTo: `https://backlinkoo.com/auth/reset-password`
+        redirectTo: `${window.location.origin}/auth/reset-password`
       });
 
       if (error) {
@@ -489,9 +571,20 @@ const Login = () => {
 
       console.log('✅ Password reset email sent via Supabase SMTP');
 
+      // Send additional password reset email via our custom service for better UX
+      try {
+        await EmailService.sendPasswordResetEmail(
+          forgotPasswordEmail.trim(),
+          `${window.location.origin}/auth/reset-password?email=${encodeURIComponent(forgotPasswordEmail)}`
+        );
+        console.log('✅ Additional password reset email sent via custom service');
+      } catch (emailError) {
+        console.warn('Custom password reset email failed (non-blocking):', emailError);
+      }
+
       toast({
         title: "Password reset email sent!",
-        description: "We've sent you a password reset link via our secure email system. Please check your email and spam folder.",
+        description: "We've sent you a password reset link. Please check your email and spam folder.",
       });
 
       // Provide additional guidance
@@ -545,7 +638,7 @@ const Login = () => {
         type: 'signup',
         email: resendEmail.trim(),
         options: {
-          emailRedirectTo: `https://backlinkoo.com/auth/confirm`
+          emailRedirectTo: `${window.location.origin}/auth/confirm`
         }
       });
 
@@ -561,11 +654,8 @@ const Login = () => {
           setShowResendConfirmation(false);
           // Switch to login tab
           setTimeout(() => {
-            const loginTab = document.querySelector('[value="login"]') as HTMLElement;
-            if (loginTab) {
-              loginTab.click();
-              setLoginEmail(resendEmail);
-            }
+            setActiveTab("login");
+            setLoginEmail(resendEmail);
           }, 100);
           return;
         } else if (error.message.includes('rate limit') || error.message.includes('too many')) {
@@ -577,9 +667,20 @@ const Login = () => {
 
       console.log('✅ Confirmation email resent via Supabase SMTP');
 
+      // Send additional confirmation email via our custom service for better UX
+      try {
+        await EmailService.sendConfirmationEmail(
+          resendEmail.trim(),
+          `${window.location.origin}/auth/confirm?email=${encodeURIComponent(resendEmail)}`
+        );
+        console.log('✅ Additional confirmation email sent via custom service');
+      } catch (emailError) {
+        console.warn('Custom confirmation email failed (non-blocking):', emailError);
+      }
+
       toast({
         title: "Confirmation email sent!",
-        description: "We've sent you a new confirmation link via our secure email system. Please check your email and spam folder.",
+        description: "We've sent you a new confirmation link. Please check your email and spam folder.",
       });
 
       // Provide additional guidance after successful resend
@@ -637,18 +738,18 @@ const Login = () => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Infinity className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">Backlink</h1>
+            <h1 className="text-2xl font-bold text-foreground">Backlink ∞</h1>
           </div>
-          <p className="text-muted-foreground">Powerful SEO & Backlink Management</p>
+          <p className="text-muted-foreground">Professional SEO & Backlink Management</p>
         </div>
 
         <Card>
           <CardHeader className="text-center">
-            <CardTitle>Welcome Back</CardTitle>
-            <CardDescription>Sign in to your account or create a new one</CardDescription>
+            <CardTitle>Welcome to Backlink ∞</CardTitle>
+            <CardDescription>Sign in to your account or create a new one to get started</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Create Account</TabsTrigger>
@@ -665,8 +766,9 @@ const Login = () => {
                       ))}
                     </div>
                   )}
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
+                    <Label htmlFor="login-email">Email Address</Label>
                     <Input
                       id="login-email"
                       type="email"
@@ -676,6 +778,7 @@ const Login = () => {
                       required
                     />
                   </div>
+                  
                   <div className="space-y-2">
                     <Label htmlFor="login-password">Password</Label>
                     <div className="relative">
@@ -702,6 +805,7 @@ const Login = () => {
                       </Button>
                     </div>
                   </div>
+                  
                   <Button type="submit" className="w-full" disabled={isLoading || !loginEmail || !loginPassword}>
                     {isLoading ? (
                       <>
@@ -709,7 +813,10 @@ const Login = () => {
                         Signing in...
                       </>
                     ) : (
-                      "Sign In"
+                      <>
+                        <Shield className="h-4 w-4 mr-2" />
+                        Sign In
+                      </>
                     )}
                   </Button>
 
@@ -722,6 +829,11 @@ const Login = () => {
                     >
                       Forgot your password?
                     </Button>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-blue-50 rounded-lg">
+                    <AlertCircle className="h-4 w-4 text-blue-600" />
+                    <span>Email verification is required before you can sign in</span>
                   </div>
                 </form>
 
@@ -770,15 +882,6 @@ const Login = () => {
               
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
-                  {/* Debug info in development */}
-                  {window.location.hostname === 'localhost' && debugInfo.length > 0 && (
-                    <div className="p-3 bg-gray-100 rounded text-xs">
-                      <div className="font-medium mb-1">Debug Info:</div>
-                      {debugInfo.map((info, idx) => (
-                        <div key={idx} className="text-gray-600">{idx + 1}. {info}</div>
-                      ))}
-                    </div>
-                  )}
                   <div className="space-y-2">
                     <Label htmlFor="first-name">First Name</Label>
                     <Input
@@ -790,8 +893,9 @@ const Login = () => {
                       required
                     />
                   </div>
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-email">Email Address</Label>
                     <Input
                       id="signup-email"
                       type="email"
@@ -801,6 +905,7 @@ const Login = () => {
                       required
                     />
                   </div>
+                  
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
                     <div className="relative">
@@ -826,7 +931,11 @@ const Login = () => {
                         )}
                       </Button>
                     </div>
+                    <div className="text-xs text-muted-foreground">
+                      Password must be at least 8 characters with uppercase, lowercase, and numbers
+                    </div>
                   </div>
+                  
                   <div className="space-y-2">
                     <Label htmlFor="confirm-password">Confirm Password</Label>
                     <Input
@@ -838,8 +947,19 @@ const Login = () => {
                       required
                     />
                   </div>
+                  
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Creating account..." : "Create Account"}
+                    {isLoading ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Creating account...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Create Account
+                      </>
+                    )}
                   </Button>
                   
                   {showResendConfirmation && (
@@ -870,10 +990,7 @@ const Login = () => {
                           onClick={() => {
                             setShowResendConfirmation(false);
                             setLoginEmail(resendEmail);
-                            const loginTab = document.querySelector('[value="login"]') as HTMLElement;
-                            if (loginTab) {
-                              loginTab.click();
-                            }
+                            setActiveTab("login");
                           }}
                         >
                           Go to Sign In Instead
@@ -882,8 +999,8 @@ const Login = () => {
                     </div>
                   )}
                   
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Mail className="h-4 w-4" />
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-green-50 rounded-lg">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
                     <span>You'll receive a confirmation email to verify your account</span>
                   </div>
                 </form>
@@ -891,6 +1008,12 @@ const Login = () => {
             </Tabs>
           </CardContent>
         </Card>
+        
+        <Separator className="my-6" />
+        
+        <div className="text-center text-xs text-muted-foreground">
+          <p>By continuing, you agree to our Terms of Service and Privacy Policy</p>
+        </div>
       </div>
     </div>
   );
