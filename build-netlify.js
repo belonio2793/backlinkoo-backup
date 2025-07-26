@@ -5,7 +5,7 @@
  * Handles the build process without complex database operations
  */
 
-import { execSync } from 'child_process';
+const { execSync } = require('child_process');
 
 console.log('🚀 Starting Netlify build process...');
 
