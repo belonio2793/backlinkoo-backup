@@ -24,10 +24,13 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     // Filter out browser extension errors
     const isExtensionError = error.message.includes('Cannot redefine property: ethereum') ||
                             error.stack?.includes('chrome-extension://') ||
-                            error.message.includes('ethereum');
+                            error.message.includes('ethereum') ||
+                            error.message.includes('evmAsk');
 
     if (isExtensionError) {
       console.warn('Browser extension conflict detected:', error.message);
+      // Reset error state to prevent app crash
+      this.setState({ hasError: false, error: undefined });
       return;
     }
 
