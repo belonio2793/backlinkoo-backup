@@ -224,6 +224,13 @@ const Index = () => {
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
             </div>
             <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/blog")}
+                className="font-medium text-gray-600 hover:text-gray-900"
+              >
+                Blog
+              </Button>
               <PurgeStorageButton
                 variant="ghost"
                 size="sm"
