@@ -40,6 +40,8 @@ export const AppWrapper = () => {
       <Route path="/terms-of-service" element={<TermsOfService />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/preview/:slug" element={<BlogPreview />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:slug" element={<BlogPost />} />
       <Route path="*" element={<NotFound />} />
 
       {/* Protected routes - require authentication and email verification */}
