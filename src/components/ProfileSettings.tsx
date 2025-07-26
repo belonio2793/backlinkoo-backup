@@ -67,6 +67,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
 
       if (isMockUser || isDevelopment) {
         console.log('🔧 ProfileSettings: Using demo mode, providing mock profile data');
+        setIsDemoMode(true);
         // Provide demo profile data
         setProfile({
           user_id: user.id,
