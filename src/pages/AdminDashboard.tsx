@@ -15,6 +15,7 @@ import { ResendConnectionTest } from "@/components/ResendConnectionTest";
 import { TestEmailSender } from "@/components/TestEmailSender";
 import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
 import { EmailTest } from "@/components/EmailTest";
+import { EmailSystemDiagnosis } from "@/components/EmailSystemDiagnosis";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { TestSupabaseConnection } from "@/components/TestSupabaseConnection";
