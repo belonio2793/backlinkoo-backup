@@ -20,25 +20,61 @@ export interface EmailResult extends EmailServiceResponse {
 }
 
 export class EmailService {
-  private static failureLog: Array<{ timestamp: Date; error: string; email: string }> = [];
+  private static failureLog: Array<{ timestamp: Date; error: string; email: string; attempt: number }> = [];
+  private static readonly MAX_RETRIES = 3;
+  private static readonly RETRY_DELAY = 1000; // 1 second base delay
 
-  private static async sendViaNetlifyFunction(emailData: any): Promise<EmailServiceResponse> {
+  private static async delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private static getRetryDelay(attempt: number): number {
+    // Exponential backoff: 1s, 2s, 4s
+    return this.RETRY_DELAY * Math.pow(2, attempt - 1);
+  }
+
+  private static async sendViaNetlifyFunction(emailData: any, attempt: number = 1): Promise<EmailServiceResponse> {
     try {
-      console.log('Sending email via Netlify function:', { to: emailData.to, subject: emailData.subject });
+      console.log(`Sending email via Netlify function (attempt ${attempt}):`, {
+        to: emailData.to,
+        subject: emailData.subject
+      });
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
       const response = await fetch('/.netlify/functions/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(emailData),
+        body: JSON.stringify({
+          ...emailData,
+          attempt,
+          retryable: attempt < this.MAX_RETRIES
+        }),
+        signal: controller.signal,
       });
 
-      // Check if response is ok before trying to parse JSON
+      clearTimeout(timeoutId);
+
+      // Enhanced error handling for different HTTP status codes
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Netlify function error response:', response.status, errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
+
+        const errorMessage = this.getErrorMessage(response.status, errorText);
+
+        // Determine if error is retryable
+        const isRetryable = this.isRetryableError(response.status);
+
+        if (isRetryable && attempt < this.MAX_RETRIES) {
+          console.log(`Retryable error, attempt ${attempt}/${this.MAX_RETRIES}, retrying...`);
+          await this.delay(this.getRetryDelay(attempt));
+          return this.sendViaNetlifyFunction(emailData, attempt + 1);
+        }
+
+        throw new Error(errorMessage);
       }
 
       let result;
@@ -46,6 +82,13 @@ export class EmailService {
         result = await response.json();
       } catch (jsonError) {
         console.error('Failed to parse JSON response:', jsonError);
+
+        if (attempt < this.MAX_RETRIES) {
+          console.log(`JSON parse error, retrying attempt ${attempt + 1}...`);
+          await this.delay(this.getRetryDelay(attempt));
+          return this.sendViaNetlifyFunction(emailData, attempt + 1);
+        }
+
         throw new Error('Invalid JSON response from email service');
       }
 
@@ -58,15 +101,108 @@ export class EmailService {
           provider: 'netlify_resend'
         };
       } else {
-        throw new Error(result.error || 'Email service returned failure');
+        const errorMessage = result.error || 'Email service returned failure';
+
+        // Check if we should retry based on the error
+        if (this.isRetryableServiceError(result.error) && attempt < this.MAX_RETRIES) {
+          console.log(`Service error is retryable, attempt ${attempt}/${this.MAX_RETRIES}, retrying...`);
+          await this.delay(this.getRetryDelay(attempt));
+          return this.sendViaNetlifyFunction(emailData, attempt + 1);
+        }
+
+        throw new Error(errorMessage);
       }
     } catch (error: any) {
       console.error('sendViaNetlifyFunction error:', error);
+
+      // Log the failure with attempt number
+      this.logFailure(emailData.to, error.message, attempt);
+
+      // Handle specific error types
+      if (error.name === 'AbortError') {
+        if (attempt < this.MAX_RETRIES) {
+          console.log(`Request timeout, retrying attempt ${attempt + 1}...`);
+          await this.delay(this.getRetryDelay(attempt));
+          return this.sendViaNetlifyFunction(emailData, attempt + 1);
+        }
+        return {
+          success: false,
+          error: 'Email service timeout after multiple attempts',
+          provider: 'netlify_resend'
+        };
+      }
+
       return {
         success: false,
-        error: error.message || 'Unknown error occurred',
+        error: this.sanitizeErrorMessage(error.message) || 'Unknown error occurred',
         provider: 'netlify_resend'
       };
+    }
+  }
+
+  private static getErrorMessage(status: number, errorText: string): string {
+    switch (status) {
+      case 400:
+        return 'Invalid email data provided';
+      case 401:
+        return 'Email service authentication failed';
+      case 403:
+        return 'Email service access forbidden';
+      case 429:
+        return 'Email rate limit exceeded, please try again later';
+      case 500:
+        return 'Email service internal error';
+      case 502:
+      case 503:
+      case 504:
+        return 'Email service temporarily unavailable';
+      default:
+        return `Email service error (${status}): ${errorText}`;
+    }
+  }
+
+  private static isRetryableError(status: number): boolean {
+    // Retry on server errors, rate limits, and timeouts
+    return status >= 500 || status === 429 || status === 408;
+  }
+
+  private static isRetryableServiceError(error: string): boolean {
+    if (!error) return false;
+
+    const retryableErrors = [
+      'timeout',
+      'rate limit',
+      'temporarily unavailable',
+      'service unavailable',
+      'internal error',
+      'connection error',
+      'network error'
+    ];
+
+    return retryableErrors.some(retryableError =>
+      error.toLowerCase().includes(retryableError)
+    );
+  }
+
+  private static sanitizeErrorMessage(message: string): string {
+    // Remove sensitive information from error messages
+    return message
+      .replace(/api[_-]?key[s]?[:\s=]*[a-zA-Z0-9_-]+/gi, 'API_KEY_REDACTED')
+      .replace(/token[s]?[:\s=]*[a-zA-Z0-9_-]+/gi, 'TOKEN_REDACTED')
+      .replace(/password[s]?[:\s=]*[^\s]+/gi, 'PASSWORD_REDACTED');
+  }
+
+  private static logFailure(email: string, error: string, attempt: number): void {
+    this.failureLog.push({
+      timestamp: new Date(),
+      error: this.sanitizeErrorMessage(error),
+      email,
+      attempt
+    });
+
+    // Keep only last 100 failures
+    if (this.failureLog.length > 100) {
+      this.failureLog = this.failureLog.slice(-100);
     }
   }
 
