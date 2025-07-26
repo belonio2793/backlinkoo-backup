@@ -184,7 +184,17 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="email-test">
-            <EmailSystemManager />
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Email System Test</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <EmailTest />
+                </CardContent>
+              </Card>
+              <EmailSystemManager />
+            </div>
           </TabsContent>
 
           <TabsContent value="security">
