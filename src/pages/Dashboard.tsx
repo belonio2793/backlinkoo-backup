@@ -306,6 +306,10 @@ const Dashboard = () => {
     setIsFirstTimeUser(false);
   };
 
+  const handleUserUpdate = (updatedUser: User) => {
+    setUser(updatedUser);
+    console.log('User profile updated:', updatedUser);
+  };
 
   const handleSignOut = async () => {
     try {
