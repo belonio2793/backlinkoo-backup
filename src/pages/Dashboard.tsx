@@ -412,89 +412,53 @@ const Dashboard = () => {
         error = fetchError;
       }
 
-      if (error) {
-        if (error.message.includes('timeout')) {
-          console.warn('📊 Campaigns fetch timed out, using fallback data');
-        } else {
-          console.error('📊 Error fetching campaigns (non-critical):', error);
-        }
-
-        // Provide demo campaigns in development
-        const isDevelopment = window.location.hostname === 'localhost' ||
-                             window.location.hostname.includes('fly.dev');
-
-        if (isDevelopment) {
-          setIsDemoMode(true);
-          const mockCampaigns = [
-            {
-              id: 'demo-1',
-              name: 'Demo Campaign 1',
-              target_url: 'https://example.com',
-              keywords: ['SEO', 'backlinks', 'marketing'],
-              links_requested: 5,
-              links_delivered: 3,
-              status: 'in_progress',
-              created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-              credits_used: 5,
-              completed_backlinks: [
-                'https://demo-site1.com/article',
-                'https://demo-site2.com/blog',
-                'https://demo-site3.com/news'
-              ]
-            },
-            {
-              id: 'demo-2',
-              name: 'Demo Campaign 2',
-              target_url: 'https://mysite.com',
-              keywords: ['web development', 'React'],
-              links_requested: 3,
-              links_delivered: 3,
-              status: 'completed',
-              created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week ago
-              credits_used: 3,
-              completed_backlinks: [
-                'https://tech-blog.com/article',
-                'https://dev-news.com/story',
-                'https://coding-tips.com/guide'
-              ]
-            }
-          ];
-          setCampaigns(mockCampaigns);
-        } else {
-          setCampaigns([]); // Empty array in production
-        }
-        return;
-      }
-
-      setCampaigns(campaignsData || []);
-    } catch (error: any) {
-      console.error('📊 Error fetching campaigns (continuing anyway):', error);
-
-      // Provide demo data in development, empty in production
-      const isDevelopment = window.location.hostname === 'localhost' ||
-                           window.location.hostname.includes('fly.dev');
-
-      if (isDevelopment) {
-        console.log('📊 Using demo campaigns for development');
+      if (error || !campaignsData) {
+        console.warn('📊 Database unavailable, using demo campaigns');
         setIsDemoMode(true);
+
         const mockCampaigns = [
           {
-            id: 'demo-fallback-1',
-            name: 'Sample Campaign',
+            id: 'demo-1',
+            name: 'Demo Campaign 1',
             target_url: 'https://example.com',
-            keywords: ['demo', 'test'],
-            links_requested: 2,
-            links_delivered: 1,
+            keywords: ['SEO', 'backlinks', 'marketing'],
+            links_requested: 5,
+            links_delivered: 3,
             status: 'in_progress',
-            created_at: new Date().toISOString(),
-            credits_used: 2,
-            completed_backlinks: ['https://demo-link.com']
+            created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+            credits_used: 5,
+            completed_backlinks: [
+              'https://demo-site1.com/article',
+              'https://demo-site2.com/blog',
+              'https://demo-site3.com/news'
+            ]
+          },
+          {
+            id: 'demo-2',
+            name: 'Demo Campaign 2',
+            target_url: 'https://mysite.com',
+            keywords: ['web development', 'React'],
+            links_requested: 3,
+            links_delivered: 3,
+            status: 'completed',
+            created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+            credits_used: 3,
+            completed_backlinks: [
+              'https://tech-blog.com/article',
+              'https://dev-news.com/story',
+              'https://coding-tips.com/guide'
+            ]
           }
         ];
         setCampaigns(mockCampaigns);
-      } else {
-        setCampaigns([]);
+        return;
       }
+
+      setCampaigns(campaignsData);
+    } catch (error: any) {
+      console.error('📊 Unexpected error in fetchCampaigns:', error);
+      setIsDemoMode(true);
+      setCampaigns([]);
     }
   };
 
