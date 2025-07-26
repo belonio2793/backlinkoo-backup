@@ -135,14 +135,22 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
                              window.location.hostname.includes('fly.dev');
 
         if (isDevelopment) {
-          console.warn('EmailVerificationGuard: Auth failed in development, allowing access');
-          setIsEmailVerified(true);
-          setUser({
-            id: 'dev-fallback-user',
-            email: 'dev@example.com',
-            email_confirmed_at: new Date().toISOString(),
-            user_metadata: { display_name: 'Development User' }
-          } as any);
+          console.warn('EmailVerificationGuard: Auth failed in development');
+          setAuthFailCount(prev => prev + 1);
+
+          // After 2 failures, show bypass option
+          if (authFailCount >= 1) {
+            setShowDevBypass(true);
+          } else {
+            // Auto-bypass on second failure
+            setIsEmailVerified(true);
+            setUser({
+              id: 'dev-fallback-user',
+              email: 'dev@example.com',
+              email_confirmed_at: new Date().toISOString(),
+              user_metadata: { display_name: 'Development User' }
+            } as any);
+          }
         } else {
           navigate('/login');
         }
