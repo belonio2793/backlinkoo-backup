@@ -281,6 +281,8 @@ const Dashboard = () => {
       // Clear user state and navigate anyway
       setUser(null);
       navigate('/');
+    } finally {
+      setIsSigningOut(false);
     }
   };
 
