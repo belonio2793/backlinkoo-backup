@@ -63,9 +63,13 @@ const Dashboard = () => {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🏠 Dashboard - Auth state change:', { event, hasSession: !!session, hasUser: !!session?.user });
+
       if (event === 'SIGNED_OUT' || !session) {
+        console.log('🏠 Dashboard - User signed out or no session, redirecting to login');
         navigate('/login');
       } else if (event === 'SIGNED_IN' && session) {
+        console.log('🏠 Dashboard - User signed in, updating state');
         setUser(session.user);
         fetchUserData();
         fetchCampaigns();
@@ -77,21 +81,43 @@ const Dashboard = () => {
 
   const checkAuthAndFetchData = async () => {
     try {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      console.log('Dashboard - Session check:', { hasSession: !!session, hasUser: !!session?.user, error: sessionError });
+      console.log('🏠 Dashboard: Starting auth check...');
+      console.log('🏠 Dashboard: Current pathname:', window.location.pathname);
+      console.log('🏠 Dashboard: Local storage keys:', Object.keys(localStorage).filter(k => k.includes('supabase')));
 
-      if (sessionError || !session || !session.user) {
-        console.log('Dashboard - No valid session/user found, redirecting to login');
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('🏠 Dashboard - Session check result:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        userId: session?.user?.id,
+        userEmail: session?.user?.email,
+        error: sessionError
+      });
+
+      if (sessionError) {
+        console.error('🏠 Dashboard - Session error:', sessionError);
         navigate('/login');
         return;
       }
 
-      console.log('Dashboard - Valid session found, setting user and fetching data');
+      if (!session) {
+        console.log('🏠 Dashboard - No session found, redirecting to login');
+        navigate('/login');
+        return;
+      }
+
+      if (!session.user) {
+        console.log('🏠 Dashboard - Session exists but no user, redirecting to login');
+        navigate('/login');
+        return;
+      }
+
+      console.log('🏠 Dashboard - Valid session found, setting user and fetching data');
       setUser(session.user);
       await fetchUserData(session.user);
       await fetchCampaigns(session.user);
     } catch (error) {
-      console.error('Dashboard - Error checking auth:', error);
+      console.error('🏠 Dashboard - Error checking auth:', error);
       navigate('/login');
     } finally {
       setLoading(false);

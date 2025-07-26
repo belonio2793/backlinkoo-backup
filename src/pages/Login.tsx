@@ -10,9 +10,10 @@ import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { ResendEmailService } from "@/services/resendEmailService";
 import { ProfileMigrationService } from "@/services/profileMigrationService";
+import LoginDebugger from "@/components/LoginDebugger";
 
 import { useNavigate } from "react-router-dom";
-import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft } from "lucide-react";
+import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft, Bug } from "lucide-react";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,6 +26,7 @@ const Login = () => {
   const [loginPassword, setLoginPassword] = useState("");
   const [showResendConfirmation, setShowResendConfirmation] = useState(false);
   const [resendEmail, setResendEmail] = useState("");
+  const [showDebugger, setShowDebugger] = useState(false);
   const { toast } = useToast();
   const { broadcastNewUser } = useGlobalNotifications();
   const navigate = useNavigate();
@@ -67,22 +69,37 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    console.log('🔑 Starting login process...');
+    console.log('Email:', loginEmail);
+    console.log('Password length:', loginPassword?.length);
+
     try {
       cleanupAuthState();
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
-        // Continue even if this fails
+        console.log('⚠️ Cleanup sign out failed (continuing):', err);
       }
 
+      console.log('🔍 Attempting Supabase sign in...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: loginPassword,
       });
 
-      if (error) throw error;
+      console.log('📊 Supabase response:', { data, error });
+
+      if (error) {
+        console.error('❌ Login error:', error);
+        throw error;
+      }
 
       if (data.user) {
+        console.log('✅ User authenticated:', data.user.id, data.user.email);
+        console.log('📝 Session data:', data.session);
+
+        // Wait a moment for session to be properly stored
+        await new Promise(resolve => setTimeout(resolve, 100));
         // Ensure user has proper profile using migration service
         try {
           const migrationResult = await ProfileMigrationService.ensureUserProfile(
@@ -99,10 +116,26 @@ const Login = () => {
           console.warn('Profile migration error, but continuing login:', profileErr);
         }
 
+        // Verify session is properly stored before redirect
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        console.log('📋 Post-login session check:', { session: !!session, error: sessionError });
+
+        if (!session) {
+          console.error('⚠️ No session found after login - this may cause redirect loop');
+          toast({
+            title: "Login Issue",
+            description: "Authentication succeeded but session not found. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
         toast({
           title: "Welcome back!",
           description: "You have been successfully signed in.",
         });
+
+        console.log('🚀 Redirecting to dashboard...');
         window.location.href = '/dashboard';
       }
     } catch (error: any) {
@@ -399,8 +432,8 @@ The Backlink ∞ Team`,
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Back to Home Button */}
-        <div className="mb-6">
+        {/* Back to Home Button and Debug Toggle */}
+        <div className="mb-6 flex justify-between items-center">
           <Button
             variant="ghost"
             onClick={() => navigate('/')}
@@ -409,6 +442,17 @@ The Backlink ∞ Team`,
             <ArrowLeft className="h-4 w-4" />
             Back to Home
           </Button>
+          {window.location.hostname === 'localhost' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowDebugger(!showDebugger)}
+              className="flex items-center gap-2"
+            >
+              <Bug className="h-4 w-4" />
+              Debug
+            </Button>
+          )}
         </div>
 
         {/* Logo */}
@@ -591,6 +635,13 @@ The Backlink ∞ Team`,
             </Tabs>
           </CardContent>
         </Card>
+
+        {/* Debug Panel */}
+        {showDebugger && (
+          <div className="mt-6">
+            <LoginDebugger />
+          </div>
+        )}
       </div>
     </div>
   );
