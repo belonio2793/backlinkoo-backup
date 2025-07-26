@@ -125,13 +125,22 @@ export class ResendEmailService {
   static async sendConfirmationEmail(email: string, confirmationUrl?: string): Promise<ResendEmailResponse> {
     console.log('Sending confirmation email to:', email);
 
-    const defaultConfirmationUrl = confirmationUrl || `https://backlinkoo.com/auth/confirm?email=${encodeURIComponent(email)}`;
+    const defaultConfirmationUrl = confirmationUrl || `${window.location.origin}/auth/confirm?email=${encodeURIComponent(email)}`;
+
+    // Add development notice if in dev mode
+    const devNotice = this.isDevelopment() ? `
+
+🧪 DEVELOPMENT MODE NOTICE:
+This is a simulated email for testing purposes. In production, you would receive an actual email.
+For testing, you can manually navigate to: ${defaultConfirmationUrl}
+
+` : '';
 
     const emailData: ResendEmailData = {
       to: email,
       subject: 'Confirm Your Backlink ∞ Account',
       message: `Welcome to Backlink ∞!
-
+${devNotice}
 Thank you for creating an account with us. To complete your registration and start building high-authority backlinks, please confirm your email address.
 
 Click the link below to verify your account:
