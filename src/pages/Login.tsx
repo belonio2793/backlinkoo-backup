@@ -441,8 +441,8 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Try Supabase resend first
-      const { error: supabaseError } = await supabase.auth.resend({
+      // Use Supabase resend (will use configured SMTP settings)
+      const { error } = await supabase.auth.resend({
         type: 'signup',
         email: resendEmail,
         options: {
@@ -450,50 +450,17 @@ const Login = () => {
         }
       });
 
-      if (supabaseError) {
-        console.log('Supabase resend failed, trying custom Resend service:', supabaseError.message);
-
-        // Fallback to custom Resend email via Netlify function
-        const confirmationLink = `https://backlinkoo.com/auth/confirm?email=${encodeURIComponent(resendEmail)}`;
-
-        const emailResponse = await fetch('/.netlify/functions/send-email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            to: resendEmail,
-            subject: 'Confirm Your Backlink ∞ Account',
-            message: `Welcome to Backlink ∞!
-
-Please confirm your email address by clicking the link below:
-
-${confirmationLink}
-
-If you didn't create an account with us, please ignore this email.
-
-Best regards,
-The Backlink ∞ Team`,
-            from: 'Backlink ∞ <support@backlinkoo.com>'
-          }),
-        });
-
-        const result = await emailResponse.json();
-
-        if (!emailResponse.ok || !result.success) {
-          throw new Error(result.error || 'Failed to send email via Resend');
-        }
-
-        toast({
-          title: "Confirmation email sent!",
-          description: "We've sent you a confirmation email via our backup system. Please check your email and spam folder.",
-        });
-      } else {
-        toast({
-          title: "Confirmation email sent!",
-          description: "We've sent you a new confirmation link. Please check your email.",
-        });
+      if (error) {
+        console.error('Supabase resend error:', error);
+        throw new Error(error.message);
       }
+
+      console.log('✅ Confirmation email resent via Supabase SMTP');
+
+      toast({
+        title: "Confirmation email sent!",
+        description: "We've sent you a new confirmation link. Please check your email and spam folder.",
+      });
 
       setShowResendConfirmation(false);
     } catch (error: any) {
