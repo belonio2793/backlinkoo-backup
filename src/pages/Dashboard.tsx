@@ -61,6 +61,14 @@ const Dashboard = () => {
     console.log('Dashboard mounted, checking authentication...');
     checkAuthAndFetchData();
 
+    // Fallback timeout to prevent infinite loading
+    const loadingTimeout = setTimeout(() => {
+      if (loading) {
+        console.warn('🏠 Dashboard - Loading timeout reached, forcing loading = false');
+        setLoading(false);
+      }
+    }, 10000); // 10 second timeout
+
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('🏠 Dashboard - Auth state change:', { event, hasSession: !!session, hasUser: !!session?.user });
@@ -76,14 +84,17 @@ const Dashboard = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(loadingTimeout);
+    };
+  }, [navigate, loading]);
 
   const checkAuthAndFetchData = async () => {
     try {
       console.log('🏠 Dashboard: Starting auth check...');
       console.log('🏠 Dashboard: Current pathname:', window.location.pathname);
-      console.log('���� Dashboard: Local storage keys:', Object.keys(localStorage).filter(k => k.includes('supabase')));
+      console.log('🏠 Dashboard: Local storage keys:', Object.keys(localStorage).filter(k => k.includes('supabase')));
 
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       console.log('🏠 Dashboard - Session check result:', {
