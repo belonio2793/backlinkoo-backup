@@ -14,6 +14,7 @@ import { EmailVerificationStatus } from "@/components/EmailVerificationStatus";
 import { ResendConnectionTest } from "@/components/ResendConnectionTest";
 import { TestEmailSender } from "@/components/TestEmailSender";
 import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
+import { EmailVerificationManager } from "@/components/admin/EmailVerificationManager";
 import { EmailTest } from "@/components/EmailTest";
 import { SupabaseEmailTest } from "@/components/SupabaseEmailTest";
 import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
@@ -162,6 +163,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="database">Database</TabsTrigger>
             <TabsTrigger value="smtp-test">SMTP Test</TabsTrigger>
             <TabsTrigger value="email-test">Email System</TabsTrigger>
+            <TabsTrigger value="email-verification">Email Verification</TabsTrigger>
             <TabsTrigger value="security">Security & Roles</TabsTrigger>
           </TabsList>
 
@@ -199,6 +201,10 @@ const AdminDashboard = () => {
               </Card>
               <EmailSystemManager />
             </div>
+          </TabsContent>
+
+          <TabsContent value="email-verification">
+            <EmailVerificationManager />
           </TabsContent>
 
           <TabsContent value="security">
