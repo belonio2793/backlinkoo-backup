@@ -126,7 +126,7 @@ Professional SEO & Backlink Management Platform
 https://backlinkoo.com`
     };
 
-    return await this.sendDirectly(emailData);
+    return await this.sendViaNetlify(emailData);
   }
 
   static async sendPasswordResetEmail(email: string, resetUrl: string): Promise<ResendEmailResponse> {
@@ -156,7 +156,7 @@ Professional SEO & Backlink Management Platform
 https://backlinkoo.com`
     };
 
-    return await this.sendDirectly(emailData);
+    return await this.sendViaNetlify(emailData);
   }
 
   static async sendWelcomeEmail(email: string, firstName?: string): Promise<ResendEmailResponse> {
@@ -205,12 +205,12 @@ Professional SEO & Backlink Management Platform
 https://backlinkoo.com`
     };
 
-    return await this.sendDirectly(emailData);
+    return await this.sendViaNetlify(emailData);
   }
 
   // Legacy compatibility methods
   static async sendEmail(emailData: ResendEmailData): Promise<ResendEmailResponse> {
-    return await this.sendDirectly(emailData);
+    return await this.sendViaNetlify(emailData);
   }
 
   static async healthCheck(): Promise<{ status: string; resend: boolean }> {
