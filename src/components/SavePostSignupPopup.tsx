@@ -114,18 +114,7 @@ export function SavePostSignupPopup({
           console.warn('Profile creation failed:', profileError);
         }
 
-        // Initialize user credits (10 free credits)
-        const { error: creditsError } = await supabase
-          .from('credits')
-          .insert({
-            user_id: authData.user.id,
-            amount: 10,
-            total_purchased: 10
-          });
 
-        if (creditsError) {
-          console.warn('Credits initialization failed:', creditsError);
-        }
 
         // Save the blog post if ID provided
         if (blogPostId) {
@@ -143,7 +132,7 @@ export function SavePostSignupPopup({
 
         toast({
           title: 'Account Created Successfully!',
-          description: 'Welcome to Backlinkoo! You\'ve received 10 free credits.',
+          description: 'Welcome to Backlinkoo!',
         });
       }
     } catch (error: any) {
@@ -198,7 +187,7 @@ export function SavePostSignupPopup({
                 <ul className="text-sm space-y-1 text-blue-700 dark:text-blue-300">
                   <li>• Your blog post is now live permanently</li>
                   <li>• Check your dashboard for campaign details</li>
-                  <li>• You have 10 free credits to create more content</li>
+
                   <li>• Explore our premium features</li>
                 </ul>
               </div>
@@ -266,33 +255,7 @@ export function SavePostSignupPopup({
             </div>
           </div>
 
-          {/* Benefits Section */}
-          <div className="text-center space-y-4">
-            <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg">
-              <h3 className="font-semibold mb-3 flex items-center justify-center gap-2">
-                <Crown className="h-5 w-5 text-yellow-500" />
-                Save & Get Premium Benefits
-              </h3>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <Save className="h-4 w-4 text-green-500" />
-                  <span>Permanent Storage</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-blue-500" />
-                  <span>10 Free Credits</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-purple-500" />
-                  <span>Full Dashboard</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <span>Priority Support</span>
-                </div>
-              </div>
-            </div>
-          </div>
+
 
           {/* Quick Signup Form */}
           <form onSubmit={handleSignup} className="space-y-4">

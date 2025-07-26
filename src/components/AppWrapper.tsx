@@ -16,6 +16,8 @@ import TermsOfService from "../pages/TermsOfService";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 import { CampaignDeliverables } from "../pages/CampaignDeliverables";
 import BlogPreview from "../pages/BlogPreview";
+import { Blog } from "../pages/Blog";
+import { BlogPost } from "../pages/BlogPost";
 import EmailMarketing from "../pages/EmailMarketing";
 import BacklinkReport from "../pages/BacklinkReport";
 import ReportViewer from "../pages/ReportViewer";
@@ -38,6 +40,8 @@ export const AppWrapper = () => {
       <Route path="/terms-of-service" element={<TermsOfService />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/preview/:slug" element={<BlogPreview />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:slug" element={<BlogPost />} />
       <Route path="*" element={<NotFound />} />
 
       {/* Protected routes - require authentication and email verification */}

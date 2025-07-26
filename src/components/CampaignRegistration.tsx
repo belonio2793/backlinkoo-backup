@@ -95,22 +95,11 @@ export function CampaignRegistration({
           console.warn('Profile creation failed:', profileError);
         }
 
-        // Initialize user credits
-        const { error: creditsError } = await supabase
-          .from('credits')
-          .insert({
-            user_id: authData.user.id,
-            amount: 10, // Give 10 free credits to new users
-            total_purchased: 10
-          });
 
-        if (creditsError) {
-          console.warn('Credits initialization failed:', creditsError);
-        }
 
         toast({
           title: 'Registration Successful!',
-          description: 'Welcome to Backlinkoo! You\'ve received 10 free credits to get started.',
+          description: 'Welcome to Backlinkoo!',
         });
 
         setIsOpen(false);
@@ -149,44 +138,16 @@ export function CampaignRegistration({
         </DialogHeader>
         
         <div className="space-y-6">
-          {/* Benefits Section */}
-          <div className="text-center space-y-4">
-            <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg">
-              <h3 className="font-semibold mb-3 flex items-center justify-center gap-2">
-                <Crown className="h-5 w-5 text-yellow-500" />
-                Account Benefits
-              </h3>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Permanent Storage</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-blue-500" />
-                  <span>10 Free Credits</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Save className="h-4 w-4 text-purple-500" />
-                  <span>Campaign Dashboard</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <span>Priority Support</span>
-                </div>
+          {campaignId && (
+            <div className="p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+              <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
+                <Clock className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  Your campaign expires in 24 hours without an account
+                </span>
               </div>
             </div>
-            
-            {campaignId && (
-              <div className="p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
-                  <Clock className="h-4 w-4" />
-                  <span className="text-sm font-medium">
-                    Your campaign expires in 24 hours without an account
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
 
           {/* Registration Form */}
           <form onSubmit={handleRegister} className="space-y-4">
@@ -269,7 +230,7 @@ export function CampaignRegistration({
               ) : (
                 <div className="flex items-center gap-2">
                   <UserPlus className="h-4 w-4" />
-                  Create Account & Get 10 Free Credits
+                  Create Account
                 </div>
               )}
             </Button>
@@ -312,10 +273,6 @@ export function QuickRegistration({ campaignId, onSaved }: QuickRegistrationProp
         </div>
         
         <div className="flex flex-wrap justify-center gap-2">
-          <Badge variant="secondary" className="gap-1">
-            <Zap className="h-3 w-3" />
-            10 Free Credits
-          </Badge>
           <Badge variant="secondary" className="gap-1">
             <Save className="h-3 w-3" />
             Permanent Storage
