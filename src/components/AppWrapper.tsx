@@ -34,6 +34,7 @@ export const AppWrapper = () => {
       <Route path="/payment-cancelled" element={<PaymentCancelled />} />
       <Route path="/auth/confirm" element={<EmailConfirmation />} />
       <Route path="/auth/callback" element={<EmailConfirmation />} />
+      <Route path="/auth/reset-password" element={<PasswordReset />} />
       <Route path="/terms-of-service" element={<TermsOfService />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/campaign/:campaignId" element={<CampaignDeliverables />} />
