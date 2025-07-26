@@ -336,44 +336,8 @@ const Dashboard = () => {
       }
 
       if (error || !campaignsData) {
-        console.warn('📊 Database unavailable, using demo campaigns');
-        setIsDemoMode(true);
-
-        const mockCampaigns = [
-          {
-            id: 'demo-1',
-            name: 'Demo Campaign 1',
-            target_url: 'https://example.com',
-            keywords: ['SEO', 'backlinks', 'marketing'],
-            links_requested: 5,
-            links_delivered: 3,
-            status: 'in_progress',
-            created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            credits_used: 5,
-            completed_backlinks: [
-              'https://demo-site1.com/article',
-              'https://demo-site2.com/blog',
-              'https://demo-site3.com/news'
-            ]
-          },
-          {
-            id: 'demo-2',
-            name: 'Demo Campaign 2',
-            target_url: 'https://mysite.com',
-            keywords: ['web development', 'React'],
-            links_requested: 3,
-            links_delivered: 3,
-            status: 'completed',
-            created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-            credits_used: 3,
-            completed_backlinks: [
-              'https://tech-blog.com/article',
-              'https://dev-news.com/story',
-              'https://coding-tips.com/guide'
-            ]
-          }
-        ];
-        setCampaigns(mockCampaigns);
+        console.warn('📊 Error fetching campaigns:', error);
+        setCampaigns([]);
         return;
       }
 
