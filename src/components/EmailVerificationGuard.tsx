@@ -215,45 +215,10 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Checking authentication...</span>
-          </div>
-
-          {/* Development bypass option */}
-          {showDevBypass && isDevelopment && (
-            <Card className="w-full max-w-md mx-auto">
-              <CardHeader>
-                <CardTitle className="text-orange-600">Development Mode</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Authentication is taking too long. This might be due to Supabase configuration issues.
-                </p>
-                <div className="space-y-2">
-                  <Button
-                    onClick={handleDevBypass}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    Continue with Development Bypass
-                  </Button>
-                  <Button
-                    onClick={() => navigate('/login')}
-                    className="w-full"
-                    variant="ghost"
-                  >
-                    Go to Login Page
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  This bypass is only available in development mode.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span>Checking authentication...</span>
         </div>
       </div>
     );
