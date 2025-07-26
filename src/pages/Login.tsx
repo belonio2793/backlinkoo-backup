@@ -277,6 +277,7 @@ const Login = () => {
 
         if (isUserExists) {
           console.log('User already exists, showing resend option');
+          setDebugInfo(prev => [...prev, 'User already exists - showing resend options']);
           setIsLoading(false); // Reset loading state
           setResendEmail(email);
           setShowResendConfirmation(true);
