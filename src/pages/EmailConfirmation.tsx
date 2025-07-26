@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { AuthService } from '@/services/authService';
 import { EmailService } from '@/services/emailService';
 import { ProfileMigrationService } from '@/services/profileMigrationService';
 import { 
@@ -154,18 +155,12 @@ const EmailConfirmation = () => {
     try {
       console.log('📧 Resending confirmation email to:', userEmail);
 
-      // Use Supabase resend
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: userEmail,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm`
-        }
-      });
+      // Use AuthService to resend confirmation
+      const result = await AuthService.resendConfirmation(userEmail);
 
-      if (error) {
-        console.error('Supabase resend error:', error);
-        throw error;
+      if (!result.success) {
+        console.error('AuthService resend error:', result.error);
+        throw new Error(result.error || 'Failed to resend confirmation');
       }
 
       // Send additional confirmation email via our custom service
