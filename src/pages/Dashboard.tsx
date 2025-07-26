@@ -237,12 +237,14 @@ const Dashboard = () => {
 
 
   const handleSignOut = async () => {
+    if (isSigningOut) return; // Prevent double-clicks
+
     try {
       console.log('Dashboard - Starting sign out process...');
+      setIsSigningOut(true);
 
       // Clear user state immediately
       setUser(null);
-      setLoading(true);
 
       // Clean up all auth-related storage
       try {
