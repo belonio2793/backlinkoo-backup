@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { AuthService } from '@/services/authService';
+import { AuthService, type SocialProvider } from '@/services/authService';
 import { EmailService } from '@/services/emailService';
+import { SocialLogin } from '@/components/SocialLogin';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   CheckCircle, 
@@ -400,30 +401,52 @@ export const AuthEmailTest = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => testSpecificEmail('confirmation')}
               className="flex items-center gap-2"
             >
               <User className="h-4 w-4" />
               Send Confirmation Email
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => testSpecificEmail('reset')}
               className="flex items-center gap-2"
             >
               <Lock className="h-4 w-4" />
               Send Password Reset
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => testSpecificEmail('welcome')}
               className="flex items-center gap-2"
             >
               <Send className="h-4 w-4" />
               Send Welcome Email
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Social Authentication Test
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Test social login functionality. Note: This will initiate actual OAuth flows.
+            </p>
+            <SocialLogin onSocialLogin={(provider) => {
+              toast({
+                title: "Social Login Initiated",
+                description: `${AuthService.getProviderDisplayName(provider)} authentication flow started`,
+              });
+            }} />
           </div>
         </CardContent>
       </Card>
