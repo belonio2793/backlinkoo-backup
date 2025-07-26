@@ -145,10 +145,8 @@ const Login = () => {
         console.log('🔐 Sign in successful:', data.user.id);
         setDebugInfo(prev => [...prev, `Login successful! User ID: ${data.user.id}`]);
 
-        // Check if email is confirmed (bypass in development)
-        const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('.fly.dev');
-
-        if (!isDev && !data.user.email_confirmed_at) {
+        // Check if email is confirmed
+        if (!data.user.email_confirmed_at) {
           console.warn('🔐 Email not confirmed, blocking login');
           setDebugInfo(prev => [...prev, 'Email not confirmed - blocking access']);
 
@@ -164,8 +162,6 @@ const Login = () => {
           setShowResendConfirmation(true);
           setResendEmail(loginEmail);
           return;
-        } else if (isDev && !data.user.email_confirmed_at) {
-          console.log('🧪 Development mode: Bypassing email verification check for login');
         }
 
         // Profile migration in background - don't wait for it
