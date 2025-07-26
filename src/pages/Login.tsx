@@ -2,17 +2,15 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { AuthService, setupAuthStateListener } from "@/services/authService";
-import { supabase } from "@/integrations/supabase/client";
 import { SocialLogin } from "@/components/SocialLogin";
 
 import { useNavigate } from "react-router-dom";
-import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft, Shield, CheckCircle, AlertCircle } from "lucide-react";
+import { Infinity, Eye, EyeOff, Mail, RefreshCw, Shield, CheckCircle, AlertCircle } from "lucide-react";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -70,33 +68,6 @@ const Login = () => {
       }
     };
   }, [navigate]);
-
-  const cleanupAuthState = () => {
-    try {
-      // Only clear specific problematic keys, not all auth state
-      const keysToRemove = [];
-
-      // Check localStorage
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (key.includes('sb-') && key.includes('token'))) {
-          keysToRemove.push(key);
-        }
-      }
-
-      keysToRemove.forEach(key => {
-        try {
-          localStorage.removeItem(key);
-        } catch (e) {
-          console.warn('Failed to remove localStorage key:', key);
-        }
-      });
-
-      console.log('🔐 Cleaned up auth state');
-    } catch (error) {
-      console.warn('Auth cleanup failed:', error);
-    }
-  };
 
   const validateEmailFormat = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -518,33 +489,17 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Back to Home Button */}
-        <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Button>
-        </div>
-
-        {/* Logo */}
+        {/* Logo and Welcome */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-2">
+          <div className="flex items-center justify-center gap-2 mb-4">
             <Infinity className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">Backlink ∞</h1>
           </div>
-          <p className="text-muted-foreground">Professional SEO & Backlink Management</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome</h1>
+          <p className="text-muted-foreground">Sign in to your account or create a new one to get started</p>
         </div>
 
         <Card>
-          <CardHeader className="text-center">
-            <CardTitle>Welcome to Backlink ∞</CardTitle>
-            <CardDescription>Sign in to your account or create a new one to get started</CardDescription>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {/* Social Login Section */}
             <div className="mb-6">
               <SocialLogin disabled={isLoading} />
@@ -809,12 +764,6 @@ const Login = () => {
             </Tabs>
           </CardContent>
         </Card>
-        
-        <Separator className="my-6" />
-        
-        <div className="text-center text-xs text-muted-foreground">
-          <p>By continuing, you agree to our Terms of Service and Privacy Policy</p>
-        </div>
       </div>
     </div>
   );
