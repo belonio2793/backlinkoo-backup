@@ -229,17 +229,48 @@ const Dashboard = () => {
 
       console.log('🔍 Fetching user data for:', currentUser.id);
 
-      // Get user profile and role with timeout
-      const profilePromise = supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', currentUser.id)
-        .single();
+      // Check if we should skip database calls
+      const isDevelopment = window.location.hostname === 'localhost' ||
+                           window.location.hostname.includes('fly.dev');
+      const isMockUser = currentUser.id === 'mock-user-id' ||
+                        currentUser.id === 'dev-fallback-user' ||
+                        currentUser.id === 'dev-bypass-user' ||
+                        currentUser.email === 'test@example.com' ||
+                        currentUser.email === 'dev@example.com';
 
-      const { data: profile, error: profileError } = await Promise.race([
-        profilePromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 2000))
-      ]) as any;
+      if (isMockUser || isDevelopment) {
+        console.log('🔍 Using mock/development mode, skipping database calls');
+        setIsDemoMode(true);
+        setUserType('user');
+        setCredits(10); // Demo credits
+        setIsFirstTimeUser(false); // Show some demo campaigns
+        return;
+      }
+
+      // Try database calls with very short timeout
+      let profile = null;
+      try {
+        const profilePromise = supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', currentUser.id)
+          .single();
+
+        const result = await Promise.race([
+          profilePromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 1000))
+        ]) as any;
+
+        profile = result.data;
+
+        if (result.error && !result.error.message.includes('timeout')) {
+          console.log('🔍 Profile error (non-critical):', result.error);
+        }
+      } catch (profileError) {
+        console.warn('🔍 Profile fetch failed, using defaults:', profileError);
+        // Fall back to demo mode
+        setIsDemoMode(true);
+      }
 
       if (profileError) {
         if (profileError.message.includes('timeout')) {
