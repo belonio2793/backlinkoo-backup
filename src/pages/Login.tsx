@@ -482,6 +482,7 @@ const Login = () => {
 
   const handleResendConfirmation = async () => {
     setIsLoading(true);
+    const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('.fly.dev');
 
     try {
       // Try Supabase resend first
@@ -489,53 +490,43 @@ const Login = () => {
         type: 'signup',
         email: resendEmail,
         options: {
-          emailRedirectTo: `https://backlinkoo.com/auth/confirm`
+          emailRedirectTo: `${window.location.origin}/auth/confirm`
         }
       });
 
       if (supabaseError) {
-        console.log('Supabase resend failed, trying custom Resend service:', supabaseError.message);
+        console.log('Supabase resend failed, trying custom email service:', supabaseError.message);
 
-        // Fallback to custom Resend email via Netlify function
-        const confirmationLink = `https://backlinkoo.com/auth/confirm?email=${encodeURIComponent(resendEmail)}`;
+        // Fallback to custom email service
+        const emailResult = await ResendEmailService.sendConfirmationEmail(resendEmail);
 
-        const emailResponse = await fetch('/.netlify/functions/send-email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            to: resendEmail,
-            subject: 'Confirm Your Backlink ∞ Account',
-            message: `Welcome to Backlink ∞!
-
-Please confirm your email address by clicking the link below:
-
-${confirmationLink}
-
-If you didn't create an account with us, please ignore this email.
-
-Best regards,
-The Backlink ∞ Team`,
-            from: 'Backlink ∞ <support@backlinkoo.com>'
-          }),
-        });
-
-        const result = await emailResponse.json();
-
-        if (!emailResponse.ok || !result.success) {
-          throw new Error(result.error || 'Failed to send email via Resend');
+        if (emailResult.success) {
+          if (isDev) {
+            toast({
+              title: "Confirmation email sent! (Development Mode)",
+              description: "Email simulation completed. In production, you would receive an actual email.",
+            });
+          } else {
+            toast({
+              title: "Confirmation email sent!",
+              description: "We've sent you a confirmation email via our backup system. Please check your email and spam folder.",
+            });
+          }
+        } else {
+          throw new Error(emailResult.error || 'Failed to send email via backup service');
         }
-
-        toast({
-          title: "Confirmation email sent!",
-          description: "We've sent you a confirmation email via our backup system. Please check your email and spam folder.",
-        });
       } else {
-        toast({
-          title: "Confirmation email sent!",
-          description: "We've sent you a new confirmation link. Please check your email.",
-        });
+        if (isDev) {
+          toast({
+            title: "Confirmation email sent! (Development Mode)",
+            description: "Supabase email simulation completed. In production, you would receive an actual email.",
+          });
+        } else {
+          toast({
+            title: "Confirmation email sent!",
+            description: "We've sent you a new confirmation link. Please check your email.",
+          });
+        }
       }
 
       setShowResendConfirmation(false);
@@ -554,6 +545,11 @@ The Backlink ∞ Team`,
         }
       } else if (typeof error === 'string') {
         errorMessage = error;
+      }
+
+      // In development, provide more helpful error context
+      if (isDev) {
+        errorMessage = `Development Mode: ${errorMessage}. Email services are mocked for testing.`;
       }
 
       toast({
