@@ -60,21 +60,19 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
 
   const loadUserProfile = async () => {
     try {
-      const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('.fly.dev');
-      
-      if (isDev) {
-        // Mock profile data for development
-        setProfile({
-          firstName: user.user_metadata?.first_name || 'Dev',
-          lastName: user.user_metadata?.last_name || 'User',
-          displayName: user.user_metadata?.display_name || 'Dev User',
-          bio: 'Development user profile for testing the profile settings functionality.',
-          website: 'https://backlinkoo.com',
-          phone: '+1-555-0123',
-        });
-        return;
-      }
+      // Load from user metadata as fallback
+      const fallbackProfile = {
+        firstName: user.user_metadata?.first_name || '',
+        lastName: user.user_metadata?.last_name || '',
+        displayName: user.user_metadata?.display_name || '',
+        bio: '',
+        website: '',
+        phone: '',
+      };
 
+      setProfile(fallbackProfile);
+
+      // Try to load from database
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -83,9 +81,9 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
 
       if (data) {
         setProfile({
-          firstName: data.first_name || '',
-          lastName: data.last_name || '',
-          displayName: data.display_name || '',
+          firstName: data.first_name || fallbackProfile.firstName,
+          lastName: data.last_name || fallbackProfile.lastName,
+          displayName: data.display_name || fallbackProfile.displayName,
           bio: data.bio || '',
           website: data.website || '',
           phone: data.phone || '',
@@ -93,6 +91,7 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
       }
     } catch (error) {
       console.error('Error loading profile:', error);
+      // Keep fallback profile data on error
     }
   };
 
