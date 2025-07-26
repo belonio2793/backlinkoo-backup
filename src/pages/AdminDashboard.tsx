@@ -160,6 +160,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="database">Database</TabsTrigger>
             <TabsTrigger value="smtp-test">SMTP Test</TabsTrigger>
             <TabsTrigger value="email-test">Email System</TabsTrigger>
+            <TabsTrigger value="email-verification">Email Verification</TabsTrigger>
             <TabsTrigger value="security">Security & Roles</TabsTrigger>
           </TabsList>
 
