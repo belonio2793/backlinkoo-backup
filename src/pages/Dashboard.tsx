@@ -83,7 +83,7 @@ const Dashboard = () => {
     try {
       console.log('🏠 Dashboard: Starting auth check...');
       console.log('🏠 Dashboard: Current pathname:', window.location.pathname);
-      console.log('🏠 Dashboard: Local storage keys:', Object.keys(localStorage).filter(k => k.includes('supabase')));
+      console.log('���� Dashboard: Local storage keys:', Object.keys(localStorage).filter(k => k.includes('supabase')));
 
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       console.log('🏠 Dashboard - Session check result:', {
@@ -96,30 +96,41 @@ const Dashboard = () => {
 
       if (sessionError) {
         console.error('🏠 Dashboard - Session error:', sessionError);
+        setLoading(false);
         navigate('/login');
         return;
       }
 
       if (!session) {
         console.log('🏠 Dashboard - No session found, redirecting to login');
+        setLoading(false);
         navigate('/login');
         return;
       }
 
       if (!session.user) {
         console.log('🏠 Dashboard - Session exists but no user, redirecting to login');
+        setLoading(false);
         navigate('/login');
         return;
       }
 
       console.log('🏠 Dashboard - Valid session found, setting user and fetching data');
       setUser(session.user);
-      await fetchUserData(session.user);
-      await fetchCampaigns(session.user);
+
+      try {
+        await fetchUserData(session.user);
+        await fetchCampaigns(session.user);
+      } catch (dataError) {
+        console.error('🏠 Dashboard - Error fetching data (non-critical):', dataError);
+        // Continue loading even if data fetch fails
+      }
     } catch (error) {
       console.error('🏠 Dashboard - Error checking auth:', error);
+      setLoading(false);
       navigate('/login');
     } finally {
+      console.log('🏠 Dashboard - Setting loading to false');
       setLoading(false);
     }
   };
