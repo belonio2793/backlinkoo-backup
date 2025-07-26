@@ -439,6 +439,11 @@ const Login = () => {
   };
 
   const handleResendConfirmation = async () => {
+    if (isLoading) {
+      console.log('Resend already in progress, ignoring click');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
