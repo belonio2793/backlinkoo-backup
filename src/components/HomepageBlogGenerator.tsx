@@ -72,34 +72,14 @@ export function HomepageBlogGenerator() {
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
 
-      // Create blog post from generated content
-      const uniqueSlug = `${generatedContent.slug}-${Date.now()}`;
-      const publishedUrl = `${window.location.origin}/preview/${uniqueSlug}`;
-
-      const blogPost = {
-        id: `live_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        slug: uniqueSlug,
-        title: generatedContent.title,
-        content: generatedContent.content,
-        metaDescription: generatedContent.metaDescription,
-        keywords: [primaryKeyword],
+      // Create blog post using the published blog service
+      const blogPost = await publishedBlogService.createBlogPost({
+        keyword: primaryKeyword,
         targetUrl,
-        publishedUrl,
-        status: 'published',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
         userId: user?.id,
         isTrialPost: !user,
-        expiresAt: !user ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : undefined,
-        viewCount: 0,
-        seoScore: generatedContent.seoScore,
-        contextualLinks: generatedContent.contextualLinks
-      };
-
-      // Store in live blog publisher
-      if (liveBlogPublisher.inMemoryPosts) {
-        liveBlogPublisher.inMemoryPosts.set(blogPost.id, blogPost);
-      }
+        wordCount: 1200
+      });
 
       // Create campaign entry for registered users
       if (user) {
@@ -107,13 +87,13 @@ export function HomepageBlogGenerator() {
           const { data: campaignData, error: campaignError } = await supabase
             .from('campaigns')
             .insert({
-              name: `Live Blog: ${generatedContent.title}`,
+              name: `Live Blog: ${blogPost.title}`,
               target_url: targetUrl,
               keywords: [primaryKeyword],
               status: 'completed',
-              links_requested: generatedContent.contextualLinks?.length || 1,
-              links_delivered: generatedContent.contextualLinks?.length || 1,
-              completed_backlinks: [publishedUrl],
+              links_requested: blogPost.contextual_links?.length || 1,
+              links_delivered: blogPost.contextual_links?.length || 1,
+              completed_backlinks: [blogPost.published_url],
               user_id: user.id,
               credits_used: 1
             })
@@ -131,7 +111,7 @@ export function HomepageBlogGenerator() {
       }
 
       setGeneratedPost(blogPost);
-      setPublishedUrl(publishedUrl);
+      setPublishedUrl(blogPost.published_url);
       setBlogPostId(blogPost.id);
       setIsCompleted(true);
 
