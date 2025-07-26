@@ -240,55 +240,80 @@ const Dashboard = () => {
         new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 3000))
       ]) as any;
 
-      if (profileError && !profileError.message.includes('timeout')) {
-        console.log('Profile error (non-critical):', profileError);
-      }
+      if (profileError) {
+        if (profileError.message.includes('timeout')) {
+          console.warn('🔍 Profile fetch timed out, using defaults');
+        } else {
+          console.log('🔍 Profile error (non-critical):', profileError);
+        }
 
-      if (profile?.role === 'admin') {
+        // Use defaults when profile fetch fails
+        setUserType('user'); // Default to regular user
+      } else if (profile?.role === 'admin') {
         setUserType('admin');
       }
 
-      // Get user credits with timeout
-      const creditsPromise = supabase
-        .from('credits')
-        .select('amount')
-        .eq('user_id', currentUser.id)
-        .single();
+      // Get user credits with shorter timeout
+      let creditsData = null;
+      try {
+        const creditsPromise = supabase
+          .from('credits')
+          .select('amount')
+          .eq('user_id', currentUser.id)
+          .single();
 
-      const { data: creditsData, error: creditsError } = await Promise.race([
-        creditsPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Credits fetch timeout')), 5000))
-      ]) as any;
+        const result = await Promise.race([
+          creditsPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Credits fetch timeout')), 2000))
+        ]) as any;
 
-      if (creditsError && !creditsError.message.includes('timeout')) {
-        console.log('Credits error (non-critical):', creditsError);
+        creditsData = result.data;
+
+        if (result.error && !result.error.message.includes('timeout')) {
+          console.log('🔍 Credits error (non-critical):', result.error);
+        }
+      } catch (creditsError) {
+        console.warn('🔍 Credits fetch failed:', creditsError);
       }
 
       if (creditsData) {
         setCredits(creditsData.amount);
       } else {
-        setCredits(0); // Default to 0 credits
+        // Provide demo credits for development
+        const isDevelopment = window.location.hostname === 'localhost' ||
+                             window.location.hostname.includes('fly.dev');
+        setCredits(isDevelopment ? 10 : 0); // 10 demo credits in dev, 0 in production
       }
 
       // Check if user has any campaigns (first time user check)
       try {
-        const { data: campaignsData } = await supabase
+        const campaignsPromise = supabase
           .from('campaigns')
           .select('id')
           .eq('user_id', currentUser.id)
           .limit(1);
 
+        const { data: campaignsData } = await Promise.race([
+          campaignsPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('First time check timeout')), 2000))
+        ]) as any;
+
         setIsFirstTimeUser(!campaignsData || campaignsData.length === 0);
       } catch (error) {
-        console.log('Error checking campaigns (non-critical):', error);
-        setIsFirstTimeUser(true); // Default to first time user
+        console.warn('🔍 Error checking campaigns for first time user:', error);
+        setIsFirstTimeUser(true); // Default to first time user when check fails
       }
 
     } catch (error) {
-      console.error('Error fetching user data (continuing anyway):', error);
-      // Set defaults
-      setCredits(0);
+      console.error('🔍 Error fetching user data (continuing anyway):', error);
+
+      // Set reasonable defaults for development
+      const isDevelopment = window.location.hostname === 'localhost' ||
+                           window.location.hostname.includes('fly.dev');
+
+      setCredits(isDevelopment ? 10 : 0);
       setIsFirstTimeUser(true);
+      setUserType('user');
     }
   };
 
