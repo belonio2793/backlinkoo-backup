@@ -133,6 +133,8 @@ export function EmailVerificationGuard({ children }: EmailVerificationGuardProps
 
   // Email not verified - show verification required screen
   if (isEmailVerified === false) {
+    const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('.fly.dev');
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
@@ -141,6 +143,14 @@ export function EmailVerificationGuard({ children }: EmailVerificationGuardProps
             <CardTitle className="text-xl text-orange-600">Email Verification Required</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {isDev && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-700">
+                  🧪 <strong>Development Mode:</strong> Email verification is simulated.
+                  Use the admin dashboard to test verification flows.
+                </p>
+              </div>
+            )}
             <div className="text-center space-y-2">
               <p className="text-muted-foreground">
                 Please verify your email address to access your account.
