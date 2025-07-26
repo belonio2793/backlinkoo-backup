@@ -272,20 +272,14 @@ const Dashboard = () => {
         setIsDemoMode(true);
       }
 
-      if (profileError) {
-        if (profileError.message.includes('timeout')) {
-          console.warn('🔍 Profile fetch timed out, using defaults');
-        } else {
-          console.log('🔍 Profile error (non-critical):', profileError);
-        }
-
-        // Use defaults when profile fetch fails
-        setUserType('user'); // Default to regular user
-      } else if (profile?.role === 'admin') {
+      // Set user type based on profile
+      if (profile?.role === 'admin') {
         setUserType('admin');
+      } else {
+        setUserType('user');
       }
 
-      // Get user credits with shorter timeout
+      // Try to get credits, but fallback quickly
       let creditsData = null;
       try {
         const creditsPromise = supabase
@@ -296,55 +290,41 @@ const Dashboard = () => {
 
         const result = await Promise.race([
           creditsPromise,
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Credits fetch timeout')), 2000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Credits fetch timeout')), 1000))
         ]) as any;
 
         creditsData = result.data;
-
-        if (result.error && !result.error.message.includes('timeout')) {
-          console.log('🔍 Credits error (non-critical):', result.error);
-        }
       } catch (creditsError) {
-        console.warn('🔍 Credits fetch failed:', creditsError);
+        console.warn('🔍 Credits fetch failed, using demo mode');
+        setIsDemoMode(true);
       }
 
-      if (creditsData) {
+      if (creditsData?.amount !== undefined) {
         setCredits(creditsData.amount);
       } else {
-        // Provide demo credits for development
-        const isDevelopment = window.location.hostname === 'localhost' ||
-                             window.location.hostname.includes('fly.dev');
-        setCredits(isDevelopment ? 10 : 0); // 10 demo credits in dev, 0 in production
+        setCredits(isDevelopment ? 10 : 0);
       }
 
-      // Check if user has any campaigns (first time user check)
+      // Quick check for campaigns
       try {
-        const campaignsPromise = supabase
-          .from('campaigns')
-          .select('id')
-          .eq('user_id', currentUser.id)
-          .limit(1);
-
         const { data: campaignsData } = await Promise.race([
-          campaignsPromise,
-          new Promise((_, reject) => setTimeout(() => reject(new Error('First time check timeout')), 2000))
+          supabase.from('campaigns').select('id').eq('user_id', currentUser.id).limit(1),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Quick campaign check timeout')), 1000))
         ]) as any;
 
         setIsFirstTimeUser(!campaignsData || campaignsData.length === 0);
       } catch (error) {
-        console.warn('🔍 Error checking campaigns for first time user:', error);
-        setIsFirstTimeUser(true); // Default to first time user when check fails
+        console.warn('🔍 Quick campaign check failed, defaulting to experienced user');
+        setIsFirstTimeUser(false); // Default to experienced user so we show demo campaigns
       }
 
     } catch (error) {
-      console.error('🔍 Error fetching user data (continuing anyway):', error);
+      console.error('🔍 Error fetching user data (using fallbacks):', error);
 
-      // Set reasonable defaults for development
-      const isDevelopment = window.location.hostname === 'localhost' ||
-                           window.location.hostname.includes('fly.dev');
-
-      setCredits(isDevelopment ? 10 : 0);
-      setIsFirstTimeUser(true);
+      // Always use demo mode when errors occur
+      setIsDemoMode(true);
+      setCredits(10);
+      setIsFirstTimeUser(false);
       setUserType('user');
     }
   };
