@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { useReferralTracking } from "@/hooks/useReferralTracking";
+import { EmailVerificationGuard } from "@/components/EmailVerificationGuard";
 import Index from "../pages/Index";
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
