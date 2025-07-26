@@ -104,7 +104,18 @@ const Dashboard = () => {
       console.log('🏠 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
 
       if (event === 'SIGNED_OUT' || !session) {
+        console.log('🏠 Dashboard - User signed out, redirecting to login...');
+
+        // Primary redirect
         navigate('/login');
+
+        // Fallback redirect to ensure user doesn't see blank page
+        setTimeout(() => {
+          if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
+            console.log('🏠 Dashboard - Fallback redirect to login...');
+            window.location.href = '/login';
+          }
+        }, 150);
       } else if (event === 'SIGNED_IN' && session && isMounted) {
         setUser(session.user);
         setLoading(false);
