@@ -312,40 +312,67 @@ const Dashboard = () => {
   };
 
   const handleSignOut = async () => {
+    console.log('🚪 Sign out button clicked!');
+
     try {
-      console.log('Dashboard - Starting sign out process...');
+      console.log('🚪 Dashboard - Starting sign out process...');
 
-      // Clean up all auth-related storage
-      Object.keys(localStorage).forEach((key) => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          localStorage.removeItem(key);
-        }
-      });
-
-      Object.keys(sessionStorage || {}).forEach((key) => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          sessionStorage.removeItem(key);
-        }
-      });
-
-      const { error } = await supabase.auth.signOut({ scope: 'global' });
-      if (error) {
-        console.error('Sign out error:', error);
-      } else {
-        console.log('Dashboard - Sign out successful');
-      }
-
-      // Clear user state
+      // Clear user state immediately
       setUser(null);
 
-      // Immediate redirect to home page
-      window.location.href = "/";
+      // Clean up all auth-related storage
+      try {
+        Object.keys(localStorage).forEach((key) => {
+          if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+            localStorage.removeItem(key);
+          }
+        });
+        console.log('🚪 Local storage cleared');
+      } catch (e) {
+        console.warn('Local storage cleanup failed:', e);
+      }
+
+      try {
+        Object.keys(sessionStorage || {}).forEach((key) => {
+          if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+            sessionStorage.removeItem(key);
+          }
+        });
+        console.log('🚪 Session storage cleared');
+      } catch (e) {
+        console.warn('Session storage cleanup failed:', e);
+      }
+
+      // Try Supabase sign out
+      try {
+        const { error } = await supabase.auth.signOut({ scope: 'global' });
+        if (error) {
+          console.error('🚪 Supabase sign out error:', error);
+        } else {
+          console.log('🚪 Supabase sign out successful');
+        }
+      } catch (e) {
+        console.warn('🚪 Supabase sign out failed:', e);
+      }
+
+      // Force redirect to login page
+      console.log('🚪 Redirecting to login...');
+      navigate('/login');
+
+      // Backup redirect if navigate fails
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 100);
 
     } catch (error) {
-      console.error("Dashboard - Sign out error:", error);
+      console.error("🚪 Dashboard - Sign out error:", error);
 
       // Force redirect even if there's an error
-      window.location.href = "/";
+      console.log('🚪 Force redirecting due to error...');
+      navigate('/login');
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 100);
     }
   };
 
