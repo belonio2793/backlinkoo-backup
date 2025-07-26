@@ -259,7 +259,7 @@ const Login = () => {
         // Continue even if this fails
       }
 
-      // Sign up and save both first_name and display_name for compatibility
+      // Sign up with email confirmation disabled (we'll use our custom Resend service)
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
