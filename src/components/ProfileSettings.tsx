@@ -55,38 +55,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
     const fetchProfile = async () => {
       if (!user) return;
 
-      // Check if we're in demo mode or using mock data
-      const isDevelopment = window.location.hostname === 'localhost' ||
-                           window.location.hostname.includes('fly.dev');
-      const isMockUser = user.id === 'mock-user-id' ||
-                        user.id === 'dev-fallback-user' ||
-                        user.id === 'dev-bypass-user' ||
-                        user.email === 'test@example.com' ||
-                        user.email === 'dev@example.com';
 
-      if (isMockUser || isDevelopment) {
-        console.log('🔧 ProfileSettings: Using demo mode, providing mock profile data');
-        setIsDemoMode(true);
-        // Provide demo profile data
-        setProfile({
-          user_id: user.id,
-          email: user.email || 'dev@example.com',
-          full_name: user.user_metadata?.display_name || 'Development User',
-          display_name: user.user_metadata?.display_name || 'Dev User',
-          bio: 'This is a demo profile for testing purposes. You can edit these fields to see how the profile system works.',
-          company: 'Demo Company Inc.',
-          website: 'https://example.com',
-          location: 'Demo City, Demo Country',
-          phone: '+1234567890',
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          marketing_emails: true,
-          role: 'user',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
-        setIsLoading(false);
-        return;
-      }
 
       try {
         // Try to fetch from database with timeout
