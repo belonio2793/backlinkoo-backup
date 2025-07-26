@@ -101,8 +101,11 @@ export function SMTPConfigTest() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Settings className="h-5 w-5" />
-          Resend SMTP Configuration Test
+          Supabase Email System Test (via SMTP)
         </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Tests email delivery through Supabase's configured SMTP settings
+        </p>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Configuration Display */}
