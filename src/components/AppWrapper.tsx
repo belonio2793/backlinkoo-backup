@@ -47,9 +47,9 @@ export const AppWrapper = () => {
         </EmailVerificationGuard>
       } />
       <Route path="/admin" element={
-        <EmailVerificationGuard>
+        <AdminAuthGuard>
           <AdminDashboard />
-        </EmailVerificationGuard>
+        </AdminAuthGuard>
       } />
       <Route path="/payment-success" element={
         <EmailVerificationGuard>
