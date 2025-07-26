@@ -16,7 +16,7 @@ import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft, Shield, CheckCircle,
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string[]>([]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -118,7 +118,7 @@ const Login = () => {
     }
 
     setIsLoading(true);
-    setDebugInfo(['Starting login process...']);
+
 
     try {
       const result = await AuthService.signIn({
@@ -126,7 +126,7 @@ const Login = () => {
         password: loginPassword
       });
 
-      setDebugInfo(prev => [...prev, `Auth result: ${result.success ? 'success' : 'failed'}`]);
+
 
       if (result.success) {
         toast({
@@ -134,23 +134,17 @@ const Login = () => {
           description: "You have been successfully signed in.",
         });
 
-        setDebugInfo(prev => [...prev, 'Navigating to dashboard...']);
+
         navigate('/dashboard');
       } else {
         if (result.requiresEmailVerification) {
           setShowResendConfirmation(true);
           setResendEmail(loginEmail);
 
-          // Provide additional guidance
-          setTimeout(() => {
-            toast({
-              title: "Need to verify your email?",
-              description: "Click the 'Resend Confirmation Email' button below if you need a new verification link.",
-            });
-          }, 3000);
+
         }
 
-        setDebugInfo(prev => [...prev, `Login failed: ${result.error}`]);
+
 
         toast({
           title: "Sign in failed",
@@ -159,13 +153,10 @@ const Login = () => {
         });
       }
 
-      // Show debug info in development
-      if (window.location.hostname === 'localhost') {
-        console.error('📝 Debug info:', debugInfo);
-      }
+
     } catch (error: any) {
       console.error('🔐 Login exception:', error);
-      setDebugInfo(prev => [...prev, `Exception: ${error.message}`]);
+
 
       toast({
         title: "Sign in failed",
@@ -186,7 +177,7 @@ const Login = () => {
     }
 
     console.log('🆕 Starting signup process for:', email);
-    setDebugInfo(prev => [...prev, 'Starting signup process...']);
+
     setIsLoading(true);
 
     // Validate email format
@@ -239,7 +230,7 @@ const Login = () => {
         firstName: firstName.trim()
       });
 
-      setDebugInfo(prev => [...prev, `Signup result: ${result.success ? 'success' : 'failed'}`]);
+
 
       if (result.success) {
         console.log('✅ Signup successful');
@@ -250,13 +241,7 @@ const Login = () => {
             description: "We've sent you a confirmation link to verify your account. Please check your email and spam folder.",
           });
 
-          // Show additional help for email confirmation
-          setTimeout(() => {
-            toast({
-              title: "Email not received?",
-              description: "Check your spam folder or use the resend button below if needed.",
-            });
-          }, 10000);
+
         } else {
           toast({
             title: "Account created and verified!",
@@ -358,7 +343,7 @@ const Login = () => {
       });
     } finally {
       console.log('🆕 Signup process finished, resetting loading state');
-      setDebugInfo(prev => [...prev, 'Signup process finished - resetting loading']);
+
       setIsLoading(false);
     }
   };
@@ -398,13 +383,7 @@ const Login = () => {
           description: "We've sent you a password reset link. Please check your email and spam folder.",
         });
 
-        // Provide additional guidance
-        setTimeout(() => {
-          toast({
-            title: "Email not received?",
-            description: "The email may take a few minutes to arrive. Check your spam folder or try again.",
-          });
-        }, 8000);
+
 
         setShowForgotPassword(false);
         setForgotPasswordEmail("");
@@ -444,13 +423,7 @@ const Login = () => {
           description: "We've sent you a new confirmation link. Please check your email and spam folder.",
         });
 
-        // Provide additional guidance after successful resend
-        setTimeout(() => {
-          toast({
-            title: "Still waiting for the email?",
-            description: "Emails typically arrive within 2-3 minutes. Check your spam folder if you don't see it.",
-          });
-        }, 10000);
+
 
         setShowResendConfirmation(false);
       } else {
@@ -532,15 +505,6 @@ const Login = () => {
               
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
-                  {/* Debug info in development */}
-                  {window.location.hostname === 'localhost' && debugInfo.length > 0 && (
-                    <div className="p-3 bg-gray-100 rounded text-xs">
-                      <div className="font-medium mb-1">Debug Info:</div>
-                      {debugInfo.map((info, idx) => (
-                        <div key={idx} className="text-gray-600">{idx + 1}. {info}</div>
-                      ))}
-                    </div>
-                  )}
                   
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email Address</Label>
@@ -606,10 +570,7 @@ const Login = () => {
                     </Button>
                   </div>
 
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-blue-50 rounded-lg">
-                    <AlertCircle className="h-4 w-4 text-blue-600" />
-                    <span>Email verification is required before you can sign in</span>
-                  </div>
+
                 </form>
 
                 {showForgotPassword && (
@@ -774,10 +735,7 @@ const Login = () => {
                     </div>
                   )}
                   
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-green-50 rounded-lg">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>You'll receive a confirmation email to verify your account</span>
-                  </div>
+
                 </form>
               </TabsContent>
             </Tabs>
