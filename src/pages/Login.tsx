@@ -375,7 +375,7 @@ const Login = () => {
           },
           body: JSON.stringify({
             to: resendEmail,
-            subject: 'Confirm Your Backlink ��� Account',
+            subject: 'Confirm Your Backlink ∞ Account',
             message: `Welcome to Backlink ∞!
 
 Please confirm your email address by clicking the link below:
@@ -686,6 +686,6 @@ The Backlink ∞ Team`,
       </div>
     </div>
   );
-};
-
-export default Login;
+  );
+  
+  export default Login;
