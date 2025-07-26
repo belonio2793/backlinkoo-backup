@@ -264,6 +264,7 @@ const Login = () => {
         if (error.message.includes('User already registered') ||
             error.message.includes('Email address already registered') ||
             error.message.includes('already been registered')) {
+          setIsLoading(false); // Reset loading state
           setResendEmail(email);
           setShowResendConfirmation(true);
           toast({
