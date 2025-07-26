@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AuthService } from '@/services/authService';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,8 @@ import {
   CheckCircle, 
   AlertCircle, 
   ArrowLeft,
-  Infinity
+  Infinity,
+  Mail
 } from 'lucide-react';
 
 const AuthCallback = () => {
@@ -21,51 +21,53 @@ const AuthCallback = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    const handleOAuthCallback = async () => {
+    const handleEmailConfirmation = async () => {
       try {
-        console.log('🔐 OAuth callback page loaded');
+        console.log('📧 Email confirmation page loaded');
         
         // Check for error parameters in URL
         const error = searchParams.get('error');
         const errorDescription = searchParams.get('error_description');
         
         if (error) {
-          console.error('OAuth error from URL:', error, errorDescription);
+          console.error('Email confirmation error from URL:', error, errorDescription);
           setStatus('error');
-          setErrorMessage(errorDescription || error || 'OAuth authentication failed');
+          setErrorMessage(errorDescription || error || 'Email confirmation failed');
           return;
         }
 
-        // Process the OAuth callback
-        const result = await AuthService.handleOAuthCallback();
-
-        if (result.success) {
-          console.log('✅ OAuth callback processed successfully');
+        // Check for confirmation success
+        const accessToken = searchParams.get('access_token');
+        const refreshToken = searchParams.get('refresh_token');
+        const type = searchParams.get('type');
+        
+        if (type === 'signup' || (accessToken && refreshToken)) {
+          console.log('✅ Email confirmation successful');
           setStatus('success');
           
           toast({
-            title: "Welcome!",
-            description: "You have been successfully signed in with your social account.",
+            title: "Email Verified!",
+            description: "Your email has been verified successfully. You can now sign in to your account.",
           });
 
-          // Redirect to dashboard after a brief delay
+          // Redirect to login after a brief delay
           setTimeout(() => {
-            navigate('/dashboard');
-          }, 2000);
+            navigate('/login');
+          }, 3000);
         } else {
-          console.error('OAuth callback failed:', result.error);
+          console.warn('Email confirmation - no valid parameters found');
           setStatus('error');
-          setErrorMessage(result.error || 'Authentication failed');
+          setErrorMessage('Invalid confirmation link. Please try again or request a new confirmation email.');
         }
 
       } catch (error: any) {
-        console.error('OAuth callback error:', error);
+        console.error('Email confirmation error:', error);
         setStatus('error');
-        setErrorMessage('An unexpected error occurred during authentication');
+        setErrorMessage('An unexpected error occurred during email verification');
       }
     };
 
-    handleOAuthCallback();
+    handleEmailConfirmation();
   }, [searchParams, navigate, toast]);
 
   const renderContent = () => {
@@ -77,9 +79,9 @@ const AuthCallback = () => {
               <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold">Completing sign in...</h3>
+              <h3 className="text-lg font-semibold">Verifying your email...</h3>
               <p className="text-muted-foreground mt-2">
-                Please wait while we securely authenticate your account.
+                Please wait while we confirm your email address.
               </p>
             </div>
           </div>
@@ -92,14 +94,14 @@ const AuthCallback = () => {
               <CheckCircle className="h-6 w-6 text-green-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-green-800">Welcome to Backlink ∞!</h3>
+              <h3 className="text-lg font-semibold text-green-800">Email Verified Successfully!</h3>
               <p className="text-muted-foreground mt-2">
-                You have been successfully signed in. Redirecting to your dashboard...
+                Your email has been confirmed. You can now sign in to your account.
               </p>
             </div>
             <div className="space-y-3">
-              <Button onClick={() => navigate('/dashboard')} className="w-full">
-                Go to Dashboard
+              <Button onClick={() => navigate('/login')} className="w-full">
+                Sign In to Your Account
               </Button>
             </div>
           </div>
@@ -112,14 +114,14 @@ const AuthCallback = () => {
               <AlertCircle className="h-6 w-6 text-red-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-red-800">Authentication failed</h3>
+              <h3 className="text-lg font-semibold text-red-800">Email Verification Failed</h3>
               <p className="text-muted-foreground mt-2">
-                {errorMessage || 'We couldn\'t complete your sign in. Please try again.'}
+                {errorMessage || 'We couldn\'t verify your email. The link may be expired or invalid.'}
               </p>
             </div>
             <div className="space-y-3">
               <Button onClick={() => navigate('/login')} className="w-full">
-                Try Again
+                Go to Sign In
               </Button>
               <Button onClick={() => navigate('/')} variant="outline" className="w-full">
                 Back to Home
@@ -154,12 +156,15 @@ const AuthCallback = () => {
             <Infinity className="h-8 w-8 text-primary" />
             <h1 className="text-2xl font-bold text-foreground">Backlink ∞</h1>
           </div>
-          <p className="text-muted-foreground">Social Authentication</p>
+          <p className="text-muted-foreground flex items-center justify-center gap-2">
+            <Mail className="h-4 w-4" />
+            Email Verification
+          </p>
         </div>
 
         <Card>
           <CardHeader className="text-center">
-            <CardTitle>Completing Authentication</CardTitle>
+            <CardTitle>Email Confirmation</CardTitle>
           </CardHeader>
           <CardContent>
             {renderContent()}
@@ -167,7 +172,7 @@ const AuthCallback = () => {
         </Card>
 
         <div className="text-center mt-6 text-xs text-muted-foreground">
-          <p>Secured by industry-standard OAuth 2.0 authentication</p>
+          <p>Secure email verification system</p>
         </div>
       </div>
     </div>
