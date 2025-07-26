@@ -392,7 +392,7 @@ const Dashboard = () => {
                 </>
               )}
               <div className="border-l border-border h-6 mx-1 sm:mx-2" />
-              <ProfileSettings user={user} userType={userType} onUserUpdate={setUser} />
+              <ProfileSettings user={user} userType={userType} onUserUpdate={handleUserUpdate} />
               <Button variant="ghost" size="sm" onClick={handleSignOut} className="px-2 sm:px-3 text-muted-foreground hover:text-destructive">
                 <LogOut className="h-4 w-4" />
                 <span className="hidden lg:inline ml-1">Sign Out</span>
