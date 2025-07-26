@@ -427,36 +427,38 @@ https://backlinkoo.com`,
 
   static async sendEmail(emailData: EmailData): Promise<EmailResult> {
     try {
+      // Validate email data before sending
+      if (!emailData.to || !emailData.subject || !emailData.message) {
+        throw new Error('Missing required email fields (to, subject, message)');
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailData.to)) {
+        throw new Error('Invalid email address format');
+      }
+
       const result = await this.sendViaNetlifyFunction(emailData);
 
-      if (!result.success && result.error) {
-        // Log failure
-        this.failureLog.push({
-          timestamp: new Date(),
-          error: result.error,
-          email: emailData.to
-        });
-
-        // Keep only last 50 failures
-        if (this.failureLog.length > 50) {
-          this.failureLog = this.failureLog.slice(-50);
-        }
+      // Enhanced logging for debugging
+      if (result.success) {
+        console.log(`Email sent successfully to ${emailData.to} via ${result.provider}`);
+      } else {
+        console.error(`Email failed to send to ${emailData.to}:`, result.error);
       }
 
       return result as EmailResult;
     } catch (error: any) {
+      const sanitizedError = this.sanitizeErrorMessage(error.message);
+      console.error('SendEmail error:', sanitizedError);
+
       const failureResult: EmailResult = {
         success: false,
-        error: error.message,
+        error: sanitizedError,
         provider: 'netlify_resend'
       };
 
-      this.failureLog.push({
-        timestamp: new Date(),
-        error: error.message,
-        email: emailData.to
-      });
-
+      // Failure logging is handled within sendViaNetlifyFunction
       return failureResult;
     }
   }
