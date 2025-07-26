@@ -1,11 +1,10 @@
 [build]
   publish = "dist"
-  command = "npm ci --legacy-peer-deps && cd netlify/functions && npm ci && cd ../../ && npm run build"
+  command = "npm ci && npm run build && cd netlify/functions && npm ci"
 
 [build.environment]
   NODE_VERSION = "20"
   NODE_ENV = "production"
-  NPM_FLAGS = "--legacy-peer-deps"
   VITE_APP_URL = "https://backlinkoo.com"
   VITE_DOMAIN = "backlinkoo.com"
 
@@ -30,4 +29,4 @@
 
 [functions]
   directory = "netlify/functions"
-  node_bundler = "nft"
+  node_bundler = "esbuild"
