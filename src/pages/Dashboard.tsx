@@ -237,7 +237,7 @@ const Dashboard = () => {
 
       const { data: profile, error: profileError } = await Promise.race([
         profilePromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 3000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 2000))
       ]) as any;
 
       if (profileError) {
