@@ -364,6 +364,12 @@ const Dashboard = () => {
                 </Card>
               )}
 
+              {/* Temporary Email Test Component */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-4">Email System Test</h3>
+                <EmailTest />
+              </div>
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
