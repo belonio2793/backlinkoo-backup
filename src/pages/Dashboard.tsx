@@ -132,6 +132,17 @@ const Dashboard = () => {
         return;
       }
 
+      const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('.fly.dev');
+
+      if (isDev) {
+        console.log('🧪 Development mode: Using mock user data');
+        // Set mock data for development
+        setCredits(10);
+        setIsFirstTimeUser(false);
+        setUserType('user');
+        return;
+      }
+
       // Get user profile and role
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
@@ -171,6 +182,10 @@ const Dashboard = () => {
       setIsFirstTimeUser(!campaignsData || campaignsData.length === 0);
     } catch (error) {
       console.error('Error fetching user data:', error);
+      // In case of error, set some default values so the app doesn't stay in loading state
+      setCredits(0);
+      setIsFirstTimeUser(true);
+      setUserType('user');
     }
   };
 
