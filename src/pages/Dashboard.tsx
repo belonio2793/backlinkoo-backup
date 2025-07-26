@@ -195,33 +195,35 @@ const Dashboard = () => {
   const fetchCampaigns = async (authUser?: User) => {
     try {
       const currentUser = authUser || user;
-      if (!currentUser) return;
+      if (!currentUser) {
+        console.log('No current user for fetchCampaigns');
+        return;
+      }
 
-      // Fetch campaigns with proper query structure
-      const { data: campaignsData, error } = await supabase
+      console.log('Fetching campaigns for:', currentUser.id);
+
+      // Fetch campaigns with timeout
+      const campaignsPromise = supabase
         .from('campaigns')
         .select('*')
         .eq('user_id', currentUser.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching campaigns:', error);
-        toast({
-          title: "Error",
-          description: `Failed to fetch campaigns: ${error.message || 'Unknown error'}`,
-          variant: "destructive",
-        });
+      const { data: campaignsData, error } = await Promise.race([
+        campaignsPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Campaigns fetch timeout')), 5000))
+      ]) as any;
+
+      if (error && !error.message.includes('timeout')) {
+        console.error('Error fetching campaigns (non-critical):', error);
+        setCampaigns([]); // Set empty array as fallback
         return;
       }
 
       setCampaigns(campaignsData || []);
     } catch (error: any) {
-      console.error('Error fetching campaigns:', error);
-      toast({
-        title: "Error",
-        description: `Failed to fetch campaigns: ${error?.message || 'Unknown error'}`,
-        variant: "destructive",
-      });
+      console.error('Error fetching campaigns (continuing anyway):', error);
+      setCampaigns([]); // Set empty array as fallback
     }
   };
 
