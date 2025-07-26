@@ -58,37 +58,63 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('Dashboard mounted, checking authentication...');
-    checkAuthAndFetchData();
+    let isMounted = true;
 
-    // Fallback timeout to prevent infinite loading
-    const loadingTimeout = setTimeout(() => {
-      if (loading) {
-        console.warn('🏠 Dashboard - Loading timeout reached, forcing loading = false');
-        setLoading(false);
+    const initializeDashboard = async () => {
+      console.log('🏠 Dashboard: Starting initialization...');
+
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (!isMounted) return;
+
+        if (error || !session || !session.user) {
+          console.log('🏠 Dashboard - No valid session, redirecting to login');
+          navigate('/login');
+          return;
+        }
+
+        console.log('🏠 Dashboard - Valid session found:', session.user.email);
+        setUser(session.user);
+
+        // Fetch user data in parallel
+        Promise.all([
+          fetchUserData(session.user),
+          fetchCampaigns(session.user)
+        ]).finally(() => {
+          if (isMounted) {
+            setLoading(false);
+          }
+        });
+
+      } catch (error) {
+        console.error('🏠 Dashboard - Initialization error:', error);
+        if (isMounted) {
+          setLoading(false);
+          navigate('/login');
+        }
       }
-    }, 10000); // 10 second timeout
+    };
+
+    initializeDashboard();
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🏠 Dashboard - Auth state change:', { event, hasSession: !!session, hasUser: !!session?.user });
+      console.log('🏠 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
 
       if (event === 'SIGNED_OUT' || !session) {
-        console.log('🏠 Dashboard - User signed out or no session, redirecting to login');
         navigate('/login');
-      } else if (event === 'SIGNED_IN' && session) {
-        console.log('🏠 Dashboard - User signed in, updating state');
+      } else if (event === 'SIGNED_IN' && session && isMounted) {
         setUser(session.user);
-        fetchUserData();
-        fetchCampaigns();
+        setLoading(false);
       }
     });
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
-      clearTimeout(loadingTimeout);
     };
-  }, [navigate, loading]);
+  }, [navigate]);
 
   const checkAuthAndFetchData = async () => {
     try {
