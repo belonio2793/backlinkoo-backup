@@ -7,23 +7,26 @@ import { GlobalNotifications } from "@/components/GlobalNotifications";
 import { BetaNotification } from "@/components/BetaNotification";
 import { AppWrapper } from "@/components/AppWrapper";
 import { AuthProfileChecker } from "@/components/AuthProfileChecker";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProfileChecker>
-        <Toaster />
-        <Sonner />
-        <GlobalNotifications />
-        <BetaNotification />
-        <BrowserRouter>
-          <AppWrapper />
-        </BrowserRouter>
-      </AuthProfileChecker>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProfileChecker>
+          <Toaster />
+          <Sonner />
+          <GlobalNotifications />
+          <BetaNotification />
+          <BrowserRouter>
+            <AppWrapper />
+          </BrowserRouter>
+        </AuthProfileChecker>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
