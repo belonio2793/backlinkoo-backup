@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { AuthService, type SocialProvider } from '@/services/authService';
 import { Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SocialLoginProps {
   onSocialLogin?: (provider: SocialProvider) => void;
