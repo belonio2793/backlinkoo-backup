@@ -106,20 +106,36 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
   const handleProfileSave = async () => {
     setIsLoading(true);
     try {
-      const { error } = await supabase
+      // Update the profiles table with only available fields
+      const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
           user_id: user.id,
-          first_name: profile.firstName,
-          last_name: profile.lastName,
           display_name: profile.displayName,
-          bio: profile.bio,
-          website: profile.website,
-          phone: profile.phone,
+          email: profile.email,
           updated_at: new Date().toISOString(),
         });
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // Update user metadata through Supabase Auth
+      const { error: authError } = await supabase.auth.updateUser({
+        data: {
+          display_name: profile.displayName,
+          first_name: additionalInfo.firstName,
+          last_name: additionalInfo.lastName,
+          bio: additionalInfo.bio,
+          website: additionalInfo.website,
+          phone: additionalInfo.phone,
+          company: additionalInfo.company,
+          location: additionalInfo.location,
+        }
+      });
+
+      if (authError) {
+        console.warn('Auth metadata update failed:', authError);
+        // Don't fail the whole operation for metadata update
+      }
 
       toast({
         title: "Profile updated successfully!",
@@ -127,9 +143,25 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
       });
 
       setIsEditing(false);
-      if (onUserUpdate) onUserUpdate({ ...user, user_metadata: { ...user.user_metadata, display_name: profile.displayName } });
+      if (onUserUpdate) {
+        onUserUpdate({
+          ...user,
+          user_metadata: {
+            ...user.user_metadata,
+            display_name: profile.displayName,
+            first_name: additionalInfo.firstName,
+            last_name: additionalInfo.lastName,
+            bio: additionalInfo.bio,
+            website: additionalInfo.website,
+            phone: additionalInfo.phone,
+            company: additionalInfo.company,
+            location: additionalInfo.location,
+          }
+        });
+      }
 
     } catch (error: any) {
+      console.error('Profile save error:', error);
       toast({
         title: "Update failed",
         description: error.message || "Failed to update profile",
