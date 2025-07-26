@@ -19,12 +19,7 @@ export class ResendEmailService {
   private static failureLog: Array<{ timestamp: Date; error: string; email: string }> = [];
   private static readonly NETLIFY_FUNCTION_URL = '/.netlify/functions/send-email';
 
-  // Check if we're in development environment
-  private static isDevelopment(): boolean {
-    return window.location.hostname === 'localhost' ||
-           window.location.hostname.includes('127.0.0.1') ||
-           window.location.hostname.includes('.fly.dev');
-  }
+
 
   private static async sendViaMockService(emailData: ResendEmailData): Promise<ResendEmailResponse> {
     console.log('🧪 DEVELOPMENT MODE: Mock email service');
