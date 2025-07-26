@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { AuthService } from '@/services/authService';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -125,37 +125,12 @@ const PasswordReset = () => {
     try {
       console.log('🔑 Attempting password reset...');
 
-      const { data, error } = await supabase.auth.updateUser({
-        password: password
-      });
+      const result = await AuthService.updatePassword(password);
 
-      if (error) {
-        console.error('Password reset error:', error);
-        
-        // Handle specific error cases
-        if (error.message.includes('session_not_found') || error.message.includes('invalid_token')) {
-          setStatus('error');
-          setErrorMessage('Your password reset link has expired or is invalid. Please request a new one.');
-        } else if (error.message.includes('same_password')) {
-          toast({
-            title: "Password unchanged",
-            description: "Please choose a different password from your current one.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Password reset failed",
-            description: error.message || "Failed to reset password. Please try again.",
-            variant: "destructive",
-          });
-        }
-        return;
-      }
-
-      if (data.user) {
+      if (result.success) {
         console.log('✅ Password reset successful');
         setStatus('success');
-        
+
         toast({
           title: "Password reset successful!",
           description: "Your password has been updated. You can now sign in with your new password.",
@@ -165,6 +140,27 @@ const PasswordReset = () => {
         setTimeout(() => {
           navigate('/login');
         }, 3000);
+      } else {
+        console.error('Password reset error:', result.error);
+
+        // Handle specific error cases
+        if (result.error?.includes('session_not_found') || result.error?.includes('invalid_token')) {
+          setStatus('error');
+          setErrorMessage('Your password reset link has expired or is invalid. Please request a new one.');
+        } else if (result.error?.includes('same_password')) {
+          toast({
+            title: "Password unchanged",
+            description: "Please choose a different password from your current one.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Password reset failed",
+            description: result.error || "Failed to reset password. Please try again.",
+            variant: "destructive",
+          });
+        }
+        return;
       }
 
     } catch (error: any) {
