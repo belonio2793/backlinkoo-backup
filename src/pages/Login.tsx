@@ -17,6 +17,7 @@ import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft } from "lucide-react"
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -34,18 +35,35 @@ const Login = () => {
   useEffect(() => {
     // Check if user is already logged in
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate('/dashboard');
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.warn('Auth session check failed:', error);
+          return;
+        }
+
+        if (session && session.user) {
+          console.log('🔐 User already authenticated, redirecting...');
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        // Continue to login page on error
       }
     };
-    
+
     checkAuth();
 
-    // Listen for auth changes
+    // Listen for auth changes with better error handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        navigate('/dashboard');
+      console.log('🔐 Auth state changed:', event, !!session);
+
+      if (event === 'SIGNED_IN' && session && session.user) {
+        console.log('🔐 Auth state change: redirecting to dashboard');
+        setTimeout(() => navigate('/dashboard'), 100);
+      } else if (event === 'SIGNED_OUT') {
+        console.log('🔐 Auth state change: user signed out');
+        // Stay on login page
       }
     });
 
@@ -53,61 +71,106 @@ const Login = () => {
   }, [navigate]);
 
   const cleanupAuthState = () => {
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
+    try {
+      // Only clear specific problematic keys, not all auth state
+      const keysToRemove = [];
+
+      // Check localStorage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('sb-') && key.includes('token'))) {
+          keysToRemove.push(key);
+        }
       }
-    });
-    Object.keys(sessionStorage || {}).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        sessionStorage.removeItem(key);
-      }
-    });
+
+      keysToRemove.forEach(key => {
+        try {
+          localStorage.removeItem(key);
+        } catch (e) {
+          console.warn('Failed to remove localStorage key:', key);
+        }
+      });
+
+      console.log('🔐 Cleaned up auth state');
+    } catch (error) {
+      console.warn('Auth cleanup failed:', error);
+    }
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (!loginEmail || !loginPassword) {
+      toast({
+        title: "Missing credentials",
+        description: "Please enter both email and password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
+      console.log('🔐 Starting login process for:', loginEmail);
+      setDebugInfo(['Starting login process...']);
+
+      // Clear any existing auth state first
       cleanupAuthState();
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
+      setDebugInfo(prev => [...prev, 'Cleared auth state']);
+
+      // Simple sign out without waiting
+      supabase.auth.signOut({ scope: 'global' }).catch(() => {});
+
+      // Wait a moment for cleanup
+      await new Promise(resolve => setTimeout(resolve, 100));
+      setDebugInfo(prev => [...prev, 'Cleaned up previous session']);
+
+      console.log('🔐 Attempting sign in...');
+      setDebugInfo(prev => [...prev, 'Calling Supabase signInWithPassword...']);
 
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
+        email: loginEmail.trim(),
         password: loginPassword,
       });
 
-      if (error) throw error;
+      setDebugInfo(prev => [...prev, `Sign in response received. Has data: ${!!data}, Has error: ${!!error}`]);
 
-      if (data.user) {
-        // Ensure user has proper profile using migration service
-        try {
-          const migrationResult = await ProfileMigrationService.ensureUserProfile(
-            data.user.id,
-            data.user.email || loginEmail,
-            data.user.user_metadata
-          );
+      if (error) {
+        console.error('🔐 Sign in error:', error);
+        throw error;
+      }
 
-          if (!migrationResult.success) {
-            console.warn('Profile migration failed, but continuing login:', migrationResult.error);
-          }
-        } catch (profileErr) {
-          // Don't fail login if profile operations fail
-          console.warn('Profile migration error, but continuing login:', profileErr);
-        }
+      if (data.user && data.session) {
+        console.log('🔐 Sign in successful:', data.user.id);
+        setDebugInfo(prev => [...prev, `Login successful! User ID: ${data.user.id}`]);
+
+        // Profile migration in background - don't wait for it
+        ProfileMigrationService.ensureUserProfile(
+          data.user.id,
+          data.user.email || loginEmail,
+          data.user.user_metadata
+        ).catch(err => {
+          console.warn('Profile migration failed (non-blocking):', err);
+        });
 
         toast({
           title: "Welcome back!",
           description: "You have been successfully signed in.",
         });
-        window.location.href = '/dashboard';
+
+        setDebugInfo(prev => [...prev, 'Navigating to dashboard...']);
+
+        // Use React Router navigation instead of window.location
+        console.log('🔐 Redirecting to dashboard...');
+        navigate('/dashboard');
+      } else {
+        setDebugInfo(prev => [...prev, 'No user/session data in response']);
+        throw new Error('No user data received from authentication');
       }
     } catch (error: any) {
+      console.error('🔐 Login failed:', error);
+
       // Handle different error types properly
       let errorMessage = 'An error occurred during sign in.';
 
@@ -116,27 +179,36 @@ const Login = () => {
           errorMessage = error.message;
 
           // Handle specific authentication errors
-          if (error.message.includes('fetch')) {
+          if (error.message.includes('fetch') || error.message.includes('network')) {
             errorMessage = 'Network connection failed. Please check your internet connection and try again.';
           } else if (error.message.includes('Invalid login credentials')) {
             errorMessage = 'Invalid email or password. Please check your credentials and try again.';
           } else if (error.message.includes('Email not confirmed')) {
             errorMessage = 'Please check your email and click the confirmation link before signing in.';
+            setShowResendConfirmation(true);
+            setResendEmail(loginEmail);
+          } else if (error.message.includes('Too many requests')) {
+            errorMessage = 'Too many login attempts. Please wait a moment and try again.';
           }
         } else if (error.error_description) {
           errorMessage = error.error_description;
-        } else if (typeof error.toString === 'function') {
-          errorMessage = error.toString();
         }
       } else if (typeof error === 'string') {
         errorMessage = error;
       }
+
+      setDebugInfo(prev => [...prev, `Login failed: ${errorMessage}`]);
 
       toast({
         title: "Sign in failed",
         description: errorMessage,
         variant: "destructive",
       });
+
+      // Show debug info in development
+      if (window.location.hostname === 'localhost') {
+        console.error('📝 Debug info:', debugInfo);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -144,6 +216,8 @@ const Login = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    console.log('🆕 Starting signup process for:', email);
+    setDebugInfo(prev => [...prev, 'Starting signup process...']);
     setIsLoading(true);
 
     if (password !== confirmPassword) {
@@ -188,10 +262,22 @@ const Login = () => {
       });
 
       if (error) {
+        console.log('Signup error details:', error);
+
         // Handle various "user already exists" error messages
-        if (error.message.includes('User already registered') ||
-            error.message.includes('Email address already registered') ||
-            error.message.includes('already been registered')) {
+        // Check both message and error code for more reliable detection
+        const errorMessage = error.message?.toLowerCase() || '';
+        const isUserExists = errorMessage.includes('user already registered') ||
+                            errorMessage.includes('email address already registered') ||
+                            errorMessage.includes('already been registered') ||
+                            errorMessage.includes('email already exists') ||
+                            errorMessage.includes('user with this email already exists') ||
+                            error.status === 422 || // Common status for user exists
+                            error.code === 'user_already_exists';
+
+        if (isUserExists) {
+          console.log('User already exists, showing resend option');
+          setDebugInfo(prev => [...prev, 'User already exists - showing resend options']);
           setResendEmail(email);
           setShowResendConfirmation(true);
           toast({
@@ -205,7 +291,7 @@ const Login = () => {
               loginTab.click();
             }
           }, 100);
-          return;
+          return; // finally block will reset loading state
         }
         throw error;
       }
@@ -228,12 +314,12 @@ const Login = () => {
           console.warn('Profile creation error during signup:', profileErr);
         }
 
-        // Send custom confirmation email via Resend directly
+        // Send custom confirmation email via Netlify function
         try {
           const emailResult = await ResendEmailService.sendConfirmationEmail(email);
 
           if (emailResult.success) {
-            console.log('Confirmation email sent successfully via Resend:', emailResult.emailId);
+            console.log('Confirmation email sent successfully via Netlify:', emailResult.emailId);
 
             toast({
               title: "Check your email!",
@@ -244,16 +330,16 @@ const Login = () => {
 
             toast({
               title: "Account created successfully!",
-              description: "Your account has been created, but we couldn't send the confirmation email. Please contact support if needed.",
+              description: `Your account has been created, but we couldn't send the confirmation email: ${emailResult.error || 'Unknown error'}. Please contact support if needed.`,
               variant: "destructive",
             });
           }
-        } catch (emailError) {
+        } catch (emailError: any) {
           console.error('Email service error:', emailError);
 
           toast({
             title: "Account created!",
-            description: "Your account has been created. If you don't receive a confirmation email, please try the resend option.",
+            description: `Your account has been created. Email service error: ${emailError?.message || 'Unknown error'}. Please try the resend option if needed.`,
           });
         }
 
@@ -308,6 +394,8 @@ const Login = () => {
         variant: "destructive",
       });
     } finally {
+      console.log('🆕 Signup process finished, resetting loading state');
+      setDebugInfo(prev => [...prev, 'Signup process finished - resetting loading']);
       setIsLoading(false);
     }
   };
@@ -473,6 +561,15 @@ The Backlink ∞ Team`,
               
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
+                  {/* Debug info in development */}
+                  {window.location.hostname === 'localhost' && debugInfo.length > 0 && (
+                    <div className="p-3 bg-gray-100 rounded text-xs">
+                      <div className="font-medium mb-1">Debug Info:</div>
+                      {debugInfo.map((info, idx) => (
+                        <div key={idx} className="text-gray-600">{idx + 1}. {info}</div>
+                      ))}
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
                     <Input
@@ -510,8 +607,15 @@ The Backlink ∞ Team`,
                       </Button>
                     </div>
                   </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Signing in..." : "Sign In"}
+                  <Button type="submit" className="w-full" disabled={isLoading || !loginEmail || !loginPassword}>
+                    {isLoading ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
                   </Button>
 
                   <div className="text-center">
@@ -571,6 +675,15 @@ The Backlink ∞ Team`,
               
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
+                  {/* Debug info in development */}
+                  {window.location.hostname === 'localhost' && debugInfo.length > 0 && (
+                    <div className="p-3 bg-gray-100 rounded text-xs">
+                      <div className="font-medium mb-1">Debug Info:</div>
+                      {debugInfo.map((info, idx) => (
+                        <div key={idx} className="text-gray-600">{idx + 1}. {info}</div>
+                      ))}
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <Label htmlFor="first-name">First Name</Label>
                     <Input

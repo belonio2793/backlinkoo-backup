@@ -188,12 +188,22 @@ const Dashboard = () => {
 
       if (error) {
         console.error('Error fetching campaigns:', error);
+        toast({
+          title: "Error",
+          description: `Failed to fetch campaigns: ${error.message || 'Unknown error'}`,
+          variant: "destructive",
+        });
         return;
       }
 
       setCampaigns(campaignsData || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching campaigns:', error);
+      toast({
+        title: "Error",
+        description: `Failed to fetch campaigns: ${error?.message || 'Unknown error'}`,
+        variant: "destructive",
+      });
     }
   };
 

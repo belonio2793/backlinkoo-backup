@@ -15,46 +15,44 @@ export interface ResendEmailData {
 }
 
 export class ResendEmailService {
-  private static readonly API_KEY = import.meta.env.VITE_RESEND_API_KEY || 're_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq';
   private static readonly FROM_EMAIL = 'Backlink ∞ <support@backlinkoo.com>';
   private static failureLog: Array<{ timestamp: Date; error: string; email: string }> = [];
+  private static readonly NETLIFY_FUNCTION_URL = '/.netlify/functions/send-email';
 
-  private static async sendDirectly(emailData: ResendEmailData): Promise<ResendEmailResponse> {
+  private static async sendViaNetlify(emailData: ResendEmailData): Promise<ResendEmailResponse> {
     try {
-      console.log('Sending email directly via Resend API:', { to: emailData.to, subject: emailData.subject });
+      console.log('Sending email via Netlify function:', { to: emailData.to, subject: emailData.subject });
 
-      const response = await fetch('https://api.resend.com/emails', {
+      const response = await fetch(this.NETLIFY_FUNCTION_URL, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           from: emailData.from || this.FROM_EMAIL,
-          to: [emailData.to],
+          to: emailData.to,
           subject: emailData.subject,
-          html: this.formatEmailHTML(emailData.message, emailData.subject),
-          text: emailData.message
+          message: emailData.message
         }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-        console.error('Resend API error:', response.status, errorData);
-        throw new Error(`Resend API error: ${errorData.message || response.statusText}`);
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Netlify function error:', response.status, errorData);
+        throw new Error(`Email service error: ${errorData.error || response.statusText}`);
       }
 
       const result = await response.json();
-      console.log('Email sent successfully via Resend:', result.id);
+      console.log('Email sent successfully via Netlify:', result.emailId);
 
       return {
         success: true,
-        emailId: result.id,
+        emailId: result.emailId,
         provider: 'resend'
       };
     } catch (error: any) {
-      console.error('Direct Resend error:', error);
-      
+      console.error('Netlify email service error:', error);
+
       // Log failure
       this.failureLog.push({
         timestamp: new Date(),
@@ -64,33 +62,13 @@ export class ResendEmailService {
 
       return {
         success: false,
-        error: error.message || 'Unknown error occurred',
+        error: error.message || 'Failed to send email',
         provider: 'resend'
       };
     }
   }
 
-  private static formatEmailHTML(message: string, subject: string): string {
-    return `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(135deg, #3B82F6, #8B5CF6); padding: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 24px;">Backlink ∞</h1>
-        </div>
-        <div style="padding: 30px; background: #ffffff;">
-          <h2 style="color: #333; margin-top: 0;">${subject}</h2>
-          <div style="white-space: pre-wrap; line-height: 1.6; color: #555;">
-            ${message.replace(/\n/g, '<br>')}
-          </div>
-        </div>
-        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #eee;">
-          <p style="margin: 0; font-size: 12px; color: #666;">
-            Sent via Backlink ∞ Email System (Direct Resend)<br>
-            ${new Date().toISOString()}
-          </p>
-        </div>
-      </div>
-    `;
-  }
+
 
   // Public methods for different email types
   static async sendConfirmationEmail(email: string, confirmationUrl?: string): Promise<ResendEmailResponse> {
@@ -128,7 +106,7 @@ Professional SEO & Backlink Management Platform
 https://backlinkoo.com`
     };
 
-    return await this.sendDirectly(emailData);
+    return await this.sendViaNetlify(emailData);
   }
 
   static async sendPasswordResetEmail(email: string, resetUrl: string): Promise<ResendEmailResponse> {
@@ -158,7 +136,7 @@ Professional SEO & Backlink Management Platform
 https://backlinkoo.com`
     };
 
-    return await this.sendDirectly(emailData);
+    return await this.sendViaNetlify(emailData);
   }
 
   static async sendWelcomeEmail(email: string, firstName?: string): Promise<ResendEmailResponse> {
@@ -207,39 +185,33 @@ Professional SEO & Backlink Management Platform
 https://backlinkoo.com`
     };
 
-    return await this.sendDirectly(emailData);
+    return await this.sendViaNetlify(emailData);
   }
 
   // Legacy compatibility methods
   static async sendEmail(emailData: ResendEmailData): Promise<ResendEmailResponse> {
-    return await this.sendDirectly(emailData);
+    return await this.sendViaNetlify(emailData);
   }
 
   static async healthCheck(): Promise<{ status: string; resend: boolean }> {
     try {
-      // Test Resend API with a minimal request
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
+      // Test Netlify function availability
+      const response = await fetch(this.NETLIFY_FUNCTION_URL, {
+        method: 'OPTIONS', // Preflight request to check availability
         headers: {
-          'Authorization': `Bearer ${this.API_KEY}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          from: this.FROM_EMAIL,
-          to: ['test@test.com'],
-          subject: 'Health Check',
-          html: '<p>Health check</p>'
-        }),
       });
 
-      // Even if this fails, if we get a proper response (not network error), Resend is working
-      const isHealthy = response.status !== 0; // Network errors return 0
-      
+      // If we get any response (even error), the function is available
+      const isHealthy = response.status !== 0;
+
       return {
         status: isHealthy ? 'healthy' : 'error',
         resend: isHealthy
       };
     } catch (error) {
+      console.warn('Email service health check failed:', error);
       return {
         status: 'error',
         resend: false

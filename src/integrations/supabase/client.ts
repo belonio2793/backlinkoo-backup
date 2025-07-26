@@ -26,23 +26,51 @@ const createMockSupabaseClient = () => {
   };
 
   const mockAuth = {
-    getSession: () => Promise.resolve({ data: { session: mockSession }, error: null }),
-    getUser: () => Promise.resolve({ data: { user: mockUser }, error: null }),
-    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-    signInWithPassword: () => Promise.resolve({
-      data: { user: mockUser, session: mockSession },
-      error: null
-    }),
-    signUp: () => Promise.resolve({
-      data: { user: mockUser, session: mockSession },
-      error: null
-    }),
-    signOut: () => Promise.resolve({ error: null }),
-    resend: () => Promise.resolve({ error: null }),
-    verifyOtp: () => Promise.resolve({
-      data: { user: mockUser, session: mockSession },
-      error: null
-    }),
+    getSession: () => {
+      console.warn('⚠️ Mock auth getSession called - using fake session');
+      return Promise.resolve({ data: { session: null }, error: { message: 'Mock mode: Please configure real Supabase credentials' } });
+    },
+    getUser: () => {
+      console.warn('⚠️ Mock auth getUser called');
+      return Promise.resolve({ data: { user: null }, error: { message: 'Mock mode: Please configure real Supabase credentials' } });
+    },
+    onAuthStateChange: (callback: any) => {
+      console.warn('⚠️ Mock auth onAuthStateChange called');
+      return { data: { subscription: { unsubscribe: () => console.log('Mock auth listener unsubscribed') } } };
+    },
+    signInWithPassword: () => {
+      console.error('⚠️ Mock auth signInWithPassword called - login will fail');
+      return Promise.resolve({
+        data: { user: null, session: null },
+        error: { message: 'Authentication not available: Please configure real Supabase credentials in environment variables' }
+      });
+    },
+    signUp: () => {
+      console.error('⚠️ Mock auth signUp called - signup will fail');
+      return Promise.resolve({
+        data: { user: null, session: null },
+        error: { message: 'Authentication not available: Please configure real Supabase credentials in environment variables' }
+      });
+    },
+    signOut: () => {
+      console.log('⚠️ Mock auth signOut called');
+      return Promise.resolve({ error: null });
+    },
+    resend: () => {
+      console.error('⚠️ Mock auth resend called');
+      return Promise.resolve({ error: { message: 'Email service not available in mock mode' } });
+    },
+    resetPasswordForEmail: () => {
+      console.error('⚠️ Mock auth resetPasswordForEmail called');
+      return Promise.resolve({ error: { message: 'Password reset not available in mock mode' } });
+    },
+    verifyOtp: () => {
+      console.error('⚠️ Mock auth verifyOtp called');
+      return Promise.resolve({
+        data: { user: null, session: null },
+        error: { message: 'OTP verification not available in mock mode' }
+      });
+    },
   };
 
   const mockFrom = (table: string) => {
@@ -68,17 +96,12 @@ const createMockSupabaseClient = () => {
       range: (from: number, to: number) => mockMethods,
       single: () => Promise.resolve({ data: { id: 'mock-id', ...mockUser }, error: null }),
       then: (callback: any) => {
-        // Return mock data based on table
-        if (table === 'profiles') {
-          return callback({ data: { user_id: mockUser.id, email: mockUser.email, role: 'user' }, error: null });
-        } else if (table === 'credits') {
-          return callback({ data: { user_id: mockUser.id, amount: 10 }, error: null });
-        } else if (table === 'campaigns') {
-          return callback({ data: [], error: null });
-        } else if (table === 'ranking_targets' || table === 'ranking_dashboard') {
-          return callback({ data: [], error: null });
-        }
-        return callback({ data: [], error: null });
+        console.warn(`⚠️ Mock database query on table '${table}' - no real data available`);
+        // Return mock error to indicate database is not available
+        return callback({
+          data: null,
+          error: { message: `Database not available: Please configure real Supabase credentials. Attempted to query table: ${table}` }
+        });
       }
     };
     return mockMethods;
@@ -109,17 +132,21 @@ const hasValidCredentials = SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY &&
   !SUPABASE_URL.includes('your-project-url') &&
   !SUPABASE_PUBLISHABLE_KEY.includes('your-anon-key') &&
   SUPABASE_URL.startsWith('https://') &&
-  SUPABASE_PUBLISHABLE_KEY.length > 20;
+  SUPABASE_URL.includes('.supabase.co') &&
+  SUPABASE_PUBLISHABLE_KEY.startsWith('eyJ') && // Valid JWT token starts with eyJ
+  SUPABASE_PUBLISHABLE_KEY.length > 100; // JWT tokens are much longer than 20 chars
 
 console.log('🔧 Supabase client configuration:', {
   hasUrl: !!SUPABASE_URL,
   hasKey: !!SUPABASE_PUBLISHABLE_KEY,
   urlLength: SUPABASE_URL?.length,
   keyLength: SUPABASE_PUBLISHABLE_KEY?.length,
-  urlValid: SUPABASE_URL?.startsWith('https://'),
-  keyValid: SUPABASE_PUBLISHABLE_KEY?.length > 20,
+  urlValid: SUPABASE_URL?.startsWith('https://') && SUPABASE_URL?.includes('.supabase.co'),
+  keyValid: SUPABASE_PUBLISHABLE_KEY?.startsWith('eyJ') && SUPABASE_PUBLISHABLE_KEY?.length > 100,
   hasValidCredentials,
-  willUseMock: !hasValidCredentials
+  willUseMock: !hasValidCredentials,
+  url: SUPABASE_URL ? `${SUPABASE_URL.substring(0, 30)}...` : 'missing',
+  keyPrefix: SUPABASE_PUBLISHABLE_KEY ? SUPABASE_PUBLISHABLE_KEY.substring(0, 10) + '...' : 'missing'
 });
 
 // Use mock client if credentials are missing or invalid
@@ -129,6 +156,21 @@ export const supabase = hasValidCredentials ?
       storage: localStorage,
       persistSession: true,
       autoRefreshToken: true,
-    }
+      detectSessionInUrl: true,
+      storageKey: 'supabase.auth.token',
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'backlink-infinity@1.0.0',
+      },
+    },
   }) :
   createMockSupabaseClient() as any;
+
+// Log the final client type
+if (hasValidCredentials) {
+  console.log('✅ Using real Supabase client');
+} else {
+  console.warn('⚠️ Using mock Supabase client - authentication will not work!');
+  console.log('Fix: Set proper VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables');
+}
