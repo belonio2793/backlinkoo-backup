@@ -104,6 +104,45 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
   };
 
   const handleProfileSave = async () => {
+    // Validate required fields
+    if (!profile.displayName.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Display name is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate email format if changed
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (profile.email && !emailRegex.test(profile.email)) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate website URL if provided
+    if (additionalInfo.website && additionalInfo.website.trim()) {
+      try {
+        new URL(additionalInfo.website);
+      } catch {
+        if (!additionalInfo.website.startsWith('http://') && !additionalInfo.website.startsWith('https://')) {
+          setAdditionalInfo({ ...additionalInfo, website: `https://${additionalInfo.website}` });
+        } else {
+          toast({
+            title: "Validation Error",
+            description: "Please enter a valid website URL.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+    }
+
     setIsLoading(true);
     try {
       // Update the profiles table with only available fields
