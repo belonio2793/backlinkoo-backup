@@ -171,32 +171,38 @@ const Dashboard = () => {
       isMounted = false;
     };
 
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🏠 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
+    // Simplified auth state listener since EmailVerificationGuard handles the main auth flow
+    let subscription;
+    try {
+      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (!isMounted) return;
 
-      if (event === 'SIGNED_OUT' || !session) {
-        console.log('🏠 Dashboard - User signed out, redirecting to login...');
+        console.log('🏠 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
 
-        // Primary redirect
-        navigate('/login');
-
-        // Fallback redirect to ensure user doesn't see blank page
-        setTimeout(() => {
-          if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
-            console.log('🏠 Dashboard - Fallback redirect to login...');
-            window.location.href = '/login';
+        if (event === 'SIGNED_OUT' || !session) {
+          console.log('🏠 Dashboard - User signed out, redirecting to login...');
+          navigate('/login');
+        } else if (event === 'SIGNED_IN' && session) {
+          console.log('🏠 Dashboard - User signed in, updating user state');
+          setUser(session.user);
+          if (loading) {
+            setLoading(false);
           }
-        }, 150);
-      } else if (event === 'SIGNED_IN' && session && isMounted) {
-        setUser(session.user);
-        setLoading(false);
-      }
-    });
+        }
+      });
+      subscription = authSubscription;
+    } catch (subscriptionError) {
+      console.warn('🏠 Dashboard - Could not set up auth listener:', subscriptionError);
+    }
 
     return () => {
-      isMounted = false;
-      subscription.unsubscribe();
+      if (subscription?.unsubscribe) {
+        try {
+          subscription.unsubscribe();
+        } catch (error) {
+          console.warn('🏠 Dashboard - Error unsubscribing:', error);
+        }
+      }
     };
   }, [navigate]);
 
