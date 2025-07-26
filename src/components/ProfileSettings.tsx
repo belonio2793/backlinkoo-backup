@@ -153,18 +153,6 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
 
     setIsLoading(true);
     try {
-      const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('.fly.dev');
-      
-      if (isDev) {
-        toast({
-          title: "Password updated! (Development Mode)",
-          description: "Password changes are simulated in development.",
-        });
-        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-        setIsLoading(false);
-        return;
-      }
-
       const { error } = await supabase.auth.updateUser({
         password: passwordData.newPassword
       });
@@ -175,9 +163,9 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
         title: "Password updated successfully!",
         description: "Your password has been changed.",
       });
-      
+
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      
+
     } catch (error: any) {
       toast({
         title: "Password update failed",
