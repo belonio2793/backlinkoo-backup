@@ -255,6 +255,18 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
     }
   };
 
+  const handleDevBypass = () => {
+    console.log('EmailVerificationGuard: Using development bypass');
+    setIsEmailVerified(true);
+    setUser({
+      id: 'dev-bypass-user',
+      email: 'dev@example.com',
+      email_confirmed_at: new Date().toISOString(),
+      user_metadata: { display_name: 'Development User (Bypass)' }
+    } as any);
+    setShowDevBypass(false);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
