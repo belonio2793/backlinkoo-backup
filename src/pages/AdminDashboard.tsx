@@ -186,6 +186,7 @@ const AdminDashboard = () => {
 
           <TabsContent value="email-test">
             <div className="space-y-6">
+              <EmailSystemDiagnosis />
               <Card>
                 <CardHeader>
                   <CardTitle>Email System Test</CardTitle>
