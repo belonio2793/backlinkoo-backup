@@ -10,6 +10,7 @@ import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { ResendEmailService } from "@/services/resendEmailService";
 import { ProfileMigrationService } from "@/services/profileMigrationService";
+import { DevEmailVerificationHelper } from "@/components/DevEmailVerificationHelper";
 
 import { useNavigate } from "react-router-dom";
 import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft } from "lucide-react";
