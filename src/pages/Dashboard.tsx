@@ -387,6 +387,7 @@ const Dashboard = () => {
                   </Button>
                 </>
               )}
+              <ProfileSettings user={user} userType={userType} onUserUpdate={setUser} />
               <Button variant="outline" size="sm" onClick={handleSignOut} className="px-2 sm:px-4">
                 <LogOut className="h-4 w-4 sm:mr-1" />
                 <span className="hidden sm:inline">Sign Out</span>
