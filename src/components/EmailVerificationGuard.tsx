@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AuthService } from '@/services/authService';
+import { AuthService, setupAuthStateListener } from '@/services/authService';
 import { Mail, AlertCircle, Loader2, Shield, CheckCircle } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 
@@ -29,82 +29,32 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
       try {
         console.log('EmailVerificationGuard: Starting auth check...');
 
-        // Try to get session with shorter timeout
-        let session = null;
-        let error = null;
-
-        try {
-          const { data, error: authError } = await Promise.race([
-            supabase.auth.getSession(),
-            new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('Auth timeout')), 5000)
-            )
-          ]) as any;
-
-          session = data?.session;
-          error = authError;
-        } catch (timeoutError) {
-          console.warn('EmailVerificationGuard: Auth check timed out, checking localStorage for session...');
-
-          // Fallback: try to get user from localStorage
-          try {
-            const storedSession = localStorage.getItem('supabase.auth.token');
-            if (storedSession) {
-              const parsed = JSON.parse(storedSession);
-              if (parsed && parsed.user) {
-                console.log('EmailVerificationGuard: Found stored session, using fallback');
-                session = parsed;
-              }
-            }
-          } catch (storageError) {
-            console.warn('EmailVerificationGuard: Could not read from localStorage:', storageError);
-          }
-
-          // If no stored session, try one more quick check
-          if (!session) {
-            console.log('EmailVerificationGuard: No stored session, attempting direct auth check...');
-            try {
-              // Quick direct check without timeout
-              const { data } = await supabase.auth.getUser();
-              if (data?.user) {
-                session = { user: data.user };
-                console.log('EmailVerificationGuard: Got user from direct check');
-              }
-            } catch (directError) {
-              console.warn('EmailVerificationGuard: Direct auth check failed:', directError);
-            }
-          }
-        }
+        // Get current session using AuthService
+        const { session, user } = await AuthService.getCurrentSession();
 
         if (!isMounted) return;
 
-        if (error && !session) {
-          console.error('EmailVerificationGuard: Auth session error:', error);
-          navigate('/login');
-          return;
-        }
-
         console.log('EmailVerificationGuard: Session check result:', {
           hasSession: !!session,
-          hasUser: !!session?.user,
-          userEmail: session?.user?.email
+          hasUser: !!user,
+          userEmail: user?.email
         });
 
-        if (!session?.user) {
+        if (!user) {
           console.log('EmailVerificationGuard: No user session found, redirecting to login');
           navigate('/login');
           return;
         }
 
-        setUser(session.user);
+        setUser(user);
 
         // Check if email is verified
-        const isVerified = session.user.email_confirmed_at !== null;
+        const isVerified = user.email_confirmed_at !== null;
         setIsEmailVerified(isVerified);
 
         console.log('EmailVerificationGuard: Email verification status:', {
-          email: session.user.email,
-          confirmed_at: session.user.email_confirmed_at,
+          email: user.email,
+          confirmed_at: user.email_confirmed_at,
           isVerified
         });
 
@@ -130,7 +80,7 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
     // Listen for auth state changes with error handling
     let subscription;
     try {
-      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const { data: { subscription: authSubscription } } = setupAuthStateListener(async (event, session) => {
         if (!isMounted) return;
 
         console.log('EmailVerificationGuard: Auth state change:', { event, hasUser: !!session?.user });
