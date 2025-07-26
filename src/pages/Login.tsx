@@ -280,6 +280,7 @@ const Login = () => {
           setDebugInfo(prev => [...prev, 'User already exists - showing resend options']);
           setResendEmail(email);
           setShowResendConfirmation(true);
+          setIsLoading(false); // Reset loading state immediately
           toast({
             title: "Email Already Registered",
             description: "This email is already registered. Please check your email for confirmation or try signing in instead.",
@@ -291,7 +292,7 @@ const Login = () => {
               loginTab.click();
             }
           }, 100);
-          return; // finally block will reset loading state
+          return;
         }
         throw error;
       }
