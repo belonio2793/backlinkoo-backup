@@ -58,6 +58,16 @@ const Dashboard = () => {
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Failsafe: force loading to false after maximum time
+  useEffect(() => {
+    const maxLoadingTime = setTimeout(() => {
+      console.warn('🏠 Dashboard - Maximum loading time reached, forcing loading to false');
+      setLoading(false);
+    }, 15000); // 15 seconds maximum
+
+    return () => clearTimeout(maxLoadingTime);
+  }, []);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
