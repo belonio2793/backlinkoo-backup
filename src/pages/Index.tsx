@@ -231,10 +231,16 @@ const Index = () => {
                 </Button>
               ) : (
                 <>
-                  <Button variant="ghost" onClick={() => navigate("/login")} className="font-medium">
+                  <Button variant="ghost" onClick={() => {
+                    console.log('Sign In button clicked');
+                    navigate("/login");
+                  }} className="font-medium">
                     Sign In
                   </Button>
-                  <Button onClick={() => navigate("/login")} className="font-medium">
+                  <Button onClick={() => {
+                    console.log('Get Started button clicked');
+                    navigate("/login");
+                  }} className="font-medium">
                     Get Started
                   </Button>
                 </>
