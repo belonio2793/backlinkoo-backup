@@ -303,7 +303,7 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
                   <Avatar className="h-20 w-20">
                     <AvatarImage src="" />
                     <AvatarFallback className="text-lg">
-                      {getInitials(displayName)}
+                      {getInitials(fullName)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-2">
