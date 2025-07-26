@@ -113,21 +113,28 @@ const Login = () => {
 
     try {
       console.log('🔐 Starting login process for:', loginEmail);
+      setDebugInfo(['Starting login process...']);
 
       // Clear any existing auth state first
       cleanupAuthState();
+      setDebugInfo(prev => [...prev, 'Cleared auth state']);
 
       // Simple sign out without waiting
       supabase.auth.signOut({ scope: 'global' }).catch(() => {});
 
       // Wait a moment for cleanup
       await new Promise(resolve => setTimeout(resolve, 100));
+      setDebugInfo(prev => [...prev, 'Cleaned up previous session']);
 
       console.log('🔐 Attempting sign in...');
+      setDebugInfo(prev => [...prev, 'Calling Supabase signInWithPassword...']);
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginEmail.trim(),
         password: loginPassword,
       });
+
+      setDebugInfo(prev => [...prev, `Sign in response received. Has data: ${!!data}, Has error: ${!!error}`]);
 
       if (error) {
         console.error('🔐 Sign in error:', error);
