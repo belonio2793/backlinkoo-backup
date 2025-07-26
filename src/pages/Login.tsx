@@ -286,22 +286,61 @@ const Login = () => {
                             error.code === 'user_already_exists';
 
         if (isUserExists) {
-          console.log('User already exists, showing resend option');
-          setDebugInfo(prev => [...prev, 'User already exists - showing resend options']);
+          console.log('User already exists, checking verification status');
+          setDebugInfo(prev => [...prev, 'User already exists - checking verification status']);
+
+          // Try to determine if user needs email verification
+          try {
+            // Attempt to get user status by trying to resend confirmation
+            const { error: testResendError } = await supabase.auth.resend({
+              type: 'signup',
+              email: email.trim(),
+              options: {
+                emailRedirectTo: `https://backlinkoo.com/auth/confirm`
+              }
+            });
+
+            if (testResendError) {
+              if (testResendError.message.includes('already confirmed') ||
+                  testResendError.message.includes('verified')) {
+                // User is already verified
+                console.log('User is already verified');
+                setIsLoading(false);
+                toast({
+                  title: "Account Already Verified",
+                  description: "This email is already registered and verified. Please try signing in with your password.",
+                });
+                // Switch to login tab and pre-fill email
+                setTimeout(() => {
+                  const loginTab = document.querySelector('[value="login"]') as HTMLElement;
+                  if (loginTab) {
+                    loginTab.click();
+                    setLoginEmail(email);
+                  }
+                }, 100);
+                return;
+              } else {
+                // Other error, treat as unverified
+                console.log('User exists but verification status unclear');
+              }
+            } else {
+              // Resend successful, means user needs verification
+              console.log('User exists and needs email verification');
+              toast({
+                title: "Verification Email Sent",
+                description: "This email is already registered but not verified. We've sent you a new confirmation link.",
+              });
+            }
+          } catch (statusError) {
+            console.log('Could not determine verification status');
+          }
+
+          // Show resend options for unverified users
           setResendEmail(email);
           setShowResendConfirmation(true);
-          setIsLoading(false); // Reset loading state immediately
-          toast({
-            title: "Email Already Registered",
-            description: "This email is already registered. Please check your email for confirmation or try signing in instead.",
-          });
-          // Switch to login tab automatically
-          setTimeout(() => {
-            const loginTab = document.querySelector('[value="login"]') as HTMLElement;
-            if (loginTab) {
-              loginTab.click();
-            }
-          }, 100);
+          setIsLoading(false);
+
+          // Don't auto-switch to login for unverified users
           return;
         }
         throw error;
