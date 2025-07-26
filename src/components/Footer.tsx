@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 
 export const Footer = () => {
   return (
