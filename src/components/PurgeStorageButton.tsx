@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { StoragePurge } from '@/utils/storagePurge';
-import { Sparkles, AlertTriangle, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { RotateCcw, AlertTriangle, Loader2, CheckCircle, XCircle } from 'lucide-react';
 
 interface PurgeStorageButtonProps {
   variant?: 'default' | 'outline' | 'ghost' | 'destructive';
