@@ -79,6 +79,11 @@ const NoHandsSEODashboard = () => {
 
       if (error) {
         console.error('Error fetching campaigns:', error);
+        toast({
+          title: "Error",
+          description: `Failed to fetch campaigns: ${error.message || 'Unknown error'}`,
+          variant: "destructive",
+        });
         return;
       }
 
@@ -89,11 +94,11 @@ const NoHandsSEODashboard = () => {
       ) || [];
 
       setCampaigns(campaignsData);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching campaigns:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch campaigns. Please try again.",
+        description: `Failed to fetch campaigns: ${error?.message || 'Please try again'}`,
         variant: "destructive",
       });
     } finally {
