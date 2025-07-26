@@ -470,13 +470,15 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
                       </div>
                       <div className="space-y-2 md:col-span-2">
                         <Label htmlFor="bio">Bio</Label>
-                        <Input
+                        <Textarea
                           id="bio"
                           value={additionalInfo.bio}
                           onChange={(e) => setAdditionalInfo({ ...additionalInfo, bio: e.target.value })}
                           disabled={!isEditing}
                           placeholder="Tell us about yourself..."
                           maxLength={500}
+                          rows={3}
+                          className="resize-none"
                         />
                         <p className="text-xs text-muted-foreground">
                           {additionalInfo.bio.length}/500 characters
