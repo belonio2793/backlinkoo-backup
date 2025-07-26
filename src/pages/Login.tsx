@@ -216,6 +216,8 @@ const Login = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    console.log('🆕 Starting signup process for:', email);
+    setDebugInfo(prev => [...prev, 'Starting signup process...']);
     setIsLoading(true);
 
     if (password !== confirmPassword) {
