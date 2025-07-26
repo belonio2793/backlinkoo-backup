@@ -839,9 +839,6 @@ const Login = () => {
             </Tabs>
           </CardContent>
         </Card>
-
-        {/* Development helper - only shows in dev mode */}
-        <DevEmailVerificationHelper />
       </div>
     </div>
   );
