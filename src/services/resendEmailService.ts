@@ -15,9 +15,9 @@ export interface ResendEmailData {
 }
 
 export class ResendEmailService {
-  private static readonly API_KEY = import.meta.env.VITE_RESEND_API_KEY || 're_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq';
   private static readonly FROM_EMAIL = 'Backlink ∞ <support@backlinkoo.com>';
   private static failureLog: Array<{ timestamp: Date; error: string; email: string }> = [];
+  private static readonly NETLIFY_FUNCTION_URL = '/.netlify/functions/send-email';
 
   private static async sendDirectly(emailData: ResendEmailData): Promise<ResendEmailResponse> {
     try {
