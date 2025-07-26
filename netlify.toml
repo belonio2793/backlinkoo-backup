@@ -1,25 +1,14 @@
 [build]
   publish = "dist"
-  command = "npm ci && cd netlify/functions && npm ci && cd ../.. && npm run build"
+  command = "npm install && npm run build"
 
 [build.environment]
   NODE_VERSION = "20"
-  NODE_ENV = "production"
-  NPM_FLAGS = "--legacy-peer-deps"
-  VITE_APP_URL = "https://backlinkoo.com"
-  VITE_DOMAIN = "backlinkoo.com"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  force = false
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
 
 [functions]
   directory = "netlify/functions"

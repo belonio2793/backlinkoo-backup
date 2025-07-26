@@ -13,8 +13,17 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Import secure configuration
-import { SecureConfig } from './secure-config.js';
+// Import secure configuration with fallback
+let SecureConfig;
+try {
+  const config = await import('./secure-config.js');
+  SecureConfig = config.SecureConfig;
+} catch (error) {
+  console.warn('⚠️  Secure config not available in build environment');
+  SecureConfig = {
+    DATABASE_PASSWORD: process.env.DATABASE_PASSWORD || ''
+  };
+}
 
 const DB_PASSWORD = SecureConfig.DATABASE_PASSWORD;
 

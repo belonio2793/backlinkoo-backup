@@ -19,28 +19,20 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: mode === 'development',
-    target: 'esnext',
-    chunkSizeWarningLimit: 1000,
+    sourcemap: false,
+    target: 'es2015',
+    chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
           supabase: ['@supabase/supabase-js'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
-          charts: ['recharts'],
-          forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
-          utils: ['date-fns', 'clsx', 'tailwind-merge'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
         },
       },
     },
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: mode === 'production',
-        drop_debugger: mode === 'production',
-      },
-    },
+    minify: 'esbuild',
   },
   define: {
     __DEV__: mode === 'development',
