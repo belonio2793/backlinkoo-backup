@@ -376,16 +376,36 @@ const Dashboard = () => {
                   </Button>
                 </>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSignOut}
-                disabled={isSigningOut}
-                className="px-2 sm:px-4"
-              >
-                <LogOut className={`h-4 w-4 sm:mr-1 ${isSigningOut ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">{isSigningOut ? 'Signing Out...' : 'Sign Out'}</span>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="px-2 sm:px-4 gap-1"
+                  >
+                    <User className="h-4 w-4" />
+                    <span className="hidden sm:inline">
+                      {user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Account'}
+                    </span>
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => setIsProfileOpen(true)}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Profile Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    disabled={isSigningOut}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <LogOut className={`mr-2 h-4 w-4 ${isSigningOut ? 'animate-spin' : ''}`} />
+                    {isSigningOut ? 'Signing Out...' : 'Sign Out'}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
