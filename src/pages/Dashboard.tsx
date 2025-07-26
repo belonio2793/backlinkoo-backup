@@ -352,6 +352,7 @@ const Dashboard = () => {
                              window.location.hostname.includes('fly.dev');
 
         if (isDevelopment) {
+          setIsDemoMode(true);
           const mockCampaigns = [
             {
               id: 'demo-1',
