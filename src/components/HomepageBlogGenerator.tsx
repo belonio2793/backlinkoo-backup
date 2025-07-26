@@ -9,6 +9,7 @@ import { aiContentGenerator } from '@/services/aiContentGenerator';
 import { blogPublisher } from '@/services/blogPublisher';
 import { multiApiContentGenerator } from '@/services/multiApiContentGenerator';
 import { liveBlogPublisher } from '@/services/liveBlogPublisher';
+import { publishedBlogService } from '@/services/publishedBlogService';
 import { supabase } from '@/integrations/supabase/client';
 import { SavePostSignupPopup } from './SavePostSignupPopup';
 import { GenerationSequence } from './GenerationSequence';
