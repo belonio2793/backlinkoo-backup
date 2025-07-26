@@ -5,9 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --mode production",
-    "build:dev": "vite build --mode development",
-    "build:staging": "vite build --mode staging",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "supabase:link": "supabase link --project-ref dfhanacsmsvvkpunurnp",
