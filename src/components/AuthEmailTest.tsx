@@ -90,7 +90,7 @@ export const AuthEmailTest = () => {
       // 2. Supabase Connection
       updateTestResult('Supabase Connection', 'running');
       try {
-        const { data: session } = await supabase.auth.getSession();
+        const { session } = await AuthService.getCurrentSession();
         updateTestResult('Supabase Connection', 'success', 'Connected successfully', { hasSession: !!session });
       } catch (error: any) {
         updateTestResult('Supabase Connection', 'error', error.message);
