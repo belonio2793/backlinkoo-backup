@@ -197,11 +197,18 @@ const Login = () => {
         errorMessage = error;
       }
 
+      setDebugInfo(prev => [...prev, `Login failed: ${errorMessage}`]);
+
       toast({
         title: "Sign in failed",
         description: errorMessage,
         variant: "destructive",
       });
+
+      // Show debug info in development
+      if (window.location.hostname === 'localhost') {
+        console.error('📝 Debug info:', debugInfo);
+      }
     } finally {
       setIsLoading(false);
     }
