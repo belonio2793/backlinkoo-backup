@@ -1,0 +1,172 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Mail, RefreshCw, LogOut } from 'lucide-react';
+
+interface EmailVerificationGuardProps {
+  children: React.ReactNode;
+}
+
+export function EmailVerificationGuard({ children }: EmailVerificationGuardProps) {
+  const [isEmailVerified, setIsEmailVerified] = useState<boolean | null>(null);
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [isResending, setIsResending] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    checkEmailVerification();
+    
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        navigate('/auth/login');
+      } else if (session?.user) {
+        checkEmailVerificationStatus(session.user);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const checkEmailVerification = async () => {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (error || !user) {
+        navigate('/auth/login');
+        return;
+      }
+
+      checkEmailVerificationStatus(user);
+    } catch (error) {
+      console.error('Error checking authentication:', error);
+      navigate('/auth/login');
+    }
+  };
+
+  const checkEmailVerificationStatus = (user: any) => {
+    setUserEmail(user.email || '');
+    
+    // Check if email is confirmed
+    if (user.email_confirmed_at) {
+      setIsEmailVerified(true);
+    } else {
+      setIsEmailVerified(false);
+      console.warn('🔐 Email not verified, blocking access to protected content');
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setIsResending(true);
+    
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: userEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/confirm`
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Resend failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Verification email sent!",
+          description: "Please check your email for the verification link.",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Resend failed",
+        description: error.message || "Failed to send verification email",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth/login');
+  };
+
+  // Loading state
+  if (isEmailVerified === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Email not verified - show verification required screen
+  if (isEmailVerified === false) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <Mail className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+            <CardTitle className="text-xl text-orange-600">Email Verification Required</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="text-center space-y-2">
+              <p className="text-muted-foreground">
+                Please verify your email address to access your account.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                We sent a verification link to: <strong>{userEmail}</strong>
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              <Button 
+                onClick={handleResendVerification} 
+                disabled={isResending}
+                className="w-full"
+                variant="default"
+              >
+                {isResending ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-4 w-4 mr-2" />
+                    Resend Verification Email
+                  </>
+                )}
+              </Button>
+              
+              <Button 
+                onClick={handleSignOut} 
+                variant="outline"
+                className="w-full"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
+            
+            <div className="text-xs text-center text-muted-foreground">
+              Check your spam folder if you don't see the email.
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Email verified - render protected content
+  return <>{children}</>;
+}
