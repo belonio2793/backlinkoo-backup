@@ -486,8 +486,7 @@ const Login = () => {
           <div className="flex items-center justify-center gap-2 mb-4">
             <Infinity className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome</h1>
-          <p className="text-muted-foreground">Sign in to your account or create a new one to get started</p>
+          <h1 className="text-3xl font-bold text-foreground">Welcome Back</h1>
         </div>
 
         <Card>
