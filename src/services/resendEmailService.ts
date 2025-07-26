@@ -19,42 +19,40 @@ export class ResendEmailService {
   private static failureLog: Array<{ timestamp: Date; error: string; email: string }> = [];
   private static readonly NETLIFY_FUNCTION_URL = '/.netlify/functions/send-email';
 
-  private static async sendDirectly(emailData: ResendEmailData): Promise<ResendEmailResponse> {
+  private static async sendViaNetlify(emailData: ResendEmailData): Promise<ResendEmailResponse> {
     try {
-      console.log('Sending email directly via Resend API:', { to: emailData.to, subject: emailData.subject });
+      console.log('Sending email via Netlify function:', { to: emailData.to, subject: emailData.subject });
 
-      const response = await fetch('https://api.resend.com/emails', {
+      const response = await fetch(this.NETLIFY_FUNCTION_URL, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           from: emailData.from || this.FROM_EMAIL,
-          to: [emailData.to],
+          to: emailData.to,
           subject: emailData.subject,
-          html: this.formatEmailHTML(emailData.message, emailData.subject),
-          text: emailData.message
+          message: emailData.message
         }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-        console.error('Resend API error:', response.status, errorData);
-        throw new Error(`Resend API error: ${errorData.message || response.statusText}`);
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Netlify function error:', response.status, errorData);
+        throw new Error(`Email service error: ${errorData.error || response.statusText}`);
       }
 
       const result = await response.json();
-      console.log('Email sent successfully via Resend:', result.id);
+      console.log('Email sent successfully via Netlify:', result.emailId);
 
       return {
         success: true,
-        emailId: result.id,
+        emailId: result.emailId,
         provider: 'resend'
       };
     } catch (error: any) {
-      console.error('Direct Resend error:', error);
-      
+      console.error('Netlify email service error:', error);
+
       // Log failure
       this.failureLog.push({
         timestamp: new Date(),
@@ -64,7 +62,7 @@ export class ResendEmailService {
 
       return {
         success: false,
-        error: error.message || 'Unknown error occurred',
+        error: error.message || 'Failed to send email',
         provider: 'resend'
       };
     }
