@@ -206,10 +206,21 @@ export class EmailService {
     }
   }
 
+  private static getOriginUrl(): string {
+    // Get the current origin, with fallback to production URL
+    if (typeof window !== 'undefined') {
+      return window.location.origin;
+    }
+
+    // Fallback for server-side or when window is not available
+    return 'https://backlinkoo.com';
+  }
+
   static async sendConfirmationEmail(email: string, confirmationUrl?: string): Promise<EmailServiceResponse> {
     console.log('EmailService: Sending confirmation email to:', email);
 
-    const defaultConfirmationUrl = confirmationUrl || `https://backlinkoo.com/auth/confirm?email=${encodeURIComponent(email)}`;
+    const origin = this.getOriginUrl();
+    const defaultConfirmationUrl = confirmationUrl || `${origin}/auth/confirm?email=${encodeURIComponent(email)}`;
 
     const emailData = {
       to: email,
@@ -238,11 +249,28 @@ The Backlink ∞ Team
 
 ---
 Professional SEO & Backlink Management Platform
-https://backlinkoo.com`,
+${origin}`,
       from: 'Backlink ∞ <support@backlinkoo.com>'
     };
 
-    return await this.sendViaNetlifyFunction(emailData);
+    try {
+      const result = await this.sendViaNetlifyFunction(emailData);
+
+      if (result.success) {
+        console.log('Confirmation email sent successfully to:', email);
+      } else {
+        console.error('Failed to send confirmation email:', result.error);
+      }
+
+      return result;
+    } catch (error: any) {
+      console.error('Error sending confirmation email:', error);
+      return {
+        success: false,
+        error: `Failed to send confirmation email: ${error.message}`,
+        provider: 'netlify_resend'
+      };
+    }
   }
 
   static async sendPasswordResetEmail(email: string, resetUrl: string): Promise<EmailServiceResponse> {
