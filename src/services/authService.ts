@@ -23,6 +23,14 @@ export interface SignInData {
   password: string;
 }
 
+export type SocialProvider = 'google' | 'facebook' | 'linkedin_oidc' | 'twitter';
+
+export interface SocialAuthOptions {
+  redirectTo?: string;
+  scopes?: string;
+  queryParams?: Record<string, string>;
+}
+
 export class AuthService {
   private static readonly EMAIL_REDIRECT_BASE = typeof window !== 'undefined' 
     ? window.location.origin 
@@ -279,6 +287,159 @@ export class AuthService {
   }
 
   /**
+   * Sign in with social provider (Google, Facebook, LinkedIn, Twitter)
+   */
+  static async signInWithSocial(
+    provider: SocialProvider,
+    options?: SocialAuthOptions
+  ): Promise<AuthResponse> {
+    try {
+      console.log(`🔐 AuthService: Starting ${provider} authentication`);
+
+      // Clean up any existing auth state
+      await this.cleanupAuthState();
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: options?.redirectTo || `${this.EMAIL_REDIRECT_BASE}/auth/callback`,
+          scopes: options?.scopes,
+          queryParams: options?.queryParams
+        }
+      });
+
+      if (error) {
+        console.error(`AuthService: ${provider} auth error:`, error);
+        return {
+          success: false,
+          error: this.formatErrorMessage(error.message)
+        };
+      }
+
+      // For OAuth, the actual authentication happens on redirect
+      // This just initiates the OAuth flow
+      console.log(`✅ AuthService: ${provider} OAuth flow initiated`);
+      return {
+        success: true
+      };
+    } catch (error: any) {
+      console.error(`AuthService: ${provider} auth exception:`, error);
+      return {
+        success: false,
+        error: this.formatErrorMessage(error.message)
+      };
+    }
+  }
+
+  /**
+   * Handle OAuth callback after social login
+   */
+  static async handleOAuthCallback(): Promise<AuthResponse> {
+    try {
+      console.log('🔐 AuthService: Processing OAuth callback');
+
+      const { data, error } = await supabase.auth.getSession();
+
+      if (error) {
+        console.error('AuthService: OAuth callback error:', error);
+        return {
+          success: false,
+          error: this.formatErrorMessage(error.message)
+        };
+      }
+
+      if (data.session && data.session.user) {
+        console.log('✅ AuthService: OAuth authentication successful:', data.session.user.id);
+
+        // Ensure user profile exists for social login users
+        this.ensureUserProfile(
+          data.session.user,
+          data.session.user.email || '',
+          data.session.user.user_metadata?.full_name || data.session.user.user_metadata?.name
+        ).catch(err => {
+          console.warn('AuthService: Social profile creation failed (non-blocking):', err);
+        });
+
+        // Send welcome email for new social users
+        if (data.session.user.created_at) {
+          const createdAt = new Date(data.session.user.created_at);
+          const now = new Date();
+          const isNewUser = (now.getTime() - createdAt.getTime()) < 60000; // Within last minute
+
+          if (isNewUser) {
+            this.sendEnhancedWelcomeEmail(
+              data.session.user.email || '',
+              data.session.user.user_metadata?.full_name || data.session.user.user_metadata?.name
+            ).catch(err => {
+              console.warn('AuthService: Welcome email failed (non-blocking):', err);
+            });
+          }
+        }
+
+        return {
+          success: true,
+          user: data.session.user,
+          session: data.session,
+          requiresEmailVerification: false // Social logins don't require email verification
+        };
+      }
+
+      return {
+        success: false,
+        error: 'No session data received from OAuth callback'
+      };
+    } catch (error: any) {
+      console.error('AuthService: OAuth callback exception:', error);
+      return {
+        success: false,
+        error: this.formatErrorMessage(error.message)
+      };
+    }
+  }
+
+  /**
+   * Get provider display name
+   */
+  static getProviderDisplayName(provider: SocialProvider): string {
+    const names = {
+      google: 'Google',
+      facebook: 'Facebook',
+      linkedin_oidc: 'LinkedIn',
+      twitter: 'X (Twitter)'
+    };
+    return names[provider] || provider;
+  }
+
+  /**
+   * Get provider icon/color info
+   */
+  static getProviderInfo(provider: SocialProvider) {
+    const info = {
+      google: {
+        name: 'Google',
+        color: 'bg-red-600 hover:bg-red-700',
+        icon: '🔍'
+      },
+      facebook: {
+        name: 'Facebook',
+        color: 'bg-blue-600 hover:bg-blue-700',
+        icon: '📘'
+      },
+      linkedin_oidc: {
+        name: 'LinkedIn',
+        color: 'bg-blue-700 hover:bg-blue-800',
+        icon: '💼'
+      },
+      twitter: {
+        name: 'X (Twitter)',
+        color: 'bg-black hover:bg-gray-800',
+        icon: '🐦'
+      }
+    };
+    return info[provider] || { name: provider, color: 'bg-gray-600 hover:bg-gray-700', icon: '🔐' };
+  }
+
+  /**
    * Sign out user
    */
   static async signOut(): Promise<AuthResponse> {
@@ -420,6 +581,15 @@ export class AuthService {
       console.log('✅ AuthService: Enhanced password reset email sent');
     } catch (error) {
       console.warn('AuthService: Enhanced password reset email failed:', error);
+    }
+  }
+
+  private static async sendEnhancedWelcomeEmail(email: string, name?: string): Promise<void> {
+    try {
+      await EmailService.sendWelcomeEmail(email, name);
+      console.log('✅ AuthService: Enhanced welcome email sent');
+    } catch (error) {
+      console.warn('AuthService: Enhanced welcome email failed:', error);
     }
   }
 
