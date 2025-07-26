@@ -1,36 +1,26 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SecurityDashboard } from "@/components/SecurityDashboard";
 import { CampaignManager } from "@/components/CampaignManager";
 import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager";
-import { EmailVerificationTest } from "@/components/EmailVerificationTest";
-import { EmailVerificationStatus } from "@/components/EmailVerificationStatus";
-import { ResendConnectionTest } from "@/components/ResendConnectionTest";
-import { TestEmailSender } from "@/components/TestEmailSender";
+
 import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
+
 import { EmailTest } from "@/components/EmailTest";
 import { SupabaseEmailTest } from "@/components/SupabaseEmailTest";
 import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
-import { TestSupabaseConnection } from "@/components/TestSupabaseConnection";
+
 import { SystemStatusCheck } from "@/components/SystemStatusCheck";
 import {
   Users,
   Activity,
   CreditCard,
-  Settings,
-  CheckCircle,
   Clock,
-  Infinity,
-  ExternalLink,
-  Shield
+  Infinity
 } from "lucide-react";
 
 const AdminDashboard = () => {
@@ -162,6 +152,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="database">Database</TabsTrigger>
             <TabsTrigger value="smtp-test">SMTP Test</TabsTrigger>
             <TabsTrigger value="email-test">Email System</TabsTrigger>
+
             <TabsTrigger value="security">Security & Roles</TabsTrigger>
           </TabsList>
 
@@ -200,6 +191,8 @@ const AdminDashboard = () => {
               <EmailSystemManager />
             </div>
           </TabsContent>
+
+
 
           <TabsContent value="security">
             <SecurityDashboard />

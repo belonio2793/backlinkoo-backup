@@ -20,25 +20,61 @@ export interface EmailResult extends EmailServiceResponse {
 }
 
 export class EmailService {
-  private static failureLog: Array<{ timestamp: Date; error: string; email: string }> = [];
+  private static failureLog: Array<{ timestamp: Date; error: string; email: string; attempt: number }> = [];
+  private static readonly MAX_RETRIES = 3;
+  private static readonly RETRY_DELAY = 1000; // 1 second base delay
 
-  private static async sendViaNetlifyFunction(emailData: any): Promise<EmailServiceResponse> {
+  private static async delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private static getRetryDelay(attempt: number): number {
+    // Exponential backoff: 1s, 2s, 4s
+    return this.RETRY_DELAY * Math.pow(2, attempt - 1);
+  }
+
+  private static async sendViaNetlifyFunction(emailData: any, attempt: number = 1): Promise<EmailServiceResponse> {
     try {
-      console.log('Sending email via Netlify function:', { to: emailData.to, subject: emailData.subject });
+      console.log(`Sending email via Netlify function (attempt ${attempt}):`, {
+        to: emailData.to,
+        subject: emailData.subject
+      });
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
       const response = await fetch('/.netlify/functions/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(emailData),
+        body: JSON.stringify({
+          ...emailData,
+          attempt,
+          retryable: attempt < this.MAX_RETRIES
+        }),
+        signal: controller.signal,
       });
 
-      // Check if response is ok before trying to parse JSON
+      clearTimeout(timeoutId);
+
+      // Enhanced error handling for different HTTP status codes
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Netlify function error response:', response.status, errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
+
+        const errorMessage = this.getErrorMessage(response.status, errorText);
+
+        // Determine if error is retryable
+        const isRetryable = this.isRetryableError(response.status);
+
+        if (isRetryable && attempt < this.MAX_RETRIES) {
+          console.log(`Retryable error, attempt ${attempt}/${this.MAX_RETRIES}, retrying...`);
+          await this.delay(this.getRetryDelay(attempt));
+          return this.sendViaNetlifyFunction(emailData, attempt + 1);
+        }
+
+        throw new Error(errorMessage);
       }
 
       let result;
@@ -46,6 +82,13 @@ export class EmailService {
         result = await response.json();
       } catch (jsonError) {
         console.error('Failed to parse JSON response:', jsonError);
+
+        if (attempt < this.MAX_RETRIES) {
+          console.log(`JSON parse error, retrying attempt ${attempt + 1}...`);
+          await this.delay(this.getRetryDelay(attempt));
+          return this.sendViaNetlifyFunction(emailData, attempt + 1);
+        }
+
         throw new Error('Invalid JSON response from email service');
       }
 
@@ -58,22 +101,126 @@ export class EmailService {
           provider: 'netlify_resend'
         };
       } else {
-        throw new Error(result.error || 'Email service returned failure');
+        const errorMessage = result.error || 'Email service returned failure';
+
+        // Check if we should retry based on the error
+        if (this.isRetryableServiceError(result.error) && attempt < this.MAX_RETRIES) {
+          console.log(`Service error is retryable, attempt ${attempt}/${this.MAX_RETRIES}, retrying...`);
+          await this.delay(this.getRetryDelay(attempt));
+          return this.sendViaNetlifyFunction(emailData, attempt + 1);
+        }
+
+        throw new Error(errorMessage);
       }
     } catch (error: any) {
       console.error('sendViaNetlifyFunction error:', error);
+
+      // Log the failure with attempt number
+      this.logFailure(emailData.to, error.message, attempt);
+
+      // Handle specific error types
+      if (error.name === 'AbortError') {
+        if (attempt < this.MAX_RETRIES) {
+          console.log(`Request timeout, retrying attempt ${attempt + 1}...`);
+          await this.delay(this.getRetryDelay(attempt));
+          return this.sendViaNetlifyFunction(emailData, attempt + 1);
+        }
+        return {
+          success: false,
+          error: 'Email service timeout after multiple attempts',
+          provider: 'netlify_resend'
+        };
+      }
+
       return {
         success: false,
-        error: error.message || 'Unknown error occurred',
+        error: this.sanitizeErrorMessage(error.message) || 'Unknown error occurred',
         provider: 'netlify_resend'
       };
     }
   }
 
+  private static getErrorMessage(status: number, errorText: string): string {
+    switch (status) {
+      case 400:
+        return 'Invalid email data provided';
+      case 401:
+        return 'Email service authentication failed';
+      case 403:
+        return 'Email service access forbidden';
+      case 429:
+        return 'Email rate limit exceeded, please try again later';
+      case 500:
+        return 'Email service internal error';
+      case 502:
+      case 503:
+      case 504:
+        return 'Email service temporarily unavailable';
+      default:
+        return `Email service error (${status}): ${errorText}`;
+    }
+  }
+
+  private static isRetryableError(status: number): boolean {
+    // Retry on server errors, rate limits, and timeouts
+    return status >= 500 || status === 429 || status === 408;
+  }
+
+  private static isRetryableServiceError(error: string): boolean {
+    if (!error) return false;
+
+    const retryableErrors = [
+      'timeout',
+      'rate limit',
+      'temporarily unavailable',
+      'service unavailable',
+      'internal error',
+      'connection error',
+      'network error'
+    ];
+
+    return retryableErrors.some(retryableError =>
+      error.toLowerCase().includes(retryableError)
+    );
+  }
+
+  private static sanitizeErrorMessage(message: string): string {
+    // Remove sensitive information from error messages
+    return message
+      .replace(/api[_-]?key[s]?[:\s=]*[a-zA-Z0-9_-]+/gi, 'API_KEY_REDACTED')
+      .replace(/token[s]?[:\s=]*[a-zA-Z0-9_-]+/gi, 'TOKEN_REDACTED')
+      .replace(/password[s]?[:\s=]*[^\s]+/gi, 'PASSWORD_REDACTED');
+  }
+
+  private static logFailure(email: string, error: string, attempt: number): void {
+    this.failureLog.push({
+      timestamp: new Date(),
+      error: this.sanitizeErrorMessage(error),
+      email,
+      attempt
+    });
+
+    // Keep only last 100 failures
+    if (this.failureLog.length > 100) {
+      this.failureLog = this.failureLog.slice(-100);
+    }
+  }
+
+  private static getOriginUrl(): string {
+    // Get the current origin, with fallback to production URL
+    if (typeof window !== 'undefined') {
+      return window.location.origin;
+    }
+
+    // Fallback for server-side or when window is not available
+    return 'https://backlinkoo.com';
+  }
+
   static async sendConfirmationEmail(email: string, confirmationUrl?: string): Promise<EmailServiceResponse> {
     console.log('EmailService: Sending confirmation email to:', email);
 
-    const defaultConfirmationUrl = confirmationUrl || `https://backlinkoo.com/auth/confirm?email=${encodeURIComponent(email)}`;
+    const origin = this.getOriginUrl();
+    const defaultConfirmationUrl = confirmationUrl || `${origin}/auth/confirm?email=${encodeURIComponent(email)}`;
 
     const emailData = {
       to: email,
@@ -102,11 +249,28 @@ The Backlink ∞ Team
 
 ---
 Professional SEO & Backlink Management Platform
-https://backlinkoo.com`,
+${origin}`,
       from: 'Backlink ∞ <support@backlinkoo.com>'
     };
 
-    return await this.sendViaNetlifyFunction(emailData);
+    try {
+      const result = await this.sendViaNetlifyFunction(emailData);
+
+      if (result.success) {
+        console.log('Confirmation email sent successfully to:', email);
+      } else {
+        console.error('Failed to send confirmation email:', result.error);
+      }
+
+      return result;
+    } catch (error: any) {
+      console.error('Error sending confirmation email:', error);
+      return {
+        success: false,
+        error: `Failed to send confirmation email: ${error.message}`,
+        provider: 'netlify_resend'
+      };
+    }
   }
 
   static async sendPasswordResetEmail(email: string, resetUrl: string): Promise<EmailServiceResponse> {
@@ -221,42 +385,80 @@ https://backlinkoo.com`,
     }
   }
 
-  static getFailureLog(): Array<{ timestamp: Date; error: string; email: string }> {
-    return this.failureLog;
+  static getFailureLog(): Array<{ timestamp: Date; error: string; email: string; attempt: number }> {
+    return this.failureLog.slice(); // Return a copy to prevent external modification
+  }
+
+  static getFailureStats(): {
+    totalFailures: number;
+    recentFailures: number;
+    uniqueEmails: number;
+    commonErrors: Array<{ error: string; count: number }>
+  } {
+    const now = new Date();
+    const recentThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000); // Last 24 hours
+
+    const recentFailures = this.failureLog.filter(log => log.timestamp > recentThreshold);
+    const uniqueEmails = new Set(this.failureLog.map(log => log.email)).size;
+
+    // Count error types
+    const errorCounts: { [key: string]: number } = {};
+    this.failureLog.forEach(log => {
+      const errorType = log.error.split(':')[0]; // Get the main error type
+      errorCounts[errorType] = (errorCounts[errorType] || 0) + 1;
+    });
+
+    const commonErrors = Object.entries(errorCounts)
+      .map(([error, count]) => ({ error, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5); // Top 5 errors
+
+    return {
+      totalFailures: this.failureLog.length,
+      recentFailures: recentFailures.length,
+      uniqueEmails,
+      commonErrors
+    };
+  }
+
+  static clearFailureLog(): void {
+    this.failureLog = [];
   }
 
   static async sendEmail(emailData: EmailData): Promise<EmailResult> {
     try {
+      // Validate email data before sending
+      if (!emailData.to || !emailData.subject || !emailData.message) {
+        throw new Error('Missing required email fields (to, subject, message)');
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailData.to)) {
+        throw new Error('Invalid email address format');
+      }
+
       const result = await this.sendViaNetlifyFunction(emailData);
 
-      if (!result.success && result.error) {
-        // Log failure
-        this.failureLog.push({
-          timestamp: new Date(),
-          error: result.error,
-          email: emailData.to
-        });
-
-        // Keep only last 50 failures
-        if (this.failureLog.length > 50) {
-          this.failureLog = this.failureLog.slice(-50);
-        }
+      // Enhanced logging for debugging
+      if (result.success) {
+        console.log(`Email sent successfully to ${emailData.to} via ${result.provider}`);
+      } else {
+        console.error(`Email failed to send to ${emailData.to}:`, result.error);
       }
 
       return result as EmailResult;
     } catch (error: any) {
+      const sanitizedError = this.sanitizeErrorMessage(error.message);
+      console.error('SendEmail error:', sanitizedError);
+
       const failureResult: EmailResult = {
         success: false,
-        error: error.message,
+        error: sanitizedError,
         provider: 'netlify_resend'
       };
 
-      this.failureLog.push({
-        timestamp: new Date(),
-        error: error.message,
-        email: emailData.to
-      });
-
+      // Failure logging is handled within sendViaNetlifyFunction
       return failureResult;
     }
   }

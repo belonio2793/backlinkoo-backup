@@ -5,6 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
   CreditCard,
   Link,
   Search,
@@ -22,7 +30,10 @@ import {
   Clock,
   AlertCircle,
   ExternalLink,
-  Zap
+  Zap,
+  User,
+  Settings,
+  ChevronDown
 } from "lucide-react";
 import { PaymentModal } from "@/components/PaymentModal";
 import { CampaignForm } from "@/components/CampaignForm";
@@ -31,6 +42,7 @@ import { RankingTracker } from "@/components/RankingTracker";
 import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
 import AdminVerificationQueue from "@/components/AdminVerificationQueue";
 import SEOToolsSection from "@/components/SEOToolsSection";
+import { ProfileSettings } from "@/components/ProfileSettings";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -46,7 +58,18 @@ const Dashboard = () => {
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Failsafe: force loading to false after maximum time
+  useEffect(() => {
+    const maxLoadingTime = setTimeout(() => {
+      console.warn('🏠 Dashboard - Maximum loading time reached, forcing loading to false');
+      setLoading(false);
+    }, 15000); // 15 seconds maximum
+
+    return () => clearTimeout(maxLoadingTime);
+  }, []);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('tab') || "overview";
@@ -65,11 +88,40 @@ const Dashboard = () => {
       console.log('🏠 Dashboard: Starting initialization...');
 
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Dashboard initialization timeout')), 8000)
+        );
+
+        const sessionPromise = supabase.auth.getSession();
+
+        let session = null;
+        let error = null;
+
+        try {
+          const result = await Promise.race([sessionPromise, timeoutPromise]) as any;
+          session = result.data?.session;
+          error = result.error;
+        } catch (timeoutError) {
+          console.warn('🏠 Dashboard - Auth check timed out, trying fallback...');
+
+          // If auth times out, redirect to login
+          console.log('🏠 Dashboard - Auth timeout, redirecting to login');
+          if (isMounted) {
+            navigate('/login');
+          }
+          return;
+        }
 
         if (!isMounted) return;
 
-        if (error || !session || !session.user) {
+        if (error && !session) {
+          console.log('🏠 Dashboard - Auth error:', error);
+          navigate('/login');
+          return;
+        }
+
+        if (!session?.user) {
           console.log('🏠 Dashboard - No valid session, redirecting to login');
           navigate('/login');
           return;
@@ -78,42 +130,81 @@ const Dashboard = () => {
         console.log('🏠 Dashboard - Valid session found:', session.user.email);
         setUser(session.user);
 
-        // Fetch user data in parallel
-        Promise.all([
-          fetchUserData(session.user),
-          fetchCampaigns(session.user)
-        ]).finally(() => {
-          if (isMounted) {
-            setLoading(false);
-          }
-        });
+        // Fetch user data with timeout protection
+        const dataPromises = [
+          fetchUserData(session.user).catch(err => {
+            console.warn('🏠 Dashboard - fetchUserData failed:', err);
+            return null;
+          }),
+          fetchCampaigns(session.user).catch(err => {
+            console.warn('🏠 Dashboard - fetchCampaigns failed:', err);
+            return null;
+          })
+        ];
+
+        // Add timeout for data fetching
+        const dataTimeout = new Promise((resolve) =>
+          setTimeout(() => {
+            console.warn('🏠 Dashboard - Data fetching timed out, continuing anyway');
+            resolve(null);
+          }, 5000)
+        );
+
+        await Promise.race([
+          Promise.all(dataPromises),
+          dataTimeout
+        ]);
 
       } catch (error) {
         console.error('🏠 Dashboard - Initialization error:', error);
+      } finally {
         if (isMounted) {
+          console.log('🏠 Dashboard - Initialization complete, stopping loading');
           setLoading(false);
-          navigate('/login');
         }
       }
     };
 
-    initializeDashboard();
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🏠 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
-
-      if (event === 'SIGNED_OUT' || !session) {
-        navigate('/login');
-      } else if (event === 'SIGNED_IN' && session && isMounted) {
-        setUser(session.user);
-        setLoading(false);
-      }
-    });
+    // Delay initialization slightly to let EmailVerificationGuard finish
+    const initTimeout = setTimeout(initializeDashboard, 100);
 
     return () => {
+      clearTimeout(initTimeout);
       isMounted = false;
-      subscription.unsubscribe();
+    };
+
+    // Simplified auth state listener since EmailVerificationGuard handles the main auth flow
+    let subscription;
+    try {
+      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (!isMounted) return;
+
+        console.log('🏠 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
+
+        if (event === 'SIGNED_OUT' || !session) {
+          console.log('🏠 Dashboard - User signed out, redirecting to login...');
+          navigate('/login');
+        } else if (event === 'SIGNED_IN' && session) {
+          console.log('🏠 Dashboard - User signed in, updating user state');
+          setUser(session.user);
+          if (loading) {
+            setLoading(false);
+          }
+        }
+      });
+      subscription = authSubscription;
+    } catch (subscriptionError) {
+      console.warn('🏠 Dashboard - Could not set up auth listener:', subscriptionError);
+    }
+
+    return () => {
+      if (subscription?.unsubscribe) {
+        try {
+          subscription.unsubscribe();
+        } catch (error) {
+          console.warn('🏠 Dashboard - Error unsubscribing:', error);
+        }
+      }
     };
   }, [navigate]);
 
@@ -123,73 +214,89 @@ const Dashboard = () => {
     try {
       const currentUser = authUser || user;
       if (!currentUser) {
-        console.log('No current user for fetchUserData');
+        console.log('🔍 No current user for fetchUserData');
         return;
       }
 
-      console.log('Fetching user data for:', currentUser.id);
+      console.log('🔍 Fetching user data for:', currentUser.id);
 
-      // Get user profile and role with timeout
-      const profilePromise = supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', currentUser.id)
-        .single();
 
-      const { data: profile, error: profileError } = await Promise.race([
-        profilePromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 5000))
-      ]) as any;
 
-      if (profileError && !profileError.message.includes('timeout')) {
-        console.log('Profile error (non-critical):', profileError);
+      // Try database calls with very short timeout
+      let profile = null;
+      try {
+        const profilePromise = supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', currentUser.id)
+          .single();
+
+        const result = await Promise.race([
+          profilePromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 1000))
+        ]) as any;
+
+        profile = result.data;
+
+        if (result.error && !result.error.message.includes('timeout')) {
+          console.log('🔍 Profile error (non-critical):', result.error);
+        }
+      } catch (profileError) {
+        console.warn('🔍 Profile fetch failed, using defaults:', profileError);
       }
 
+      // Set user type based on profile
       if (profile?.role === 'admin') {
         setUserType('admin');
+      } else {
+        setUserType('user');
       }
 
-      // Get user credits with timeout
-      const creditsPromise = supabase
-        .from('credits')
-        .select('amount')
-        .eq('user_id', currentUser.id)
-        .single();
+      // Try to get credits, but fallback quickly
+      let creditsData = null;
+      try {
+        const creditsPromise = supabase
+          .from('credits')
+          .select('amount')
+          .eq('user_id', currentUser.id)
+          .single();
 
-      const { data: creditsData, error: creditsError } = await Promise.race([
-        creditsPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Credits fetch timeout')), 5000))
-      ]) as any;
+        const result = await Promise.race([
+          creditsPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Credits fetch timeout')), 1000))
+        ]) as any;
 
-      if (creditsError && !creditsError.message.includes('timeout')) {
-        console.log('Credits error (non-critical):', creditsError);
+        creditsData = result.data;
+      } catch (creditsError) {
+        console.warn('🔍 Credits fetch failed');
       }
 
-      if (creditsData) {
+      if (creditsData?.amount !== undefined) {
         setCredits(creditsData.amount);
       } else {
-        setCredits(0); // Default to 0 credits
+        setCredits(0);
       }
 
-      // Check if user has any campaigns (first time user check)
+      // Quick check for campaigns
       try {
-        const { data: campaignsData } = await supabase
-          .from('campaigns')
-          .select('id')
-          .eq('user_id', currentUser.id)
-          .limit(1);
+        const { data: campaignsData } = await Promise.race([
+          supabase.from('campaigns').select('id').eq('user_id', currentUser.id).limit(1),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Quick campaign check timeout')), 1000))
+        ]) as any;
 
         setIsFirstTimeUser(!campaignsData || campaignsData.length === 0);
       } catch (error) {
-        console.log('Error checking campaigns (non-critical):', error);
-        setIsFirstTimeUser(true); // Default to first time user
+        console.warn('🔍 Quick campaign check failed, defaulting to experienced user');
+        setIsFirstTimeUser(false); // Default to experienced user so we show demo campaigns
       }
 
     } catch (error) {
-      console.error('Error fetching user data (continuing anyway):', error);
-      // Set defaults
+      console.error('🔍 Error fetching user data (using defaults):', error);
+
+      // Set safe defaults
       setCredits(0);
       setIsFirstTimeUser(true);
+      setUserType('user');
     }
   };
 
@@ -197,34 +304,47 @@ const Dashboard = () => {
     try {
       const currentUser = authUser || user;
       if (!currentUser) {
-        console.log('No current user for fetchCampaigns');
+        console.log('📊 No current user for fetchCampaigns');
         return;
       }
 
-      console.log('Fetching campaigns for:', currentUser.id);
+      console.log('📊 Fetching campaigns for:', currentUser.id);
 
-      // Fetch campaigns with timeout
-      const campaignsPromise = supabase
-        .from('campaigns')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: false });
 
-      const { data: campaignsData, error } = await Promise.race([
-        campaignsPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Campaigns fetch timeout')), 5000))
-      ]) as any;
 
-      if (error && !error.message.includes('timeout')) {
-        console.error('Error fetching campaigns (non-critical):', error);
-        setCampaigns([]); // Set empty array as fallback
+      // Try database call with very short timeout
+      let campaignsData = null;
+      let error = null;
+
+      try {
+        const campaignsPromise = supabase
+          .from('campaigns')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false });
+
+        const result = await Promise.race([
+          campaignsPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Campaigns fetch timeout')), 1000))
+        ]) as any;
+
+        campaignsData = result.data;
+        error = result.error;
+      } catch (fetchError) {
+        console.warn('📊 Campaigns fetch failed, using demo mode');
+        error = fetchError;
+      }
+
+      if (error || !campaignsData) {
+        console.warn('📊 Error fetching campaigns:', error);
+        setCampaigns([]);
         return;
       }
 
-      setCampaigns(campaignsData || []);
+      setCampaigns(campaignsData);
     } catch (error: any) {
-      console.error('Error fetching campaigns (continuing anyway):', error);
-      setCampaigns([]); // Set empty array as fallback
+      console.error('📊 Unexpected error in fetchCampaigns:', error);
+      setCampaigns([]);
     }
   };
 
@@ -271,16 +391,40 @@ const Dashboard = () => {
         console.log('Dashboard - Sign out successful');
       }
 
-      // Use React Router for navigation
-      console.log('Navigating to home page...');
-      navigate('/');
+      // Multiple redirect mechanisms to ensure user gets redirected
+      console.log('Navigating to login page...');
+
+      // Primary navigation using React Router
+      navigate('/login');
+
+      // Fallback navigation after a short delay
+      setTimeout(() => {
+        if (window.location.pathname !== '/login') {
+          console.log('Fallback redirect to login...');
+          window.location.href = '/login';
+        }
+      }, 100);
 
     } catch (error) {
       console.error("Dashboard - Sign out error:", error);
 
       // Clear user state and navigate anyway
       setUser(null);
-      navigate('/');
+
+      // Force redirect even on error
+      try {
+        navigate('/login');
+      } catch (navError) {
+        console.error('Navigation error, using window.location:', navError);
+        window.location.href = '/login';
+      }
+
+      // Additional fallback
+      setTimeout(() => {
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+      }, 200);
     } finally {
       setIsSigningOut(false);
     }
@@ -328,16 +472,36 @@ const Dashboard = () => {
                   </Button>
                 </>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSignOut}
-                disabled={isSigningOut}
-                className="px-2 sm:px-4"
-              >
-                <LogOut className={`h-4 w-4 sm:mr-1 ${isSigningOut ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">{isSigningOut ? 'Signing Out...' : 'Sign Out'}</span>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="px-2 sm:px-4 gap-1"
+                  >
+                    <User className="h-4 w-4" />
+                    <span className="hidden sm:inline">
+                      {user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Account'}
+                    </span>
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => setIsProfileOpen(true)}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Profile Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    disabled={isSigningOut}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <LogOut className={`mr-2 h-4 w-4 ${isSigningOut ? 'animate-spin' : ''}`} />
+                    {isSigningOut ? 'Signing Out...' : 'Sign Out'}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
@@ -864,10 +1028,22 @@ const Dashboard = () => {
         )}
       </div>
 
-      <PaymentModal 
-        isOpen={isPaymentModalOpen} 
-        onClose={() => setIsPaymentModalOpen(false)} 
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
       />
+
+      <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Profile Settings</DialogTitle>
+          </DialogHeader>
+          <ProfileSettings
+            user={user}
+            onClose={() => setIsProfileOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
