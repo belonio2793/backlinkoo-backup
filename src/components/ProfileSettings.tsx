@@ -212,8 +212,11 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
       .slice(0, 2);
   };
 
-  const displayName = profile.displayName || user.user_metadata?.display_name || user.email?.split('@')[0] || 'User';
-  const userEmail = user.email || 'user@example.com';
+  const displayName = profile.displayName || user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'User';
+  const userEmail = user?.email || 'user@example.com';
+
+  // Safety check - if no user provided, don't render
+  if (!user) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
