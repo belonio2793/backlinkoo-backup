@@ -10,7 +10,7 @@ import { AuthService, setupAuthStateListener } from "@/services/authService";
 import { SocialLogin } from "@/components/SocialLogin";
 
 import { useNavigate } from "react-router-dom";
-import { Infinity, Eye, EyeOff, Mail, RefreshCw, Shield, CheckCircle, AlertCircle } from "lucide-react";
+import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft, Shield, CheckCircle, AlertCircle } from "lucide-react";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
