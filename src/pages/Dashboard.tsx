@@ -105,20 +105,12 @@ const Dashboard = () => {
         } catch (timeoutError) {
           console.warn('🏠 Dashboard - Auth check timed out, trying fallback...');
 
-          // Since EmailVerificationGuard already checked auth, try to continue with fallback
-          const isDevelopment = window.location.hostname === 'localhost' ||
-                               window.location.hostname.includes('fly.dev');
-
-          if (isDevelopment) {
-            console.log('🏠 Dashboard - Using development fallback user');
-            session = {
-              user: {
-                id: 'dev-fallback-user',
-                email: 'dev@example.com',
-                user_metadata: { display_name: 'Development User' }
-              }
-            };
+          // If auth times out, redirect to login
+          console.log('🏠 Dashboard - Auth timeout, redirecting to login');
+          if (isMounted) {
+            navigate('/login');
           }
+          return;
         }
 
         if (!isMounted) return;
