@@ -70,6 +70,7 @@ const Dashboard = () => {
   }, []);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('tab') || "overview";
