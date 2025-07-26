@@ -16,6 +16,7 @@ import { TestEmailSender } from "@/components/TestEmailSender";
 import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
 import { EmailTest } from "@/components/EmailTest";
 import { SupabaseEmailTest } from "@/components/SupabaseEmailTest";
+import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { TestSupabaseConnection } from "@/components/TestSupabaseConnection";
