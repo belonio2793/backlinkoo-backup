@@ -180,7 +180,13 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
 
     return () => {
       isMounted = false;
-      subscription.unsubscribe();
+      if (subscription?.unsubscribe) {
+        try {
+          subscription.unsubscribe();
+        } catch (error) {
+          console.warn('EmailVerificationGuard: Error unsubscribing from auth changes:', error);
+        }
+      }
     };
   }, [navigate]);
 
