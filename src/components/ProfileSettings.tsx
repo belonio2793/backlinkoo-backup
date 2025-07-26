@@ -241,6 +241,9 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
           <DialogTitle className="flex items-center gap-2">
             <UserCircle className="h-5 w-5" />
             Profile Settings
+            {(window.location.hostname === 'localhost' || window.location.hostname.includes('.fly.dev')) && (
+              <Badge variant="secondary" className="text-xs">DEV MODE</Badge>
+            )}
           </DialogTitle>
         </DialogHeader>
 
