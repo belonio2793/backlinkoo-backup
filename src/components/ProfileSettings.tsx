@@ -317,64 +317,121 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
 
                 <Separator />
 
-                {/* Profile Form */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input
-                      id="firstName"
-                      value={profile.firstName}
-                      onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
-                      disabled={!isEditing}
-                    />
+                {/* Core Profile Form */}
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-sm text-muted-foreground">Core Information</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="displayName">Display Name *</Label>
+                        <Input
+                          id="displayName"
+                          value={profile.displayName}
+                          onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
+                          disabled={!isEditing}
+                          placeholder="How others will see your name"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="email">Email Address</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={profile.email}
+                          onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                          disabled={true} // Email should be changed through account settings
+                          className="bg-muted"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Email can be changed in the Security tab
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      value={profile.lastName}
-                      onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="displayName">Display Name</Label>
-                    <Input
-                      id="displayName"
-                      value={profile.displayName}
-                      onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input
-                      id="phone"
-                      value={profile.phone}
-                      onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                      disabled={!isEditing}
-                      placeholder="+1-555-0123"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="website">Website</Label>
-                    <Input
-                      id="website"
-                      value={profile.website}
-                      onChange={(e) => setProfile({ ...profile, website: e.target.value })}
-                      disabled={!isEditing}
-                      placeholder="https://yourwebsite.com"
-                    />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="bio">Bio</Label>
-                    <Input
-                      id="bio"
-                      value={profile.bio}
-                      onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                      disabled={!isEditing}
-                      placeholder="Tell us about yourself..."
-                    />
+
+                  <Separator />
+
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-sm text-muted-foreground">Personal Information</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input
+                          id="firstName"
+                          value={additionalInfo.firstName}
+                          onChange={(e) => setAdditionalInfo({ ...additionalInfo, firstName: e.target.value })}
+                          disabled={!isEditing}
+                          placeholder="Your first name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input
+                          id="lastName"
+                          value={additionalInfo.lastName}
+                          onChange={(e) => setAdditionalInfo({ ...additionalInfo, lastName: e.target.value })}
+                          disabled={!isEditing}
+                          placeholder="Your last name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone Number</Label>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          value={additionalInfo.phone}
+                          onChange={(e) => setAdditionalInfo({ ...additionalInfo, phone: e.target.value })}
+                          disabled={!isEditing}
+                          placeholder="+1 (555) 123-4567"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="location">Location</Label>
+                        <Input
+                          id="location"
+                          value={additionalInfo.location}
+                          onChange={(e) => setAdditionalInfo({ ...additionalInfo, location: e.target.value })}
+                          disabled={!isEditing}
+                          placeholder="City, Country"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="company">Company</Label>
+                        <Input
+                          id="company"
+                          value={additionalInfo.company}
+                          onChange={(e) => setAdditionalInfo({ ...additionalInfo, company: e.target.value })}
+                          disabled={!isEditing}
+                          placeholder="Your company name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="website">Website</Label>
+                        <Input
+                          id="website"
+                          type="url"
+                          value={additionalInfo.website}
+                          onChange={(e) => setAdditionalInfo({ ...additionalInfo, website: e.target.value })}
+                          disabled={!isEditing}
+                          placeholder="https://yourwebsite.com"
+                        />
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="bio">Bio</Label>
+                        <Input
+                          id="bio"
+                          value={additionalInfo.bio}
+                          onChange={(e) => setAdditionalInfo({ ...additionalInfo, bio: e.target.value })}
+                          disabled={!isEditing}
+                          placeholder="Tell us about yourself..."
+                          maxLength={500}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {additionalInfo.bio.length}/500 characters
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
