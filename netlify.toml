@@ -4,6 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  RESEND_API_KEY = "re_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq"
 
 [[redirects]]
   from = "/*"
