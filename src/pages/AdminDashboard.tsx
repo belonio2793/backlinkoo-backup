@@ -16,6 +16,7 @@ import { TestEmailSender } from "@/components/TestEmailSender";
 import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
+import { TestSupabaseConnection } from "@/components/TestSupabaseConnection";
 import {
   Users,
   Activity,
@@ -154,6 +155,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
             <TabsTrigger value="affiliates">Affiliate Program</TabsTrigger>
             <TabsTrigger value="deployment">Deployment</TabsTrigger>
+            <TabsTrigger value="database">Database</TabsTrigger>
             <TabsTrigger value="smtp-test">SMTP Test</TabsTrigger>
             <TabsTrigger value="email-test">Email System</TabsTrigger>
             <TabsTrigger value="security">Security & Roles</TabsTrigger>
@@ -169,6 +171,17 @@ const AdminDashboard = () => {
 
           <TabsContent value="deployment">
             <DeploymentStatus />
+          </TabsContent>
+
+          <TabsContent value="database">
+            <Card>
+              <CardHeader>
+                <CardTitle>Database Connection Test</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <TestSupabaseConnection />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="smtp-test">
