@@ -16,6 +16,8 @@ import TermsOfService from "../pages/TermsOfService";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 import { CampaignDeliverables } from "../pages/CampaignDeliverables";
 import BlogPreview from "../pages/BlogPreview";
+import { Blog } from "../pages/Blog";
+import { BlogPost } from "../pages/BlogPost";
 import EmailMarketing from "../pages/EmailMarketing";
 import BacklinkReport from "../pages/BacklinkReport";
 import ReportViewer from "../pages/ReportViewer";
