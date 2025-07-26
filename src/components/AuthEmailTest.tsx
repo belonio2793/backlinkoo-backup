@@ -6,9 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { AuthService, type SocialProvider } from '@/services/authService';
+import { AuthService } from '@/services/authService';
 import { EmailService } from '@/services/emailService';
-import { SocialLogin } from '@/components/SocialLogin';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   CheckCircle, 
@@ -429,27 +428,7 @@ export const AuthEmailTest = () => {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Social Authentication Test
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Test social login functionality. Note: This will initiate actual OAuth flows.
-            </p>
-            <SocialLogin onSocialLogin={(provider) => {
-              toast({
-                title: "Social Login Initiated",
-                description: `${AuthService.getProviderDisplayName(provider)} authentication flow started`,
-              });
-            }} />
-          </div>
-        </CardContent>
-      </Card>
+
 
       <Card>
         <CardHeader>

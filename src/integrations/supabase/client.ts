@@ -71,13 +71,7 @@ const createMockSupabaseClient = () => {
         error: { message: 'OTP verification not available in mock mode' }
       });
     },
-    signInWithOAuth: () => {
-      console.error('⚠️ Mock auth signInWithOAuth called - OAuth not available');
-      return Promise.resolve({
-        data: { url: null, provider: null },
-        error: { message: 'Social authentication not available: Please configure OAuth providers in Supabase Dashboard' }
-      });
-    },
+
   };
 
   const mockFrom = (table: string) => {

@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { AuthService, setupAuthStateListener } from "@/services/authService";
-import { SocialLogin } from "@/components/SocialLogin";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 
 import { useNavigate } from "react-router-dom";
@@ -491,11 +490,6 @@ const Login = () => {
 
         <Card>
           <CardContent className="pt-6">
-            {/* Social Login Section */}
-            <div className="mb-6">
-              <SocialLogin disabled={isLoading} />
-            </div>
-
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Sign In</TabsTrigger>
