@@ -187,6 +187,7 @@ const AdminDashboard = () => {
 
           <TabsContent value="email-test">
             <div className="space-y-6">
+              <SupabaseEmailGuide />
               <SupabaseEmailTest />
               <Card>
                 <CardHeader>
