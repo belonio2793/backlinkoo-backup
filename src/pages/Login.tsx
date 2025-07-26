@@ -34,18 +34,35 @@ const Login = () => {
   useEffect(() => {
     // Check if user is already logged in
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate('/dashboard');
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.warn('Auth session check failed:', error);
+          return;
+        }
+
+        if (session && session.user) {
+          console.log('🔐 User already authenticated, redirecting...');
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        // Continue to login page on error
       }
     };
-    
+
     checkAuth();
 
-    // Listen for auth changes
+    // Listen for auth changes with better error handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        navigate('/dashboard');
+      console.log('🔐 Auth state changed:', event, !!session);
+
+      if (event === 'SIGNED_IN' && session && session.user) {
+        console.log('🔐 Auth state change: redirecting to dashboard');
+        setTimeout(() => navigate('/dashboard'), 100);
+      } else if (event === 'SIGNED_OUT') {
+        console.log('🔐 Auth state change: user signed out');
+        // Stay on login page
       }
     });
 
@@ -53,61 +70,95 @@ const Login = () => {
   }, [navigate]);
 
   const cleanupAuthState = () => {
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
+    try {
+      // Only clear specific problematic keys, not all auth state
+      const keysToRemove = [];
+
+      // Check localStorage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('sb-') && key.includes('token'))) {
+          keysToRemove.push(key);
+        }
       }
-    });
-    Object.keys(sessionStorage || {}).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        sessionStorage.removeItem(key);
-      }
-    });
+
+      keysToRemove.forEach(key => {
+        try {
+          localStorage.removeItem(key);
+        } catch (e) {
+          console.warn('Failed to remove localStorage key:', key);
+        }
+      });
+
+      console.log('🔐 Cleaned up auth state');
+    } catch (error) {
+      console.warn('Auth cleanup failed:', error);
+    }
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (!loginEmail || !loginPassword) {
+      toast({
+        title: "Missing credentials",
+        description: "Please enter both email and password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      cleanupAuthState();
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
+      console.log('🔐 Starting login process for:', loginEmail);
 
+      // Clear any existing auth state first
+      cleanupAuthState();
+
+      // Simple sign out without waiting
+      supabase.auth.signOut({ scope: 'global' }).catch(() => {});
+
+      // Wait a moment for cleanup
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      console.log('🔐 Attempting sign in...');
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
+        email: loginEmail.trim(),
         password: loginPassword,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('🔐 Sign in error:', error);
+        throw error;
+      }
 
-      if (data.user) {
-        // Ensure user has proper profile using migration service
-        try {
-          const migrationResult = await ProfileMigrationService.ensureUserProfile(
-            data.user.id,
-            data.user.email || loginEmail,
-            data.user.user_metadata
-          );
+      if (data.user && data.session) {
+        console.log('🔐 Sign in successful:', data.user.id);
 
-          if (!migrationResult.success) {
-            console.warn('Profile migration failed, but continuing login:', migrationResult.error);
-          }
-        } catch (profileErr) {
-          // Don't fail login if profile operations fail
-          console.warn('Profile migration error, but continuing login:', profileErr);
-        }
+        // Profile migration in background - don't wait for it
+        ProfileMigrationService.ensureUserProfile(
+          data.user.id,
+          data.user.email || loginEmail,
+          data.user.user_metadata
+        ).catch(err => {
+          console.warn('Profile migration failed (non-blocking):', err);
+        });
 
         toast({
           title: "Welcome back!",
           description: "You have been successfully signed in.",
         });
-        window.location.href = '/dashboard';
+
+        // Use React Router navigation instead of window.location
+        console.log('🔐 Redirecting to dashboard...');
+        navigate('/dashboard');
+      } else {
+        throw new Error('No user data received from authentication');
       }
     } catch (error: any) {
+      console.error('🔐 Login failed:', error);
+
       // Handle different error types properly
       let errorMessage = 'An error occurred during sign in.';
 
@@ -116,17 +167,19 @@ const Login = () => {
           errorMessage = error.message;
 
           // Handle specific authentication errors
-          if (error.message.includes('fetch')) {
+          if (error.message.includes('fetch') || error.message.includes('network')) {
             errorMessage = 'Network connection failed. Please check your internet connection and try again.';
           } else if (error.message.includes('Invalid login credentials')) {
             errorMessage = 'Invalid email or password. Please check your credentials and try again.';
           } else if (error.message.includes('Email not confirmed')) {
             errorMessage = 'Please check your email and click the confirmation link before signing in.';
+            setShowResendConfirmation(true);
+            setResendEmail(loginEmail);
+          } else if (error.message.includes('Too many requests')) {
+            errorMessage = 'Too many login attempts. Please wait a moment and try again.';
           }
         } else if (error.error_description) {
           errorMessage = error.error_description;
-        } else if (typeof error.toString === 'function') {
-          errorMessage = error.toString();
         }
       } else if (typeof error === 'string') {
         errorMessage = error;
@@ -510,8 +563,15 @@ The Backlink ∞ Team`,
                       </Button>
                     </div>
                   </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Signing in..." : "Sign In"}
+                  <Button type="submit" className="w-full" disabled={isLoading || !loginEmail || !loginPassword}>
+                    {isLoading ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
                   </Button>
 
                   <div className="text-center">
