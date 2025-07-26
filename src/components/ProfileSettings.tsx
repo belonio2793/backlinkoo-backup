@@ -49,6 +49,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
