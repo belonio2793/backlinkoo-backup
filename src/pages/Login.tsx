@@ -395,6 +395,8 @@ const Login = () => {
         variant: "destructive",
       });
     } finally {
+      console.log('🆕 Signup process finished, resetting loading state');
+      setDebugInfo(prev => [...prev, 'Signup process finished - resetting loading']);
       setIsLoading(false);
     }
   };
