@@ -98,19 +98,6 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
   const handleProfileSave = async () => {
     setIsLoading(true);
     try {
-      const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('.fly.dev');
-      
-      if (isDev) {
-        // Mock save for development
-        toast({
-          title: "Profile updated! (Development Mode)",
-          description: "Profile changes are simulated in development.",
-        });
-        setIsEditing(false);
-        setIsLoading(false);
-        return;
-      }
-
       const { error } = await supabase
         .from('profiles')
         .upsert({
@@ -130,10 +117,10 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
         title: "Profile updated successfully!",
         description: "Your profile information has been saved.",
       });
-      
+
       setIsEditing(false);
       if (onUserUpdate) onUserUpdate({ ...user, user_metadata: { ...user.user_metadata, display_name: profile.displayName } });
-      
+
     } catch (error: any) {
       toast({
         title: "Update failed",
