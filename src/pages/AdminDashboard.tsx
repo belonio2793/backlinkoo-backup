@@ -19,12 +19,8 @@ import {
   Users,
   Activity,
   CreditCard,
-  Settings,
-  CheckCircle,
   Clock,
-  Infinity,
-  ExternalLink,
-  Shield
+  Infinity
 } from "lucide-react";
 
 const AdminDashboard = () => {
