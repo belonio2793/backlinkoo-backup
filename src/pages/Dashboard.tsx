@@ -271,16 +271,40 @@ const Dashboard = () => {
         console.log('Dashboard - Sign out successful');
       }
 
-      // Use React Router for navigation
-      console.log('Navigating to home page...');
-      navigate('/');
+      // Multiple redirect mechanisms to ensure user gets redirected
+      console.log('Navigating to login page...');
+
+      // Primary navigation using React Router
+      navigate('/login');
+
+      // Fallback navigation after a short delay
+      setTimeout(() => {
+        if (window.location.pathname !== '/login') {
+          console.log('Fallback redirect to login...');
+          window.location.href = '/login';
+        }
+      }, 100);
 
     } catch (error) {
       console.error("Dashboard - Sign out error:", error);
 
       // Clear user state and navigate anyway
       setUser(null);
-      navigate('/');
+
+      // Force redirect even on error
+      try {
+        navigate('/login');
+      } catch (navError) {
+        console.error('Navigation error, using window.location:', navError);
+        window.location.href = '/login';
+      }
+
+      // Additional fallback
+      setTimeout(() => {
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+      }, 200);
     } finally {
       setIsSigningOut(false);
     }
