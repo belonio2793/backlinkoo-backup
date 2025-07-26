@@ -68,8 +68,8 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
           firstName: user.user_metadata?.first_name || 'Dev',
           lastName: user.user_metadata?.last_name || 'User',
           displayName: user.user_metadata?.display_name || 'Dev User',
-          bio: 'Development user profile',
-          website: 'https://example.com',
+          bio: 'Development user profile for testing the profile settings functionality.',
+          website: 'https://backlinkoo.com',
           phone: '+1-555-0123',
         });
         return;
