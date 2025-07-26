@@ -7,6 +7,7 @@ import AdminDashboard from "../pages/AdminDashboard";
 import PaymentSuccess from "../pages/PaymentSuccess";
 import PaymentCancelled from "../pages/PaymentCancelled";
 import EmailConfirmation from "../pages/EmailConfirmation";
+import PasswordReset from "../pages/PasswordReset";
 import NotFound from "../pages/NotFound";
 import TermsOfService from "../pages/TermsOfService";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
