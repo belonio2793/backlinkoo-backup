@@ -7,6 +7,7 @@ import AdminDashboard from "../pages/AdminDashboard";
 import PaymentSuccess from "../pages/PaymentSuccess";
 import PaymentCancelled from "../pages/PaymentCancelled";
 import EmailConfirmation from "../pages/EmailConfirmation";
+import PasswordReset from "../pages/PasswordReset";
 import NotFound from "../pages/NotFound";
 import TermsOfService from "../pages/TermsOfService";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
@@ -33,6 +34,7 @@ export const AppWrapper = () => {
       <Route path="/payment-cancelled" element={<PaymentCancelled />} />
       <Route path="/auth/confirm" element={<EmailConfirmation />} />
       <Route path="/auth/callback" element={<EmailConfirmation />} />
+      <Route path="/auth/reset-password" element={<PasswordReset />} />
       <Route path="/terms-of-service" element={<TermsOfService />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/campaign/:campaignId" element={<CampaignDeliverables />} />

@@ -10,10 +10,9 @@ import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { ResendEmailService } from "@/services/resendEmailService";
 import { ProfileMigrationService } from "@/services/profileMigrationService";
-import LoginDebugger from "@/components/LoginDebugger";
 
 import { useNavigate } from "react-router-dom";
-import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft, Bug } from "lucide-react";
+import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft } from "lucide-react";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -26,7 +25,8 @@ const Login = () => {
   const [loginPassword, setLoginPassword] = useState("");
   const [showResendConfirmation, setShowResendConfirmation] = useState(false);
   const [resendEmail, setResendEmail] = useState("");
-  const [showDebugger, setShowDebugger] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const { toast } = useToast();
   const { broadcastNewUser } = useGlobalNotifications();
   const navigate = useNavigate();
@@ -69,37 +69,22 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    console.log('🔑 Starting login process...');
-    console.log('Email:', loginEmail);
-    console.log('Password length:', loginPassword?.length);
-
     try {
       cleanupAuthState();
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
-        console.log('⚠️ Cleanup sign out failed (continuing):', err);
+        // Continue even if this fails
       }
 
-      console.log('🔍 Attempting Supabase sign in...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: loginPassword,
       });
 
-      console.log('📊 Supabase response:', { data, error });
-
-      if (error) {
-        console.error('❌ Login error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       if (data.user) {
-        console.log('✅ User authenticated:', data.user.id, data.user.email);
-        console.log('📝 Session data:', data.session);
-
-        // Wait a moment for session to be properly stored
-        await new Promise(resolve => setTimeout(resolve, 100));
         // Ensure user has proper profile using migration service
         try {
           const migrationResult = await ProfileMigrationService.ensureUserProfile(
@@ -116,26 +101,10 @@ const Login = () => {
           console.warn('Profile migration error, but continuing login:', profileErr);
         }
 
-        // Verify session is properly stored before redirect
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        console.log('📋 Post-login session check:', { session: !!session, error: sessionError });
-
-        if (!session) {
-          console.error('⚠️ No session found after login - this may cause redirect loop');
-          toast({
-            title: "Login Issue",
-            description: "Authentication succeeded but session not found. Please try again.",
-            variant: "destructive",
-          });
-          return;
-        }
-
         toast({
           title: "Welcome back!",
           description: "You have been successfully signed in.",
         });
-
-        console.log('🚀 Redirecting to dashboard...');
         window.location.href = '/dashboard';
       }
     } catch (error: any) {
@@ -343,6 +312,43 @@ const Login = () => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!forgotPasswordEmail.trim()) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+        redirectTo: `https://backlinkoo.com/auth/reset-password`
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Password reset email sent!",
+        description: "Check your email for a link to reset your password.",
+      });
+
+      setShowForgotPassword(false);
+      setForgotPasswordEmail("");
+    } catch (error: any) {
+      toast({
+        title: "Password reset failed",
+        description: error.message || "Failed to send password reset email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleResendConfirmation = async () => {
     setIsLoading(true);
 
@@ -369,7 +375,7 @@ const Login = () => {
           },
           body: JSON.stringify({
             to: resendEmail,
-            subject: 'Confirm Your Backlink ��� Account',
+            subject: 'Confirm Your Backlink ∞ Account',
             message: `Welcome to Backlink ∞!
 
 Please confirm your email address by clicking the link below:
@@ -432,8 +438,8 @@ The Backlink ∞ Team`,
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Back to Home Button and Debug Toggle */}
-        <div className="mb-6 flex justify-between items-center">
+        {/* Back to Home Button */}
+        <div className="mb-6">
           <Button
             variant="ghost"
             onClick={() => navigate('/')}
@@ -442,17 +448,6 @@ The Backlink ∞ Team`,
             <ArrowLeft className="h-4 w-4" />
             Back to Home
           </Button>
-          {window.location.hostname === 'localhost' && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowDebugger(!showDebugger)}
-              className="flex items-center gap-2"
-            >
-              <Bug className="h-4 w-4" />
-              Debug
-            </Button>
-          )}
         </div>
 
         {/* Logo */}
@@ -518,7 +513,60 @@ The Backlink ∞ Team`,
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Signing in..." : "Sign In"}
                   </Button>
+
+                  <div className="text-center">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="text-sm text-muted-foreground"
+                      onClick={() => setShowForgotPassword(true)}
+                    >
+                      Forgot your password?
+                    </Button>
+                  </div>
                 </form>
+
+                {showForgotPassword && (
+                  <div className="mt-4 p-4 border-2 border-blue-200 rounded-lg bg-blue-50">
+                    <div className="flex items-center gap-2 text-sm text-blue-800 mb-3">
+                      <Mail className="h-4 w-4" />
+                      <span className="font-medium">Reset Password</span>
+                    </div>
+                    <p className="text-sm text-blue-700 mb-4">
+                      Enter your email address and we'll send you a link to reset your password.
+                    </p>
+                    <div className="space-y-3">
+                      <Input
+                        type="email"
+                        placeholder="your@email.com"
+                        value={forgotPasswordEmail}
+                        onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="default"
+                          className="flex-1 bg-blue-600 hover:bg-blue-700"
+                          onClick={handleForgotPassword}
+                          disabled={isLoading}
+                        >
+                          <Mail className="h-4 w-4 mr-2" />
+                          {isLoading ? "Sending..." : "Send Reset Email"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setShowForgotPassword(false);
+                            setForgotPasswordEmail("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </TabsContent>
               
               <TabsContent value="signup">
@@ -635,16 +683,9 @@ The Backlink ∞ Team`,
             </Tabs>
           </CardContent>
         </Card>
-
-        {/* Debug Panel */}
-        {showDebugger && (
-          <div className="mt-6">
-            <LoginDebugger />
-          </div>
-        )}
       </div>
     </div>
   );
-};
-
-export default Login;
+  );
+  
+  export default Login;
