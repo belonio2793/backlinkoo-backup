@@ -23,7 +23,7 @@ export function EmailVerificationGuard({ children }: EmailVerificationGuardProps
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
-        navigate('/auth/login');
+        navigate('/login');
       } else if (session?.user) {
         checkEmailVerificationStatus(session.user);
       }
