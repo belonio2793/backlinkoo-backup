@@ -110,7 +110,7 @@ export function SMTPConfigTest() {
       <CardContent className="space-y-6">
         {/* Configuration Display */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-medium text-blue-800 mb-3">Current Configuration:</h4>
+          <h4 className="font-medium text-blue-800 mb-3">Expected SMTP Configuration in Supabase:</h4>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="font-medium">Host:</span> {resendConfig.host}
@@ -125,6 +125,9 @@ export function SMTPConfigTest() {
               <span className="font-medium">Password:</span> ••••••••••••••••••••
             </div>
           </div>
+          <p className="text-xs text-blue-600 mt-2">
+            ℹ️ This configuration should be set in Supabase Dashboard → Authentication → SMTP Settings
+          </p>
         </div>
 
         {/* Test Button */}
