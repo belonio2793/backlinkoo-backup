@@ -385,8 +385,44 @@ https://backlinkoo.com`,
     }
   }
 
-  static getFailureLog(): Array<{ timestamp: Date; error: string; email: string }> {
-    return this.failureLog;
+  static getFailureLog(): Array<{ timestamp: Date; error: string; email: string; attempt: number }> {
+    return this.failureLog.slice(); // Return a copy to prevent external modification
+  }
+
+  static getFailureStats(): {
+    totalFailures: number;
+    recentFailures: number;
+    uniqueEmails: number;
+    commonErrors: Array<{ error: string; count: number }>
+  } {
+    const now = new Date();
+    const recentThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000); // Last 24 hours
+
+    const recentFailures = this.failureLog.filter(log => log.timestamp > recentThreshold);
+    const uniqueEmails = new Set(this.failureLog.map(log => log.email)).size;
+
+    // Count error types
+    const errorCounts: { [key: string]: number } = {};
+    this.failureLog.forEach(log => {
+      const errorType = log.error.split(':')[0]; // Get the main error type
+      errorCounts[errorType] = (errorCounts[errorType] || 0) + 1;
+    });
+
+    const commonErrors = Object.entries(errorCounts)
+      .map(([error, count]) => ({ error, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5); // Top 5 errors
+
+    return {
+      totalFailures: this.failureLog.length,
+      recentFailures: recentFailures.length,
+      uniqueEmails,
+      commonErrors
+    };
+  }
+
+  static clearFailureLog(): void {
+    this.failureLog = [];
   }
 
   static async sendEmail(emailData: EmailData): Promise<EmailResult> {
