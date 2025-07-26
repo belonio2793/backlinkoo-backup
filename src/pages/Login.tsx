@@ -459,7 +459,6 @@ const Login = () => {
 
   const handleResendConfirmation = async () => {
     setIsLoading(true);
-    const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('.fly.dev');
 
     try {
       // Try Supabase resend first
@@ -478,32 +477,18 @@ const Login = () => {
         const emailResult = await ResendEmailService.sendConfirmationEmail(resendEmail);
 
         if (emailResult.success) {
-          if (isDev) {
-            toast({
-              title: "Confirmation email sent! (Development Mode)",
-              description: "Email simulation completed. In production, you would receive an actual email.",
-            });
-          } else {
-            toast({
-              title: "Confirmation email sent!",
-              description: "We've sent you a confirmation email via our backup system. Please check your email and spam folder.",
-            });
-          }
+          toast({
+            title: "Confirmation email sent!",
+            description: "We've sent you a confirmation email via our backup system. Please check your email and spam folder.",
+          });
         } else {
           throw new Error(emailResult.error || 'Failed to send email via backup service');
         }
       } else {
-        if (isDev) {
-          toast({
-            title: "Confirmation email sent! (Development Mode)",
-            description: "Supabase email simulation completed. In production, you would receive an actual email.",
-          });
-        } else {
-          toast({
-            title: "Confirmation email sent!",
-            description: "We've sent you a new confirmation link. Please check your email.",
-          });
-        }
+        toast({
+          title: "Confirmation email sent!",
+          description: "We've sent you a new confirmation link. Please check your email.",
+        });
       }
 
       setShowResendConfirmation(false);
@@ -522,11 +507,6 @@ const Login = () => {
         }
       } else if (typeof error === 'string') {
         errorMessage = error;
-      }
-
-      // In development, provide more helpful error context
-      if (isDev) {
-        errorMessage = `Development Mode: ${errorMessage}. Email services are mocked for testing.`;
       }
 
       toast({
