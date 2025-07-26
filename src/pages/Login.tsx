@@ -8,7 +8,6 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { supabase } from "@/integrations/supabase/client";
-import { ResendEmailService } from "@/services/resendEmailService";
 import { ProfileMigrationService } from "@/services/profileMigrationService";
 
 import { useNavigate } from "react-router-dom";
