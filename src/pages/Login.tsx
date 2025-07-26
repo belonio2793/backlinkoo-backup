@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { AuthService, setupAuthStateListener } from "@/services/authService";
 import { supabase } from "@/integrations/supabase/client";
+import { SocialLogin } from "@/components/SocialLogin";
 
 import { useNavigate } from "react-router-dom";
 import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft, Shield, CheckCircle, AlertCircle } from "lucide-react";
@@ -544,6 +545,11 @@ const Login = () => {
             <CardDescription>Sign in to your account or create a new one to get started</CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Social Login Section */}
+            <div className="mb-6">
+              <SocialLogin disabled={isLoading} />
+            </div>
+
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Sign In</TabsTrigger>
