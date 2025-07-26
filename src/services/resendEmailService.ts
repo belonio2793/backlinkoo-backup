@@ -21,36 +21,7 @@ export class ResendEmailService {
 
 
 
-  private static async sendViaMockService(emailData: ResendEmailData): Promise<ResendEmailResponse> {
-    console.log('🧪 DEVELOPMENT MODE: Mock email service');
-    console.log('📧 Email would be sent:', {
-      from: emailData.from || this.FROM_EMAIL,
-      to: emailData.to,
-      subject: emailData.subject,
-      message: emailData.message.substring(0, 100) + '...'
-    });
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Simulate successful email sending in development
-    const mockEmailId = `mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    console.log('✅ Mock email sent successfully with ID:', mockEmailId);
-
-    return {
-      success: true,
-      emailId: mockEmailId,
-      provider: 'resend'
-    };
-  }
-
   private static async sendViaNetlify(emailData: ResendEmailData): Promise<ResendEmailResponse> {
-    // Use mock service in development
-    if (this.isDevelopment()) {
-      console.warn('⚠️ Development environment detected - using mock email service');
-      return await this.sendViaMockService(emailData);
-    }
 
     try {
       console.log('Sending email via Netlify function:', { to: emailData.to, subject: emailData.subject });
