@@ -26,7 +26,37 @@ export class ResendEmailService {
            window.location.hostname.includes('.fly.dev');
   }
 
+  private static async sendViaMockService(emailData: ResendEmailData): Promise<ResendEmailResponse> {
+    console.log('🧪 DEVELOPMENT MODE: Mock email service');
+    console.log('📧 Email would be sent:', {
+      from: emailData.from || this.FROM_EMAIL,
+      to: emailData.to,
+      subject: emailData.subject,
+      message: emailData.message.substring(0, 100) + '...'
+    });
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Simulate successful email sending in development
+    const mockEmailId = `mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    console.log('✅ Mock email sent successfully with ID:', mockEmailId);
+
+    return {
+      success: true,
+      emailId: mockEmailId,
+      provider: 'resend'
+    };
+  }
+
   private static async sendViaNetlify(emailData: ResendEmailData): Promise<ResendEmailResponse> {
+    // Use mock service in development
+    if (this.isDevelopment()) {
+      console.warn('⚠️ Development environment detected - using mock email service');
+      return await this.sendViaMockService(emailData);
+    }
+
     try {
       console.log('Sending email via Netlify function:', { to: emailData.to, subject: emailData.subject });
 
@@ -44,7 +74,13 @@ export class ResendEmailService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+        }
+
         console.error('Netlify function error:', response.status, errorData);
         throw new Error(`Email service error: ${errorData.error || response.statusText}`);
       }
@@ -60,16 +96,24 @@ export class ResendEmailService {
     } catch (error: any) {
       console.error('Netlify email service error:', error);
 
+      // In production, try to provide more helpful error messages
+      let friendlyError = error.message || 'Failed to send email';
+      if (error.message?.includes('404')) {
+        friendlyError = 'Email service not available - Netlify function not found';
+      } else if (error.message?.includes('fetch')) {
+        friendlyError = 'Network error - unable to connect to email service';
+      }
+
       // Log failure
       this.failureLog.push({
         timestamp: new Date(),
-        error: error.message,
+        error: friendlyError,
         email: emailData.to
       });
 
       return {
         success: false,
-        error: error.message || 'Failed to send email',
+        error: friendlyError,
         provider: 'resend'
       };
     }
