@@ -278,7 +278,6 @@ const Login = () => {
         if (isUserExists) {
           console.log('User already exists, showing resend option');
           setDebugInfo(prev => [...prev, 'User already exists - showing resend options']);
-          setIsLoading(false); // Reset loading state
           setResendEmail(email);
           setShowResendConfirmation(true);
           toast({
@@ -292,7 +291,7 @@ const Login = () => {
               loginTab.click();
             }
           }, 100);
-          return;
+          return; // finally block will reset loading state
         }
         throw error;
       }
