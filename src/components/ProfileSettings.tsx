@@ -249,21 +249,6 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Demo Mode Notification */}
-      {isDemoMode && (
-        <Card className="border-orange-200 bg-orange-50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-orange-800">
-              <AlertCircle className="h-4 w-4" />
-              <span className="font-medium">Demo Mode</span>
-            </div>
-            <p className="text-sm text-orange-700 mt-2">
-              You're viewing demo profile data. Changes will be saved locally but not persisted to the database.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
