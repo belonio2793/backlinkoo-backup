@@ -92,10 +92,30 @@ const AdminDashboard = () => {
               <Infinity className="h-6 w-6 text-primary" />
               <h1 className="text-xl font-semibold">Backlink ∞ Admin</h1>
             </div>
-            <Badge variant="default" className="gap-1">
-              <Users className="h-3 w-3" />
-              Administrator
-            </Badge>
+            <div className="flex items-center gap-3">
+              <PurgeStorageButton
+                variant="ghost"
+                size="sm"
+                showIcon={true}
+                className="text-muted-foreground hover:text-foreground"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  AdminAuthService.signOutAdmin();
+                  window.location.reload();
+                }}
+                className="text-muted-foreground hover:text-foreground"
+                title="Sign out admin"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+              <Badge variant="default" className="gap-1">
+                <Users className="h-3 w-3" />
+                Administrator
+              </Badge>
+            </div>
           </div>
         </div>
       </header>
