@@ -11,7 +11,7 @@ import { SocialLogin } from "@/components/SocialLogin";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 
 import { useNavigate } from "react-router-dom";
-import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft, Shield, CheckCircle, AlertCircle } from "lucide-react";
+import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft, Shield, CheckCircle } from "lucide-react";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
