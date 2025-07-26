@@ -8,6 +8,7 @@ import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager"
 
 import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
 import { AuthEmailTest } from "@/components/AuthEmailTest";
+import { SocialAuthSetupGuide } from "@/components/SocialAuthSetupGuide";
 import { EmailTest } from "@/components/EmailTest";
 import { SupabaseEmailTest } from "@/components/SupabaseEmailTest";
 import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
@@ -149,6 +150,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
             <TabsTrigger value="affiliates">Affiliate Program</TabsTrigger>
             <TabsTrigger value="auth-test">Auth & Email Test</TabsTrigger>
+            <TabsTrigger value="social-auth">Social Auth Setup</TabsTrigger>
             <TabsTrigger value="deployment">Deployment</TabsTrigger>
             <TabsTrigger value="database">Database</TabsTrigger>
             <TabsTrigger value="smtp-test">SMTP Test</TabsTrigger>
@@ -166,6 +168,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="auth-test">
             <AuthEmailTest />
+          </TabsContent>
+
+          <TabsContent value="social-auth">
+            <SocialAuthSetupGuide />
           </TabsContent>
 
           <TabsContent value="deployment">
