@@ -513,7 +513,60 @@ The Backlink ∞ Team`,
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Signing in..." : "Sign In"}
                   </Button>
+
+                  <div className="text-center">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="text-sm text-muted-foreground"
+                      onClick={() => setShowForgotPassword(true)}
+                    >
+                      Forgot your password?
+                    </Button>
+                  </div>
                 </form>
+
+                {showForgotPassword && (
+                  <div className="mt-4 p-4 border-2 border-blue-200 rounded-lg bg-blue-50">
+                    <div className="flex items-center gap-2 text-sm text-blue-800 mb-3">
+                      <Mail className="h-4 w-4" />
+                      <span className="font-medium">Reset Password</span>
+                    </div>
+                    <p className="text-sm text-blue-700 mb-4">
+                      Enter your email address and we'll send you a link to reset your password.
+                    </p>
+                    <div className="space-y-3">
+                      <Input
+                        type="email"
+                        placeholder="your@email.com"
+                        value={forgotPasswordEmail}
+                        onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="default"
+                          className="flex-1 bg-blue-600 hover:bg-blue-700"
+                          onClick={handleForgotPassword}
+                          disabled={isLoading}
+                        >
+                          <Mail className="h-4 w-4 mr-2" />
+                          {isLoading ? "Sending..." : "Send Reset Email"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setShowForgotPassword(false);
+                            setForgotPasswordEmail("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </TabsContent>
               
               <TabsContent value="signup">
