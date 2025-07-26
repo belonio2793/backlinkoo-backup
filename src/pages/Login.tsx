@@ -145,6 +145,25 @@ const Login = () => {
         console.log('🔐 Sign in successful:', data.user.id);
         setDebugInfo(prev => [...prev, `Login successful! User ID: ${data.user.id}`]);
 
+        // Check if email is confirmed
+        if (!data.user.email_confirmed_at) {
+          console.warn('🔐 Email not confirmed, blocking login');
+          setDebugInfo(prev => [...prev, 'Email not confirmed - blocking access']);
+
+          // Sign out the user immediately
+          await supabase.auth.signOut();
+
+          toast({
+            title: "Email verification required",
+            description: "Please check your email and click the confirmation link before signing in.",
+            variant: "destructive",
+          });
+
+          setShowResendConfirmation(true);
+          setResendEmail(loginEmail);
+          return;
+        }
+
         // Profile migration in background - don't wait for it
         ProfileMigrationService.ensureUserProfile(
           data.user.id,
