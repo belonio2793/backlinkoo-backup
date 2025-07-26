@@ -224,6 +224,7 @@ const Dashboard = () => {
       setCampaigns(campaignsData || []);
     } catch (error: any) {
       console.error('Error fetching campaigns:', error);
+      setCampaigns([]); // Set empty array on error
       toast({
         title: "Error",
         description: `Failed to fetch campaigns: ${error?.message || 'Unknown error'}`,
