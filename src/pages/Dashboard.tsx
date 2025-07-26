@@ -243,8 +243,6 @@ const Dashboard = () => {
         }
       } catch (profileError) {
         console.warn('🔍 Profile fetch failed, using defaults:', profileError);
-        // Fall back to demo mode
-        setIsDemoMode(true);
       }
 
       // Set user type based on profile
