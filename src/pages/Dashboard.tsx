@@ -60,25 +60,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     console.log('Dashboard mounted, checking authentication...');
-    const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('.fly.dev');
-
-    if (isDev) {
-      console.log('🧪 Development mode: Skipping complex auth flow, using mock data');
-      // In development, just set mock data and skip the auth flow
-      setUser({
-        id: 'dev-user-123',
-        email: 'dev@example.com',
-        email_confirmed_at: new Date().toISOString(),
-        user_metadata: { display_name: 'Dev User' }
-      } as any);
-      setCredits(10);
-      setCampaigns([]);
-      setUserType('user');
-      setIsFirstTimeUser(false);
-      setLoading(false);
-      return;
-    }
-
     checkAuthAndFetchData();
 
     // Listen for auth state changes
