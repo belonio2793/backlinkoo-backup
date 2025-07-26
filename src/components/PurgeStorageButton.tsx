@@ -102,8 +102,8 @@ export const PurgeStorageButton = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-orange-500" />
-            Clear Browser Storage
+            <Sparkles className="h-5 w-5 text-purple-500" />
+            Reset & Refresh Session
           </DialogTitle>
           <DialogDescription>
             This will permanently remove all stored data for this website from your browser.
