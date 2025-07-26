@@ -307,13 +307,21 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-2">
-                    <h3 className="font-semibold">{displayName}</h3>
+                    <h3 className="font-semibold">{fullName}</h3>
+                    {fullName !== displayName && (
+                      <p className="text-sm text-muted-foreground">@{displayName}</p>
+                    )}
                     <p className="text-sm text-muted-foreground">{userEmail}</p>
                     <div className="flex gap-2">
                       <Badge variant={userType === 'admin' ? 'default' : 'secondary'}>
                         <Shield className="h-3 w-3 mr-1" />
                         {userType === 'admin' ? 'Administrator' : 'User'}
                       </Badge>
+                      {additionalInfo.company && (
+                        <Badge variant="outline">
+                          {additionalInfo.company}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
