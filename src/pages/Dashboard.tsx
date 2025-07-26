@@ -122,49 +122,73 @@ const Dashboard = () => {
     try {
       const currentUser = authUser || user;
       if (!currentUser) {
-        navigate('/login');
+        console.log('No current user for fetchUserData');
         return;
       }
 
-      // Get user profile and role
-      const { data: profile, error: profileError } = await supabase
+      console.log('Fetching user data for:', currentUser.id);
+
+      // Get user profile and role with timeout
+      const profilePromise = supabase
         .from('profiles')
         .select('role')
         .eq('user_id', currentUser.id)
         .single();
 
-      console.log('Profile data:', profile, 'Profile error:', profileError);
+      const { data: profile, error: profileError } = await Promise.race([
+        profilePromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 5000))
+      ]) as any;
+
+      if (profileError && !profileError.message.includes('timeout')) {
+        console.log('Profile error (non-critical):', profileError);
+      }
 
       if (profile?.role === 'admin') {
         setUserType('admin');
       }
 
-      // Get user credits
-      const { data: creditsData, error: creditsError } = await supabase
+      // Get user credits with timeout
+      const creditsPromise = supabase
         .from('credits')
         .select('amount')
         .eq('user_id', currentUser.id)
         .single();
 
-      console.log('Credits data:', creditsData, 'Credits error:', creditsError);
+      const { data: creditsData, error: creditsError } = await Promise.race([
+        creditsPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Credits fetch timeout')), 5000))
+      ]) as any;
+
+      if (creditsError && !creditsError.message.includes('timeout')) {
+        console.log('Credits error (non-critical):', creditsError);
+      }
 
       if (creditsData) {
         setCredits(creditsData.amount);
-        console.log('Setting credits to:', creditsData.amount);
       } else {
-        console.log('No credits data found');
+        setCredits(0); // Default to 0 credits
       }
 
       // Check if user has any campaigns (first time user check)
-      const { data: campaignsData } = await supabase
-        .from('campaigns')
-        .select('id')
-        .eq('user_id', currentUser.id)
-        .limit(1);
+      try {
+        const { data: campaignsData } = await supabase
+          .from('campaigns')
+          .select('id')
+          .eq('user_id', currentUser.id)
+          .limit(1);
 
-      setIsFirstTimeUser(!campaignsData || campaignsData.length === 0);
+        setIsFirstTimeUser(!campaignsData || campaignsData.length === 0);
+      } catch (error) {
+        console.log('Error checking campaigns (non-critical):', error);
+        setIsFirstTimeUser(true); // Default to first time user
+      }
+
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('Error fetching user data (continuing anyway):', error);
+      // Set defaults
+      setCredits(0);
+      setIsFirstTimeUser(true);
     }
   };
 
