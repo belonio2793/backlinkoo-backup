@@ -291,12 +291,11 @@ const Dashboard = () => {
       }
 
     } catch (error) {
-      console.error('🔍 Error fetching user data (using fallbacks):', error);
+      console.error('🔍 Error fetching user data (using defaults):', error);
 
-      // Always use demo mode when errors occur
-      setIsDemoMode(true);
-      setCredits(10);
-      setIsFirstTimeUser(false);
+      // Set safe defaults
+      setCredits(0);
+      setIsFirstTimeUser(true);
       setUserType('user');
     }
   };
