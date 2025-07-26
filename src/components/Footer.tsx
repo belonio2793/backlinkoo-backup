@@ -34,6 +34,12 @@ export const Footer = () => {
               >
                 Rank Tracker
               </Link>
+              <Link
+                to="/blog"
+                className="block text-gray-600 hover:text-gray-900 text-sm"
+              >
+                Blog
+              </Link>
             </div>
           </div>
 
