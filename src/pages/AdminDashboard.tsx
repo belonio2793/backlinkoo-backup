@@ -17,6 +17,7 @@ import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { TestSupabaseConnection } from "@/components/TestSupabaseConnection";
+import { SystemStatusCheck } from "@/components/SystemStatusCheck";
 import {
   Users,
   Activity,
@@ -174,14 +175,7 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="database">
-            <Card>
-              <CardHeader>
-                <CardTitle>Database Connection Test</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <TestSupabaseConnection />
-              </CardContent>
-            </Card>
+            <SystemStatusCheck />
           </TabsContent>
 
           <TabsContent value="smtp-test">
