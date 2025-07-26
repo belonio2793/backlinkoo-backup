@@ -344,7 +344,6 @@ const Dashboard = () => {
       setCampaigns(campaignsData);
     } catch (error: any) {
       console.error('📊 Unexpected error in fetchCampaigns:', error);
-      setIsDemoMode(true);
       setCampaigns([]);
     }
   };
