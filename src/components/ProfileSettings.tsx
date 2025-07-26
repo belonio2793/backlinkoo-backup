@@ -73,41 +73,20 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
         ]) as any;
 
         if (error && error.code !== 'PGRST116') { // PGRST116 = row not found
-          if (error.message.includes('timeout')) {
-            console.warn('🔧 ProfileSettings: Database timeout, using demo profile');
-            // Use demo profile on timeout
-            setProfile({
-              user_id: user.id,
-              email: user.email || '',
-              full_name: user.user_metadata?.full_name || 'User',
-              display_name: user.user_metadata?.display_name || user.user_metadata?.full_name || 'User',
-              bio: '',
-              company: '',
-              website: '',
-              location: '',
-              phone: '',
-              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-              marketing_emails: true,
-              role: 'user',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            });
-          } else {
-            console.error('🔧 ProfileSettings: Error fetching profile:', error);
-            toast({
-              title: "Warning",
-              description: "Could not load profile data from database. Using local data.",
-              variant: "destructive",
-            });
-            // Initialize with user data as fallback
-            setProfile(prev => ({
-              ...prev,
-              user_id: user.id,
-              email: user.email || '',
-              full_name: user.user_metadata?.full_name || '',
-              display_name: user.user_metadata?.display_name || user.user_metadata?.full_name || '',
-            }));
-          }
+          console.error('🔧 ProfileSettings: Error fetching profile:', error);
+          toast({
+            title: "Warning",
+            description: "Could not load profile data from database.",
+            variant: "destructive",
+          });
+          // Initialize with user data as fallback
+          setProfile(prev => ({
+            ...prev,
+            user_id: user.id,
+            email: user.email || '',
+            full_name: user.user_metadata?.full_name || '',
+            display_name: user.user_metadata?.display_name || user.user_metadata?.full_name || '',
+          }));
         } else if (data) {
           setProfile({
             ...data,
