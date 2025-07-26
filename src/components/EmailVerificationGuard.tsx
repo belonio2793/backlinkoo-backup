@@ -62,7 +62,8 @@ export function EmailVerificationGuard({ children }: EmailVerificationGuardProps
 
   const handleResendVerification = async () => {
     setIsResending(true);
-    
+    const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('.fly.dev');
+
     try {
       const { error } = await supabase.auth.resend({
         type: 'signup',
@@ -73,23 +74,44 @@ export function EmailVerificationGuard({ children }: EmailVerificationGuardProps
       });
 
       if (error) {
+        if (isDev) {
+          toast({
+            title: "Development Mode",
+            description: "Email verification is simulated in development. Use admin panel to test verification flow.",
+          });
+        } else {
+          toast({
+            title: "Resend failed",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
+      } else {
+        if (isDev) {
+          toast({
+            title: "Development Mode - Email Simulated",
+            description: "In production, you would receive an actual verification email.",
+          });
+        } else {
+          toast({
+            title: "Verification email sent!",
+            description: "Please check your email for the verification link.",
+          });
+        }
+      }
+    } catch (error: any) {
+      if (isDev) {
         toast({
-          title: "Resend failed",
-          description: error.message,
-          variant: "destructive",
+          title: "Development Mode",
+          description: "Email verification is simulated. Use the admin panel to manage verification status.",
         });
       } else {
         toast({
-          title: "Verification email sent!",
-          description: "Please check your email for the verification link.",
+          title: "Resend failed",
+          description: error.message || "Failed to send verification email",
+          variant: "destructive",
         });
       }
-    } catch (error: any) {
-      toast({
-        title: "Resend failed",
-        description: error.message || "Failed to send verification email",
-        variant: "destructive",
-      });
     } finally {
       setIsResending(false);
     }
