@@ -487,10 +487,12 @@ const Login = () => {
     setIsLoading(true);
 
     try {
+      console.log('📧 Resending confirmation email for:', resendEmail);
+
       // Use Supabase resend (will use configured SMTP settings)
       const { error } = await supabase.auth.resend({
         type: 'signup',
-        email: resendEmail,
+        email: resendEmail.trim(),
         options: {
           emailRedirectTo: `https://backlinkoo.com/auth/confirm`
         }
@@ -498,19 +500,48 @@ const Login = () => {
 
       if (error) {
         console.error('Supabase resend error:', error);
-        throw new Error(error.message);
+
+        // Handle specific resend errors
+        if (error.message.includes('already confirmed') || error.message.includes('verified')) {
+          toast({
+            title: "Email already verified!",
+            description: "Your email address is already confirmed. You can now sign in to your account.",
+          });
+          setShowResendConfirmation(false);
+          // Switch to login tab
+          setTimeout(() => {
+            const loginTab = document.querySelector('[value="login"]') as HTMLElement;
+            if (loginTab) {
+              loginTab.click();
+              setLoginEmail(resendEmail);
+            }
+          }, 100);
+          return;
+        } else if (error.message.includes('rate limit') || error.message.includes('too many')) {
+          throw new Error('Too many email requests. Please wait a few minutes before trying again.');
+        } else {
+          throw new Error(error.message);
+        }
       }
 
       console.log('✅ Confirmation email resent via Supabase SMTP');
 
       toast({
         title: "Confirmation email sent!",
-        description: "We've sent you a new confirmation link. Please check your email and spam folder.",
+        description: "We've sent you a new confirmation link via our secure email system. Please check your email and spam folder.",
       });
+
+      // Provide additional guidance after successful resend
+      setTimeout(() => {
+        toast({
+          title: "Still waiting for the email?",
+          description: "Emails typically arrive within 2-3 minutes. Check your spam folder if you don't see it.",
+        });
+      }, 10000);
 
       setShowResendConfirmation(false);
     } catch (error: any) {
-      console.error('Email sending error:', error);
+      console.error('Resend confirmation error:', error);
 
       let errorMessage = 'Failed to send confirmation email. Please try again or contact support.';
 
@@ -725,7 +756,7 @@ const Login = () => {
                       <Input
                         id="signup-password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="•••��••••"
+                        placeholder="••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
