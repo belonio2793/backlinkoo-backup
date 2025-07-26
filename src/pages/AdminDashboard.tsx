@@ -203,9 +203,7 @@ const AdminDashboard = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="email-verification">
-            <EmailVerificationManager />
-          </TabsContent>
+
 
           <TabsContent value="security">
             <SecurityDashboard />
