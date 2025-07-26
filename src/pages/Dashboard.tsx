@@ -268,14 +268,13 @@ const Dashboard = () => {
 
         creditsData = result.data;
       } catch (creditsError) {
-        console.warn('🔍 Credits fetch failed, using demo mode');
-        setIsDemoMode(true);
+        console.warn('🔍 Credits fetch failed');
       }
 
       if (creditsData?.amount !== undefined) {
         setCredits(creditsData.amount);
       } else {
-        setCredits(isDevelopment ? 10 : 0);
+        setCredits(0);
       }
 
       // Quick check for campaigns
