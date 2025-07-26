@@ -300,12 +300,12 @@ const Login = () => {
           console.warn('Profile creation error during signup:', profileErr);
         }
 
-        // Send custom confirmation email via Resend directly
+        // Send custom confirmation email via Netlify function
         try {
           const emailResult = await ResendEmailService.sendConfirmationEmail(email);
 
           if (emailResult.success) {
-            console.log('Confirmation email sent successfully via Resend:', emailResult.emailId);
+            console.log('Confirmation email sent successfully via Netlify:', emailResult.emailId);
 
             toast({
               title: "Check your email!",
@@ -316,16 +316,16 @@ const Login = () => {
 
             toast({
               title: "Account created successfully!",
-              description: "Your account has been created, but we couldn't send the confirmation email. Please contact support if needed.",
+              description: `Your account has been created, but we couldn't send the confirmation email: ${emailResult.error || 'Unknown error'}. Please contact support if needed.`,
               variant: "destructive",
             });
           }
-        } catch (emailError) {
+        } catch (emailError: any) {
           console.error('Email service error:', emailError);
 
           toast({
             title: "Account created!",
-            description: "Your account has been created. If you don't receive a confirmation email, please try the resend option.",
+            description: `Your account has been created. Email service error: ${emailError?.message || 'Unknown error'}. Please try the resend option if needed.`,
           });
         }
 
