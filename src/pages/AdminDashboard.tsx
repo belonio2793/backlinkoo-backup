@@ -13,7 +13,7 @@ import { SupabaseEmailTest } from "@/components/SupabaseEmailTest";
 import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
-import { TestSupabaseConnection } from "@/components/TestSupabaseConnection";
+
 import { SystemStatusCheck } from "@/components/SystemStatusCheck";
 import {
   Users,
