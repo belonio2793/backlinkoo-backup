@@ -327,27 +327,57 @@ const Login = () => {
         }
 
         // Send custom confirmation email via Netlify function
+        console.log('📧 Attempting to send confirmation email via ResendEmailService...');
         try {
           const emailResult = await ResendEmailService.sendConfirmationEmail(email);
+          console.log('��� Email service response:', emailResult);
 
           if (emailResult.success) {
-            console.log('Confirmation email sent successfully via Netlify:', emailResult.emailId);
+            console.log('✅ Confirmation email sent successfully via Netlify:', emailResult.emailId);
 
             toast({
               title: "Check your email!",
               description: "We've sent you a confirmation link via our secure email system. Please check your email and spam folder.",
             });
           } else {
-            console.error('Failed to send confirmation email:', emailResult.error);
+            console.error('❌ Failed to send confirmation email:', emailResult.error);
 
-            toast({
-              title: "Account created successfully!",
-              description: `Your account has been created, but we couldn't send the confirmation email: ${emailResult.error || 'Unknown error'}. Please contact support if needed.`,
-              variant: "destructive",
-            });
+            // Try fallback: Supabase resend
+            console.log('📧 Attempting fallback via Supabase resend...');
+            try {
+              const { error: resendError } = await supabase.auth.resend({
+                type: 'signup',
+                email: email,
+                options: {
+                  emailRedirectTo: `https://backlinkoo.com/auth/confirm`
+                }
+              });
+
+              if (resendError) {
+                console.error('❌ Supabase resend also failed:', resendError);
+                toast({
+                  title: "Email sending failed",
+                  description: `We couldn't send the confirmation email. Resend error: ${resendError.message}. Please try the resend button below.`,
+                  variant: "destructive",
+                });
+              } else {
+                console.log('✅ Fallback email sent via Supabase');
+                toast({
+                  title: "Check your email!",
+                  description: "We've sent you a confirmation link via our backup system. Please check your email and spam folder.",
+                });
+              }
+            } catch (resendFallbackError: any) {
+              console.error('❌ Fallback email also failed:', resendFallbackError);
+              toast({
+                title: "Account created successfully!",
+                description: `Your account has been created, but we couldn't send the confirmation email. Please use the resend option below or contact support.`,
+                variant: "destructive",
+              });
+            }
           }
         } catch (emailError: any) {
-          console.error('Email service error:', emailError);
+          console.error('❌ Email service error:', emailError);
 
           toast({
             title: "Account created!",
