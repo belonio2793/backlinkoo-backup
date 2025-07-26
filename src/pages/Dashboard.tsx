@@ -191,7 +191,7 @@ const Dashboard = () => {
         console.log('🏠 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
 
         if (event === 'SIGNED_OUT' || !session) {
-          console.log('��� Dashboard - User signed out, redirecting to login...');
+          console.log('🏠 Dashboard - User signed out, redirecting to login...');
           navigate('/login');
         } else if (event === 'SIGNED_IN' && session) {
           console.log('🏠 Dashboard - User signed in, updating user state');
@@ -274,7 +274,7 @@ const Dashboard = () => {
           console.log('🔍 Credits error (non-critical):', result.error);
         }
       } catch (creditsError) {
-        console.warn('���� Credits fetch failed:', creditsError);
+        console.warn('🔍 Credits fetch failed:', creditsError);
       }
 
       if (creditsData) {
@@ -610,6 +610,22 @@ const Dashboard = () => {
       </header>
 
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        {/* Demo Mode Notification */}
+        {isDemoMode && (
+          <Card className="mb-6 border-orange-200 bg-orange-50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-orange-800">
+                <AlertCircle className="h-4 w-4" />
+                <span className="font-medium">Demo Mode Active</span>
+              </div>
+              <p className="text-sm text-orange-700 mt-2">
+                Database connection unavailable. You're viewing demo data for testing purposes.
+                Real data will be available once Supabase is properly configured.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {userType === "user" ? (
           <>
             {activeSection === "dashboard" ? (
