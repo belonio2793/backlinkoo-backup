@@ -326,9 +326,15 @@ const Dashboard = () => {
                   </Button>
                 </>
               )}
-              <Button variant="outline" size="sm" onClick={handleSignOut} className="px-2 sm:px-4">
-                <LogOut className="h-4 w-4 sm:mr-1" />
-                <span className="hidden sm:inline">Sign Out</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className="px-2 sm:px-4"
+              >
+                <LogOut className={`h-4 w-4 sm:mr-1 ${isSigningOut ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">{isSigningOut ? 'Signing Out...' : 'Sign Out'}</span>
               </Button>
             </div>
           </div>
