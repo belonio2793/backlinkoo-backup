@@ -17,6 +17,7 @@ import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft } from "lucide-react"
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
