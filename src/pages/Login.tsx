@@ -490,11 +490,6 @@ const Login = () => {
 
         <Card>
           <CardContent className="pt-6">
-            {/* Social Login Section */}
-            <div className="mb-6">
-              <SocialLogin disabled={isLoading} />
-            </div>
-
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Sign In</TabsTrigger>
