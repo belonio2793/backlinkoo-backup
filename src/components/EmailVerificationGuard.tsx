@@ -104,9 +104,7 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
         console.log('EmailVerificationGuard: Email verification status:', {
           email: session.user.email,
           confirmed_at: session.user.email_confirmed_at,
-          isVerified,
-          isUsingMockClient,
-          isDevelopment
+          isVerified
         });
 
       } catch (error: any) {
