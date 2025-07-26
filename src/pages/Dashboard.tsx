@@ -286,11 +286,11 @@ const Dashboard = () => {
     try {
       const currentUser = authUser || user;
       if (!currentUser) {
-        console.log('No current user for fetchCampaigns');
+        console.log('📊 No current user for fetchCampaigns');
         return;
       }
 
-      console.log('Fetching campaigns for:', currentUser.id);
+      console.log('📊 Fetching campaigns for:', currentUser.id);
 
       // Fetch campaigns with timeout
       const campaignsPromise = supabase
@@ -301,7 +301,7 @@ const Dashboard = () => {
 
       const { data: campaignsData, error } = await Promise.race([
         campaignsPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Campaigns fetch timeout')), 5000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Campaigns fetch timeout')), 3000))
       ]) as any;
 
       if (error && !error.message.includes('timeout')) {
