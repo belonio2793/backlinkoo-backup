@@ -143,6 +143,7 @@ const Login = () => {
 
       if (data.user && data.session) {
         console.log('🔐 Sign in successful:', data.user.id);
+        setDebugInfo(prev => [...prev, `Login successful! User ID: ${data.user.id}`]);
 
         // Profile migration in background - don't wait for it
         ProfileMigrationService.ensureUserProfile(
@@ -158,10 +159,13 @@ const Login = () => {
           description: "You have been successfully signed in.",
         });
 
+        setDebugInfo(prev => [...prev, 'Navigating to dashboard...']);
+
         // Use React Router navigation instead of window.location
         console.log('🔐 Redirecting to dashboard...');
         navigate('/dashboard');
       } else {
+        setDebugInfo(prev => [...prev, 'No user/session data in response']);
         throw new Error('No user data received from authentication');
       }
     } catch (error: any) {
