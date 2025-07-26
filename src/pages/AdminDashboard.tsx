@@ -5,10 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SecurityDashboard } from "@/components/SecurityDashboard";
 import { CampaignManager } from "@/components/CampaignManager";
 import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager";
-import { EmailVerificationTest } from "@/components/EmailVerificationTest";
-import { EmailVerificationStatus } from "@/components/EmailVerificationStatus";
-import { ResendConnectionTest } from "@/components/ResendConnectionTest";
-import { TestEmailSender } from "@/components/TestEmailSender";
+
 import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
 
 import { EmailTest } from "@/components/EmailTest";
