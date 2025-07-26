@@ -239,19 +239,28 @@ const Dashboard = () => {
     try {
       console.log('Dashboard - Starting sign out process...');
 
+      // Clear user state immediately
+      setUser(null);
+      setLoading(true);
+
       // Clean up all auth-related storage
-      Object.keys(localStorage).forEach((key) => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          localStorage.removeItem(key);
-        }
-      });
+      try {
+        Object.keys(localStorage).forEach((key) => {
+          if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+            localStorage.removeItem(key);
+          }
+        });
 
-      Object.keys(sessionStorage || {}).forEach((key) => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          sessionStorage.removeItem(key);
-        }
-      });
+        Object.keys(sessionStorage || {}).forEach((key) => {
+          if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+            sessionStorage.removeItem(key);
+          }
+        });
+      } catch (storageError) {
+        console.warn('Storage cleanup error:', storageError);
+      }
 
+      // Sign out from Supabase
       const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) {
         console.error('Sign out error:', error);
@@ -259,17 +268,16 @@ const Dashboard = () => {
         console.log('Dashboard - Sign out successful');
       }
 
-      // Clear user state
-      setUser(null);
-
-      // Immediate redirect to home page
-      window.location.href = "/";
+      // Use React Router for navigation
+      console.log('Navigating to home page...');
+      navigate('/');
 
     } catch (error) {
       console.error("Dashboard - Sign out error:", error);
 
-      // Force redirect even if there's an error
-      window.location.href = "/";
+      // Clear user state and navigate anyway
+      setUser(null);
+      navigate('/');
     }
   };
 
