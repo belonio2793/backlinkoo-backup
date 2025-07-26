@@ -133,6 +133,32 @@ export const SocialLogin = ({ onSocialLogin, disabled, className }: SocialLoginP
 
   const socialProviders: SocialProvider[] = ['google', 'facebook', 'linkedin_oidc', 'twitter'];
 
+  // Don't render social login buttons in mock mode
+  if (isMockMode) {
+    return (
+      <div className={`space-y-4 ${className}`}>
+        {/* Show notice about social login unavailability */}
+        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="text-center text-sm text-yellow-800">
+            Social login temporarily unavailable. Please use email authentication.
+          </div>
+        </div>
+
+        {/* Divider for email only */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <Separator className="w-full" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Continue with email
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Social Login Buttons */}
