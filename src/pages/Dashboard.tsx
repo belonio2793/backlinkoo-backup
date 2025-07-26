@@ -339,17 +339,78 @@ const Dashboard = () => {
 
       console.log('📊 Fetching campaigns for:', currentUser.id);
 
-      // Fetch campaigns with timeout
-      const campaignsPromise = supabase
-        .from('campaigns')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: false });
+      // Check if we should skip database calls
+      const isDevelopment = window.location.hostname === 'localhost' ||
+                           window.location.hostname.includes('fly.dev');
+      const isMockUser = currentUser.id === 'mock-user-id' ||
+                        currentUser.id === 'dev-fallback-user' ||
+                        currentUser.id === 'dev-bypass-user' ||
+                        currentUser.email === 'test@example.com' ||
+                        currentUser.email === 'dev@example.com';
 
-      const { data: campaignsData, error } = await Promise.race([
-        campaignsPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Campaigns fetch timeout')), 2000))
-      ]) as any;
+      if (isMockUser || isDevelopment) {
+        console.log('📊 Using mock/development mode, providing demo campaigns');
+        setIsDemoMode(true);
+        const mockCampaigns = [
+          {
+            id: 'demo-1',
+            name: 'Demo Campaign 1',
+            target_url: 'https://example.com',
+            keywords: ['SEO', 'backlinks', 'marketing'],
+            links_requested: 5,
+            links_delivered: 3,
+            status: 'in_progress',
+            created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+            credits_used: 5,
+            completed_backlinks: [
+              'https://demo-site1.com/article',
+              'https://demo-site2.com/blog',
+              'https://demo-site3.com/news'
+            ]
+          },
+          {
+            id: 'demo-2',
+            name: 'Demo Campaign 2',
+            target_url: 'https://mysite.com',
+            keywords: ['web development', 'React'],
+            links_requested: 3,
+            links_delivered: 3,
+            status: 'completed',
+            created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+            credits_used: 3,
+            completed_backlinks: [
+              'https://tech-blog.com/article',
+              'https://dev-news.com/story',
+              'https://coding-tips.com/guide'
+            ]
+          }
+        ];
+        setCampaigns(mockCampaigns);
+        return;
+      }
+
+      // Try database call with very short timeout
+      let campaignsData = null;
+      let error = null;
+
+      try {
+        const campaignsPromise = supabase
+          .from('campaigns')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false });
+
+        const result = await Promise.race([
+          campaignsPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Campaigns fetch timeout')), 1000))
+        ]) as any;
+
+        campaignsData = result.data;
+        error = result.error;
+      } catch (fetchError) {
+        console.warn('📊 Campaigns fetch failed, using demo mode');
+        error = fetchError;
+      }
 
       if (error) {
         if (error.message.includes('timeout')) {
