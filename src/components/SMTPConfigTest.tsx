@@ -201,11 +201,12 @@ export function SMTPConfigTest() {
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
           <h4 className="font-medium text-amber-800 mb-2">Test Instructions:</h4>
           <ol className="text-sm text-amber-700 space-y-1">
-            <li>1. Click "Test Resend SMTP Configuration" button</li>
-            <li>2. Wait for the SMTP connection and email sending process</li>
-            <li>3. Check the test results displayed below</li>
-            <li>4. Verify email delivery by checking support@backlinkoo.com inbox</li>
-            <li>5. If successful, the SMTP configuration is working correctly!</li>
+            <li>1. Ensure Resend SMTP is configured in Supabase Dashboard → Authentication → SMTP Settings</li>
+            <li>2. Click "Test Supabase Email System" button</li>
+            <li>3. The test will send an email via Supabase's configured SMTP</li>
+            <li>4. Check the test results displayed below</li>
+            <li>5. Verify email delivery by checking support@backlinkoo.com inbox</li>
+            <li>6. If successful, your Supabase email system is working correctly!</li>
           </ol>
         </div>
       </CardContent>
