@@ -166,7 +166,7 @@ export function SMTPConfigTest() {
               <span className={`font-medium ${
                 testResult.success ? 'text-green-800' : 'text-red-800'
               }`}>
-                {testResult.success ? 'SMTP Test Successful' : 'SMTP Test Failed'}
+                {testResult.success ? 'Email System Test Successful' : 'Email System Test Failed'}
               </span>
               <Badge variant="outline">
                 {testResult.config.host}:{testResult.config.port}
