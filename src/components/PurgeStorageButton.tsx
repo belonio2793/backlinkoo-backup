@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { StoragePurge } from '@/utils/storagePurge';
-import { Sparkles, AlertTriangle, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { RotateCcw, AlertTriangle, Loader2, CheckCircle, XCircle } from 'lucide-react';
 
 interface PurgeStorageButtonProps {
   variant?: 'default' | 'outline' | 'ghost' | 'destructive';
@@ -91,9 +91,9 @@ export const PurgeStorageButton = ({
           size={size}
           className={className}
           onClick={handleOpenDialog}
-          title="✨ Reset & refresh your session"
+          title="♻️ Reset & refresh your session"
         >
-          {showIcon && <Sparkles className="h-4 w-4" />}
+          {showIcon && <RotateCcw className="h-4 w-4" />}
           {showText && <span className={showIcon ? "ml-2" : ""}>Clear Storage</span>}
           {!showText && !showIcon && "Purge"}
         </Button>
@@ -102,7 +102,7 @@ export const PurgeStorageButton = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-purple-500" />
+            <RotateCcw className="h-5 w-5 text-purple-500" />
             Reset & Refresh Session
           </DialogTitle>
           <DialogDescription>
@@ -154,7 +154,7 @@ export const PurgeStorageButton = ({
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4 mr-2" />
+                <RotateCcw className="h-4 w-4 mr-2" />
                 Clear All Storage
               </>
             )}
