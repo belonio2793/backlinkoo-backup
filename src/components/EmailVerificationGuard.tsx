@@ -50,7 +50,15 @@ export function EmailVerificationGuard({ children }: EmailVerificationGuardProps
 
   const checkEmailVerificationStatus = (user: any) => {
     setUserEmail(user.email || '');
-    
+    const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('.fly.dev');
+
+    // In development mode, bypass email verification to allow testing
+    if (isDev) {
+      console.log('🧪 Development mode: Bypassing email verification check');
+      setIsEmailVerified(true);
+      return;
+    }
+
     // Check if email is confirmed
     if (user.email_confirmed_at) {
       setIsEmailVerified(true);
