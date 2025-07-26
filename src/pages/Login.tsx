@@ -425,23 +425,52 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+      console.log('🔑 Requesting password reset for:', forgotPasswordEmail);
+
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail.trim(), {
         redirectTo: `https://backlinkoo.com/auth/reset-password`
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Password reset error:', error);
+        throw error;
+      }
+
+      console.log('✅ Password reset email sent via Supabase SMTP');
 
       toast({
         title: "Password reset email sent!",
-        description: "Check your email for a link to reset your password.",
+        description: "We've sent you a password reset link via our secure email system. Please check your email and spam folder.",
       });
+
+      // Provide additional guidance
+      setTimeout(() => {
+        toast({
+          title: "Email not received?",
+          description: "The email may take a few minutes to arrive. Check your spam folder or try again.",
+        });
+      }, 8000);
 
       setShowForgotPassword(false);
       setForgotPasswordEmail("");
     } catch (error: any) {
+      console.error('Password reset failed:', error);
+
+      let errorMessage = "Failed to send password reset email. Please try again.";
+
+      if (error.message) {
+        if (error.message.includes('rate limit') || error.message.includes('too many')) {
+          errorMessage = "Too many password reset attempts. Please wait a few minutes before trying again.";
+        } else if (error.message.includes('not found') || error.message.includes('invalid email')) {
+          errorMessage = "This email address is not registered with us. Please check the email or create a new account.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
       toast({
         title: "Password reset failed",
-        description: error.message || "Failed to send password reset email. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -696,7 +725,7 @@ const Login = () => {
                       <Input
                         id="signup-password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
+                        placeholder="•••��••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
