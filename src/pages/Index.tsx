@@ -39,21 +39,7 @@ const Index = () => {
 
   // Check for authenticated user on component mount
   useEffect(() => {
-    // Clear any potentially corrupted auth state first
-    const clearCorruptedAuthState = () => {
-      const authKeys = Object.keys(localStorage).filter(key =>
-        key.startsWith('supabase.auth.') || key.includes('sb-')
-      );
-
-      // If there are auth keys but we can't verify them, clear them
-      if (authKeys.length > 0) {
-        console.log('Index page - Found auth keys, validating...');
-      }
-    };
-
-    clearCorruptedAuthState();
-
-    // Get initial session and validate it properly
+    // Get initial session with faster timeout
     const getInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -62,38 +48,60 @@ const Index = () => {
         if (error || !session || !session.user) {
           console.log('Index page - No valid session, clearing user state');
           setUser(null);
+          setAuthChecked(true);
           return;
         }
 
-        // Verify the session is actually valid by trying to get user
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) {
-          console.log('Index page - Session invalid, clearing auth state');
-          await supabase.auth.signOut({ scope: 'global' });
-          setUser(null);
-          return;
-        }
-
+        // Quick validation - if session exists, trust it initially
         console.log('Index page - Valid user session found');
-        setUser(user);
+        setUser(session.user);
+        setAuthChecked(true);
+
+        // Async validation in background - don't block UI
+        setTimeout(async () => {
+          try {
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            if (userError || !user) {
+              console.log('Index page - Background validation failed, clearing auth state');
+              await supabase.auth.signOut({ scope: 'global' });
+              setUser(null);
+            }
+          } catch (err) {
+            console.warn('Background auth validation failed:', err);
+          }
+        }, 100);
+
       } catch (error) {
         console.error('Error in getSession:', error);
         setUser(null);
-      } finally {
         setAuthChecked(true);
       }
     };
 
     getInitialSession();
 
+    // Fallback timeout to prevent indefinite loading state
+    const fallbackTimeout = setTimeout(() => {
+      if (!authChecked) {
+        console.log('Index page - Auth check timeout, forcing authChecked = true');
+        setAuthChecked(true);
+      }
+    }, 3000); // 3 second timeout
+
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Index page - Auth state changed:', { event, hasUser: !!session?.user, userId: session?.user?.id });
       setUser(session?.user ?? null);
+      if (!authChecked) {
+        setAuthChecked(true);
+      }
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(fallbackTimeout);
+    };
+  }, [authChecked]);
 
   const headlineVariations = [
     "Enterprise Backlinks",

@@ -8,7 +8,6 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { supabase } from "@/integrations/supabase/client";
-import { ResendEmailService } from "@/services/resendEmailService";
 import { ProfileMigrationService } from "@/services/profileMigrationService";
 
 import { useNavigate } from "react-router-dom";
@@ -100,6 +99,11 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    if (isLoading) {
+      console.log('Login already in progress, ignoring submit');
+      return;
+    }
+
     if (!loginEmail || !loginPassword) {
       toast({
         title: "Missing credentials",
@@ -183,12 +187,24 @@ const Login = () => {
             errorMessage = 'Network connection failed. Please check your internet connection and try again.';
           } else if (error.message.includes('Invalid login credentials')) {
             errorMessage = 'Invalid email or password. Please check your credentials and try again.';
-          } else if (error.message.includes('Email not confirmed')) {
-            errorMessage = 'Please check your email and click the confirmation link before signing in.';
+          } else if (error.message.includes('Email not confirmed') ||
+                     error.message.includes('not verified') ||
+                     error.message.includes('confirmation')) {
+            errorMessage = 'Your email address needs to be verified. Please check your email for a confirmation link.';
             setShowResendConfirmation(true);
             setResendEmail(loginEmail);
-          } else if (error.message.includes('Too many requests')) {
-            errorMessage = 'Too many login attempts. Please wait a moment and try again.';
+
+            // Provide additional guidance
+            setTimeout(() => {
+              toast({
+                title: "Need to verify your email?",
+                description: "Click the 'Resend Confirmation Email' button below if you need a new verification link.",
+              });
+            }, 3000);
+          } else if (error.message.includes('Too many requests') || error.message.includes('rate limit')) {
+            errorMessage = 'Too many login attempts. Please wait a few minutes and try again.';
+          } else if (error.message.includes('account') && error.message.includes('disabled')) {
+            errorMessage = 'Your account has been disabled. Please contact support for assistance.';
           }
         } else if (error.error_description) {
           errorMessage = error.error_description;
@@ -216,6 +232,12 @@ const Login = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+
+    if (isLoading) {
+      console.log('Signup already in progress, ignoring submit');
+      return;
+    }
+
     console.log('🆕 Starting signup process for:', email);
     setDebugInfo(prev => [...prev, 'Starting signup process...']);
     setIsLoading(true);
@@ -248,7 +270,7 @@ const Login = () => {
         // Continue even if this fails
       }
 
-      // Sign up and save both first_name and display_name for compatibility
+      // Sign up with email confirmation disabled (we'll use our custom Resend service)
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -276,28 +298,68 @@ const Login = () => {
                             error.code === 'user_already_exists';
 
         if (isUserExists) {
-          console.log('User already exists, showing resend option');
-          setDebugInfo(prev => [...prev, 'User already exists - showing resend options']);
+          console.log('User already exists, checking verification status');
+          setDebugInfo(prev => [...prev, 'User already exists - checking verification status']);
+
+          // Try to determine if user needs email verification
+          try {
+            // Attempt to get user status by trying to resend confirmation
+            const { error: testResendError } = await supabase.auth.resend({
+              type: 'signup',
+              email: email.trim(),
+              options: {
+                emailRedirectTo: `https://backlinkoo.com/auth/confirm`
+              }
+            });
+
+            if (testResendError) {
+              if (testResendError.message.includes('already confirmed') ||
+                  testResendError.message.includes('verified')) {
+                // User is already verified
+                console.log('User is already verified');
+                setIsLoading(false);
+                toast({
+                  title: "Account Already Verified",
+                  description: "This email is already registered and verified. Please try signing in with your password.",
+                });
+                // Switch to login tab and pre-fill email
+                setTimeout(() => {
+                  const loginTab = document.querySelector('[value="login"]') as HTMLElement;
+                  if (loginTab) {
+                    loginTab.click();
+                    setLoginEmail(email);
+                  }
+                }, 100);
+                return;
+              } else {
+                // Other error, treat as unverified
+                console.log('User exists but verification status unclear');
+              }
+            } else {
+              // Resend successful, means user needs verification
+              console.log('User exists and needs email verification');
+              toast({
+                title: "Verification Email Sent",
+                description: "This email is already registered but not verified. We've sent you a new confirmation link.",
+              });
+            }
+          } catch (statusError) {
+            console.log('Could not determine verification status');
+          }
+
+          // Show resend options for unverified users
           setResendEmail(email);
           setShowResendConfirmation(true);
-          toast({
-            title: "Email Already Registered",
-            description: "This email is already registered. Please check your email for confirmation or try signing in instead.",
-          });
-          // Switch to login tab automatically
-          setTimeout(() => {
-            const loginTab = document.querySelector('[value="login"]') as HTMLElement;
-            if (loginTab) {
-              loginTab.click();
-            }
-          }, 100);
-          return; // finally block will reset loading state
+          setIsLoading(false);
+
+          // Don't auto-switch to login for unverified users
+          return;
         }
         throw error;
       }
 
       if (data.user) {
-        console.log('Signup successful, user created:', data.user.id);
+        console.log('✅ Signup successful, user created:', data.user.id);
 
         // Ensure profile is created using migration service
         try {
@@ -314,33 +376,29 @@ const Login = () => {
           console.warn('Profile creation error during signup:', profileErr);
         }
 
-        // Send custom confirmation email via Netlify function
-        try {
-          const emailResult = await ResendEmailService.sendConfirmationEmail(email);
-
-          if (emailResult.success) {
-            console.log('Confirmation email sent successfully via Netlify:', emailResult.emailId);
-
-            toast({
-              title: "Check your email!",
-              description: "We've sent you a confirmation link via our secure email system. Please check your email and spam folder.",
-            });
-          } else {
-            console.error('Failed to send confirmation email:', emailResult.error);
-
-            toast({
-              title: "Account created successfully!",
-              description: `Your account has been created, but we couldn't send the confirmation email: ${emailResult.error || 'Unknown error'}. Please contact support if needed.`,
-              variant: "destructive",
-            });
-          }
-        } catch (emailError: any) {
-          console.error('Email service error:', emailError);
-
+        // Check if email was sent and provide appropriate feedback
+        if (data.user.email_confirmed_at) {
+          // User is already confirmed (shouldn't happen for new signups)
+          console.log('🎉 User email already confirmed');
           toast({
-            title: "Account created!",
-            description: `Your account has been created. Email service error: ${emailError?.message || 'Unknown error'}. Please try the resend option if needed.`,
+            title: "Account created and verified!",
+            description: "Your account has been created and your email is already verified. You can now sign in.",
           });
+        } else {
+          // Email confirmation needed - Supabase will send via configured SMTP
+          console.log('📧 Confirmation email will be sent via Supabase SMTP');
+          toast({
+            title: "Account created! Check your email",
+            description: "We've sent you a confirmation link to verify your account. Please check your email and spam folder.",
+          });
+
+          // Show additional help for email confirmation
+          setTimeout(() => {
+            toast({
+              title: "Email not received?",
+              description: "Check your spam folder or use the resend button below if needed.",
+            });
+          }, 10000); // Show after 10 seconds
         }
 
         // Broadcast new user notification globally
@@ -355,7 +413,7 @@ const Login = () => {
             loginTab.click();
             setLoginEmail(email); // Pre-fill email for easy login
           }
-        }, 3000);
+        }, 5000); // Increased time to 5 seconds so users can read the message
       }
     } catch (error: any) {
       console.error("Signup error:", error);
@@ -401,6 +459,11 @@ const Login = () => {
   };
 
   const handleForgotPassword = async () => {
+    if (isLoading) {
+      console.log('Password reset already in progress, ignoring click');
+      return;
+    }
+
     if (!forgotPasswordEmail.trim()) {
       toast({
         title: "Email required",
@@ -413,23 +476,52 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+      console.log('🔑 Requesting password reset for:', forgotPasswordEmail);
+
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail.trim(), {
         redirectTo: `https://backlinkoo.com/auth/reset-password`
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Password reset error:', error);
+        throw error;
+      }
+
+      console.log('✅ Password reset email sent via Supabase SMTP');
 
       toast({
         title: "Password reset email sent!",
-        description: "Check your email for a link to reset your password.",
+        description: "We've sent you a password reset link via our secure email system. Please check your email and spam folder.",
       });
+
+      // Provide additional guidance
+      setTimeout(() => {
+        toast({
+          title: "Email not received?",
+          description: "The email may take a few minutes to arrive. Check your spam folder or try again.",
+        });
+      }, 8000);
 
       setShowForgotPassword(false);
       setForgotPasswordEmail("");
     } catch (error: any) {
+      console.error('Password reset failed:', error);
+
+      let errorMessage = "Failed to send password reset email. Please try again.";
+
+      if (error.message) {
+        if (error.message.includes('rate limit') || error.message.includes('too many')) {
+          errorMessage = "Too many password reset attempts. Please wait a few minutes before trying again.";
+        } else if (error.message.includes('not found') || error.message.includes('invalid email')) {
+          errorMessage = "This email address is not registered with us. Please check the email or create a new account.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
       toast({
         title: "Password reset failed",
-        description: error.message || "Failed to send password reset email. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -438,66 +530,69 @@ const Login = () => {
   };
 
   const handleResendConfirmation = async () => {
+    if (isLoading) {
+      console.log('Resend already in progress, ignoring click');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Try Supabase resend first
-      const { error: supabaseError } = await supabase.auth.resend({
+      console.log('📧 Resending confirmation email for:', resendEmail);
+
+      // Use Supabase resend (will use configured SMTP settings)
+      const { error } = await supabase.auth.resend({
         type: 'signup',
-        email: resendEmail,
+        email: resendEmail.trim(),
         options: {
           emailRedirectTo: `https://backlinkoo.com/auth/confirm`
         }
       });
 
-      if (supabaseError) {
-        console.log('Supabase resend failed, trying custom Resend service:', supabaseError.message);
+      if (error) {
+        console.error('Supabase resend error:', error);
 
-        // Fallback to custom Resend email via Netlify function
-        const confirmationLink = `https://backlinkoo.com/auth/confirm?email=${encodeURIComponent(resendEmail)}`;
-
-        const emailResponse = await fetch('/.netlify/functions/send-email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            to: resendEmail,
-            subject: 'Confirm Your Backlink ∞ Account',
-            message: `Welcome to Backlink ∞!
-
-Please confirm your email address by clicking the link below:
-
-${confirmationLink}
-
-If you didn't create an account with us, please ignore this email.
-
-Best regards,
-The Backlink ∞ Team`,
-            from: 'Backlink ∞ <support@backlinkoo.com>'
-          }),
-        });
-
-        const result = await emailResponse.json();
-
-        if (!emailResponse.ok || !result.success) {
-          throw new Error(result.error || 'Failed to send email via Resend');
+        // Handle specific resend errors
+        if (error.message.includes('already confirmed') || error.message.includes('verified')) {
+          toast({
+            title: "Email already verified!",
+            description: "Your email address is already confirmed. You can now sign in to your account.",
+          });
+          setShowResendConfirmation(false);
+          // Switch to login tab
+          setTimeout(() => {
+            const loginTab = document.querySelector('[value="login"]') as HTMLElement;
+            if (loginTab) {
+              loginTab.click();
+              setLoginEmail(resendEmail);
+            }
+          }, 100);
+          return;
+        } else if (error.message.includes('rate limit') || error.message.includes('too many')) {
+          throw new Error('Too many email requests. Please wait a few minutes before trying again.');
+        } else {
+          throw new Error(error.message);
         }
-
-        toast({
-          title: "Confirmation email sent!",
-          description: "We've sent you a confirmation email via our backup system. Please check your email and spam folder.",
-        });
-      } else {
-        toast({
-          title: "Confirmation email sent!",
-          description: "We've sent you a new confirmation link. Please check your email.",
-        });
       }
+
+      console.log('✅ Confirmation email resent via Supabase SMTP');
+
+      toast({
+        title: "Confirmation email sent!",
+        description: "We've sent you a new confirmation link via our secure email system. Please check your email and spam folder.",
+      });
+
+      // Provide additional guidance after successful resend
+      setTimeout(() => {
+        toast({
+          title: "Still waiting for the email?",
+          description: "Emails typically arrive within 2-3 minutes. Check your spam folder if you don't see it.",
+        });
+      }, 10000);
 
       setShowResendConfirmation(false);
     } catch (error: any) {
-      console.error('Email sending error:', error);
+      console.error('Resend confirmation error:', error);
 
       let errorMessage = 'Failed to send confirmation email. Please try again or contact support.';
 

@@ -46,6 +46,7 @@ const Dashboard = () => {
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('tab') || "overview";
@@ -58,152 +59,172 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('Dashboard mounted, checking authentication...');
-    checkAuthAndFetchData();
+    let isMounted = true;
+
+    const initializeDashboard = async () => {
+      console.log('🏠 Dashboard: Starting initialization...');
+
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (!isMounted) return;
+
+        if (error || !session || !session.user) {
+          console.log('🏠 Dashboard - No valid session, redirecting to login');
+          navigate('/login');
+          return;
+        }
+
+        console.log('🏠 Dashboard - Valid session found:', session.user.email);
+        setUser(session.user);
+
+        // Fetch user data in parallel
+        Promise.all([
+          fetchUserData(session.user),
+          fetchCampaigns(session.user)
+        ]).finally(() => {
+          if (isMounted) {
+            setLoading(false);
+          }
+        });
+
+      } catch (error) {
+        console.error('🏠 Dashboard - Initialization error:', error);
+        if (isMounted) {
+          setLoading(false);
+          navigate('/login');
+        }
+      }
+    };
+
+    initializeDashboard();
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🏠 Dashboard - Auth state change:', { event, hasSession: !!session, hasUser: !!session?.user });
+      console.log('🏠 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
 
       if (event === 'SIGNED_OUT' || !session) {
-        console.log('🏠 Dashboard - User signed out or no session, redirecting to login');
         navigate('/login');
-      } else if (event === 'SIGNED_IN' && session) {
-        console.log('🏠 Dashboard - User signed in, updating state');
+      } else if (event === 'SIGNED_IN' && session && isMounted) {
         setUser(session.user);
-        fetchUserData();
-        fetchCampaigns();
+        setLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
-  const checkAuthAndFetchData = async () => {
-    try {
-      console.log('🏠 Dashboard: Starting auth check...');
-      console.log('🏠 Dashboard: Current pathname:', window.location.pathname);
-      console.log('🏠 Dashboard: Local storage keys:', Object.keys(localStorage).filter(k => k.includes('supabase')));
 
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      console.log('🏠 Dashboard - Session check result:', {
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        userId: session?.user?.id,
-        userEmail: session?.user?.email,
-        error: sessionError
-      });
-
-      if (sessionError) {
-        console.error('🏠 Dashboard - Session error:', sessionError);
-        navigate('/login');
-        return;
-      }
-
-      if (!session) {
-        console.log('🏠 Dashboard - No session found, redirecting to login');
-        navigate('/login');
-        return;
-      }
-
-      if (!session.user) {
-        console.log('🏠 Dashboard - Session exists but no user, redirecting to login');
-        navigate('/login');
-        return;
-      }
-
-      console.log('🏠 Dashboard - Valid session found, setting user and fetching data');
-      setUser(session.user);
-      await fetchUserData(session.user);
-      await fetchCampaigns(session.user);
-    } catch (error) {
-      console.error('🏠 Dashboard - Error checking auth:', error);
-      navigate('/login');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchUserData = async (authUser?: User) => {
     try {
       const currentUser = authUser || user;
       if (!currentUser) {
-        navigate('/login');
+        console.log('No current user for fetchUserData');
         return;
       }
 
-      // Get user profile and role
-      const { data: profile, error: profileError } = await supabase
+      console.log('Fetching user data for:', currentUser.id);
+
+      // Get user profile and role with timeout
+      const profilePromise = supabase
         .from('profiles')
         .select('role')
         .eq('user_id', currentUser.id)
         .single();
 
-      console.log('Profile data:', profile, 'Profile error:', profileError);
+      const { data: profile, error: profileError } = await Promise.race([
+        profilePromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 5000))
+      ]) as any;
+
+      if (profileError && !profileError.message.includes('timeout')) {
+        console.log('Profile error (non-critical):', profileError);
+      }
 
       if (profile?.role === 'admin') {
         setUserType('admin');
       }
 
-      // Get user credits
-      const { data: creditsData, error: creditsError } = await supabase
+      // Get user credits with timeout
+      const creditsPromise = supabase
         .from('credits')
         .select('amount')
         .eq('user_id', currentUser.id)
         .single();
 
-      console.log('Credits data:', creditsData, 'Credits error:', creditsError);
+      const { data: creditsData, error: creditsError } = await Promise.race([
+        creditsPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Credits fetch timeout')), 5000))
+      ]) as any;
+
+      if (creditsError && !creditsError.message.includes('timeout')) {
+        console.log('Credits error (non-critical):', creditsError);
+      }
 
       if (creditsData) {
         setCredits(creditsData.amount);
-        console.log('Setting credits to:', creditsData.amount);
       } else {
-        console.log('No credits data found');
+        setCredits(0); // Default to 0 credits
       }
 
       // Check if user has any campaigns (first time user check)
-      const { data: campaignsData } = await supabase
-        .from('campaigns')
-        .select('id')
-        .eq('user_id', currentUser.id)
-        .limit(1);
+      try {
+        const { data: campaignsData } = await supabase
+          .from('campaigns')
+          .select('id')
+          .eq('user_id', currentUser.id)
+          .limit(1);
 
-      setIsFirstTimeUser(!campaignsData || campaignsData.length === 0);
+        setIsFirstTimeUser(!campaignsData || campaignsData.length === 0);
+      } catch (error) {
+        console.log('Error checking campaigns (non-critical):', error);
+        setIsFirstTimeUser(true); // Default to first time user
+      }
+
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('Error fetching user data (continuing anyway):', error);
+      // Set defaults
+      setCredits(0);
+      setIsFirstTimeUser(true);
     }
   };
 
   const fetchCampaigns = async (authUser?: User) => {
     try {
       const currentUser = authUser || user;
-      if (!currentUser) return;
+      if (!currentUser) {
+        console.log('No current user for fetchCampaigns');
+        return;
+      }
 
-      // Fetch campaigns with proper query structure
-      const { data: campaignsData, error } = await supabase
+      console.log('Fetching campaigns for:', currentUser.id);
+
+      // Fetch campaigns with timeout
+      const campaignsPromise = supabase
         .from('campaigns')
         .select('*')
         .eq('user_id', currentUser.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching campaigns:', error);
-        toast({
-          title: "Error",
-          description: `Failed to fetch campaigns: ${error.message || 'Unknown error'}`,
-          variant: "destructive",
-        });
+      const { data: campaignsData, error } = await Promise.race([
+        campaignsPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Campaigns fetch timeout')), 5000))
+      ]) as any;
+
+      if (error && !error.message.includes('timeout')) {
+        console.error('Error fetching campaigns (non-critical):', error);
+        setCampaigns([]); // Set empty array as fallback
         return;
       }
 
       setCampaigns(campaignsData || []);
     } catch (error: any) {
-      console.error('Error fetching campaigns:', error);
-      toast({
-        title: "Error",
-        description: `Failed to fetch campaigns: ${error?.message || 'Unknown error'}`,
-        variant: "destructive",
-      });
+      console.error('Error fetching campaigns (continuing anyway):', error);
+      setCampaigns([]); // Set empty array as fallback
     }
   };
 
@@ -216,22 +237,33 @@ const Dashboard = () => {
 
 
   const handleSignOut = async () => {
+    if (isSigningOut) return; // Prevent double-clicks
+
     try {
       console.log('Dashboard - Starting sign out process...');
+      setIsSigningOut(true);
+
+      // Clear user state immediately
+      setUser(null);
 
       // Clean up all auth-related storage
-      Object.keys(localStorage).forEach((key) => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          localStorage.removeItem(key);
-        }
-      });
+      try {
+        Object.keys(localStorage).forEach((key) => {
+          if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+            localStorage.removeItem(key);
+          }
+        });
 
-      Object.keys(sessionStorage || {}).forEach((key) => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          sessionStorage.removeItem(key);
-        }
-      });
+        Object.keys(sessionStorage || {}).forEach((key) => {
+          if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+            sessionStorage.removeItem(key);
+          }
+        });
+      } catch (storageError) {
+        console.warn('Storage cleanup error:', storageError);
+      }
 
+      // Sign out from Supabase
       const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) {
         console.error('Sign out error:', error);
@@ -239,17 +271,18 @@ const Dashboard = () => {
         console.log('Dashboard - Sign out successful');
       }
 
-      // Clear user state
-      setUser(null);
-
-      // Immediate redirect to home page
-      window.location.href = "/";
+      // Use React Router for navigation
+      console.log('Navigating to home page...');
+      navigate('/');
 
     } catch (error) {
       console.error("Dashboard - Sign out error:", error);
 
-      // Force redirect even if there's an error
-      window.location.href = "/";
+      // Clear user state and navigate anyway
+      setUser(null);
+      navigate('/');
+    } finally {
+      setIsSigningOut(false);
     }
   };
 
@@ -259,7 +292,7 @@ const Dashboard = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Infinity className="h-8 w-8 text-primary mx-auto mb-4 animate-spin" />
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -295,9 +328,15 @@ const Dashboard = () => {
                   </Button>
                 </>
               )}
-              <Button variant="outline" size="sm" onClick={handleSignOut} className="px-2 sm:px-4">
-                <LogOut className="h-4 w-4 sm:mr-1" />
-                <span className="hidden sm:inline">Sign Out</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className="px-2 sm:px-4"
+              >
+                <LogOut className={`h-4 w-4 sm:mr-1 ${isSigningOut ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">{isSigningOut ? 'Signing Out...' : 'Sign Out'}</span>
               </Button>
             </div>
           </div>

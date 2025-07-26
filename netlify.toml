@@ -18,4 +18,4 @@
     X-XSS-Protection = "1; mode=block"
 
 [functions]
-  directory = "supabase/functions"
+  directory = "netlify/functions"

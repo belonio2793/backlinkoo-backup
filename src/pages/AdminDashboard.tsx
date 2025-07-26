@@ -14,6 +14,9 @@ import { EmailVerificationStatus } from "@/components/EmailVerificationStatus";
 import { ResendConnectionTest } from "@/components/ResendConnectionTest";
 import { TestEmailSender } from "@/components/TestEmailSender";
 import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
+import { EmailTest } from "@/components/EmailTest";
+import { SupabaseEmailTest } from "@/components/SupabaseEmailTest";
+import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { TestSupabaseConnection } from "@/components/TestSupabaseConnection";
@@ -183,7 +186,19 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="email-test">
-            <EmailSystemManager />
+            <div className="space-y-6">
+              <SupabaseEmailGuide />
+              <SupabaseEmailTest />
+              <Card>
+                <CardHeader>
+                  <CardTitle>Manual Email Test</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <EmailTest />
+                </CardContent>
+              </Card>
+              <EmailSystemManager />
+            </div>
           </TabsContent>
 
           <TabsContent value="security">
