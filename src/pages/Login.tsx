@@ -308,7 +308,7 @@ const Login = () => {
       }
 
       if (data.user) {
-        console.log('Signup successful, user created:', data.user.id);
+        console.log('✅ Signup successful, user created:', data.user.id);
 
         // Ensure profile is created using migration service
         try {
@@ -325,13 +325,30 @@ const Login = () => {
           console.warn('Profile creation error during signup:', profileErr);
         }
 
-        // Supabase will automatically send confirmation email via configured SMTP
-        console.log('✅ Account created successfully. Supabase will send confirmation email via configured SMTP.');
+        // Check if email was sent and provide appropriate feedback
+        if (data.user.email_confirmed_at) {
+          // User is already confirmed (shouldn't happen for new signups)
+          console.log('🎉 User email already confirmed');
+          toast({
+            title: "Account created and verified!",
+            description: "Your account has been created and your email is already verified. You can now sign in.",
+          });
+        } else {
+          // Email confirmation needed - Supabase will send via configured SMTP
+          console.log('📧 Confirmation email will be sent via Supabase SMTP');
+          toast({
+            title: "Account created! Check your email",
+            description: "We've sent you a confirmation link to verify your account. Please check your email and spam folder.",
+          });
 
-        toast({
-          title: "Check your email!",
-          description: "We've sent you a confirmation link to verify your account. Please check your email and spam folder.",
-        });
+          // Show additional help for email confirmation
+          setTimeout(() => {
+            toast({
+              title: "Email not received?",
+              description: "Check your spam folder or use the resend button below if needed.",
+            });
+          }, 10000); // Show after 10 seconds
+        }
 
         // Broadcast new user notification globally
         setTimeout(() => {
@@ -345,7 +362,7 @@ const Login = () => {
             loginTab.click();
             setLoginEmail(email); // Pre-fill email for easy login
           }
-        }, 3000);
+        }, 5000); // Increased time to 5 seconds so users can read the message
       }
     } catch (error: any) {
       console.error("Signup error:", error);
