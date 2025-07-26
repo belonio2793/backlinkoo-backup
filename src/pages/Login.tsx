@@ -674,6 +674,15 @@ The Backlink ∞ Team`,
               
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
+                  {/* Debug info in development */}
+                  {window.location.hostname === 'localhost' && debugInfo.length > 0 && (
+                    <div className="p-3 bg-gray-100 rounded text-xs">
+                      <div className="font-medium mb-1">Debug Info:</div>
+                      {debugInfo.map((info, idx) => (
+                        <div key={idx} className="text-gray-600">{idx + 1}. {info}</div>
+                      ))}
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <Label htmlFor="first-name">First Name</Label>
                     <Input
