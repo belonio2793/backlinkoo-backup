@@ -154,7 +154,7 @@ export const PurgeStorageButton = ({
               </>
             ) : (
               <>
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Sparkles className="h-4 w-4 mr-2" />
                 Clear All Storage
               </>
             )}
