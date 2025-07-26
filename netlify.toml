@@ -6,6 +6,8 @@
   NODE_VERSION = "20"
   NODE_ENV = "production"
   NPM_FLAGS = "--legacy-peer-deps"
+  VITE_APP_URL = "https://backlinkoo.com"
+  VITE_DOMAIN = "backlinkoo.com"
 
 [[redirects]]
   from = "/*"
