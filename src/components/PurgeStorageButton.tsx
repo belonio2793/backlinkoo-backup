@@ -93,7 +93,7 @@ export const PurgeStorageButton = ({
           onClick={handleOpenDialog}
           title="Clear all browser storage"
         >
-          {showIcon && <Trash2 className="h-4 w-4" />}
+          {showIcon && <Sparkles className="h-4 w-4" />}
           {showText && <span className={showIcon ? "ml-2" : ""}>Clear Storage</span>}
           {!showText && !showIcon && "Purge"}
         </Button>
