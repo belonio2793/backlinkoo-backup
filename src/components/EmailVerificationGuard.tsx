@@ -37,14 +37,14 @@ export function EmailVerificationGuard({ children }: EmailVerificationGuardProps
       const { data: { user }, error } = await supabase.auth.getUser();
       
       if (error || !user) {
-        navigate('/auth/login');
+        navigate('/login');
         return;
       }
 
       checkEmailVerificationStatus(user);
     } catch (error) {
       console.error('Error checking authentication:', error);
-      navigate('/auth/login');
+      navigate('/login');
     }
   };
 
