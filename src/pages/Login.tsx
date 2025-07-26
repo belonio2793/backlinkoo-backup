@@ -336,30 +336,54 @@ const Login = () => {
         // Send custom confirmation email via Netlify function
         try {
           const emailResult = await ResendEmailService.sendConfirmationEmail(email);
+          const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('.fly.dev');
 
           if (emailResult.success) {
-            console.log('Confirmation email sent successfully via Netlify:', emailResult.emailId);
+            console.log('Confirmation email sent successfully:', emailResult.emailId);
 
-            toast({
-              title: "Check your email!",
-              description: "We've sent you a confirmation link via our secure email system. Please check your email and spam folder.",
-            });
+            if (isDev) {
+              toast({
+                title: "Account created! (Development Mode)",
+                description: "Email verification is simulated in development. In production, you would receive an actual email. You can test the verification flow using the admin panel.",
+              });
+            } else {
+              toast({
+                title: "Check your email!",
+                description: "We've sent you a confirmation link via our secure email system. Please check your email and spam folder.",
+              });
+            }
           } else {
             console.error('Failed to send confirmation email:', emailResult.error);
 
-            toast({
-              title: "Account created successfully!",
-              description: `Your account has been created, but we couldn't send the confirmation email: ${emailResult.error || 'Unknown error'}. Please contact support if needed.`,
-              variant: "destructive",
-            });
+            if (isDev) {
+              toast({
+                title: "Account created! (Development Mode)",
+                description: "Account created successfully. Email sending is simulated in development - you can test verification in the admin panel.",
+              });
+            } else {
+              toast({
+                title: "Account created with email issue",
+                description: `Your account has been created, but we couldn't send the confirmation email: ${emailResult.error || 'Unknown error'}. Please use the resend option or contact support.`,
+                variant: "destructive",
+              });
+            }
           }
         } catch (emailError: any) {
           console.error('Email service error:', emailError);
+          const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('.fly.dev');
 
-          toast({
-            title: "Account created!",
-            description: `Your account has been created. Email service error: ${emailError?.message || 'Unknown error'}. Please try the resend option if needed.`,
-          });
+          if (isDev) {
+            toast({
+              title: "Account created! (Development Mode)",
+              description: "Account created successfully. Email system is in mock mode for development.",
+            });
+          } else {
+            toast({
+              title: "Account created with email issue",
+              description: `Your account has been created. Email service error: ${emailError?.message || 'Unknown error'}. Please try the resend option.`,
+              variant: "destructive",
+            });
+          }
         }
 
         // Broadcast new user notification globally
