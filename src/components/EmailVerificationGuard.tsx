@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Mail, AlertCircle, Loader2 } from 'lucide-react';
+import { AuthService } from '@/services/authService';
+import { Mail, AlertCircle, Loader2, Shield, CheckCircle } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 
 interface EmailVerificationGuardProps {
@@ -166,32 +167,34 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
 
     setIsResending(true);
     try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: user.email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm`
-        }
-      });
+      const result = await AuthService.resendConfirmation(user.email);
 
-      if (error) {
-        console.error('Resend verification error:', error);
-        toast({
-          title: "Error",
-          description: error.message || "Failed to resend verification email",
-          variant: "destructive",
-        });
-      } else {
+      if (result.success) {
         toast({
           title: "Verification email sent",
-          description: "Please check your email and click the verification link",
+          description: "Please check your email and click the verification link. Check your spam folder if you don't see it.",
         });
+      } else {
+        if (result.error?.includes('already verified')) {
+          toast({
+            title: "Email already verified",
+            description: "Your email is already confirmed. Please refresh the page.",
+          });
+          // Refresh the page to re-check verification status
+          setTimeout(() => window.location.reload(), 2000);
+        } else {
+          toast({
+            title: "Failed to resend",
+            description: result.error || "Failed to resend verification email",
+            variant: "destructive",
+          });
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Resend verification error:', error);
       toast({
         title: "Error",
-        description: "Failed to resend verification email",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -201,7 +204,7 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
+      await AuthService.signOut();
       navigate('/login');
     } catch (error) {
       console.error('Sign out error:', error);
@@ -232,20 +235,28 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
-              <Mail className="h-6 w-6 text-orange-600" />
+              <Shield className="h-6 w-6 text-orange-600" />
             </div>
-            <CardTitle className="text-xl">Verify your email</CardTitle>
+            <CardTitle className="text-xl">Email Verification Required</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <AlertCircle className="h-4 w-4" />
-                <span>Email verification required</span>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground p-3 bg-orange-50 rounded-lg">
+                <AlertCircle className="h-4 w-4 text-orange-600" />
+                <span className="font-medium">Account access restricted</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                We sent a verification email to <strong>{user.email}</strong>. 
-                Please check your email and click the verification link to continue.
+                We sent a verification email to <strong>{user.email}</strong>.
+                Please check your email and click the verification link to access your account.
               </p>
+              <div className="text-xs text-muted-foreground p-2 bg-blue-50 rounded">
+                <p className="font-medium text-blue-800 mb-1">Why verify your email?</p>
+                <ul className="list-disc list-inside space-y-1 text-blue-700">
+                  <li>Secure your account</li>
+                  <li>Access all platform features</li>
+                  <li>Receive important updates</li>
+                </ul>
+              </div>
             </div>
             
             <div className="space-y-3">
@@ -277,8 +288,19 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
               </Button>
             </div>
 
-            <div className="text-xs text-muted-foreground text-center">
-              <p>Didn't receive the email? Check your spam folder or try resending.</p>
+            <div className="text-xs text-muted-foreground text-center space-y-2">
+              <div className="p-2 bg-gray-50 rounded">
+                <p className="font-medium mb-1">Didn't receive the email?</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Check your spam/junk folder</li>
+                  <li>Wait 2-3 minutes for delivery</li>
+                  <li>Try resending using the button above</li>
+                </ul>
+              </div>
+              <p className="text-green-700">
+                <CheckCircle className="h-3 w-3 inline mr-1" />
+                Your account is created and secure
+              </p>
             </div>
           </CardContent>
         </Card>
