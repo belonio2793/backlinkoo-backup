@@ -486,7 +486,7 @@ const Login = () => {
           <div className="flex items-center justify-center gap-2 mb-4">
             <Infinity className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground">Welcome Back</h1>
+          <h1 className="text-3xl font-bold text-foreground" role="banner">Welcome Back</h1>
         </div>
 
         <Card>
