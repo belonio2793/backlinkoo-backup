@@ -80,6 +80,14 @@ const Index = () => {
 
     getInitialSession();
 
+    // Fallback timeout to prevent indefinite loading state
+    const fallbackTimeout = setTimeout(() => {
+      if (!authChecked) {
+        console.log('Index page - Auth check timeout, forcing authChecked = true');
+        setAuthChecked(true);
+      }
+    }, 3000); // 3 second timeout
+
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Index page - Auth state changed:', { event, hasUser: !!session?.user, userId: session?.user?.id });
@@ -89,7 +97,10 @@ const Index = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(fallbackTimeout);
+    };
   }, [authChecked]);
 
   const headlineVariations = [
