@@ -100,6 +100,11 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    if (isLoading) {
+      console.log('Login already in progress, ignoring submit');
+      return;
+    }
+
     if (!loginEmail || !loginPassword) {
       toast({
         title: "Missing credentials",
@@ -216,6 +221,12 @@ const Login = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+
+    if (isLoading) {
+      console.log('Signup already in progress, ignoring submit');
+      return;
+    }
+
     console.log('🆕 Starting signup process for:', email);
     setDebugInfo(prev => [...prev, 'Starting signup process...']);
     setIsLoading(true);
@@ -402,6 +413,11 @@ const Login = () => {
   };
 
   const handleForgotPassword = async () => {
+    if (isLoading) {
+      console.log('Password reset already in progress, ignoring click');
+      return;
+    }
+
     if (!forgotPasswordEmail.trim()) {
       toast({
         title: "Email required",
