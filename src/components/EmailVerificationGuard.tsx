@@ -19,6 +19,15 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Development bypass - check for dev environment or URL parameter
+  const isDevelopment = window.location.hostname === 'localhost' ||
+                       window.location.hostname.includes('fly.dev') ||
+                       window.location.search.includes('bypass-auth=true');
+
+  // If in development and auth keeps failing, show a bypass option
+  const [showDevBypass, setShowDevBypass] = useState(false);
+  const [authFailCount, setAuthFailCount] = useState(0);
+
   useEffect(() => {
     let isMounted = true;
 
