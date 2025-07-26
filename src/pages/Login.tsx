@@ -25,6 +25,8 @@ const Login = () => {
   const [loginPassword, setLoginPassword] = useState("");
   const [showResendConfirmation, setShowResendConfirmation] = useState(false);
   const [resendEmail, setResendEmail] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const { toast } = useToast();
   const { broadcastNewUser } = useGlobalNotifications();
   const navigate = useNavigate();
