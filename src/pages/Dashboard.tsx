@@ -220,23 +220,7 @@ const Dashboard = () => {
 
       console.log('🔍 Fetching user data for:', currentUser.id);
 
-      // Check if we should skip database calls
-      const isDevelopment = window.location.hostname === 'localhost' ||
-                           window.location.hostname.includes('fly.dev');
-      const isMockUser = currentUser.id === 'mock-user-id' ||
-                        currentUser.id === 'dev-fallback-user' ||
-                        currentUser.id === 'dev-bypass-user' ||
-                        currentUser.email === 'test@example.com' ||
-                        currentUser.email === 'dev@example.com';
 
-      if (isMockUser || isDevelopment) {
-        console.log('🔍 Using mock/development mode, skipping database calls');
-        setIsDemoMode(true);
-        setUserType('user');
-        setCredits(10); // Demo credits
-        setIsFirstTimeUser(false); // Show some demo campaigns
-        return;
-      }
 
       // Try database calls with very short timeout
       let profile = null;
