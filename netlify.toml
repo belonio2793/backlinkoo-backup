@@ -1,10 +1,13 @@
 [build]
   publish = "dist"
-  command = "npm run build"
+  command = "npm ci && cd netlify/functions && npm ci && cd ../.. && npm run build"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
   NODE_ENV = "production"
+  NPM_FLAGS = "--legacy-peer-deps"
+  VITE_APP_URL = "https://backlinkoo.com"
+  VITE_DOMAIN = "backlinkoo.com"
 
 [[redirects]]
   from = "/*"
