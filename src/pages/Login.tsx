@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { AuthService, setupAuthStateListener } from "@/services/authService";
 import { SocialLogin } from "@/components/SocialLogin";
+import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 
 import { useNavigate } from "react-router-dom";
 import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft, Shield, CheckCircle, AlertCircle } from "lucide-react";
