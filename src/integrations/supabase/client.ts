@@ -16,6 +16,7 @@ const createMockSupabaseClient = () => {
     email: 'test@example.com',
     user_metadata: { display_name: 'Test User' },
     created_at: new Date().toISOString(),
+    email_confirmed_at: new Date().toISOString(), // Add this for email verification
     aud: 'authenticated'
   };
 
