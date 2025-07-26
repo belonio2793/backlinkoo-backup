@@ -67,31 +67,34 @@ export function ProfileSettings({ user, userType, onUserUpdate }: ProfileSetting
     try {
       // Load from user metadata as fallback
       const fallbackProfile = {
+        displayName: user.user_metadata?.display_name || user.user_metadata?.first_name || '',
+        email: user.email || '',
+      };
+
+      const fallbackAdditionalInfo = {
         firstName: user.user_metadata?.first_name || '',
         lastName: user.user_metadata?.last_name || '',
-        displayName: user.user_metadata?.display_name || '',
-        bio: '',
-        website: '',
-        phone: '',
+        bio: user.user_metadata?.bio || '',
+        website: user.user_metadata?.website || '',
+        phone: user.user_metadata?.phone || '',
+        company: user.user_metadata?.company || '',
+        location: user.user_metadata?.location || '',
       };
 
       setProfile(fallbackProfile);
+      setAdditionalInfo(fallbackAdditionalInfo);
 
-      // Try to load from database
+      // Try to load from database (only fields that exist)
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('display_name, email')
         .eq('user_id', user.id)
         .single();
 
       if (data) {
         setProfile({
-          firstName: data.first_name || fallbackProfile.firstName,
-          lastName: data.last_name || fallbackProfile.lastName,
           displayName: data.display_name || fallbackProfile.displayName,
-          bio: data.bio || '',
-          website: data.website || '',
-          phone: data.phone || '',
+          email: data.email || fallbackProfile.email,
         });
       }
     } catch (error) {
