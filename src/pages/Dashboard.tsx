@@ -85,6 +85,7 @@ const Dashboard = () => {
       console.log('🏠 Dashboard: Current pathname:', window.location.pathname);
       console.log('🏠 Dashboard: Local storage keys:', Object.keys(localStorage).filter(k => k.includes('supabase')));
 
+      console.log('🏠 Dashboard: About to call supabase.auth.getSession()...');
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       console.log('🏠 Dashboard - Session check result:', {
         hasSession: !!session,
@@ -96,6 +97,7 @@ const Dashboard = () => {
 
       if (sessionError) {
         console.error('🏠 Dashboard - Session error:', sessionError);
+        console.log('🏠 Dashboard - Navigating to login due to session error');
         navigate('/login');
         return;
       }
@@ -114,12 +116,19 @@ const Dashboard = () => {
 
       console.log('🏠 Dashboard - Valid session found, setting user and fetching data');
       setUser(session.user);
+
+      console.log('🏠 Dashboard - About to fetch user data...');
       await fetchUserData(session.user);
+      console.log('🏠 Dashboard - User data fetched, about to fetch campaigns...');
       await fetchCampaigns(session.user);
+      console.log('🏠 Dashboard - Campaigns fetched, auth check complete');
+
     } catch (error) {
       console.error('🏠 Dashboard - Error checking auth:', error);
+      console.log('🏠 Dashboard - Navigating to login due to error');
       navigate('/login');
     } finally {
+      console.log('🏠 Dashboard - Setting loading to false');
       setLoading(false);
     }
   };
