@@ -4,6 +4,8 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  NODE_ENV = "production"
+  VITE_BUILD_TARGET = "production"
 
 [[redirects]]
   from = "/*"
