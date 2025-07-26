@@ -86,6 +86,9 @@ export const SocialLogin = ({ onSocialLogin, disabled, className }: SocialLoginP
   const { toast } = useToast();
   const [loadingProvider, setLoadingProvider] = useState<SocialProvider | null>(null);
 
+  // Check if we're using mock mode (no OAuth available)
+  const isMockMode = !supabase.auth.signInWithOAuth || typeof supabase.auth.signInWithOAuth !== 'function';
+
   const handleSocialLogin = async (provider: SocialProvider) => {
     if (disabled || loadingProvider) return;
 
