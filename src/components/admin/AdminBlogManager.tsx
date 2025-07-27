@@ -61,8 +61,12 @@ export function AdminBlogManager() {
 
   const loadContentFilterStats = async () => {
     try {
-      const stats = await contentFilterService.getFilterStats(7);
-      setContentFilterStats(stats);
+      const [filterStats, modStats] = await Promise.all([
+        contentFilterService.getFilterStats(7),
+        contentModerationService.getModerationStats(7)
+      ]);
+      setContentFilterStats(filterStats);
+      setModerationStats(modStats);
     } catch (error) {
       console.warn('Failed to load content filter stats:', error);
     }
