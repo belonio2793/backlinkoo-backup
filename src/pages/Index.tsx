@@ -39,6 +39,7 @@ import { useGuestTracking } from "@/hooks/useGuestTracking";
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { trackInteraction, trackPageView, shouldShowConversionPrompt } = useGuestTracking();
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
