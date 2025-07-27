@@ -95,7 +95,7 @@ export function ClaimTrialPostDialog({
 
       if (!currentUser) {
         // Redirect to signup with claim intent
-        navigate(`/auth-callback?action=signup&redirect=/blog/${trialPostSlug}&claim=true`);
+        navigate(`/auth/callback?action=signup&redirect=/blog/${trialPostSlug}&claim=true`);
         return;
       }
 
