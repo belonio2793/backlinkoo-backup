@@ -178,7 +178,13 @@ export function HomepageBlogGenerator() {
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         const blogSlug = `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`;
-        const publishedBlogUrl = `${window.location.origin}/blog/${blogSlug}`;
+
+        // Create URLs for both domains to ensure accessibility
+        const currentDomainUrl = `${window.location.origin}/blog/${blogSlug}`;
+        const backlinkooUrl = `https://backlinkoo.com/blog/${blogSlug}`;
+
+        // Use backlinkoo.com as primary published URL
+        const publishedBlogUrl = backlinkooUrl;
 
         // Create comprehensive blog content with multiple sections and strategic backlinks
         const blogContent = `
