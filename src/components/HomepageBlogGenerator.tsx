@@ -136,7 +136,7 @@ export function HomepageBlogGenerator() {
         setIsCompleted(true);
         setIsGenerating(false);
         setShowProgress(false);
-      }, 2000); // Give progress indicator time to complete
+      }, 1000); // Brief delay to show completion
 
       toast({
         title: "Blog Post Generated!",
