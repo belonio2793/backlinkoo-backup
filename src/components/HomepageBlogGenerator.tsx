@@ -750,23 +750,25 @@ export function HomepageBlogGenerator() {
                   </div>
                 )}
 
-                <div className="mt-8 space-y-4">
+                {/* FINALIZED NEXT STEPS */}
+                <div className="mt-8 space-y-6">
                   {currentUser ? (
-                    <div className="p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
-                      <p className="text-sm text-green-800 font-medium mb-2">
-                        ✅ <strong>Success! Your backlink is permanently saved</strong>
+                    <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-6 text-white text-center">
+                      <div className="flex items-center justify-center gap-2 mb-3">
+                        <CheckCircle2 className="h-6 w-6" />
+                        <h4 className="text-xl font-bold">🎯 Mission Complete!</h4>
+                      </div>
+                      <p className="text-green-100 mb-4 text-lg">
+                        Your professional backlink is now <strong>permanently active</strong> and boosting your SEO rankings!
                       </p>
-                      <p className="text-sm text-green-700 mb-3">
-                        Your backlink is live and will continue providing SEO value indefinitely.
-                        View all your backlinks and create more from your dashboard.
-                      </p>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
                         <Button
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700 text-white"
+                          size="lg"
+                          className="bg-white text-green-600 hover:bg-green-50 font-semibold"
                           onClick={() => window.location.href = '/dashboard'}
                         >
-                          View Dashboard
+                          <BarChart3 className="mr-2 h-5 w-5" />
+                          View Analytics Dashboard
                         </Button>
                         <Button
                           size="sm"
