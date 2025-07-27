@@ -1,16 +1,39 @@
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
 
+// Get environment variables with fallbacks to different naming conventions
+const SUPABASE_URL = process.env.SUPABASE_URL ||
+                    process.env.VITE_SUPABASE_URL ||
+                    'https://dfhanacsmsvvkpunurnp.supabase.co';
+
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY ||
+                         process.env.VITE_SUPABASE_ANON_KEY ||
+                         process.env.SUPABASE_SERVICE_ROLE_KEY ||
+                         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT8ZZqa5RY';
+
 // Validate required environment variables
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.error('Missing required environment variables: SUPABASE_URL and SUPABASE_ANON_KEY');
+  console.log('Available env vars:', Object.keys(process.env).filter(k => k.includes('SUPABASE')));
 }
 
-const supabase = process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY
-  ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
+const supabase = SUPABASE_URL && SUPABASE_ANON_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 
 exports.handler = async (event, context) => {
+  console.log('🚀 Blog generation function called:', {
+    method: event.httpMethod,
+    path: event.path,
+    hasSupabase: !!supabase,
+    envVars: {
+      hasSupabaseUrl: !!SUPABASE_URL,
+      hasSupabaseKey: !!SUPABASE_ANON_KEY,
+      supabaseUrlLength: SUPABASE_URL?.length,
+      supabaseKeyLength: SUPABASE_ANON_KEY?.length
+    }
+  });
+
   // Handle CORS
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -25,6 +48,7 @@ exports.handler = async (event, context) => {
   }
 
   if (event.httpMethod !== 'POST') {
+    console.warn('⚠️ Invalid method:', event.httpMethod);
     return {
       statusCode: 405,
       headers: {

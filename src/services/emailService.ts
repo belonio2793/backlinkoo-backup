@@ -1,3 +1,5 @@
+import { errorLogger, ErrorSeverity, ErrorCategory } from './errorLoggingService';
+
 // Direct Resend email service for authentication emails
 
 export interface EmailServiceResponse {
@@ -40,6 +42,23 @@ export class EmailService {
         subject: emailData.subject
       });
 
+      // Log email attempt
+      await errorLogger.logError(
+        ErrorSeverity.LOW,
+        ErrorCategory.EMAIL,
+        `Email sending attempt ${attempt}`,
+        {
+          context: {
+            to: emailData.to,
+            subject: emailData.subject,
+            attempt,
+            provider: 'netlify_resend'
+          },
+          component: 'EmailService',
+          action: 'send_email'
+        }
+      );
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
@@ -74,6 +93,19 @@ export class EmailService {
           return this.sendViaNetlifyFunction(emailData, attempt + 1);
         }
 
+        // Log the error
+        await errorLogger.logEmailError(
+          `Email delivery failed: ${errorMessage}`,
+          {
+            httpStatus: response.status,
+            to: emailData.to,
+            subject: emailData.subject,
+            attempt,
+            retryable: isRetryable
+          },
+          'EmailService'
+        );
+
         throw new Error(errorMessage);
       }
 
@@ -88,6 +120,17 @@ export class EmailService {
           await this.delay(this.getRetryDelay(attempt));
           return this.sendViaNetlifyFunction(emailData, attempt + 1);
         }
+
+        await errorLogger.logEmailError(
+          'Invalid JSON response from email service',
+          {
+            to: emailData.to,
+            subject: emailData.subject,
+            attempt,
+            jsonError: jsonError instanceof Error ? jsonError.message : String(jsonError)
+          },
+          'EmailService'
+        );
 
         throw new Error('Invalid JSON response from email service');
       }
@@ -110,6 +153,18 @@ export class EmailService {
           return this.sendViaNetlifyFunction(emailData, attempt + 1);
         }
 
+        await errorLogger.logEmailError(
+          `Email service returned failure: ${errorMessage}`,
+          {
+            to: emailData.to,
+            subject: emailData.subject,
+            attempt,
+            serviceError: result.error,
+            retryable: this.isRetryableServiceError(result.error)
+          },
+          'EmailService'
+        );
+
         throw new Error(errorMessage);
       }
     } catch (error: any) {
@@ -117,6 +172,19 @@ export class EmailService {
 
       // Log the failure with attempt number
       this.logFailure(emailData.to, error.message, attempt);
+
+      // Log to centralized error logging
+      await errorLogger.logEmailError(
+        `Email sending failed: ${error.message}`,
+        {
+          to: emailData.to,
+          subject: emailData.subject,
+          attempt,
+          errorType: error.name,
+          isTimeout: error.name === 'AbortError'
+        },
+        'EmailService'
+      );
 
       // Handle specific error types
       if (error.name === 'AbortError') {
@@ -219,6 +287,18 @@ export class EmailService {
   static async sendConfirmationEmail(email: string, confirmationUrl?: string): Promise<EmailServiceResponse> {
     console.log('EmailService: Sending confirmation email to:', email);
 
+    // Log confirmation email request
+    await errorLogger.logError(
+      ErrorSeverity.LOW,
+      ErrorCategory.EMAIL,
+      'Confirmation email requested',
+      {
+        context: { to: email, type: 'confirmation' },
+        component: 'EmailService',
+        action: 'send_confirmation_email'
+      }
+    );
+
     const origin = this.getOriginUrl();
     const defaultConfirmationUrl = confirmationUrl || `${origin}/auth/confirm?email=${encodeURIComponent(email)}`;
 
@@ -265,6 +345,17 @@ ${origin}`,
       return result;
     } catch (error: any) {
       console.error('Error sending confirmation email:', error);
+
+      await errorLogger.logEmailError(
+        `Failed to send confirmation email: ${error.message}`,
+        {
+          to: email,
+          emailType: 'confirmation',
+          confirmationUrl
+        },
+        'EmailService'
+      );
+
       return {
         success: false,
         error: `Failed to send confirmation email: ${error.message}`,
@@ -276,10 +367,23 @@ ${origin}`,
   static async sendPasswordResetEmail(email: string, resetUrl: string): Promise<EmailServiceResponse> {
     console.log('EmailService: Sending password reset email to:', email);
 
-    const emailData = {
-      to: email,
-      subject: 'Reset Your Backlink ∞ Password',
-      message: `Hi there,
+    // Log password reset email request
+    await errorLogger.logError(
+      ErrorSeverity.LOW,
+      ErrorCategory.EMAIL,
+      'Password reset email requested',
+      {
+        context: { to: email, type: 'password_reset' },
+        component: 'EmailService',
+        action: 'send_password_reset_email'
+      }
+    );
+
+    try {
+      const emailData = {
+        to: email,
+        subject: 'Reset Your Backlink ∞ Password',
+        message: `Hi there,
 
 We received a request to reset your password for your Backlink ∞ account.
 
@@ -298,21 +402,46 @@ The Backlink ∞ Team
 ---
 Professional SEO & Backlink Management Platform
 https://backlinkoo.com`,
-      from: 'Backlink ∞ <support@backlinkoo.com>'
-    };
+        from: 'Backlink ∞ <support@backlinkoo.com>'
+      };
 
-    return await this.sendViaNetlifyFunction(emailData);
+      return await this.sendViaNetlifyFunction(emailData);
+    } catch (error: any) {
+      await errorLogger.logEmailError(
+        `Failed to send password reset email: ${error.message}`,
+        {
+          to: email,
+          emailType: 'password_reset',
+          resetUrl
+        },
+        'EmailService'
+      );
+      throw error;
+    }
   }
 
   static async sendWelcomeEmail(email: string, firstName?: string): Promise<EmailServiceResponse> {
     console.log('EmailService: Sending welcome email to:', email);
 
-    const name = firstName ? ` ${firstName}` : '';
+    // Log welcome email request
+    await errorLogger.logError(
+      ErrorSeverity.LOW,
+      ErrorCategory.EMAIL,
+      'Welcome email requested',
+      {
+        context: { to: email, type: 'welcome', firstName },
+        component: 'EmailService',
+        action: 'send_welcome_email'
+      }
+    );
 
-    const emailData = {
-      to: email,
-      subject: 'Welcome to Backlink ∞ - Your SEO Journey Starts Now!',
-      message: `Hi${name}!
+    try {
+      const name = firstName ? ` ${firstName}` : '';
+
+      const emailData = {
+        to: email,
+        subject: 'Welcome to Backlink ∞ - Your SEO Journey Starts Now!',
+        message: `Hi${name}!
 
 Welcome to Backlink ∞! 🎉
 
@@ -348,10 +477,22 @@ The Backlink ∞ Team
 ---
 Professional SEO & Backlink Management Platform
 https://backlinkoo.com`,
-      from: 'Backlink ∞ <support@backlinkoo.com>'
-    };
+        from: 'Backlink ∞ <support@backlinkoo.com>'
+      };
 
-    return await this.sendViaNetlifyFunction(emailData);
+      return await this.sendViaNetlifyFunction(emailData);
+    } catch (error: any) {
+      await errorLogger.logEmailError(
+        `Failed to send welcome email: ${error.message}`,
+        {
+          to: email,
+          emailType: 'welcome',
+          firstName
+        },
+        'EmailService'
+      );
+      throw error;
+    }
   }
 
   // Legacy methods for EmailSystemManager compatibility

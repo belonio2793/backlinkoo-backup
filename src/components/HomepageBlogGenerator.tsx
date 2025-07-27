@@ -7,6 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStatus } from '@/hooks/useAuth';
 import { aiContentGenerator } from '@/services/aiContentGenerator';
+import { errorLogger, ErrorSeverity, ErrorCategory } from '@/services/errorLoggingService';
+import BlogGenerationError from './BlogGenerationError';
+import { PublishedBlogService } from '@/services/publishedBlogService';
+import { testBlogPostAccess } from '@/utils/blogTestUtils';
 import { blogPublisher } from '@/services/blogPublisher';
 import { multiApiContentGenerator } from '@/services/multiApiContentGenerator';
 import { liveBlogPublisher } from '@/services/liveBlogPublisher';
@@ -38,22 +42,34 @@ import {
 import { RotatingText } from './RotatingText';
 import { LoginModal } from './LoginModal';
 
+/**
+ * HomepageBlogGenerator - Main component for generating high-quality blog posts with backlinks
+ * Features: Netlify function integration with fallback, error handling, trial/permanent post management
+ * Last updated: January 2025 - Enhanced error handling and blog post storage
+ */
 export function HomepageBlogGenerator() {
+  // Form state
   const [targetUrl, setTargetUrl] = useState('');
   const [primaryKeyword, setPrimaryKeyword] = useState('');
+
+  // Generation state
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const [forceComplete, setForceComplete] = useState(false);
+
+  // Content state
   const [generatedPost, setGeneratedPost] = useState<any>(null);
   const [allGeneratedPosts, setAllGeneratedPosts] = useState<any[]>([]);
   const [publishedUrl, setPublishedUrl] = useState('');
   const [blogPostId, setBlogPostId] = useState<string>('');
+
+  // UI state
   const [showSignupPopup, setShowSignupPopup] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const { toast } = useToast();
+  const [generationError, setGenerationError] = useState<Error | string | null>(null);
 
-  // Use the authentication hook
+  const { toast } = useToast();
   const { currentUser, isCheckingAuth, isLoggedIn, isGuest, authChecked } = useAuthStatus();
 
   // ENTERPRISE DEBUG & MONITORING
@@ -91,6 +107,9 @@ export function HomepageBlogGenerator() {
       userType: isLoggedIn ? 'AUTHENTICATED' : 'TRIAL',
       timestamp: new Date().toISOString()
     });
+
+    // Clear any previous errors
+    setGenerationError(null);
 
     // ============= ENTERPRISE VALIDATION LAYER =============
     if (!targetUrl || !primaryKeyword) {
@@ -134,9 +153,8 @@ export function HomepageBlogGenerator() {
 
     try {
       console.log('🔄 GENERATION PROCESS STARTED');
-      // Use the already checked currentUser state instead of re-checking
 
-      // Check if we're in development mode
+      // Test connection to Netlify functions first (in production)
       const isDevelopment = window.location.hostname === 'localhost' ||
                            window.location.hostname === '127.0.0.1' ||
                            window.location.hostname.includes('localhost') ||
@@ -264,23 +282,62 @@ export function HomepageBlogGenerator() {
           })
         });
 
+        // Check if response is ok first
         if (!response.ok) {
-          // Read the response body once and handle errors
-          let errorMessage = 'Failed to generate blog post';
-          try {
-            const errorData = await response.json();
-            errorMessage = errorData.error || errorMessage;
-          } catch (parseError) {
-            // If we can't parse the error response, use the status text
-            errorMessage = `Server error: ${response.status} ${response.statusText}`;
+          console.log('ℹ️ Netlify function response status:', response.status);
+
+          // Handle 404 specifically with fallback
+          if (response.status === 404) {
+            console.warn('⚠️ Netlify function not found (404), using fallback content generation');
+
+            // Show user-friendly message about fallback mode
+            toast({
+              title: "Using Backup Mode",
+              description: "Blog generation service is temporarily unavailable. Using our backup system to create your content.",
+              variant: "default"
+            });
+
+            // Use fallback content generation
+            data = await generateFallbackBlogPost(targetUrl, primaryKeyword);
+
+            if (data.success) {
+              console.log('✅ Fallback content generated successfully');
+            } else {
+              console.error('❌ Fallback generation failed:', data.error);
+              throw new Error(data.error || 'Fallback generation failed');
+            }
+          } else {
+            // For other errors, try to get error message from response
+            let errorMessage = `HTTP error! status: ${response.status}`;
+            try {
+              const errorData = await response.text();
+              console.error('Server error response:', errorData);
+              // Try to parse as JSON to get error message
+              try {
+                const parsedError = JSON.parse(errorData);
+                errorMessage = parsedError.error || parsedError.message || errorMessage;
+              } catch {
+                // If not JSON, use the text as error message
+                errorMessage = errorData || errorMessage;
+              }
+            } catch {
+              // If we can't read the response, use status-based message
+              errorMessage = `Server error (${response.status}). Please try again.`;
+            }
+            throw new Error(errorMessage);
           }
-          throw new Error(errorMessage);
-        }
+        } else {
+          // Response is OK, parse JSON response
+          try {
+            data = await response.json();
+          } catch (jsonError) {
+            console.error('Failed to parse response as JSON:', jsonError);
+            throw new Error('Invalid response from server. Please try again.');
+          }
 
-        data = await response.json();
-
-        if (!data.success) {
-          throw new Error(data.error || 'Failed to generate blog post');
+          if (!data.success) {
+            throw new Error(data.error || 'Failed to generate blog post');
+          }
         }
       }
 
@@ -335,6 +392,31 @@ export function HomepageBlogGenerator() {
       setPublishedUrl(publishedUrl);
       setBlogPostId(blogPost.id);
 
+      // Verify the blog post is accessible
+      if (blogPost.slug) {
+        console.log('📋 Blog post details:', {
+          slug: blogPost.slug,
+          id: blogPost.id,
+          title: blogPost.title,
+          status: blogPost.status,
+          isTrialPost: blogPost.is_trial_post,
+          publishedUrl: publishedUrl,
+          accessUrl: `/blog/${blogPost.slug}`
+        });
+
+        setTimeout(async () => {
+          console.log('🔍 Verifying blog post accessibility...');
+          const verification = await testBlogPostAccess(blogPost.slug);
+          if (verification.success) {
+            console.log('✅ Blog post verified as accessible at:', `/blog/${blogPost.slug}`);
+            console.log('🌐 Full URL:', `${window.location.origin}/blog/${blogPost.slug}`);
+          } else {
+            console.warn('⚠️ Blog post verification failed:', verification.error);
+            console.log('💡 Try refreshing the page or checking the blog listing at /blog');
+          }
+        }, 1000);
+      }
+
       // Force immediate completion for enterprise UX
       console.log('⚡ FINALIZING RESULTS - Transitioning to completion state');
       setForceComplete(true);
@@ -387,11 +469,16 @@ export function HomepageBlogGenerator() {
       // Execute completion with slight delay for state consistency
       setTimeout(completeGeneration, 100);
 
+      // Show appropriate toast based on generation mode
+      const isUsingFallback = blogPost?.mode === 'fallback';
+
       toast({
-        title: "Blog Post Generated!",
-        description: isLoggedIn
-          ? "Your content is ready and saved to your dashboard!"
-          : "Your demo preview is ready. Register to keep it forever!",
+        title: isUsingFallback ? "Blog Post Generated (Backup Mode)" : "Blog Post Generated!",
+        description: isUsingFallback
+          ? "Your blog post was created using our backup system. All features work normally!"
+          : isLoggedIn
+            ? "Your content is ready and saved to your dashboard!"
+            : "Your demo preview is ready. Register to keep it forever!",
       });
 
       // Store trial post info for notification system
@@ -431,6 +518,27 @@ export function HomepageBlogGenerator() {
         errorStack: error instanceof Error ? error.stack : 'No stack trace'
       });
 
+      // Set the error state for detailed display
+      setGenerationError(error instanceof Error ? error : String(error));
+
+      // Log the error for tracking
+      await errorLogger.logError(
+        ErrorSeverity.HIGH,
+        ErrorCategory.GENERAL,
+        `Blog generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        {
+          error: error instanceof Error ? error : new Error(String(error)),
+          context: {
+            targetUrl,
+            primaryKeyword,
+            userId: currentUser?.id,
+            isProduction: true
+          },
+          component: 'HomepageBlogGenerator',
+          action: 'generate_blog_post'
+        }
+      );
+
       // Determine error type and user guidance
       let errorTitle = "⚠️ Generation Process Failed";
       let errorDescription = "An unexpected error occurred during blog generation.";
@@ -459,7 +567,7 @@ export function HomepageBlogGenerator() {
         title: errorTitle,
         description: `${errorDescription} ${nextSteps}`,
         variant: "destructive",
-        duration: 10000 // Longer duration for error messages
+        duration: 10000
       });
 
       // Reset all states to clean slate
@@ -471,13 +579,8 @@ export function HomepageBlogGenerator() {
       setGeneratedPost(null);
       setPublishedUrl('');
       setBlogPostId('');
-
-      // Optional: Add error reporting for enterprise monitoring
-      // reportErrorToAnalytics(error, { targetUrl, primaryKeyword, userType: isLoggedIn ? 'AUTH' : 'TRIAL' });
     }
   };
-
-
 
   const isValidUrl = (url: string): boolean => {
     try {
@@ -485,6 +588,48 @@ export function HomepageBlogGenerator() {
       return true;
     } catch {
       return false;
+    }
+  };
+
+  // Fallback content generation using proper blog service
+  const generateFallbackBlogPost = async (targetUrl: string, keyword: string) => {
+    console.log('🔄 Generating fallback blog post using blog service...');
+
+    try {
+      const blogService = new PublishedBlogService();
+
+      // Create blog post using the proper service
+      const blogPost = await blogService.createBlogPost({
+        keyword,
+        targetUrl,
+        userId: currentUser?.id,
+        isTrialPost: !currentUser,
+        wordCount: 1200
+      });
+
+      console.log('✅ Blog post created and saved:', {
+        slug: blogPost.slug,
+        id: blogPost.id,
+        publishedUrl: blogPost.published_url,
+        isTrialPost: blogPost.is_trial_post
+      });
+
+      return {
+        success: true,
+        slug: blogPost.slug,
+        blogPost: {
+          ...blogPost,
+          mode: 'fallback'
+        },
+        publishedUrl: blogPost.published_url,
+        message: 'Blog post generated and saved using fallback mode'
+      };
+    } catch (error) {
+      console.error('Fallback generation failed:', error);
+      return {
+        success: false,
+        error: `Fallback generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      };
     }
   };
 
@@ -498,6 +643,7 @@ export function HomepageBlogGenerator() {
     setShowProgress(false);
     setIsGenerating(false);
     setForceComplete(false);
+    setGenerationError(null);
   };
 
   return (
@@ -598,183 +744,190 @@ export function HomepageBlogGenerator() {
                   setShowProgress(false);
                   setIsGenerating(false);
                   setForceComplete(false);
-                  // Completion state should already be set by the generation logic
                 }}
               />
             ) : (
               <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
-              <CardHeader className="text-center pb-6">
-                <div className="flex items-center justify-center gap-3 mb-4">
-                  <div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500">
-                    <Sparkles className="h-6 w-6 text-white" />
+                <CardHeader className="text-center pb-6">
+                  <div className="flex items-center justify-center gap-3 mb-4">
+                    <div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500">
+                      <Sparkles className="h-6 w-6 text-white" />
+                    </div>
+                    <CardTitle className="text-2xl font-semibold">Enter Campaign Details</CardTitle>
                   </div>
-                  <CardTitle className="text-2xl font-semibold">Enter Campaign Details</CardTitle>
-                </div>
-                <div className="flex items-center justify-center gap-6 text-sm text-gray-600">
-                  <div className="flex items-center gap-2">
-                    <Star className="h-4 w-4 text-yellow-500" />
-                    <span>High-Quality Content</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Zap className="h-4 w-4 text-blue-500" />
-                    <span>Instant Publishing</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-4 w-4 text-green-500" />
-                    <span>Live Backlink</span>
-                  </div>
-                  {authChecked && (
+                  <div className="flex items-center justify-center gap-6 text-sm text-gray-600">
                     <div className="flex items-center gap-2">
-                      <Save className={`h-4 w-4 ${isLoggedIn ? 'text-green-500' : 'text-amber-500'}`} />
-                      <span className={isLoggedIn ? 'text-green-600' : 'text-amber-600'}>
-                        {isLoggedIn ? 'Permanent Save' : 'Trial Mode'}
-                      </span>
+                      <Star className="h-4 w-4 text-yellow-500" />
+                      <span>High-Quality Content</span>
                     </div>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-8 px-8 pb-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <Label htmlFor="targetUrl" className="text-base font-medium flex items-center gap-2">
-                      <Link2 className="h-4 w-4 text-blue-500" />
-                      Your Website URL
-                    </Label>
-                    <Input
-                      id="targetUrl"
-                      placeholder="https://yourwebsite.com"
-                      value={targetUrl}
-                      onChange={(e) => setTargetUrl(e.target.value)}
-                      className="text-base py-3 px-4 border-gray-200 focus:border-blue-400 focus:ring-blue-400"
-                    />
-                    <p className="text-sm text-gray-500">The URL you want to get a backlink to</p>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <Label htmlFor="primaryKeyword" className="text-base font-medium flex items-center gap-2">
-                      <Target className="h-4 w-4 text-purple-500" />
-                      Primary Keyword
-                    </Label>
-                    <Input
-                      id="primaryKeyword"
-                      placeholder="e.g., digital marketing, SEO tools"
-                      value={primaryKeyword}
-                      onChange={(e) => setPrimaryKeyword(e.target.value)}
-                      className="text-base py-3 px-4 border-gray-200 focus:border-purple-400 focus:ring-purple-400"
-                    />
-                    <p className="text-sm text-gray-500">The keyword you're ranking for (used as anchor text)</p>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-100">
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-blue-600" />
-                    What You'll Get:
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                      <span>1,200+ word SEO-optimized blog post</span>
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-blue-500" />
+                      <span>Instant Publishing</span>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
-                      <span>Permanent links</span>
+                    <div className="flex items-center gap-2">
+                      <Globe className="h-4 w-4 text-green-500" />
+                      <span>Live Backlink</span>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                      <span>Published, viewable and indexed link within private networks</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
-                      <span>Dofollow backlinks</span>
-                    </div>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={handleGenerate}
-                  disabled={isGenerating || !targetUrl || !primaryKeyword || isCheckingAuth}
-                  size="lg"
-                  className="w-full text-lg py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium shadow-lg relative overflow-hidden"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                      <span className="animate-pulse">
-                        {showProgress
-                          ? 'Processing Your Enterprise Backlink...'
-                          : currentUser
-                            ? 'Generating Professional Content...'
-                            : 'Creating Your Trial Content...'
-                        }
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="mr-3 h-5 w-5" />
-                      <span>
-                        {currentUser
-                          ? 'Create Permanent Link'
-                          : 'Start Free Trial'
-                        }
-                      </span>
-                    </>
-                  )}
-
-                  {/* Enterprise progress indicator overlay */}
-                  {isGenerating && (
-                    <div className="absolute bottom-0 left-0 h-1 bg-white/30 animate-pulse w-full"></div>
-                  )}
-                </Button>
-
-                {/* Enterprise Status & Validation Display */}
-                <div className="text-center space-y-2">
-                  {isGenerating && (
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
-                      ENTERPRISE GENERATION IN PROGRESS
-                    </div>
-                  )}
-
-                  {!isGenerating && targetUrl && primaryKeyword && (
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-medium">
-                      <CheckCircle2 className="w-4 h-4" />
-                      READY FOR DEPLOYMENT
-                    </div>
-                  )}
-                </div>
-
-                {authChecked && (
-                  <div className="text-center text-sm">
-                    {currentUser ? (
-                      <div className="space-y-2">
-                        <p className="text-green-600 font-medium">
-                          ✅ Logged in - Your backlinks will be saved permanently
-                        </p>
-                        <p className="text-gray-500">
-                          Welcome back! Your content will be saved to your dashboard.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <p className="text-amber-600 font-medium">
-                          ⚠️ Guest Mode - Trial backlink (24 hours)
-                        </p>
-                        <p className="text-gray-500">
-                          ��� Completely free • No signup required • Register to save permanently
-                        </p>
+                    {authChecked && (
+                      <div className="flex items-center gap-2">
+                        <Save className={`h-4 w-4 ${isLoggedIn ? 'text-green-500' : 'text-amber-500'}`} />
+                        <span className={isLoggedIn ? 'text-green-600' : 'text-amber-600'}>
+                          {isLoggedIn ? 'Permanent Save' : 'Trial Mode'}
+                        </span>
                       </div>
                     )}
                   </div>
-                )}
+                </CardHeader>
+                <CardContent className="space-y-8 px-8 pb-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <Label htmlFor="targetUrl" className="text-base font-medium flex items-center gap-2">
+                        <Link2 className="h-4 w-4 text-blue-500" />
+                        Your Website URL
+                      </Label>
+                      <Input
+                        id="targetUrl"
+                        placeholder="https://yourwebsite.com"
+                        value={targetUrl}
+                        onChange={(e) => setTargetUrl(e.target.value)}
+                        className="text-base py-3 px-4 border-gray-200 focus:border-blue-400 focus:ring-blue-400"
+                      />
+                      <p className="text-sm text-gray-500">The URL you want to get a backlink to</p>
+                    </div>
+                    <div className="space-y-3">
+                      <Label htmlFor="primaryKeyword" className="text-base font-medium flex items-center gap-2">
+                        <Target className="h-4 w-4 text-purple-500" />
+                        Primary Keyword
+                      </Label>
+                      <Input
+                        id="primaryKeyword"
+                        placeholder="e.g., digital marketing, SEO tools"
+                        value={primaryKeyword}
+                        onChange={(e) => setPrimaryKeyword(e.target.value)}
+                        className="text-base py-3 px-4 border-gray-200 focus:border-purple-400 focus:ring-purple-400"
+                      />
+                      <p className="text-sm text-gray-500">The keyword you're ranking for (used as anchor text)</p>
+                    </div>
+                  </div>
 
-                {isCheckingAuth && (
-                  <p className="text-center text-sm text-gray-500">
-                    🔄 Checking authentication status...
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-100">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-blue-600" />
+                      What You'll Get:
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                        <span>1,200+ word SEO-optimized blog post</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
+                        <span>Permanent links</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                        <span>Published, viewable and indexed link within private networks</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
+                        <span>Dofollow backlinks</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={handleGenerate}
+                    disabled={isGenerating || !targetUrl || !primaryKeyword || isCheckingAuth}
+                    size="lg"
+                    className="w-full text-lg py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium shadow-lg relative overflow-hidden"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                        <span className="animate-pulse">
+                          {showProgress
+                            ? 'Processing Your Enterprise Backlink...'
+                            : currentUser
+                              ? 'Generating Professional Content...'
+                              : 'Creating Your Trial Content...'
+                          }
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-3 h-5 w-5" />
+                        <span>
+                          {currentUser
+                            ? 'Create Permanent Link'
+                            : 'Start Free Trial'
+                          }
+                        </span>
+                      </>
+                    )}
+                    {isGenerating && (
+                      <div className="absolute bottom-0 left-0 h-1 bg-white/30 animate-pulse w-full"></div>
+                    )}
+                  </Button>
+
+                  {/* Enterprise Status & Validation Display */}
+                  <div className="text-center space-y-2">
+                    {isGenerating && (
+                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
+                        ENTERPRISE GENERATION IN PROGRESS
+                      </div>
+                    )}
+                    {!isGenerating && targetUrl && primaryKeyword && (
+                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-medium">
+                        <CheckCircle2 className="w-4 h-4" />
+                        READY FOR DEPLOYMENT
+                      </div>
+                    )}
+                  </div>
+
+                  {authChecked && (
+                    <div className="text-center text-sm">
+                      {currentUser ? (
+                        <div className="space-y-2">
+                          <p className="text-green-600 font-medium">
+                            ✅ Logged in - Your backlinks will be saved permanently
+                          </p>
+                          <p className="text-gray-500">
+                            Welcome back! Your content will be saved to your dashboard.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <p className="text-amber-600 font-medium">
+                            ⚠️ Guest Mode - Trial backlink (24 hours)
+                          </p>
+                          <p className="text-gray-500">
+                            🆓 Completely free • No signup required • Register to save permanently
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {isCheckingAuth && (
+                    <p className="text-center text-sm text-gray-500">
+                      🔄 Checking authentication status...
+                    </p>
+                  )}
+
+                  {generationError && (
+                    <div className="mt-6">
+                      <BlogGenerationError
+                        error={generationError}
+                        targetUrl={targetUrl}
+                        keyword={primaryKeyword}
+                        onRetry={handleGenerate}
+                        onDismiss={() => setGenerationError(null)}
+                      />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             )
           ) : (
             // Success state
@@ -788,19 +941,14 @@ export function HomepageBlogGenerator() {
                     <span className="w-3 h-3 bg-white rounded-full animate-ping"></span>
                     🎯 YOUR BACKLINK IS NOW LIVE
                   </div>
-
                   <h3 className="text-5xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
                     Content Successfully Published!
                   </h3>
-
                   <p className="text-2xl text-gray-700 mb-8 max-w-4xl mx-auto leading-relaxed">
                     Professional article about <span className="font-bold text-blue-600">"{primaryKeyword}"</span> is now live with strategic backlinks to your website
                   </p>
-
-                  {/* 🚀 LIVE BLOG POST SHOWCASE - MAIN ATTRACTION */}
                   <div className="mb-12 max-w-5xl mx-auto">
                     <div className="bg-white rounded-2xl shadow-2xl border-4 border-green-200 overflow-hidden">
-                      {/* Browser URL Bar Mockup */}
                       <div className="bg-gray-100 px-6 py-4 border-b flex items-center gap-4">
                         <div className="flex gap-2">
                           <div className="w-3 h-3 bg-red-400 rounded-full"></div>
@@ -829,14 +977,11 @@ export function HomepageBlogGenerator() {
                           📋 Copy URL
                         </Button>
                       </div>
-
-                      {/* Live Content Preview */}
                       <div className="p-8 bg-white">
                         <div className="text-left space-y-6">
                           <h4 className="text-3xl font-bold text-gray-900 leading-tight">
                             {generatedPost?.title || `The Ultimate Guide to ${primaryKeyword}: Professional Insights & Strategies`}
                           </h4>
-
                           <div className="flex items-center gap-6 text-sm text-gray-600">
                             <div className="flex items-center gap-2">
                               <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
@@ -854,7 +999,6 @@ export function HomepageBlogGenerator() {
                               <span className="text-green-600 font-medium">Live & Indexed</span>
                             </div>
                           </div>
-
                           <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border border-blue-200">
                             <div className="flex items-start gap-4">
                               <div className="p-2 bg-blue-100 rounded-lg">
@@ -868,7 +1012,6 @@ export function HomepageBlogGenerator() {
                               </div>
                             </div>
                           </div>
-
                           <div className="prose prose-lg max-w-none text-gray-700">
                             <p className="leading-relaxed">
                               In today's competitive digital landscape, mastering <strong className="text-blue-600">{primaryKeyword}</strong> is essential for business success. This comprehensive guide provides actionable insights, proven strategies, and expert recommendations to help you achieve your goals...
@@ -879,8 +1022,6 @@ export function HomepageBlogGenerator() {
                           </div>
                         </div>
                       </div>
-
-                      {/* Call-to-Action Footer */}
                       <div className="bg-gradient-to-r from-green-50 to-blue-50 px-8 py-6 border-t">
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                           <Button
@@ -895,7 +1036,6 @@ export function HomepageBlogGenerator() {
                             <ExternalLink className="mr-3 h-6 w-6" />
                             View Your Live Article
                           </Button>
-
                           <Button
                             size="lg"
                             variant="outline"
@@ -913,7 +1053,6 @@ export function HomepageBlogGenerator() {
                             📤 Copy Share Link
                           </Button>
                         </div>
-
                         <div className="text-center mt-6">
                           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md border">
                             <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -925,10 +1064,7 @@ export function HomepageBlogGenerator() {
                       </div>
                     </div>
                   </div>
-
-                  {/* PRODUCTION STATUS & NEXT STEPS */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    {/* SEO Impact */}
                     <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-6 rounded-xl border border-green-200">
                       <div className="text-center">
                         <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -939,8 +1075,6 @@ export function HomepageBlogGenerator() {
                         <p className="text-sm text-green-700">High-quality backlink now boosting your rankings</p>
                       </div>
                     </div>
-
-                    {/* Content Quality */}
                     <div className="bg-gradient-to-br from-blue-50 to-cyan-100 p-6 rounded-xl border border-blue-200">
                       <div className="text-center">
                         <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -951,8 +1085,6 @@ export function HomepageBlogGenerator() {
                         <p className="text-sm text-blue-700">Professional words with natural backlinks</p>
                       </div>
                     </div>
-
-                    {/* Status */}
                     <div className={`bg-gradient-to-br p-6 rounded-xl border ${
                       currentUser
                         ? 'from-purple-50 to-indigo-100 border-purple-200'
@@ -980,8 +1112,6 @@ export function HomepageBlogGenerator() {
                       </div>
                     </div>
                   </div>
-
-                  {/* 🚀 PRODUCTION NEXT STEPS GUIDANCE */}
                   <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8 border border-blue-200 mb-8">
                     <div className="text-center mb-6">
                       <h4 className="text-2xl font-bold text-gray-900 mb-2">
@@ -991,7 +1121,6 @@ export function HomepageBlogGenerator() {
                         Here's what's happening behind the scenes and what to expect
                       </p>
                     </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="bg-white p-6 rounded-lg border border-green-200">
                         <h5 className="font-bold text-green-800 mb-4 flex items-center gap-2">
@@ -1005,7 +1134,6 @@ export function HomepageBlogGenerator() {
                           <li>• Organic search traffic will increase over 2-4 weeks</li>
                         </ul>
                       </div>
-
                       <div className="bg-white p-6 rounded-lg border border-blue-200">
                         <h5 className="font-bold text-blue-800 mb-4 flex items-center gap-2">
                           <TrendingUp className="h-5 w-5" />
@@ -1019,7 +1147,6 @@ export function HomepageBlogGenerator() {
                         </ul>
                       </div>
                     </div>
-
                     <div className="mt-6 text-center">
                       <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-full font-semibold shadow-lg">
                         <Star className="h-5 w-5 animate-pulse" />
@@ -1027,8 +1154,6 @@ export function HomepageBlogGenerator() {
                       </div>
                     </div>
                   </div>
-
-                {/* Authentication Status Notice */}
                   {currentUser ? (
                     <div className="max-w-3xl mx-auto mb-8 p-4 bg-green-50 border border-green-200 rounded-lg">
                       <div className="flex items-start gap-3">
@@ -1060,221 +1185,205 @@ export function HomepageBlogGenerator() {
                       </div>
                     </div>
                   )}
-                </div>
-
-                {/* COMPLETION SUMMARY CARDS */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                  {/* Content Quality Card */}
-                  <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-4 rounded-xl border border-green-200">
-                    <div className="flex items-center gap-2 mb-3">
-                      <FileText className="h-5 w-5 text-green-600" />
-                      <h4 className="font-semibold text-green-800">Content Quality</h4>
-                    </div>
-                    <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
-                        <span>Word Count:</span>
-                        <span className="font-medium">{generatedPost?.word_count || 1200}+ words</span>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-4 rounded-xl border border-green-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <FileText className="h-5 w-5 text-green-600" />
+                        <h4 className="font-semibold text-green-800">Content Quality</h4>
                       </div>
-                      <div className="flex justify-between">
-                        <span>SEO Score:</span>
-                        <span className="font-medium text-green-600">{generatedPost?.seo_score || 85}/100</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Reading Time:</span>
-                        <span className="font-medium">{Math.ceil((generatedPost?.word_count || 1200) / 200)} min</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Backlink Details Card */}
-                  <div className="bg-gradient-to-br from-blue-50 to-cyan-100 p-4 rounded-xl border border-blue-200">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Link2 className="h-5 w-5 text-blue-600" />
-                      <h4 className="font-semibold text-blue-800">Backlink Details</h4>
-                    </div>
-                    <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
-                        <span>Links Created:</span>
-                        <span className="font-medium">{generatedPost?.contextual_links?.length || 1}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Link Type:</span>
-                        <span className="font-medium">Dofollow</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Anchor Text:</span>
-                        <span className="font-medium text-blue-600">"{primaryKeyword}"</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Status Card */}
-                  <div className={`bg-gradient-to-br p-4 rounded-xl border ${
-                    currentUser
-                      ? 'from-green-50 to-emerald-100 border-green-200'
-                      : 'from-amber-50 to-orange-100 border-amber-200'
-                  }`}>
-                    <div className="flex items-center gap-2 mb-3">
-                      {currentUser ? (
-                        <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      ) : (
-                        <AlertCircle className="h-5 w-5 text-amber-600" />
-                      )}
-                      <h4 className={`font-semibold ${currentUser ? 'text-green-800' : 'text-amber-800'}`}>
-                        Status
-                      </h4>
-                    </div>
-                    <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
-                        <span>Type:</span>
-                        <span className="font-medium">{currentUser ? 'Permanent' : 'Trial'}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Duration:</span>
-                        <span className="font-medium">{currentUser ? 'Lifetime' : '24 hours'}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Indexing:</span>
-                        <span className="font-medium text-green-600">Live</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* TARGET URL CONFIRMATION */}
-                <div className="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Target className="h-5 w-5 text-gray-600" />
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">Backlink Target</p>
-                        <p className="text-sm text-gray-600">Your website is now receiving SEO value</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <a
-                        href={targetUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-700 font-medium text-sm break-all"
-                      >
-                        {targetUrl}
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                {!currentUser && generatedPost && (
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
-                    <ClaimTrialPostDialog
-                      trialPostSlug={generatedPost.slug}
-                      trialPostTitle={generatedPost.title}
-                      expiresAt={generatedPost.expires_at}
-                      targetUrl={targetUrl}
-                      onClaimed={() => {
-                        // Refresh the page to update UI
-                        window.location.reload();
-                      }}
-                    >
-                      <Button
-                        size="lg"
-                        className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white animate-pulse"
-                      >
-                        <Save className="mr-2 h-5 w-5" />
-                        Save Now - Deletes in 24hrs!
-                      </Button>
-                    </ClaimTrialPostDialog>
-                  </div>
-                )}
-
-                {/* FINALIZED NEXT STEPS */}
-                <div className="mt-8 space-y-6">
-                  {currentUser ? (
-                    <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-6 text-white text-center">
-                      <div className="flex items-center justify-center gap-2 mb-3">
-                        <CheckCircle2 className="h-6 w-6" />
-                        <h4 className="text-xl font-bold">🎯 Mission Complete!</h4>
-                      </div>
-                      <p className="text-green-100 mb-4 text-lg">
-                        Your professional backlink is now <strong>permanently active</strong> and boosting your SEO rankings!
-                      </p>
-                      <div className="space-y-4">
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                          <Button
-                            size="lg"
-                            className="bg-white text-green-600 hover:bg-green-50 font-bold px-8"
-                            onClick={() => window.location.href = '/dashboard'}
-                          >
-                            <BarChart3 className="mr-2 h-5 w-5" />
-                            📊 Track Your SEO Growth
-                          </Button>
-                          <Button
-                            size="lg"
-                            variant="outline"
-                            className="border-white text-white hover:bg-white hover:text-green-600 font-bold px-8"
-                            onClick={resetForm}
-                          >
-                            <Sparkles className="mr-2 h-5 w-5" />
-                            🚀 Create Another Backlink
-                          </Button>
+                      <div className="space-y-1 text-sm">
+                        <div className="flex justify-between">
+                          <span>Word Count:</span>
+                          <span className="font-medium">{generatedPost?.word_count || 1200}+ words</span>
                         </div>
-
-                        <div className="text-center">
-                          <p className="text-green-100 text-sm">
-                            💡 <strong>Pro Tip:</strong> Create 3-5 backlinks per month for maximum SEO impact
+                        <div className="flex justify-between">
+                          <span>SEO Score:</span>
+                          <span className="font-medium text-green-600">{generatedPost?.seo_score || 85}/100</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Reading Time:</span>
+                          <span className="font-medium">{Math.ceil((generatedPost?.word_count || 1200) / 200)} min</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-gradient-to-br from-blue-50 to-cyan-100 p-4 rounded-xl border border-blue-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Link2 className="h-5 w-5 text-blue-600" />
+                        <h4 className="font-semibold text-blue-800">Backlink Details</h4>
+                      </div>
+                      <div className="space-y-1 text-sm">
+                        <div className="flex justify-between">
+                          <span>Links Created:</span>
+                          <span className="font-medium">{generatedPost?.contextual_links?.length || 1}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Link Type:</span>
+                          <span className="font-medium">Dofollow</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Anchor Text:</span>
+                          <span className="font-medium text-blue-600">"{primaryKeyword}"</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className={`bg-gradient-to-br p-4 rounded-xl border ${
+                      currentUser
+                        ? 'from-green-50 to-emerald-100 border-green-200'
+                        : 'from-amber-50 to-orange-100 border-amber-200'
+                    }`}>
+                      <div className="flex items-center gap-2 mb-3">
+                        {currentUser ? (
+                          <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        ) : (
+                          <AlertCircle className="h-5 w-5 text-amber-600" />
+                        )}
+                        <h4 className={`font-semibold ${currentUser ? 'text-green-800' : 'text-amber-800'}`}>
+                          Status
+                        </h4>
+                      </div>
+                      <div className="space-y-1 text-sm">
+                        <div className="flex justify-between">
+                          <span>Type:</span>
+                          <span className="font-medium">{currentUser ? 'Permanent' : 'Trial'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Duration:</span>
+                          <span className="font-medium">{currentUser ? 'Lifetime' : '24 hours'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Indexing:</span>
+                          <span className="font-medium text-green-600">Live</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Target className="h-5 w-5 text-gray-600" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">Backlink Target</p>
+                          <p className="text-sm text-gray-600">Your website is now receiving SEO value</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <a
+                          href={targetUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-700 font-medium text-sm break-all"
+                        >
+                          {targetUrl}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  {!currentUser && generatedPost && (
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+                      <ClaimTrialPostDialog
+                        trialPostSlug={generatedPost.slug}
+                        trialPostTitle={generatedPost.title}
+                        expiresAt={generatedPost.expires_at}
+                        targetUrl={targetUrl}
+                        onClaimed={() => {
+                          window.location.reload();
+                        }}
+                      >
+                        <Button
+                          size="lg"
+                          className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white animate-pulse"
+                        >
+                          <Save className="mr-2 h-5 w-5" />
+                          Save Now - Deletes in 24hrs!
+                        </Button>
+                      </ClaimTrialPostDialog>
+                    </div>
+                  )}
+                  <div className="mt-8 space-y-6">
+                    {currentUser ? (
+                      <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-6 text-white text-center">
+                        <div className="flex items-center justify-center gap-2 mb-3">
+                          <CheckCircle2 className="h-6 w-6" />
+                          <h4 className="text-xl font-bold">🎯 Mission Complete!</h4>
+                        </div>
+                        <p className="text-green-100 mb-4 text-lg">
+                          Your professional backlink is now <strong>permanently active</strong> and boosting your SEO rankings!
+                        </p>
+                        <div className="space-y-4">
+                          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                            <Button
+                              size="lg"
+                              className="bg-white text-green-600 hover:bg-green-50 font-bold px-8"
+                              onClick={() => window.location.href = '/dashboard'}
+                            >
+                              <BarChart3 className="mr-2 h-5 w-5" />
+                              📊 Track Your SEO Growth
+                            </Button>
+                            <Button
+                              size="lg"
+                              variant="outline"
+                              className="border-white text-white hover:bg-white hover:text-green-600 font-bold px-8"
+                              onClick={resetForm}
+                            >
+                              <Sparkles className="mr-2 h-5 w-5" />
+                              🚀 Create Another Backlink
+                            </Button>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-green-100 text-sm">
+                              💡 <strong>Pro Tip:</strong> Create 3-5 backlinks per month for maximum SEO impact
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="bg-gradient-to-r from-red-500 to-orange-600 rounded-xl p-6 text-white text-center">
+                          <div className="flex items-center justify-center gap-2 mb-3">
+                            <AlertCircle className="h-6 w-6 animate-pulse" />
+                            <h4 className="text-xl font-bold">⚠️ Action Required!</h4>
+                          </div>
+                          <p className="text-red-100 mb-4 text-lg">
+                            Your backlink is <strong>live and working</strong> but will auto-delete in 24 hours!
+                          </p>
+                          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                            <Button
+                              size="lg"
+                              className="bg-white text-red-600 hover:bg-red-50 font-semibold animate-pulse"
+                              onClick={() => setShowSignupPopup(true)}
+                            >
+                              <Save className="mr-2 h-5 w-5" />
+                              Save Forever - Stop Timer!
+                            </Button>
+                            <Button
+                              size="lg"
+                              variant="outline"
+                              className="border-white text-white hover:bg-white hover:text-red-600 font-semibold"
+                              onClick={() => setShowLoginModal(true)}
+                            >
+                              <Shield className="mr-2 h-5 w-5" />
+                              Login / Register
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-200 text-center">
+                          <p className="text-blue-800 font-medium mb-2">
+                            🚀 Ready to scale your SEO?
+                          </p>
+                          <p className="text-sm text-blue-700">
+                            Create unlimited professional backlinks with advanced targeting and analytics!
                           </p>
                         </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="bg-gradient-to-r from-red-500 to-orange-600 rounded-xl p-6 text-white text-center">
-                        <div className="flex items-center justify-center gap-2 mb-3">
-                          <AlertCircle className="h-6 w-6 animate-pulse" />
-                          <h4 className="text-xl font-bold">⚠️ Action Required!</h4>
-                        </div>
-                        <p className="text-red-100 mb-4 text-lg">
-                          Your backlink is <strong>live and working</strong> but will auto-delete in 24 hours!
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                          <Button
-                            size="lg"
-                            className="bg-white text-red-600 hover:bg-red-50 font-semibold animate-pulse"
-                            onClick={() => setShowSignupPopup(true)}
-                          >
-                            <Save className="mr-2 h-5 w-5" />
-                            Save Forever - Stop Timer!
-                          </Button>
-                          <Button
-                            size="lg"
-                            variant="outline"
-                            className="border-white text-white hover:bg-white hover:text-red-600 font-semibold"
-                            onClick={() => setShowLoginModal(true)}
-                          >
-                            <Shield className="mr-2 h-5 w-5" />
-                            Login / Register
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-200 text-center">
-                        <p className="text-blue-800 font-medium mb-2">
-                          🚀 Ready to scale your SEO?
-                        </p>
-                        <p className="text-sm text-blue-700">
-                          Create unlimited professional backlinks with advanced targeting and analytics!
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )
           )}
         </div>
       </div>
 
-      {/* Signup Popup for Saving Posts */}
       <SavePostSignupPopup
         isOpen={showSignupPopup}
         onClose={() => setShowSignupPopup(false)}
@@ -1283,19 +1392,16 @@ export function HomepageBlogGenerator() {
         blogPostTitle={generatedPost?.title}
         onSignupSuccess={(user) => {
           setShowSignupPopup(false);
-          // Refresh the page to update auth state
           window.location.reload();
         }}
-        timeRemaining={86400} // 24 hours
+        timeRemaining={86400}
       />
 
-      {/* Login Modal */}
       <LoginModal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
         onAuthSuccess={(user) => {
           setShowLoginModal(false);
-          // Refresh the page to update all auth states
           window.location.reload();
         }}
         defaultTab="login"
