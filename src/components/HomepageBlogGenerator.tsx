@@ -784,36 +784,41 @@ export function HomepageBlogGenerator() {
                     </div>
                   ) : (
                     <>
-                      <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
-                        <p className="text-sm text-red-800 font-medium mb-2">
-                          ⏰ <strong>WARNING: This backlink will auto-delete in 24 hours!</strong>
+                      <div className="bg-gradient-to-r from-red-500 to-orange-600 rounded-xl p-6 text-white text-center">
+                        <div className="flex items-center justify-center gap-2 mb-3">
+                          <AlertCircle className="h-6 w-6 animate-pulse" />
+                          <h4 className="text-xl font-bold">⚠️ Action Required!</h4>
+                        </div>
+                        <p className="text-red-100 mb-4 text-lg">
+                          Your backlink is <strong>live and working</strong> but will auto-delete in 24 hours!
                         </p>
-                        <p className="text-sm text-red-700 mb-3">
-                          Your backlink is live and building SEO value right now, but it's on a 24-hour trial timer.
-                          Create an account now to keep it forever and stop the deletion countdown!
-                        </p>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
                           <Button
-                            size="sm"
-                            className="bg-red-600 hover:bg-red-700 text-white animate-pulse"
+                            size="lg"
+                            className="bg-white text-red-600 hover:bg-red-50 font-semibold animate-pulse"
                             onClick={() => setShowSignupPopup(true)}
                           >
-                            Stop Deletion Timer Now
+                            <Save className="mr-2 h-5 w-5" />
+                            Save Forever - Stop Timer!
                           </Button>
                           <Button
-                            size="sm"
+                            size="lg"
                             variant="outline"
-                            className="border-red-600 text-red-700 hover:bg-red-100"
+                            className="border-white text-white hover:bg-white hover:text-red-600 font-semibold"
                             onClick={() => setShowLoginModal(true)}
                           >
+                            <Shield className="mr-2 h-5 w-5" />
                             Login / Register
                           </Button>
                         </div>
                       </div>
 
-                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-sm text-blue-800 font-medium">
-                          🚀 Ready for more? Create unlimited backlinks with our premium packages and advanced targeting!
+                      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-200 text-center">
+                        <p className="text-blue-800 font-medium mb-2">
+                          🚀 Ready to scale your SEO?
+                        </p>
+                        <p className="text-sm text-blue-700">
+                          Create unlimited professional backlinks with advanced targeting and analytics!
                         </p>
                       </div>
                     </>
