@@ -293,9 +293,14 @@ export function HomepageBlogGenerator() {
                   console.log(`Progress: ${step} - ${Math.round(progress)}%`);
                 }}
                 onNaturalComplete={() => {
+                  console.log('🎉 Progress complete, showing results...');
                   setShowProgress(false);
                   setIsGenerating(false);
                   setForceComplete(false);
+                  // Only transition to completion if we have generated content
+                  if (generatedPost) {
+                    setIsCompleted(true);
+                  }
                 }}
               />
             ) : (
