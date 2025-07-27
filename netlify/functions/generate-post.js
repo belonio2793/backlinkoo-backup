@@ -35,6 +35,21 @@ exports.handler = async (event, context) => {
     };
   }
 
+  // Check if Supabase is configured
+  if (!supabase) {
+    return {
+      statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        success: false,
+        error: 'Server configuration error: Database not available. Please contact support.'
+      })
+    };
+  }
+
   try {
     const { destinationUrl, keyword, userId } = JSON.parse(event.body);
 
