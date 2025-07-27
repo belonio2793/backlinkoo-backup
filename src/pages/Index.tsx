@@ -312,59 +312,25 @@ const Index = () => {
       <section className="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
         <div className="container mx-auto">
           {/* Optional: Advanced Generator Toggle (Hidden by default) */}
-          <div className="max-w-sm mx-auto mb-4">
-            <details className="group">
-              <summary className="cursor-pointer text-center text-sm text-gray-500 hover:text-gray-700">
-                Advanced Options ▼
-              </summary>
-              <div className="mt-2 p-3 bg-white/50 rounded-lg border">
-                <div className="flex justify-center">
-                  <div className="flex bg-gray-100 rounded-lg p-1">
-                    <Button
-                      variant={!useProductionGenerator ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setUseProductionGenerator(false)}
-                      className="text-xs px-3 py-1"
-                    >
-                      <Zap className="h-3 w-3 mr-1" />
-                      Enhanced
-                    </Button>
-                    <Button
-                      variant={useProductionGenerator ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setUseProductionGenerator(true)}
-                      className="text-xs px-3 py-1"
-                    >
-                      <Shield className="h-3 w-3 mr-1" />
-                      Basic
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </details>
-          </div>
 
-          {/* Conditional Generator Rendering */}
-          {useProductionGenerator ? (
-            <ProductionBlogGenerator />
-          ) : (
-            <div className="max-w-6xl mx-auto">
-              <GlobalBlogGenerator
-                variant="homepage"
-                onSuccess={(blogPost) => {
-                  setUser(user); // Refresh state
-                  toast({
-                    title: "Success! 🎉",
-                    description: `Your backlink post "${blogPost.title}" is now live!`,
-                  });
-                  // Navigate to blog after a short delay
-                  setTimeout(() => {
-                    navigate(`/blog/${blogPost.slug}`);
-                  }, 2000);
-                }}
-              />
-            </div>
-          )}
+
+          {/* Generator Rendering */}
+          <div className="max-w-6xl mx-auto">
+            <GlobalBlogGenerator
+              variant="homepage"
+              onSuccess={(blogPost) => {
+                setUser(user); // Refresh state
+                toast({
+                  title: "Success! 🎉",
+                  description: `Your backlink post "${blogPost.title}" is now live!`,
+                });
+                // Navigate to blog after a short delay
+                setTimeout(() => {
+                  navigate(`/blog/${blogPost.slug}`);
+                }, 2000);
+              }}
+            />
+          </div>
         </div>
       </section>
 

@@ -388,7 +388,7 @@ export function GlobalBlogGenerator({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Globe className="h-6 w-6 text-blue-600" />
-              <CardTitle>Global Blog Generator</CardTitle>
+              <CardTitle>Create Your First Backlink For Free</CardTitle>
               <Badge variant="outline" className="bg-green-50 text-green-700">
                 Live & Dynamic
               </Badge>
@@ -502,7 +502,7 @@ export function GlobalBlogGenerator({
               ) : (
                 <>
                   <Zap className="h-4 w-4 mr-2" />
-                  Generate Global Backlink Post
+                  Create Permanent Link
                 </>
               )}
             </Button>
