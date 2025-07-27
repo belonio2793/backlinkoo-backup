@@ -316,7 +316,7 @@ export function HomepageBlogGenerator() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    {currentUser ? (
+                    {isLoggedIn ? (
                       <>
                         <CheckCircle2 className="h-5 w-5 text-green-600" />
                         <div>
@@ -659,7 +659,7 @@ export function HomepageBlogGenerator() {
                   {currentUser ? (
                     <div className="p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
                       <p className="text-sm text-green-800 font-medium mb-2">
-                        ✅ <strong>Success! Your backlink is permanently saved</strong>
+                        ��� <strong>Success! Your backlink is permanently saved</strong>
                       </p>
                       <p className="text-sm text-green-700 mb-3">
                         Your backlink is live and will continue providing SEO value indefinitely.
