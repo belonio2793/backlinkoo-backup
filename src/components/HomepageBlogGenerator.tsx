@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStatus } from '@/hooks/useAuth';
 import { aiContentGenerator } from '@/services/aiContentGenerator';
+import { errorLogger, ErrorSeverity, ErrorCategory } from '@/services/errorLoggingService';
 import { blogPublisher } from '@/services/blogPublisher';
 import { multiApiContentGenerator } from '@/services/multiApiContentGenerator';
 import { liveBlogPublisher } from '@/services/liveBlogPublisher';
