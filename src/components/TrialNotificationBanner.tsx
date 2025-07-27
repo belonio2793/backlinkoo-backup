@@ -95,7 +95,12 @@ export function TrialNotificationBanner() {
   };
 
   const handleSignUp = () => {
-    navigate('/auth-callback?action=signup&redirect=/dashboard');
+    navigate('/login');
+  };
+
+  const handleQuickUpgrade = () => {
+    // Open inline auth form with trial conversion focus
+    navigate('/?upgrade=trial');
   };
 
   const viewTrialPost = (slug: string) => {
