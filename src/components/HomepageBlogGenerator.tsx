@@ -968,7 +968,7 @@ export function HomepageBlogGenerator() {
                         <Button
                           size="sm"
                           onClick={() => {
-                            const urlToCopy = publishedUrl || `${window.location.origin}/blog/?slug=${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
+                            const urlToCopy = publishedUrl || `${window.location.origin}/blog/${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
                             navigator.clipboard.writeText(urlToCopy);
                             toast({ title: "✅ URL Copied!", description: "Blog post URL copied to clipboard" });
                           }}
