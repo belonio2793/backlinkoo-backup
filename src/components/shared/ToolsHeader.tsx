@@ -224,6 +224,18 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
           </div>
         )}
       </div>
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onAuthSuccess={(user) => {
+          setShowLoginModal(false);
+          // Refresh the page to update auth state
+          window.location.reload();
+        }}
+        defaultTab="login"
+      />
     </header>
   );
 };
