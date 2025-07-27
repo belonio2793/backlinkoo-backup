@@ -188,7 +188,7 @@ export function HomepageBlogGenerator() {
 
         // Check if response is ok first
         if (!response.ok) {
-          console.error('Non-OK response status:', response.status);
+          console.log('ℹ️ Netlify function response status:', response.status);
 
           // Handle 404 specifically with fallback
           if (response.status === 404) {
