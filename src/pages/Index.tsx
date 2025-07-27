@@ -32,6 +32,8 @@ import { InlineAuthForm } from "@/components/InlineAuthForm";
 import { TrialConversionBanner } from "@/components/TrialConversionBanner";
 import { QuickTrialUpgrade } from "@/components/QuickTrialUpgrade";
 import { TrialConversionService } from "@/services/trialConversionService";
+import { GuestSessionReminder } from "@/components/GuestSessionReminder";
+import { useGuestTracking } from "@/hooks/useGuestTracking";
 
 
 const Index = () => {
