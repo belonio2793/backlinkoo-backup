@@ -540,7 +540,7 @@ export function HomepageBlogGenerator() {
       );
 
       // Determine error type and user guidance
-      let errorTitle = "⚠️ Generation Process Failed";
+      let errorTitle = "���️ Generation Process Failed";
       let errorDescription = "An unexpected error occurred during blog generation.";
       let nextSteps = "Please try again or contact support if the issue persists.";
 
@@ -957,7 +957,7 @@ export function HomepageBlogGenerator() {
                         </div>
                         <div className="flex-1 bg-white rounded-lg px-4 py-2 font-mono text-lg text-gray-700 border-2 border-blue-200 flex items-center">
                           <Globe className="h-5 w-5 text-green-500 mr-2" />
-                          <span className="text-green-600 font-semibold">�� https://</span>
+                          <span className="text-green-600 font-semibold">🔒 https://</span>
                           <span className="font-bold">
                             {publishedUrl?.includes('://')
                               ? publishedUrl.split('://')[1]
@@ -1259,7 +1259,7 @@ export function HomepageBlogGenerator() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <Target className="h-5 w-5 text-gray-600" />
-                        <div>
+                        <div className="text-left">
                           <p className="text-sm font-medium text-gray-900">Backlink Target</p>
                           <p className="text-sm text-gray-600">Your website is now receiving SEO value</p>
                         </div>
