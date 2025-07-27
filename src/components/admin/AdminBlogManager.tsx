@@ -237,6 +237,10 @@ export function AdminBlogManager() {
             <p className="text-gray-600">Manage all generated blog posts and backlinks</p>
           </div>
           <div className="flex gap-2">
+            <Button onClick={verifySyncStatus} variant="outline" size="sm">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Verify Sync
+            </Button>
             <Button onClick={cleanupExpiredPosts} variant="outline" size="sm">
               <Trash2 className="mr-2 h-4 w-4" />
               Cleanup Expired
