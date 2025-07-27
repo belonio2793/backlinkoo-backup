@@ -306,7 +306,134 @@ Format the response as JSON with:
 
   } catch (error) {
     console.error('OpenAI generation failed:', error);
-    return generateFallbackContent(destinationUrl, keyword);
+    throw error; // Let the calling function handle the fallback
+  }
+}
+
+async function tryGrok(destinationUrl, keyword, apiKey) {
+  try {
+    const domain = new URL(destinationUrl).hostname.replace('www.', '');
+
+    const prompt = `Write a comprehensive, SEO-optimized blog post about "${keyword}" that naturally mentions and links to ${destinationUrl}.
+
+Requirements:
+- 1200+ words
+- Professional, informative tone
+- Include the keyword "${keyword}" naturally throughout
+- Add 2-3 contextual backlinks to ${destinationUrl} with relevant anchor text
+- Structure with clear headings (H2, H3)
+- Include actionable tips and insights
+- Make it valuable for readers interested in ${keyword}
+
+Format the response as JSON with:
+{
+  "title": "Engaging title with keyword",
+  "content": "Full HTML formatted blog post content",
+  "metaDescription": "SEO meta description under 160 chars",
+  "excerpt": "Brief excerpt for preview (150 chars)",
+  "contextualLinks": [{"anchor": "anchor text", "url": "${destinationUrl}"}],
+  "seoScore": 85
+}`;
+
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: prompt }],
+        model: 'grok-beta',
+        stream: false,
+        temperature: 0.7
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Grok API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error('No content generated from Grok');
+    }
+
+    // Try to parse JSON response
+    try {
+      const parsed = JSON.parse(content);
+      return {
+        title: parsed.title || `Complete Guide to ${keyword}`,
+        content: parsed.content || content,
+        metaDescription: parsed.metaDescription || `Learn everything about ${keyword} and boost your results with expert insights.`,
+        excerpt: parsed.excerpt || `Discover the ultimate guide to ${keyword} with actionable tips and strategies.`,
+        contextualLinks: parsed.contextualLinks || [{ anchor: keyword, url: destinationUrl }],
+        seoScore: parsed.seoScore || 85
+      };
+    } catch (parseError) {
+      return {
+        title: `The Ultimate Guide to ${keyword}`,
+        content: content,
+        metaDescription: `Learn everything about ${keyword} and boost your results with expert insights.`,
+        excerpt: `Discover the ultimate guide to ${keyword} with actionable tips and strategies.`,
+        contextualLinks: [{ anchor: keyword, url: destinationUrl }],
+        seoScore: 85
+      };
+    }
+
+  } catch (error) {
+    console.error('Grok generation failed:', error);
+    throw error;
+  }
+}
+
+async function tryCohere(destinationUrl, keyword, apiKey) {
+  try {
+    const domain = new URL(destinationUrl).hostname.replace('www.', '');
+
+    const prompt = `Write a comprehensive, SEO-optimized blog post about "${keyword}" that naturally mentions and links to ${destinationUrl}. Include the keyword naturally throughout, add contextual backlinks, and structure with clear headings. Make it valuable for readers interested in ${keyword}.`;
+
+    const response = await fetch('https://api.cohere.ai/v1/generate', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'command',
+        prompt: prompt,
+        max_tokens: 3000,
+        temperature: 0.7,
+        k: 0,
+        stop_sequences: [],
+        return_likelihoods: 'NONE'
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Cohere API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.generations?.[0]?.text;
+
+    if (!content) {
+      throw new Error('No content generated from Cohere');
+    }
+
+    return {
+      title: `The Ultimate Guide to ${keyword}`,
+      content: `<h1>The Ultimate Guide to ${keyword}</h1>\n\n${content.replace(/\n/g, '</p>\n<p>')}`,
+      metaDescription: `Learn everything about ${keyword} and boost your results with expert insights.`,
+      excerpt: `Discover the ultimate guide to ${keyword} with actionable tips and strategies.`,
+      contextualLinks: [{ anchor: keyword, url: destinationUrl }],
+      seoScore: 85
+    };
+
+  } catch (error) {
+    console.error('Cohere generation failed:', error);
+    throw error;
   }
 }
 
