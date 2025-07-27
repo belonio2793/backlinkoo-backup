@@ -36,7 +36,8 @@ try {
 // Global error handler for uncaught ethereum conflicts
 window.addEventListener('error', (event) => {
   if (event.error?.message?.includes('Cannot redefine property: ethereum') ||
-      event.error?.message?.includes('evmAsk')) {
+      event.error?.message?.includes('evmAsk') ||
+      event.error?.message?.includes('defineProperty')) {
     console.warn('Prevented ethereum conflict error:', event.error.message);
     event.preventDefault();
     return false;
@@ -45,11 +46,29 @@ window.addEventListener('error', (event) => {
 
 window.addEventListener('unhandledrejection', (event) => {
   if (event.reason?.message?.includes('Cannot redefine property: ethereum') ||
-      event.reason?.message?.includes('evmAsk')) {
+      event.reason?.message?.includes('evmAsk') ||
+      event.reason?.message?.includes('defineProperty')) {
     console.warn('Prevented ethereum promise rejection:', event.reason.message);
     event.preventDefault();
   }
 });
+
+// Additional protection against extension injection conflicts
+const originalDefineProperty = Object.defineProperty;
+Object.defineProperty = function(obj: any, prop: string | symbol, descriptor: PropertyDescriptor) {
+  if (obj === window && prop === 'ethereum') {
+    try {
+      const existing = Object.getOwnPropertyDescriptor(window, 'ethereum');
+      if (existing && !existing.configurable) {
+        console.warn('Prevented attempt to redefine non-configurable ethereum property');
+        return obj;
+      }
+    } catch (e) {
+      console.warn('Error checking ethereum property:', e);
+    }
+  }
+  return originalDefineProperty.call(this, obj, prop, descriptor);
+};
 
 createRoot(document.getElementById("root")!).render(<App />);
 
