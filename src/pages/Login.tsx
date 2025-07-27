@@ -232,7 +232,7 @@ const Login = () => {
 
 
       if (result.success) {
-        console.log('��� Signup successful');
+        console.log('Signup successful');
 
         if (result.requiresEmailVerification) {
           toast({

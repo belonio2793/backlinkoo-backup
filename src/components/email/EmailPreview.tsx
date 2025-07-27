@@ -217,7 +217,7 @@ export function EmailPreview() {
             <h4 className="font-medium mb-2 text-blue-800">Why Use Preview Links?</h4>
             <ul className="text-sm text-blue-700 space-y-1">
               <li>• <strong>No Domain Setup:</strong> Test emails without configuring DNS or domains</li>
-              <li>�� <strong>Instant Sharing:</strong> Share with clients or team members immediately</li>
+              <li>• <strong>Instant Sharing:</strong> Share with clients or team members immediately</li>
               <li>• <strong>Mobile Testing:</strong> View how emails look on different devices</li>
               <li>• <strong>Analytics:</strong> Track views and engagement on preview links</li>
             </ul>

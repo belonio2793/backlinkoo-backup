@@ -902,7 +902,7 @@ export function HomepageBlogGenerator() {
                             ⚠️ Guest Mode - Trial backlink (24 hours)
                           </p>
                           <p className="text-gray-500">
-                            🆓 Completely free • No signup required • Register to save permanently
+                            Completely free • No signup required • Register to save permanently
                           </p>
                         </div>
                       )}
@@ -911,7 +911,7 @@ export function HomepageBlogGenerator() {
 
                   {isCheckingAuth && (
                     <p className="text-center text-sm text-gray-500">
-                      🔄 Checking authentication status...
+                      Checking authentication status...
                     </p>
                   )}
 
