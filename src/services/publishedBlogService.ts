@@ -129,18 +129,21 @@ export class PublishedBlogService {
   }
 
   async getBlogPostBySlug(slug: string): Promise<PublishedBlogPost | null> {
-    // Try database first
+    // Normalize slug (remove potential domain variants)
+    const normalizedSlug = slug.replace(/_(current|backlinkoo)$/, '');
+
+    // Try database first with normalized slug
     try {
       const { data, error } = await supabase
         .from('published_blog_posts')
         .select('*')
-        .eq('slug', slug)
+        .eq('slug', normalizedSlug)
         .eq('status', 'published')
         .single();
 
       if (data && !error) {
         // Increment view count
-        await this.incrementViewCount(slug);
+        await this.incrementViewCount(normalizedSlug);
         return data as PublishedBlogPost;
       }
     } catch (dbError) {
