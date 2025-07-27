@@ -81,7 +81,7 @@ export function HomepageBlogGenerator() {
     }
 
     // Show different messages based on auth status
-    if (currentUser) {
+    if (isLoggedIn) {
       console.log('✅ Starting generation for authenticated user');
       toast({
         title: "Generating Your Backlink",
