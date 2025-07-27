@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStatus } from '@/hooks/useAuth';
 import { chatGPTBlogGenerator } from '@/services/chatGPTBlogGenerator';
+import { productionBlogGenerator } from '@/services/productionBlogGenerator';
 import { errorLogger, ErrorSeverity, ErrorCategory } from '@/services/errorLoggingService';
 import BlogGenerationError from './BlogGenerationError';
 import { supabase } from '@/integrations/supabase/client';
