@@ -526,9 +526,144 @@ function generateTags(keyword, targetUrl) {
   return [...keywordTags, domain, 'SEO', 'digital marketing'];
 }
 
+async function tryOpenAIWithChatGPTStructure(destinationUrl, keyword, anchorText, domain, apiKey) {
+  try {
+    const chatGPTPrompt = `Write a comprehensive, SEO-optimized blog post about "${keyword}" following this exact structure:
+
+Title: SEO-rich title with target keyword
+Meta Description: 155-160 characters with target keyword
+H1: Same as title
+H2: Introduction (include target keyword in first 100 words)
+H2: Main Content (3-4 paragraphs with natural backlink using "${anchorText}" linking to ${destinationUrl})
+H2: Why ${keyword} Matters (1-2 paragraphs about importance)
+H2: Conclusion (Summary + call to action linking to ${destinationUrl})
+
+Requirements:
+- Natural, human tone with short sentences
+- Include LSI keywords naturally
+- 1200+ words total
+- Strategic placement of 2-3 backlinks to ${destinationUrl}
+- Use "${anchorText}" as primary anchor text
+
+Format as JSON:
+{
+  "title": "SEO title with keyword",
+  "content": "Full HTML with proper H1/H2 structure",
+  "metaDescription": "155-160 char description",
+  "excerpt": "Brief preview",
+  "seoScore": 92
+}`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-4',
+        messages: [{ role: 'user', content: chatGPTPrompt }],
+        max_tokens: 3500,
+        temperature: 0.7
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error('No content generated from OpenAI');
+    }
+
+    // Try to parse JSON response
+    try {
+      const parsed = JSON.parse(content);
+      return {
+        title: parsed.title || `${keyword}: Complete Professional Guide for 2024`,
+        content: parsed.content || content,
+        metaDescription: parsed.metaDescription || `Master ${keyword} with this comprehensive guide. Expert strategies and proven techniques.`,
+        excerpt: parsed.excerpt || `Discover everything about ${keyword} in this ultimate guide.`,
+        contextualLinks: [
+          { anchor: anchorText, url: destinationUrl },
+          { anchor: domain, url: destinationUrl }
+        ],
+        seoScore: parsed.seoScore || 92
+      };
+    } catch (parseError) {
+      return {
+        title: `${keyword}: Complete Professional Guide for 2024`,
+        content: content,
+        metaDescription: `Master ${keyword} with this comprehensive guide. Expert strategies and proven techniques.`,
+        excerpt: `Discover everything about ${keyword} in this ultimate guide.`,
+        contextualLinks: [
+          { anchor: anchorText, url: destinationUrl }
+        ],
+        seoScore: 92
+      };
+    }
+
+  } catch (error) {
+    console.error('OpenAI ChatGPT structure generation failed:', error);
+    throw error;
+  }
+}
+
+function generateChatGPTFallbackContent(destinationUrl, keyword, anchorText, domain) {
+  const title = `${keyword}: Complete Professional Guide for 2024`;
+
+  const content = `
+<h1>${title}</h1>
+
+<h2>Introduction</h2>
+<p>In today's competitive digital landscape, mastering <strong>${keyword}</strong> has become essential for businesses and professionals seeking sustainable growth. This comprehensive guide provides you with expert insights, proven strategies, and actionable techniques to excel in ${keyword} and achieve measurable results.</p>
+
+<p>Whether you're new to ${keyword} or looking to enhance your existing knowledge, this guide covers everything you need to know to succeed in this dynamic field.</p>
+
+<h2>Main Content</h2>
+<p>Understanding the fundamentals of ${keyword} is crucial for developing an effective strategy. Industry leaders consistently emphasize the importance of a systematic approach, and organizations like <a href="${destinationUrl}" target="_blank" rel="noopener noreferrer">${anchorText}</a> have demonstrated how proper implementation can drive remarkable results.</p>
+
+<p>The key to success with ${keyword} lies in understanding both the technical aspects and strategic implications. Here are the most effective approaches:</p>
+
+<ul>
+<li><strong>Strategic Planning:</strong> Develop a comprehensive roadmap aligned with your business objectives</li>
+<li><strong>Best Practices:</strong> Implement industry-proven methodologies and standards</li>
+<li><strong>Continuous Optimization:</strong> Regularly review and improve your ${keyword} approach</li>
+<li><strong>Performance Monitoring:</strong> Track key metrics and adjust strategies accordingly</li>
+</ul>
+
+<p>Expert practitioners recommend focusing on quality over quantity when implementing ${keyword} strategies. Companies that prioritize excellence, such as those featured on <a href="${destinationUrl}" target="_blank" rel="noopener noreferrer">${domain}</a>, consistently outperform competitors by maintaining high standards and innovative approaches.</p>
+
+<h2>Why ${keyword} Matters</h2>
+<p>The significance of ${keyword} in today's business environment cannot be overstated. Organizations that effectively leverage ${keyword} strategies experience significant competitive advantages, including improved market positioning, enhanced customer satisfaction, and sustainable growth.</p>
+
+<p>Research indicates that businesses implementing comprehensive ${keyword} approaches see measurable improvements in key performance indicators within 2-3 months of implementation. The long-term benefits extend beyond immediate results, creating lasting value and competitive differentiation.</p>
+
+<h2>Conclusion</h2>
+<p>Success with ${keyword} requires dedication, strategic thinking, and continuous learning. By implementing the strategies outlined in this guide and leveraging professional resources, you'll be well-positioned to achieve your objectives and drive meaningful results.</p>
+
+<p>Ready to take your ${keyword} strategy to the next level? <a href="${destinationUrl}" target="_blank" rel="noopener noreferrer"><strong><u>Discover comprehensive ${keyword} solutions</u></strong></a> and unlock your organization's full potential with expert guidance and proven methodologies.</p>
+  `.trim();
+
+  return {
+    title,
+    content,
+    metaDescription: `Master ${keyword} with this comprehensive guide. Expert strategies, proven techniques, and actionable insights for success.`,
+    excerpt: `Discover everything you need to know about ${keyword} in this ultimate professional guide with actionable strategies.`,
+    contextualLinks: [
+      { anchor: anchorText, url: destinationUrl },
+      { anchor: domain, url: destinationUrl }
+    ],
+    seoScore: 92
+  };
+}
+
 function categorizeContent(keyword) {
   const lowerKeyword = keyword.toLowerCase();
-  
+
   if (lowerKeyword.includes('marketing') || lowerKeyword.includes('seo')) {
     return 'Digital Marketing';
   } else if (lowerKeyword.includes('tech') || lowerKeyword.includes('software')) {
