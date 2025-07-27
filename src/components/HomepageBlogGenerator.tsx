@@ -457,51 +457,10 @@ export function HomepageBlogGenerator() {
     }
   };
 
-  // Fallback content generation using proper blog service
-  const generateFallbackBlogPost = async (targetUrl: string, keyword: string) => {
-    console.log('🔄 Generating fallback blog post using blog service...');
-
-    try {
-      const blogService = new PublishedBlogService();
-
-      // Create blog post using the proper service
-      const blogPost = await blogService.createBlogPost({
-        keyword,
-        targetUrl,
-        userId: currentUser?.id,
-        isTrialPost: !currentUser,
-        wordCount: 1200
-      });
-
-      console.log('✅ Blog post created and saved:', {
-        slug: blogPost.slug,
-        id: blogPost.id,
-        publishedUrl: blogPost.published_url,
-        isTrialPost: blogPost.is_trial_post
-      });
-
-      return {
-        success: true,
-        slug: blogPost.slug,
-        blogPost: {
-          ...blogPost,
-          mode: 'fallback'
-        },
-        publishedUrl: blogPost.published_url,
-        message: 'Blog post generated and saved using fallback mode'
-      };
-    } catch (error) {
-      console.error('Fallback generation failed:', error);
-      return {
-        success: false,
-        error: `Fallback generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-      };
-    }
-  };
-
   const resetForm = () => {
     setTargetUrl('');
     setPrimaryKeyword('');
+    setAnchorText('');
     setIsCompleted(false);
     setGeneratedPost(null);
     setAllGeneratedPosts([]);
