@@ -153,6 +153,18 @@ export class EmailService {
           return this.sendViaNetlifyFunction(emailData, attempt + 1);
         }
 
+        await errorLogger.logEmailError(
+          `Email service returned failure: ${errorMessage}`,
+          {
+            to: emailData.to,
+            subject: emailData.subject,
+            attempt,
+            serviceError: result.error,
+            retryable: this.isRetryableServiceError(result.error)
+          },
+          'EmailService'
+        );
+
         throw new Error(errorMessage);
       }
     } catch (error: any) {
@@ -160,6 +172,19 @@ export class EmailService {
 
       // Log the failure with attempt number
       this.logFailure(emailData.to, error.message, attempt);
+
+      // Log to centralized error logging
+      await errorLogger.logEmailError(
+        `Email sending failed: ${error.message}`,
+        {
+          to: emailData.to,
+          subject: emailData.subject,
+          attempt,
+          errorType: error.name,
+          isTimeout: error.name === 'AbortError'
+        },
+        'EmailService'
+      );
 
       // Handle specific error types
       if (error.name === 'AbortError') {
@@ -277,7 +302,7 @@ ${defaultConfirmationUrl}
 
 Why verify your email?
 ✅ Secure your account
-�� Access all platform features
+✅ Access all platform features
 ✅ Receive important updates
 ✅ Start your first backlink campaign
 
