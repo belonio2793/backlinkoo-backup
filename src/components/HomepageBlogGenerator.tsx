@@ -214,7 +214,7 @@ export function HomepageBlogGenerator() {
       });
 
       // Store trial post info for notification system
-      if (!currentUser && blogPost.is_trial_post) {
+      if (isGuest && blogPost.is_trial_post) {
         const trialPostInfo = {
           id: blogPost.id,
           title: blogPost.title,
