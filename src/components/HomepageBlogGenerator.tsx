@@ -194,6 +194,8 @@ export function HomepageBlogGenerator() {
     setGeneratedPost(null);
     setAllGeneratedPosts([]);
     setPublishedUrl('');
+    setShowProgress(false);
+    setIsGenerating(false);
   };
 
   return (
@@ -373,7 +375,7 @@ export function HomepageBlogGenerator() {
                     <CheckCircle2 className="h-10 w-10 text-white" />
                   </div>
                   <h3 className="text-3xl font-bold mb-4 text-gray-900">
-                    🎉 Your Blog Post is Live!
+                    ���� Your Blog Post is Live!
                   </h3>
                   <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
                     We've created a professional article about "{primaryKeyword}" with natural backlinks pointing to your website. Your content is now live and ready to boost your SEO!
