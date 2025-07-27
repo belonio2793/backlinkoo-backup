@@ -499,12 +499,7 @@ export function HomepageBlogGenerator() {
         localStorage.setItem('trial_blog_posts', JSON.stringify(trialPosts));
       }
 
-      // Show signup popup for guest users after a delay
-      if (isGuest) {
-        setTimeout(() => {
-          setShowSignupPopup(true);
-        }, 3000); // Show popup after 3 seconds
-      }
+      // Popup can still be triggered manually via buttons
 
     } catch (error) {
       // ============= ENTERPRISE ERROR HANDLING =============
