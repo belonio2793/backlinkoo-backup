@@ -1020,7 +1020,7 @@ export function HomepageBlogGenerator() {
                           <Button
                             size="lg"
                             onClick={() => {
-                              const blogUrl = publishedUrl || `${window.location.origin}/blog/?slug=${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
+                              const blogUrl = publishedUrl || `${window.location.origin}/blog/${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
                               console.log('🔗 Opening blog post URL:', blogUrl);
                               window.open(blogUrl, '_blank');
                             }}
