@@ -754,6 +754,19 @@ export function HomepageBlogGenerator() {
         }}
         timeRemaining={86400} // 24 hours
       />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onAuthSuccess={(user) => {
+          setCurrentUser(user);
+          setShowLoginModal(false);
+          // Refresh the page to update all auth states
+          window.location.reload();
+        }}
+        defaultTab="login"
+      />
     </div>
   );
 }
