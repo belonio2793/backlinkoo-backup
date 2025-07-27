@@ -174,11 +174,29 @@ export function HomepageBlogGenerator() {
             }
           } catch {
             // If we can't read the response, use status-based message
-            errorMessage = response.status === 404
-              ? 'Blog generation service not found. Please contact support.'
-              : `Server error (${response.status}). Please try again.`;
+            if (response.status === 404) {
+              errorMessage = 'Blog generation service not found. Using fallback mode.';
+              console.warn('⚠️ Netlify function not found, using fallback content generation');
+
+              // Use fallback content generation
+              data = await generateFallbackBlogPost(targetUrl, primaryKeyword);
+
+              // Skip the error throwing and continue with fallback data
+              if (data.success) {
+                console.log('✅ Fallback content generated successfully');
+              } else {
+                throw new Error(data.error || 'Fallback generation failed');
+              }
+            } else {
+              errorMessage = `Server error (${response.status}). Please try again.`;
+              throw new Error(errorMessage);
+            }
           }
-          throw new Error(errorMessage);
+
+          // Only throw error if not handled by fallback
+          if (response.status !== 404) {
+            throw new Error(errorMessage);
+          }
         }
 
         // Parse JSON response
