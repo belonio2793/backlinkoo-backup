@@ -21,6 +21,7 @@ import { Blog } from "../pages/Blog";
 import { BlogPost } from "../pages/BlogPost";
 import EmailMarketing from "../pages/EmailMarketing";
 import { GuestDashboard } from "../components/GuestDashboard";
+import { DashboardRouter } from "../components/DashboardRouter";
 import BacklinkReport from "../pages/BacklinkReport";
 import ReportViewer from "../pages/ReportViewer";
 import NoHandsSEO from "../pages/NoHandsSEO";
