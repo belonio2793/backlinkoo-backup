@@ -45,6 +45,8 @@ export function HomepageBlogGenerator() {
   const { toast } = useToast();
 
   const handleGenerate = async () => {
+    console.log('🚀 handleGenerate called with:', { targetUrl, primaryKeyword });
+
     if (!targetUrl || !primaryKeyword) {
       toast({
         title: "Missing Information",
@@ -63,6 +65,7 @@ export function HomepageBlogGenerator() {
       return;
     }
 
+    console.log('✅ Starting generation with valid inputs');
     setIsGenerating(true);
     setIsCompleted(false);
   };
