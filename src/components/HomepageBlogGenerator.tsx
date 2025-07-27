@@ -43,7 +43,6 @@ export function HomepageBlogGenerator() {
   const [showSignupPopup, setShowSignupPopup] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const handleGenerate = async () => {
     if (!targetUrl || !primaryKeyword) {
