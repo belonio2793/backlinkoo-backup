@@ -848,7 +848,7 @@ export function HomepageBlogGenerator() {
                             <span>Published {new Date().toLocaleDateString()}</span>
                             <span>•</span>
                             <span>{generatedPost?.word_count || 1200}+ words</span>
-                            <span>•</span>
+                            <span>���</span>
                             <div className="flex items-center gap-1">
                               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                               <span className="text-green-600 font-medium">Live & Indexed</span>
@@ -900,10 +900,13 @@ export function HomepageBlogGenerator() {
                             size="lg"
                             variant="outline"
                             onClick={() => {
-                              const url = publishedUrl || `https://backlinkoo.com/blog/${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`;
-                              const text = `🎯 Just published a professional article about ${primaryKeyword}! Check out my new backlink: ${url}`;
-                              navigator.clipboard.writeText(text);
-                              toast({ title: "✅ Share Text Copied!", description: "Perfect for social media sharing!" });
+                              const blogUrl = publishedUrl || `${window.location.origin}/blog/?slug=${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
+                              const shareText = `🎯 Just published a professional article about ${primaryKeyword}! Check out my new backlink: ${blogUrl}`;
+                              navigator.clipboard.writeText(shareText);
+                              toast({
+                                title: "✅ Share Text Copied!",
+                                description: "Perfect for social media sharing!"
+                              });
                             }}
                             className="border-2 border-blue-600 text-blue-700 hover:bg-blue-50 font-semibold px-8 py-4 text-lg"
                           >
