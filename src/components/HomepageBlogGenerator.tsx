@@ -166,7 +166,7 @@ export function HomepageBlogGenerator() {
       const { slug, blogPost, publishedUrl } = data;
 
       // Create campaign entry for registered users
-      if (currentUser) {
+      if (isLoggedIn) {
         try {
           const { data: campaignData, error: campaignError } = await supabase
             .from('campaigns')
