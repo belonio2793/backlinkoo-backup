@@ -257,18 +257,40 @@ const Index = () => {
                 </Button>
               ) : (
                 <>
-                  <Button variant="ghost" onClick={() => {
-                    console.log('Sign In button clicked');
-                    setShowLoginModal(true);
-                  }} className="font-medium">
-                    Sign In
-                  </Button>
-                  <Button onClick={() => {
-                    console.log('Get Started button clicked');
-                    navigate("/login");
-                  }} className="font-medium">
-                    Get Started
-                  </Button>
+                  {/* Show trial upgrade button if user has trial posts */}
+                  {TrialConversionService.hasConvertibleTrialPosts() ? (
+                    <>
+                      <QuickTrialUpgrade
+                        onSuccess={(user) => {
+                          setUser(user);
+                          navigate('/dashboard');
+                        }}
+                        variant="default"
+                        size="sm"
+                        className="bg-amber-600 hover:bg-amber-700 text-white"
+                      />
+                      <Button variant="ghost" onClick={() => {
+                        setShowLoginModal(true);
+                      }} className="font-medium">
+                        Sign In
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="ghost" onClick={() => {
+                        console.log('Sign In button clicked');
+                        setShowLoginModal(true);
+                      }} className="font-medium">
+                        Sign In
+                      </Button>
+                      <Button onClick={() => {
+                        console.log('Get Started button clicked');
+                        navigate("/login");
+                      }} className="font-medium">
+                        Get Started
+                      </Button>
+                    </>
+                  )}
                 </>
               )}
             </div>
