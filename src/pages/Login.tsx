@@ -9,7 +9,7 @@ import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { AuthService, setupAuthStateListener } from "@/services/authService";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft, Shield, CheckCircle } from "lucide-react";
 
 const Login = () => {
@@ -679,7 +679,7 @@ const Login = () => {
                     <Input
                       id="confirm-password"
                       type="password"
-                      placeholder="••••••••"
+                      placeholder="••••••���•"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
