@@ -149,21 +149,30 @@ export function HomepageBlogGenerator() {
     });
 
     try {
-      console.log('🔄 ChatGPT BLOG GENERATION PIPELINE STARTED');
+      console.log('🔄 BLOG GENERATION PIPELINE STARTED');
 
-      // Use ChatGPT Blog Generation Service
+      // Use Self-Contained Production Generator as primary method
       const blogInput = {
         destinationURL: targetUrl,
         targetKeyword: primaryKeyword,
         anchorText: anchorText || primaryKeyword // Default to keyword if no anchor text
       };
 
-      console.log('📋 ChatGPT Generation Input:', blogInput);
+      console.log('📋 Generation Input:', blogInput);
 
-      const result = await chatGPTBlogGenerator.generateAndPublishBlog(
+      let result = await productionBlogGenerator.generateAndPublishBlog(
         blogInput,
         currentUser?.id
       );
+
+      // Fallback to ChatGPT generator if needed (though this should be reliable)
+      if (!result.success) {
+        console.log('⚠️ Self-contained generator failed, trying ChatGPT fallback...');
+        result = await chatGPTBlogGenerator.generateAndPublishBlog(
+          blogInput,
+          currentUser?.id
+        );
+      }
 
       if (!result.success) {
         throw new Error(result.error || 'Blog generation failed');
