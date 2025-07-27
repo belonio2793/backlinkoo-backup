@@ -16,8 +16,8 @@ Your deployment is failing because Netlify functions require environment variabl
 SUPABASE_URL=https://dfhanacsmsvvkpunurnp.supabase.co
 SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc3MDQxMjIsImV4cCI6MjA1MzI4MDEyMn0.Fj4zzWzQIxZ-2Ps-FHk6KeqPjSMwP1gJwqGj_d5K5GM
 
-# REQUIRED - Site URL (URL is reserved in Netlify, use URI)
-URI=https://backlinkoo.com
+# Site URL is automatically provided by Netlify (no manual configuration needed)
+# Netlify provides: URL, DEPLOY_URL automatically
 ```
 
 ### 2. **Optional but Recommended**
