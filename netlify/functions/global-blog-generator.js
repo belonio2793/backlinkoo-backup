@@ -251,13 +251,23 @@ exports.handler = async (event, context) => {
     }
 
     // Generate blog post
+    const content = generateContextualContent(request);
+    const seoMeta = generateSEOMetadata(request);
     const blogPost = {
       id: crypto.randomUUID(),
       slug: `${primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
-      content: generateContextualContent(request),
+      content: content,
+      excerpt: `Comprehensive guide to ${primaryKeyword} with expert insights and practical strategies.`,
       target_url: targetUrl,
       anchor_text: anchorText || primaryKeyword,
       published_url: `https://backlinkoo.com/blog/${primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
+      published_at: new Date().toISOString(),
+      author_name: 'Backlinkoo AI',
+      category: 'SEO Guide',
+      view_count: 0,
+      word_count: Math.floor(content.length / 6),
+      tags: seoMeta.keywords,
+      contextual_links: [],
       is_trial_post: true,
       expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       created_at: new Date().toISOString(),
@@ -265,7 +275,7 @@ exports.handler = async (event, context) => {
       user_ip: clientIP,
       user_location: userLocation,
       session_id: sessionId,
-      ...generateSEOMetadata(request)
+      ...seoMeta
     };
 
     // Store in database
