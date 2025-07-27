@@ -9,6 +9,7 @@ import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager"
 
 import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
 import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
+import { TrialPostCleanupManager } from "@/components/admin/TrialPostCleanupManager";
 import { AuthEmailTest } from "@/components/AuthEmailTest";
 
 import { EmailTest } from "@/components/EmailTest";
