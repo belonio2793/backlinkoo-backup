@@ -653,7 +653,7 @@ export function HomepageBlogGenerator() {
                       <span>
                         {currentUser
                           ? '�� Create Permanent Link'
-                          : '🎯 Start Free Trial Backlink'
+                          : '🎯 Start Free Trial'
                         }
                       </span>
                     </>
@@ -699,7 +699,7 @@ export function HomepageBlogGenerator() {
                           ⚠️ Guest Mode - Trial backlink (24 hours)
                         </p>
                         <p className="text-gray-500">
-                          ✨ Completely free • No signup required • Register to save permanently
+                          ��� Completely free • No signup required • Register to save permanently
                         </p>
                       </div>
                     )}
