@@ -51,7 +51,13 @@ export class PublishedBlogService {
       
       // Create unique slug
       const uniqueSlug = `${generatedPost.slug}-${Date.now()}`;
-      const publishedUrl = `${window.location.origin}/blog/${uniqueSlug}`;
+
+      // Create URLs for both domains to ensure accessibility
+      const currentDomainUrl = `${window.location.origin}/blog/${uniqueSlug}`;
+      const backlinkooUrl = `https://backlinkoo.com/blog/${uniqueSlug}`;
+
+      // Use backlinkoo.com as primary published URL, current domain as fallback
+      const publishedUrl = backlinkooUrl;
       
       // Create blog post data
       const blogPost: PublishedBlogPost = {
