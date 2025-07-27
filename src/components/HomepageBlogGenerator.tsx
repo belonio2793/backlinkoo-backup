@@ -652,8 +652,8 @@ export function HomepageBlogGenerator() {
                   </div>
                 )}
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  {!currentUser && generatedPost && (
+                {!currentUser && generatedPost && (
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
                     <ClaimTrialPostDialog
                       trialPostSlug={generatedPost.slug}
                       trialPostTitle={generatedPost.title}
@@ -673,43 +673,74 @@ export function HomepageBlogGenerator() {
                         Save Now - Deletes in 24hrs!
                       </Button>
                     </ClaimTrialPostDialog>
-                  )}
-                  <Button
-                    onClick={resetForm}
-                    variant="outline"
-                    size="lg"
-                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                  >
-                    Create More Backlinks
-                  </Button>
-                </div>
-
-                {!currentUser && (
-                  <div className="mt-8 space-y-4">
-                    <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
-                      <p className="text-sm text-red-800 font-medium mb-2">
-                        ⏰ <strong>WARNING: This backlink will auto-delete in 24 hours!</strong>
-                      </p>
-                      <p className="text-sm text-red-700 mb-3">
-                        Your backlink is live and building SEO value right now, but it's on a 24-hour trial timer.
-                        Create an account now to keep it forever and stop the deletion countdown!
-                      </p>
-                      <Button
-                        size="sm"
-                        className="bg-red-600 hover:bg-red-700 text-white animate-pulse"
-                        onClick={() => setShowSignupPopup(true)}
-                      >
-                        Stop Deletion Timer Now
-                      </Button>
-                    </div>
-
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                      <p className="text-sm text-blue-800 font-medium">
-                        🚀 Ready for more? Create unlimited backlinks with our premium packages and advanced targeting!
-                      </p>
-                    </div>
                   </div>
                 )}
+
+                <div className="mt-8 space-y-4">
+                  {currentUser ? (
+                    <div className="p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+                      <p className="text-sm text-green-800 font-medium mb-2">
+                        ✅ <strong>Success! Your backlink is permanently saved</strong>
+                      </p>
+                      <p className="text-sm text-green-700 mb-3">
+                        Your backlink is live and will continue providing SEO value indefinitely.
+                        View all your backlinks and create more from your dashboard.
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => window.location.href = '/dashboard'}
+                        >
+                          View Dashboard
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-green-600 text-green-700 hover:bg-green-100"
+                          onClick={resetForm}
+                        >
+                          Create Another
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
+                        <p className="text-sm text-red-800 font-medium mb-2">
+                          ⏰ <strong>WARNING: This backlink will auto-delete in 24 hours!</strong>
+                        </p>
+                        <p className="text-sm text-red-700 mb-3">
+                          Your backlink is live and building SEO value right now, but it's on a 24-hour trial timer.
+                          Create an account now to keep it forever and stop the deletion countdown!
+                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            className="bg-red-600 hover:bg-red-700 text-white animate-pulse"
+                            onClick={() => setShowSignupPopup(true)}
+                          >
+                            Stop Deletion Timer Now
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-red-600 text-red-700 hover:bg-red-100"
+                            onClick={() => window.location.href = '/login'}
+                          >
+                            Login / Register
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <p className="text-sm text-blue-800 font-medium">
+                          🚀 Ready for more? Create unlimited backlinks with our premium packages and advanced targeting!
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )}
