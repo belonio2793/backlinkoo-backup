@@ -886,13 +886,14 @@ export function HomepageBlogGenerator() {
                           <Button
                             size="lg"
                             onClick={() => {
-                              const url = publishedUrl || `https://backlinkoo.com/blog/${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`;
-                              window.open(url, '_blank');
+                              const blogUrl = publishedUrl || `${window.location.origin}/blog/?slug=${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
+                              console.log('🔗 Opening blog post URL:', blogUrl);
+                              window.open(blogUrl, '_blank');
                             }}
                             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold px-10 py-4 text-xl shadow-xl transform hover:scale-105 transition-all"
                           >
                             <ExternalLink className="mr-3 h-6 w-6" />
-                            🚀 View Your Live Article
+                            View Your Live Article
                           </Button>
 
                           <Button
