@@ -289,13 +289,25 @@ export function HomepageBlogGenerator() {
 
       // Verify the blog post is accessible
       if (blogPost.slug) {
+        console.log('📋 Blog post details:', {
+          slug: blogPost.slug,
+          id: blogPost.id,
+          title: blogPost.title,
+          status: blogPost.status,
+          isTrialPost: blogPost.is_trial_post,
+          publishedUrl: publishedUrl,
+          accessUrl: `/blog/${blogPost.slug}`
+        });
+
         setTimeout(async () => {
           console.log('🔍 Verifying blog post accessibility...');
           const verification = await testBlogPostAccess(blogPost.slug);
           if (verification.success) {
             console.log('✅ Blog post verified as accessible at:', `/blog/${blogPost.slug}`);
+            console.log('🌐 Full URL:', `${window.location.origin}/blog/${blogPost.slug}`);
           } else {
             console.warn('⚠️ Blog post verification failed:', verification.error);
+            console.log('💡 Try refreshing the page or checking the blog listing at /blog');
           }
         }, 1000);
       }
