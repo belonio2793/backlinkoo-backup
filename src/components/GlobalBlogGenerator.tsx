@@ -502,7 +502,7 @@ export function GlobalBlogGenerator({
               ) : (
                 <>
                   <Zap className="h-4 w-4 mr-2" />
-                  Generate Global Backlink Post
+                  Create Permanent Link
                 </>
               )}
             </Button>
