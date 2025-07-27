@@ -103,8 +103,8 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Generate AI content using multiple services
-    const aiContent = await generateAIContent(destinationUrl, keyword);
+    // Generate AI content using ChatGPT structure
+    const aiContent = await generateChatGPTBlogContent(destinationUrl, keyword, anchorText);
     
     // Create unique slug
     const slug = `${keyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${crypto.randomBytes(4).toString('hex')}`;
