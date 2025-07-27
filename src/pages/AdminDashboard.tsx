@@ -201,6 +201,10 @@ const AdminDashboard = () => {
             <ContentFilterManager />
           </TabsContent>
 
+          <TabsContent value="moderation-queue">
+            <ContentModerationQueue />
+          </TabsContent>
+
           <TabsContent value="trial-cleanup">
             <TrialPostCleanupManager />
           </TabsContent>
