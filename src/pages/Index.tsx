@@ -242,7 +242,7 @@ const Index = () => {
                 <>
                   <Button variant="ghost" onClick={() => {
                     console.log('Sign In button clicked');
-                    navigate("/login");
+                    setShowLoginModal(true);
                   }} className="font-medium">
                     Sign In
                   </Button>
