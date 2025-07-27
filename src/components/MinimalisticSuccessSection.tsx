@@ -17,7 +17,8 @@ export function MinimalisticSuccessSection({
   generatedPost,
   primaryKeyword,
   targetUrl,
-  currentUser
+  currentUser,
+  onCreateAnother
 }: MinimalisticSuccessSectionProps) {
   const { toast } = useToast();
 
