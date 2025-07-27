@@ -27,6 +27,7 @@ export function BlogPost() {
   const [blogPost, setBlogPost] = useState<PublishedBlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
     const loadBlogPost = async () => {
