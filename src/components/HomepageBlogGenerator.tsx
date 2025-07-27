@@ -468,15 +468,26 @@ export function HomepageBlogGenerator() {
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  {!currentUser && (
-                    <Button
-                      onClick={() => setShowSignupPopup(true)}
-                      size="lg"
-                      className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white animate-pulse"
+                  {!currentUser && generatedPost && (
+                    <ClaimTrialPostDialog
+                      trialPostSlug={generatedPost.slug}
+                      trialPostTitle={generatedPost.title}
+                      expiresAt={generatedPost.expires_at}
+                      targetUrl={targetUrl}
+                      onClaimed={() => {
+                        setCurrentUser(true); // Mark as claimed
+                        // Refresh the page to update UI
+                        window.location.reload();
+                      }}
                     >
-                      <Save className="mr-2 h-5 w-5" />
-                      Save Now - Deletes in 24hrs!
-                    </Button>
+                      <Button
+                        size="lg"
+                        className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white animate-pulse"
+                      >
+                        <Save className="mr-2 h-5 w-5" />
+                        Save Now - Deletes in 24hrs!
+                      </Button>
+                    </ClaimTrialPostDialog>
                   )}
                   <Button
                     onClick={resetForm}
