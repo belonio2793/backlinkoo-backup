@@ -268,6 +268,31 @@ export function HomepageBlogGenerator() {
           wordCount: data.blogPost.word_count,
           seoScore: data.blogPost.seo_score
         });
+
+        // CRITICAL: Save the mock blog post to the service so it can be accessed later
+        try {
+          console.log('💾 Saving mock blog post to publishedBlogService...');
+          publishedBlogService.inMemoryPosts.set(blogSlug, data.blogPost);
+          console.log('✅ Mock blog post saved successfully to in-memory storage');
+
+          // Also save to localStorage for trial posts
+          if (!isLoggedIn) {
+            const existingTrialPosts = JSON.parse(localStorage.getItem('trial_blog_posts') || '[]');
+            const trialPost = {
+              id: data.blogPost.id,
+              title: data.blogPost.title,
+              slug: data.blogPost.slug,
+              expires_at: data.blogPost.expires_at,
+              target_url: data.blogPost.target_url,
+              created_at: data.blogPost.created_at
+            };
+            existingTrialPosts.push(trialPost);
+            localStorage.setItem('trial_blog_posts', JSON.stringify(existingTrialPosts));
+            console.log('✅ Trial post saved to localStorage for notifications');
+          }
+        } catch (saveError) {
+          console.error('❌ Failed to save mock blog post:', saveError);
+        }
       } else {
         // Production mode - call actual Netlify function
         const response = await fetch('/.netlify/functions/generate-post', {
@@ -540,7 +565,7 @@ export function HomepageBlogGenerator() {
       );
 
       // Determine error type and user guidance
-      let errorTitle = "���️ Generation Process Failed";
+      let errorTitle = "�����️ Generation Process Failed";
       let errorDescription = "An unexpected error occurred during blog generation.";
       let nextSteps = "Please try again or contact support if the issue persists.";
 
