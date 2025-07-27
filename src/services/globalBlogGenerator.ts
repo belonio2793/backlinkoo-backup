@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { contentFilterService } from './contentFilterService';
 
 export interface GlobalBlogRequest {
   targetUrl: string;
