@@ -195,6 +195,10 @@ const AdminDashboard = () => {
             <AdminBlogManager />
           </TabsContent>
 
+          <TabsContent value="content-filter">
+            <ContentFilterManager />
+          </TabsContent>
+
           <TabsContent value="trial-cleanup">
             <TrialPostCleanupManager />
           </TabsContent>
