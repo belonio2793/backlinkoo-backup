@@ -92,18 +92,35 @@ export function BlogPost() {
         if (post) {
           setBlogPost(post);
         } else {
-          // Provide more helpful error message with debug info
-          const errorMessage = allKeys.length > 0
-            ? `Blog post "${slug}" not found. Available posts: ${allKeys.map(k => k.replace('blog_post_', '')).join(', ')}`
-            : 'Blog post not found or has expired. No blog posts found in storage.';
+          // Show debug information if in development
+          if (allKeys.length > 0) {
+            console.error('❌ Blog post not found:', {
+              searchedSlug: slug,
+              searchedKey: blogStorageKey,
+              availableKeys: allKeys
+            });
 
-          console.error('❌ Blog post not found:', {
-            searchedSlug: slug,
-            searchedKey: blogStorageKey,
-            availableKeys: allKeys
-          });
+            // Try to find a similar slug
+            const similarKey = allKeys.find(key => key.includes(slug.split('-')[0]));
+            if (similarKey) {
+              console.log('🔍 Found similar key, trying to load:', similarKey);
+              const similarData = localStorage.getItem(similarKey);
+              if (similarData) {
+                try {
+                  const similarPost = JSON.parse(similarData);
+                  console.log('📄 Similar post found:', similarPost.title);
+                  setBlogPost(similarPost);
+                  return;
+                } catch (e) {
+                  console.warn('Failed to parse similar post');
+                }
+              }
+            }
 
-          setError(errorMessage);
+            setError(`Blog post "${slug}" not found. Available posts: ${allKeys.map(k => k.replace('blog_post_', '')).join(', ')}`);
+          } else {
+            setError('Blog post not found or has expired. No blog posts found in storage.');
+          }
         }
       } catch (err) {
         console.error('Failed to load blog post:', err);
