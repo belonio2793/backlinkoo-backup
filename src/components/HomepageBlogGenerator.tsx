@@ -30,7 +30,8 @@ import {
   Target,
   TrendingUp,
   Save,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from 'lucide-react';
 import { RotatingText } from './RotatingText';
 import { LoginModal } from './LoginModal';
