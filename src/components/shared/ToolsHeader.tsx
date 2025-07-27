@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   Infinity,
   Target,
   Sparkles,
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { User } from '@supabase/supabase-js';
+import { LoginModal } from "@/components/LoginModal";
 
 interface ToolsHeaderProps {
   user: User | null;
