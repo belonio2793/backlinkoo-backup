@@ -1121,24 +1121,32 @@ export function HomepageBlogGenerator() {
                       <p className="text-green-100 mb-4 text-lg">
                         Your professional backlink is now <strong>permanently active</strong> and boosting your SEO rankings!
                       </p>
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <Button
-                          size="lg"
-                          className="bg-white text-green-600 hover:bg-green-50 font-semibold"
-                          onClick={() => window.location.href = '/dashboard'}
-                        >
-                          <BarChart3 className="mr-2 h-5 w-5" />
-                          View Analytics Dashboard
-                        </Button>
-                        <Button
-                          size="lg"
-                          variant="outline"
-                          className="border-white text-white hover:bg-white hover:text-green-600 font-semibold"
-                          onClick={resetForm}
-                        >
-                          <Sparkles className="mr-2 h-5 w-5" />
-                          Create Another Backlink
-                        </Button>
+                      <div className="space-y-4">
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                          <Button
+                            size="lg"
+                            className="bg-white text-green-600 hover:bg-green-50 font-bold px-8"
+                            onClick={() => window.location.href = '/dashboard'}
+                          >
+                            <BarChart3 className="mr-2 h-5 w-5" />
+                            📊 Track Your SEO Growth
+                          </Button>
+                          <Button
+                            size="lg"
+                            variant="outline"
+                            className="border-white text-white hover:bg-white hover:text-green-600 font-bold px-8"
+                            onClick={resetForm}
+                          >
+                            <Sparkles className="mr-2 h-5 w-5" />
+                            🚀 Create Another Backlink
+                          </Button>
+                        </div>
+
+                        <div className="text-center">
+                          <p className="text-green-100 text-sm">
+                            💡 <strong>Pro Tip:</strong> Create 3-5 backlinks per month for maximum SEO impact
+                          </p>
+                        </div>
                       </div>
                     </div>
                   ) : (
