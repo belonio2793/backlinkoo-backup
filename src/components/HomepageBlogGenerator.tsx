@@ -1134,9 +1134,8 @@ export function HomepageBlogGenerator() {
                         </ul>
                       </div>
                       <div className="bg-white p-6 rounded-lg border border-blue-200">
-                        <h5 className="font-bold text-blue-800 mb-4 flex items-center gap-2">
-                          <TrendingUp className="h-5 w-5" />
-                          📈 Expected Timeline
+                        <h5 className="font-bold text-blue-800 mb-4 text-left">
+                          Expected Timeline
                         </h5>
                         <ul className="space-y-2 text-sm text-gray-700">
                           <li>• <strong>Week 1:</strong> Google discovers and crawls your backlink</li>
