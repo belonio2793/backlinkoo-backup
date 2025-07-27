@@ -196,6 +196,9 @@ const Index = () => {
   ];
 
   const handleGetStarted = (planId: 'starter_100' | 'starter_200' | 'starter_300' | 'custom') => {
+    // Track interaction
+    trackInteraction(`get_started_${planId}`);
+
     if (planId === 'custom') {
       setIsCustomPackage(true);
     } else {
