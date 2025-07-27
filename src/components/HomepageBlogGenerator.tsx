@@ -64,47 +64,56 @@ export function HomepageBlogGenerator() {
   }, [authChecked, isLoggedIn]);
 
   const handleGenerate = async () => {
-    console.log('🚀 handleGenerate called with:', { targetUrl, primaryKeyword });
-    console.log('👤 Current user status:', isLoggedIn ? 'Authenticated' : 'Guest');
+    console.log('🚀 ENTERPRISE BLOG GENERATION INITIATED');
+    console.log('📋 Generation Parameters:', {
+      targetUrl,
+      primaryKeyword,
+      userType: isLoggedIn ? 'AUTHENTICATED' : 'TRIAL',
+      timestamp: new Date().toISOString()
+    });
 
+    // ============= ENTERPRISE VALIDATION LAYER =============
     if (!targetUrl || !primaryKeyword) {
+      console.error('❌ VALIDATION FAILED: Missing required parameters');
       toast({
-        title: "Missing Information",
-        description: "Please provide both target URL and primary keyword",
+        title: "⚠️ Missing Required Information",
+        description: "Both target URL and primary keyword are required to proceed",
         variant: "destructive"
       });
       return;
     }
 
     if (!isValidUrl(targetUrl)) {
+      console.error('❌ VALIDATION FAILED: Invalid URL format');
       toast({
-        title: "Invalid URL",
+        title: "⚠️ Invalid URL Format",
         description: "Please enter a valid URL (e.g., https://example.com)",
         variant: "destructive"
       });
       return;
     }
 
-    // Show different messages based on auth status
-    if (isLoggedIn) {
-      console.log('✅ Starting generation for authenticated user');
-      toast({
-        title: "Generating Your Backlink",
-        description: "Creating your permanent blog post with backlinks...",
-      });
-    } else {
-      console.log('✅ Starting generation for guest user (trial mode)');
-      toast({
-        title: "Generating Your Free Trial",
-        description: "Creating your demo blog post - register to save it permanently!",
-      });
-    }
+    // ============= ENTERPRISE INITIALIZATION =============
+    console.log('✅ VALIDATION PASSED - Initializing generation process');
 
+    // Reset all states for clean start
     setIsGenerating(true);
     setIsCompleted(false);
     setShowProgress(true);
+    setGeneratedPost(null);
+    setPublishedUrl('');
+    setBlogPostId('');
+
+    // Enterprise-grade user feedback
+    toast({
+      title: isLoggedIn ? "🚀 Creating Your Professional Backlink" : "🎯 Starting Your Free Trial",
+      description: isLoggedIn
+        ? "Generating high-quality content with permanent backlinks..."
+        : "Creating demo content - upgrade to save permanently!",
+    });
 
     try {
+      console.log('🔄 GENERATION PROCESS STARTED');
       // Use the already checked currentUser state instead of re-checking
 
       // Check if we're in development mode
