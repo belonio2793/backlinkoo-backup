@@ -143,6 +143,51 @@ export function AdminBlogManager() {
     }
   };
 
+  const verifySyncStatus = async () => {
+    try {
+      const publicPosts = await publishedBlogService.getRecentBlogPosts(50);
+      const adminPosts = blogPosts;
+
+      const syncIssues = [];
+
+      // Check for posts in admin but not public
+      adminPosts.forEach(adminPost => {
+        const foundInPublic = publicPosts.find(p => p.slug === adminPost.slug);
+        if (!foundInPublic) {
+          syncIssues.push(`Admin post "${adminPost.title}" not found in public view`);
+        }
+      });
+
+      // Check for posts in public but not admin
+      publicPosts.forEach(publicPost => {
+        const foundInAdmin = adminPosts.find(p => p.slug === publicPost.slug);
+        if (!foundInAdmin) {
+          syncIssues.push(`Public post "${publicPost.title}" not found in admin view`);
+        }
+      });
+
+      if (syncIssues.length === 0) {
+        toast({
+          title: 'Sync Verified ✅',
+          description: `All ${adminPosts.length} posts are properly synced between admin and public views`
+        });
+      } else {
+        toast({
+          title: 'Sync Issues Found',
+          description: `${syncIssues.length} sync issues detected. Check console for details.`,
+          variant: 'destructive'
+        });
+        console.warn('Sync Issues:', syncIssues);
+      }
+    } catch (error) {
+      toast({
+        title: 'Sync Check Failed',
+        description: 'Unable to verify sync status',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const exportPostsData = () => {
     const csvData = filteredPosts.map(post => ({
       title: post.title,
@@ -151,11 +196,12 @@ export function AdminBlogManager() {
       keywords: post.keywords.join('; '),
       status: post.status,
       is_trial: post.is_trial_post ? 'Yes' : 'No',
+      expires_at: post.expires_at || 'Never',
       view_count: post.view_count,
       seo_score: post.seo_score,
       word_count: post.word_count,
       created_at: post.created_at,
-      expires_at: post.expires_at || 'Never'
+      user_type: post.user_id ? 'Registered' : 'Guest'
     }));
 
     const csv = [
