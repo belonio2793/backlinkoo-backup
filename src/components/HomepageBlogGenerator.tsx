@@ -46,39 +46,10 @@ export function HomepageBlogGenerator() {
   const [publishedUrl, setPublishedUrl] = useState('');
   const [blogPostId, setBlogPostId] = useState<string>('');
   const [showSignupPopup, setShowSignupPopup] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [authChecked, setAuthChecked] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const { toast } = useToast();
 
-  // Check authentication status on component mount
-  useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        setCurrentUser(user);
-        setAuthChecked(true);
-        console.log('📝 Auth status checked:', user ? 'Logged in' : 'Guest user');
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        setCurrentUser(null);
-        setAuthChecked(true);
-      } finally {
-        setIsCheckingAuth(false);
-      }
-    };
-
-    checkAuthStatus();
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setCurrentUser(session?.user || null);
-      setAuthChecked(true);
-      console.log('🔄 Auth state changed:', session?.user ? 'Logged in' : 'Logged out');
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  // Use the authentication hook
+  const { currentUser, isCheckingAuth, isLoggedIn, isGuest, authChecked } = useAuthStatus();
 
   const handleGenerate = async () => {
     console.log('🚀 handleGenerate called with:', { targetUrl, primaryKeyword });
