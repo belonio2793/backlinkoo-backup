@@ -43,8 +43,8 @@ After setting the environment variables:
 
 For the blog widget to work, you **ONLY** need:
 1. `SUPABASE_URL` ✅ (already provided)
-2. `SUPABASE_ANON_KEY` ✅ (already provided) 
-3. `URI` (your site URL - note: URL is reserved in Netlify)
+2. `SUPABASE_ANON_KEY` ✅ (already provided)
+3. Site URL ✅ (automatically provided by Netlify as `URL` or `DEPLOY_URL`)
 
 ## 🔍 How to Get Missing Keys
 
