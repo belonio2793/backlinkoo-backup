@@ -1123,9 +1123,8 @@ export function HomepageBlogGenerator() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="bg-white p-6 rounded-lg border border-green-200">
-                        <h5 className="font-bold text-green-800 mb-4 flex items-center gap-2">
-                          <CheckCircle2 className="h-5 w-5" />
-                          ✅ Active SEO Benefits
+                        <h5 className="font-bold text-green-800 mb-4 text-left">
+                          Active SEO Benefits
                         </h5>
                         <ul className="space-y-2 text-sm text-gray-700">
                           <li>• Google is now indexing your new backlink</li>
