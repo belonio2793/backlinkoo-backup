@@ -980,93 +980,18 @@ export function HomepageBlogGenerator() {
                       </Button>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-6 rounded-xl border border-green-200">
-                      <div className="text-center">
-                        <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <TrendingUp className="h-6 w-6 text-white" />
-                        </div>
-                        <h4 className="font-bold text-green-800 mb-2">SEO Impact</h4>
-                        <div className="text-2xl font-bold text-green-600 mb-2">{generatedPost?.seo_score || 85}/100</div>
-                        <p className="text-sm text-green-700">High-quality backlink now boosting your rankings</p>
-                      </div>
-                    </div>
-                    <div className="bg-gradient-to-br from-blue-50 to-cyan-100 p-6 rounded-xl border border-blue-200">
-                      <div className="text-center">
-                        <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <FileText className="h-6 w-6 text-white" />
-                        </div>
-                        <h4 className="font-bold text-blue-800 mb-2">Content Quality</h4>
-                        <div className="text-2xl font-bold text-blue-600 mb-2">{generatedPost?.word_count || 1200}+</div>
-                        <p className="text-sm text-blue-700">Professional words with natural backlinks</p>
-                      </div>
-                    </div>
-                    <div className={`bg-gradient-to-br p-6 rounded-xl border ${
-                      currentUser
-                        ? 'from-purple-50 to-indigo-100 border-purple-200'
-                        : 'from-amber-50 to-orange-100 border-amber-200'
-                    }`}>
-                      <div className="text-center">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 ${
-                          currentUser ? 'bg-purple-500' : 'bg-amber-500'
-                        }`}>
-                          {currentUser ? (
-                            <CheckCircle2 className="h-6 w-6 text-white" />
-                          ) : (
-                            <AlertCircle className="h-6 w-6 text-white" />
-                          )}
-                        </div>
-                        <h4 className={`font-bold mb-2 ${currentUser ? 'text-purple-800' : 'text-amber-800'}`}>
-                          {currentUser ? 'Permanent' : 'Trial Mode'}
-                        </h4>
-                        <div className={`text-2xl font-bold mb-2 ${currentUser ? 'text-purple-600' : 'text-amber-600'}`}>
-                          {currentUser ? '∞' : '24h'}
-                        </div>
-                        <p className={`text-sm ${currentUser ? 'text-purple-700' : 'text-amber-700'}`}>
-                          {currentUser ? 'Lifetime backlink active' : 'Register to save forever'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8 border border-blue-200 mb-8">
-                    <div className="text-center mb-6">
-                      <h4 className="text-2xl font-bold text-gray-900 mb-2">
-                        🎯 Your Backlink is Working Right Now!
-                      </h4>
-                      <p className="text-gray-600">
-                        Here's what's happening behind the scenes and what to expect
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="bg-white p-6 rounded-lg border border-green-200">
-                        <h5 className="font-bold text-green-800 mb-4 text-left">
-                          Active SEO Benefits
-                        </h5>
-                        <ul className="space-y-2 text-sm text-gray-700 text-left">
-                          <li>• Google is now indexing your new backlink</li>
-                          <li>• Domain authority signals are being sent to your site</li>
-                          <li>• "{primaryKeyword}" keyword rankings are improving</li>
-                          <li>• Organic search traffic will increase over 2-4 weeks</li>
-                        </ul>
-                      </div>
-                      <div className="bg-white p-6 rounded-lg border border-blue-200">
-                        <h5 className="font-bold text-blue-800 mb-4 text-left">
-                          Expected Timeline
-                        </h5>
-                        <ul className="space-y-2 text-sm text-gray-700 text-left">
-                          <li>• <strong>Week 1:</strong> Google discovers and crawls your backlink</li>
-                          <li>• <strong>Week 2-3:</strong> Keyword rankings begin to improve</li>
-                          <li>• <strong>Week 4+:</strong> Measurable organic traffic increase</li>
-                          <li>• <strong>Ongoing:</strong> Sustained SEO value and authority boost</li>
-                        </ul>
-                      </div>
-                    </div>
-                    <div className="mt-6 text-center">
-                      <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-full font-semibold shadow-lg">
-                        <Star className="h-5 w-5 animate-pulse" />
-                        Your professional backlink is live and boosting your SEO right now!
-                      </div>
-                    </div>
+
+                  <div className="mt-6">
+                    <Button
+                      onClick={() => {
+                        const blogUrl = publishedUrl || `${window.location.origin}/blog/${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
+                        window.open(blogUrl, '_blank');
+                      }}
+                      className="w-full"
+                    >
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      View Article
+                    </Button>
                   </div>
                   {currentUser ? (
                     <div className="max-w-3xl mx-auto mb-8 p-4 bg-green-50 border border-green-200 rounded-lg">
