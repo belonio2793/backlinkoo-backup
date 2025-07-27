@@ -32,8 +32,8 @@ import {
 import { RotatingText } from './RotatingText';
 
 export function HomepageBlogGenerator() {
-  const [targetUrl, setTargetUrl] = useState('https://example.com');
-  const [primaryKeyword, setPrimaryKeyword] = useState('SEO optimization');
+  const [targetUrl, setTargetUrl] = useState('');
+  const [primaryKeyword, setPrimaryKeyword] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [generatedPost, setGeneratedPost] = useState<any>(null);
