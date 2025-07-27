@@ -213,6 +213,8 @@ export class ProductionBlogGenerator {
       // Store in localStorage (works without database)
       if (typeof window !== 'undefined') {
         const blogStorageKey = `blog_post_${slug}`;
+        console.log('💾 Storing blog post with key:', blogStorageKey);
+        console.log('📄 Blog post data:', { slug, title: blogPost.title, id: blogPost.id });
         localStorage.setItem(blogStorageKey, JSON.stringify(blogPost));
 
         // Maintain list of all blog posts
