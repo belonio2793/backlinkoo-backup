@@ -133,13 +133,13 @@ export function TrialNotificationBanner() {
             
             <div className="hidden sm:block text-sm">
               <span className="font-semibold">
-                ⚠️ Your backlink{trialPosts.length > 1 ? 's' : ''} will auto-delete in{' '}
-                <span className={`${timeRemaining.urgent ? 'animate-pulse font-bold' : 'font-medium'}`}>
+                {timeRemaining.urgent ? '🚨' : '⏰'} Trial backlink{trialPosts.length > 1 ? 's' : ''} expire{trialPosts.length === 1 ? 's' : ''} in{' '}
+                <span className={`${timeRemaining.urgent ? 'animate-pulse font-bold text-yellow-200' : 'font-medium'}`}>
                   {timeRemaining.hours}h {timeRemaining.minutes}m
                 </span>
               </span>
               <span className="ml-2 opacity-90">
-                Sign up now to save them forever!
+                {timeRemaining.urgent ? 'Upgrade NOW to save them!' : 'Upgrade to permanent backlinks + unlock features'}
               </span>
             </div>
           </div>
