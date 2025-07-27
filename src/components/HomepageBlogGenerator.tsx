@@ -803,14 +803,14 @@ export function HomepageBlogGenerator() {
                           <span className="font-bold">
                             {publishedUrl?.includes('://')
                               ? publishedUrl.split('://')[1]
-                              : `${window.location.host}/blog/?slug=${generatedPost?.slug || primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`
+                              : `${window.location.host}/blog/${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString().slice(-6)}`}`
                             }
                           </span>
                         </div>
                         <Button
                           size="sm"
                           onClick={() => {
-                            const urlToCopy = publishedUrl || `${window.location.origin}/blog/?slug=${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
+                            const urlToCopy = publishedUrl || `${window.location.origin}/blog/${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString().slice(-6)}`}`;
                             navigator.clipboard.writeText(urlToCopy);
                             toast({ title: "✅ URL Copied!", description: "Blog post URL copied to clipboard" });
                           }}
@@ -869,7 +869,7 @@ export function HomepageBlogGenerator() {
                           <Button
                             size="lg"
                             onClick={() => {
-                              const blogUrl = publishedUrl || `${window.location.origin}/blog/?slug=${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
+                              const blogUrl = publishedUrl || `${window.location.origin}/blog/${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString().slice(-6)}`}`;
                               console.log('🔗 Opening blog post URL:', blogUrl);
                               window.open(blogUrl, '_blank');
                             }}
@@ -882,7 +882,7 @@ export function HomepageBlogGenerator() {
                             size="lg"
                             variant="outline"
                             onClick={() => {
-                              const blogUrl = publishedUrl || `${window.location.origin}/blog/?slug=${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
+                              const blogUrl = publishedUrl || `${window.location.origin}/blog/${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString().slice(-6)}`}`;
                               const shareText = `🎯 Just published a professional article about ${primaryKeyword}! Check out my new backlink: ${blogUrl}`;
                               navigator.clipboard.writeText(shareText);
                               toast({
@@ -1159,7 +1159,7 @@ export function HomepageBlogGenerator() {
                               onClick={() => window.location.href = '/dashboard'}
                             >
                               <BarChart3 className="mr-2 h-5 w-5" />
-                              📊 Track Your SEO Growth
+                              ��� Track Your SEO Growth
                             </Button>
                             <Button
                               size="lg"
