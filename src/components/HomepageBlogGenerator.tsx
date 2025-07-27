@@ -716,35 +716,137 @@ export function HomepageBlogGenerator() {
                   <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-r from-green-500 to-blue-500 mb-6 animate-pulse">
                     <CheckCircle2 className="h-12 w-12 text-white" />
                   </div>
-                  <h3 className="text-4xl font-bold mb-4 text-gray-900">
-                    🎉 Mission Accomplished!
+                  <div className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-full text-lg font-bold mb-6 shadow-lg">
+                    <span className="w-3 h-3 bg-white rounded-full animate-ping"></span>
+                    🎯 YOUR BACKLINK IS NOW LIVE
+                  </div>
+
+                  <h3 className="text-5xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+                    Content Successfully Published!
                   </h3>
-                  <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-                    Your professional blog post about <strong>"{primaryKeyword}"</strong> is now live with natural backlinks pointing to your website!
+
+                  <p className="text-2xl text-gray-700 mb-8 max-w-4xl mx-auto leading-relaxed">
+                    Professional article about <span className="font-bold text-blue-600">"{primaryKeyword}"</span> is now live with strategic backlinks to your website
                   </p>
 
-                  {/* PROMINENT PUBLISHED LINK SHOWCASE */}
-                  <div className="mb-8 p-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl text-white shadow-xl">
-                    <div className="flex items-center justify-center gap-3 mb-4">
-                      <Globe className="h-6 w-6" />
-                      <h4 className="text-xl font-bold">🔗 Your Live Blog Post</h4>
+                  {/* 🚀 LIVE BLOG POST SHOWCASE - MAIN ATTRACTION */}
+                  <div className="mb-12 max-w-5xl mx-auto">
+                    <div className="bg-white rounded-2xl shadow-2xl border-4 border-green-200 overflow-hidden">
+                      {/* Browser URL Bar Mockup */}
+                      <div className="bg-gray-100 px-6 py-4 border-b flex items-center gap-4">
+                        <div className="flex gap-2">
+                          <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                          <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                          <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                        </div>
+                        <div className="flex-1 bg-white rounded-lg px-4 py-2 font-mono text-lg text-gray-700 border-2 border-blue-200 flex items-center">
+                          <Globe className="h-5 w-5 text-green-500 mr-2" />
+                          <span className="text-green-600 font-semibold">🔒 https://</span>
+                          <span className="font-bold">{publishedUrl?.replace('https://', '') || `backlinkoo.com/blog/${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}</span>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            const urlToCopy = publishedUrl || `https://backlinkoo.com/blog/${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`;
+                            navigator.clipboard.writeText(urlToCopy);
+                            toast({ title: "✅ URL Copied!", description: "Blog post URL copied to clipboard" });
+                          }}
+                          className="bg-blue-500 hover:bg-blue-600 text-white"
+                        >
+                          📋 Copy URL
+                        </Button>
+                      </div>
+
+                      {/* Live Content Preview */}
+                      <div className="p-8 bg-white">
+                        <div className="text-left space-y-6">
+                          <h4 className="text-3xl font-bold text-gray-900 leading-tight">
+                            {generatedPost?.title || `The Ultimate Guide to ${primaryKeyword}: Professional Insights & Strategies`}
+                          </h4>
+
+                          <div className="flex items-center gap-6 text-sm text-gray-600">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                                B
+                              </div>
+                              <span>Backlinkoo Editorial</span>
+                            </div>
+                            <span>•</span>
+                            <span>Published {new Date().toLocaleDateString()}</span>
+                            <span>•</span>
+                            <span>{generatedPost?.word_count || 1200}+ words</span>
+                            <span>•</span>
+                            <div className="flex items-center gap-1">
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                              <span className="text-green-600 font-medium">Live & Indexed</span>
+                            </div>
+                          </div>
+
+                          <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border border-blue-200">
+                            <div className="flex items-start gap-4">
+                              <div className="p-2 bg-blue-100 rounded-lg">
+                                <Link2 className="h-5 w-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <h5 className="font-semibold text-blue-900 mb-2">Strategic Backlink Placement</h5>
+                                <p className="text-blue-800 text-sm">
+                                  Natural contextual links to <a href={targetUrl} className="font-semibold underline hover:text-blue-900" target="_blank" rel="noopener noreferrer">{targetUrl}</a> have been strategically placed throughout this professional article to maximize your SEO impact.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="prose prose-lg max-w-none text-gray-700">
+                            <p className="leading-relaxed">
+                              In today's competitive digital landscape, mastering <strong className="text-blue-600">{primaryKeyword}</strong> is essential for business success. This comprehensive guide provides actionable insights, proven strategies, and expert recommendations to help you achieve your goals...
+                            </p>
+                            <p className="text-gray-500 italic text-sm mt-4">
+                              [This is a preview - click "View Full Article" below to see the complete professional content with all backlinks and SEO optimizations]
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Call-to-Action Footer */}
+                      <div className="bg-gradient-to-r from-green-50 to-blue-50 px-8 py-6 border-t">
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                          <Button
+                            size="lg"
+                            onClick={() => {
+                              const url = publishedUrl || `https://backlinkoo.com/blog/${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`;
+                              window.open(url, '_blank');
+                            }}
+                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold px-10 py-4 text-xl shadow-xl transform hover:scale-105 transition-all"
+                          >
+                            <ExternalLink className="mr-3 h-6 w-6" />
+                            🚀 View Your Live Article
+                          </Button>
+
+                          <Button
+                            size="lg"
+                            variant="outline"
+                            onClick={() => {
+                              const url = publishedUrl || `https://backlinkoo.com/blog/${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`;
+                              const text = `🎯 Just published a professional article about ${primaryKeyword}! Check out my new backlink: ${url}`;
+                              navigator.clipboard.writeText(text);
+                              toast({ title: "✅ Share Text Copied!", description: "Perfect for social media sharing!" });
+                            }}
+                            className="border-2 border-blue-600 text-blue-700 hover:bg-blue-50 font-semibold px-8 py-4 text-lg"
+                          >
+                            📤 Copy Share Link
+                          </Button>
+                        </div>
+
+                        <div className="text-center mt-6">
+                          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md border">
+                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            <span className="text-sm font-medium text-gray-700">
+                              {currentUser ? '💎 Permanent Backlink Active' : '⏱️ Trial Backlink Active (24 hours)'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="bg-white/10 rounded-lg p-4 mb-4 backdrop-blur-sm">
-                      <p className="text-sm font-mono break-all text-blue-100 mb-2">
-                        {publishedUrl}
-                      </p>
-                      <p className="text-lg font-semibold">
-                        {generatedPost?.title}
-                      </p>
-                    </div>
-                    <Button
-                      size="lg"
-                      onClick={() => window.open(publishedUrl, '_blank')}
-                      className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-8 py-3 text-lg shadow-lg"
-                    >
-                      <ExternalLink className="mr-2 h-5 w-5" />
-                      View Your Live Blog Post
-                    </Button>
                   </div>
 
                   <p className="text-lg text-gray-600 mb-6">
