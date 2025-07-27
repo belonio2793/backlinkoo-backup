@@ -316,30 +316,16 @@ export function AdminBlogManager() {
           </Card>
         </div>
 
-        {/* Content Filter Status */}
-        {contentFilterStats && (
-          <Card className="mb-6">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-green-600" />
-                  <span className="font-medium">Content Filter Status</span>
-                  <div className="flex items-center gap-4 ml-4">
-                    <div className="text-sm">
-                      <span className="text-gray-600">Blocked:</span>
-                      <span className="ml-1 font-semibold text-red-600">{contentFilterStats.blocked}</span>
-                    </div>
-                    <div className="text-sm">
-                      <span className="text-gray-600">Block Rate:</span>
-                      <span className="ml-1 font-semibold text-orange-600">{contentFilterStats.blockRate}%</span>
-                    </div>
-                    <div className="text-sm">
-                      <span className="text-gray-600">Total Requests:</span>
-                      <span className="ml-1 font-semibold text-blue-600">{contentFilterStats.total}</span>
-                    </div>
+        {/* Content Protection Status */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          {contentFilterStats && (
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-green-600" />
+                    <span className="font-medium">Content Filter</span>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
                   {contentFilterService.getConfiguration().enabled ? (
                     <Badge className="bg-green-100 text-green-800 border-green-200">
                       <Shield className="mr-1 h-3 w-3" />
@@ -352,10 +338,54 @@ export function AdminBlogManager() {
                     </Badge>
                   )}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-lg font-semibold text-red-600">{contentFilterStats.blocked}</div>
+                    <div className="text-xs text-gray-600">Blocked</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-semibold text-orange-600">{contentFilterStats.blockRate}%</div>
+                    <div className="text-xs text-gray-600">Block Rate</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-semibold text-blue-600">{contentFilterStats.total}</div>
+                    <div className="text-xs text-gray-600">Total</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {moderationStats && (
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-orange-600" />
+                    <span className="font-medium">Content Moderation</span>
+                  </div>
+                  <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                    {moderationStats.pending} Pending
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-lg font-semibold text-green-600">{moderationStats.approved}</div>
+                    <div className="text-xs text-gray-600">Approved</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-semibold text-red-600">{moderationStats.rejected}</div>
+                    <div className="text-xs text-gray-600">Rejected</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-semibold text-purple-600">{moderationStats.approvalRate}%</div>
+                    <div className="text-xs text-gray-600">Approval Rate</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
 
       {/* Filters */}
