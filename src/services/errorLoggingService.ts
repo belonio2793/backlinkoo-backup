@@ -279,10 +279,38 @@ GRANT ALL ON error_logs TO service_role;
         .limit(limit);
 
       if (error) {
+        console.warn('Database error retrieval failed:', error.message);
+
+        // Check if it's a known database unavailability issue
+        const isDatabaseUnavailable = error.message?.includes('does not exist') ||
+                                     error.message?.includes('Mock mode') ||
+                                     error.message?.includes('Database not available');
+
+        if (isDatabaseUnavailable) {
+          console.log('Using localStorage fallback for error retrieval');
+          return this.getErrorsFromLocalStorage();
+        }
+
         throw error;
       }
 
-      return data || [];
+      // If we have database data, merge with localStorage for completeness
+      const dbErrors = data || [];
+      const localErrors = this.getErrorsFromLocalStorage();
+
+      // Combine and deduplicate by timestamp + message
+      const allErrors = [...dbErrors, ...localErrors];
+      const uniqueErrors = allErrors.filter((error, index, self) =>
+        index === self.findIndex(e =>
+          e.timestamp === error.timestamp && e.message === error.message
+        )
+      );
+
+      // Sort by timestamp (newest first) and limit
+      return uniqueErrors
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, limit);
+
     } catch (error) {
       console.error('Failed to fetch errors from database:', error);
       return this.getErrorsFromLocalStorage();
