@@ -257,7 +257,7 @@ export function BlogPost() {
               </div>
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />
-                <span>{blogPost.view_count} views</span>
+                <span>{blogPost.view_count || 0} views</span>
               </div>
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
