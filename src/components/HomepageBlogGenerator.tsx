@@ -56,12 +56,32 @@ export function HomepageBlogGenerator() {
   // Use the authentication hook
   const { currentUser, isCheckingAuth, isLoggedIn, isGuest, authChecked } = useAuthStatus();
 
-  // Log auth status changes
+  // ENTERPRISE DEBUG & MONITORING
   useEffect(() => {
     if (authChecked) {
-      console.log('📝 Auth status:', isLoggedIn ? 'Logged in' : 'Guest user');
+      console.log('🔐 ENTERPRISE AUTH STATUS:', {
+        isLoggedIn: isLoggedIn,
+        isGuest: isGuest,
+        authChecked: authChecked,
+        currentUser: !!currentUser,
+        timestamp: new Date().toISOString()
+      });
     }
   }, [authChecked, isLoggedIn]);
+
+  // ENTERPRISE STATE MONITORING
+  useEffect(() => {
+    console.log('📊 ENTERPRISE STATE UPDATE:', {
+      isGenerating,
+      isCompleted,
+      showProgress,
+      forceComplete,
+      hasGeneratedPost: !!generatedPost,
+      hasPublishedUrl: !!publishedUrl,
+      hasBlogPostId: !!blogPostId,
+      timestamp: new Date().toISOString()
+    });
+  }, [isGenerating, isCompleted, showProgress, forceComplete, generatedPost, publishedUrl, blogPostId]);
 
   const handleGenerate = async () => {
     console.log('🚀 ENTERPRISE BLOG GENERATION INITIATED');
