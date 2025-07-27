@@ -198,10 +198,39 @@ async function generateAIContent(destinationUrl, keyword) {
 }
 
 async function generateWithOpenAI(destinationUrl, keyword) {
-  if (!process.env.OPENAI_API_KEY) {
-    console.warn('OpenAI API key not configured, using fallback content');
+  // Check for OpenAI API key first, then try other providers
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const grokKey = process.env.GROK_API_KEY;
+  const cohereKey = process.env.COHERE_API_KEY;
+
+  if (!openaiKey && !grokKey && !cohereKey) {
+    console.warn('No AI API keys configured, using fallback content');
     return generateFallbackContent(destinationUrl, keyword);
   }
+
+  // Try OpenAI first if available
+  if (openaiKey) {
+    console.log('🤖 Using OpenAI for content generation');
+    return await tryOpenAI(destinationUrl, keyword, openaiKey);
+  }
+
+  // Try Grok as fallback
+  if (grokKey) {
+    console.log('⚡ Using Grok for content generation');
+    return await tryGrok(destinationUrl, keyword, grokKey);
+  }
+
+  // Try Cohere as final fallback
+  if (cohereKey) {
+    console.log('🔥 Using Cohere for content generation');
+    return await tryCohere(destinationUrl, keyword, cohereKey);
+  }
+
+  console.warn('All AI providers failed, using fallback content');
+  return generateFallbackContent(destinationUrl, keyword);
+}
+
+async function tryOpenAI(destinationUrl, keyword, apiKey) {
 
   try {
     const domain = new URL(destinationUrl).hostname.replace('www.', '');
