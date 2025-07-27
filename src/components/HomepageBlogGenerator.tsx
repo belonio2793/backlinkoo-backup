@@ -60,7 +60,7 @@ export function HomepageBlogGenerator() {
 
   const handleGenerate = async () => {
     console.log('🚀 handleGenerate called with:', { targetUrl, primaryKeyword });
-    console.log('👤 Current user status:', currentUser ? 'Authenticated' : 'Guest');
+    console.log('👤 Current user status:', isLoggedIn ? 'Authenticated' : 'Guest');
 
     if (!targetUrl || !primaryKeyword) {
       toast({
