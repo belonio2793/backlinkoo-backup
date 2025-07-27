@@ -348,7 +348,22 @@ const Index = () => {
           {useProductionGenerator ? (
             <ProductionBlogGenerator />
           ) : (
-            <HomepageBlogGenerator />
+            <div className="max-w-6xl mx-auto">
+              <GlobalBlogGenerator
+                variant="homepage"
+                onSuccess={(blogPost) => {
+                  setUser(user); // Refresh state
+                  toast({
+                    title: "Success! 🎉",
+                    description: `Your backlink post "${blogPost.title}" is now live!`,
+                  });
+                  // Navigate to blog after a short delay
+                  setTimeout(() => {
+                    navigate(`/blog/${blogPost.slug}`);
+                  }, 2000);
+                }}
+              />
+            </div>
           )}
         </div>
       </section>
