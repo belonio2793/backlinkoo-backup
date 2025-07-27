@@ -654,7 +654,6 @@ export function HomepageBlogGenerator() {
                       expiresAt={generatedPost.expires_at}
                       targetUrl={targetUrl}
                       onClaimed={() => {
-                        setCurrentUser(true); // Mark as claimed
                         // Refresh the page to update UI
                         window.location.reload();
                       }}
