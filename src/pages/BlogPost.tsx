@@ -245,7 +245,7 @@ export function BlogPost() {
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 pt-4 border-t border-gray-200">
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                <span>{blogPost.author_name}</span>
+                <span>{blogPost.author_name || 'Backlinkoo AI'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
