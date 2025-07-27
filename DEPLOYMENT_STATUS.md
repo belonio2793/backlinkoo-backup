@@ -13,10 +13,10 @@
 ```bash
 SUPABASE_URL=https://dfhanacsmsvvkpunurnp.supabase.co
 SUPABASE_ANON_KEY=[your_anon_key]
-URI=https://backlinkoo.com
 OPENAI_API_KEY=[optional]
 RESEND_API_KEY=[optional]
 SUPABASE_SERVICE_ROLE_KEY=[optional]
+# URL automatically provided by Netlify
 ```
 
 ### **Functions Status:**
