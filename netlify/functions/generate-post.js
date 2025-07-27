@@ -22,6 +22,18 @@ const supabase = SUPABASE_URL && SUPABASE_ANON_KEY
   : null;
 
 exports.handler = async (event, context) => {
+  console.log('🚀 Blog generation function called:', {
+    method: event.httpMethod,
+    path: event.path,
+    hasSupabase: !!supabase,
+    envVars: {
+      hasSupabaseUrl: !!SUPABASE_URL,
+      hasSupabaseKey: !!SUPABASE_ANON_KEY,
+      supabaseUrlLength: SUPABASE_URL?.length,
+      supabaseKeyLength: SUPABASE_ANON_KEY?.length
+    }
+  });
+
   // Handle CORS
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -36,6 +48,7 @@ exports.handler = async (event, context) => {
   }
 
   if (event.httpMethod !== 'POST') {
+    console.warn('⚠️ Invalid method:', event.httpMethod);
     return {
       statusCode: 405,
       headers: {
