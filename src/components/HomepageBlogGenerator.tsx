@@ -402,9 +402,9 @@ export function HomepageBlogGenerator() {
                   </div>
                   {authChecked && (
                     <div className="flex items-center gap-2">
-                      <Save className={`h-4 w-4 ${currentUser ? 'text-green-500' : 'text-amber-500'}`} />
-                      <span className={currentUser ? 'text-green-600' : 'text-amber-600'}>
-                        {currentUser ? 'Permanent Save' : 'Trial Mode'}
+                      <Save className={`h-4 w-4 ${isLoggedIn ? 'text-green-500' : 'text-amber-500'}`} />
+                      <span className={isLoggedIn ? 'text-green-600' : 'text-amber-600'}>
+                        {isLoggedIn ? 'Permanent Save' : 'Trial Mode'}
                       </span>
                     </div>
                   )}
