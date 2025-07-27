@@ -43,6 +43,17 @@ const Index = () => {
   const [isCustomPackage, setIsCustomPackage] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [useProductionGenerator, setUseProductionGenerator] = useState(false);
+  const [showTrialUpgrade, setShowTrialUpgrade] = useState(false);
+  const [showInlineAuth, setShowInlineAuth] = useState(false);
+
+  // Check URL parameters for trial upgrade
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('upgrade') === 'trial') {
+      setShowTrialUpgrade(true);
+      setShowInlineAuth(true);
+    }
+  }, []);
 
   // Check for authenticated user on component mount
   useEffect(() => {
