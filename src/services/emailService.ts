@@ -1,3 +1,5 @@
+import { errorLogger, ErrorSeverity, ErrorCategory } from './errorLoggingService';
+
 // Direct Resend email service for authentication emails
 
 export interface EmailServiceResponse {
@@ -39,6 +41,23 @@ export class EmailService {
         to: emailData.to,
         subject: emailData.subject
       });
+
+      // Log email attempt
+      await errorLogger.logError(
+        ErrorSeverity.LOW,
+        ErrorCategory.EMAIL,
+        `Email sending attempt ${attempt}`,
+        {
+          context: {
+            to: emailData.to,
+            subject: emailData.subject,
+            attempt,
+            provider: 'netlify_resend'
+          },
+          component: 'EmailService',
+          action: 'send_email'
+        }
+      );
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
