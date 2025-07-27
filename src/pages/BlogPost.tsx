@@ -253,7 +253,7 @@ export function BlogPost() {
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                <span>{blogPost.reading_time} min read</span>
+                <span>{blogPost.reading_time || 5} min read</span>
               </div>
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />
