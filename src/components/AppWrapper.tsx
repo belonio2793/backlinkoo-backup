@@ -31,7 +31,9 @@ export const AppWrapper = () => {
   useReferralTracking();
 
   return (
-    <Routes>
+    <>
+      <TrialNotificationBanner />
+      <Routes>
       {/* Public routes - no authentication required */}
       <Route path="/" element={<Index />} />
       <Route path="/login" element={<Login />} />
@@ -101,6 +103,7 @@ export const AppWrapper = () => {
           <PromotionMaterials />
         </EmailVerificationGuard>
       } />
-    </Routes>
+      </Routes>
+    </>
   );
 };
