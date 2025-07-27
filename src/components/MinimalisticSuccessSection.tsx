@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle2, ExternalLink, Copy, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ExternalLink, Copy, ArrowRight, Plus, BarChart3 } from 'lucide-react';
 
 interface MinimalisticSuccessSectionProps {
   publishedUrl: string;
@@ -9,6 +9,7 @@ interface MinimalisticSuccessSectionProps {
   primaryKeyword: string;
   targetUrl: string;
   currentUser: any;
+  onCreateAnother?: () => void;
 }
 
 export function MinimalisticSuccessSection({
