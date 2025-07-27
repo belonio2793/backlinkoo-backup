@@ -133,11 +133,22 @@ class ErrorLoggingService {
         .insert([entry]);
 
       if (error) {
+        // Check if error is due to table not existing
+        if (error.message?.includes('relation "error_logs" does not exist') ||
+            error.message?.includes('table "error_logs" does not exist')) {
+          console.warn('error_logs table does not exist. Creating table...');
+          await this.createErrorLogsTable();
+
+          // Retry the insert after table creation
+          if (retryCount === 0) {
+            return this.saveErrorToDatabase(entry, retryCount + 1);
+          }
+        }
         throw error;
       }
     } catch (error) {
       console.error('Failed to save error to database:', error);
-      
+
       // Retry logic
       if (retryCount < this.maxRetries) {
         setTimeout(() => {
@@ -147,6 +158,74 @@ class ErrorLoggingService {
         // Store in local storage as fallback
         this.saveErrorToLocalStorage(entry);
       }
+    }
+  }
+
+  private async createErrorLogsTable(): Promise<void> {
+    try {
+      // Try to call the setup function
+      const response = await fetch('/supabase/functions/v1/setup-error-logs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create error_logs table via function');
+      }
+
+      console.log('error_logs table created successfully');
+    } catch (error) {
+      console.error('Failed to create error_logs table automatically:', error);
+      console.warn('Please create the error_logs table manually in Supabase dashboard');
+
+      // Log instructions to console
+      console.log(`
+To create the error_logs table manually, run this SQL in your Supabase dashboard:
+
+CREATE TABLE IF NOT EXISTS error_logs (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    timestamp TEXT NOT NULL,
+    severity TEXT NOT NULL CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+    category TEXT NOT NULL CHECK (category IN (
+        'authentication', 'email', 'payment', 'seo_analysis',
+        'database', 'network', 'validation', 'general'
+    )),
+    message TEXT NOT NULL,
+    details JSONB,
+    stack_trace TEXT,
+    user_id TEXT,
+    component TEXT,
+    action TEXT,
+    resolved BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_error_logs_timestamp ON error_logs(timestamp);
+CREATE INDEX IF NOT EXISTS idx_error_logs_severity ON error_logs(severity);
+CREATE INDEX IF NOT EXISTS idx_error_logs_category ON error_logs(category);
+CREATE INDEX IF NOT EXISTS idx_error_logs_resolved ON error_logs(resolved);
+CREATE INDEX IF NOT EXISTS idx_error_logs_user_id ON error_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_error_logs_created_at ON error_logs(created_at);
+
+ALTER TABLE error_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Admin can access all error logs" ON error_logs
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM user_roles
+            WHERE user_roles.user_id::text = auth.uid()::text
+            AND user_roles.role = 'admin'
+        )
+    );
+
+CREATE POLICY "Users can see their own error logs" ON error_logs
+    FOR SELECT USING (user_id = auth.uid()::text);
+
+GRANT ALL ON error_logs TO authenticated;
+GRANT ALL ON error_logs TO service_role;
+      `);
     }
   }
 
