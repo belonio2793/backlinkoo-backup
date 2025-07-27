@@ -96,7 +96,7 @@ exports.handler = async (event, context) => {
       excerpt: aiContent.excerpt,
       keywords: [keyword, ...extractKeywordsFromContent(aiContent.content)],
       target_url: destinationUrl,
-      published_url: `${process.env.URL || 'https://backlinkoo.com'}/blog/${slug}`,
+      published_url: `${process.env.URI || 'https://backlinkoo.com'}/blog/${slug}`,
       status: 'published',
       is_trial_post: !userId,
       expires_at: !userId ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null,
