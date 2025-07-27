@@ -35,6 +35,13 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
                              window.location.port === '8080' ||
                              process.env.NODE_ENV === 'development';
 
+        console.log('🔍 Development mode check:', {
+          hostname: window.location.hostname,
+          port: window.location.port,
+          nodeEnv: process.env.NODE_ENV,
+          isDevelopment
+        });
+
         if (isDevelopment) {
           console.log('EmailVerificationGuard: Development mode detected - using mock user');
           const mockUser = {
