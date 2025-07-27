@@ -251,21 +251,53 @@ export function HomepageBlogGenerator() {
       console.log('⚡ FINALIZING RESULTS - Transitioning to completion state');
       setForceComplete(true);
 
-      // Ensure completion happens immediately and reliably
-      setTimeout(() => {
+      // ENTERPRISE COMPLETION GUARANTEE - Multiple validation layers
+      const completeGeneration = () => {
         console.log('✅ MISSION ACCOMPLISHED - Displaying final results');
+        console.log('🔍 FINAL VALIDATION:', {
+          hasGeneratedPost: !!blogPost,
+          hasPublishedUrl: !!publishedUrl,
+          hasBlogPostId: !!blogPost?.id,
+          completionTimestamp: new Date().toISOString()
+        });
+
+        // Validate all required data is present
+        if (!blogPost || !publishedUrl || !blogPost.id) {
+          console.error('🚨 CRITICAL: Incomplete data for completion state');
+          toast({
+            title: "⚠️ Generation Issue Detected",
+            description: "Content created but display data incomplete. Please refresh or try again.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        // Set completion state with validation
         setIsCompleted(true);
         setIsGenerating(false);
         setShowProgress(false);
 
         // Enterprise success confirmation
         toast({
-          title: "🎉 Success! Your Backlink is Live",
+          title: "🎉 Enterprise Backlink Successfully Deployed!",
           description: isLoggedIn
-            ? "Professional content published with permanent backlinks"
-            : "Trial content live for 24 hours - register to save!",
+            ? `Professional content for "${primaryKeyword}" is now live with permanent backlinks`
+            : `Trial content for "${primaryKeyword}" is live for 24 hours - register to save permanently!`,
+          duration: 8000
         });
-      }, 100); // Minimal delay for state consistency
+
+        // Additional verification
+        console.log('🎯 COMPLETION STATE SET - User should now see results');
+        console.log('📊 Final Data Summary:', {
+          title: blogPost.title,
+          url: publishedUrl,
+          type: isLoggedIn ? 'PERMANENT' : 'TRIAL',
+          seoScore: blogPost.seo_score || 85
+        });
+      };
+
+      // Execute completion with slight delay for state consistency
+      setTimeout(completeGeneration, 100);
 
       toast({
         title: "Blog Post Generated!",
