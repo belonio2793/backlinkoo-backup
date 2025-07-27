@@ -312,6 +312,14 @@ export class ChatGPTBlogGenerator {
         published_at: new Date().toISOString()
       };
 
+      console.log('📝 Attempting to save blog post:', {
+        id: blogPost.id,
+        slug: blogPost.slug,
+        title: blogPost.title,
+        userId: blogPost.user_id,
+        isTrialPost: blogPost.is_trial_post
+      });
+
       // Save to Supabase published_blog_posts table
       const { data, error } = await supabase
         .from('published_blog_posts')
