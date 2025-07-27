@@ -22,6 +22,20 @@ exports.handler = async (event, context) => {
     };
   }
 
+  // Check if Supabase is configured
+  if (!supabase) {
+    return {
+      statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        error: 'Server configuration error: Database not available for cleanup.'
+      })
+    };
+  }
+
   try {
     const now = new Date().toISOString();
     
