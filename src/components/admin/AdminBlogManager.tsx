@@ -20,7 +20,9 @@ import {
   Sparkles,
   Filter,
   Download,
-  RefreshCw
+  RefreshCw,
+  Shield,
+  AlertTriangle
 } from 'lucide-react';
 
 export function AdminBlogManager() {
