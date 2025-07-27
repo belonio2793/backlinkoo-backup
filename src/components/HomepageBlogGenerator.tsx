@@ -672,8 +672,25 @@ export function HomepageBlogGenerator() {
                         onChange={(e) => setPrimaryKeyword(e.target.value)}
                         className="text-base py-3 px-4 border-gray-200 focus:border-purple-400 focus:ring-purple-400"
                       />
-                      <p className="text-sm text-gray-500">The keyword you're ranking for (used as anchor text)</p>
+                      <p className="text-sm text-gray-500">The keyword you're ranking for</p>
                     </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="anchorText" className="text-base font-medium flex items-center gap-2">
+                      <Link2 className="h-4 w-4 text-green-500" />
+                      Anchor Text (Optional)
+                    </Label>
+                    <Input
+                      id="anchorText"
+                      placeholder="Leave blank to use keyword as anchor text"
+                      value={anchorText}
+                      onChange={(e) => setAnchorText(e.target.value)}
+                      className="text-base py-3 px-4 border-gray-200 focus:border-green-400 focus:ring-green-400"
+                    />
+                    <p className="text-sm text-gray-500">
+                      Custom anchor text for your backlink. {anchorText || primaryKeyword ? `Will use: "${anchorText || primaryKeyword}"` : 'Defaults to your keyword'}
+                    </p>
                   </div>
 
                   <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-100">
