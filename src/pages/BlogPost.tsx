@@ -362,26 +362,38 @@ export function BlogPost() {
         )}
 
         {/* SEO Info for Context */}
-        {blogPost.contextual_links.length > 0 && (
+        {(blogPost.contextual_links && blogPost.contextual_links.length > 0) || blogPost.keywords || blogPost.tags ? (
           <Card className="mt-8">
             <CardContent className="p-6">
               <h3 className="font-semibold text-gray-900 mb-4">
                 SEO Information
               </h3>
               <div className="space-y-2">
+                {(blogPost.keywords || blogPost.tags) && (
+                  <p className="text-sm text-gray-600">
+                    <strong>Target Keywords:</strong> {(blogPost.keywords || blogPost.tags || []).join(', ')}
+                  </p>
+                )}
+                {blogPost.word_count && (
+                  <p className="text-sm text-gray-600">
+                    <strong>Word Count:</strong> {blogPost.word_count} words
+                  </p>
+                )}
+                {blogPost.contextual_links && blogPost.contextual_links.length > 0 && (
+                  <p className="text-sm text-gray-600">
+                    <strong>Contextual Links:</strong> {blogPost.contextual_links.length}
+                  </p>
+                )}
                 <p className="text-sm text-gray-600">
-                  <strong>Target Keywords:</strong> {blogPost.keywords.join(', ')}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <strong>Word Count:</strong> {blogPost.word_count} words
-                </p>
-                <p className="text-sm text-gray-600">
-                  <strong>Contextual Links:</strong> {blogPost.contextual_links.length}
+                  <strong>Target URL:</strong>
+                  <a href={blogPost.target_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
+                    {blogPost.target_url}
+                  </a>
                 </p>
               </div>
             </CardContent>
           </Card>
-        )}
+        ) : null}
       </article>
 
       {/* Custom styles for blog content */}
