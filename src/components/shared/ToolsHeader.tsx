@@ -23,6 +23,7 @@ interface ToolsHeaderProps {
 const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
   const navigate = useNavigate();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: Target },
