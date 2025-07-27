@@ -152,9 +152,38 @@ export function HomepageBlogGenerator() {
           })
         });
 
-        data = await response.json();
+        // Check if response is ok first
+        if (!response.ok) {
+          let errorMessage = `HTTP error! status: ${response.status}`;
+          try {
+            const errorData = await response.text();
+            console.error('Server error response:', errorData);
+            // Try to parse as JSON to get error message
+            try {
+              const parsedError = JSON.parse(errorData);
+              errorMessage = parsedError.error || parsedError.message || errorMessage;
+            } catch {
+              // If not JSON, use the text as error message
+              errorMessage = errorData || errorMessage;
+            }
+          } catch {
+            // If we can't read the response, use status-based message
+            errorMessage = response.status === 404
+              ? 'Blog generation service not found. Please contact support.'
+              : `Server error (${response.status}). Please try again.`;
+          }
+          throw new Error(errorMessage);
+        }
 
-        if (!response.ok || !data.success) {
+        // Parse JSON response
+        try {
+          data = await response.json();
+        } catch (jsonError) {
+          console.error('Failed to parse response as JSON:', jsonError);
+          throw new Error('Invalid response from server. Please try again.');
+        }
+
+        if (!data.success) {
           throw new Error(data.error || 'Failed to generate blog post');
         }
       }
