@@ -310,19 +310,23 @@ export function AdminBlogManager() {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-gray-900 truncate">{post.title}</h3>
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <h3 className="font-semibold text-gray-900 truncate flex-1 min-w-0">{post.title}</h3>
                         <Badge className={getStatusColor(post.status)}>
-                          {post.status}
+                          {post.status.toUpperCase()}
                         </Badge>
-                        {post.is_trial_post && (
-                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                            <Sparkles className="mr-1 h-3 w-3" />
-                            Trial
+                        {getPostTypeInfo(post).map((info, index) => (
+                          <Badge key={index} variant="outline" className={info.color}>
+                            {info.icon === 'Sparkles' && <Sparkles className="mr-1 h-3 w-3" />}
+                            {info.icon === 'User' && <User className="mr-1 h-3 w-3" />}
+                            {info.icon === 'Eye' && <Eye className="mr-1 h-3 w-3" />}
+                            {info.label}
                           </Badge>
-                        )}
+                        ))}
                         {isExpired(post) && (
-                          <Badge variant="destructive">Expired</Badge>
+                          <Badge variant="destructive" className="animate-pulse">
+                            EXPIRED
+                          </Badge>
                         )}
                       </div>
                       
