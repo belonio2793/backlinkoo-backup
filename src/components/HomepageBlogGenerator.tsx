@@ -1126,7 +1126,7 @@ export function HomepageBlogGenerator() {
                         <h5 className="font-bold text-green-800 mb-4 text-left">
                           Active SEO Benefits
                         </h5>
-                        <ul className="space-y-2 text-sm text-gray-700">
+                        <ul className="space-y-2 text-sm text-gray-700 text-left">
                           <li>• Google is now indexing your new backlink</li>
                           <li>• Domain authority signals are being sent to your site</li>
                           <li>• "{primaryKeyword}" keyword rankings are improving</li>
@@ -1173,7 +1173,7 @@ export function HomepageBlogGenerator() {
                         <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
                         <div className="text-left">
                           <p className="text-sm font-medium text-amber-800 mb-1">
-                            ⚠️ Trial Backlink - 24 Hour Expiry
+                            ⚠�� Trial Backlink - 24 Hour Expiry
                           </p>
                           <p className="text-sm text-amber-700">
                             <strong>This is a trial backlink</strong> that will automatically delete in 24 hours unless claimed.
