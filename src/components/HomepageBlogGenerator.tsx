@@ -574,6 +574,19 @@ export function HomepageBlogGenerator() {
                     🔄 Checking authentication status...
                   </p>
                 )}
+
+                {/* Error Display */}
+                {generationError && (
+                  <div className="mt-6">
+                    <BlogGenerationError
+                      error={generationError}
+                      targetUrl={targetUrl}
+                      keyword={primaryKeyword}
+                      onRetry={handleGenerate}
+                      onDismiss={() => setGenerationError(null)}
+                    />
+                  </div>
+                )}
               </CardContent>
             </Card>
             )
