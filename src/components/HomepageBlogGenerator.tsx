@@ -226,68 +226,33 @@ export function HomepageBlogGenerator() {
         <div className="max-w-4xl mx-auto">
           {!isCompleted ? (
             isGenerating ? (
-              <MultiBlogGenerator
-                keyword={primaryKeyword}
-                targetUrl={targetUrl}
-                onComplete={async (posts) => {
-                  // Handle multiple posts completion - MultiBlogGenerator already stored all posts
-                  console.log(`✅ MultiBlogGenerator completed with ${posts.length} posts`);
-                  setAllGeneratedPosts(posts);
-                  setIsCompleted(true);
-                  setIsGenerating(false);
-
-                  // Set the first post as the main generated post for display
-                  const firstPost = posts[0];
-                  if (firstPost?.content) {
-                    setGeneratedPost({
-                      title: firstPost.title,
-                      content: firstPost.content,
-                      contextualLinks: firstPost.content?.contextualLinks || [],
-                      seoScore: firstPost.stats.seoScore
-                    });
-                    setPublishedUrl(firstPost.previewUrl || '');
-                  }
-
-                  // Create campaign entry for registered users with all preview URLs
-                  const { data: { user } } = await supabase.auth.getUser();
-                  if (user) {
-                    try {
-                      const allPreviewUrls = posts.filter(p => p.previewUrl).map(p => p.previewUrl);
-                      const totalBacklinks = posts.reduce((sum, p) => sum + (p.stats.backlinks || 1), 0);
-
-                      const { data: campaignData, error: campaignError } = await supabase
-                        .from('campaigns')
-                        .insert({
-                          name: `5-Post Campaign: ${primaryKeyword}`,
-                          target_url: targetUrl,
-                          keywords: [primaryKeyword],
-                          status: 'completed',
-                          links_requested: posts.length,
-                          links_delivered: posts.length,
-                          completed_backlinks: allPreviewUrls,
-                          user_id: user.id,
-                          credits_used: posts.length
-                        })
-                        .select()
-                        .single();
-
-                      if (campaignError) {
-                        console.warn('Failed to create multi-post campaign:', campaignError);
-                      } else {
-                        console.log('✅ Multi-post campaign created successfully:', campaignData);
-                      }
-                    } catch (error) {
-                      console.warn('Failed to create multi-post campaign:', error);
-                    }
-                  }
-
-                  toast({
-                    title: "🎉 5 Blog Posts Generated!",
-                    description: "Your backlink campaign is ready! Click the buttons below to view your live posts.",
-                  });
-                }}
-                onSaveCampaign={() => setShowSignupPopup(true)}
-              />
+              <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
+                <CardContent className="text-center py-12 px-8">
+                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 mb-6">
+                    <Loader2 className="h-10 w-10 text-white animate-spin" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4 text-gray-900">
+                    Creating Your Blog Post...
+                  </h3>
+                  <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
+                    Our AI is crafting a high-quality article about "{primaryKeyword}" with natural backlinks to your website.
+                  </p>
+                  <div className="flex justify-center space-x-4 text-sm text-gray-500">
+                    <div className="flex items-center">
+                      <Sparkles className="h-4 w-4 mr-1" />
+                      Generating content
+                    </div>
+                    <div className="flex items-center">
+                      <Link2 className="h-4 w-4 mr-1" />
+                      Adding backlinks
+                    </div>
+                    <div className="flex items-center">
+                      <Globe className="h-4 w-4 mr-1" />
+                      Publishing live
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             ) : (
               <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
               <CardHeader className="text-center pb-6">
