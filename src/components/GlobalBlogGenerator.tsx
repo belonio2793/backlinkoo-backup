@@ -124,6 +124,32 @@ export function GlobalBlogGenerator({
   const handleGenerate = async () => {
     if (!validateForm()) return;
 
+    // Check content filtering before proceeding
+    const filterResult = contentFilterService.filterBlogRequest(
+      targetUrl,
+      primaryKeyword,
+      anchorText
+    );
+
+    if (!filterResult.isAllowed) {
+      toast({
+        title: "Content blocked",
+        description: filterResult.reason || "Your request contains terms that are not allowed.",
+        variant: "destructive",
+      });
+
+      // Show suggestions if available
+      if (filterResult.suggestions && filterResult.suggestions.length > 0) {
+        setTimeout(() => {
+          toast({
+            title: "Suggestions",
+            description: filterResult.suggestions![0],
+          });
+        }, 2000);
+      }
+      return;
+    }
+
     if (remainingRequests <= 0) {
       toast({
         title: "Rate limit reached",
