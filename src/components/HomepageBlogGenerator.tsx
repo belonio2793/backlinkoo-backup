@@ -627,18 +627,35 @@ export function HomepageBlogGenerator() {
                   onClick={handleGenerate}
                   disabled={isGenerating || !targetUrl || !primaryKeyword || isCheckingAuth}
                   size="lg"
-                  className="w-full text-lg py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium shadow-lg"
+                  className="w-full text-lg py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium shadow-lg relative overflow-hidden"
                 >
                   {isGenerating ? (
                     <>
                       <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                      {currentUser ? 'Generating Your Backlink...' : 'Generating Your Trial Backlink...'}
+                      <span className="animate-pulse">
+                        {showProgress
+                          ? 'Processing Your Enterprise Backlink...'
+                          : currentUser
+                            ? 'Generating Professional Content...'
+                            : 'Creating Your Trial Content...'
+                        }
+                      </span>
                     </>
                   ) : (
                     <>
                       <Sparkles className="mr-3 h-5 w-5" />
-                      {currentUser ? 'Create Permanent Backlink' : 'Create Free Trial Backlink'}
+                      <span>
+                        {currentUser
+                          ? '🚀 Deploy Enterprise Backlink'
+                          : '🎯 Start Free Trial Backlink'
+                        }
+                      </span>
                     </>
+                  )}
+
+                  {/* Enterprise progress indicator overlay */}
+                  {isGenerating && (
+                    <div className="absolute bottom-0 left-0 h-1 bg-white/30 animate-pulse w-full"></div>
                   )}
                 </Button>
 
