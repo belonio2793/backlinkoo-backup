@@ -112,6 +112,13 @@ export function HomepageBlogGenerator() {
                            window.location.port === '8080' ||
                            process.env.NODE_ENV === 'development';
 
+      console.log('🔍 Environment check:', {
+        hostname: window.location.hostname,
+        port: window.location.port,
+        isDevelopment,
+        nodeEnv: process.env.NODE_ENV
+      });
+
       let data;
 
       if (isDevelopment) {
