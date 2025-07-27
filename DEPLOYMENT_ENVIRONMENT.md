@@ -22,10 +22,11 @@ RESEND_API_KEY=re_your_resend_api_key_here
 ```
 
 ### Netlify Configuration
-```bash
-URI=https://backlinkoo.com
-```
-**Note**: Use `URI` instead of `URL` as `URL` is a reserved environment variable in Netlify.
+Site URL is automatically provided by Netlify via:
+- `URL` (production deploy URL)
+- `DEPLOY_URL` (current deploy URL)
+
+**No manual configuration needed** - Netlify handles this automatically.
 
 ## Setting Up in Netlify
 
