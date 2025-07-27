@@ -961,7 +961,7 @@ export function HomepageBlogGenerator() {
                           <span className="font-bold">
                             {publishedUrl?.includes('://')
                               ? publishedUrl.split('://')[1]
-                              : `${window.location.host}/blog/?slug=${generatedPost?.slug || primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`
+                              : `${window.location.host}/blog/${generatedPost?.slug || primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`
                             }
                           </span>
                         </div>
