@@ -232,7 +232,7 @@ export function HomepageBlogGenerator() {
       }
 
       // Show signup popup for guest users after a delay
-      if (!currentUser) {
+      if (isGuest) {
         setTimeout(() => {
           setShowSignupPopup(true);
         }, 3000); // Show popup after 3 seconds
