@@ -238,18 +238,12 @@ export function HomepageBlogGenerator() {
         <div className="max-w-4xl mx-auto">
           {!isCompleted ? (
             showProgress ? (
-              <RealtimeProgressIndicator
+              <SmartProgressIndicator
                 isActive={isGenerating}
                 targetUrl={targetUrl}
                 keyword={primaryKeyword}
-                onComplete={() => {
-                  setShowProgress(false);
-                  setIsGenerating(false);
-                }}
-                onError={(error) => {
-                  console.error('Progress indicator error:', error);
-                  setShowProgress(false);
-                  setIsGenerating(false);
+                onProgressUpdate={(step, progress) => {
+                  console.log(`Progress: ${step} - ${Math.round(progress)}%`);
                 }}
               />
             ) : (
