@@ -489,30 +489,32 @@ export function HomepageBlogGenerator() {
                   </Button>
                 </div>
 
-                <div className="mt-8 space-y-4">
-                  <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
-                    <p className="text-sm text-red-800 font-medium mb-2">
-                      ⏰ <strong>WARNING: These backlinks will auto-delete in 24 hours!</strong>
-                    </p>
-                    <p className="text-sm text-red-700 mb-3">
-                      Your 5 backlinks are live and building SEO value right now, but they're on a 24-hour trial timer.
-                      Create an account now to keep them forever and stop the deletion countdown!
-                    </p>
-                    <Button
-                      size="sm"
-                      className="bg-red-600 hover:bg-red-700 text-white animate-pulse"
-                      onClick={() => setShowSignupPopup(true)}
-                    >
-                      Stop Deletion Timer Now
-                    </Button>
-                  </div>
+                {!currentUser && (
+                  <div className="mt-8 space-y-4">
+                    <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
+                      <p className="text-sm text-red-800 font-medium mb-2">
+                        ⏰ <strong>WARNING: This backlink will auto-delete in 24 hours!</strong>
+                      </p>
+                      <p className="text-sm text-red-700 mb-3">
+                        Your backlink is live and building SEO value right now, but it's on a 24-hour trial timer.
+                        Create an account now to keep it forever and stop the deletion countdown!
+                      </p>
+                      <Button
+                        size="sm"
+                        className="bg-red-600 hover:bg-red-700 text-white animate-pulse"
+                        onClick={() => setShowSignupPopup(true)}
+                      >
+                        Stop Deletion Timer Now
+                      </Button>
+                    </div>
 
-                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-sm text-blue-800 font-medium">
-                      🚀 Ready for more? Our premium packages include unlimited 5-post campaigns, advanced targeting, and priority support!
-                    </p>
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-sm text-blue-800 font-medium">
+                        🚀 Ready for more? Create unlimited backlinks with our premium packages and advanced targeting!
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           )}
