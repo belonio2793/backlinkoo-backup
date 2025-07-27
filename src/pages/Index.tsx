@@ -315,7 +315,7 @@ const Index = () => {
           <div className="max-w-sm mx-auto mb-4">
             <details className="group">
               <summary className="cursor-pointer text-center text-sm text-gray-500 hover:text-gray-700">
-                Advanced Options ▼
+                Advanced Options
               </summary>
               <div className="mt-2 p-3 bg-white/50 rounded-lg border">
                 <div className="flex justify-center">
