@@ -54,7 +54,14 @@ export function BlogPost() {
         if (!post) {
           try {
             const blogStorageKey = `blog_post_${slug}`;
+            console.log('🔍 Looking for blog post with key:', blogStorageKey);
+
+            // Debug: Show all localStorage keys that start with 'blog_post_'
+            const allKeys = Object.keys(localStorage).filter(key => key.startsWith('blog_post_'));
+            console.log('📋 Available blog post keys:', allKeys);
+
             const storedBlogData = localStorage.getItem(blogStorageKey);
+            console.log('📄 Found stored data:', !!storedBlogData);
 
             if (storedBlogData) {
               const blogData = JSON.parse(storedBlogData);
