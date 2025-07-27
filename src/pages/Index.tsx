@@ -731,6 +731,21 @@ const Index = () => {
 
       {/* Footer */}
       <Footer />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onAuthSuccess={(user) => {
+          setUser(user);
+          setShowLoginModal(false);
+          toast({
+            title: "Welcome!",
+            description: "You have been successfully signed in.",
+          });
+        }}
+        defaultTab="login"
+      />
     </div>
   );
 };
