@@ -983,13 +983,6 @@ export function HomepageBlogGenerator() {
                             {generatedPost?.title || `The Ultimate Guide to ${primaryKeyword}: Professional Insights & Strategies`}
                           </h4>
                           <div className="flex items-center gap-6 text-sm text-gray-600">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
-                                B
-                              </div>
-                              <span>Backlinkoo Editorial</span>
-                            </div>
-                            <span>•</span>
                             <span>Published {new Date().toLocaleDateString()}</span>
                             <span>•</span>
                             <span>{generatedPost?.word_count || 1200}+ words</span>
