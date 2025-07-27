@@ -239,12 +239,18 @@ export function HomepageBlogGenerator() {
         <div className="max-w-4xl mx-auto">
           {!isCompleted ? (
             showProgress ? (
-              <SmartProgressIndicator
+              <AdaptiveProgressIndicator
                 isActive={isGenerating}
                 targetUrl={targetUrl}
                 keyword={primaryKeyword}
+                forceComplete={forceComplete}
                 onProgressUpdate={(step, progress) => {
                   console.log(`Progress: ${step} - ${Math.round(progress)}%`);
+                }}
+                onNaturalComplete={() => {
+                  setShowProgress(false);
+                  setIsGenerating(false);
+                  setForceComplete(false);
                 }}
               />
             ) : (
