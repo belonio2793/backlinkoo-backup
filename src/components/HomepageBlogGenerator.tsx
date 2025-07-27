@@ -276,9 +276,11 @@ export function HomepageBlogGenerator() {
         description: error instanceof Error ? error.message : "Failed to generate blog post. Please try again.",
         variant: "destructive"
       });
+      // Reset all states on error
       setIsGenerating(false);
       setShowProgress(false);
       setForceComplete(false);
+      setIsCompleted(false);
     }
   };
 
