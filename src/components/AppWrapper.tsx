@@ -34,6 +34,7 @@ export const AppWrapper = () => {
   return (
     <>
       <TrialNotificationBanner />
+      <TrialBottomNotification />
       <Routes>
       {/* Public routes - no authentication required */}
       <Route path="/" element={<Index />} />
