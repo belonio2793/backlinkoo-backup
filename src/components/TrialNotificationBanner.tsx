@@ -102,9 +102,8 @@ export function TrialNotificationBanner() {
     window.open(`/blog/${slug}`, '_blank');
   };
 
-  if (!isVisible || currentUser || trialPosts.length === 0) {
-    return null;
-  }
+  // Banner disabled - replaced with subtle bottom notification
+  return null;
 
   const mostUrgentPost = trialPosts.reduce((urgent, post) => {
     const postTime = getTimeRemaining(post.expires_at);
