@@ -362,7 +362,7 @@ export function HomepageBlogGenerator() {
                       variant="outline"
                       size="sm"
                       className="border-amber-600 text-amber-700 hover:bg-amber-100"
-                      onClick={() => window.location.href = '/login'}
+                      onClick={() => setShowLoginModal(true)}
                     >
                       Login / Register
                     </Button>
