@@ -423,40 +423,36 @@ export function HomepageBlogGenerator() {
                   </div>
                 </div>
 
-                {/* Show all generated blog posts */}
-                {allGeneratedPosts.length > 0 && (
+                {/* Blog Post Preview */}
+                {generatedPost && (
                   <div className="space-y-4 mb-6">
-                    <h4 className="text-lg font-semibold text-center">🎉 Your 5 Live Backlink Posts:</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {allGeneratedPosts.map((post, index) => (
-                        <div key={post.id} className="p-3 border rounded-lg bg-white">
-                          <div className="text-sm font-medium mb-1">{post.expert?.avatar} {post.expert?.name}</div>
-                          <div className="text-xs text-gray-600 mb-2 truncate">{post.title}</div>
+                    <div className="p-4 border rounded-lg bg-white">
+                      <div className="text-lg font-medium mb-2">{generatedPost.title}</div>
+                      <div className="text-sm text-gray-600 mb-3">
+                        Published at: <a href={publishedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{publishedUrl}</a>
+                      </div>
 
-                          {/* Unclaimed Blog Notification */}
-                          {!currentUser && (
-                            <div className="mb-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs">
-                              <div className="flex items-center gap-1 mb-1">
-                                <span className="text-amber-600">⚠️</span>
-                                <span className="font-medium text-amber-800">Unclaimed Blog</span>
-                              </div>
-                              <p className="text-amber-700 leading-tight">
-                                This blog has not been claimed. Create an account to claim and save it permanently,
-                                or it will be automatically deleted in 24 hours.
-                              </p>
-                            </div>
-                          )}
-
-                          <Button
-                            size="sm"
-                            onClick={() => window.open(post.previewUrl || `/blog/${post.slug}`, '_blank')}
-                            className="w-full text-xs"
-                          >
-                            <ExternalLink className="mr-1 h-3 w-3" />
-                            View Live Post
-                          </Button>
+                      {/* Unclaimed Blog Notification */}
+                      {!currentUser && (
+                        <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-amber-600">⚠️</span>
+                            <span className="font-medium text-amber-800">Trial Blog Post</span>
+                          </div>
+                          <p className="text-amber-700 text-sm leading-tight">
+                            This blog post is in trial mode. Create an account to claim and save it permanently,
+                            or it will be automatically deleted in 24 hours.
+                          </p>
                         </div>
-                      ))}
+                      )}
+
+                      <Button
+                        onClick={() => window.open(publishedUrl, '_blank')}
+                        className="w-full"
+                      >
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        View Live Blog Post
+                      </Button>
                     </div>
                   </div>
                 )}
