@@ -270,6 +270,25 @@ export function HomepageBlogGenerator() {
 
     } catch (error) {
       console.error('Blog generation error:', error);
+
+      // Log the error for tracking
+      await errorLogger.logError(
+        ErrorSeverity.HIGH,
+        ErrorCategory.GENERAL,
+        `Blog generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        {
+          error: error instanceof Error ? error : new Error(String(error)),
+          context: {
+            targetUrl,
+            primaryKeyword,
+            userId: currentUser?.id,
+            isProduction: true
+          },
+          component: 'HomepageBlogGenerator',
+          action: 'generate_blog_post'
+        }
+      );
+
       toast({
         title: "Generation Failed",
         description: error instanceof Error ? error.message : "Failed to generate blog post. Please try again.",
@@ -620,7 +639,7 @@ export function HomepageBlogGenerator() {
                         <li>• Contextual Links: {generatedPost?.contextualLinks?.length || 1}</li>
                         <li>• Type: Natural, Contextual</li>
                         <li className={`font-medium ${currentUser ? 'text-green-600' : 'text-amber-600'}`}>
-                          • Status: {currentUser ? 'Live & Permanent' : 'Trial (Expires in 24h)'}
+                          ��� Status: {currentUser ? 'Live & Permanent' : 'Trial (Expires in 24h)'}
                         </li>
                       </ul>
                     </div>
