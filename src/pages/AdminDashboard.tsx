@@ -193,6 +193,10 @@ const AdminDashboard = () => {
             <AdminBlogManager />
           </TabsContent>
 
+          <TabsContent value="trial-cleanup">
+            <TrialPostCleanupManager />
+          </TabsContent>
+
           <TabsContent value="affiliates">
             <AdminAffiliateManager />
           </TabsContent>
