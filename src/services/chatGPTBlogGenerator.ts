@@ -320,8 +320,14 @@ export class ChatGPTBlogGenerator {
         .single();
 
       if (error) {
-        console.error('❌ Supabase insert error:', error);
-        throw new Error(`Failed to save blog post: ${error.message}`);
+        console.error('❌ Supabase insert error:', JSON.stringify(error, null, 2));
+        console.error('❌ Supabase error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw new Error(`Failed to save blog post: ${error.message || error.details || 'Unknown Supabase error'}`);
       }
 
       console.log('✅ Blog post published successfully:', {
