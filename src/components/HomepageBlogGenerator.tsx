@@ -760,7 +760,6 @@ export function HomepageBlogGenerator() {
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
         onAuthSuccess={(user) => {
-          setCurrentUser(user);
           setShowLoginModal(false);
           // Refresh the page to update all auth states
           window.location.reload();
