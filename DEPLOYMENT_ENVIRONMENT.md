@@ -23,8 +23,9 @@ RESEND_API_KEY=re_your_resend_api_key_here
 
 ### Netlify Configuration
 ```bash
-URL=https://backlinkoo.com
+URI=https://backlinkoo.com
 ```
+**Note**: Use `URI` instead of `URL` as `URL` is a reserved environment variable in Netlify.
 
 ## Setting Up in Netlify
 
