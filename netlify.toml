@@ -5,14 +5,15 @@
 [functions]
   directory = "netlify/functions"
 
-# Scheduled function to cleanup expired posts every 30 minutes
-[[plugins]]
-  package = "@netlify/plugin-scheduled-functions"
-
-[scheduled]
-  [scheduled.cleanup-posts]
-    path = "/.netlify/functions/cleanup-posts"
-    schedule = "*/30 * * * *"  # Every 30 minutes
+# Note: Scheduled functions require Netlify Pro plan
+# For now, cleanup can be triggered manually via /.netlify/functions/cleanup-posts
+# Uncomment below if you have Netlify Pro:
+# [[plugins]]
+#   package = "@netlify/plugin-scheduled-functions"
+# [scheduled]
+#   [scheduled.cleanup-posts]
+#     path = "/.netlify/functions/cleanup-posts"
+#     schedule = "*/30 * * * *"
 
 # Redirects for blog posts
 [[redirects]]
