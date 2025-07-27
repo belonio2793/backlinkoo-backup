@@ -316,6 +316,35 @@ export class PublishedBlogService {
     this.inMemoryPosts.set(blogPost.slug, blogPost);
     console.log(`✅ Blog post saved to in-memory storage: ${blogPost.slug}`);
   }
+
+  // Private method to create dual-domain entries for cross-domain accessibility
+  private saveDualDomainEntries(blogPost: PublishedBlogPost, currentDomainUrl: string, backlinkooUrl: string): void {
+    try {
+      // Create variant with current domain URL
+      const currentDomainVariant = {
+        ...blogPost,
+        published_url: currentDomainUrl,
+        id: `${blogPost.id}_current`
+      };
+
+      // Create variant with backlinkoo URL
+      const backlinkooVariant = {
+        ...blogPost,
+        published_url: backlinkooUrl,
+        id: `${blogPost.id}_backlinkoo`
+      };
+
+      // Save both variants to ensure accessibility from both domains
+      this.inMemoryPosts.set(`${blogPost.slug}_current`, currentDomainVariant);
+      this.inMemoryPosts.set(`${blogPost.slug}_backlinkoo`, backlinkooVariant);
+
+      console.log(`✅ Dual-domain entries created for slug: ${blogPost.slug}`);
+      console.log(`   📍 Current domain: ${currentDomainUrl}`);
+      console.log(`   📍 Backlinkoo: ${backlinkooUrl}`);
+    } catch (error) {
+      console.warn('Failed to create dual-domain entries:', error);
+    }
+  }
 }
 
 export const publishedBlogService = new PublishedBlogService();
