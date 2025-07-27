@@ -65,6 +65,9 @@ export function HomepageBlogGenerator() {
     console.log('🚀 handleGenerate called with:', { targetUrl, primaryKeyword });
     console.log('👤 Current user status:', isLoggedIn ? 'Authenticated' : 'Guest');
 
+    // Clear any previous errors
+    setGenerationError(null);
+
     if (!targetUrl || !primaryKeyword) {
       toast({
         title: "Missing Information",
