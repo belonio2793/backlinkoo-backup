@@ -30,6 +30,8 @@ import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 import { LoginModal } from "@/components/LoginModal";
 import { InlineAuthForm } from "@/components/InlineAuthForm";
 import { TrialConversionBanner } from "@/components/TrialConversionBanner";
+import { QuickTrialUpgrade } from "@/components/QuickTrialUpgrade";
+import { TrialConversionService } from "@/services/trialConversionService";
 
 
 const Index = () => {
