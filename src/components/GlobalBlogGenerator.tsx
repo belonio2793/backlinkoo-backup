@@ -124,28 +124,29 @@ export function GlobalBlogGenerator({
   const handleGenerate = async () => {
     if (!validateForm()) return;
 
-    // Check content filtering before proceeding
-    const filterResult = contentFilterService.filterBlogRequest(
+    // Enhanced content moderation check before proceeding
+    const moderationResult = await contentModerationService.moderateContent(
+      `${targetUrl} ${primaryKeyword} ${anchorText || ''}`,
       targetUrl,
       primaryKeyword,
-      anchorText
+      anchorText,
+      undefined, // No user ID for guest users
+      'blog_request'
     );
 
-    if (!filterResult.isAllowed) {
-      toast({
-        title: "Content blocked",
-        description: filterResult.reason || "Your request contains terms that are not allowed.",
-        variant: "destructive",
-      });
-
-      // Show suggestions if available
-      if (filterResult.suggestions && filterResult.suggestions.length > 0) {
-        setTimeout(() => {
-          toast({
-            title: "Suggestions",
-            description: filterResult.suggestions![0],
-          });
-        }, 2000);
+    if (!moderationResult.allowed) {
+      if (moderationResult.requiresReview) {
+        toast({
+          title: "Content submitted for review",
+          description: "Your request has been flagged for administrative review. You'll be notified once the review is complete.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Content blocked",
+          description: "Your request contains terms that violate our content policy. Please try again with appropriate content.",
+          variant: "destructive",
+        });
       }
       return;
     }
