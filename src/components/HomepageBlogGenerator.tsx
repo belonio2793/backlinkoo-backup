@@ -231,20 +231,41 @@ export function HomepageBlogGenerator() {
         }
       }
 
-      console.log('🎯 Setting generated post data:', { blogPost, publishedUrl });
+      // ============= ENTERPRISE SUCCESS HANDLING =============
+      console.log('🎯 GENERATION SUCCESSFUL - Processing results');
+      console.log('📊 Generated Content Data:', {
+        title: blogPost.title,
+        wordCount: blogPost.word_count,
+        seoScore: blogPost.seo_score,
+        publishedUrl,
+        isTrialPost: blogPost.is_trial_post,
+        userId: blogPost.user_id
+      });
+
+      // Set all completion data atomically
       setGeneratedPost(blogPost);
       setPublishedUrl(publishedUrl);
       setBlogPostId(blogPost.id);
 
-      // Force the progress indicator to complete
-      console.log('⏰ Forcing progress completion...');
+      // Force immediate completion for enterprise UX
+      console.log('⚡ FINALIZING RESULTS - Transitioning to completion state');
       setForceComplete(true);
 
-      // Show results immediately for better UX
-      console.log('✅ Setting completion state to true immediately');
-      setIsCompleted(true);
-      setIsGenerating(false);
-      setShowProgress(false);
+      // Ensure completion happens immediately and reliably
+      setTimeout(() => {
+        console.log('✅ MISSION ACCOMPLISHED - Displaying final results');
+        setIsCompleted(true);
+        setIsGenerating(false);
+        setShowProgress(false);
+
+        // Enterprise success confirmation
+        toast({
+          title: "🎉 Success! Your Backlink is Live",
+          description: isLoggedIn
+            ? "Professional content published with permanent backlinks"
+            : "Trial content live for 24 hours - register to save!",
+        });
+      }, 100); // Minimal delay for state consistency
 
       toast({
         title: "Blog Post Generated!",
