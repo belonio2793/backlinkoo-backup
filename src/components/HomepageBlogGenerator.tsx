@@ -16,6 +16,7 @@ import { GenerationSequence } from './GenerationSequence';
 import { InteractiveContentGenerator } from './InteractiveContentGenerator';
 import { MultiBlogGenerator } from './MultiBlogGenerator';
 import { ClaimTrialPostDialog } from './ClaimTrialPostDialog';
+import { AdaptiveProgressIndicator } from './AdaptiveProgressIndicator';
 import {
   Sparkles,
   Link2,
@@ -36,6 +37,8 @@ export function HomepageBlogGenerator() {
   const [primaryKeyword, setPrimaryKeyword] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
+  const [forceComplete, setForceComplete] = useState(false);
   const [generatedPost, setGeneratedPost] = useState<any>(null);
   const [allGeneratedPosts, setAllGeneratedPosts] = useState<any[]>([]);
   const [publishedUrl, setPublishedUrl] = useState('');
@@ -68,6 +71,7 @@ export function HomepageBlogGenerator() {
     console.log('✅ Starting generation with valid inputs');
     setIsGenerating(true);
     setIsCompleted(false);
+    setShowProgress(true);
 
     try {
       // Check if user is logged in
@@ -127,7 +131,14 @@ export function HomepageBlogGenerator() {
       setGeneratedPost(blogPost);
       setPublishedUrl(publishedUrl);
       setBlogPostId(blogPost.id);
-      setIsCompleted(true);
+
+      // Force the progress indicator to complete
+      setForceComplete(true);
+
+      // Show results after progress completes
+      setTimeout(() => {
+        setIsCompleted(true);
+      }, 2000);
 
       toast({
         title: "Blog Post Generated!",
@@ -169,6 +180,8 @@ export function HomepageBlogGenerator() {
         variant: "destructive"
       });
       setIsGenerating(false);
+      setShowProgress(false);
+      setForceComplete(false);
     }
   };
 
@@ -190,6 +203,9 @@ export function HomepageBlogGenerator() {
     setGeneratedPost(null);
     setAllGeneratedPosts([]);
     setPublishedUrl('');
+    setShowProgress(false);
+    setIsGenerating(false);
+    setForceComplete(false);
   };
 
   return (
@@ -225,34 +241,21 @@ export function HomepageBlogGenerator() {
 
         <div className="max-w-4xl mx-auto">
           {!isCompleted ? (
-            isGenerating ? (
-              <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
-                <CardContent className="text-center py-12 px-8">
-                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 mb-6">
-                    <Loader2 className="h-10 w-10 text-white animate-spin" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4 text-gray-900">
-                    Creating Your Blog Post...
-                  </h3>
-                  <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-                    Our AI is crafting a high-quality article about "{primaryKeyword}" with natural backlinks to your website.
-                  </p>
-                  <div className="flex justify-center space-x-4 text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <Sparkles className="h-4 w-4 mr-1" />
-                      Generating content
-                    </div>
-                    <div className="flex items-center">
-                      <Link2 className="h-4 w-4 mr-1" />
-                      Adding backlinks
-                    </div>
-                    <div className="flex items-center">
-                      <Globe className="h-4 w-4 mr-1" />
-                      Publishing live
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            showProgress ? (
+              <AdaptiveProgressIndicator
+                isActive={isGenerating}
+                targetUrl={targetUrl}
+                keyword={primaryKeyword}
+                forceComplete={forceComplete}
+                onProgressUpdate={(step, progress) => {
+                  console.log(`Progress: ${step} - ${Math.round(progress)}%`);
+                }}
+                onNaturalComplete={() => {
+                  setShowProgress(false);
+                  setIsGenerating(false);
+                  setForceComplete(false);
+                }}
+              />
             ) : (
               <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
               <CardHeader className="text-center pb-6">
