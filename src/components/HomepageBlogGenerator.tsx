@@ -702,10 +702,10 @@ export function HomepageBlogGenerator() {
                         <Loader2 className="mr-3 h-5 w-5 animate-spin" />
                         <span className="animate-pulse">
                           {showProgress
-                            ? 'Processing Your Enterprise Backlink...'
+                            ? 'Processing Your Professional Backlink...'
                             : currentUser
-                              ? 'Generating Professional Content...'
-                              : 'Creating Your Trial Content...'
+                              ? 'Generating Content Instantly...'
+                              : 'Creating Your Free Backlink...'
                           }
                         </span>
                       </>
