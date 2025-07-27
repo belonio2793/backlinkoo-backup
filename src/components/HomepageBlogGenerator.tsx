@@ -15,6 +15,7 @@ import { SavePostSignupPopup } from './SavePostSignupPopup';
 import { GenerationSequence } from './GenerationSequence';
 import { InteractiveContentGenerator } from './InteractiveContentGenerator';
 import { MultiBlogGenerator } from './MultiBlogGenerator';
+import { ClaimTrialPostDialog } from './ClaimTrialPostDialog';
 import {
   Sparkles,
   Link2,
