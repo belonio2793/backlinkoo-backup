@@ -287,6 +287,19 @@ export function HomepageBlogGenerator() {
       setPublishedUrl(publishedUrl);
       setBlogPostId(blogPost.id);
 
+      // Verify the blog post is accessible
+      if (blogPost.slug) {
+        setTimeout(async () => {
+          console.log('🔍 Verifying blog post accessibility...');
+          const verification = await testBlogPostAccess(blogPost.slug);
+          if (verification.success) {
+            console.log('✅ Blog post verified as accessible at:', `/blog/${blogPost.slug}`);
+          } else {
+            console.warn('⚠️ Blog post verification failed:', verification.error);
+          }
+        }, 1000);
+      }
+
       // Force the progress indicator to complete
       setForceComplete(true);
 
