@@ -1158,14 +1158,14 @@ export function HomepageBlogGenerator() {
                     </div>
                   </div>
                   {currentUser ? (
-                    <div className="max-w-3xl mx-auto mb-8 p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="flex items-start gap-3">
-                        <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div className="max-w-2xl mx-auto mb-6 p-3 bg-green-50 border border-green-200 rounded">
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
                         <div className="text-left">
-                          <p className="text-sm font-medium text-green-800 mb-1">
-                            ✅ Permanent Backlink Created
+                          <p className="text-xs font-medium text-green-800 mb-1" style={{fontFamily: 'Roboto, sans-serif'}}>
+                            Permanent Backlink Created
                           </p>
-                          <p className="text-sm text-green-700">
+                          <p className="text-xs text-green-700" style={{fontFamily: 'Roboto, sans-serif'}}>
                             <strong>Your backlink is permanently saved</strong> and will continue providing SEO value indefinitely.
                             You can view and manage all your backlinks from your dashboard.
                           </p>
@@ -1173,14 +1173,14 @@ export function HomepageBlogGenerator() {
                       </div>
                     </div>
                   ) : (
-                    <div className="max-w-3xl mx-auto mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                      <div className="flex items-start gap-3">
-                        <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div className="max-w-2xl mx-auto mb-6 p-3 bg-amber-50 border border-amber-200 rounded">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
                         <div className="text-left">
-                          <p className="text-sm font-medium text-amber-800 mb-1">
-                            ⚠️ Trial Backlink - 24 Hour Expiry
+                          <p className="text-xs font-medium text-amber-800 mb-1" style={{fontFamily: 'Roboto, sans-serif'}}>
+                            Trial Backlink - 24 Hour Expiry
                           </p>
-                          <p className="text-sm text-amber-700">
+                          <p className="text-xs text-amber-700" style={{fontFamily: 'Roboto, sans-serif'}}>
                             <strong>This is a trial backlink</strong> that will automatically delete in 24 hours unless claimed.
                             Create an account now to make this backlink permanent and unlock unlimited backlink creation!
                           </p>
@@ -1188,13 +1188,13 @@ export function HomepageBlogGenerator() {
                       </div>
                     </div>
                   )}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-4 rounded-xl border border-green-200">
-                      <div className="flex items-center gap-2 mb-3">
-                        <FileText className="h-5 w-5 text-green-600" />
-                        <h4 className="font-semibold text-green-800">Content Quality</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                    <div className="bg-green-50 p-3 rounded border border-green-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileText className="h-4 w-4 text-green-600" />
+                        <h4 className="font-medium text-green-800 text-sm" style={{fontFamily: 'Roboto, sans-serif'}}>Content Quality</h4>
                       </div>
-                      <div className="space-y-1 text-sm">
+                      <div className="space-y-1 text-xs" style={{fontFamily: 'Roboto, sans-serif'}}>
                         <div className="flex justify-between">
                           <span>Word Count:</span>
                           <span className="font-medium">{generatedPost?.word_count || 1200}+ words</span>
@@ -1209,12 +1209,12 @@ export function HomepageBlogGenerator() {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-gradient-to-br from-blue-50 to-cyan-100 p-4 rounded-xl border border-blue-200">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Link2 className="h-5 w-5 text-blue-600" />
-                        <h4 className="font-semibold text-blue-800">Backlink Details</h4>
+                    <div className="bg-blue-50 p-3 rounded border border-blue-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Link2 className="h-4 w-4 text-blue-600" />
+                        <h4 className="font-medium text-blue-800 text-sm" style={{fontFamily: 'Roboto, sans-serif'}}>Backlink Details</h4>
                       </div>
-                      <div className="space-y-1 text-sm">
+                      <div className="space-y-1 text-xs" style={{fontFamily: 'Roboto, sans-serif'}}>
                         <div className="flex justify-between">
                           <span>Links Created:</span>
                           <span className="font-medium">{generatedPost?.contextual_links?.length || 1}</span>
@@ -1229,22 +1229,22 @@ export function HomepageBlogGenerator() {
                         </div>
                       </div>
                     </div>
-                    <div className={`bg-gradient-to-br p-4 rounded-xl border ${
+                    <div className={`p-3 rounded border ${
                       currentUser
-                        ? 'from-green-50 to-emerald-100 border-green-200'
-                        : 'from-amber-50 to-orange-100 border-amber-200'
+                        ? 'bg-green-50 border-green-200'
+                        : 'bg-amber-50 border-amber-200'
                     }`}>
-                      <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center gap-2 mb-2">
                         {currentUser ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-600" />
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
                         ) : (
-                          <AlertCircle className="h-5 w-5 text-amber-600" />
+                          <AlertCircle className="h-4 w-4 text-amber-600" />
                         )}
-                        <h4 className={`font-semibold ${currentUser ? 'text-green-800' : 'text-amber-800'}`}>
+                        <h4 className={`font-medium text-sm ${currentUser ? 'text-green-800' : 'text-amber-800'}`} style={{fontFamily: 'Roboto, sans-serif'}}>
                           Status
                         </h4>
                       </div>
-                      <div className="space-y-1 text-sm">
+                      <div className="space-y-1 text-xs" style={{fontFamily: 'Roboto, sans-serif'}}>
                         <div className="flex justify-between">
                           <span>Type:</span>
                           <span className="font-medium">{currentUser ? 'Permanent' : 'Trial'}</span>
@@ -1260,13 +1260,13 @@ export function HomepageBlogGenerator() {
                       </div>
                     </div>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-200">
+                  <div className="bg-gray-50 rounded p-3 mb-4 border border-gray-200">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Target className="h-5 w-5 text-gray-600" />
+                      <div className="flex items-center gap-2">
+                        <Target className="h-4 w-4 text-gray-600" />
                         <div>
-                          <p className="text-sm font-medium text-gray-900">Backlink Target</p>
-                          <p className="text-sm text-gray-600">Your website is now receiving SEO value</p>
+                          <p className="text-xs font-medium text-gray-900" style={{fontFamily: 'Roboto, sans-serif'}}>Backlink Target</p>
+                          <p className="text-xs text-gray-600" style={{fontFamily: 'Roboto, sans-serif'}}>Your website is now receiving SEO value</p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -1274,7 +1274,8 @@ export function HomepageBlogGenerator() {
                           href={targetUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-700 font-medium text-sm break-all"
+                          className="text-blue-600 hover:text-blue-700 font-medium text-xs break-all"
+                          style={{fontFamily: 'Roboto, sans-serif'}}
                         >
                           {targetUrl}
                         </a>
