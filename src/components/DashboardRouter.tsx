@@ -35,15 +35,9 @@ export function DashboardRouter() {
 
         // Routing logic
         if (session?.user) {
-          // User is logged in - check email verification
-          const isEmailVerified = session.user.email_confirmed_at !== null;
-          if (isEmailVerified) {
-            // Show authenticated dashboard
-            return;
-          } else {
-            // Let EmailVerificationGuard handle this
-            return;
-          }
+          // User is logged in - redirect to protected dashboard
+          navigate('/my-dashboard');
+          return;
         } else {
           // User not logged in
           if (validTrialPosts.length > 0) {
