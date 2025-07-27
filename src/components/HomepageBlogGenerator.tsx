@@ -549,17 +549,44 @@ export function HomepageBlogGenerator() {
             <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
               <CardContent className="text-center py-12 px-8">
                 <div className="mb-8">
-                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-r from-green-500 to-blue-500 mb-6">
-                    <CheckCircle2 className="h-10 w-10 text-white" />
+                  <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-r from-green-500 to-blue-500 mb-6 animate-pulse">
+                    <CheckCircle2 className="h-12 w-12 text-white" />
                   </div>
-                  <h3 className="text-3xl font-bold mb-4 text-gray-900">
-                    🎉 Your Blog Post is Live!
+                  <h3 className="text-4xl font-bold mb-4 text-gray-900">
+                    🎉 Mission Accomplished!
                   </h3>
-                  <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-                    We've created a professional article about "{primaryKeyword}" with natural backlinks pointing to your website.
+                  <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+                    Your professional blog post about <strong>"{primaryKeyword}"</strong> is now live with natural backlinks pointing to your website!
+                  </p>
+
+                  {/* PROMINENT PUBLISHED LINK SHOWCASE */}
+                  <div className="mb-8 p-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl text-white shadow-xl">
+                    <div className="flex items-center justify-center gap-3 mb-4">
+                      <Globe className="h-6 w-6" />
+                      <h4 className="text-xl font-bold">🔗 Your Live Blog Post</h4>
+                    </div>
+                    <div className="bg-white/10 rounded-lg p-4 mb-4 backdrop-blur-sm">
+                      <p className="text-sm font-mono break-all text-blue-100 mb-2">
+                        {publishedUrl}
+                      </p>
+                      <p className="text-lg font-semibold">
+                        {generatedPost?.title}
+                      </p>
+                    </div>
+                    <Button
+                      size="lg"
+                      onClick={() => window.open(publishedUrl, '_blank')}
+                      className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-8 py-3 text-lg shadow-lg"
+                    >
+                      <ExternalLink className="mr-2 h-5 w-5" />
+                      View Your Live Blog Post
+                    </Button>
+                  </div>
+
+                  <p className="text-lg text-gray-600 mb-6">
                     {currentUser
-                      ? "Your content is permanently saved and ready to boost your SEO!"
-                      : "Your trial content is live and ready to boost your SEO!"
+                      ? "✅ Your content is permanently saved and ready to boost your SEO!"
+                      : "⚠️ Your trial content is live for 24 hours - register to save it permanently!"
                     }
                   </p>
 
