@@ -278,7 +278,27 @@ export function HomepageBlogGenerator() {
         try {
           console.log('💾 Saving mock blog post to publishedBlogService...');
           publishedBlogService.saveBlogPost(data.blogPost);
-          console.log('✅ Mock blog post saved successfully to in-memory storage');
+
+          // Create dual-domain variants for cross-domain accessibility
+          const currentDomainVariant = {
+            ...data.blogPost,
+            published_url: currentDomainUrl,
+            id: `${data.blogPost.id}_current`
+          };
+
+          const backlinkooVariant = {
+            ...data.blogPost,
+            published_url: backlinkooUrl,
+            id: `${data.blogPost.id}_backlinkoo`
+          };
+
+          // Save both variants
+          publishedBlogService.saveBlogPost(currentDomainVariant);
+          publishedBlogService.saveBlogPost(backlinkooVariant);
+
+          console.log('✅ Mock blog post saved with dual-domain accessibility');
+          console.log(`   📍 Current domain: ${currentDomainUrl}`);
+          console.log(`   📍 Backlinkoo: ${backlinkooUrl}`);
 
           // Also save to localStorage for trial posts
           if (!isLoggedIn) {
