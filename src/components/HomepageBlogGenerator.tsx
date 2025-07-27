@@ -108,10 +108,29 @@ export function HomepageBlogGenerator() {
     try {
       // Use the already checked currentUser state instead of re-checking
 
-      // Check if we're in development mode
+      // Test connection to Netlify functions first (in production)
       const isDevelopment = window.location.hostname === 'localhost' ||
                            window.location.hostname === '127.0.0.1' ||
                            window.location.hostname.includes('localhost');
+
+      if (!isDevelopment) {
+        console.log('🧪 Testing Netlify function connection...');
+        try {
+          const testResponse = await fetch('/.netlify/functions/test-connection', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          });
+
+          if (testResponse.ok) {
+            const testData = await testResponse.json();
+            console.log('✅ Netlify functions are working:', testData);
+          } else {
+            console.warn('⚠️ Netlify functions test failed:', testResponse.status);
+          }
+        } catch (testError) {
+          console.warn('⚠️ Netlify functions connection test failed:', testError);
+        }
+      }
 
       let data;
 
