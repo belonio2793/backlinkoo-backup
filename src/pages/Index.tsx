@@ -51,14 +51,17 @@ const Index = () => {
   const [showTrialUpgrade, setShowTrialUpgrade] = useState(false);
   const [showInlineAuth, setShowInlineAuth] = useState(false);
 
-  // Check URL parameters for trial upgrade
+  // Check URL parameters for trial upgrade and track page view
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('upgrade') === 'trial') {
       setShowTrialUpgrade(true);
       setShowInlineAuth(true);
     }
-  }, []);
+
+    // Track homepage visit
+    trackPageView('homepage');
+  }, [trackPageView]);
 
   // Check for authenticated user on component mount
   useEffect(() => {
