@@ -11,7 +11,15 @@ declare global {
 
 export const safeEthereumAccess = (): any | null => {
   try {
-    return window.ethereum || null;
+    // Handle cases where ethereum might be accessed during redefinition conflicts
+    if (typeof window !== 'undefined') {
+      const descriptor = Object.getOwnPropertyDescriptor(window, 'ethereum');
+      if (descriptor && descriptor.value) {
+        return descriptor.value;
+      }
+      return window.ethereum || null;
+    }
+    return null;
   } catch (error) {
     console.warn('Ethereum object access blocked:', error);
     return null;
