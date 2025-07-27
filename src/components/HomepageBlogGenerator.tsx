@@ -272,7 +272,7 @@ export function HomepageBlogGenerator() {
         // CRITICAL: Save the mock blog post to the service so it can be accessed later
         try {
           console.log('💾 Saving mock blog post to publishedBlogService...');
-          publishedBlogService.inMemoryPosts.set(blogSlug, data.blogPost);
+          publishedBlogService.saveBlogPost(data.blogPost);
           console.log('✅ Mock blog post saved successfully to in-memory storage');
 
           // Also save to localStorage for trial posts
@@ -565,7 +565,7 @@ export function HomepageBlogGenerator() {
       );
 
       // Determine error type and user guidance
-      let errorTitle = "�����️ Generation Process Failed";
+      let errorTitle = "���️ Generation Process Failed";
       let errorDescription = "An unexpected error occurred during blog generation.";
       let nextSteps = "Please try again or contact support if the issue persists.";
 
