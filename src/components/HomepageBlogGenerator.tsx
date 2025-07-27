@@ -125,7 +125,16 @@ export function HomepageBlogGenerator() {
             const testData = await testResponse.json();
             console.log('✅ Netlify functions are working:', testData);
           } else {
-            console.warn('⚠️ Netlify functions test failed:', testResponse.status);
+            console.warn('⚠️ Netlify functions test failed:', {
+              status: testResponse.status,
+              statusText: testResponse.statusText,
+              url: testResponse.url
+            });
+
+            // If test connection also fails, we know functions aren't deployed
+            if (testResponse.status === 404) {
+              console.warn('📋 Functions appear to not be deployed. Will use fallback mode for generation.');
+            }
           }
         } catch (testError) {
           console.warn('⚠️ Netlify functions connection test failed:', testError);
