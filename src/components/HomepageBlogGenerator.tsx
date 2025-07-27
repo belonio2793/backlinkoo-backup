@@ -9,6 +9,7 @@ import { useAuthStatus } from '@/hooks/useAuth';
 import { aiContentGenerator } from '@/services/aiContentGenerator';
 import { errorLogger, ErrorSeverity, ErrorCategory } from '@/services/errorLoggingService';
 import BlogGenerationError from './BlogGenerationError';
+import { PublishedBlogService } from '@/services/publishedBlogService';
 import { blogPublisher } from '@/services/blogPublisher';
 import { multiApiContentGenerator } from '@/services/multiApiContentGenerator';
 import { liveBlogPublisher } from '@/services/liveBlogPublisher';
