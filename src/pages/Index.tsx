@@ -26,6 +26,7 @@ import type { User } from '@supabase/supabase-js';
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
+import { LoginModal } from "@/components/LoginModal";
 
 
 const Index = () => {
