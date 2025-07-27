@@ -423,12 +423,25 @@ https://backlinkoo.com`,
   static async sendWelcomeEmail(email: string, firstName?: string): Promise<EmailServiceResponse> {
     console.log('EmailService: Sending welcome email to:', email);
 
-    const name = firstName ? ` ${firstName}` : '';
+    // Log welcome email request
+    await errorLogger.logError(
+      ErrorSeverity.LOW,
+      ErrorCategory.EMAIL,
+      'Welcome email requested',
+      {
+        context: { to: email, type: 'welcome', firstName },
+        component: 'EmailService',
+        action: 'send_welcome_email'
+      }
+    );
 
-    const emailData = {
-      to: email,
-      subject: 'Welcome to Backlink ∞ - Your SEO Journey Starts Now!',
-      message: `Hi${name}!
+    try {
+      const name = firstName ? ` ${firstName}` : '';
+
+      const emailData = {
+        to: email,
+        subject: 'Welcome to Backlink ∞ - Your SEO Journey Starts Now!',
+        message: `Hi${name}!
 
 Welcome to Backlink ∞! 🎉
 
@@ -464,10 +477,22 @@ The Backlink ∞ Team
 ---
 Professional SEO & Backlink Management Platform
 https://backlinkoo.com`,
-      from: 'Backlink ∞ <support@backlinkoo.com>'
-    };
+        from: 'Backlink ∞ <support@backlinkoo.com>'
+      };
 
-    return await this.sendViaNetlifyFunction(emailData);
+      return await this.sendViaNetlifyFunction(emailData);
+    } catch (error: any) {
+      await errorLogger.logEmailError(
+        `Failed to send welcome email: ${error.message}`,
+        {
+          to: email,
+          emailType: 'welcome',
+          firstName
+        },
+        'EmailService'
+      );
+      throw error;
+    }
   }
 
   // Legacy methods for EmailSystemManager compatibility
