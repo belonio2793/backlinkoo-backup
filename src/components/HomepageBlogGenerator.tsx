@@ -772,12 +772,13 @@ export function HomepageBlogGenerator() {
                           View Analytics Dashboard
                         </Button>
                         <Button
-                          size="sm"
+                          size="lg"
                           variant="outline"
-                          className="border-green-600 text-green-700 hover:bg-green-100"
+                          className="border-white text-white hover:bg-white hover:text-green-600 font-semibold"
                           onClick={resetForm}
                         >
-                          Create Another
+                          <Sparkles className="mr-2 h-5 w-5" />
+                          Create Another Backlink
                         </Button>
                       </div>
                     </div>
