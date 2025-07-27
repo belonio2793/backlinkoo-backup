@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/services/authService";
 import { Eye, EyeOff, Mail, RefreshCw, Shield, CheckCircle, Infinity } from "lucide-react";
+import { LiveUserActivity, SocialProofTestimonials, TrustBadges, MoneyBackGuarantee } from "./SocialProofElements";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -300,6 +301,9 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
             <Infinity className="h-6 w-6 text-blue-600" />
             Join Backlink
           </DialogTitle>
+          <div className="mt-3">
+            <LiveUserActivity />
+          </div>
         </DialogHeader>
 
         {showForgotPassword ? (

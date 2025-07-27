@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -218,8 +218,10 @@ export function BlogPost() {
           <div className="space-y-4">
             {/* Category and Tags */}
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary">{blogPost.category}</Badge>
-              {blogPost.tags.slice(0, 3).map((tag, index) => (
+              {blogPost.category && (
+                <Badge variant="secondary">{blogPost.category}</Badge>
+              )}
+              {(blogPost.tags || blogPost.keywords || []).slice(0, 3).map((tag, index) => (
                 <Badge key={index} variant="outline" className="text-xs">
                   <Tag className="mr-1 h-3 w-3" />
                   {tag}
@@ -243,23 +245,23 @@ export function BlogPost() {
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 pt-4 border-t border-gray-200">
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                <span>{blogPost.author_name}</span>
+                <span>{blogPost.author_name || 'Backlinkoo AI'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                <span>{formatDate(blogPost.published_at)}</span>
+                <span>{formatDate(blogPost.published_at || blogPost.created_at)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                <span>{blogPost.reading_time} min read</span>
+                <span>{blogPost.reading_time || 5} min read</span>
               </div>
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />
-                <span>{blogPost.view_count} views</span>
+                <span>{blogPost.view_count || 0} views</span>
               </div>
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
-                <span>SEO Score: {blogPost.seo_score}/100</span>
+                <span>SEO Score: {blogPost.seo_score || 85}/100</span>
               </div>
             </div>
 
@@ -360,26 +362,38 @@ export function BlogPost() {
         )}
 
         {/* SEO Info for Context */}
-        {blogPost.contextual_links.length > 0 && (
+        {(blogPost.contextual_links && blogPost.contextual_links.length > 0) || blogPost.keywords || blogPost.tags ? (
           <Card className="mt-8">
             <CardContent className="p-6">
               <h3 className="font-semibold text-gray-900 mb-4">
                 SEO Information
               </h3>
               <div className="space-y-2">
+                {(blogPost.keywords || blogPost.tags) && (
+                  <p className="text-sm text-gray-600">
+                    <strong>Target Keywords:</strong> {(blogPost.keywords || blogPost.tags || []).join(', ')}
+                  </p>
+                )}
+                {blogPost.word_count && (
+                  <p className="text-sm text-gray-600">
+                    <strong>Word Count:</strong> {blogPost.word_count} words
+                  </p>
+                )}
+                {blogPost.contextual_links && blogPost.contextual_links.length > 0 && (
+                  <p className="text-sm text-gray-600">
+                    <strong>Contextual Links:</strong> {blogPost.contextual_links.length}
+                  </p>
+                )}
                 <p className="text-sm text-gray-600">
-                  <strong>Target Keywords:</strong> {blogPost.keywords.join(', ')}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <strong>Word Count:</strong> {blogPost.word_count} words
-                </p>
-                <p className="text-sm text-gray-600">
-                  <strong>Contextual Links:</strong> {blogPost.contextual_links.length}
+                  <strong>Target URL:</strong>
+                  <a href={blogPost.target_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
+                    {blogPost.target_url}
+                  </a>
                 </p>
               </div>
             </CardContent>
           </Card>
-        )}
+        ) : null}
       </article>
 
       {/* Custom styles for blog content */}

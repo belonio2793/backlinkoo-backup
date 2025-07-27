@@ -95,7 +95,12 @@ export function TrialNotificationBanner() {
   };
 
   const handleSignUp = () => {
-    navigate('/auth-callback?action=signup&redirect=/dashboard');
+    navigate('/login');
+  };
+
+  const handleQuickUpgrade = () => {
+    // Open inline auth form with trial conversion focus
+    navigate('/?upgrade=trial');
   };
 
   const viewTrialPost = (slug: string) => {
@@ -128,13 +133,13 @@ export function TrialNotificationBanner() {
             
             <div className="hidden sm:block text-sm">
               <span className="font-semibold">
-                ⚠️ Your backlink{trialPosts.length > 1 ? 's' : ''} will auto-delete in{' '}
-                <span className={`${timeRemaining.urgent ? 'animate-pulse font-bold' : 'font-medium'}`}>
+                {timeRemaining.urgent ? '🚨' : '⏰'} Trial backlink{trialPosts.length > 1 ? 's' : ''} expire{trialPosts.length === 1 ? 's' : ''} in{' '}
+                <span className={`${timeRemaining.urgent ? 'animate-pulse font-bold text-yellow-200' : 'font-medium'}`}>
                   {timeRemaining.hours}h {timeRemaining.minutes}m
                 </span>
               </span>
               <span className="ml-2 opacity-90">
-                Sign up now to save them forever!
+                {timeRemaining.urgent ? 'Upgrade NOW to save them!' : 'Upgrade to permanent backlinks + unlock features'}
               </span>
             </div>
           </div>
@@ -142,11 +147,11 @@ export function TrialNotificationBanner() {
           <div className="flex items-center gap-2">
             <Button
               size="sm"
-              onClick={handleSignUp}
-              className="bg-white text-red-600 hover:bg-red-50 font-medium animate-pulse"
+              onClick={handleQuickUpgrade}
+              className={`bg-white font-medium ${timeRemaining.urgent ? 'text-red-600 hover:bg-red-50 animate-pulse' : 'text-orange-600 hover:bg-orange-50'}`}
             >
               <Crown className="mr-1 h-4 w-4" />
-              Save Forever
+              {timeRemaining.urgent ? 'Upgrade Now!' : 'Upgrade Trial'}
             </Button>
             
             {trialPosts.length === 1 && (

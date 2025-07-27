@@ -22,17 +22,25 @@ import { PaymentModal } from "@/components/PaymentModal";
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
 import { HomepageBlogGenerator } from "@/components/HomepageBlogGenerator";
 import { ProductionBlogGenerator } from "@/components/ProductionBlogGenerator";
+import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 import { LoginModal } from "@/components/LoginModal";
+import { InlineAuthForm } from "@/components/InlineAuthForm";
+import { TrialConversionBanner } from "@/components/TrialConversionBanner";
+import { QuickTrialUpgrade } from "@/components/QuickTrialUpgrade";
+import { TrialConversionService } from "@/services/trialConversionService";
+import { GuestSessionReminder } from "@/components/GuestSessionReminder";
+import { useGuestTracking } from "@/hooks/useGuestTracking";
 
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { trackInteraction, trackPageView, shouldShowConversionPrompt } = useGuestTracking();
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -41,6 +49,20 @@ const Index = () => {
   const [isCustomPackage, setIsCustomPackage] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [useProductionGenerator, setUseProductionGenerator] = useState(false);
+  const [showTrialUpgrade, setShowTrialUpgrade] = useState(false);
+  const [showInlineAuth, setShowInlineAuth] = useState(false);
+
+  // Check URL parameters for trial upgrade and track page view
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('upgrade') === 'trial') {
+      setShowTrialUpgrade(true);
+      setShowInlineAuth(true);
+    }
+
+    // Track homepage visit
+    trackPageView('homepage');
+  }, [trackPageView]);
 
   // Check for authenticated user on component mount
   useEffect(() => {
@@ -175,6 +197,9 @@ const Index = () => {
   ];
 
   const handleGetStarted = (planId: 'starter_100' | 'starter_200' | 'starter_300' | 'custom') => {
+    // Track interaction
+    trackInteraction(`get_started_${planId}`);
+
     if (planId === 'custom') {
       setIsCustomPackage(true);
     } else {
@@ -242,18 +267,40 @@ const Index = () => {
                 </Button>
               ) : (
                 <>
-                  <Button variant="ghost" onClick={() => {
-                    console.log('Sign In button clicked');
-                    setShowLoginModal(true);
-                  }} className="font-medium">
-                    Sign In
-                  </Button>
-                  <Button onClick={() => {
-                    console.log('Get Started button clicked');
-                    navigate("/login");
-                  }} className="font-medium">
-                    Get Started
-                  </Button>
+                  {/* Show trial upgrade button if user has trial posts */}
+                  {TrialConversionService.hasConvertibleTrialPosts() ? (
+                    <>
+                      <QuickTrialUpgrade
+                        onSuccess={(user) => {
+                          setUser(user);
+                          navigate('/dashboard');
+                        }}
+                        variant="default"
+                        size="sm"
+                        className="bg-amber-600 hover:bg-amber-700 text-white"
+                      />
+                      <Button variant="ghost" onClick={() => {
+                        setShowLoginModal(true);
+                      }} className="font-medium">
+                        Sign In
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="ghost" onClick={() => {
+                        console.log('Sign In button clicked');
+                        setShowLoginModal(true);
+                      }} className="font-medium">
+                        Sign In
+                      </Button>
+                      <Button onClick={() => {
+                        console.log('Get Started button clicked');
+                        navigate("/login");
+                      }} className="font-medium">
+                        Get Started
+                      </Button>
+                    </>
+                  )}
                 </>
               )}
             </div>
@@ -301,11 +348,121 @@ const Index = () => {
           {useProductionGenerator ? (
             <ProductionBlogGenerator />
           ) : (
-            <HomepageBlogGenerator />
+            <div className="max-w-6xl mx-auto">
+              <GlobalBlogGenerator
+                variant="homepage"
+                onSuccess={(blogPost) => {
+                  setUser(user); // Refresh state
+                  toast({
+                    title: "Success! 🎉",
+                    description: `Your backlink post "${blogPost.title}" is now live!`,
+                  });
+                  // Navigate to blog after a short delay
+                  setTimeout(() => {
+                    navigate(`/blog/${blogPost.slug}`);
+                  }, 2000);
+                }}
+              />
+            </div>
           )}
         </div>
       </section>
 
+      {/* Trial Conversion Section */}
+      {showTrialUpgrade && (
+        <section className="py-12 px-6 bg-gradient-to-br from-amber-50 to-orange-50">
+          <div className="container mx-auto max-w-4xl">
+            <TrialConversionBanner
+              onUpgrade={() => {
+                setShowInlineAuth(true);
+                document.getElementById('inline-auth')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="mb-8"
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Inline Authentication Section - Show for guests or trial upgrades */}
+      {(!user && authChecked) || showInlineAuth ? (
+        <section className="py-16 px-6 bg-gradient-to-br from-blue-50 to-indigo-50" id="inline-auth">
+          <div className="container mx-auto max-w-6xl">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              {/* Left side - Value proposition */}
+              <div>
+                <h2 className="text-3xl md:text-4xl font-light mb-6 tracking-tight">
+                  {showTrialUpgrade ? "Upgrade Your Trial" : "Start Building Authority Today"}
+                </h2>
+                <p className="text-xl text-muted-foreground mb-8 leading-relaxed font-light">
+                  {showTrialUpgrade
+                    ? "Convert your trial backlinks to permanent ones and unlock the full power of our platform."
+                    : "Join thousands of professionals who trust our platform for their most important SEO campaigns."
+                  }
+                </p>
+
+                <div className="space-y-4 mb-8">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    <span className="font-light">
+                      {showTrialUpgrade ? "Permanent backlinks (no expiration)" : "High-authority backlinks"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    <span className="font-light">
+                      {showTrialUpgrade ? "Advanced analytics & reporting" : "Real-time campaign tracking"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    <span className="font-light">
+                      {showTrialUpgrade ? "Priority support & consultation" : "Competitive analysis tools"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    <span className="font-light">
+                      {showTrialUpgrade ? "Campaign management tools" : "99% success rate guarantee"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Trust indicators */}
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-semibold text-primary mb-1">2,000+</div>
+                    <div className="text-sm text-muted-foreground">Active Users</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-semibold text-primary mb-1">99%</div>
+                    <div className="text-sm text-muted-foreground">Success Rate</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-semibold text-primary mb-1">4.9/5</div>
+                    <div className="text-sm text-muted-foreground">User Rating</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right side - Inline auth form */}
+              <div>
+                <InlineAuthForm
+                  onAuthSuccess={(user) => {
+                    setUser(user);
+                    setShowInlineAuth(false);
+                    navigate('/dashboard');
+                  }}
+                  onTrialConversion={() => {
+                    // Handle trial conversion logic
+                    navigate('/login?upgrade=trial');
+                  }}
+                  showTrialUpgrade={showTrialUpgrade}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* Hero Section */}
       <section 
@@ -768,6 +925,18 @@ const Index = () => {
         }}
         initialCredits={isCustomPackage ? customCredits : pricingPlans.find(p => p.id === selectedPlan)?.credits}
       />
+
+      {/* Guest Session Reminder - Show for non-authenticated users */}
+      {!user && authChecked && shouldShowConversionPrompt() && (
+        <GuestSessionReminder
+          onSignUp={() => {
+            trackInteraction('guest_reminder_signup');
+            setShowLoginModal(true);
+          }}
+          variant="floating"
+          position="bottom"
+        />
+      )}
 
       {/* Footer */}
       <Footer />
