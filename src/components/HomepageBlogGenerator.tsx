@@ -667,6 +667,9 @@ export function HomepageBlogGenerator() {
                     <h4 className="font-semibold mb-3 flex items-center gap-2">
                       <TrendingUp className="h-5 w-5 text-blue-600" />
                       What You'll Get:
+                      <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700 text-xs">
+                        Production Ready
+                      </Badge>
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                       <div className="flex items-start gap-2">
