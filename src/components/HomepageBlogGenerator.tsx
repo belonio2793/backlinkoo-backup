@@ -16,6 +16,7 @@ import { InteractiveContentGenerator } from './InteractiveContentGenerator';
 import { MultiBlogGenerator } from './MultiBlogGenerator';
 import { ClaimTrialPostDialog } from './ClaimTrialPostDialog';
 import { AdaptiveProgressIndicator } from './AdaptiveProgressIndicator';
+import { MinimalisticSuccessSection } from './MinimalisticSuccessSection';
 import {
   Sparkles,
   Link2,
@@ -1159,7 +1160,7 @@ export function HomepageBlogGenerator() {
                               onClick={() => window.location.href = '/dashboard'}
                             >
                               <BarChart3 className="mr-2 h-5 w-5" />
-                              ��� Track Your SEO Growth
+                              📊 Track Your SEO Growth
                             </Button>
                             <Button
                               size="lg"
