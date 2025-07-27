@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { contentFilterService } from '@/services/contentFilterService';
+import { ContentTestingTool } from './ContentTestingTool';
 import {
   Shield,
   AlertTriangle,
