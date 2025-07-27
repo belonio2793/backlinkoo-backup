@@ -5,16 +5,28 @@ import { trialPostCleanupService } from './services/trialPostCleanupService'
 
 // Prevent ethereum property conflicts from browser extensions
 try {
-  if (typeof window !== 'undefined' && window.ethereum) {
-    // Create a non-configurable proxy to prevent redefinition attempts
-    const originalEthereum = window.ethereum;
-    delete window.ethereum;
-    Object.defineProperty(window, 'ethereum', {
-      value: originalEthereum,
-      writable: false,
-      configurable: false,
-      enumerable: true
-    });
+  if (typeof window !== 'undefined') {
+    // Check if ethereum property exists and is configurable
+    const descriptor = Object.getOwnPropertyDescriptor(window, 'ethereum');
+
+    if (!descriptor || descriptor.configurable) {
+      // Property doesn't exist or is configurable, we can safely define it
+      const originalEthereum = window.ethereum;
+
+      if (originalEthereum) {
+        delete window.ethereum;
+      }
+
+      Object.defineProperty(window, 'ethereum', {
+        value: originalEthereum || null,
+        writable: false,
+        configurable: false,
+        enumerable: true
+      });
+    } else {
+      // Property already exists and is not configurable, leave it alone
+      console.info('Ethereum property already protected by extension');
+    }
   }
 } catch (error) {
   // Silently handle any ethereum property conflicts
