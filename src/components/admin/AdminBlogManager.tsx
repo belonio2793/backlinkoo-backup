@@ -309,6 +309,47 @@ export function AdminBlogManager() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Content Filter Status */}
+        {contentFilterStats && (
+          <Card className="mb-6">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-green-600" />
+                  <span className="font-medium">Content Filter Status</span>
+                  <div className="flex items-center gap-4 ml-4">
+                    <div className="text-sm">
+                      <span className="text-gray-600">Blocked:</span>
+                      <span className="ml-1 font-semibold text-red-600">{contentFilterStats.blocked}</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="text-gray-600">Block Rate:</span>
+                      <span className="ml-1 font-semibold text-orange-600">{contentFilterStats.blockRate}%</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="text-gray-600">Total Requests:</span>
+                      <span className="ml-1 font-semibold text-blue-600">{contentFilterStats.total}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {contentFilterService.getConfiguration().enabled ? (
+                    <Badge className="bg-green-100 text-green-800 border-green-200">
+                      <Shield className="mr-1 h-3 w-3" />
+                      Active
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+                      <AlertTriangle className="mr-1 h-3 w-3" />
+                      Disabled
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Filters */}
