@@ -552,30 +552,45 @@ export function HomepageBlogGenerator() {
                     🎉 Your Blog Post is Live!
                   </h3>
                   <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-                    We've created a professional article about "{primaryKeyword}" with natural backlinks pointing to your website. Your content is now live and ready to boost your SEO!
+                    We've created a professional article about "{primaryKeyword}" with natural backlinks pointing to your website.
+                    {currentUser
+                      ? "Your content is permanently saved and ready to boost your SEO!"
+                      : "Your trial content is live and ready to boost your SEO!"
+                    }
                   </p>
 
-                  {/* Trial Backlink Notice - Only shown after completion */}
-                  <div className="max-w-3xl mx-auto mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 mt-0.5">
-                        <svg className="h-5 w-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <div className="text-left">
-                        <p className="text-sm font-medium text-amber-800 mb-1">
-                          ⚠️ Demo Preview Notice
-                        </p>
-                        <p className="text-sm text-amber-700">
-                          <strong>This is a demo preview</strong> of your generated blog post content.
-                          To publish this as a live backlink on high-authority domains, simply{' '}
-                          <span className="font-semibold">create an account and purchase any number of credits</span>.
-                          Your content will then be published as a permanent campaign with real SEO value.
-                        </p>
+                  {/* Authentication Status Notice */}
+                  {currentUser ? (
+                    <div className="max-w-3xl mx-auto mb-8 p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                        <div className="text-left">
+                          <p className="text-sm font-medium text-green-800 mb-1">
+                            ✅ Permanent Backlink Created
+                          </p>
+                          <p className="text-sm text-green-700">
+                            <strong>Your backlink is permanently saved</strong> and will continue providing SEO value indefinitely.
+                            You can view and manage all your backlinks from your dashboard.
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="max-w-3xl mx-auto mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <div className="text-left">
+                          <p className="text-sm font-medium text-amber-800 mb-1">
+                            ⚠️ Trial Backlink - 24 Hour Expiry
+                          </p>
+                          <p className="text-sm text-amber-700">
+                            <strong>This is a trial backlink</strong> that will automatically delete in 24 hours unless claimed.
+                            Create an account now to make this backlink permanent and unlock unlimited backlink creation!
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 mb-8 border border-green-100">
@@ -585,7 +600,7 @@ export function HomepageBlogGenerator() {
                       <ul className="space-y-1 text-sm text-gray-700">
                         <li>• Title: {generatedPost?.title}</li>
                         <li>• Word Count: {generatedPost?.wordCount || 1200}+ words</li>
-                        <li>• Status: Demo Preview Ready</li>
+                        <li>• Status: {currentUser ? 'Permanently Saved' : 'Trial (24h Expiry)'}</li>
                         <li>• SEO Score: {generatedPost?.seoScore || 85}/100</li>
                       </ul>
                     </div>
@@ -595,8 +610,8 @@ export function HomepageBlogGenerator() {
                         <li>• Target: {targetUrl}</li>
                         <li>• Contextual Links: {generatedPost?.contextualLinks?.length || 1}</li>
                         <li>• Type: Natural, Contextual</li>
-                        <li className="font-medium text-blue-600">
-                          • Status: Demo Preview (Ready for Publishing)
+                        <li className={`font-medium ${currentUser ? 'text-green-600' : 'text-amber-600'}`}>
+                          • Status: {currentUser ? 'Live & Permanent' : 'Trial (Expires in 24h)'}
                         </li>
                       </ul>
                     </div>
