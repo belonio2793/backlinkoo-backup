@@ -92,7 +92,18 @@ export function BlogPost() {
         if (post) {
           setBlogPost(post);
         } else {
-          setError('Blog post not found or has expired');
+          // Provide more helpful error message with debug info
+          const errorMessage = allKeys.length > 0
+            ? `Blog post "${slug}" not found. Available posts: ${allKeys.map(k => k.replace('blog_post_', '')).join(', ')}`
+            : 'Blog post not found or has expired. No blog posts found in storage.';
+
+          console.error('❌ Blog post not found:', {
+            searchedSlug: slug,
+            searchedKey: blogStorageKey,
+            availableKeys: allKeys
+          });
+
+          setError(errorMessage);
         }
       } catch (err) {
         console.error('Failed to load blog post:', err);
