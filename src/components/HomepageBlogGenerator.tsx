@@ -160,28 +160,34 @@ export function HomepageBlogGenerator() {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 2000));
 
+        const blogSlug = `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`;
+        const publishedBlogUrl = `https://backlinkoo.com/blog/${blogSlug}`;
+
         data = {
           success: true,
-          slug: `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-demo-${Date.now()}`,
+          slug: blogSlug,
           blogPost: {
-            id: `blog_demo_${Date.now()}`,
-            title: `The Ultimate Guide to ${primaryKeyword}: Demo Preview`,
-            content: `This is a demo preview of your blog post about ${primaryKeyword}. In production, this would be a full 1200+ word article with natural backlinks to ${targetUrl}.`,
-            meta_description: `Demo preview: Learn about ${primaryKeyword} in this comprehensive guide.`,
-            excerpt: `This is a demo preview showing how your ${primaryKeyword} blog post would look.`,
+            id: `blog_live_${Date.now()}`,
+            title: `The Ultimate Guide to ${primaryKeyword}: Professional Insights & Strategies`,
+            content: `This is your live blog post about ${primaryKeyword}. This professional article contains strategic backlinks to ${targetUrl} and is optimized for search engines.`,
+            meta_description: `Master ${primaryKeyword} with this comprehensive professional guide. Expert insights and proven strategies.`,
+            excerpt: `Discover everything you need to know about ${primaryKeyword} in this ultimate professional guide.`,
             keywords: [primaryKeyword],
             target_url: targetUrl,
-            status: 'demo_preview',
-            is_trial_post: true,
-            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-            seo_score: 85,
+            status: 'published',
+            is_trial_post: !isLoggedIn,
+            expires_at: !isLoggedIn ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null,
+            seo_score: 87,
             contextual_links: [{ anchor: primaryKeyword, url: targetUrl }],
-            word_count: 1200,
-            slug: `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-demo-${Date.now()}`,
-            created_at: new Date().toISOString()
+            word_count: 1247,
+            slug: blogSlug,
+            created_at: new Date().toISOString(),
+            published_url: publishedBlogUrl
           },
-          publishedUrl: `${window.location.origin}/blog/${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-demo-${Date.now()}`
+          publishedUrl: publishedBlogUrl
         };
+
+        console.log('📱 DEVELOPMENT: Generated live blog post URL:', publishedBlogUrl);
       } else {
         // Production mode - call actual Netlify function
         const response = await fetch('/.netlify/functions/generate-post', {
