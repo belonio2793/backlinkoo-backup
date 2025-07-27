@@ -367,10 +367,23 @@ ${origin}`,
   static async sendPasswordResetEmail(email: string, resetUrl: string): Promise<EmailServiceResponse> {
     console.log('EmailService: Sending password reset email to:', email);
 
-    const emailData = {
-      to: email,
-      subject: 'Reset Your Backlink ∞ Password',
-      message: `Hi there,
+    // Log password reset email request
+    await errorLogger.logError(
+      ErrorSeverity.LOW,
+      ErrorCategory.EMAIL,
+      'Password reset email requested',
+      {
+        context: { to: email, type: 'password_reset' },
+        component: 'EmailService',
+        action: 'send_password_reset_email'
+      }
+    );
+
+    try {
+      const emailData = {
+        to: email,
+        subject: 'Reset Your Backlink ∞ Password',
+        message: `Hi there,
 
 We received a request to reset your password for your Backlink ∞ account.
 
@@ -389,10 +402,22 @@ The Backlink ∞ Team
 ---
 Professional SEO & Backlink Management Platform
 https://backlinkoo.com`,
-      from: 'Backlink ∞ <support@backlinkoo.com>'
-    };
+        from: 'Backlink ∞ <support@backlinkoo.com>'
+      };
 
-    return await this.sendViaNetlifyFunction(emailData);
+      return await this.sendViaNetlifyFunction(emailData);
+    } catch (error: any) {
+      await errorLogger.logEmailError(
+        `Failed to send password reset email: ${error.message}`,
+        {
+          to: email,
+          emailType: 'password_reset',
+          resetUrl
+        },
+        'EmailService'
+      );
+      throw error;
+    }
   }
 
   static async sendWelcomeEmail(email: string, firstName?: string): Promise<EmailServiceResponse> {
