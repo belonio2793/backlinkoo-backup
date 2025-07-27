@@ -659,6 +659,23 @@ export function HomepageBlogGenerator() {
                   )}
                 </Button>
 
+                {/* Enterprise Status & Validation Display */}
+                <div className="text-center space-y-2">
+                  {isGenerating && (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
+                      ENTERPRISE GENERATION IN PROGRESS
+                    </div>
+                  )}
+
+                  {!isGenerating && targetUrl && primaryKeyword && (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-medium">
+                      <CheckCircle2 className="w-4 h-4" />
+                      READY FOR DEPLOYMENT
+                    </div>
+                  )}
+                </div>
+
                 {authChecked && (
                   <div className="text-center text-sm">
                     {currentUser ? (
