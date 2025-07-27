@@ -148,6 +148,28 @@ class GlobalBlogGeneratorService {
 
   async generateGlobalBlogPost(request: GlobalBlogRequest): Promise<GlobalBlogResponse> {
     try {
+      // Check content filtering first
+      const filterResult = contentFilterService.filterBlogRequest(
+        request.targetUrl,
+        request.primaryKeyword,
+        request.anchorText
+      );
+
+      if (!filterResult.isAllowed) {
+        // Log the filter event
+        await contentFilterService.logFilterEvent(
+          `${request.targetUrl} ${request.primaryKeyword} ${request.anchorText || ''}`,
+          filterResult,
+          undefined, // No user ID for global requests
+          'blog_request'
+        );
+
+        return {
+          success: false,
+          error: `Content blocked: ${filterResult.reason} Please review your content and try again with appropriate keywords.`,
+        };
+      }
+
       // Check rate limiting
       const rateCheck = this.checkRateLimit();
       if (!rateCheck.allowed) {
