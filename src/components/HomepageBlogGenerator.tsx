@@ -1033,7 +1033,7 @@ export function HomepageBlogGenerator() {
                             size="lg"
                             variant="outline"
                             onClick={() => {
-                              const blogUrl = publishedUrl || `${window.location.origin}/blog/?slug=${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
+                              const blogUrl = publishedUrl || `${window.location.origin}/blog/${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
                               const shareText = `🎯 Just published a professional article about ${primaryKeyword}! Check out my new backlink: ${blogUrl}`;
                               navigator.clipboard.writeText(shareText);
                               toast({
