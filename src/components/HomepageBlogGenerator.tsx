@@ -45,10 +45,42 @@ export function HomepageBlogGenerator() {
   const [blogPostId, setBlogPostId] = useState<string>('');
   const [showSignupPopup, setShowSignupPopup] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const { toast } = useToast();
+
+  // Check authentication status on component mount
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setCurrentUser(user);
+        setAuthChecked(true);
+        console.log('📝 Auth status checked:', user ? 'Logged in' : 'Guest user');
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        setCurrentUser(null);
+        setAuthChecked(true);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAuthStatus();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(session?.user || null);
+      setAuthChecked(true);
+      console.log('🔄 Auth state changed:', session?.user ? 'Logged in' : 'Logged out');
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleGenerate = async () => {
     console.log('🚀 handleGenerate called with:', { targetUrl, primaryKeyword });
+    console.log('👤 Current user status:', currentUser ? 'Authenticated' : 'Guest');
 
     if (!targetUrl || !primaryKeyword) {
       toast({
@@ -68,15 +100,27 @@ export function HomepageBlogGenerator() {
       return;
     }
 
-    console.log('✅ Starting generation with valid inputs');
+    // Show different messages based on auth status
+    if (currentUser) {
+      console.log('✅ Starting generation for authenticated user');
+      toast({
+        title: "Generating Your Backlink",
+        description: "Creating your permanent blog post with backlinks...",
+      });
+    } else {
+      console.log('✅ Starting generation for guest user (trial mode)');
+      toast({
+        title: "Generating Your Free Trial",
+        description: "Creating your demo blog post - register to save it permanently!",
+      });
+    }
+
     setIsGenerating(true);
     setIsCompleted(false);
     setShowProgress(true);
 
     try {
-      // Check if user is logged in
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUser(user);
+      // Use the already checked currentUser state instead of re-checking
 
       // Check if we're in development mode
       const isDevelopment = window.location.hostname === 'localhost' ||
@@ -124,7 +168,7 @@ export function HomepageBlogGenerator() {
           body: JSON.stringify({
             destinationUrl: targetUrl,
             keyword: primaryKeyword,
-            userId: user?.id
+            userId: currentUser?.id
           })
         });
 
@@ -142,7 +186,7 @@ export function HomepageBlogGenerator() {
       const { slug, blogPost, publishedUrl } = data;
 
       // Create campaign entry for registered users
-      if (user) {
+      if (currentUser) {
         try {
           const { data: campaignData, error: campaignError } = await supabase
             .from('campaigns')
@@ -154,7 +198,7 @@ export function HomepageBlogGenerator() {
               links_requested: blogPost.contextual_links?.length || 1,
               links_delivered: blogPost.contextual_links?.length || 1,
               completed_backlinks: [publishedUrl],
-              user_id: user.id,
+              user_id: currentUser.id,
               credits_used: 1
             })
             .select()
@@ -184,13 +228,13 @@ export function HomepageBlogGenerator() {
 
       toast({
         title: "Blog Post Generated!",
-        description: user
+        description: currentUser
           ? "Your content is ready and saved to your dashboard!"
           : "Your demo preview is ready. Register to keep it forever!",
       });
 
       // Store trial post info for notification system
-      if (!user && blogPost.is_trial_post) {
+      if (!currentUser && blogPost.is_trial_post) {
         const trialPostInfo = {
           id: blogPost.id,
           title: blogPost.title,
@@ -208,7 +252,7 @@ export function HomepageBlogGenerator() {
       }
 
       // Show signup popup for guest users after a delay
-      if (!user) {
+      if (!currentUser) {
         setTimeout(() => {
           setShowSignupPopup(true);
         }, 3000); // Show popup after 3 seconds
