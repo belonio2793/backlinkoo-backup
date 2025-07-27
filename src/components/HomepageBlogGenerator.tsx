@@ -810,7 +810,12 @@ export function HomepageBlogGenerator() {
                         <div className="flex-1 bg-white rounded-lg px-4 py-2 font-mono text-lg text-gray-700 border-2 border-blue-200 flex items-center">
                           <Globe className="h-5 w-5 text-green-500 mr-2" />
                           <span className="text-green-600 font-semibold">🔒 https://</span>
-                          <span className="font-bold">{publishedUrl?.replace('https://', '') || `backlinkoo.com/blog/${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}</span>
+                          <span className="font-bold">
+                            {publishedUrl?.includes('://')
+                              ? publishedUrl.split('://')[1]
+                              : `${window.location.host}/blog/?slug=${generatedPost?.slug || primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`
+                            }
+                          </span>
                         </div>
                         <Button
                           size="sm"
