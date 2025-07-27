@@ -276,6 +276,9 @@ export function HomepageBlogGenerator() {
     } catch (error) {
       console.error('Blog generation error:', error);
 
+      // Set the error state for detailed display
+      setGenerationError(error instanceof Error ? error : String(error));
+
       // Log the error for tracking
       await errorLogger.logError(
         ErrorSeverity.HIGH,
@@ -294,6 +297,7 @@ export function HomepageBlogGenerator() {
         }
       );
 
+      // Still show the toast for immediate feedback
       toast({
         title: "Generation Failed",
         description: error instanceof Error ? error.message : "Failed to generate blog post. Please try again.",
