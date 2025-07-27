@@ -222,16 +222,21 @@ export function HomepageBlogGenerator() {
         }
       }
 
+      console.log('🎯 Setting generated post data:', { blogPost, publishedUrl });
       setGeneratedPost(blogPost);
       setPublishedUrl(publishedUrl);
       setBlogPostId(blogPost.id);
 
       // Force the progress indicator to complete
+      console.log('⏰ Forcing progress completion...');
       setForceComplete(true);
 
       // Show results after progress completes
       setTimeout(() => {
+        console.log('✅ Setting completion state to true');
         setIsCompleted(true);
+        setIsGenerating(false);
+        setShowProgress(false);
       }, 2000);
 
       toast({
