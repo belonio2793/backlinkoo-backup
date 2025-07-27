@@ -46,6 +46,7 @@ export const AppWrapper = () => {
       <Route path="/preview/:slug" element={<BlogPreview />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/blog/:slug" element={<BlogPost />} />
+      <Route path="/trial-dashboard" element={<GuestDashboard />} />
       <Route path="*" element={<NotFound />} />
 
       {/* Protected routes - require authentication and email verification */}
