@@ -748,8 +748,9 @@ export function HomepageBlogGenerator() {
         blogPostUrl={publishedUrl}
         blogPostTitle={generatedPost?.title}
         onSignupSuccess={(user) => {
-          setCurrentUser(user);
           setShowSignupPopup(false);
+          // Refresh the page to update auth state
+          window.location.reload();
         }}
         timeRemaining={86400} // 24 hours
       />
