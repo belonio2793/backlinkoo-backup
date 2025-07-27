@@ -931,22 +931,19 @@ export function HomepageBlogGenerator() {
             )
           ) : (
             // Success state
-            <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
-              <CardContent className="text-center py-12 px-8">
-                <div className="mb-8">
-                  <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-r from-green-500 to-blue-500 mb-6 animate-pulse">
-                    <CheckCircle2 className="h-12 w-12 text-white" />
+            <Card className="border border-gray-200 shadow-sm bg-white">
+              <CardContent className="py-8 px-6">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-6 w-6 text-green-600" />
+                    <h3 className="text-xl font-semibold text-gray-900">
+                      Article Published
+                    </h3>
                   </div>
-                  <div className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-full text-lg font-bold mb-6 shadow-lg">
-                    <span className="w-3 h-3 bg-white rounded-full animate-ping"></span>
-                    🎯 YOUR BACKLINK IS NOW LIVE
+
+                  <div className="text-sm text-gray-600">
+                    Your backlink for "<span className="font-medium">{primaryKeyword}</span>" is now live
                   </div>
-                  <h3 className="text-5xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
-                    Content Successfully Published!
-                  </h3>
-                  <p className="text-2xl text-gray-700 mb-8 max-w-4xl mx-auto leading-relaxed">
-                    Professional article about <span className="font-bold text-blue-600">"{primaryKeyword}"</span> is now live with strategic backlinks to your website
-                  </p>
                   <div className="mb-12 max-w-5xl mx-auto">
                     <div className="bg-white rounded-2xl shadow-2xl border-4 border-green-200 overflow-hidden">
                       <div className="bg-gray-100 px-6 py-4 border-b flex items-center gap-4">
