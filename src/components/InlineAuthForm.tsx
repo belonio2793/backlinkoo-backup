@@ -179,48 +179,81 @@ export function InlineAuthForm({
     setIsLoading(true);
 
     try {
-      const result = await AuthService.signUp({
-        email: signupEmail,
-        password: signupPassword,
-        firstName: firstName.trim(),
-      });
+      // Use trial conversion service if we're upgrading a trial
+      if (showTrialUpgrade && TrialConversionService.hasConvertibleTrialPosts()) {
+        const conversionResult = await TrialConversionService.convertTrialToAccount(
+          signupEmail,
+          signupPassword,
+          firstName.trim()
+        );
 
-      if (result.success) {
-        if (result.user?.email_confirmed_at) {
+        if (conversionResult.success) {
+          const convertedCount = conversionResult.convertedPosts || 0;
           toast({
-            title: "Account created successfully!",
-            description: "You're now signed in and ready to start your first campaign.",
+            title: "Trial upgraded successfully!",
+            description: convertedCount > 0
+              ? `Your account is ready and ${convertedCount} trial post${convertedCount > 1 ? 's have' : ' has'} been converted to permanent.`
+              : "Your account is ready! You can now create permanent backlinks.",
           });
-          onAuthSuccess?.(result.user);
+          onAuthSuccess?.(conversionResult.user);
         } else {
           toast({
-            title: "Account created!",
-            description: "Please check your email for a verification link to complete your account setup.",
+            title: "Upgrade failed",
+            description: conversionResult.error || "Failed to upgrade trial account.",
+            variant: "destructive",
           });
         }
-        
+
         // Reset signup form
         setSignupEmail("");
         setSignupPassword("");
         setConfirmPassword("");
         setFirstName("");
-        
       } else {
-        let errorTitle = "Registration failed";
-        let errorMessage = result.error || "An error occurred during registration.";
-
-        if (result.error?.includes("already registered") || result.error?.includes("already exists")) {
-          errorTitle = "Account already exists";
-          errorMessage = "An account with this email already exists. Please try signing in instead.";
-          setActiveTab("login");
-          setLoginEmail(signupEmail);
-        }
-
-        toast({
-          title: errorTitle,
-          description: errorMessage,
-          variant: "destructive",
+        // Regular signup
+        const result = await AuthService.signUp({
+          email: signupEmail,
+          password: signupPassword,
+          firstName: firstName.trim(),
         });
+
+        if (result.success) {
+          if (result.user?.email_confirmed_at) {
+            toast({
+              title: "Account created successfully!",
+              description: "You're now signed in and ready to start your first campaign.",
+            });
+            onAuthSuccess?.(result.user);
+          } else {
+            toast({
+              title: "Account created!",
+              description: "Please check your email for a verification link to complete your account setup.",
+            });
+          }
+
+          // Reset signup form
+          setSignupEmail("");
+          setSignupPassword("");
+          setConfirmPassword("");
+          setFirstName("");
+
+        } else {
+          let errorTitle = "Registration failed";
+          let errorMessage = result.error || "An error occurred during registration.";
+
+          if (result.error?.includes("already registered") || result.error?.includes("already exists")) {
+            errorTitle = "Account already exists";
+            errorMessage = "An account with this email already exists. Please try signing in instead.";
+            setActiveTab("login");
+            setLoginEmail(signupEmail);
+          }
+
+          toast({
+            title: errorTitle,
+            description: errorMessage,
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error('Signup error:', error);
