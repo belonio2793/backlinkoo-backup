@@ -378,80 +378,38 @@ export function HomepageBlogGenerator() {
     }
   };
 
-  // Fallback content generation when Netlify function is not available
+  // Fallback content generation using proper blog service
   const generateFallbackBlogPost = async (targetUrl: string, keyword: string) => {
-    console.log('🔄 Generating fallback blog post...');
+    console.log('🔄 Generating fallback blog post using blog service...');
 
     try {
-      const domain = new URL(targetUrl).hostname.replace('www.', '');
-      const slug = `${keyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`;
+      const blogService = new PublishedBlogService();
 
-      const title = `The Ultimate Guide to ${keyword}: Expert Insights and Strategies`;
-      const content = `
-        <h1>${title}</h1>
-
-        <p>In today's competitive digital landscape, understanding <strong>${keyword}</strong> is crucial for success. This comprehensive guide will walk you through everything you need to know about ${keyword}, providing actionable insights and proven strategies.</p>
-
-        <h2>What is ${keyword}?</h2>
-        <p>${keyword} has become increasingly important in recent years. Whether you're a beginner or looking to advance your knowledge, this guide covers all the essential aspects you need to master.</p>
-
-        <h2>Why ${keyword} Matters</h2>
-        <p>The importance of ${keyword} cannot be overstated. Industry leaders and experts consistently emphasize its role in driving results and achieving goals. <a href="${targetUrl}" target="_blank">${domain}</a> has been at the forefront of ${keyword} innovation, providing valuable solutions and insights.</p>
-
-        <h2>Key Strategies for ${keyword}</h2>
-        <p>Here are the most effective strategies for ${keyword}:</p>
-        <ul>
-          <li><strong>Research and Planning:</strong> Understanding your ${keyword} objectives is the first step to success.</li>
-          <li><strong>Implementation:</strong> Execute your ${keyword} strategy with precision and consistency.</li>
-          <li><strong>Optimization:</strong> Continuously improve your ${keyword} approach based on data and results.</li>
-          <li><strong>Monitoring:</strong> Track your ${keyword} performance and make adjustments as needed.</li>
-        </ul>
-
-        <h2>Best Practices for ${keyword}</h2>
-        <p>To maximize your ${keyword} results, consider these proven best practices. Many successful businesses, including those featured on <a href="${targetUrl}" target="_blank">${domain}</a>, have implemented these strategies with great success.</p>
-
-        <h3>Getting Started with ${keyword}</h3>
-        <p>If you're new to ${keyword}, start with these fundamental steps:</p>
-        <ol>
-          <li>Define your ${keyword} goals and objectives</li>
-          <li>Research your target audience and their ${keyword} needs</li>
-          <li>Develop a comprehensive ${keyword} strategy</li>
-          <li>Create high-quality content focused on ${keyword}</li>
-          <li>Measure and analyze your ${keyword} performance</li>
-        </ol>
-
-        <h2>Advanced ${keyword} Techniques</h2>
-        <p>Once you've mastered the basics, these advanced ${keyword} techniques can help you achieve even better results. The experts at <a href="${targetUrl}" target="_blank">${domain}</a> recommend focusing on continuous learning and adaptation in the ${keyword} space.</p>
-
-        <h2>Conclusion</h2>
-        <p>Mastering ${keyword} requires dedication, continuous learning, and the right strategies. By following the guidelines in this comprehensive guide, you'll be well-equipped to achieve your ${keyword} objectives and drive meaningful results.</p>
-      `;
-
-      const publishedUrl = `${window.location.origin}/blog/${slug}`;
-
-      const blogPost = {
-        id: `fallback_${Date.now()}`,
-        slug,
-        title,
-        content,
-        metaDescription: `Master ${keyword} with this comprehensive guide. Learn proven strategies, best practices, and expert tips to achieve better results.`,
-        excerpt: `Discover everything you need to know about ${keyword} in this ultimate guide with actionable strategies and expert insights.`,
-        keywords: [keyword],
+      // Create blog post using the proper service
+      const blogPost = await blogService.createBlogPost({
+        keyword,
         targetUrl,
-        publishedUrl,
-        status: 'published',
+        userId: currentUser?.id,
         isTrialPost: !currentUser,
-        expiresAt: !currentUser ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null,
-        createdAt: new Date().toISOString(),
-        mode: 'fallback'
-      };
+        wordCount: 1200
+      });
+
+      console.log('✅ Blog post created and saved:', {
+        slug: blogPost.slug,
+        id: blogPost.id,
+        publishedUrl: blogPost.published_url,
+        isTrialPost: blogPost.is_trial_post
+      });
 
       return {
         success: true,
-        slug,
-        blogPost,
-        publishedUrl,
-        message: 'Blog post generated using fallback mode'
+        slug: blogPost.slug,
+        blogPost: {
+          ...blogPost,
+          mode: 'fallback'
+        },
+        publishedUrl: blogPost.published_url,
+        message: 'Blog post generated and saved using fallback mode'
       };
     } catch (error) {
       console.error('Fallback generation failed:', error);
