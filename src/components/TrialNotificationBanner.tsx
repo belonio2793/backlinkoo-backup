@@ -95,7 +95,7 @@ export function TrialNotificationBanner() {
   };
 
   const handleSignUp = () => {
-    navigate('/auth-callback?action=signup&redirect=/dashboard');
+    navigate('/auth/callback?action=signup&redirect=/dashboard');
   };
 
   const viewTrialPost = (slug: string) => {
