@@ -147,24 +147,63 @@ export function HomepageBlogGenerator() {
     });
 
     try {
-      console.log('🔄 GENERATION PROCESS STARTED');
+      console.log('🔄 ChatGPT BLOG GENERATION PIPELINE STARTED');
 
-      // Test connection to Netlify functions first (in production)
-      const isDevelopment = window.location.hostname === 'localhost' ||
-                           window.location.hostname === '127.0.0.1' ||
-                           window.location.hostname.includes('localhost') ||
-                           window.location.hostname.includes('.fly.dev') ||
-                           window.location.port === '8080' ||
-                           process.env.NODE_ENV === 'development';
+      // Use ChatGPT Blog Generation Service
+      const blogInput = {
+        destinationURL: targetUrl,
+        targetKeyword: primaryKeyword,
+        anchorText: anchorText || primaryKeyword // Default to keyword if no anchor text
+      };
 
-      console.log('🔍 Environment check:', {
-        hostname: window.location.hostname,
-        port: window.location.port,
-        isDevelopment,
-        nodeEnv: process.env.NODE_ENV
-      });
+      console.log('📋 ChatGPT Generation Input:', blogInput);
 
-      let data;
+      const result = await chatGPTBlogGenerator.generateAndPublishBlog(
+        blogInput,
+        currentUser?.id
+      );
+
+      if (!result.success) {
+        throw new Error(result.error || 'Blog generation failed');
+      }
+
+      console.log('✅ ChatGPT Pipeline Success:', result);
+
+      // Convert to expected format for UI compatibility
+      const data = {
+        success: true,
+        slug: result.blogPost?.slug,
+        blogPost: {
+          id: result.blogPost?.id,
+          title: result.blogPost?.title,
+          content: result.blogPost?.content,
+          meta_description: result.blogPost?.metaDescription,
+          excerpt: result.blogPost?.metaDescription,
+          keywords: [primaryKeyword],
+          target_url: targetUrl,
+          published_url: result.livePostURL,
+          status: 'published',
+          is_trial_post: !currentUser,
+          expires_at: result.expiresIn === '24 hours' ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null,
+          seo_score: result.blogPost?.seoScore || 92,
+          contextual_links: [
+            { anchor: anchorText || primaryKeyword, url: targetUrl }
+          ],
+          word_count: result.blogPost?.wordCount || 1200,
+          reading_time: Math.ceil((result.blogPost?.wordCount || 1200) / 200),
+          author_name: 'Backlinkoo Editorial Team',
+          author_avatar: '/placeholder.svg',
+          tags: [primaryKeyword, 'Professional Guide', 'SEO Content'],
+          category: 'Professional Guides',
+          featured_image: `https://images.unsplash.com/1600x900/?${encodeURIComponent(primaryKeyword)}`,
+          slug: result.blogPost?.slug,
+          created_at: new Date().toISOString(),
+          published_at: result.blogPost?.publishedAt,
+          updated_at: new Date().toISOString(),
+          view_count: 0
+        },
+        publishedUrl: result.livePostURL
+      };
 
       if (isDevelopment) {
         // Development mode - create mock data
