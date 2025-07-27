@@ -144,9 +144,21 @@ export function Blog() {
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               Backlinkoo Blog
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
               High-quality SEO content created by our AI-powered backlink generation system
             </p>
+
+            {/* Create New Post CTA */}
+            <div className="mb-6">
+              <Button
+                onClick={() => navigate('/blog/create')}
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
+                <Sparkles className="h-5 w-5 mr-2" />
+                Create Your Backlink Post
+              </Button>
+            </div>
           </div>
 
           {/* Search and Filter */}
