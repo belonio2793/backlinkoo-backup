@@ -1,7 +1,14 @@
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+// Validate required environment variables
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+  console.error('Missing required environment variables: SUPABASE_URL and SUPABASE_ANON_KEY');
+}
+
+const supabase = process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY
+  ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
+  : null;
 
 exports.handler = async (event, context) => {
   // Handle CORS
