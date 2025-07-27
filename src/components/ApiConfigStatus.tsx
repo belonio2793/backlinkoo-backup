@@ -91,13 +91,13 @@ export function ApiConfigStatus() {
   const testAPIConnections = async () => {
     setIsChecking(true);
     try {
-      const results = await enhancedAIContentGenerator.testAPIConnections();
-      
+      const providerStatus = await productionAIContentManager.getProviderStatus();
+
       const updatedStatuses = apiStatuses.map(status => ({
         ...status,
-        working: results[status.key]
+        working: providerStatus[status.name]?.working || false
       }));
-      
+
       setApiStatuses(updatedStatuses);
     } catch (error) {
       console.error('Failed to test API connections:', error);
