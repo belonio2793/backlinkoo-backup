@@ -147,11 +147,11 @@ export function TrialNotificationBanner() {
           <div className="flex items-center gap-2">
             <Button
               size="sm"
-              onClick={handleSignUp}
-              className="bg-white text-red-600 hover:bg-red-50 font-medium animate-pulse"
+              onClick={handleQuickUpgrade}
+              className={`bg-white font-medium ${timeRemaining.urgent ? 'text-red-600 hover:bg-red-50 animate-pulse' : 'text-orange-600 hover:bg-orange-50'}`}
             >
               <Crown className="mr-1 h-4 w-4" />
-              Save Forever
+              {timeRemaining.urgent ? 'Upgrade Now!' : 'Upgrade Trial'}
             </Button>
             
             {trialPosts.length === 1 && (
