@@ -358,23 +358,13 @@ export function HomepageBlogGenerator() {
                   </div>
                 </div>
 
-                <Button 
-                  onClick={handleGenerate}
-                  disabled={isGenerating || !targetUrl || !primaryKeyword}
+                <Button
+                  onClick={() => navigate('/login?tab=signup')}
                   size="lg"
                   className="w-full text-lg py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium shadow-lg"
                 >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                      Generating Your Trial Backlink...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="mr-3 h-5 w-5" />
-                      Claim Now
-                    </>
-                  )}
+                  <Sparkles className="mr-3 h-5 w-5" />
+                  Claim Now
                 </Button>
 
                 <p className="text-center text-sm text-gray-500">
