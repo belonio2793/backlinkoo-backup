@@ -19,6 +19,7 @@ import { CampaignDeliverables } from "../pages/CampaignDeliverables";
 import BlogPreview from "../pages/BlogPreview";
 import { Blog } from "../pages/Blog";
 import { BlogPost } from "../pages/BlogPost";
+import { BlogCreator } from "../pages/BlogCreator";
 import EmailMarketing from "../pages/EmailMarketing";
 import { GuestDashboard } from "../components/GuestDashboard";
 import { EnhancedDashboardRouter } from "../components/EnhancedDashboardRouter";
