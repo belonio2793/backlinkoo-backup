@@ -780,6 +780,7 @@ export function HomepageBlogGenerator() {
               primaryKeyword={primaryKeyword}
               targetUrl={targetUrl}
               currentUser={currentUser}
+              onCreateAnother={resetForm}
             />
           )}
         </div>
