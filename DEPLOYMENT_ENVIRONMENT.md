@@ -52,7 +52,7 @@ URI=https://backlinkoo.com
 - SUPABASE_URL
 - SUPABASE_ANON_KEY
 - OPENAI_API_KEY (optional - fallback content used if not provided)
-- URL (for constructing published URLs)
+- URI (for constructing published URLs)
 
 ### claim-post.js
 - SUPABASE_URL
