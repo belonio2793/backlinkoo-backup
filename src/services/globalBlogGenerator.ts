@@ -229,23 +229,31 @@ class GlobalBlogGeneratorService {
 
   private async generateFallbackBlogPost(request: any): Promise<GlobalBlogResponse> {
     // Simulate AI generation with realistic content
+    const content = this.generateFallbackContent(request);
     const blogPost = {
       id: crypto.randomUUID(),
       title: `${request.primaryKeyword}: A Comprehensive Guide for ${new Date().getFullYear()}`,
-      content: this.generateFallbackContent(request),
+      content: content,
       excerpt: `Discover everything you need to know about ${request.primaryKeyword}. Expert insights, practical tips, and actionable strategies.`,
       slug: `${request.primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
       keywords: [request.primaryKeyword, ...this.generateRelatedKeywords(request.primaryKeyword)],
+      tags: [request.primaryKeyword, ...this.generateRelatedKeywords(request.primaryKeyword)], // Add tags for compatibility
       meta_description: `Complete guide to ${request.primaryKeyword}. Learn from experts and boost your results with proven strategies.`,
       target_url: request.targetUrl,
       anchor_text: request.anchorText || request.primaryKeyword,
       seo_score: Math.floor(Math.random() * 20) + 80,
       reading_time: Math.floor(Math.random() * 5) + 3,
+      word_count: Math.floor(content.length / 6), // Approximate word count
+      view_count: 0,
+      author_name: 'Backlinkoo AI',
+      category: 'SEO Guide',
       published_url: `https://backlinkoo.com/blog/${request.primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
+      published_at: new Date().toISOString(),
       is_trial_post: true,
       expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      contextual_links: []
     };
 
     await this.storeGlobalBlogPost(blogPost);
