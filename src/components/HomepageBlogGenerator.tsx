@@ -300,17 +300,60 @@ export function HomepageBlogGenerator() {
       }
 
     } catch (error) {
-      console.error('Blog generation error:', error);
-      toast({
-        title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to generate blog post. Please try again.",
-        variant: "destructive"
+      // ============= ENTERPRISE ERROR HANDLING =============
+      console.error('🚨 CRITICAL ERROR IN GENERATION PROCESS:', error);
+      console.error('📋 Error Context:', {
+        targetUrl,
+        primaryKeyword,
+        userType: isLoggedIn ? 'AUTHENTICATED' : 'TRIAL',
+        timestamp: new Date().toISOString(),
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        errorStack: error instanceof Error ? error.stack : 'No stack trace'
       });
-      // Reset all states on error
+
+      // Determine error type and user guidance
+      let errorTitle = "⚠️ Generation Process Failed";
+      let errorDescription = "An unexpected error occurred during blog generation.";
+      let nextSteps = "Please try again or contact support if the issue persists.";
+
+      if (error instanceof Error) {
+        if (error.message.includes('404')) {
+          errorTitle = "🔌 Service Temporarily Unavailable";
+          errorDescription = "Our blog generation service is currently offline.";
+          nextSteps = "Please try again in a few minutes. If this persists, contact our support team.";
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorTitle = "🌐 Connection Error";
+          errorDescription = "Unable to connect to our generation service.";
+          nextSteps = "Check your internet connection and try again.";
+        } else if (error.message.includes('timeout')) {
+          errorTitle = "⏱️ Request Timeout";
+          errorDescription = "Generation took longer than expected.";
+          nextSteps = "This usually resolves itself. Please try again.";
+        } else {
+          errorDescription = error.message;
+        }
+      }
+
+      // Enterprise-grade error notification
+      toast({
+        title: errorTitle,
+        description: `${errorDescription} ${nextSteps}`,
+        variant: "destructive",
+        duration: 10000 // Longer duration for error messages
+      });
+
+      // Reset all states to clean slate
+      console.log('🔄 RESETTING STATES AFTER ERROR');
       setIsGenerating(false);
       setShowProgress(false);
       setForceComplete(false);
       setIsCompleted(false);
+      setGeneratedPost(null);
+      setPublishedUrl('');
+      setBlogPostId('');
+
+      // Optional: Add error reporting for enterprise monitoring
+      // reportErrorToAnalytics(error, { targetUrl, primaryKeyword, userType: isLoggedIn ? 'AUTH' : 'TRIAL' });
     }
   };
 
