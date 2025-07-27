@@ -993,37 +993,6 @@ export function HomepageBlogGenerator() {
                       View Article
                     </Button>
                   </div>
-                  {currentUser ? (
-                    <div className="max-w-3xl mx-auto mb-8 p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="flex items-start gap-3">
-                        <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                        <div className="text-left">
-                          <p className="text-sm font-medium text-green-800 mb-1">
-                            ✅ Permanent Backlink Created
-                          </p>
-                          <p className="text-sm text-green-700">
-                            <strong>Your backlink is permanently saved</strong> and will continue providing SEO value indefinitely.
-                            You can view and manage all your backlinks from your dashboard.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="max-w-3xl mx-auto mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                      <div className="flex items-start gap-3">
-                        <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
-                        <div className="text-left">
-                          <p className="text-sm font-medium text-amber-800 mb-1">
-                            ⚠️ Trial Backlink - 24 Hour Expiry
-                          </p>
-                          <p className="text-sm text-amber-700">
-                            <strong>This is a trial backlink</strong> that will automatically delete in 24 hours unless claimed.
-                            Create an account now to make this backlink permanent and unlock unlimited backlink creation!
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                     <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-4 rounded-xl border border-green-200">
                       <div className="flex items-center gap-2 mb-3">
