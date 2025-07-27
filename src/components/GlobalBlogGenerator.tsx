@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { globalBlogGenerator, type GlobalBlogRequest } from '@/services/globalBlogGenerator';
-import { contentFilterService } from '@/services/contentFilterService';
+import { contentModerationService } from '@/services/contentModerationService';
 import { useAuthStatus } from '@/hooks/useAuth';
 import { trackBlogGeneration } from '@/hooks/useGuestTracking';
 import {
