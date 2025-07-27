@@ -309,7 +309,7 @@ export function HomepageBlogGenerator() {
           {/* Authentication Status Banner */}
           {authChecked && (
             <Card className={`mb-6 border-l-4 ${
-              currentUser
+              isLoggedIn
                 ? 'border-l-green-500 bg-green-50 border-green-200'
                 : 'border-l-amber-500 bg-amber-50 border-amber-200'
             }`}>
