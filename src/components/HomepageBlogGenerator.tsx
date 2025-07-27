@@ -231,13 +231,11 @@ export function HomepageBlogGenerator() {
       console.log('⏰ Forcing progress completion...');
       setForceComplete(true);
 
-      // Show results after progress completes
-      setTimeout(() => {
-        console.log('✅ Setting completion state to true');
-        setIsCompleted(true);
-        setIsGenerating(false);
-        setShowProgress(false);
-      }, 2000);
+      // Show results immediately for better UX
+      console.log('✅ Setting completion state to true immediately');
+      setIsCompleted(true);
+      setIsGenerating(false);
+      setShowProgress(false);
 
       toast({
         title: "Blog Post Generated!",
