@@ -123,6 +123,24 @@ export function HomepageBlogGenerator() {
           : "Your demo preview is ready. Register to keep it forever!",
       });
 
+      // Store trial post info for notification system
+      if (!user && blogPost.is_trial_post) {
+        const trialPostInfo = {
+          id: blogPost.id,
+          title: blogPost.title,
+          slug: blogPost.slug,
+          expires_at: blogPost.expires_at,
+          target_url: targetUrl,
+          created_at: blogPost.created_at
+        };
+
+        // Store in localStorage for notification tracking
+        const existingTrialPosts = localStorage.getItem('trial_blog_posts');
+        const trialPosts = existingTrialPosts ? JSON.parse(existingTrialPosts) : [];
+        trialPosts.push(trialPostInfo);
+        localStorage.setItem('trial_blog_posts', JSON.stringify(trialPosts));
+      }
+
       // Show signup popup for guest users after a delay
       if (!user) {
         setTimeout(() => {
