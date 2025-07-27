@@ -70,6 +70,7 @@ export function HomepageBlogGenerator() {
     console.log('✅ Starting generation with valid inputs');
     setIsGenerating(true);
     setIsCompleted(false);
+    setShowProgress(true);
 
     try {
       // Check if user is logged in
