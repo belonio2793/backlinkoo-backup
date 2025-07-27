@@ -53,7 +53,7 @@ Site URL is automatically provided by Netlify via:
 - SUPABASE_URL
 - SUPABASE_ANON_KEY
 - OPENAI_API_KEY (optional - fallback content used if not provided)
-- URI (for constructing published URLs)
+- URL/DEPLOY_URL (automatically provided by Netlify)
 
 ### claim-post.js
 - SUPABASE_URL
