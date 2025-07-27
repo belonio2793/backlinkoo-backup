@@ -907,6 +907,18 @@ const Index = () => {
         initialCredits={isCustomPackage ? customCredits : pricingPlans.find(p => p.id === selectedPlan)?.credits}
       />
 
+      {/* Guest Session Reminder - Show for non-authenticated users */}
+      {!user && authChecked && shouldShowConversionPrompt() && (
+        <GuestSessionReminder
+          onSignUp={() => {
+            trackInteraction('guest_reminder_signup');
+            setShowLoginModal(true);
+          }}
+          variant="floating"
+          position="bottom"
+        />
+      )}
+
       {/* Footer */}
       <Footer />
 
