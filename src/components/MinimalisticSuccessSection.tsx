@@ -22,7 +22,15 @@ export function MinimalisticSuccessSection({
 }: MinimalisticSuccessSectionProps) {
   const { toast } = useToast();
 
+  console.log('🎯 MinimalisticSuccessSection props:', {
+    publishedUrl,
+    generatedPostSlug: generatedPost?.slug,
+    generatedPostId: generatedPost?.id,
+    generatedPostTitle: generatedPost?.title
+  });
+
   const blogUrl = publishedUrl || `${window.location.origin}/blog/${generatedPost?.slug}`;
+  console.log('🔗 Constructed blog URL:', blogUrl);
 
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(blogUrl);
