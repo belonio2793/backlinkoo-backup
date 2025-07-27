@@ -178,7 +178,7 @@ export function HomepageBlogGenerator() {
         throw new Error(result.error || 'Blog generation failed');
       }
 
-      console.log('✅ ChatGPT Pipeline Success:', result);
+      console.log('✅ Blog Generation Pipeline Success:', result);
 
       // Convert to expected format for UI compatibility
       const data = {
