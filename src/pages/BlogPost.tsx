@@ -218,8 +218,10 @@ export function BlogPost() {
           <div className="space-y-4">
             {/* Category and Tags */}
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary">{blogPost.category}</Badge>
-              {blogPost.tags.slice(0, 3).map((tag, index) => (
+              {blogPost.category && (
+                <Badge variant="secondary">{blogPost.category}</Badge>
+              )}
+              {(blogPost.tags || blogPost.keywords || []).slice(0, 3).map((tag, index) => (
                 <Badge key={index} variant="outline" className="text-xs">
                   <Tag className="mr-1 h-3 w-3" />
                   {tag}
