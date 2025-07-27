@@ -145,10 +145,13 @@ export function MultiBlogGenerator({
   ];
 
   useEffect(() => {
+    console.log('🎯 MultiBlogGenerator mounted with:', { keyword, targetUrl });
     initializeBlogGeneration();
   }, []);
 
   const initializeBlogGeneration = async () => {
+    console.log('🔄 Initializing blog generation with experts:', experts.length);
+
     // Initialize blog posts with experts
     const initialPosts: BlogPost[] = experts.map((expert, index) => ({
       id: `blog_${index + 1}`,

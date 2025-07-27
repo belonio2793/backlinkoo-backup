@@ -45,6 +45,8 @@ export function HomepageBlogGenerator() {
   const { toast } = useToast();
 
   const handleGenerate = async () => {
+    console.log('🚀 handleGenerate called with:', { targetUrl, primaryKeyword });
+
     if (!targetUrl || !primaryKeyword) {
       toast({
         title: "Missing Information",
@@ -63,6 +65,7 @@ export function HomepageBlogGenerator() {
       return;
     }
 
+    console.log('✅ Starting generation with valid inputs');
     setIsGenerating(true);
     setIsCompleted(false);
   };
@@ -356,7 +359,7 @@ export function HomepageBlogGenerator() {
                   </div>
                 </div>
 
-                <Button 
+                <Button
                   onClick={handleGenerate}
                   disabled={isGenerating || !targetUrl || !primaryKeyword}
                   size="lg"
@@ -453,6 +456,21 @@ export function HomepageBlogGenerator() {
                         <div key={post.id} className="p-3 border rounded-lg bg-white">
                           <div className="text-sm font-medium mb-1">{post.expert?.avatar} {post.expert?.name}</div>
                           <div className="text-xs text-gray-600 mb-2 truncate">{post.title}</div>
+
+                          {/* Unclaimed Blog Notification */}
+                          {!currentUser && (
+                            <div className="mb-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs">
+                              <div className="flex items-center gap-1 mb-1">
+                                <span className="text-amber-600">⚠️</span>
+                                <span className="font-medium text-amber-800">Unclaimed Blog</span>
+                              </div>
+                              <p className="text-amber-700 leading-tight">
+                                This blog has not been claimed. Create an account to claim and save it permanently,
+                                or it will be automatically deleted in 24 hours.
+                              </p>
+                            </div>
+                          )}
+
                           <Button
                             size="sm"
                             onClick={() => window.open(post.previewUrl || `/blog/${post.slug}`, '_blank')}
