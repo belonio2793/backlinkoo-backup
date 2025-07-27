@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -369,6 +369,14 @@ export function HomepageBlogGenerator() {
                     <Globe className="h-4 w-4 text-green-500" />
                     <span>Live Backlink</span>
                   </div>
+                  {authChecked && (
+                    <div className="flex items-center gap-2">
+                      <Save className={`h-4 w-4 ${currentUser ? 'text-green-500' : 'text-amber-500'}`} />
+                      <span className={currentUser ? 'text-green-600' : 'text-amber-600'}>
+                        {currentUser ? 'Permanent Save' : 'Trial Mode'}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-8 px-8 pb-8">
@@ -431,7 +439,7 @@ export function HomepageBlogGenerator() {
 
                 <Button
                   onClick={handleGenerate}
-                  disabled={isGenerating || !targetUrl || !primaryKeyword}
+                  disabled={isGenerating || !targetUrl || !primaryKeyword || isCheckingAuth}
                   size="lg"
                   className="w-full text-lg py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium shadow-lg"
                 >
@@ -448,9 +456,35 @@ export function HomepageBlogGenerator() {
                   )}
                 </Button>
 
-                <p className="text-center text-sm text-gray-500">
-                  ✨ Completely free • No signup required • Instant results
-                </p>
+                {authChecked && (
+                  <div className="text-center text-sm">
+                    {currentUser ? (
+                      <div className="space-y-2">
+                        <p className="text-green-600 font-medium">
+                          ✅ Logged in - Your backlinks will be saved permanently
+                        </p>
+                        <p className="text-gray-500">
+                          Welcome back! Your content will be saved to your dashboard.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <p className="text-amber-600 font-medium">
+                          ⚠️ Guest Mode - Trial backlink (24 hours)
+                        </p>
+                        <p className="text-gray-500">
+                          ✨ Completely free • No signup required • Register to save permanently
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {isCheckingAuth && (
+                  <p className="text-center text-sm text-gray-500">
+                    🔄 Checking authentication status...
+                  </p>
+                )}
               </CardContent>
             </Card>
             )
