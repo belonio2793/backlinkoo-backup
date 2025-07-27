@@ -31,7 +31,8 @@ import {
   TrendingUp,
   Save,
   AlertCircle,
-  FileText
+  FileText,
+  BarChart3
 } from 'lucide-react';
 import { RotatingText } from './RotatingText';
 import { LoginModal } from './LoginModal';
