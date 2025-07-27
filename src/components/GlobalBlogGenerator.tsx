@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { globalBlogGenerator, type GlobalBlogRequest } from '@/services/globalBlogGenerator';
+import { contentModerationService } from '@/services/contentModerationService';
 import { useAuthStatus } from '@/hooks/useAuth';
 import { trackBlogGeneration } from '@/hooks/useGuestTracking';
 import {
@@ -122,6 +123,33 @@ export function GlobalBlogGenerator({
 
   const handleGenerate = async () => {
     if (!validateForm()) return;
+
+    // Enhanced content moderation check before proceeding
+    const moderationResult = await contentModerationService.moderateContent(
+      `${targetUrl} ${primaryKeyword} ${anchorText || ''}`,
+      targetUrl,
+      primaryKeyword,
+      anchorText,
+      undefined, // No user ID for guest users
+      'blog_request'
+    );
+
+    if (!moderationResult.allowed) {
+      if (moderationResult.requiresReview) {
+        toast({
+          title: "Content submitted for review",
+          description: "Your request has been flagged for administrative review. You'll be notified once the review is complete.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Content blocked",
+          description: "Your request contains terms that violate our content policy. Please try again with appropriate content.",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
 
     if (remainingRequests <= 0) {
       toast({

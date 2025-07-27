@@ -1,4 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
+import { contentFilterService } from './contentFilterService';
+import { contentModerationService } from './contentModerationService';
 
 export interface GlobalBlogRequest {
   targetUrl: string;
@@ -147,6 +149,30 @@ class GlobalBlogGeneratorService {
 
   async generateGlobalBlogPost(request: GlobalBlogRequest): Promise<GlobalBlogResponse> {
     try {
+      // Enhanced content moderation check
+      const moderationResult = await contentModerationService.moderateContent(
+        `${request.targetUrl} ${request.primaryKeyword} ${request.anchorText || ''}`,
+        request.targetUrl,
+        request.primaryKeyword,
+        request.anchorText,
+        undefined, // No user ID for global requests
+        'blog_request'
+      );
+
+      if (!moderationResult.allowed) {
+        if (moderationResult.requiresReview) {
+          return {
+            success: false,
+            error: `Content flagged for review: Your request has been submitted for administrative review due to potentially inappropriate content. You will be notified once the review is complete.`,
+          };
+        } else {
+          return {
+            success: false,
+            error: `Content blocked: Your request contains terms that violate our content policy. Please review our guidelines and try again with appropriate content.`,
+          };
+        }
+      }
+
       // Check rate limiting
       const rateCheck = this.checkRateLimit();
       if (!rateCheck.allowed) {
@@ -230,6 +256,24 @@ class GlobalBlogGeneratorService {
   private async generateFallbackBlogPost(request: any): Promise<GlobalBlogResponse> {
     // Simulate AI generation with realistic content
     const content = this.generateFallbackContent(request);
+
+    // Enhanced moderation of generated content
+    const title = `${request.primaryKeyword}: A Comprehensive Guide for ${new Date().getFullYear()}`;
+    const keywords = [request.primaryKeyword, ...this.generateRelatedKeywords(request.primaryKeyword)];
+
+    const generatedContentModeration = await contentModerationService.moderateContent(
+      `${title} ${content}`,
+      request.targetUrl,
+      request.primaryKeyword,
+      request.anchorText,
+      undefined,
+      'generated_content'
+    );
+
+    if (!generatedContentModeration.allowed) {
+      throw new Error(`Generated content was flagged for moderation: The AI-generated content contains terms that require review before publication.`);
+    }
+
     const blogPost = {
       id: crypto.randomUUID(),
       title: `${request.primaryKeyword}: A Comprehensive Guide for ${new Date().getFullYear()}`,

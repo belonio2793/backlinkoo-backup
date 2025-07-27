@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { publishedBlogService, type PublishedBlogPost } from '@/services/publishedBlogService';
+import { contentFilterService } from '@/services/contentFilterService';
+import { contentModerationService } from '@/services/contentModerationService';
 import { 
   Calendar, 
   Clock, 
@@ -19,7 +21,9 @@ import {
   Sparkles,
   Filter,
   Download,
-  RefreshCw
+  RefreshCw,
+  Shield,
+  AlertTriangle
 } from 'lucide-react';
 
 export function AdminBlogManager() {
@@ -29,9 +33,12 @@ export function AdminBlogManager() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [trialFilter, setTrialFilter] = useState<string>('');
+  const [contentFilterStats, setContentFilterStats] = useState<any>(null);
+  const [moderationStats, setModerationStats] = useState<any>(null);
 
   useEffect(() => {
     loadBlogPosts();
+    loadContentFilterStats();
   }, []);
 
   const loadBlogPosts = async () => {
@@ -49,6 +56,19 @@ export function AdminBlogManager() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadContentFilterStats = async () => {
+    try {
+      const [filterStats, modStats] = await Promise.all([
+        contentFilterService.getFilterStats(7),
+        contentModerationService.getModerationStats(7)
+      ]);
+      setContentFilterStats(filterStats);
+      setModerationStats(modStats);
+    } catch (error) {
+      console.warn('Failed to load content filter stats:', error);
     }
   };
 
@@ -294,6 +314,77 @@ export function AdminBlogManager() {
               <div className="text-sm text-gray-600">Avg SEO Score</div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Content Protection Status */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          {contentFilterStats && (
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-green-600" />
+                    <span className="font-medium">Content Filter</span>
+                  </div>
+                  {contentFilterService.getConfiguration().enabled ? (
+                    <Badge className="bg-green-100 text-green-800 border-green-200">
+                      <Shield className="mr-1 h-3 w-3" />
+                      Active
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+                      <AlertTriangle className="mr-1 h-3 w-3" />
+                      Disabled
+                    </Badge>
+                  )}
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-lg font-semibold text-red-600">{contentFilterStats.blocked}</div>
+                    <div className="text-xs text-gray-600">Blocked</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-semibold text-orange-600">{contentFilterStats.blockRate}%</div>
+                    <div className="text-xs text-gray-600">Block Rate</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-semibold text-blue-600">{contentFilterStats.total}</div>
+                    <div className="text-xs text-gray-600">Total</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {moderationStats && (
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-orange-600" />
+                    <span className="font-medium">Content Moderation</span>
+                  </div>
+                  <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                    {moderationStats.pending} Pending
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-lg font-semibold text-green-600">{moderationStats.approved}</div>
+                    <div className="text-xs text-gray-600">Approved</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-semibold text-red-600">{moderationStats.rejected}</div>
+                    <div className="text-xs text-gray-600">Rejected</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-semibold text-purple-600">{moderationStats.approvalRate}%</div>
+                    <div className="text-xs text-gray-600">Approval Rate</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 

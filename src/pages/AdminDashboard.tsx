@@ -10,6 +10,8 @@ import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager"
 import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
 import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
 import { TrialPostCleanupManager } from "@/components/admin/TrialPostCleanupManager";
+import { ContentFilterManager } from "@/components/admin/ContentFilterManager";
+import { ContentModerationQueue } from "@/components/admin/ContentModerationQueue";
 import { AuthEmailTest } from "@/components/AuthEmailTest";
 
 import { EmailTest } from "@/components/EmailTest";
@@ -93,7 +95,7 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Infinity className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-semibold">Backlink ∞ Admin</h1>
+              <h1 className="text-xl font-semibold">Admin Dashboard</h1>
             </div>
             <div className="flex items-center gap-3">
               <PurgeStorageButton
@@ -175,6 +177,8 @@ const AdminDashboard = () => {
           <TabsList>
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
             <TabsTrigger value="blog-posts">Blog Posts</TabsTrigger>
+            <TabsTrigger value="content-filter">Content Filter</TabsTrigger>
+            <TabsTrigger value="moderation-queue">Moderation Queue</TabsTrigger>
             <TabsTrigger value="trial-cleanup">Trial Cleanup</TabsTrigger>
             <TabsTrigger value="affiliates">Affiliate Program</TabsTrigger>
             <TabsTrigger value="auth-test">Auth & Email Test</TabsTrigger>
@@ -191,6 +195,14 @@ const AdminDashboard = () => {
 
           <TabsContent value="blog-posts">
             <AdminBlogManager />
+          </TabsContent>
+
+          <TabsContent value="content-filter">
+            <ContentFilterManager />
+          </TabsContent>
+
+          <TabsContent value="moderation-queue">
+            <ContentModerationQueue />
           </TabsContent>
 
           <TabsContent value="trial-cleanup">
