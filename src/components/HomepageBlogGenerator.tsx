@@ -1304,78 +1304,82 @@ export function HomepageBlogGenerator() {
                       </ClaimTrialPostDialog>
                     </div>
                   )}
-                  <div className="mt-8 space-y-6">
+                  <div className="mt-6 space-y-4">
                     {currentUser ? (
-                      <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-6 text-white text-center">
-                        <div className="flex items-center justify-center gap-2 mb-3">
-                          <CheckCircle2 className="h-6 w-6" />
-                          <h4 className="text-xl font-bold">🎯 Mission Complete!</h4>
+                      <div className="bg-green-500 rounded p-4 text-white text-center">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <CheckCircle2 className="h-5 w-5" />
+                          <h4 className="text-lg font-medium" style={{fontFamily: 'Roboto, sans-serif'}}>Mission Complete!</h4>
                         </div>
-                        <p className="text-green-100 mb-4 text-lg">
+                        <p className="text-green-100 mb-3 text-sm" style={{fontFamily: 'Roboto, sans-serif'}}>
                           Your professional backlink is now <strong>permanently active</strong> and boosting your SEO rankings!
                         </p>
-                        <div className="space-y-4">
-                          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <div className="space-y-3">
+                          <div className="flex flex-col sm:flex-row gap-2 justify-center">
                             <Button
-                              size="lg"
-                              className="bg-white text-green-600 hover:bg-green-50 font-bold px-8"
+                              size="default"
+                              className="bg-white text-green-600 hover:bg-green-50 font-medium px-6"
                               onClick={() => window.location.href = '/dashboard'}
+                              style={{fontFamily: 'Roboto, sans-serif'}}
                             >
-                              <BarChart3 className="mr-2 h-5 w-5" />
-                              📊 Track Your SEO Growth
+                              <BarChart3 className="mr-2 h-4 w-4" />
+                              Track Your SEO Growth
                             </Button>
                             <Button
-                              size="lg"
+                              size="default"
                               variant="outline"
-                              className="border-white text-white hover:bg-white hover:text-green-600 font-bold px-8"
+                              className="border-white text-white hover:bg-white hover:text-green-600 font-medium px-6"
                               onClick={resetForm}
+                              style={{fontFamily: 'Roboto, sans-serif'}}
                             >
-                              <Sparkles className="mr-2 h-5 w-5" />
-                              🚀 Create Another Backlink
+                              <Sparkles className="mr-2 h-4 w-4" />
+                              Create Another Backlink
                             </Button>
                           </div>
                           <div className="text-center">
-                            <p className="text-green-100 text-sm">
-                              💡 <strong>Pro Tip:</strong> Create 3-5 backlinks per month for maximum SEO impact
+                            <p className="text-green-100 text-xs" style={{fontFamily: 'Roboto, sans-serif'}}>
+                              <strong>Pro Tip:</strong> Create 3-5 backlinks per month for maximum SEO impact
                             </p>
                           </div>
                         </div>
                       </div>
                     ) : (
                       <>
-                        <div className="bg-gradient-to-r from-red-500 to-orange-600 rounded-xl p-6 text-white text-center">
-                          <div className="flex items-center justify-center gap-2 mb-3">
-                            <AlertCircle className="h-6 w-6 animate-pulse" />
-                            <h4 className="text-xl font-bold">⚠️ Action Required!</h4>
+                        <div className="bg-red-500 rounded p-4 text-white text-center">
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            <AlertCircle className="h-5 w-5" />
+                            <h4 className="text-lg font-medium" style={{fontFamily: 'Roboto, sans-serif'}}>Action Required!</h4>
                           </div>
-                          <p className="text-red-100 mb-4 text-lg">
+                          <p className="text-red-100 mb-3 text-sm" style={{fontFamily: 'Roboto, sans-serif'}}>
                             Your backlink is <strong>live and working</strong> but will auto-delete in 24 hours!
                           </p>
-                          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                          <div className="flex flex-col sm:flex-row gap-2 justify-center">
                             <Button
-                              size="lg"
-                              className="bg-white text-red-600 hover:bg-red-50 font-semibold animate-pulse"
+                              size="default"
+                              className="bg-white text-red-600 hover:bg-red-50 font-medium"
                               onClick={() => setShowSignupPopup(true)}
+                              style={{fontFamily: 'Roboto, sans-serif'}}
                             >
-                              <Save className="mr-2 h-5 w-5" />
+                              <Save className="mr-2 h-4 w-4" />
                               Save Forever - Stop Timer!
                             </Button>
                             <Button
-                              size="lg"
+                              size="default"
                               variant="outline"
-                              className="border-white text-white hover:bg-white hover:text-red-600 font-semibold"
+                              className="border-white text-white hover:bg-white hover:text-red-600 font-medium"
                               onClick={() => setShowLoginModal(true)}
+                              style={{fontFamily: 'Roboto, sans-serif'}}
                             >
-                              <Shield className="mr-2 h-5 w-5" />
+                              <Shield className="mr-2 h-4 w-4" />
                               Login / Register
                             </Button>
                           </div>
                         </div>
-                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-200 text-center">
-                          <p className="text-blue-800 font-medium mb-2">
-                            🚀 Ready to scale your SEO?
+                        <div className="bg-blue-50 rounded p-3 border border-blue-200 text-center">
+                          <p className="text-blue-800 font-medium mb-1 text-sm" style={{fontFamily: 'Roboto, sans-serif'}}>
+                            Ready to scale your SEO?
                           </p>
-                          <p className="text-sm text-blue-700">
+                          <p className="text-xs text-blue-700" style={{fontFamily: 'Roboto, sans-serif'}}>
                             Create unlimited professional backlinks with advanced targeting and analytics!
                           </p>
                         </div>
