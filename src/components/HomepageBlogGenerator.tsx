@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuthStatus } from '@/hooks/useAuth';
 import { aiContentGenerator } from '@/services/aiContentGenerator';
 import { errorLogger, ErrorSeverity, ErrorCategory } from '@/services/errorLoggingService';
+import BlogGenerationError from './BlogGenerationError';
 import { blogPublisher } from '@/services/blogPublisher';
 import { multiApiContentGenerator } from '@/services/multiApiContentGenerator';
 import { liveBlogPublisher } from '@/services/liveBlogPublisher';
@@ -639,7 +640,7 @@ export function HomepageBlogGenerator() {
                         <li>• Contextual Links: {generatedPost?.contextualLinks?.length || 1}</li>
                         <li>• Type: Natural, Contextual</li>
                         <li className={`font-medium ${currentUser ? 'text-green-600' : 'text-amber-600'}`}>
-                          ��� Status: {currentUser ? 'Live & Permanent' : 'Trial (Expires in 24h)'}
+                          • Status: {currentUser ? 'Live & Permanent' : 'Trial (Expires in 24h)'}
                         </li>
                       </ul>
                     </div>
