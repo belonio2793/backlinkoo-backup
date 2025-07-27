@@ -306,84 +306,31 @@ export function ContentFilterManager() {
           </CardContent>
         </Card>
 
-        {/* Content Tester */}
+        {/* Basic Filter Settings Info */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TestTube className="h-5 w-5" />
-              Content Filter Tester
+              <Eye className="h-5 w-5" />
+              Filter Information
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="testContent">Test Content</Label>
-              <Textarea
-                id="testContent"
-                placeholder="Enter content to test against the current filter settings..."
-                value={testContent}
-                onChange={(e) => setTestContent(e.target.value)}
-                rows={4}
-              />
+            <div className="text-sm text-gray-600">
+              <p className="mb-2">The content filtering system includes:</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Basic keyword filtering for explicit content</li>
+                <li>Pattern-based detection for sophisticated evasion</li>
+                <li>Enhanced moderation for harmful content</li>
+                <li>Admin review workflow for questionable content</li>
+                <li>Automatic rejection of severe policy violations</li>
+              </ul>
             </div>
 
-            <Button onClick={testContentFilter} className="w-full">
-              <Eye className="mr-2 h-4 w-4" />
-              Test Content
-            </Button>
-
-            {testResult && (
-              <div className={`p-4 rounded-lg border ${
-                testResult.isAllowed 
-                  ? 'bg-green-50 border-green-200' 
-                  : 'bg-red-50 border-red-200'
-              }`}>
-                <div className="flex items-center gap-2 mb-2">
-                  {testResult.isAllowed ? (
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
-                  ) : (
-                    <XCircle className="h-5 w-5 text-red-600" />
-                  )}
-                  <span className="font-medium">
-                    {testResult.isAllowed ? 'Content Allowed' : 'Content Blocked'}
-                  </span>
-                  {!testResult.isAllowed && (
-                    <Badge className={getSeverityColor(testResult.severity)}>
-                      {testResult.severity.toUpperCase()}
-                    </Badge>
-                  )}
-                </div>
-
-                {!testResult.isAllowed && (
-                  <>
-                    <p className="text-sm text-gray-700 mb-2">{testResult.reason}</p>
-                    
-                    {testResult.blockedTerms.length > 0 && (
-                      <div className="mb-2">
-                        <p className="text-xs font-medium text-gray-600 mb-1">Blocked Terms:</p>
-                        <div className="flex flex-wrap gap-1">
-                          {testResult.blockedTerms.map((term: string, index: number) => (
-                            <Badge key={index} variant="destructive" className="text-xs">
-                              {term}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {testResult.suggestions && testResult.suggestions.length > 0 && (
-                      <div>
-                        <p className="text-xs font-medium text-gray-600 mb-1">Suggestions:</p>
-                        <ul className="text-xs text-gray-600 list-disc list-inside">
-                          {testResult.suggestions.map((suggestion: string, index: number) => (
-                            <li key={index}>{suggestion}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
+            <div className="p-3 bg-blue-50 rounded border border-blue-200">
+              <p className="text-sm text-blue-800">
+                <strong>Note:</strong> Use the Enhanced Content Testing tool above to test content against both basic filtering and advanced moderation systems.
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
