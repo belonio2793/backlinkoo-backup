@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { publishedBlogService, type PublishedBlogPost } from '@/services/publishedBlogService';
+import { contentFilterService } from '@/services/contentFilterService';
 import { 
   Calendar, 
   Clock, 
