@@ -232,26 +232,53 @@ export function BlogPost() {
           />
         </div>
 
-        {/* Trial Post Notice */}
+        {/* Trial Post Notice with Claim Option */}
         {blogPost.is_trial_post && blogPost.expires_at && (
           <Card className="mt-8 border-amber-200 bg-amber-50">
             <CardContent className="p-6">
               <div className="flex items-start gap-3">
                 <Sparkles className="h-5 w-5 text-amber-600 mt-0.5" />
-                <div>
+                <div className="flex-1">
                   <h3 className="font-semibold text-amber-800 mb-2">
-                    Trial Blog Post
+                    Trial Blog Post - Will Expire Soon!
                   </h3>
-                  <p className="text-sm text-amber-700 mb-3">
-                    This is a demo blog post that will expire on {formatDate(blogPost.expires_at)}. 
-                    To create permanent backlinks like this one, sign up for a Backlinkoo account.
+                  <p className="text-sm text-amber-700 mb-4">
+                    This demo blog post will automatically delete on {formatDate(blogPost.expires_at)} unless claimed.
+                    Claim it now to make this backlink permanent!
                   </p>
-                  <Button 
-                    onClick={() => navigate('/')} 
-                    className="bg-amber-600 hover:bg-amber-700 text-white"
-                  >
-                    Create Your Backlinks
-                  </Button>
+                  <div className="flex gap-3">
+                    {!currentUser ? (
+                      <ClaimTrialPostDialog
+                        trialPostSlug={blogPost.slug}
+                        trialPostTitle={blogPost.title}
+                        expiresAt={blogPost.expires_at}
+                        targetUrl={blogPost.target_url}
+                        onClaimed={() => {
+                          // Refresh the page to show updated status
+                          window.location.reload();
+                        }}
+                      >
+                        <Button className="bg-red-600 hover:bg-red-700 text-white animate-pulse">
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          Claim This Post Forever
+                        </Button>
+                      </ClaimTrialPostDialog>
+                    ) : (
+                      <Button
+                        onClick={() => navigate('/dashboard')}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        View in Dashboard
+                      </Button>
+                    )}
+                    <Button
+                      onClick={() => navigate('/')}
+                      variant="outline"
+                      className="border-amber-600 text-amber-700 hover:bg-amber-100"
+                    >
+                      Create More Backlinks
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
