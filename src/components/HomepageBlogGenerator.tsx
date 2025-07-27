@@ -677,16 +677,16 @@ export function HomepageBlogGenerator() {
                         <span>1,200+ word SEO-optimized blog post</span>
                       </div>
                       <div className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
-                        <span>Permanent links</span>
+                        <CheckCircle2 className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                        <span>Instant generation (no API delays)</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                        <span>Published, viewable and indexed link within private networks</span>
+                        <span>Professional content structure</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
-                        <span>Dofollow backlinks</span>
+                        <span>Strategic dofollow backlinks</span>
                       </div>
                     </div>
                   </div>
