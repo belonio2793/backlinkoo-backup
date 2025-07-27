@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { RotatingText } from './RotatingText';
 import { LoginModal } from './LoginModal';
+import { trackBlogGeneration, trackFeatureExploration } from '@/hooks/useGuestTracking';
 
 /**
  * HomepageBlogGenerator - Main component for generating high-quality blog posts with backlinks
