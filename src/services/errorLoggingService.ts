@@ -133,30 +133,48 @@ class ErrorLoggingService {
         .insert([entry]);
 
       if (error) {
-        // Check if error is due to table not existing
-        if (error.message?.includes('relation "error_logs" does not exist') ||
-            error.message?.includes('table "error_logs" does not exist')) {
-          console.warn('error_logs table does not exist. Creating table...');
+        console.warn('Database error logging failed:', error.message);
+
+        // Check if error is due to table not existing or database unavailable
+        const isTableError = error.message?.includes('relation "error_logs" does not exist') ||
+                            error.message?.includes('table "error_logs" does not exist') ||
+                            error.message?.includes('Database not available');
+
+        const isMockMode = error.message?.includes('Mock mode') ||
+                          error.message?.includes('Please configure real Supabase credentials');
+
+        if (isTableError && retryCount === 0) {
+          console.warn('error_logs table does not exist. Attempting to create...');
           await this.createErrorLogsTable();
 
-          // Retry the insert after table creation
-          if (retryCount === 0) {
-            return this.saveErrorToDatabase(entry, retryCount + 1);
-          }
+          // Retry the insert after table creation attempt
+          return this.saveErrorToDatabase(entry, retryCount + 1);
         }
+
+        if (isMockMode) {
+          console.warn('Supabase in mock mode, saving error to localStorage only');
+          this.saveErrorToLocalStorage(entry);
+          return;
+        }
+
         throw error;
       }
     } catch (error) {
       console.error('Failed to save error to database:', error);
 
-      // Retry logic
-      if (retryCount < this.maxRetries) {
+      // Always save to localStorage as fallback
+      this.saveErrorToLocalStorage(entry);
+
+      // Retry logic for temporary failures (but not for missing table/mock mode)
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const isRetryableError = !errorMessage.includes('does not exist') &&
+                              !errorMessage.includes('Mock mode') &&
+                              !errorMessage.includes('Database not available');
+
+      if (isRetryableError && retryCount < this.maxRetries) {
         setTimeout(() => {
           this.saveErrorToDatabase(entry, retryCount + 1);
         }, this.retryDelay * Math.pow(2, retryCount));
-      } else {
-        // Store in local storage as fallback
-        this.saveErrorToLocalStorage(entry);
       }
     }
   }
