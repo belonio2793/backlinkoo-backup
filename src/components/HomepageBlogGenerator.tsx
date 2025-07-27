@@ -957,7 +957,7 @@ export function HomepageBlogGenerator() {
                         </div>
                         <div className="flex-1 bg-white rounded-lg px-4 py-2 font-mono text-lg text-gray-700 border-2 border-blue-200 flex items-center">
                           <Globe className="h-5 w-5 text-green-500 mr-2" />
-                          <span className="text-green-600 font-semibold">🔒 https://</span>
+                          <span className="text-green-600 font-semibold">�� https://</span>
                           <span className="font-bold">
                             {publishedUrl?.includes('://')
                               ? publishedUrl.split('://')[1]
@@ -1137,7 +1137,7 @@ export function HomepageBlogGenerator() {
                         <h5 className="font-bold text-blue-800 mb-4 text-left">
                           Expected Timeline
                         </h5>
-                        <ul className="space-y-2 text-sm text-gray-700">
+                        <ul className="space-y-2 text-sm text-gray-700 text-left">
                           <li>• <strong>Week 1:</strong> Google discovers and crawls your backlink</li>
                           <li>• <strong>Week 2-3:</strong> Keyword rankings begin to improve</li>
                           <li>• <strong>Week 4+:</strong> Measurable organic traffic increase</li>
@@ -1173,7 +1173,7 @@ export function HomepageBlogGenerator() {
                         <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
                         <div className="text-left">
                           <p className="text-sm font-medium text-amber-800 mb-1">
-                            ⚠�� Trial Backlink - 24 Hour Expiry
+                            ⚠️ Trial Backlink - 24 Hour Expiry
                           </p>
                           <p className="text-sm text-amber-700">
                             <strong>This is a trial backlink</strong> that will automatically delete in 24 hours unless claimed.
