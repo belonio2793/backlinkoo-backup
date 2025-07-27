@@ -944,114 +944,40 @@ export function HomepageBlogGenerator() {
                   <div className="text-sm text-gray-600">
                     Your backlink for "<span className="font-medium">{primaryKeyword}</span>" is now live
                   </div>
-                  <div className="mb-12 max-w-5xl mx-auto">
-                    <div className="bg-white rounded-2xl shadow-2xl border-4 border-green-200 overflow-hidden">
-                      <div className="bg-gray-100 px-6 py-4 border-b flex items-center gap-4">
-                        <div className="flex gap-2">
-                          <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                          <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                          <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                        </div>
-                        <div className="flex-1 bg-white rounded-lg px-4 py-2 font-mono text-lg text-gray-700 border-2 border-blue-200 flex items-center">
-                          <Globe className="h-5 w-5 text-green-500 mr-2" />
-                          <span className="text-green-600 font-semibold">🔒 https://</span>
-                          <span className="font-bold">
-                            {publishedUrl?.includes('://')
-                              ? publishedUrl.split('://')[1]
-                              : `${window.location.host}/blog/${generatedPost?.slug || primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`
-                            }
-                          </span>
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            const urlToCopy = publishedUrl || `${window.location.origin}/blog/${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
-                            navigator.clipboard.writeText(urlToCopy);
-                            toast({ title: "✅ URL Copied!", description: "Blog post URL copied to clipboard" });
-                          }}
-                          className="bg-blue-500 hover:bg-blue-600 text-white"
-                        >
-                          📋 Copy URL
-                        </Button>
-                      </div>
-                      <div className="p-8 bg-white">
-                        <div className="text-left space-y-6">
-                          <h4 className="text-3xl font-bold text-gray-900 leading-tight">
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 rounded-lg p-4 border">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-gray-900 truncate">
                             {generatedPost?.title || `The Ultimate Guide to ${primaryKeyword}: Professional Insights & Strategies`}
                           </h4>
-                          <div className="flex items-center gap-6 text-sm text-gray-600">
+                          <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
                             <span>Published {new Date().toLocaleDateString()}</span>
-                            <span>•</span>
                             <span>{generatedPost?.word_count || 1200}+ words</span>
-                            <span>•</span>
-                            <div className="flex items-center gap-1">
-                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                              <span className="text-green-600 font-medium">Live & Indexed</span>
-                            </div>
-                          </div>
-                          <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border border-blue-200">
-                            <div className="flex items-start gap-4">
-                              <div className="p-2 bg-blue-100 rounded-lg">
-                                <Link2 className="h-5 w-5 text-blue-600" />
-                              </div>
-                              <div>
-                                <h5 className="font-semibold text-blue-900 mb-2">Strategic Backlink Placement</h5>
-                                <p className="text-blue-800 text-sm">
-                                  Natural contextual links to <a href={targetUrl} className="font-semibold underline hover:text-blue-900" target="_blank" rel="noopener noreferrer">{targetUrl}</a> have been strategically placed throughout this professional article to maximize your SEO impact.
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="prose prose-lg max-w-none text-gray-700">
-                            <p className="leading-relaxed">
-                              In today's competitive digital landscape, mastering <strong className="text-blue-600">{primaryKeyword}</strong> is essential for business success. This comprehensive guide provides actionable insights, proven strategies, and expert recommendations to help you achieve your goals...
-                            </p>
-                            <p className="text-gray-500 italic text-sm mt-4">
-                              [This is a preview - click "View Full Article" below to see the complete professional content with all backlinks and SEO optimizations]
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="bg-gradient-to-r from-green-50 to-blue-50 px-8 py-6 border-t">
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                          <Button
-                            size="lg"
-                            onClick={() => {
-                              const blogUrl = publishedUrl || `${window.location.origin}/blog/${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
-                              console.log('🔗 Opening blog post URL:', blogUrl);
-                              window.open(blogUrl, '_blank');
-                            }}
-                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold px-10 py-4 text-xl shadow-xl transform hover:scale-105 transition-all"
-                          >
-                            <ExternalLink className="mr-3 h-6 w-6" />
-                            View Your Live Article
-                          </Button>
-                          <Button
-                            size="lg"
-                            variant="outline"
-                            onClick={() => {
-                              const blogUrl = publishedUrl || `${window.location.origin}/blog/${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
-                              const shareText = `🎯 Just published a professional article about ${primaryKeyword}! Check out my new backlink: ${blogUrl}`;
-                              navigator.clipboard.writeText(shareText);
-                              toast({
-                                title: "✅ Share Text Copied!",
-                                description: "Perfect for social media sharing!"
-                              });
-                            }}
-                            className="border-2 border-blue-600 text-blue-700 hover:bg-blue-50 font-semibold px-8 py-4 text-lg"
-                          >
-                            📤 Copy Share Link
-                          </Button>
-                        </div>
-                        <div className="text-center mt-6">
-                          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md border">
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
-                            <span className="text-sm font-medium text-gray-700">
-                              {currentUser ? '💎 Permanent Backlink Active' : '⏱️ Trial Backlink Active (24 hours)'}
+                            <span className="flex items-center gap-1">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              Live
                             </span>
                           </div>
                         </div>
                       </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
+                      <span className="text-sm text-gray-600 truncate flex-1 font-mono">
+                        {publishedUrl || `${window.location.origin}/blog/${generatedPost?.slug || primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const urlToCopy = publishedUrl || `${window.location.origin}/blog/${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
+                          navigator.clipboard.writeText(urlToCopy);
+                          toast({ title: "URL Copied", description: "Blog post URL copied to clipboard" });
+                        }}
+                      >
+                        Copy
+                      </Button>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
