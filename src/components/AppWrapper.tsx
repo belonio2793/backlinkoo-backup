@@ -3,6 +3,7 @@ import { useReferralTracking } from "@/hooks/useReferralTracking";
 import { EmailVerificationGuard } from "./EmailVerificationGuard";
 import { AdminAuthGuard } from "./AdminAuthGuard";
 import { TrialNotificationBanner } from "./TrialNotificationBanner";
+import { TrialBottomNotification } from "./TrialBottomNotification";
 import Index from "../pages/Index";
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
