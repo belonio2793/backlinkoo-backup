@@ -147,23 +147,33 @@ export class PublishedBlogService {
       console.warn('Database query failed, checking in-memory storage:', dbError);
     }
 
-    // Fallback to in-memory storage
-    const post = this.inMemoryPosts.get(slug);
+    // Fallback to in-memory storage - check multiple variants
+    let post = this.inMemoryPosts.get(slug);
+
+    // If not found, try dual-domain variants
+    if (!post) {
+      post = this.inMemoryPosts.get(`${slug}_current`) ||
+             this.inMemoryPosts.get(`${slug}_backlinkoo`);
+    }
+
     if (post && post.status === 'published') {
       // Check if trial post has expired
       if (post.is_trial_post && post.expires_at) {
         const now = new Date();
         const expiresAt = new Date(post.expires_at);
         if (now > expiresAt) {
+          // Clean up all variants
           this.inMemoryPosts.delete(slug);
+          this.inMemoryPosts.delete(`${slug}_current`);
+          this.inMemoryPosts.delete(`${slug}_backlinkoo`);
           return null;
         }
       }
-      
+
       // Increment view count for in-memory posts
       post.view_count += 1;
       this.inMemoryPosts.set(slug, post);
-      
+
       return post;
     }
 
