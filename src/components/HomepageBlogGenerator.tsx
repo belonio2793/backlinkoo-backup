@@ -646,7 +646,7 @@ export function HomepageBlogGenerator() {
                       <Sparkles className="mr-3 h-5 w-5" />
                       <span>
                         {currentUser
-                          ? '🚀 Deploy Enterprise Backlink'
+                          ? '�� Deploy Enterprise Backlink'
                           : '🎯 Start Free Trial Backlink'
                         }
                       </span>
@@ -849,12 +849,60 @@ export function HomepageBlogGenerator() {
                     </div>
                   </div>
 
-                  <p className="text-lg text-gray-600 mb-6">
-                    {currentUser
-                      ? "✅ Your content is permanently saved and ready to boost your SEO!"
-                      : "⚠️ Your trial content is live for 24 hours - register to save it permanently!"
-                    }
-                  </p>
+                  {/* PRODUCTION STATUS & NEXT STEPS */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    {/* SEO Impact */}
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-6 rounded-xl border border-green-200">
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <TrendingUp className="h-6 w-6 text-white" />
+                        </div>
+                        <h4 className="font-bold text-green-800 mb-2">SEO Impact</h4>
+                        <div className="text-2xl font-bold text-green-600 mb-2">{generatedPost?.seo_score || 85}/100</div>
+                        <p className="text-sm text-green-700">High-quality backlink now boosting your rankings</p>
+                      </div>
+                    </div>
+
+                    {/* Content Quality */}
+                    <div className="bg-gradient-to-br from-blue-50 to-cyan-100 p-6 rounded-xl border border-blue-200">
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <FileText className="h-6 w-6 text-white" />
+                        </div>
+                        <h4 className="font-bold text-blue-800 mb-2">Content Quality</h4>
+                        <div className="text-2xl font-bold text-blue-600 mb-2">{generatedPost?.word_count || 1200}+</div>
+                        <p className="text-sm text-blue-700">Professional words with natural backlinks</p>
+                      </div>
+                    </div>
+
+                    {/* Status */}
+                    <div className={`bg-gradient-to-br p-6 rounded-xl border ${
+                      currentUser
+                        ? 'from-purple-50 to-indigo-100 border-purple-200'
+                        : 'from-amber-50 to-orange-100 border-amber-200'
+                    }`}>
+                      <div className="text-center">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                          currentUser ? 'bg-purple-500' : 'bg-amber-500'
+                        }`}>
+                          {currentUser ? (
+                            <CheckCircle2 className="h-6 w-6 text-white" />
+                          ) : (
+                            <AlertCircle className="h-6 w-6 text-white" />
+                          )}
+                        </div>
+                        <h4 className={`font-bold mb-2 ${currentUser ? 'text-purple-800' : 'text-amber-800'}`}>
+                          {currentUser ? 'Permanent' : 'Trial Mode'}
+                        </h4>
+                        <div className={`text-2xl font-bold mb-2 ${currentUser ? 'text-purple-600' : 'text-amber-600'}`}>
+                          {currentUser ? '∞' : '24h'}
+                        </div>
+                        <p className={`text-sm ${currentUser ? 'text-purple-700' : 'text-amber-700'}`}>
+                          {currentUser ? 'Lifetime backlink active' : 'Register to save forever'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Authentication Status Notice */}
                   {currentUser ? (
