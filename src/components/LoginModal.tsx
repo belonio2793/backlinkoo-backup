@@ -298,7 +298,7 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Infinity className="h-6 w-6 text-blue-600" />
-            Join Backlinkoo
+            Join Backlink
           </DialogTitle>
         </DialogHeader>
 
