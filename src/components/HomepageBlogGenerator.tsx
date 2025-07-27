@@ -78,23 +78,65 @@ export function HomepageBlogGenerator() {
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
 
-      // Call Netlify function to generate blog post
-      const response = await fetch('/.netlify/functions/generate-post', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          destinationUrl: targetUrl,
-          keyword: primaryKeyword,
-          userId: user?.id
-        })
-      });
+      // Check if we're in development mode
+      const isDevelopment = window.location.hostname === 'localhost' ||
+                           window.location.hostname === '127.0.0.1' ||
+                           window.location.hostname.includes('localhost');
 
-      const data = await response.json();
+      let data;
 
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to generate blog post');
+      if (isDevelopment) {
+        // Development mode - create mock data
+        console.log('🚧 Development mode detected - generating mock blog post');
+
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        data = {
+          success: true,
+          slug: `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-demo-${Date.now()}`,
+          blogPost: {
+            id: `blog_demo_${Date.now()}`,
+            title: `The Ultimate Guide to ${primaryKeyword}: Demo Preview`,
+            content: `This is a demo preview of your blog post about ${primaryKeyword}. In production, this would be a full 1200+ word article with natural backlinks to ${targetUrl}.`,
+            meta_description: `Demo preview: Learn about ${primaryKeyword} in this comprehensive guide.`,
+            excerpt: `This is a demo preview showing how your ${primaryKeyword} blog post would look.`,
+            keywords: [primaryKeyword],
+            target_url: targetUrl,
+            status: 'demo_preview',
+            is_trial_post: true,
+            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            seo_score: 85,
+            contextual_links: [{ anchor: primaryKeyword, url: targetUrl }],
+            word_count: 1200,
+            slug: `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-demo-${Date.now()}`,
+            created_at: new Date().toISOString()
+          },
+          publishedUrl: `${window.location.origin}/blog/${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-demo-${Date.now()}`
+        };
+      } else {
+        // Production mode - call actual Netlify function
+        const response = await fetch('/.netlify/functions/generate-post', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            destinationUrl: targetUrl,
+            keyword: primaryKeyword,
+            userId: user?.id
+          })
+        });
+
+        data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Failed to generate blog post');
+        }
+      }
+
+      if (!data.success) {
+        throw new Error('Failed to generate blog post');
       }
 
       const { slug, blogPost, publishedUrl } = data;

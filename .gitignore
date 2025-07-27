@@ -35,3 +35,6 @@ dist-ssr
 **/secrets.json
 **/*-credentials.*
 **/*-secrets.*
+
+# Local Netlify folder
+.netlify
