@@ -208,7 +208,7 @@ export function HomepageBlogGenerator() {
 
       toast({
         title: "Blog Post Generated!",
-        description: currentUser
+        description: isLoggedIn
           ? "Your content is ready and saved to your dashboard!"
           : "Your demo preview is ready. Register to keep it forever!",
       });
