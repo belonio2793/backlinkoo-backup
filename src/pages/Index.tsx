@@ -319,6 +319,101 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Trial Conversion Section */}
+      {showTrialUpgrade && (
+        <section className="py-12 px-6 bg-gradient-to-br from-amber-50 to-orange-50">
+          <div className="container mx-auto max-w-4xl">
+            <TrialConversionBanner
+              onUpgrade={() => {
+                setShowInlineAuth(true);
+                document.getElementById('inline-auth')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="mb-8"
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Inline Authentication Section - Show for guests or trial upgrades */}
+      {(!user && authChecked) || showInlineAuth ? (
+        <section className="py-16 px-6 bg-gradient-to-br from-blue-50 to-indigo-50" id="inline-auth">
+          <div className="container mx-auto max-w-6xl">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              {/* Left side - Value proposition */}
+              <div>
+                <h2 className="text-3xl md:text-4xl font-light mb-6 tracking-tight">
+                  {showTrialUpgrade ? "Upgrade Your Trial" : "Start Building Authority Today"}
+                </h2>
+                <p className="text-xl text-muted-foreground mb-8 leading-relaxed font-light">
+                  {showTrialUpgrade
+                    ? "Convert your trial backlinks to permanent ones and unlock the full power of our platform."
+                    : "Join thousands of professionals who trust our platform for their most important SEO campaigns."
+                  }
+                </p>
+
+                <div className="space-y-4 mb-8">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    <span className="font-light">
+                      {showTrialUpgrade ? "Permanent backlinks (no expiration)" : "High-authority backlinks"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    <span className="font-light">
+                      {showTrialUpgrade ? "Advanced analytics & reporting" : "Real-time campaign tracking"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    <span className="font-light">
+                      {showTrialUpgrade ? "Priority support & consultation" : "Competitive analysis tools"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    <span className="font-light">
+                      {showTrialUpgrade ? "Campaign management tools" : "99% success rate guarantee"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Trust indicators */}
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-semibold text-primary mb-1">2,000+</div>
+                    <div className="text-sm text-muted-foreground">Active Users</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-semibold text-primary mb-1">99%</div>
+                    <div className="text-sm text-muted-foreground">Success Rate</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-semibold text-primary mb-1">4.9/5</div>
+                    <div className="text-sm text-muted-foreground">User Rating</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right side - Inline auth form */}
+              <div>
+                <InlineAuthForm
+                  onAuthSuccess={(user) => {
+                    setUser(user);
+                    setShowInlineAuth(false);
+                    navigate('/dashboard');
+                  }}
+                  onTrialConversion={() => {
+                    // Handle trial conversion logic
+                    navigate('/login?upgrade=trial');
+                  }}
+                  showTrialUpgrade={showTrialUpgrade}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* Hero Section */}
       <section 
