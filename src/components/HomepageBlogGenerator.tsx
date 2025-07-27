@@ -38,19 +38,32 @@ import {
 } from 'lucide-react';
 import { RotatingText } from './RotatingText';
 
+/**
+ * HomepageBlogGenerator - Main component for generating high-quality blog posts with backlinks
+ * Features: Netlify function integration with fallback, error handling, trial/permanent post management
+ * Last updated: January 2025 - Enhanced error handling and blog post storage
+ */
 export function HomepageBlogGenerator() {
+  // Form state
   const [targetUrl, setTargetUrl] = useState('');
   const [primaryKeyword, setPrimaryKeyword] = useState('');
+
+  // Generation state
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const [forceComplete, setForceComplete] = useState(false);
+
+  // Content state
   const [generatedPost, setGeneratedPost] = useState<any>(null);
   const [allGeneratedPosts, setAllGeneratedPosts] = useState<any[]>([]);
   const [publishedUrl, setPublishedUrl] = useState('');
   const [blogPostId, setBlogPostId] = useState<string>('');
+
+  // UI state
   const [showSignupPopup, setShowSignupPopup] = useState(false);
   const [generationError, setGenerationError] = useState<Error | string | null>(null);
+
   const { toast } = useToast();
 
   // Use the authentication hook
