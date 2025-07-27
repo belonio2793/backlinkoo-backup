@@ -68,22 +68,32 @@ export function HomepageBlogGenerator() {
     console.log('✅ Starting generation with valid inputs');
     setIsGenerating(true);
     setIsCompleted(false);
-  };
 
-  const handleGenerationComplete = async (generatedContent: any) => {
     try {
       // Check if user is logged in
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
 
-      // Create blog post using the published blog service
-      const blogPost = await publishedBlogService.createBlogPost({
-        keyword: primaryKeyword,
-        targetUrl,
-        userId: user?.id,
-        isTrialPost: !user,
-        wordCount: 1200
+      // Call Netlify function to generate blog post
+      const response = await fetch('/.netlify/functions/generate-post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          destinationUrl: targetUrl,
+          keyword: primaryKeyword,
+          userId: user?.id
+        })
       });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to generate blog post');
+      }
+
+      const { slug, blogPost, publishedUrl } = data;
 
       // Create campaign entry for registered users
       if (user) {
@@ -97,7 +107,7 @@ export function HomepageBlogGenerator() {
               status: 'completed',
               links_requested: blogPost.contextual_links?.length || 1,
               links_delivered: blogPost.contextual_links?.length || 1,
-              completed_backlinks: [blogPost.published_url],
+              completed_backlinks: [publishedUrl],
               user_id: user.id,
               credits_used: 1
             })
@@ -115,7 +125,7 @@ export function HomepageBlogGenerator() {
       }
 
       setGeneratedPost(blogPost);
-      setPublishedUrl(blogPost.published_url);
+      setPublishedUrl(publishedUrl);
       setBlogPostId(blogPost.id);
       setIsCompleted(true);
 
@@ -158,10 +168,11 @@ export function HomepageBlogGenerator() {
         description: error instanceof Error ? error.message : "Failed to generate blog post. Please try again.",
         variant: "destructive"
       });
-    } finally {
       setIsGenerating(false);
     }
   };
+
+
 
   const isValidUrl = (url: string): boolean => {
     try {
@@ -215,68 +226,33 @@ export function HomepageBlogGenerator() {
         <div className="max-w-4xl mx-auto">
           {!isCompleted ? (
             isGenerating ? (
-              <MultiBlogGenerator
-                keyword={primaryKeyword}
-                targetUrl={targetUrl}
-                onComplete={async (posts) => {
-                  // Handle multiple posts completion - MultiBlogGenerator already stored all posts
-                  console.log(`✅ MultiBlogGenerator completed with ${posts.length} posts`);
-                  setAllGeneratedPosts(posts);
-                  setIsCompleted(true);
-                  setIsGenerating(false);
-
-                  // Set the first post as the main generated post for display
-                  const firstPost = posts[0];
-                  if (firstPost?.content) {
-                    setGeneratedPost({
-                      title: firstPost.title,
-                      content: firstPost.content,
-                      contextualLinks: firstPost.content?.contextualLinks || [],
-                      seoScore: firstPost.stats.seoScore
-                    });
-                    setPublishedUrl(firstPost.previewUrl || '');
-                  }
-
-                  // Create campaign entry for registered users with all preview URLs
-                  const { data: { user } } = await supabase.auth.getUser();
-                  if (user) {
-                    try {
-                      const allPreviewUrls = posts.filter(p => p.previewUrl).map(p => p.previewUrl);
-                      const totalBacklinks = posts.reduce((sum, p) => sum + (p.stats.backlinks || 1), 0);
-
-                      const { data: campaignData, error: campaignError } = await supabase
-                        .from('campaigns')
-                        .insert({
-                          name: `5-Post Campaign: ${primaryKeyword}`,
-                          target_url: targetUrl,
-                          keywords: [primaryKeyword],
-                          status: 'completed',
-                          links_requested: posts.length,
-                          links_delivered: posts.length,
-                          completed_backlinks: allPreviewUrls,
-                          user_id: user.id,
-                          credits_used: posts.length
-                        })
-                        .select()
-                        .single();
-
-                      if (campaignError) {
-                        console.warn('Failed to create multi-post campaign:', campaignError);
-                      } else {
-                        console.log('✅ Multi-post campaign created successfully:', campaignData);
-                      }
-                    } catch (error) {
-                      console.warn('Failed to create multi-post campaign:', error);
-                    }
-                  }
-
-                  toast({
-                    title: "🎉 5 Blog Posts Generated!",
-                    description: "Your backlink campaign is ready! Click the buttons below to view your live posts.",
-                  });
-                }}
-                onSaveCampaign={() => setShowSignupPopup(true)}
-              />
+              <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
+                <CardContent className="text-center py-12 px-8">
+                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 mb-6">
+                    <Loader2 className="h-10 w-10 text-white animate-spin" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4 text-gray-900">
+                    Creating Your Blog Post...
+                  </h3>
+                  <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
+                    Our AI is crafting a high-quality article about "{primaryKeyword}" with natural backlinks to your website.
+                  </p>
+                  <div className="flex justify-center space-x-4 text-sm text-gray-500">
+                    <div className="flex items-center">
+                      <Sparkles className="h-4 w-4 mr-1" />
+                      Generating content
+                    </div>
+                    <div className="flex items-center">
+                      <Link2 className="h-4 w-4 mr-1" />
+                      Adding backlinks
+                    </div>
+                    <div className="flex items-center">
+                      <Globe className="h-4 w-4 mr-1" />
+                      Publishing live
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             ) : (
               <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
               <CardHeader className="text-center pb-6">
@@ -393,10 +369,10 @@ export function HomepageBlogGenerator() {
                     <CheckCircle2 className="h-10 w-10 text-white" />
                   </div>
                   <h3 className="text-3xl font-bold mb-4 text-gray-900">
-                    🎉 Surprise! 5 Live Backlink Posts Ready!
+                    🎉 Your Blog Post is Live!
                   </h3>
                   <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-                    Instead of 1 blog post, we created 5 professional articles about "{primaryKeyword}" with live backlinks pointing to your website. Click below to see them in action!
+                    We've created a professional article about "{primaryKeyword}" with natural backlinks pointing to your website. Your content is now live and ready to boost your SEO!
                   </p>
 
                   {/* Trial Backlink Notice - Only shown after completion */}
@@ -447,40 +423,36 @@ export function HomepageBlogGenerator() {
                   </div>
                 </div>
 
-                {/* Show all generated blog posts */}
-                {allGeneratedPosts.length > 0 && (
+                {/* Blog Post Preview */}
+                {generatedPost && (
                   <div className="space-y-4 mb-6">
-                    <h4 className="text-lg font-semibold text-center">🎉 Your 5 Live Backlink Posts:</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {allGeneratedPosts.map((post, index) => (
-                        <div key={post.id} className="p-3 border rounded-lg bg-white">
-                          <div className="text-sm font-medium mb-1">{post.expert?.avatar} {post.expert?.name}</div>
-                          <div className="text-xs text-gray-600 mb-2 truncate">{post.title}</div>
+                    <div className="p-4 border rounded-lg bg-white">
+                      <div className="text-lg font-medium mb-2">{generatedPost.title}</div>
+                      <div className="text-sm text-gray-600 mb-3">
+                        Published at: <a href={publishedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{publishedUrl}</a>
+                      </div>
 
-                          {/* Unclaimed Blog Notification */}
-                          {!currentUser && (
-                            <div className="mb-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs">
-                              <div className="flex items-center gap-1 mb-1">
-                                <span className="text-amber-600">⚠️</span>
-                                <span className="font-medium text-amber-800">Unclaimed Blog</span>
-                              </div>
-                              <p className="text-amber-700 leading-tight">
-                                This blog has not been claimed. Create an account to claim and save it permanently,
-                                or it will be automatically deleted in 24 hours.
-                              </p>
-                            </div>
-                          )}
-
-                          <Button
-                            size="sm"
-                            onClick={() => window.open(post.previewUrl || `/blog/${post.slug}`, '_blank')}
-                            className="w-full text-xs"
-                          >
-                            <ExternalLink className="mr-1 h-3 w-3" />
-                            View Live Post
-                          </Button>
+                      {/* Unclaimed Blog Notification */}
+                      {!currentUser && (
+                        <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-amber-600">⚠️</span>
+                            <span className="font-medium text-amber-800">Trial Blog Post</span>
+                          </div>
+                          <p className="text-amber-700 text-sm leading-tight">
+                            This blog post is in trial mode. Create an account to claim and save it permanently,
+                            or it will be automatically deleted in 24 hours.
+                          </p>
                         </div>
-                      ))}
+                      )}
+
+                      <Button
+                        onClick={() => window.open(publishedUrl, '_blank')}
+                        className="w-full"
+                      >
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        View Live Blog Post
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -517,30 +489,32 @@ export function HomepageBlogGenerator() {
                   </Button>
                 </div>
 
-                <div className="mt-8 space-y-4">
-                  <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
-                    <p className="text-sm text-red-800 font-medium mb-2">
-                      ⏰ <strong>WARNING: These backlinks will auto-delete in 24 hours!</strong>
-                    </p>
-                    <p className="text-sm text-red-700 mb-3">
-                      Your 5 backlinks are live and building SEO value right now, but they're on a 24-hour trial timer.
-                      Create an account now to keep them forever and stop the deletion countdown!
-                    </p>
-                    <Button
-                      size="sm"
-                      className="bg-red-600 hover:bg-red-700 text-white animate-pulse"
-                      onClick={() => setShowSignupPopup(true)}
-                    >
-                      Stop Deletion Timer Now
-                    </Button>
-                  </div>
+                {!currentUser && (
+                  <div className="mt-8 space-y-4">
+                    <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
+                      <p className="text-sm text-red-800 font-medium mb-2">
+                        ⏰ <strong>WARNING: This backlink will auto-delete in 24 hours!</strong>
+                      </p>
+                      <p className="text-sm text-red-700 mb-3">
+                        Your backlink is live and building SEO value right now, but it's on a 24-hour trial timer.
+                        Create an account now to keep it forever and stop the deletion countdown!
+                      </p>
+                      <Button
+                        size="sm"
+                        className="bg-red-600 hover:bg-red-700 text-white animate-pulse"
+                        onClick={() => setShowSignupPopup(true)}
+                      >
+                        Stop Deletion Timer Now
+                      </Button>
+                    </div>
 
-                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-sm text-blue-800 font-medium">
-                      🚀 Ready for more? Our premium packages include unlimited 5-post campaigns, advanced targeting, and priority support!
-                    </p>
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-sm text-blue-800 font-medium">
+                        🚀 Ready for more? Create unlimited backlinks with our premium packages and advanced targeting!
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           )}

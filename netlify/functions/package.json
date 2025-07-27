@@ -1,8 +1,9 @@
 {
   "name": "netlify-functions",
   "version": "1.0.0",
-  "description": "Netlify Functions for Backlink Email System",
+  "description": "Netlify Functions for Backlinkoo Blog Widget",
   "dependencies": {
+    "@supabase/supabase-js": "^2.52.0",
     "resend": "^2.1.0"
   }
 }

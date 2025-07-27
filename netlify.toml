@@ -1,18 +1,47 @@
 [build]
   publish = "dist"
-  command = "npm install && npm run build"
+  command = "npm run build"
 
-[build.environment]
-  NODE_VERSION = "20"
-  RESEND_API_KEY = "re_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq"
+[functions]
+  directory = "netlify/functions"
 
+# Note: Scheduled functions require Netlify Pro plan
+# For now, cleanup can be triggered manually via /.netlify/functions/cleanup-posts
+# Uncomment below if you have Netlify Pro:
+# [[plugins]]
+#   package = "@netlify/plugin-scheduled-functions"
+# [scheduled]
+#   [scheduled.cleanup-posts]
+#     path = "/.netlify/functions/cleanup-posts"
+#     schedule = "*/30 * * * *"
+
+# Redirects for blog posts
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/index.html?slug=:slug"
+  status = 200
+
+# API redirects
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# SPA fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-[functions]
-  directory = "netlify/functions"
+[build.environment]
+  NODE_VERSION = "18"
 
-[[plugins]]
-  package = "@netlify/plugin-functions-install-core"
+# Environment variable settings
+[context.production.environment]
+  VITE_ENVIRONMENT = "production"
+
+[context.deploy-preview.environment]
+  VITE_ENVIRONMENT = "preview"
+
+[context.branch-deploy.environment]
+  VITE_ENVIRONMENT = "development"

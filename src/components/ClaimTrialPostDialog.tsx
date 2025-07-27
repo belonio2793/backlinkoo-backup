@@ -89,10 +89,10 @@ export function ClaimTrialPostDialog({
     if (!trialPostSlug) return;
 
     setIsClaiming(true);
-    
+
     try {
       const { hasCredits, credits } = await checkUserCredits();
-      
+
       if (!currentUser) {
         // Redirect to signup with claim intent
         navigate(`/auth-callback?action=signup&redirect=/blog/${trialPostSlug}&claim=true`);
@@ -109,49 +109,65 @@ export function ClaimTrialPostDialog({
         return;
       }
 
-      // Convert trial post to permanent
-      const { error: updateError } = await supabase
-        .from('published_blog_posts')
-        .update({
-          is_trial_post: false,
-          expires_at: null,
-          user_id: currentUser.id,
-          updated_at: new Date().toISOString()
-        })
-        .eq('slug', trialPostSlug);
+      // Get user email for notification
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('user_id', currentUser.id)
+        .single();
 
-      if (updateError) {
-        throw updateError;
+      // Call Netlify function to claim the post
+      const response = await fetch('/.netlify/functions/claim-post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          slug: trialPostSlug,
+          userId: currentUser.id,
+          userEmail: profile?.email || currentUser.email
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to claim blog post');
       }
 
       // Deduct 1 credit from user
       const { error: creditError } = await supabase
-        .from('profiles')
+        .from('credits')
         .update({
-          credits: credits - 1
+          amount: credits - 1,
+          total_used: credits - 1
         })
-        .eq('id', currentUser.id);
+        .eq('user_id', currentUser.id);
 
       if (creditError) {
         console.warn('Failed to deduct credit:', creditError);
       }
 
       // Create campaign entry
-      const { error: campaignError } = await supabase
-        .from('campaigns')
-        .insert({
-          name: `Claimed: ${trialPostTitle}`,
-          target_url: targetUrl,
-          keywords: [trialPostTitle?.split(' ').slice(0, 2).join(' ') || 'claimed post'],
-          status: 'completed',
-          links_requested: 1,
-          links_delivered: 1,
-          completed_backlinks: [`${window.location.origin}/blog/${trialPostSlug}`],
-          user_id: currentUser.id,
-          credits_used: 1
-        });
+      try {
+        const { error: campaignError } = await supabase
+          .from('campaigns')
+          .insert({
+            name: `Claimed: ${trialPostTitle}`,
+            target_url: targetUrl,
+            keywords: [trialPostTitle?.split(' ').slice(0, 2).join(' ') || 'claimed post'],
+            status: 'completed',
+            links_requested: 1,
+            links_delivered: 1,
+            completed_backlinks: [`${window.location.origin}/blog/${trialPostSlug}`],
+            user_id: currentUser.id,
+            credits_used: 1
+          });
 
-      if (campaignError) {
+        if (campaignError) {
+          console.warn('Failed to create campaign entry:', campaignError);
+        }
+      } catch (campaignError) {
         console.warn('Failed to create campaign entry:', campaignError);
       }
 
@@ -165,7 +181,7 @@ export function ClaimTrialPostDialog({
 
       toast({
         title: "🎉 Post Claimed Successfully!",
-        description: `Your backlink is now permanent! (${credits - 1} credits remaining)`,
+        description: `Your backlink is now permanent! Check your email for confirmation.`,
       });
 
       setIsOpen(false);
@@ -175,7 +191,7 @@ export function ClaimTrialPostDialog({
       console.error('Failed to claim trial post:', error);
       toast({
         title: "Claim Failed",
-        description: "Failed to claim the trial post. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to claim the trial post. Please try again.",
         variant: "destructive"
       });
     } finally {
