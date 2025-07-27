@@ -148,7 +148,7 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
                 </Button>
               </div>
             ) : (
-              <Button onClick={() => navigate("/login")} className="font-medium">
+              <Button onClick={() => setShowLoginModal(true)} className="font-medium">
                 Sign In
               </Button>
             )}
