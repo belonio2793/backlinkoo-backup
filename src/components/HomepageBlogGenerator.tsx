@@ -107,7 +107,10 @@ export function HomepageBlogGenerator() {
       // Check if we're in development mode
       const isDevelopment = window.location.hostname === 'localhost' ||
                            window.location.hostname === '127.0.0.1' ||
-                           window.location.hostname.includes('localhost');
+                           window.location.hostname.includes('localhost') ||
+                           window.location.hostname.includes('.fly.dev') ||
+                           window.location.port === '8080' ||
+                           process.env.NODE_ENV === 'development';
 
       let data;
 
