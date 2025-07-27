@@ -297,6 +297,12 @@ export class PublishedBlogService {
       console.warn('Failed to cleanup expired trial posts from database:', error);
     }
   }
+
+  // Public method to save blog posts directly (for development/mock data)
+  saveBlogPost(blogPost: PublishedBlogPost): void {
+    this.inMemoryPosts.set(blogPost.slug, blogPost);
+    console.log(`✅ Blog post saved to in-memory storage: ${blogPost.slug}`);
+  }
 }
 
 export const publishedBlogService = new PublishedBlogService();
