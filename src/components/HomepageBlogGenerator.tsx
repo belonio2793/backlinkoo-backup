@@ -68,6 +68,108 @@ export function HomepageBlogGenerator() {
     console.log('✅ Starting generation with valid inputs');
     setIsGenerating(true);
     setIsCompleted(false);
+
+    try {
+      // Check if user is logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
+
+      // Call Netlify function to generate blog post
+      const response = await fetch('/.netlify/functions/generate-post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          destinationUrl: targetUrl,
+          keyword: primaryKeyword,
+          userId: user?.id
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to generate blog post');
+      }
+
+      const { slug, blogPost, publishedUrl } = data;
+
+      // Create campaign entry for registered users
+      if (user) {
+        try {
+          const { data: campaignData, error: campaignError } = await supabase
+            .from('campaigns')
+            .insert({
+              name: `Live Blog: ${blogPost.title}`,
+              target_url: targetUrl,
+              keywords: [primaryKeyword],
+              status: 'completed',
+              links_requested: blogPost.contextual_links?.length || 1,
+              links_delivered: blogPost.contextual_links?.length || 1,
+              completed_backlinks: [publishedUrl],
+              user_id: user.id,
+              credits_used: 1
+            })
+            .select()
+            .single();
+
+          if (campaignError) {
+            console.warn('Failed to create campaign entry:', campaignError);
+          } else {
+            console.log('✅ Campaign created successfully:', campaignData);
+          }
+        } catch (error) {
+          console.warn('Failed to create campaign entry:', error);
+        }
+      }
+
+      setGeneratedPost(blogPost);
+      setPublishedUrl(publishedUrl);
+      setBlogPostId(blogPost.id);
+      setIsCompleted(true);
+
+      toast({
+        title: "Blog Post Generated!",
+        description: user
+          ? "Your content is ready and saved to your dashboard!"
+          : "Your demo preview is ready. Register to keep it forever!",
+      });
+
+      // Store trial post info for notification system
+      if (!user && blogPost.is_trial_post) {
+        const trialPostInfo = {
+          id: blogPost.id,
+          title: blogPost.title,
+          slug: blogPost.slug,
+          expires_at: blogPost.expires_at,
+          target_url: targetUrl,
+          created_at: blogPost.created_at
+        };
+
+        // Store in localStorage for notification tracking
+        const existingTrialPosts = localStorage.getItem('trial_blog_posts');
+        const trialPosts = existingTrialPosts ? JSON.parse(existingTrialPosts) : [];
+        trialPosts.push(trialPostInfo);
+        localStorage.setItem('trial_blog_posts', JSON.stringify(trialPosts));
+      }
+
+      // Show signup popup for guest users after a delay
+      if (!user) {
+        setTimeout(() => {
+          setShowSignupPopup(true);
+        }, 3000); // Show popup after 3 seconds
+      }
+
+    } catch (error) {
+      console.error('Blog generation error:', error);
+      toast({
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "Failed to generate blog post. Please try again.",
+        variant: "destructive"
+      });
+      setIsGenerating(false);
+    }
   };
 
   const handleGenerationComplete = async (generatedContent: any) => {
