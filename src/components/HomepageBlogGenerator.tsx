@@ -652,8 +652,8 @@ export function HomepageBlogGenerator() {
                       <Sparkles className="mr-3 h-5 w-5" />
                       <span>
                         {currentUser
-                          ? '�� Create Permanent Link'
-                          : '🎯 Start Free Trial'
+                          ? 'Create Permanent Link'
+                          : 'Start Free Trial'
                         }
                       </span>
                     </>
