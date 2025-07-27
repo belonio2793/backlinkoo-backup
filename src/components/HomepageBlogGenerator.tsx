@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthStatus } from '@/hooks/useAuth';
 import { aiContentGenerator } from '@/services/aiContentGenerator';
 import { blogPublisher } from '@/services/blogPublisher';
 import { multiApiContentGenerator } from '@/services/multiApiContentGenerator';
