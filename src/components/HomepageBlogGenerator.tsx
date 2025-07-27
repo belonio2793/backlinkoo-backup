@@ -820,7 +820,7 @@ export function HomepageBlogGenerator() {
                         <Button
                           size="sm"
                           onClick={() => {
-                            const urlToCopy = publishedUrl || `https://backlinkoo.com/blog/${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`;
+                            const urlToCopy = publishedUrl || `${window.location.origin}/blog/?slug=${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
                             navigator.clipboard.writeText(urlToCopy);
                             toast({ title: "✅ URL Copied!", description: "Blog post URL copied to clipboard" });
                           }}
@@ -848,7 +848,7 @@ export function HomepageBlogGenerator() {
                             <span>Published {new Date().toLocaleDateString()}</span>
                             <span>•</span>
                             <span>{generatedPost?.word_count || 1200}+ words</span>
-                            <span>���</span>
+                            <span>•</span>
                             <div className="flex items-center gap-1">
                               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                               <span className="text-green-600 font-medium">Live & Indexed</span>
