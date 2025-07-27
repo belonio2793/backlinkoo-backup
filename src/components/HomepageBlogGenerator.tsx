@@ -278,11 +278,16 @@ export function HomepageBlogGenerator() {
         setIsCompleted(true);
       }, 2000);
 
+      // Show appropriate toast based on generation mode
+      const isUsingFallback = blogPost?.mode === 'fallback';
+
       toast({
-        title: "Blog Post Generated!",
-        description: isLoggedIn
-          ? "Your content is ready and saved to your dashboard!"
-          : "Your demo preview is ready. Register to keep it forever!",
+        title: isUsingFallback ? "Blog Post Generated (Backup Mode)" : "Blog Post Generated!",
+        description: isUsingFallback
+          ? "Your blog post was created using our backup system. All features work normally!"
+          : isLoggedIn
+            ? "Your content is ready and saved to your dashboard!"
+            : "Your demo preview is ready. Register to keep it forever!",
       });
 
       // Store trial post info for notification system
