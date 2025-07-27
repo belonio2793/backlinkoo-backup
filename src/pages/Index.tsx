@@ -264,24 +264,15 @@ const Index = () => {
       {/* Free Blog Generator - Top Feature */}
       <section className="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
         <div className="container mx-auto">
-          {/* Generator Mode Toggle */}
-          <div className="max-w-md mx-auto mb-8">
-            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm">
-                    <span className="font-medium text-gray-700">Generation Mode:</span>
-                  </div>
+          {/* Optional: Advanced Generator Toggle (Hidden by default) */}
+          <div className="max-w-sm mx-auto mb-4">
+            <details className="group">
+              <summary className="cursor-pointer text-center text-sm text-gray-500 hover:text-gray-700">
+                Advanced Options ▼
+              </summary>
+              <div className="mt-2 p-3 bg-white/50 rounded-lg border">
+                <div className="flex justify-center">
                   <div className="flex bg-gray-100 rounded-lg p-1">
-                    <Button
-                      variant={useProductionGenerator ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setUseProductionGenerator(true)}
-                      className="text-xs px-3 py-1"
-                    >
-                      <Shield className="h-3 w-3 mr-1" />
-                      Self-Contained
-                    </Button>
                     <Button
                       variant={!useProductionGenerator ? "default" : "ghost"}
                       size="sm"
@@ -289,18 +280,21 @@ const Index = () => {
                       className="text-xs px-3 py-1"
                     >
                       <Zap className="h-3 w-3 mr-1" />
-                      AI-Powered
+                      Enhanced
+                    </Button>
+                    <Button
+                      variant={useProductionGenerator ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setUseProductionGenerator(true)}
+                      className="text-xs px-3 py-1"
+                    >
+                      <Shield className="h-3 w-3 mr-1" />
+                      Basic
                     </Button>
                   </div>
                 </div>
-                <div className="mt-2 text-xs text-gray-500">
-                  {useProductionGenerator
-                    ? "Production-ready • No external APIs • Instant generation"
-                    : "External AI APIs • Advanced content • Requires API keys"
-                  }
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </details>
           </div>
 
           {/* Conditional Generator Rendering */}
