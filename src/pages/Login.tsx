@@ -33,7 +33,6 @@ const Login = () => {
   const { toast } = useToast();
   const { broadcastNewUser } = useGlobalNotifications();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -679,7 +678,7 @@ const Login = () => {
                     <Input
                       id="confirm-password"
                       type="password"
-                      placeholder="••••••���•"
+                      placeholder="••••••••"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
