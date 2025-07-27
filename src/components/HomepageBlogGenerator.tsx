@@ -42,9 +42,10 @@ import { LoginModal } from './LoginModal';
  * Last updated: January 2025 - Enhanced error handling and blog post storage
  */
 export function HomepageBlogGenerator() {
-  // Form state
-  const [targetUrl, setTargetUrl] = useState('');
-  const [primaryKeyword, setPrimaryKeyword] = useState('');
+  // Form state - Following ChatGPT specification
+  const [targetUrl, setTargetUrl] = useState(''); // destinationURL
+  const [primaryKeyword, setPrimaryKeyword] = useState(''); // targetKeyword
+  const [anchorText, setAnchorText] = useState(''); // anchorText (optional)
 
   // Generation state
   const [isGenerating, setIsGenerating] = useState(false);
