@@ -22,7 +22,7 @@ export function MinimalisticSuccessSection({
 }: MinimalisticSuccessSectionProps) {
   const { toast } = useToast();
 
-  const blogUrl = publishedUrl || `${window.location.origin}/blog/${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString().slice(-6)}`}`;
+  const blogUrl = publishedUrl || `${window.location.origin}/blog/${generatedPost?.slug}`;
 
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(blogUrl);
