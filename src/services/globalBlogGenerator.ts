@@ -346,7 +346,7 @@ class GlobalBlogGeneratorService {
 
   async getGlobalBlogStats() {
     try {
-      const response = await fetch(`${this.API_BASE}/blog-stats`);
+      const response = await fetch(`${this.API_BASE}/global-blog-generator`);
       if (response.ok) {
         return await response.json();
       }
