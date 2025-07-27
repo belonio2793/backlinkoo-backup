@@ -99,6 +99,11 @@ export function HomepageBlogGenerator() {
 
   const handleGenerate = async () => {
     console.log('🚀 ENTERPRISE BLOG GENERATION INITIATED');
+
+    // Track blog generation attempt for guest users
+    if (!isLoggedIn) {
+      trackBlogGeneration();
+    }
     console.log('📋 Generation Parameters:', {
       targetUrl,
       primaryKeyword,
