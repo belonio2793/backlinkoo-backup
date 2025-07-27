@@ -32,7 +32,8 @@ import {
   Save,
   AlertCircle,
   FileText,
-  BarChart3
+  BarChart3,
+  Shield
 } from 'lucide-react';
 import { RotatingText } from './RotatingText';
 import { LoginModal } from './LoginModal';
