@@ -48,6 +48,7 @@ export function HomepageBlogGenerator() {
   const [publishedUrl, setPublishedUrl] = useState('');
   const [blogPostId, setBlogPostId] = useState<string>('');
   const [showSignupPopup, setShowSignupPopup] = useState(false);
+  const [generationError, setGenerationError] = useState<Error | string | null>(null);
   const { toast } = useToast();
 
   // Use the authentication hook
