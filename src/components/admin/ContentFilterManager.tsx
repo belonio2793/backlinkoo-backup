@@ -230,6 +230,9 @@ export function ContentFilterManager() {
         </Card>
       </div>
 
+      {/* Enhanced Content Testing */}
+      <ContentTestingTool />
+
       {/* Filter Configuration */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Main Settings */}
