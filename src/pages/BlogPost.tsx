@@ -42,7 +42,46 @@ export function BlogPost() {
         const { data: { user } } = await supabase.auth.getUser();
         setCurrentUser(user);
 
-        const post = await publishedBlogService.getBlogPostBySlug(slug);
+        // Try database first
+        let post: PublishedBlogPost | null = null;
+        try {
+          post = await publishedBlogService.getBlogPostBySlug(slug);
+        } catch (dbError) {
+          console.warn('Database unavailable, trying localStorage:', dbError);
+        }
+
+        // If not found in database, try localStorage
+        if (!post) {
+          try {
+            const blogStorageKey = `blog_post_${slug}`;
+            const storedBlogData = localStorage.getItem(blogStorageKey);
+
+            if (storedBlogData) {
+              const blogData = JSON.parse(storedBlogData);
+
+              // Check if trial post is expired
+              if (blogData.is_trial_post && blogData.expires_at) {
+                const isExpired = new Date() > new Date(blogData.expires_at);
+                if (isExpired) {
+                  // Remove expired trial post
+                  localStorage.removeItem(blogStorageKey);
+                  setError('This trial blog post has expired');
+                  setLoading(false);
+                  return;
+                }
+              }
+
+              // Increment view count
+              blogData.view_count = (blogData.view_count || 0) + 1;
+              localStorage.setItem(blogStorageKey, JSON.stringify(blogData));
+
+              post = blogData;
+            }
+          } catch (storageError) {
+            console.warn('Failed to load from localStorage:', storageError);
+          }
+        }
+
         if (post) {
           setBlogPost(post);
         } else {
