@@ -57,7 +57,7 @@ export function AdaptiveProgressIndicator({
       description: `Checking ${targetUrl} accessibility and keyword "${keyword}"`,
       status: 'pending',
       icon: Search,
-      minDuration: 2
+      minDuration: 4
     },
     {
       id: 'analyzing',
@@ -65,7 +65,15 @@ export function AdaptiveProgressIndicator({
       description: `Scanning ${targetUrl} for content themes and relevance`,
       status: 'pending',
       icon: Target,
-      minDuration: 5
+      minDuration: 8
+    },
+    {
+      id: 'research',
+      title: 'Research & Planning',
+      description: 'Gathering topic research and competitor analysis',
+      status: 'pending',
+      icon: Search,
+      minDuration: 12
     },
     {
       id: 'generating',
@@ -73,7 +81,7 @@ export function AdaptiveProgressIndicator({
       description: 'Creating high-quality, SEO-optimized blog post content',
       status: 'pending',
       icon: PenTool,
-      minDuration: 15
+      minDuration: 25
     },
     {
       id: 'optimizing',
@@ -81,7 +89,15 @@ export function AdaptiveProgressIndicator({
       description: 'Adding natural backlinks and optimizing structure',
       status: 'pending',
       icon: Link2,
-      minDuration: 8
+      minDuration: 15
+    },
+    {
+      id: 'reviewing',
+      title: 'Content Review',
+      description: 'Quality checking and editorial refinement',
+      status: 'pending',
+      icon: FileText,
+      minDuration: 10
     },
     {
       id: 'publishing',
@@ -89,7 +105,7 @@ export function AdaptiveProgressIndicator({
       description: 'Deploying to blog network and making it discoverable',
       status: 'pending',
       icon: Upload,
-      minDuration: 5
+      minDuration: 8
     },
     {
       id: 'finalizing',
@@ -97,7 +113,7 @@ export function AdaptiveProgressIndicator({
       description: 'Verifying links and indexing for search engines',
       status: 'pending',
       icon: CheckCircle2,
-      minDuration: 3
+      minDuration: 6
     }
   ];
 
