@@ -93,6 +93,19 @@ export class EmailService {
           return this.sendViaNetlifyFunction(emailData, attempt + 1);
         }
 
+        // Log the error
+        await errorLogger.logEmailError(
+          `Email delivery failed: ${errorMessage}`,
+          {
+            httpStatus: response.status,
+            to: emailData.to,
+            subject: emailData.subject,
+            attempt,
+            retryable: isRetryable
+          },
+          'EmailService'
+        );
+
         throw new Error(errorMessage);
       }
 
@@ -107,6 +120,17 @@ export class EmailService {
           await this.delay(this.getRetryDelay(attempt));
           return this.sendViaNetlifyFunction(emailData, attempt + 1);
         }
+
+        await errorLogger.logEmailError(
+          'Invalid JSON response from email service',
+          {
+            to: emailData.to,
+            subject: emailData.subject,
+            attempt,
+            jsonError: jsonError instanceof Error ? jsonError.message : String(jsonError)
+          },
+          'EmailService'
+        );
 
         throw new Error('Invalid JSON response from email service');
       }
@@ -253,7 +277,7 @@ ${defaultConfirmationUrl}
 
 Why verify your email?
 ✅ Secure your account
-✅ Access all platform features
+�� Access all platform features
 ✅ Receive important updates
 ✅ Start your first backlink campaign
 
