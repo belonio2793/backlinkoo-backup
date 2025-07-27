@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { aiContentGenerator } from '@/services/aiContentGenerator';
+import { productionAIContentManager } from '@/services/productionAIContentManager';
 import { Loader2, Plus, X, Link, Target, Hash } from 'lucide-react';
 
 interface BlogFormProps {
@@ -50,12 +50,12 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
     setIsGenerating(true);
     
     try {
-      // Generate content using AI service
-      const generatedContent = await aiContentGenerator.generateContent({
+      // Generate content using Production AI service with intelligent provider selection
+      const generatedContent = await productionAIContentManager.generateContent({
         targetUrl,
         primaryKeyword,
         secondaryKeywords,
-        contentType,
+        contentType: contentType as 'blog-post' | 'editorial' | 'guest-post' | 'resource-page',
         wordCount: parseInt(wordCount),
         tone,
         customInstructions

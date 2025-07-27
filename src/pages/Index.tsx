@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { PaymentModal } from "@/components/PaymentModal";
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
 import { HomepageBlogGenerator } from "@/components/HomepageBlogGenerator";
+import { ProductionBlogGenerator } from "@/components/ProductionBlogGenerator";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
 import { Footer } from "@/components/Footer";
@@ -39,6 +40,7 @@ const Index = () => {
   const [customCredits, setCustomCredits] = useState<number>(0);
   const [isCustomPackage, setIsCustomPackage] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [useProductionGenerator, setUseProductionGenerator] = useState(false);
 
   // Check for authenticated user on component mount
   useEffect(() => {
@@ -262,7 +264,45 @@ const Index = () => {
       {/* Free Blog Generator - Top Feature */}
       <section className="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
         <div className="container mx-auto">
-          <HomepageBlogGenerator />
+          {/* Optional: Advanced Generator Toggle (Hidden by default) */}
+          <div className="max-w-sm mx-auto mb-4">
+            <details className="group">
+              <summary className="cursor-pointer text-center text-sm text-gray-500 hover:text-gray-700">
+                Advanced Options ▼
+              </summary>
+              <div className="mt-2 p-3 bg-white/50 rounded-lg border">
+                <div className="flex justify-center">
+                  <div className="flex bg-gray-100 rounded-lg p-1">
+                    <Button
+                      variant={!useProductionGenerator ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setUseProductionGenerator(false)}
+                      className="text-xs px-3 py-1"
+                    >
+                      <Zap className="h-3 w-3 mr-1" />
+                      Enhanced
+                    </Button>
+                    <Button
+                      variant={useProductionGenerator ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setUseProductionGenerator(true)}
+                      className="text-xs px-3 py-1"
+                    >
+                      <Shield className="h-3 w-3 mr-1" />
+                      Basic
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          {/* Conditional Generator Rendering */}
+          {useProductionGenerator ? (
+            <ProductionBlogGenerator />
+          ) : (
+            <HomepageBlogGenerator />
+          )}
         </div>
       </section>
 

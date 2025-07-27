@@ -28,8 +28,60 @@ export function Blog() {
   useEffect(() => {
     const loadBlogPosts = async () => {
       try {
-        const posts = await publishedBlogService.getRecentBlogPosts(50);
-        setBlogPosts(posts);
+        // Try to load from database first
+        let posts: PublishedBlogPost[] = [];
+        try {
+          posts = await publishedBlogService.getRecentBlogPosts(50);
+        } catch (dbError) {
+          console.warn('Database unavailable, using localStorage:', dbError);
+        }
+
+        // Also load from localStorage
+        const localBlogPosts: PublishedBlogPost[] = [];
+        try {
+          const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+
+          for (const blogMeta of allBlogPosts) {
+            const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
+            if (blogData) {
+              const blogPost = JSON.parse(blogData);
+
+              // Check if trial post is expired
+              if (blogPost.is_trial_post && blogPost.expires_at) {
+                const isExpired = new Date() > new Date(blogPost.expires_at);
+                if (isExpired) {
+                  // Remove expired trial post
+                  localStorage.removeItem(`blog_post_${blogMeta.slug}`);
+                  continue;
+                }
+              }
+
+              localBlogPosts.push(blogPost);
+            }
+          }
+
+          // Update the all_blog_posts list to remove expired ones
+          const validBlogMetas = allBlogPosts.filter((meta: any) => {
+            return localBlogPosts.some(post => post.slug === meta.slug);
+          });
+          localStorage.setItem('all_blog_posts', JSON.stringify(validBlogMetas));
+
+        } catch (storageError) {
+          console.warn('Failed to load from localStorage:', storageError);
+        }
+
+        // Combine database and localStorage posts, removing duplicates
+        const allPosts = [...posts];
+        localBlogPosts.forEach(localPost => {
+          if (!allPosts.find(dbPost => dbPost.slug === localPost.slug)) {
+            allPosts.push(localPost);
+          }
+        });
+
+        // Sort by created date, newest first
+        allPosts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+        setBlogPosts(allPosts);
       } catch (error) {
         console.error('Failed to load blog posts:', error);
       } finally {

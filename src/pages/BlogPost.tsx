@@ -42,11 +42,85 @@ export function BlogPost() {
         const { data: { user } } = await supabase.auth.getUser();
         setCurrentUser(user);
 
-        const post = await publishedBlogService.getBlogPostBySlug(slug);
+        // Try database first
+        let post: PublishedBlogPost | null = null;
+        try {
+          post = await publishedBlogService.getBlogPostBySlug(slug);
+        } catch (dbError) {
+          console.warn('Database unavailable, trying localStorage:', dbError);
+        }
+
+        // If not found in database, try localStorage
+        if (!post) {
+          try {
+            const blogStorageKey = `blog_post_${slug}`;
+            console.log('🔍 Looking for blog post with key:', blogStorageKey);
+
+            // Debug: Show all localStorage keys that start with 'blog_post_'
+            const allKeys = Object.keys(localStorage).filter(key => key.startsWith('blog_post_'));
+            console.log('📋 Available blog post keys:', allKeys);
+
+            const storedBlogData = localStorage.getItem(blogStorageKey);
+            console.log('📄 Found stored data:', !!storedBlogData);
+
+            if (storedBlogData) {
+              const blogData = JSON.parse(storedBlogData);
+
+              // Check if trial post is expired
+              if (blogData.is_trial_post && blogData.expires_at) {
+                const isExpired = new Date() > new Date(blogData.expires_at);
+                if (isExpired) {
+                  // Remove expired trial post
+                  localStorage.removeItem(blogStorageKey);
+                  setError('This trial blog post has expired');
+                  setLoading(false);
+                  return;
+                }
+              }
+
+              // Increment view count
+              blogData.view_count = (blogData.view_count || 0) + 1;
+              localStorage.setItem(blogStorageKey, JSON.stringify(blogData));
+
+              post = blogData;
+            }
+          } catch (storageError) {
+            console.warn('Failed to load from localStorage:', storageError);
+          }
+        }
+
         if (post) {
           setBlogPost(post);
         } else {
-          setError('Blog post not found or has expired');
+          // Show debug information if in development
+          if (allKeys.length > 0) {
+            console.error('❌ Blog post not found:', {
+              searchedSlug: slug,
+              searchedKey: blogStorageKey,
+              availableKeys: allKeys
+            });
+
+            // Try to find a similar slug
+            const similarKey = allKeys.find(key => key.includes(slug.split('-')[0]));
+            if (similarKey) {
+              console.log('🔍 Found similar key, trying to load:', similarKey);
+              const similarData = localStorage.getItem(similarKey);
+              if (similarData) {
+                try {
+                  const similarPost = JSON.parse(similarData);
+                  console.log('📄 Similar post found:', similarPost.title);
+                  setBlogPost(similarPost);
+                  return;
+                } catch (e) {
+                  console.warn('Failed to parse similar post');
+                }
+              }
+            }
+
+            setError(`Blog post "${slug}" not found. Available posts: ${allKeys.map(k => k.replace('blog_post_', '')).join(', ')}`);
+          } else {
+            setError('Blog post not found or has expired. No blog posts found in storage.');
+          }
         }
       } catch (err) {
         console.error('Failed to load blog post:', err);

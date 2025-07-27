@@ -43,6 +43,8 @@ import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
 import AdminVerificationQueue from "@/components/AdminVerificationQueue";
 import SEOToolsSection from "@/components/SEOToolsSection";
 import { ProfileSettings } from "@/components/ProfileSettings";
+import { ApiConfigStatus } from "@/components/ApiConfigStatus";
+import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";

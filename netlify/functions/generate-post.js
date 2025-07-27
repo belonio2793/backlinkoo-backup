@@ -75,7 +75,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { destinationUrl, keyword, userId } = JSON.parse(event.body);
+    const { destinationUrl, keyword, userId, anchorText } = JSON.parse(event.body);
 
     // Validate input
     if (!destinationUrl || !keyword) {
@@ -103,8 +103,8 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Generate AI content using multiple services
-    const aiContent = await generateAIContent(destinationUrl, keyword);
+    // Generate AI content using ChatGPT structure
+    const aiContent = await generateChatGPTBlogContent(destinationUrl, keyword, anchorText);
     
     // Create unique slug
     const slug = `${keyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${crypto.randomBytes(4).toString('hex')}`;
@@ -185,23 +185,55 @@ exports.handler = async (event, context) => {
   }
 };
 
-async function generateAIContent(destinationUrl, keyword) {
-  // Use OpenAI for primary content generation
-  const aiContent = await generateWithOpenAI(destinationUrl, keyword);
-  
-  // If OpenAI fails, use fallback content generation
+async function generateChatGPTBlogContent(destinationUrl, keyword, anchorText) {
+  const finalAnchorText = anchorText || keyword;
+  const domain = new URL(destinationUrl).hostname.replace('www.', '');
+
+  // Use OpenAI for primary content generation with ChatGPT structure
+  const aiContent = await generateWithOpenAI(destinationUrl, keyword, finalAnchorText, domain);
+
+  // If OpenAI fails, use ChatGPT structured fallback
   if (!aiContent.content) {
-    return generateFallbackContent(destinationUrl, keyword);
+    return generateChatGPTFallbackContent(destinationUrl, keyword, finalAnchorText, domain);
   }
-  
+
   return aiContent;
 }
 
-async function generateWithOpenAI(destinationUrl, keyword) {
-  if (!process.env.OPENAI_API_KEY) {
-    console.warn('OpenAI API key not configured, using fallback content');
+async function generateWithOpenAI(destinationUrl, keyword, anchorText, domain) {
+  // Check for OpenAI API key first, then try other providers
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const grokKey = process.env.GROK_API_KEY;
+  const cohereKey = process.env.COHERE_API_KEY;
+
+  if (!openaiKey && !grokKey && !cohereKey) {
+    console.warn('No AI API keys configured, using fallback content');
     return generateFallbackContent(destinationUrl, keyword);
   }
+
+  // Try OpenAI first if available
+  if (openaiKey) {
+    console.log('🤖 Using OpenAI for ChatGPT structured content generation');
+    return await tryOpenAIWithChatGPTStructure(destinationUrl, keyword, anchorText, domain, openaiKey);
+  }
+
+  // Try Grok as fallback
+  if (grokKey) {
+    console.log('⚡ Using Grok for content generation');
+    return await tryGrok(destinationUrl, keyword, grokKey);
+  }
+
+  // Try Cohere as final fallback
+  if (cohereKey) {
+    console.log('🔥 Using Cohere for content generation');
+    return await tryCohere(destinationUrl, keyword, cohereKey);
+  }
+
+  console.warn('All AI providers failed, using fallback content');
+  return generateFallbackContent(destinationUrl, keyword);
+}
+
+async function tryOpenAI(destinationUrl, keyword, apiKey) {
 
   try {
     const domain = new URL(destinationUrl).hostname.replace('www.', '');
@@ -230,7 +262,7 @@ Format the response as JSON with:
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -277,7 +309,134 @@ Format the response as JSON with:
 
   } catch (error) {
     console.error('OpenAI generation failed:', error);
-    return generateFallbackContent(destinationUrl, keyword);
+    throw error; // Let the calling function handle the fallback
+  }
+}
+
+async function tryGrok(destinationUrl, keyword, apiKey) {
+  try {
+    const domain = new URL(destinationUrl).hostname.replace('www.', '');
+
+    const prompt = `Write a comprehensive, SEO-optimized blog post about "${keyword}" that naturally mentions and links to ${destinationUrl}.
+
+Requirements:
+- 1200+ words
+- Professional, informative tone
+- Include the keyword "${keyword}" naturally throughout
+- Add 2-3 contextual backlinks to ${destinationUrl} with relevant anchor text
+- Structure with clear headings (H2, H3)
+- Include actionable tips and insights
+- Make it valuable for readers interested in ${keyword}
+
+Format the response as JSON with:
+{
+  "title": "Engaging title with keyword",
+  "content": "Full HTML formatted blog post content",
+  "metaDescription": "SEO meta description under 160 chars",
+  "excerpt": "Brief excerpt for preview (150 chars)",
+  "contextualLinks": [{"anchor": "anchor text", "url": "${destinationUrl}"}],
+  "seoScore": 85
+}`;
+
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: prompt }],
+        model: 'grok-beta',
+        stream: false,
+        temperature: 0.7
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Grok API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error('No content generated from Grok');
+    }
+
+    // Try to parse JSON response
+    try {
+      const parsed = JSON.parse(content);
+      return {
+        title: parsed.title || `Complete Guide to ${keyword}`,
+        content: parsed.content || content,
+        metaDescription: parsed.metaDescription || `Learn everything about ${keyword} and boost your results with expert insights.`,
+        excerpt: parsed.excerpt || `Discover the ultimate guide to ${keyword} with actionable tips and strategies.`,
+        contextualLinks: parsed.contextualLinks || [{ anchor: keyword, url: destinationUrl }],
+        seoScore: parsed.seoScore || 85
+      };
+    } catch (parseError) {
+      return {
+        title: `The Ultimate Guide to ${keyword}`,
+        content: content,
+        metaDescription: `Learn everything about ${keyword} and boost your results with expert insights.`,
+        excerpt: `Discover the ultimate guide to ${keyword} with actionable tips and strategies.`,
+        contextualLinks: [{ anchor: keyword, url: destinationUrl }],
+        seoScore: 85
+      };
+    }
+
+  } catch (error) {
+    console.error('Grok generation failed:', error);
+    throw error;
+  }
+}
+
+async function tryCohere(destinationUrl, keyword, apiKey) {
+  try {
+    const domain = new URL(destinationUrl).hostname.replace('www.', '');
+
+    const prompt = `Write a comprehensive, SEO-optimized blog post about "${keyword}" that naturally mentions and links to ${destinationUrl}. Include the keyword naturally throughout, add contextual backlinks, and structure with clear headings. Make it valuable for readers interested in ${keyword}.`;
+
+    const response = await fetch('https://api.cohere.ai/v1/generate', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'command',
+        prompt: prompt,
+        max_tokens: 3000,
+        temperature: 0.7,
+        k: 0,
+        stop_sequences: [],
+        return_likelihoods: 'NONE'
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Cohere API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.generations?.[0]?.text;
+
+    if (!content) {
+      throw new Error('No content generated from Cohere');
+    }
+
+    return {
+      title: `The Ultimate Guide to ${keyword}`,
+      content: `<h1>The Ultimate Guide to ${keyword}</h1>\n\n${content.replace(/\n/g, '</p>\n<p>')}`,
+      metaDescription: `Learn everything about ${keyword} and boost your results with expert insights.`,
+      excerpt: `Discover the ultimate guide to ${keyword} with actionable tips and strategies.`,
+      contextualLinks: [{ anchor: keyword, url: destinationUrl }],
+      seoScore: 85
+    };
+
+  } catch (error) {
+    console.error('Cohere generation failed:', error);
+    throw error;
   }
 }
 
@@ -367,9 +526,144 @@ function generateTags(keyword, targetUrl) {
   return [...keywordTags, domain, 'SEO', 'digital marketing'];
 }
 
+async function tryOpenAIWithChatGPTStructure(destinationUrl, keyword, anchorText, domain, apiKey) {
+  try {
+    const chatGPTPrompt = `Write a comprehensive, SEO-optimized blog post about "${keyword}" following this exact structure:
+
+Title: SEO-rich title with target keyword
+Meta Description: 155-160 characters with target keyword
+H1: Same as title
+H2: Introduction (include target keyword in first 100 words)
+H2: Main Content (3-4 paragraphs with natural backlink using "${anchorText}" linking to ${destinationUrl})
+H2: Why ${keyword} Matters (1-2 paragraphs about importance)
+H2: Conclusion (Summary + call to action linking to ${destinationUrl})
+
+Requirements:
+- Natural, human tone with short sentences
+- Include LSI keywords naturally
+- 1200+ words total
+- Strategic placement of 2-3 backlinks to ${destinationUrl}
+- Use "${anchorText}" as primary anchor text
+
+Format as JSON:
+{
+  "title": "SEO title with keyword",
+  "content": "Full HTML with proper H1/H2 structure",
+  "metaDescription": "155-160 char description",
+  "excerpt": "Brief preview",
+  "seoScore": 92
+}`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-4',
+        messages: [{ role: 'user', content: chatGPTPrompt }],
+        max_tokens: 3500,
+        temperature: 0.7
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error('No content generated from OpenAI');
+    }
+
+    // Try to parse JSON response
+    try {
+      const parsed = JSON.parse(content);
+      return {
+        title: parsed.title || `${keyword}: Complete Professional Guide for 2024`,
+        content: parsed.content || content,
+        metaDescription: parsed.metaDescription || `Master ${keyword} with this comprehensive guide. Expert strategies and proven techniques.`,
+        excerpt: parsed.excerpt || `Discover everything about ${keyword} in this ultimate guide.`,
+        contextualLinks: [
+          { anchor: anchorText, url: destinationUrl },
+          { anchor: domain, url: destinationUrl }
+        ],
+        seoScore: parsed.seoScore || 92
+      };
+    } catch (parseError) {
+      return {
+        title: `${keyword}: Complete Professional Guide for 2024`,
+        content: content,
+        metaDescription: `Master ${keyword} with this comprehensive guide. Expert strategies and proven techniques.`,
+        excerpt: `Discover everything about ${keyword} in this ultimate guide.`,
+        contextualLinks: [
+          { anchor: anchorText, url: destinationUrl }
+        ],
+        seoScore: 92
+      };
+    }
+
+  } catch (error) {
+    console.error('OpenAI ChatGPT structure generation failed:', error);
+    throw error;
+  }
+}
+
+function generateChatGPTFallbackContent(destinationUrl, keyword, anchorText, domain) {
+  const title = `${keyword}: Complete Professional Guide for 2024`;
+
+  const content = `
+<h1>${title}</h1>
+
+<h2>Introduction</h2>
+<p>In today's competitive digital landscape, mastering <strong>${keyword}</strong> has become essential for businesses and professionals seeking sustainable growth. This comprehensive guide provides you with expert insights, proven strategies, and actionable techniques to excel in ${keyword} and achieve measurable results.</p>
+
+<p>Whether you're new to ${keyword} or looking to enhance your existing knowledge, this guide covers everything you need to know to succeed in this dynamic field.</p>
+
+<h2>Main Content</h2>
+<p>Understanding the fundamentals of ${keyword} is crucial for developing an effective strategy. Industry leaders consistently emphasize the importance of a systematic approach, and organizations like <a href="${destinationUrl}" target="_blank" rel="noopener noreferrer">${anchorText}</a> have demonstrated how proper implementation can drive remarkable results.</p>
+
+<p>The key to success with ${keyword} lies in understanding both the technical aspects and strategic implications. Here are the most effective approaches:</p>
+
+<ul>
+<li><strong>Strategic Planning:</strong> Develop a comprehensive roadmap aligned with your business objectives</li>
+<li><strong>Best Practices:</strong> Implement industry-proven methodologies and standards</li>
+<li><strong>Continuous Optimization:</strong> Regularly review and improve your ${keyword} approach</li>
+<li><strong>Performance Monitoring:</strong> Track key metrics and adjust strategies accordingly</li>
+</ul>
+
+<p>Expert practitioners recommend focusing on quality over quantity when implementing ${keyword} strategies. Companies that prioritize excellence, such as those featured on <a href="${destinationUrl}" target="_blank" rel="noopener noreferrer">${domain}</a>, consistently outperform competitors by maintaining high standards and innovative approaches.</p>
+
+<h2>Why ${keyword} Matters</h2>
+<p>The significance of ${keyword} in today's business environment cannot be overstated. Organizations that effectively leverage ${keyword} strategies experience significant competitive advantages, including improved market positioning, enhanced customer satisfaction, and sustainable growth.</p>
+
+<p>Research indicates that businesses implementing comprehensive ${keyword} approaches see measurable improvements in key performance indicators within 2-3 months of implementation. The long-term benefits extend beyond immediate results, creating lasting value and competitive differentiation.</p>
+
+<h2>Conclusion</h2>
+<p>Success with ${keyword} requires dedication, strategic thinking, and continuous learning. By implementing the strategies outlined in this guide and leveraging professional resources, you'll be well-positioned to achieve your objectives and drive meaningful results.</p>
+
+<p>Ready to take your ${keyword} strategy to the next level? <a href="${destinationUrl}" target="_blank" rel="noopener noreferrer"><strong><u>Discover comprehensive ${keyword} solutions</u></strong></a> and unlock your organization's full potential with expert guidance and proven methodologies.</p>
+  `.trim();
+
+  return {
+    title,
+    content,
+    metaDescription: `Master ${keyword} with this comprehensive guide. Expert strategies, proven techniques, and actionable insights for success.`,
+    excerpt: `Discover everything you need to know about ${keyword} in this ultimate professional guide with actionable strategies.`,
+    contextualLinks: [
+      { anchor: anchorText, url: destinationUrl },
+      { anchor: domain, url: destinationUrl }
+    ],
+    seoScore: 92
+  };
+}
+
 function categorizeContent(keyword) {
   const lowerKeyword = keyword.toLowerCase();
-  
+
   if (lowerKeyword.includes('marketing') || lowerKeyword.includes('seo')) {
     return 'Digital Marketing';
   } else if (lowerKeyword.includes('tech') || lowerKeyword.includes('software')) {

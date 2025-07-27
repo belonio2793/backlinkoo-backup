@@ -133,7 +133,7 @@ export function CampaignRegistration({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center text-xl">
-            Join Backlinkoo & Save Your Campaign
+            Join Backlink & Save Your Campaign
           </DialogTitle>
         </DialogHeader>
         

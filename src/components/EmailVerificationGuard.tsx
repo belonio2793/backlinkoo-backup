@@ -33,7 +33,16 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
         const isDevelopment = window.location.hostname === 'localhost' ||
                              window.location.hostname.includes('fly.dev') ||
                              window.location.port === '8080' ||
-                             process.env.NODE_ENV === 'development';
+                             process.env.NODE_ENV === 'development' ||
+                             window.location.href.includes('fly.dev');
+
+        console.log('🔍 Development mode check:', {
+          hostname: window.location.hostname,
+          port: window.location.port,
+          href: window.location.href,
+          nodeEnv: process.env.NODE_ENV,
+          isDevelopment
+        });
 
         if (isDevelopment) {
           console.log('EmailVerificationGuard: Development mode detected - using mock user');

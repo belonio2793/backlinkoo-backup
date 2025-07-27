@@ -20,6 +20,8 @@ import BlogPreview from "../pages/BlogPreview";
 import { Blog } from "../pages/Blog";
 import { BlogPost } from "../pages/BlogPost";
 import EmailMarketing from "../pages/EmailMarketing";
+import { GuestDashboard } from "../components/GuestDashboard";
+import { DashboardRouter } from "../components/DashboardRouter";
 import BacklinkReport from "../pages/BacklinkReport";
 import ReportViewer from "../pages/ReportViewer";
 import NoHandsSEO from "../pages/NoHandsSEO";
@@ -45,10 +47,12 @@ export const AppWrapper = () => {
       <Route path="/preview/:slug" element={<BlogPreview />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/blog/:slug" element={<BlogPost />} />
+      <Route path="/trial-dashboard" element={<GuestDashboard />} />
       <Route path="*" element={<NotFound />} />
 
       {/* Protected routes - require authentication and email verification */}
-      <Route path="/dashboard" element={
+      <Route path="/dashboard" element={<DashboardRouter />} />
+      <Route path="/my-dashboard" element={
         <EmailVerificationGuard>
           <Dashboard />
         </EmailVerificationGuard>
