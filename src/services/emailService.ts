@@ -287,6 +287,18 @@ export class EmailService {
   static async sendConfirmationEmail(email: string, confirmationUrl?: string): Promise<EmailServiceResponse> {
     console.log('EmailService: Sending confirmation email to:', email);
 
+    // Log confirmation email request
+    await errorLogger.logError(
+      ErrorSeverity.LOW,
+      ErrorCategory.EMAIL,
+      'Confirmation email requested',
+      {
+        context: { to: email, type: 'confirmation' },
+        component: 'EmailService',
+        action: 'send_confirmation_email'
+      }
+    );
+
     const origin = this.getOriginUrl();
     const defaultConfirmationUrl = confirmationUrl || `${origin}/auth/confirm?email=${encodeURIComponent(email)}`;
 
@@ -333,6 +345,17 @@ ${origin}`,
       return result;
     } catch (error: any) {
       console.error('Error sending confirmation email:', error);
+
+      await errorLogger.logEmailError(
+        `Failed to send confirmation email: ${error.message}`,
+        {
+          to: email,
+          emailType: 'confirmation',
+          confirmationUrl
+        },
+        'EmailService'
+      );
+
       return {
         success: false,
         error: `Failed to send confirmation email: ${error.message}`,
