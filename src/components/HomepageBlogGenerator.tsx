@@ -15,6 +15,7 @@ import { SavePostSignupPopup } from './SavePostSignupPopup';
 import { GenerationSequence } from './GenerationSequence';
 import { InteractiveContentGenerator } from './InteractiveContentGenerator';
 import { MultiBlogGenerator } from './MultiBlogGenerator';
+import { ClaimTrialPostDialog } from './ClaimTrialPostDialog';
 import {
   Sparkles,
   Link2,
@@ -121,6 +122,24 @@ export function HomepageBlogGenerator() {
           ? "Your content is ready and saved to your dashboard!"
           : "Your demo preview is ready. Register to keep it forever!",
       });
+
+      // Store trial post info for notification system
+      if (!user && blogPost.is_trial_post) {
+        const trialPostInfo = {
+          id: blogPost.id,
+          title: blogPost.title,
+          slug: blogPost.slug,
+          expires_at: blogPost.expires_at,
+          target_url: targetUrl,
+          created_at: blogPost.created_at
+        };
+
+        // Store in localStorage for notification tracking
+        const existingTrialPosts = localStorage.getItem('trial_blog_posts');
+        const trialPosts = existingTrialPosts ? JSON.parse(existingTrialPosts) : [];
+        trialPosts.push(trialPostInfo);
+        localStorage.setItem('trial_blog_posts', JSON.stringify(trialPosts));
+      }
 
       // Show signup popup for guest users after a delay
       if (!user) {
@@ -449,15 +468,26 @@ export function HomepageBlogGenerator() {
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  {!currentUser && (
-                    <Button
-                      onClick={() => setShowSignupPopup(true)}
-                      size="lg"
-                      className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white animate-pulse"
+                  {!currentUser && generatedPost && (
+                    <ClaimTrialPostDialog
+                      trialPostSlug={generatedPost.slug}
+                      trialPostTitle={generatedPost.title}
+                      expiresAt={generatedPost.expires_at}
+                      targetUrl={targetUrl}
+                      onClaimed={() => {
+                        setCurrentUser(true); // Mark as claimed
+                        // Refresh the page to update UI
+                        window.location.reload();
+                      }}
                     >
-                      <Save className="mr-2 h-5 w-5" />
-                      Save Now - Deletes in 24hrs!
-                    </Button>
+                      <Button
+                        size="lg"
+                        className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white animate-pulse"
+                      >
+                        <Save className="mr-2 h-5 w-5" />
+                        Save Now - Deletes in 24hrs!
+                      </Button>
+                    </ClaimTrialPostDialog>
                   )}
                   <Button
                     onClick={resetForm}

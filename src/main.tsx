@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { trialPostCleanupService } from './services/trialPostCleanupService'
 
 // Prevent ethereum property conflicts from browser extensions
 try {
@@ -39,3 +40,6 @@ window.addEventListener('unhandledrejection', (event) => {
 });
 
 createRoot(document.getElementById("root")!).render(<App />);
+
+// Initialize trial post cleanup service
+trialPostCleanupService.scheduleCleanup().catch(console.error);

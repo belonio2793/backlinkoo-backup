@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import { useReferralTracking } from "@/hooks/useReferralTracking";
 import { EmailVerificationGuard } from "./EmailVerificationGuard";
 import { AdminAuthGuard } from "./AdminAuthGuard";
+import { TrialNotificationBanner } from "./TrialNotificationBanner";
 import Index from "../pages/Index";
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
@@ -30,7 +31,9 @@ export const AppWrapper = () => {
   useReferralTracking();
 
   return (
-    <Routes>
+    <>
+      <TrialNotificationBanner />
+      <Routes>
       {/* Public routes - no authentication required */}
       <Route path="/" element={<Index />} />
       <Route path="/login" element={<Login />} />
@@ -100,6 +103,7 @@ export const AppWrapper = () => {
           <PromotionMaterials />
         </EmailVerificationGuard>
       } />
-    </Routes>
+      </Routes>
+    </>
   );
 };

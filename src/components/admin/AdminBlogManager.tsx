@@ -64,11 +64,45 @@ export function AdminBlogManager() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'published': return 'bg-green-100 text-green-800';
-      case 'draft': return 'bg-yellow-100 text-yellow-800';
-      case 'archived': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'published': return 'bg-green-100 text-green-800 border-green-200';
+      case 'draft': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'archived': return 'bg-gray-100 text-gray-800 border-gray-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
+  };
+
+  const getPostTypeInfo = (post: PublishedBlogPost) => {
+    const info = [];
+
+    if (post.is_trial_post) {
+      info.push({
+        label: 'Trial Post',
+        color: 'bg-amber-100 text-amber-800 border-amber-200',
+        icon: 'Sparkles'
+      });
+    } else {
+      info.push({
+        label: 'Permanent',
+        color: 'bg-blue-100 text-blue-800 border-blue-200',
+        icon: 'Shield'
+      });
+    }
+
+    if (post.user_id) {
+      info.push({
+        label: 'User Post',
+        color: 'bg-purple-100 text-purple-800 border-purple-200',
+        icon: 'User'
+      });
+    } else {
+      info.push({
+        label: 'Demo Post',
+        color: 'bg-orange-100 text-orange-800 border-orange-200',
+        icon: 'Eye'
+      });
+    }
+
+    return info;
   };
 
   const isExpired = (post: PublishedBlogPost) => {
@@ -109,6 +143,51 @@ export function AdminBlogManager() {
     }
   };
 
+  const verifySyncStatus = async () => {
+    try {
+      const publicPosts = await publishedBlogService.getRecentBlogPosts(50);
+      const adminPosts = blogPosts;
+
+      const syncIssues = [];
+
+      // Check for posts in admin but not public
+      adminPosts.forEach(adminPost => {
+        const foundInPublic = publicPosts.find(p => p.slug === adminPost.slug);
+        if (!foundInPublic) {
+          syncIssues.push(`Admin post "${adminPost.title}" not found in public view`);
+        }
+      });
+
+      // Check for posts in public but not admin
+      publicPosts.forEach(publicPost => {
+        const foundInAdmin = adminPosts.find(p => p.slug === publicPost.slug);
+        if (!foundInAdmin) {
+          syncIssues.push(`Public post "${publicPost.title}" not found in admin view`);
+        }
+      });
+
+      if (syncIssues.length === 0) {
+        toast({
+          title: 'Sync Verified ✅',
+          description: `All ${adminPosts.length} posts are properly synced between admin and public views`
+        });
+      } else {
+        toast({
+          title: 'Sync Issues Found',
+          description: `${syncIssues.length} sync issues detected. Check console for details.`,
+          variant: 'destructive'
+        });
+        console.warn('Sync Issues:', syncIssues);
+      }
+    } catch (error) {
+      toast({
+        title: 'Sync Check Failed',
+        description: 'Unable to verify sync status',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const exportPostsData = () => {
     const csvData = filteredPosts.map(post => ({
       title: post.title,
@@ -117,11 +196,12 @@ export function AdminBlogManager() {
       keywords: post.keywords.join('; '),
       status: post.status,
       is_trial: post.is_trial_post ? 'Yes' : 'No',
+      expires_at: post.expires_at || 'Never',
       view_count: post.view_count,
       seo_score: post.seo_score,
       word_count: post.word_count,
       created_at: post.created_at,
-      expires_at: post.expires_at || 'Never'
+      user_type: post.user_id ? 'Registered' : 'Guest'
     }));
 
     const csv = [
@@ -157,6 +237,10 @@ export function AdminBlogManager() {
             <p className="text-gray-600">Manage all generated blog posts and backlinks</p>
           </div>
           <div className="flex gap-2">
+            <Button onClick={verifySyncStatus} variant="outline" size="sm">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Verify Sync
+            </Button>
             <Button onClick={cleanupExpiredPosts} variant="outline" size="sm">
               <Trash2 className="mr-2 h-4 w-4" />
               Cleanup Expired
@@ -276,19 +360,23 @@ export function AdminBlogManager() {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-gray-900 truncate">{post.title}</h3>
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <h3 className="font-semibold text-gray-900 truncate flex-1 min-w-0">{post.title}</h3>
                         <Badge className={getStatusColor(post.status)}>
-                          {post.status}
+                          {post.status.toUpperCase()}
                         </Badge>
-                        {post.is_trial_post && (
-                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                            <Sparkles className="mr-1 h-3 w-3" />
-                            Trial
+                        {getPostTypeInfo(post).map((info, index) => (
+                          <Badge key={index} variant="outline" className={info.color}>
+                            {info.icon === 'Sparkles' && <Sparkles className="mr-1 h-3 w-3" />}
+                            {info.icon === 'User' && <User className="mr-1 h-3 w-3" />}
+                            {info.icon === 'Eye' && <Eye className="mr-1 h-3 w-3" />}
+                            {info.label}
                           </Badge>
-                        )}
+                        ))}
                         {isExpired(post) && (
-                          <Badge variant="destructive">Expired</Badge>
+                          <Badge variant="destructive" className="animate-pulse">
+                            EXPIRED
+                          </Badge>
                         )}
                       </div>
                       
