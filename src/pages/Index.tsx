@@ -26,6 +26,7 @@ import type { User } from '@supabase/supabase-js';
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
+import { LoginModal } from "@/components/LoginModal";
 
 
 const Index = () => {
@@ -37,6 +38,7 @@ const Index = () => {
   const [selectedPlan, setSelectedPlan] = useState<'starter_100' | 'starter_200' | 'starter_300'>('starter_200');
   const [customCredits, setCustomCredits] = useState<number>(0);
   const [isCustomPackage, setIsCustomPackage] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   // Check for authenticated user on component mount
   useEffect(() => {
@@ -240,7 +242,7 @@ const Index = () => {
                 <>
                   <Button variant="ghost" onClick={() => {
                     console.log('Sign In button clicked');
-                    navigate("/login");
+                    setShowLoginModal(true);
                   }} className="font-medium">
                     Sign In
                   </Button>
@@ -729,6 +731,21 @@ const Index = () => {
 
       {/* Footer */}
       <Footer />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onAuthSuccess={(user) => {
+          setUser(user);
+          setShowLoginModal(false);
+          toast({
+            title: "Welcome!",
+            description: "You have been successfully signed in.",
+          });
+        }}
+        defaultTab="login"
+      />
     </div>
   );
 };

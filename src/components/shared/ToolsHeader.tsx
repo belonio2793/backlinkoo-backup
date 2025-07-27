@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   Infinity,
   Target,
   Sparkles,
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { User } from '@supabase/supabase-js';
+import { LoginModal } from "@/components/LoginModal";
 
 interface ToolsHeaderProps {
   user: User | null;
@@ -22,6 +23,7 @@ interface ToolsHeaderProps {
 const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
   const navigate = useNavigate();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: Target },
@@ -146,7 +148,7 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
                 </Button>
               </div>
             ) : (
-              <Button onClick={() => navigate("/login")} className="font-medium">
+              <Button onClick={() => setShowLoginModal(true)} className="font-medium">
                 Sign In
               </Button>
             )}
@@ -222,6 +224,18 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
           </div>
         )}
       </div>
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onAuthSuccess={(user) => {
+          setShowLoginModal(false);
+          // Refresh the page to update auth state
+          window.location.reload();
+        }}
+        defaultTab="login"
+      />
     </header>
   );
 };
