@@ -57,6 +57,15 @@ export function AdminBlogManager() {
     }
   };
 
+  const loadContentFilterStats = async () => {
+    try {
+      const stats = await contentFilterService.getFilterStats(7);
+      setContentFilterStats(stats);
+    } catch (error) {
+      console.warn('Failed to load content filter stats:', error);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
