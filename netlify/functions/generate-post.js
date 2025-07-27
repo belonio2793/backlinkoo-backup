@@ -213,8 +213,8 @@ async function generateWithOpenAI(destinationUrl, keyword, anchorText, domain) {
 
   // Try OpenAI first if available
   if (openaiKey) {
-    console.log('🤖 Using OpenAI for content generation');
-    return await tryOpenAI(destinationUrl, keyword, openaiKey);
+    console.log('🤖 Using OpenAI for ChatGPT structured content generation');
+    return await tryOpenAIWithChatGPTStructure(destinationUrl, keyword, anchorText, domain, openaiKey);
   }
 
   // Try Grok as fallback
