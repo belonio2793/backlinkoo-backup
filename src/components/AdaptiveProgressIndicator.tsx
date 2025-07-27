@@ -240,22 +240,22 @@ export function AdaptiveProgressIndicator({
   if (!isActive) return null;
 
   return (
-    <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
-      <CardContent className="p-8">
+    <Card className="border-0 shadow-lg bg-white" style={{fontFamily: 'Roboto, sans-serif'}}>
+      <CardContent className="p-6">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 mb-4">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-500 mb-3">
             {isCompleting ? (
-              <CheckCircle2 className="h-8 w-8 text-white animate-bounce" />
+              <CheckCircle2 className="h-6 w-6 text-white" />
             ) : (
-              <Sparkles className="h-8 w-8 text-white animate-pulse" />
+              <Sparkles className="h-6 w-6 text-white animate-pulse" />
             )}
           </div>
-          <h3 className="text-2xl font-bold mb-2 text-gray-900">
+          <h3 className="text-lg font-medium mb-2 text-gray-900">
             {isCompleting ? 'Finalizing Your Blog Post...' : 'Creating Your Blog Post...'}
           </h3>
-          <p className="text-gray-600 mb-4">
-            {isCompleting ? 
+          <p className="text-sm text-gray-600 mb-4">
+            {isCompleting ?
               'Almost done! Putting the finishing touches on your content.' :
               `Generating high-quality content about "${keyword}" with natural backlinks`
             }
