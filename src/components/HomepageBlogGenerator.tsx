@@ -1377,9 +1377,9 @@ export function HomepageBlogGenerator() {
                       </>
                     )}
                   </div>
-                </CardContent>
-              </Card>
-            )
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>
