@@ -74,7 +74,7 @@ export function TrialBottomNotification() {
   };
 
   const handleSignUp = () => {
-    navigate('/auth-callback?action=signup&redirect=/dashboard');
+    navigate('/auth/callback?action=signup&redirect=/dashboard');
   };
 
   const dismiss = () => {
