@@ -161,7 +161,52 @@ export function HomepageBlogGenerator() {
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         const blogSlug = `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`;
-        const publishedBlogUrl = `https://backlinkoo.com/blog/${blogSlug}`;
+        const publishedBlogUrl = `${window.location.origin}/blog/?slug=${blogSlug}`;
+
+        // Create comprehensive blog content with multiple sections and strategic backlinks
+        const blogContent = `
+          <div class="prose prose-lg max-w-none">
+            <p class="text-xl text-gray-700 mb-6 leading-relaxed">In today's competitive digital landscape, mastering <strong>${primaryKeyword}</strong> has become essential for businesses and professionals alike. This comprehensive guide explores the latest strategies, best practices, and expert insights to help you excel in this dynamic field.</p>
+
+            <h2>Understanding ${primaryKeyword}: The Foundation</h2>
+            <p>Before diving into advanced strategies, it's crucial to understand the fundamentals of ${primaryKeyword}. Industry leaders consistently emphasize the importance of building a solid foundation, and companies like <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${new URL(targetUrl).hostname}</a> have demonstrated how proper implementation can drive remarkable results.</p>
+
+            <h2>Key Strategies for ${primaryKeyword} Success</h2>
+            <p>Successful implementation of ${primaryKeyword} requires a multi-faceted approach:</p>
+            <ul>
+              <li><strong>Strategic Planning:</strong> Develop a comprehensive roadmap that aligns with your objectives</li>
+              <li><strong>Best Practices:</strong> Follow industry-proven methodologies and standards</li>
+              <li><strong>Continuous Optimization:</strong> Regularly review and improve your approach</li>
+              <li><strong>Performance Monitoring:</strong> Track key metrics and adjust strategies accordingly</li>
+            </ul>
+
+            <h2>Expert Insights and Professional Recommendations</h2>
+            <p>Leading professionals in the field recommend focusing on quality over quantity when it comes to ${primaryKeyword}. Organizations that prioritize excellence, such as those featured on <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${new URL(targetUrl).hostname}</a>, consistently outperform their competitors by maintaining high standards and innovative approaches.</p>
+
+            <h2>Common Challenges and Solutions</h2>
+            <p>Every journey with ${primaryKeyword} comes with its unique challenges. Here are the most common obstacles and how to overcome them:</p>
+            <ol>
+              <li><strong>Resource Allocation:</strong> Ensure adequate budget and personnel for optimal results</li>
+              <li><strong>Technology Integration:</strong> Seamlessly integrate new solutions with existing systems</li>
+              <li><strong>Skill Development:</strong> Invest in training and professional development</li>
+              <li><strong>Market Adaptation:</strong> Stay flexible and responsive to changing market conditions</li>
+            </ol>
+
+            <h2>Future Trends and Opportunities</h2>
+            <p>The landscape of ${primaryKeyword} continues to evolve rapidly. Forward-thinking organizations are already preparing for emerging trends and technologies that will shape the future of this field.</p>
+
+            <h2>Conclusion</h2>
+            <p>Success with ${primaryKeyword} requires dedication, strategic thinking, and continuous learning. By implementing the strategies outlined in this guide and learning from industry leaders, you'll be well-positioned to achieve your goals and drive meaningful results in your organization.</p>
+
+            <div class="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
+              <h3 class="text-lg font-semibold text-blue-900 mb-2">Ready to Take Your ${primaryKeyword} Strategy to the Next Level?</h3>
+              <p class="text-blue-800 mb-3">Discover how professional solutions can accelerate your success and deliver measurable results.</p>
+              <a href="${targetUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium">
+                Learn More About Professional ${primaryKeyword} Solutions →
+              </a>
+            </div>
+          </div>
+        `;
 
         data = {
           success: true,
@@ -169,25 +214,42 @@ export function HomepageBlogGenerator() {
           blogPost: {
             id: `blog_live_${Date.now()}`,
             title: `The Ultimate Guide to ${primaryKeyword}: Professional Insights & Strategies`,
-            content: `This is your live blog post about ${primaryKeyword}. This professional article contains strategic backlinks to ${targetUrl} and is optimized for search engines.`,
-            meta_description: `Master ${primaryKeyword} with this comprehensive professional guide. Expert insights and proven strategies.`,
-            excerpt: `Discover everything you need to know about ${primaryKeyword} in this ultimate professional guide.`,
-            keywords: [primaryKeyword],
+            content: blogContent,
+            meta_description: `Master ${primaryKeyword} with this comprehensive professional guide. Expert insights, proven strategies, and best practices for success.`,
+            excerpt: `Discover everything you need to know about ${primaryKeyword} in this ultimate professional guide with actionable strategies and expert insights.`,
+            keywords: [primaryKeyword, 'professional guide', 'best practices', 'strategies'],
             target_url: targetUrl,
             status: 'published',
             is_trial_post: !isLoggedIn,
             expires_at: !isLoggedIn ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null,
-            seo_score: 87,
-            contextual_links: [{ anchor: primaryKeyword, url: targetUrl }],
+            seo_score: 92,
+            contextual_links: [
+              { anchor: new URL(targetUrl).hostname, url: targetUrl },
+              { anchor: `Professional ${primaryKeyword} Solutions`, url: targetUrl }
+            ],
             word_count: 1247,
+            reading_time: 6,
+            author_name: 'Backlinkoo Editorial Team',
+            author_avatar: '/placeholder.svg',
+            tags: [primaryKeyword, 'Professional Guide', 'Best Practices', 'Expert Insights'],
+            category: 'Professional Guides',
+            featured_image: `https://images.unsplash.com/1600x900/?${encodeURIComponent(primaryKeyword)}`,
             slug: blogSlug,
             created_at: new Date().toISOString(),
-            published_url: publishedBlogUrl
+            published_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            published_url: publishedBlogUrl,
+            view_count: 0
           },
           publishedUrl: publishedBlogUrl
         };
 
-        console.log('📱 DEVELOPMENT: Generated live blog post URL:', publishedBlogUrl);
+        console.log('📱 DEVELOPMENT: Generated comprehensive blog post:', {
+          url: publishedBlogUrl,
+          title: data.blogPost.title,
+          wordCount: data.blogPost.word_count,
+          seoScore: data.blogPost.seo_score
+        });
       } else {
         // Production mode - call actual Netlify function
         const response = await fetch('/.netlify/functions/generate-post', {
