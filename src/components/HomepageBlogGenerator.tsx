@@ -704,39 +704,28 @@ export function HomepageBlogGenerator() {
                   </div>
                 </div>
 
-                {/* Blog Post Preview */}
-                {generatedPost && (
-                  <div className="space-y-4 mb-6">
-                    <div className="p-4 border rounded-lg bg-white">
-                      <div className="text-lg font-medium mb-2">{generatedPost.title}</div>
-                      <div className="text-sm text-gray-600 mb-3">
-                        Published at: <a href={publishedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{publishedUrl}</a>
+                {/* TARGET URL CONFIRMATION */}
+                <div className="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Target className="h-5 w-5 text-gray-600" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Backlink Target</p>
+                        <p className="text-sm text-gray-600">Your website is now receiving SEO value</p>
                       </div>
-
-                      {/* Unclaimed Blog Notification */}
-                      {!currentUser && (
-                        <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-amber-600">⚠️</span>
-                            <span className="font-medium text-amber-800">Trial Blog Post</span>
-                          </div>
-                          <p className="text-amber-700 text-sm leading-tight">
-                            This blog post is in trial mode. Create an account to claim and save it permanently,
-                            or it will be automatically deleted in 24 hours.
-                          </p>
-                        </div>
-                      )}
-
-                      <Button
-                        onClick={() => window.open(publishedUrl, '_blank')}
-                        className="w-full"
+                    </div>
+                    <div className="text-right">
+                      <a
+                        href={targetUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-700 font-medium text-sm break-all"
                       >
-                        <ExternalLink className="mr-2 h-4 w-4" />
-                        View Live Blog Post
-                      </Button>
+                        {targetUrl}
+                      </a>
                     </div>
                   </div>
-                )}
+                </div>
 
                 {!currentUser && generatedPost && (
                   <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
