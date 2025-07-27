@@ -145,6 +145,7 @@ export function MultiBlogGenerator({
   ];
 
   useEffect(() => {
+    console.log('🎯 MultiBlogGenerator mounted with:', { keyword, targetUrl });
     initializeBlogGeneration();
   }, []);
 
