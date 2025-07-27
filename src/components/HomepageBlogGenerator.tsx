@@ -152,9 +152,22 @@ export function HomepageBlogGenerator() {
           })
         });
 
+        if (!response.ok) {
+          // Read the response body once and handle errors
+          let errorMessage = 'Failed to generate blog post';
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorMessage;
+          } catch (parseError) {
+            // If we can't parse the error response, use the status text
+            errorMessage = `Server error: ${response.status} ${response.statusText}`;
+          }
+          throw new Error(errorMessage);
+        }
+
         data = await response.json();
 
-        if (!response.ok || !data.success) {
+        if (!data.success) {
           throw new Error(data.error || 'Failed to generate blog post');
         }
       }
