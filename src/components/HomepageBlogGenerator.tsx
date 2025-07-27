@@ -405,10 +405,9 @@ export function HomepageBlogGenerator() {
                   setShowProgress(false);
                   setIsGenerating(false);
                   setForceComplete(false);
-                  // Only transition to completion if we have generated content
-                  if (generatedPost) {
-                    setIsCompleted(true);
-                  }
+                  // Always transition to completion after progress finishes
+                  // The completion state will handle showing results when ready
+                  setIsCompleted(true);
                 }}
               />
             ) : (
