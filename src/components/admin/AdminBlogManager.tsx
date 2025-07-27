@@ -64,11 +64,45 @@ export function AdminBlogManager() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'published': return 'bg-green-100 text-green-800';
-      case 'draft': return 'bg-yellow-100 text-yellow-800';
-      case 'archived': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'published': return 'bg-green-100 text-green-800 border-green-200';
+      case 'draft': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'archived': return 'bg-gray-100 text-gray-800 border-gray-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
+  };
+
+  const getPostTypeInfo = (post: PublishedBlogPost) => {
+    const info = [];
+
+    if (post.is_trial_post) {
+      info.push({
+        label: 'Trial Post',
+        color: 'bg-amber-100 text-amber-800 border-amber-200',
+        icon: 'Sparkles'
+      });
+    } else {
+      info.push({
+        label: 'Permanent',
+        color: 'bg-blue-100 text-blue-800 border-blue-200',
+        icon: 'Shield'
+      });
+    }
+
+    if (post.user_id) {
+      info.push({
+        label: 'User Post',
+        color: 'bg-purple-100 text-purple-800 border-purple-200',
+        icon: 'User'
+      });
+    } else {
+      info.push({
+        label: 'Demo Post',
+        color: 'bg-orange-100 text-orange-800 border-orange-200',
+        icon: 'Eye'
+      });
+    }
+
+    return info;
   };
 
   const isExpired = (post: PublishedBlogPost) => {
