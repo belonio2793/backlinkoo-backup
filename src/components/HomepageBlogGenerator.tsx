@@ -205,6 +205,7 @@ export function HomepageBlogGenerator() {
     setPublishedUrl('');
     setShowProgress(false);
     setIsGenerating(false);
+    setForceComplete(false);
   };
 
   return (
