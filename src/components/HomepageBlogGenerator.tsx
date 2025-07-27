@@ -931,34 +931,34 @@ export function HomepageBlogGenerator() {
             )
           ) : (
             // Success state
-            <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
-              <CardContent className="text-center py-12 px-8">
-                <div className="mb-8">
-                  <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-r from-green-500 to-blue-500 mb-6 animate-pulse">
-                    <CheckCircle2 className="h-12 w-12 text-white" />
+            <Card className="border-0 shadow-lg bg-white">
+              <CardContent className="text-center py-6 px-6" style={{fontFamily: 'Roboto, sans-serif'}}>
+                <div className="mb-6">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-500 mb-4">
+                    <CheckCircle2 className="h-6 w-6 text-white" />
                   </div>
-                  <div className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-full text-lg font-bold mb-6 shadow-lg">
-                    <span className="w-3 h-3 bg-white rounded-full animate-ping"></span>
-                    🎯 YOUR BACKLINK IS NOW LIVE
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-full text-sm font-medium mb-4 shadow">
+                    <span className="w-2 h-2 bg-white rounded-full"></span>
+                    YOUR BACKLINK IS NOW LIVE
                   </div>
-                  <h3 className="text-5xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+                  <h3 className="text-2xl font-semibold mb-4 text-gray-900" style={{fontFamily: 'Roboto, sans-serif'}}>
                     Content Successfully Published!
                   </h3>
-                  <p className="text-2xl text-gray-700 mb-8 max-w-4xl mx-auto leading-relaxed">
-                    Professional article about <span className="font-bold text-blue-600">"{primaryKeyword}"</span> is now live with strategic backlinks to your website
+                  <p className="text-base text-gray-700 mb-6 max-w-2xl mx-auto" style={{fontFamily: 'Roboto, sans-serif'}}>
+                    Professional article about <span className="font-medium text-blue-600">"{primaryKeyword}"</span> is now live with strategic backlinks to your website
                   </p>
-                  <div className="mb-12 max-w-5xl mx-auto">
-                    <div className="bg-white rounded-2xl shadow-2xl border-4 border-green-200 overflow-hidden">
-                      <div className="bg-gray-100 px-6 py-4 border-b flex items-center gap-4">
-                        <div className="flex gap-2">
-                          <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                          <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                          <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                  <div className="mb-8 max-w-3xl mx-auto">
+                    <div className="bg-white rounded-lg shadow border border-green-200 overflow-hidden">
+                      <div className="bg-gray-50 px-4 py-3 border-b flex items-center gap-3">
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                          <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                         </div>
-                        <div className="flex-1 bg-white rounded-lg px-4 py-2 font-mono text-lg text-gray-700 border-2 border-blue-200 flex items-center">
-                          <Globe className="h-5 w-5 text-green-500 mr-2" />
-                          <span className="text-green-600 font-semibold">🔒 https://</span>
-                          <span className="font-bold">
+                        <div className="flex-1 bg-white rounded px-3 py-1 text-sm text-gray-700 border border-blue-200 flex items-center" style={{fontFamily: 'Roboto, monospace'}}>
+                          <Globe className="h-4 w-4 text-green-500 mr-2" />
+                          <span className="text-green-600 font-medium">https://</span>
+                          <span className="font-medium">
                             {publishedUrl?.includes('://')
                               ? publishedUrl.split('://')[1]
                               : `${window.location.host}/blog/?slug=${generatedPost?.slug || primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`
@@ -970,21 +970,22 @@ export function HomepageBlogGenerator() {
                           onClick={() => {
                             const urlToCopy = publishedUrl || `${window.location.origin}/blog/?slug=${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
                             navigator.clipboard.writeText(urlToCopy);
-                            toast({ title: "✅ URL Copied!", description: "Blog post URL copied to clipboard" });
+                            toast({ title: "URL Copied!", description: "Blog post URL copied to clipboard" });
                           }}
-                          className="bg-blue-500 hover:bg-blue-600 text-white"
+                          className="bg-blue-500 hover:bg-blue-600 text-white text-xs"
+                          style={{fontFamily: 'Roboto, sans-serif'}}
                         >
-                          📋 Copy URL
+                          Copy URL
                         </Button>
                       </div>
-                      <div className="p-8 bg-white">
-                        <div className="text-left space-y-6">
-                          <h4 className="text-3xl font-bold text-gray-900 leading-tight">
+                      <div className="p-4 bg-white">
+                        <div className="text-left space-y-4">
+                          <h4 className="text-lg font-semibold text-gray-900 leading-snug" style={{fontFamily: 'Roboto, sans-serif'}}>
                             {generatedPost?.title || `The Ultimate Guide to ${primaryKeyword}: Professional Insights & Strategies`}
                           </h4>
-                          <div className="flex items-center gap-6 text-sm text-gray-600">
+                          <div className="flex items-center gap-4 text-xs text-gray-600" style={{fontFamily: 'Roboto, sans-serif'}}>
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium text-xs">
                                 B
                               </div>
                               <span>Backlinkoo Editorial</span>
@@ -995,151 +996,153 @@ export function HomepageBlogGenerator() {
                             <span>{generatedPost?.word_count || 1200}+ words</span>
                             <span>•</span>
                             <div className="flex items-center gap-1">
-                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                               <span className="text-green-600 font-medium">Live & Indexed</span>
                             </div>
                           </div>
-                          <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border border-blue-200">
-                            <div className="flex items-start gap-4">
-                              <div className="p-2 bg-blue-100 rounded-lg">
-                                <Link2 className="h-5 w-5 text-blue-600" />
+                          <div className="bg-blue-50 p-4 rounded border border-blue-200">
+                            <div className="flex items-start gap-3">
+                              <div className="p-1 bg-blue-100 rounded">
+                                <Link2 className="h-4 w-4 text-blue-600" />
                               </div>
                               <div>
-                                <h5 className="font-semibold text-blue-900 mb-2">Strategic Backlink Placement</h5>
-                                <p className="text-blue-800 text-sm">
-                                  Natural contextual links to <a href={targetUrl} className="font-semibold underline hover:text-blue-900" target="_blank" rel="noopener noreferrer">{targetUrl}</a> have been strategically placed throughout this professional article to maximize your SEO impact.
+                                <h5 className="font-medium text-blue-900 mb-1 text-sm" style={{fontFamily: 'Roboto, sans-serif'}}>Strategic Backlink Placement</h5>
+                                <p className="text-blue-800 text-xs" style={{fontFamily: 'Roboto, sans-serif'}}>
+                                  Natural contextual links to <a href={targetUrl} className="font-medium underline hover:text-blue-900" target="_blank" rel="noopener noreferrer" style={{fontFamily: 'Roboto, sans-serif'}}>{targetUrl}</a> have been strategically placed throughout this professional article to maximize your SEO impact.
                                 </p>
                               </div>
                             </div>
                           </div>
-                          <div className="prose prose-lg max-w-none text-gray-700">
-                            <p className="leading-relaxed">
+                          <div className="max-w-none text-gray-700">
+                            <p className="text-sm" style={{fontFamily: 'Roboto, sans-serif'}}>
                               In today's competitive digital landscape, mastering <strong className="text-blue-600">{primaryKeyword}</strong> is essential for business success. This comprehensive guide provides actionable insights, proven strategies, and expert recommendations to help you achieve your goals...
                             </p>
-                            <p className="text-gray-500 italic text-sm mt-4">
+                            <p className="text-gray-500 italic text-xs mt-2" style={{fontFamily: 'Roboto, sans-serif'}}>
                               [This is a preview - click "View Full Article" below to see the complete professional content with all backlinks and SEO optimizations]
                             </p>
                           </div>
                         </div>
                       </div>
-                      <div className="bg-gradient-to-r from-green-50 to-blue-50 px-8 py-6 border-t">
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                      <div className="bg-gray-50 px-4 py-4 border-t">
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
                           <Button
-                            size="lg"
+                            size="default"
                             onClick={() => {
                               const blogUrl = publishedUrl || `${window.location.origin}/blog/?slug=${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
-                              console.log('🔗 Opening blog post URL:', blogUrl);
+                              console.log('Opening blog post URL:', blogUrl);
                               window.open(blogUrl, '_blank');
                             }}
-                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold px-10 py-4 text-xl shadow-xl transform hover:scale-105 transition-all"
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 text-sm"
+                            style={{fontFamily: 'Roboto, sans-serif'}}
                           >
-                            <ExternalLink className="mr-3 h-6 w-6" />
+                            <ExternalLink className="mr-2 h-4 w-4" />
                             View Your Live Article
                           </Button>
                           <Button
-                            size="lg"
+                            size="default"
                             variant="outline"
                             onClick={() => {
                               const blogUrl = publishedUrl || `${window.location.origin}/blog/?slug=${generatedPost?.slug || `${primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`}`;
-                              const shareText = `🎯 Just published a professional article about ${primaryKeyword}! Check out my new backlink: ${blogUrl}`;
+                              const shareText = `Just published a professional article about ${primaryKeyword}! Check out my new backlink: ${blogUrl}`;
                               navigator.clipboard.writeText(shareText);
                               toast({
-                                title: "✅ Share Text Copied!",
+                                title: "Share Text Copied!",
                                 description: "Perfect for social media sharing!"
                               });
                             }}
-                            className="border-2 border-blue-600 text-blue-700 hover:bg-blue-50 font-semibold px-8 py-4 text-lg"
+                            className="border border-blue-600 text-blue-700 hover:bg-blue-50 font-medium px-6 py-2 text-sm"
+                            style={{fontFamily: 'Roboto, sans-serif'}}
                           >
-                            📤 Copy Share Link
+                            Copy Share Link
                           </Button>
                         </div>
-                        <div className="text-center mt-6">
-                          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md border">
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
-                            <span className="text-sm font-medium text-gray-700">
-                              {currentUser ? '💎 Permanent Backlink Active' : '⏱️ Trial Backlink Active (24 hours)'}
+                        <div className="text-center mt-4">
+                          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white rounded border">
+                            <CheckCircle2 className="h-3 w-3 text-green-500" />
+                            <span className="text-xs font-medium text-gray-700" style={{fontFamily: 'Roboto, sans-serif'}}>
+                              {currentUser ? 'Permanent Backlink Active' : 'Trial Backlink Active (24 hours)'}
                             </span>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-6 rounded-xl border border-green-200">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-green-50 p-4 rounded border border-green-200">
                       <div className="text-center">
-                        <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <TrendingUp className="h-6 w-6 text-white" />
+                        <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                          <TrendingUp className="h-4 w-4 text-white" />
                         </div>
-                        <h4 className="font-bold text-green-800 mb-2">SEO Impact</h4>
-                        <div className="text-2xl font-bold text-green-600 mb-2">{generatedPost?.seo_score || 85}/100</div>
-                        <p className="text-sm text-green-700">High-quality backlink now boosting your rankings</p>
+                        <h4 className="font-medium text-green-800 mb-1 text-sm" style={{fontFamily: 'Roboto, sans-serif'}}>SEO Impact</h4>
+                        <div className="text-lg font-medium text-green-600 mb-1">{generatedPost?.seo_score || 85}/100</div>
+                        <p className="text-xs text-green-700" style={{fontFamily: 'Roboto, sans-serif'}}>High-quality backlink now boosting your rankings</p>
                       </div>
                     </div>
-                    <div className="bg-gradient-to-br from-blue-50 to-cyan-100 p-6 rounded-xl border border-blue-200">
+                    <div className="bg-blue-50 p-4 rounded border border-blue-200">
                       <div className="text-center">
-                        <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <FileText className="h-6 w-6 text-white" />
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                          <FileText className="h-4 w-4 text-white" />
                         </div>
-                        <h4 className="font-bold text-blue-800 mb-2">Content Quality</h4>
-                        <div className="text-2xl font-bold text-blue-600 mb-2">{generatedPost?.word_count || 1200}+</div>
-                        <p className="text-sm text-blue-700">Professional words with natural backlinks</p>
+                        <h4 className="font-medium text-blue-800 mb-1 text-sm" style={{fontFamily: 'Roboto, sans-serif'}}>Content Quality</h4>
+                        <div className="text-lg font-medium text-blue-600 mb-1">{generatedPost?.word_count || 1200}+</div>
+                        <p className="text-xs text-blue-700" style={{fontFamily: 'Roboto, sans-serif'}}>Professional words with natural backlinks</p>
                       </div>
                     </div>
-                    <div className={`bg-gradient-to-br p-6 rounded-xl border ${
+                    <div className={`p-4 rounded border ${
                       currentUser
-                        ? 'from-purple-50 to-indigo-100 border-purple-200'
-                        : 'from-amber-50 to-orange-100 border-amber-200'
+                        ? 'bg-purple-50 border-purple-200'
+                        : 'bg-amber-50 border-amber-200'
                     }`}>
                       <div className="text-center">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 ${
                           currentUser ? 'bg-purple-500' : 'bg-amber-500'
                         }`}>
                           {currentUser ? (
-                            <CheckCircle2 className="h-6 w-6 text-white" />
+                            <CheckCircle2 className="h-4 w-4 text-white" />
                           ) : (
-                            <AlertCircle className="h-6 w-6 text-white" />
+                            <AlertCircle className="h-4 w-4 text-white" />
                           )}
                         </div>
-                        <h4 className={`font-bold mb-2 ${currentUser ? 'text-purple-800' : 'text-amber-800'}`}>
+                        <h4 className={`font-medium mb-1 text-sm ${currentUser ? 'text-purple-800' : 'text-amber-800'}`} style={{fontFamily: 'Roboto, sans-serif'}}>
                           {currentUser ? 'Permanent' : 'Trial Mode'}
                         </h4>
-                        <div className={`text-2xl font-bold mb-2 ${currentUser ? 'text-purple-600' : 'text-amber-600'}`}>
+                        <div className={`text-lg font-medium mb-1 ${currentUser ? 'text-purple-600' : 'text-amber-600'}`}>
                           {currentUser ? '∞' : '24h'}
                         </div>
-                        <p className={`text-sm ${currentUser ? 'text-purple-700' : 'text-amber-700'}`}>
+                        <p className={`text-xs ${currentUser ? 'text-purple-700' : 'text-amber-700'}`} style={{fontFamily: 'Roboto, sans-serif'}}>
                           {currentUser ? 'Lifetime backlink active' : 'Register to save forever'}
                         </p>
                       </div>
                     </div>
                   </div>
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8 border border-blue-200 mb-8">
-                    <div className="text-center mb-6">
-                      <h4 className="text-2xl font-bold text-gray-900 mb-2">
-                        🎯 Your Backlink is Working Right Now!
+                  <div className="bg-blue-50 rounded p-6 border border-blue-200 mb-6">
+                    <div className="text-center mb-4">
+                      <h4 className="text-lg font-medium text-gray-900 mb-2" style={{fontFamily: 'Roboto, sans-serif'}}>
+                        Your Backlink is Working Right Now!
                       </h4>
-                      <p className="text-gray-600">
+                      <p className="text-sm text-gray-600" style={{fontFamily: 'Roboto, sans-serif'}}>
                         Here's what's happening behind the scenes and what to expect
                       </p>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="bg-white p-6 rounded-lg border border-green-200">
-                        <h5 className="font-bold text-green-800 mb-4 flex items-center gap-2">
-                          <CheckCircle2 className="h-5 w-5" />
-                          ✅ Active SEO Benefits
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-white p-4 rounded border border-green-200">
+                        <h5 className="font-medium text-green-800 mb-3 flex items-center gap-2 text-left text-sm" style={{fontFamily: 'Roboto, sans-serif'}}>
+                          <CheckCircle2 className="h-4 w-4" />
+                          Active SEO Benefits
                         </h5>
-                        <ul className="space-y-2 text-sm text-gray-700">
+                        <ul className="space-y-1 text-xs text-gray-700 text-left" style={{fontFamily: 'Roboto, sans-serif'}}>
                           <li>• Google is now indexing your new backlink</li>
                           <li>• Domain authority signals are being sent to your site</li>
                           <li>• "{primaryKeyword}" keyword rankings are improving</li>
                           <li>• Organic search traffic will increase over 2-4 weeks</li>
                         </ul>
                       </div>
-                      <div className="bg-white p-6 rounded-lg border border-blue-200">
-                        <h5 className="font-bold text-blue-800 mb-4 flex items-center gap-2">
-                          <TrendingUp className="h-5 w-5" />
-                          📈 Expected Timeline
+                      <div className="bg-white p-4 rounded border border-blue-200">
+                        <h5 className="font-medium text-blue-800 mb-3 flex items-center gap-2 text-left text-sm" style={{fontFamily: 'Roboto, sans-serif'}}>
+                          <TrendingUp className="h-4 w-4" />
+                          Expected Timeline
                         </h5>
-                        <ul className="space-y-2 text-sm text-gray-700">
+                        <ul className="space-y-1 text-xs text-gray-700 text-left" style={{fontFamily: 'Roboto, sans-serif'}}>
                           <li>• <strong>Week 1:</strong> Google discovers and crawls your backlink</li>
                           <li>• <strong>Week 2-3:</strong> Keyword rankings begin to improve</li>
                           <li>• <strong>Week 4+:</strong> Measurable organic traffic increase</li>
@@ -1147,10 +1150,10 @@ export function HomepageBlogGenerator() {
                         </ul>
                       </div>
                     </div>
-                    <div className="mt-6 text-center">
-                      <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-full font-semibold shadow-lg">
-                        <Star className="h-5 w-5 animate-pulse" />
-                        Your professional backlink is live and boosting your SEO right now!
+                    <div className="mt-4 text-center">
+                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded font-medium text-sm">
+                        <Star className="h-4 w-4" />
+                        <span style={{fontFamily: 'Roboto, sans-serif'}}>Your professional backlink is live and boosting your SEO right now!</span>
                       </div>
                     </div>
                   </div>
