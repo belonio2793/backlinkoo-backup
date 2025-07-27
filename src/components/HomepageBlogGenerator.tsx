@@ -33,6 +33,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { RotatingText } from './RotatingText';
+import { LoginModal } from './LoginModal';
 
 export function HomepageBlogGenerator() {
   const [targetUrl, setTargetUrl] = useState('');
