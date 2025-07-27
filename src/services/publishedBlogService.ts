@@ -100,18 +100,25 @@ export class PublishedBlogService {
 
           if (error) {
             console.warn('Database save failed, using in-memory storage:', error);
+            // Save to in-memory storage for both domain access patterns
             this.inMemoryPosts.set(blogPost.slug, blogPost);
+            this.saveDualDomainEntries(blogPost, currentDomainUrl, backlinkooUrl);
           } else {
             console.log('✅ Blog post saved to database:', data);
+            // Also save in-memory entries for immediate access
+            this.inMemoryPosts.set(blogPost.slug, blogPost);
+            this.saveDualDomainEntries(blogPost, currentDomainUrl, backlinkooUrl);
             return data as PublishedBlogPost;
           }
         } catch (dbError) {
           console.warn('Database error, using in-memory storage:', dbError);
           this.inMemoryPosts.set(blogPost.slug, blogPost);
+          this.saveDualDomainEntries(blogPost, currentDomainUrl, backlinkooUrl);
         }
       } else {
         // For trial posts, always use in-memory storage
         this.inMemoryPosts.set(blogPost.slug, blogPost);
+        this.saveDualDomainEntries(blogPost, currentDomainUrl, backlinkooUrl);
       }
 
       return blogPost;
