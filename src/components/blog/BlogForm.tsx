@@ -50,17 +50,15 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
     setIsGenerating(true);
     
     try {
-      // Generate content using Enhanced AI service with multiple API providers
-      const generatedContent = await enhancedAIContentGenerator.generateContent({
+      // Generate content using Production AI service with intelligent provider selection
+      const generatedContent = await productionAIContentManager.generateContent({
         targetUrl,
         primaryKeyword,
         secondaryKeywords,
         contentType: contentType as 'blog-post' | 'editorial' | 'guest-post' | 'resource-page',
         wordCount: parseInt(wordCount),
         tone,
-        autoDelete: false,
-        userEmail: undefined,
-        userId: undefined
+        customInstructions
       });
 
       onContentGenerated(generatedContent);
