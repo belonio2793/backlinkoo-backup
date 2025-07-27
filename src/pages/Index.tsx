@@ -312,16 +312,7 @@ const Index = () => {
       <section className="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
         <div className="container mx-auto">
           {/* Optional: Advanced Generator Toggle (Hidden by default) */}
-          <div className="max-w-sm mx-auto mb-4">
-            <details className="group">
-              <summary className="cursor-pointer text-center text-sm text-gray-500 hover:text-gray-700">
-                Advanced Options
-              </summary>
-              <div className="mt-2 p-3 bg-white/50 rounded-lg border">
 
-              </div>
-            </details>
-          </div>
 
           {/* Generator Rendering */}
           <div className="max-w-6xl mx-auto">
