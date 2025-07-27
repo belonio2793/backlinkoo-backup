@@ -16,7 +16,7 @@ import { GenerationSequence } from './GenerationSequence';
 import { InteractiveContentGenerator } from './InteractiveContentGenerator';
 import { MultiBlogGenerator } from './MultiBlogGenerator';
 import { ClaimTrialPostDialog } from './ClaimTrialPostDialog';
-import { SmartProgressIndicator } from './SmartProgressIndicator';
+import { AdaptiveProgressIndicator } from './AdaptiveProgressIndicator';
 import {
   Sparkles,
   Link2,
