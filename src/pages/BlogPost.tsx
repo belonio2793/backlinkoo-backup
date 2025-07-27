@@ -38,6 +38,10 @@ export function BlogPost() {
       }
 
       try {
+        // Check user authentication
+        const { data: { user } } = await supabase.auth.getUser();
+        setCurrentUser(user);
+
         const post = await publishedBlogService.getBlogPostBySlug(slug);
         if (post) {
           setBlogPost(post);
