@@ -40,6 +40,7 @@ const Index = () => {
   const [customCredits, setCustomCredits] = useState<number>(0);
   const [isCustomPackage, setIsCustomPackage] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [useProductionGenerator, setUseProductionGenerator] = useState(true);
 
   // Check for authenticated user on component mount
   useEffect(() => {
