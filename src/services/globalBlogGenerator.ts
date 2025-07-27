@@ -149,26 +149,28 @@ class GlobalBlogGeneratorService {
 
   async generateGlobalBlogPost(request: GlobalBlogRequest): Promise<GlobalBlogResponse> {
     try {
-      // Check content filtering first
-      const filterResult = contentFilterService.filterBlogRequest(
+      // Enhanced content moderation check
+      const moderationResult = await contentModerationService.moderateContent(
+        `${request.targetUrl} ${request.primaryKeyword} ${request.anchorText || ''}`,
         request.targetUrl,
         request.primaryKeyword,
-        request.anchorText
+        request.anchorText,
+        undefined, // No user ID for global requests
+        'blog_request'
       );
 
-      if (!filterResult.isAllowed) {
-        // Log the filter event
-        await contentFilterService.logFilterEvent(
-          `${request.targetUrl} ${request.primaryKeyword} ${request.anchorText || ''}`,
-          filterResult,
-          undefined, // No user ID for global requests
-          'blog_request'
-        );
-
-        return {
-          success: false,
-          error: `Content blocked: ${filterResult.reason} Please review your content and try again with appropriate keywords.`,
-        };
+      if (!moderationResult.allowed) {
+        if (moderationResult.requiresReview) {
+          return {
+            success: false,
+            error: `Content flagged for review: Your request has been submitted for administrative review due to potentially inappropriate content. You will be notified once the review is complete.`,
+          };
+        } else {
+          return {
+            success: false,
+            error: `Content blocked: Your request contains terms that violate our content policy. Please review our guidelines and try again with appropriate content.`,
+          };
+        }
       }
 
       // Check rate limiting
