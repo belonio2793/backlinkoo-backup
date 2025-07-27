@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { publishedBlogService, type PublishedBlogPost } from '@/services/publishedBlogService';
+import { ClaimTrialPostDialog } from '@/components/ClaimTrialPostDialog';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Calendar, 
   Clock, 
