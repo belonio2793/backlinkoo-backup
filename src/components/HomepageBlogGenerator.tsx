@@ -624,27 +624,81 @@ export function HomepageBlogGenerator() {
                   )}
                 </div>
 
-                <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 mb-8 border border-green-100">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                    <div>
-                      <h4 className="font-semibold mb-2 text-gray-900">📝 Generated Content Details</h4>
-                      <ul className="space-y-1 text-sm text-gray-700">
-                        <li>• Title: {generatedPost?.title}</li>
-                        <li>• Word Count: {generatedPost?.wordCount || 1200}+ words</li>
-                        <li>• Status: {currentUser ? 'Permanently Saved' : 'Trial (24h Expiry)'}</li>
-                        <li>• SEO Score: {generatedPost?.seoScore || 85}/100</li>
-                      </ul>
+                {/* COMPLETION SUMMARY CARDS */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                  {/* Content Quality Card */}
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-4 rounded-xl border border-green-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <FileText className="h-5 w-5 text-green-600" />
+                      <h4 className="font-semibold text-green-800">Content Quality</h4>
                     </div>
-                    <div>
-                      <h4 className="font-semibold mb-2 text-gray-900">🔗 Backlink Preview Details</h4>
-                      <ul className="space-y-1 text-sm text-gray-700">
-                        <li>• Target: {targetUrl}</li>
-                        <li>• Contextual Links: {generatedPost?.contextualLinks?.length || 1}</li>
-                        <li>• Type: Natural, Contextual</li>
-                        <li className={`font-medium ${currentUser ? 'text-green-600' : 'text-amber-600'}`}>
-                          • Status: {currentUser ? 'Live & Permanent' : 'Trial (Expires in 24h)'}
-                        </li>
-                      </ul>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span>Word Count:</span>
+                        <span className="font-medium">{generatedPost?.word_count || 1200}+ words</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>SEO Score:</span>
+                        <span className="font-medium text-green-600">{generatedPost?.seo_score || 85}/100</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Reading Time:</span>
+                        <span className="font-medium">{Math.ceil((generatedPost?.word_count || 1200) / 200)} min</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Backlink Details Card */}
+                  <div className="bg-gradient-to-br from-blue-50 to-cyan-100 p-4 rounded-xl border border-blue-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Link2 className="h-5 w-5 text-blue-600" />
+                      <h4 className="font-semibold text-blue-800">Backlink Details</h4>
+                    </div>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span>Links Created:</span>
+                        <span className="font-medium">{generatedPost?.contextual_links?.length || 1}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Link Type:</span>
+                        <span className="font-medium">Dofollow</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Anchor Text:</span>
+                        <span className="font-medium text-blue-600">"{primaryKeyword}"</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Status Card */}
+                  <div className={`bg-gradient-to-br p-4 rounded-xl border ${
+                    currentUser
+                      ? 'from-green-50 to-emerald-100 border-green-200'
+                      : 'from-amber-50 to-orange-100 border-amber-200'
+                  }`}>
+                    <div className="flex items-center gap-2 mb-3">
+                      {currentUser ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5 text-amber-600" />
+                      )}
+                      <h4 className={`font-semibold ${currentUser ? 'text-green-800' : 'text-amber-800'}`}>
+                        Status
+                      </h4>
+                    </div>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span>Type:</span>
+                        <span className="font-medium">{currentUser ? 'Permanent' : 'Trial'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Duration:</span>
+                        <span className="font-medium">{currentUser ? 'Lifetime' : '24 hours'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Indexing:</span>
+                        <span className="font-medium text-green-600">Live</span>
+                      </div>
                     </div>
                   </div>
                 </div>
