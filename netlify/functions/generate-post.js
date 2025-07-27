@@ -200,7 +200,7 @@ async function generateChatGPTBlogContent(destinationUrl, keyword, anchorText) {
   return aiContent;
 }
 
-async function generateWithOpenAI(destinationUrl, keyword) {
+async function generateWithOpenAI(destinationUrl, keyword, anchorText, domain) {
   // Check for OpenAI API key first, then try other providers
   const openaiKey = process.env.OPENAI_API_KEY;
   const grokKey = process.env.GROK_API_KEY;
