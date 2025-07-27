@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthStatus } from '@/hooks/useAuth';
 import { aiContentGenerator } from '@/services/aiContentGenerator';
 import { blogPublisher } from '@/services/blogPublisher';
 import { multiApiContentGenerator } from '@/services/multiApiContentGenerator';
@@ -28,7 +29,8 @@ import {
   Globe,
   Target,
   TrendingUp,
-  Save
+  Save,
+  AlertCircle
 } from 'lucide-react';
 import { RotatingText } from './RotatingText';
 
@@ -44,11 +46,21 @@ export function HomepageBlogGenerator() {
   const [publishedUrl, setPublishedUrl] = useState('');
   const [blogPostId, setBlogPostId] = useState<string>('');
   const [showSignupPopup, setShowSignupPopup] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
   const { toast } = useToast();
+
+  // Use the authentication hook
+  const { currentUser, isCheckingAuth, isLoggedIn, isGuest, authChecked } = useAuthStatus();
+
+  // Log auth status changes
+  useEffect(() => {
+    if (authChecked) {
+      console.log('📝 Auth status:', isLoggedIn ? 'Logged in' : 'Guest user');
+    }
+  }, [authChecked, isLoggedIn]);
 
   const handleGenerate = async () => {
     console.log('🚀 handleGenerate called with:', { targetUrl, primaryKeyword });
+    console.log('👤 Current user status:', isLoggedIn ? 'Authenticated' : 'Guest');
 
     if (!targetUrl || !primaryKeyword) {
       toast({
@@ -68,15 +80,27 @@ export function HomepageBlogGenerator() {
       return;
     }
 
-    console.log('✅ Starting generation with valid inputs');
+    // Show different messages based on auth status
+    if (isLoggedIn) {
+      console.log('✅ Starting generation for authenticated user');
+      toast({
+        title: "Generating Your Backlink",
+        description: "Creating your permanent blog post with backlinks...",
+      });
+    } else {
+      console.log('✅ Starting generation for guest user (trial mode)');
+      toast({
+        title: "Generating Your Free Trial",
+        description: "Creating your demo blog post - register to save it permanently!",
+      });
+    }
+
     setIsGenerating(true);
     setIsCompleted(false);
     setShowProgress(true);
 
     try {
-      // Check if user is logged in
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUser(user);
+      // Use the already checked currentUser state instead of re-checking
 
       // Check if we're in development mode
       const isDevelopment = window.location.hostname === 'localhost' ||
@@ -124,7 +148,7 @@ export function HomepageBlogGenerator() {
           body: JSON.stringify({
             destinationUrl: targetUrl,
             keyword: primaryKeyword,
-            userId: user?.id
+            userId: currentUser?.id
           })
         });
 
@@ -142,7 +166,7 @@ export function HomepageBlogGenerator() {
       const { slug, blogPost, publishedUrl } = data;
 
       // Create campaign entry for registered users
-      if (user) {
+      if (isLoggedIn) {
         try {
           const { data: campaignData, error: campaignError } = await supabase
             .from('campaigns')
@@ -154,7 +178,7 @@ export function HomepageBlogGenerator() {
               links_requested: blogPost.contextual_links?.length || 1,
               links_delivered: blogPost.contextual_links?.length || 1,
               completed_backlinks: [publishedUrl],
-              user_id: user.id,
+              user_id: currentUser.id,
               credits_used: 1
             })
             .select()
@@ -184,13 +208,13 @@ export function HomepageBlogGenerator() {
 
       toast({
         title: "Blog Post Generated!",
-        description: user
+        description: isLoggedIn
           ? "Your content is ready and saved to your dashboard!"
           : "Your demo preview is ready. Register to keep it forever!",
       });
 
       // Store trial post info for notification system
-      if (!user && blogPost.is_trial_post) {
+      if (isGuest && blogPost.is_trial_post) {
         const trialPostInfo = {
           id: blogPost.id,
           title: blogPost.title,
@@ -208,7 +232,7 @@ export function HomepageBlogGenerator() {
       }
 
       // Show signup popup for guest users after a delay
-      if (!user) {
+      if (isGuest) {
         setTimeout(() => {
           setShowSignupPopup(true);
         }, 3000); // Show popup after 3 seconds
@@ -282,6 +306,57 @@ export function HomepageBlogGenerator() {
         </div>
 
         <div className="max-w-4xl mx-auto">
+          {/* Authentication Status Banner */}
+          {authChecked && (
+            <Card className={`mb-6 border-l-4 ${
+              isLoggedIn
+                ? 'border-l-green-500 bg-green-50 border-green-200'
+                : 'border-l-amber-500 bg-amber-50 border-amber-200'
+            }`}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {isLoggedIn ? (
+                      <>
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        <div>
+                          <p className="font-medium text-green-800">
+                            Welcome back! You're logged in
+                          </p>
+                          <p className="text-sm text-green-700">
+                            Your backlinks will be saved permanently to your dashboard
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="h-5 w-5 text-amber-600" />
+                        <div>
+                          <p className="font-medium text-amber-800">
+                            Guest Mode - Create your free trial backlink
+                          </p>
+                          <p className="text-sm text-amber-700">
+                            Trial backlinks expire in 24 hours. Register to save permanently!
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {isGuest && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-amber-600 text-amber-700 hover:bg-amber-100"
+                      onClick={() => window.location.href = '/login'}
+                    >
+                      Login / Register
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {!isCompleted ? (
             showProgress ? (
               <AdaptiveProgressIndicator
@@ -293,9 +368,14 @@ export function HomepageBlogGenerator() {
                   console.log(`Progress: ${step} - ${Math.round(progress)}%`);
                 }}
                 onNaturalComplete={() => {
+                  console.log('🎉 Progress complete, showing results...');
                   setShowProgress(false);
                   setIsGenerating(false);
                   setForceComplete(false);
+                  // Only transition to completion if we have generated content
+                  if (generatedPost) {
+                    setIsCompleted(true);
+                  }
                 }}
               />
             ) : (
@@ -320,6 +400,14 @@ export function HomepageBlogGenerator() {
                     <Globe className="h-4 w-4 text-green-500" />
                     <span>Live Backlink</span>
                   </div>
+                  {authChecked && (
+                    <div className="flex items-center gap-2">
+                      <Save className={`h-4 w-4 ${isLoggedIn ? 'text-green-500' : 'text-amber-500'}`} />
+                      <span className={isLoggedIn ? 'text-green-600' : 'text-amber-600'}>
+                        {isLoggedIn ? 'Permanent Save' : 'Trial Mode'}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-8 px-8 pb-8">
@@ -382,26 +470,52 @@ export function HomepageBlogGenerator() {
 
                 <Button
                   onClick={handleGenerate}
-                  disabled={isGenerating || !targetUrl || !primaryKeyword}
+                  disabled={isGenerating || !targetUrl || !primaryKeyword || isCheckingAuth}
                   size="lg"
                   className="w-full text-lg py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium shadow-lg"
                 >
                   {isGenerating ? (
                     <>
                       <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                      Generating Your Trial Backlink...
+                      {currentUser ? 'Generating Your Backlink...' : 'Generating Your Trial Backlink...'}
                     </>
                   ) : (
                     <>
                       <Sparkles className="mr-3 h-5 w-5" />
-                      Claim Now
+                      {currentUser ? 'Create Permanent Backlink' : 'Create Free Trial Backlink'}
                     </>
                   )}
                 </Button>
 
-                <p className="text-center text-sm text-gray-500">
-                  ✨ Completely free • No signup required • Instant results
-                </p>
+                {authChecked && (
+                  <div className="text-center text-sm">
+                    {currentUser ? (
+                      <div className="space-y-2">
+                        <p className="text-green-600 font-medium">
+                          ✅ Logged in - Your backlinks will be saved permanently
+                        </p>
+                        <p className="text-gray-500">
+                          Welcome back! Your content will be saved to your dashboard.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <p className="text-amber-600 font-medium">
+                          ⚠️ Guest Mode - Trial backlink (24 hours)
+                        </p>
+                        <p className="text-gray-500">
+                          ✨ Completely free • No signup required • Register to save permanently
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {isCheckingAuth && (
+                  <p className="text-center text-sm text-gray-500">
+                    🔄 Checking authentication status...
+                  </p>
+                )}
               </CardContent>
             </Card>
             )
@@ -417,30 +531,45 @@ export function HomepageBlogGenerator() {
                     🎉 Your Blog Post is Live!
                   </h3>
                   <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-                    We've created a professional article about "{primaryKeyword}" with natural backlinks pointing to your website. Your content is now live and ready to boost your SEO!
+                    We've created a professional article about "{primaryKeyword}" with natural backlinks pointing to your website.
+                    {currentUser
+                      ? "Your content is permanently saved and ready to boost your SEO!"
+                      : "Your trial content is live and ready to boost your SEO!"
+                    }
                   </p>
 
-                  {/* Trial Backlink Notice - Only shown after completion */}
-                  <div className="max-w-3xl mx-auto mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 mt-0.5">
-                        <svg className="h-5 w-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <div className="text-left">
-                        <p className="text-sm font-medium text-amber-800 mb-1">
-                          ⚠️ Demo Preview Notice
-                        </p>
-                        <p className="text-sm text-amber-700">
-                          <strong>This is a demo preview</strong> of your generated blog post content.
-                          To publish this as a live backlink on high-authority domains, simply{' '}
-                          <span className="font-semibold">create an account and purchase any number of credits</span>.
-                          Your content will then be published as a permanent campaign with real SEO value.
-                        </p>
+                  {/* Authentication Status Notice */}
+                  {currentUser ? (
+                    <div className="max-w-3xl mx-auto mb-8 p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                        <div className="text-left">
+                          <p className="text-sm font-medium text-green-800 mb-1">
+                            ✅ Permanent Backlink Created
+                          </p>
+                          <p className="text-sm text-green-700">
+                            <strong>Your backlink is permanently saved</strong> and will continue providing SEO value indefinitely.
+                            You can view and manage all your backlinks from your dashboard.
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="max-w-3xl mx-auto mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <div className="text-left">
+                          <p className="text-sm font-medium text-amber-800 mb-1">
+                            ⚠️ Trial Backlink - 24 Hour Expiry
+                          </p>
+                          <p className="text-sm text-amber-700">
+                            <strong>This is a trial backlink</strong> that will automatically delete in 24 hours unless claimed.
+                            Create an account now to make this backlink permanent and unlock unlimited backlink creation!
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 mb-8 border border-green-100">
@@ -450,7 +579,7 @@ export function HomepageBlogGenerator() {
                       <ul className="space-y-1 text-sm text-gray-700">
                         <li>• Title: {generatedPost?.title}</li>
                         <li>• Word Count: {generatedPost?.wordCount || 1200}+ words</li>
-                        <li>• Status: Demo Preview Ready</li>
+                        <li>• Status: {currentUser ? 'Permanently Saved' : 'Trial (24h Expiry)'}</li>
                         <li>• SEO Score: {generatedPost?.seoScore || 85}/100</li>
                       </ul>
                     </div>
@@ -460,8 +589,8 @@ export function HomepageBlogGenerator() {
                         <li>• Target: {targetUrl}</li>
                         <li>• Contextual Links: {generatedPost?.contextualLinks?.length || 1}</li>
                         <li>• Type: Natural, Contextual</li>
-                        <li className="font-medium text-blue-600">
-                          • Status: Demo Preview (Ready for Publishing)
+                        <li className={`font-medium ${currentUser ? 'text-green-600' : 'text-amber-600'}`}>
+                          • Status: {currentUser ? 'Live & Permanent' : 'Trial (Expires in 24h)'}
                         </li>
                       </ul>
                     </div>
@@ -502,8 +631,8 @@ export function HomepageBlogGenerator() {
                   </div>
                 )}
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  {!currentUser && generatedPost && (
+                {!currentUser && generatedPost && (
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
                     <ClaimTrialPostDialog
                       trialPostSlug={generatedPost.slug}
                       trialPostTitle={generatedPost.title}
@@ -523,43 +652,74 @@ export function HomepageBlogGenerator() {
                         Save Now - Deletes in 24hrs!
                       </Button>
                     </ClaimTrialPostDialog>
-                  )}
-                  <Button
-                    onClick={resetForm}
-                    variant="outline"
-                    size="lg"
-                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                  >
-                    Create More Backlinks
-                  </Button>
-                </div>
-
-                {!currentUser && (
-                  <div className="mt-8 space-y-4">
-                    <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
-                      <p className="text-sm text-red-800 font-medium mb-2">
-                        ⏰ <strong>WARNING: This backlink will auto-delete in 24 hours!</strong>
-                      </p>
-                      <p className="text-sm text-red-700 mb-3">
-                        Your backlink is live and building SEO value right now, but it's on a 24-hour trial timer.
-                        Create an account now to keep it forever and stop the deletion countdown!
-                      </p>
-                      <Button
-                        size="sm"
-                        className="bg-red-600 hover:bg-red-700 text-white animate-pulse"
-                        onClick={() => setShowSignupPopup(true)}
-                      >
-                        Stop Deletion Timer Now
-                      </Button>
-                    </div>
-
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                      <p className="text-sm text-blue-800 font-medium">
-                        🚀 Ready for more? Create unlimited backlinks with our premium packages and advanced targeting!
-                      </p>
-                    </div>
                   </div>
                 )}
+
+                <div className="mt-8 space-y-4">
+                  {currentUser ? (
+                    <div className="p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+                      <p className="text-sm text-green-800 font-medium mb-2">
+                        ✅ <strong>Success! Your backlink is permanently saved</strong>
+                      </p>
+                      <p className="text-sm text-green-700 mb-3">
+                        Your backlink is live and will continue providing SEO value indefinitely.
+                        View all your backlinks and create more from your dashboard.
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => window.location.href = '/dashboard'}
+                        >
+                          View Dashboard
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-green-600 text-green-700 hover:bg-green-100"
+                          onClick={resetForm}
+                        >
+                          Create Another
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
+                        <p className="text-sm text-red-800 font-medium mb-2">
+                          ⏰ <strong>WARNING: This backlink will auto-delete in 24 hours!</strong>
+                        </p>
+                        <p className="text-sm text-red-700 mb-3">
+                          Your backlink is live and building SEO value right now, but it's on a 24-hour trial timer.
+                          Create an account now to keep it forever and stop the deletion countdown!
+                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            className="bg-red-600 hover:bg-red-700 text-white animate-pulse"
+                            onClick={() => setShowSignupPopup(true)}
+                          >
+                            Stop Deletion Timer Now
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-red-600 text-red-700 hover:bg-red-100"
+                            onClick={() => window.location.href = '/login'}
+                          >
+                            Login / Register
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <p className="text-sm text-blue-800 font-medium">
+                          🚀 Ready for more? Create unlimited backlinks with our premium packages and advanced targeting!
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )}
