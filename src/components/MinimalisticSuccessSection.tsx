@@ -144,9 +144,31 @@ export function MinimalisticSuccessSection({
           </div>
         </div>
 
+        {/* Additional Actions */}
+        <div className="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-gray-100">
+          {currentUser && (
+            <Button
+              variant="outline"
+              onClick={() => window.location.href = '/dashboard'}
+              className="flex-1"
+            >
+              <BarChart3 className="h-4 w-4 mr-2" />
+              View Dashboard
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            onClick={onCreateAnother}
+            className="flex-1"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create Another
+          </Button>
+        </div>
+
         {/* Next Steps */}
         {!currentUser && (
-          <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
             <div className="flex items-start gap-3">
               <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                 <ArrowRight className="h-3 w-3 text-amber-600" />
