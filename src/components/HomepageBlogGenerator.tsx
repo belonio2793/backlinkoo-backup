@@ -51,6 +51,13 @@ export function HomepageBlogGenerator() {
   // Use the authentication hook
   const { currentUser, isCheckingAuth, isLoggedIn, isGuest, authChecked } = useAuthStatus();
 
+  // Log auth status changes
+  useEffect(() => {
+    if (authChecked) {
+      console.log('📝 Auth status:', isLoggedIn ? 'Logged in' : 'Guest user');
+    }
+  }, [authChecked, isLoggedIn]);
+
   const handleGenerate = async () => {
     console.log('🚀 handleGenerate called with:', { targetUrl, primaryKeyword });
     console.log('👤 Current user status:', currentUser ? 'Authenticated' : 'Guest');
