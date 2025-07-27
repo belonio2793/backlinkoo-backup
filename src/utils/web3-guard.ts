@@ -36,14 +36,16 @@ export const isWeb3Available = (): boolean => {
 
 export const waitForEthereum = (timeout = 3000): Promise<any> => {
   return new Promise((resolve) => {
-    if (safeEthereumAccess()) {
-      resolve(window.ethereum);
+    const ethereum = safeEthereumAccess();
+    if (ethereum) {
+      resolve(ethereum);
       return;
     }
 
     const checkEthereum = () => {
-      if (safeEthereumAccess()) {
-        resolve(window.ethereum);
+      const current = safeEthereumAccess();
+      if (current) {
+        resolve(current);
       } else {
         setTimeout(checkEthereum, 100);
       }
