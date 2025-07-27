@@ -32,6 +32,7 @@ export function AdminBlogManager() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [trialFilter, setTrialFilter] = useState<string>('');
+  const [contentFilterStats, setContentFilterStats] = useState<any>(null);
 
   useEffect(() => {
     loadBlogPosts();
