@@ -28,7 +28,8 @@ import {
   Globe,
   Target,
   TrendingUp,
-  Save
+  Save,
+  AlertCircle
 } from 'lucide-react';
 import { RotatingText } from './RotatingText';
 
