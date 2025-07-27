@@ -28,6 +28,8 @@ import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 import { LoginModal } from "@/components/LoginModal";
+import { InlineAuthForm } from "@/components/InlineAuthForm";
+import { TrialConversionBanner } from "@/components/TrialConversionBanner";
 
 
 const Index = () => {
