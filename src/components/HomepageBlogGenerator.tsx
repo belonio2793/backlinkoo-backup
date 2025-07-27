@@ -1283,7 +1283,7 @@ export function HomepageBlogGenerator() {
                     </div>
                   </div>
                   {!currentUser && generatedPost && (
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+                    <div className="flex justify-center items-center mb-4">
                       <ClaimTrialPostDialog
                         trialPostSlug={generatedPost.slug}
                         trialPostTitle={generatedPost.title}
@@ -1294,10 +1294,11 @@ export function HomepageBlogGenerator() {
                         }}
                       >
                         <Button
-                          size="lg"
-                          className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white animate-pulse"
+                          size="default"
+                          className="bg-red-600 hover:bg-red-700 text-white font-medium"
+                          style={{fontFamily: 'Roboto, sans-serif'}}
                         >
-                          <Save className="mr-2 h-5 w-5" />
+                          <Save className="mr-2 h-4 w-4" />
                           Save Now - Deletes in 24hrs!
                         </Button>
                       </ClaimTrialPostDialog>
