@@ -130,7 +130,13 @@ export function HomepageBlogGenerator() {
       setGeneratedPost(blogPost);
       setPublishedUrl(publishedUrl);
       setBlogPostId(blogPost.id);
-      setIsCompleted(true);
+
+      // Let the progress indicator complete naturally, then show results
+      setTimeout(() => {
+        setIsCompleted(true);
+        setIsGenerating(false);
+        setShowProgress(false);
+      }, 2000); // Give progress indicator time to complete
 
       toast({
         title: "Blog Post Generated!",
