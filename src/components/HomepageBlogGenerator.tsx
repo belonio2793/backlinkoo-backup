@@ -326,6 +326,57 @@ export function HomepageBlogGenerator() {
         </div>
 
         <div className="max-w-4xl mx-auto">
+          {/* Authentication Status Banner */}
+          {authChecked && (
+            <Card className={`mb-6 border-l-4 ${
+              currentUser
+                ? 'border-l-green-500 bg-green-50 border-green-200'
+                : 'border-l-amber-500 bg-amber-50 border-amber-200'
+            }`}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {currentUser ? (
+                      <>
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        <div>
+                          <p className="font-medium text-green-800">
+                            Welcome back! You're logged in
+                          </p>
+                          <p className="text-sm text-green-700">
+                            Your backlinks will be saved permanently to your dashboard
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="h-5 w-5 text-amber-600" />
+                        <div>
+                          <p className="font-medium text-amber-800">
+                            Guest Mode - Create your free trial backlink
+                          </p>
+                          <p className="text-sm text-amber-700">
+                            Trial backlinks expire in 24 hours. Register to save permanently!
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {!currentUser && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-amber-600 text-amber-700 hover:bg-amber-100"
+                      onClick={() => window.location.href = '/login'}
+                    >
+                      Login / Register
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {!isCompleted ? (
             showProgress ? (
               <AdaptiveProgressIndicator
@@ -446,12 +497,12 @@ export function HomepageBlogGenerator() {
                   {isGenerating ? (
                     <>
                       <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                      Generating Your Trial Backlink...
+                      {currentUser ? 'Generating Your Backlink...' : 'Generating Your Trial Backlink...'}
                     </>
                   ) : (
                     <>
                       <Sparkles className="mr-3 h-5 w-5" />
-                      Claim Now
+                      {currentUser ? 'Create Permanent Backlink' : 'Create Free Trial Backlink'}
                     </>
                   )}
                 </Button>
