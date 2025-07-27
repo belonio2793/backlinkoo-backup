@@ -1276,27 +1276,7 @@ export function HomepageBlogGenerator() {
                       </div>
                     </div>
                   </div>
-                  {!currentUser && generatedPost && (
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
-                      <ClaimTrialPostDialog
-                        trialPostSlug={generatedPost.slug}
-                        trialPostTitle={generatedPost.title}
-                        expiresAt={generatedPost.expires_at}
-                        targetUrl={targetUrl}
-                        onClaimed={() => {
-                          window.location.reload();
-                        }}
-                      >
-                        <Button
-                          size="lg"
-                          className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white animate-pulse"
-                        >
-                          <Save className="mr-2 h-5 w-5" />
-                          Save Now - Deletes in 24hrs!
-                        </Button>
-                      </ClaimTrialPostDialog>
-                    </div>
-                  )}
+
                   <div className="mt-8 space-y-6">
                     {currentUser ? (
                       <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-6 text-white text-center">
