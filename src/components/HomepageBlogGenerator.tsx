@@ -172,6 +172,7 @@ export function HomepageBlogGenerator() {
         variant: "destructive"
       });
       setIsGenerating(false);
+      setShowProgress(false);
     }
   };
 
