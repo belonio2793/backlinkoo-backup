@@ -174,12 +174,13 @@ class GlobalBlogGeneratorService {
 
       console.log('🌍 Global blog generation request:', enhancedRequest);
 
-      // Try Netlify function first
+      // Try enhanced global Netlify function first
       try {
-        const response = await fetch(`${this.API_BASE}/generate-post`, {
+        const response = await fetch(`${this.API_BASE}/global-blog-generator`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'X-User-IP': locationData?.ip || 'unknown'
           },
           body: JSON.stringify(enhancedRequest)
         });
