@@ -399,13 +399,11 @@ export function HomepageBlogGenerator() {
                   console.log(`Progress: ${step} - ${Math.round(progress)}%`);
                 }}
                 onNaturalComplete={() => {
-                  console.log('🎉 Progress complete, showing results...');
+                  console.log('🎉 Progress animation complete');
                   setShowProgress(false);
                   setIsGenerating(false);
                   setForceComplete(false);
-                  // Always transition to completion after progress finishes
-                  // The completion state will handle showing results when ready
-                  setIsCompleted(true);
+                  // Completion state should already be set by the generation logic
                 }}
               />
             ) : (
