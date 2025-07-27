@@ -185,15 +185,18 @@ exports.handler = async (event, context) => {
   }
 };
 
-async function generateAIContent(destinationUrl, keyword) {
-  // Use OpenAI for primary content generation
-  const aiContent = await generateWithOpenAI(destinationUrl, keyword);
-  
-  // If OpenAI fails, use fallback content generation
+async function generateChatGPTBlogContent(destinationUrl, keyword, anchorText) {
+  const finalAnchorText = anchorText || keyword;
+  const domain = new URL(destinationUrl).hostname.replace('www.', '');
+
+  // Use OpenAI for primary content generation with ChatGPT structure
+  const aiContent = await generateWithOpenAI(destinationUrl, keyword, finalAnchorText, domain);
+
+  // If OpenAI fails, use ChatGPT structured fallback
   if (!aiContent.content) {
-    return generateFallbackContent(destinationUrl, keyword);
+    return generateChatGPTFallbackContent(destinationUrl, keyword, finalAnchorText, domain);
   }
-  
+
   return aiContent;
 }
 
