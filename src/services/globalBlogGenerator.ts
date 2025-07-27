@@ -257,21 +257,21 @@ class GlobalBlogGeneratorService {
     // Simulate AI generation with realistic content
     const content = this.generateFallbackContent(request);
 
-    // Filter the generated content before publishing
+    // Enhanced moderation of generated content
     const title = `${request.primaryKeyword}: A Comprehensive Guide for ${new Date().getFullYear()}`;
     const keywords = [request.primaryKeyword, ...this.generateRelatedKeywords(request.primaryKeyword)];
 
-    const contentFilterResult = contentFilterService.filterBlogPost(title, content, keywords);
-    if (!contentFilterResult.isAllowed) {
-      // Log the filter event
-      await contentFilterService.logFilterEvent(
-        `Title: ${title}, Content: ${content.substring(0, 200)}...`,
-        contentFilterResult,
-        undefined,
-        'generated_content'
-      );
+    const generatedContentModeration = await contentModerationService.moderateContent(
+      `${title} ${content}`,
+      request.targetUrl,
+      request.primaryKeyword,
+      request.anchorText,
+      undefined,
+      'generated_content'
+    );
 
-      throw new Error(`Generated content was blocked: ${contentFilterResult.reason}`);
+    if (!generatedContentModeration.allowed) {
+      throw new Error(`Generated content was flagged for moderation: The AI-generated content contains terms that require review before publication.`);
     }
 
     const blogPost = {
