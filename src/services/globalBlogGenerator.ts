@@ -284,7 +284,7 @@ class GlobalBlogGeneratorService {
 
   private generateFallbackContent(request: any): string {
     const sections = [
-      `# ${request.primaryKeyword}: Your Complete Guide\n\nWelcome to the ultimate guide on ${request.primaryKeyword}. Whether you're a beginner or looking to enhance your knowledge, this comprehensive resource will provide you with valuable insights and practical strategies.\n\n`,
+      `<h1>${request.primaryKeyword}: Your Complete Guide</h1><p>Welcome to the ultimate guide on ${request.primaryKeyword}. Whether you're a beginner or looking to enhance your knowledge, this comprehensive resource will provide you with valuable insights and practical strategies.</p>`,
       
       `## What is ${request.primaryKeyword}?\n\n${request.primaryKeyword} is a crucial aspect of modern digital strategies. Understanding its fundamentals can significantly impact your success in today's competitive landscape.\n\n`,
       
