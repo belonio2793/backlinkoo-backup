@@ -75,7 +75,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { destinationUrl, keyword, userId } = JSON.parse(event.body);
+    const { destinationUrl, keyword, userId, anchorText } = JSON.parse(event.body);
 
     // Validate input
     if (!destinationUrl || !keyword) {
