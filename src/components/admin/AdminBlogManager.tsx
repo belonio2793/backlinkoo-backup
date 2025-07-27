@@ -36,6 +36,7 @@ export function AdminBlogManager() {
 
   useEffect(() => {
     loadBlogPosts();
+    loadContentFilterStats();
   }, []);
 
   const loadBlogPosts = async () => {
