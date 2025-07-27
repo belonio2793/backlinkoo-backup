@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/services/authService";
 import { Eye, EyeOff, Mail, RefreshCw, Shield, CheckCircle, Infinity } from "lucide-react";
+import { LiveUserActivity, SocialProofTestimonials, TrustBadges, MoneyBackGuarantee } from "./SocialProofElements";
 
 interface LoginModalProps {
   isOpen: boolean;
