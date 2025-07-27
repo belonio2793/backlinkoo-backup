@@ -183,7 +183,14 @@ export function HomepageBlogGenerator() {
 
           // Handle 404 specifically with fallback
           if (response.status === 404) {
-            console.warn('⚠️ Netlify function not found, using fallback content generation');
+            console.warn('⚠️ Netlify function not found (404), using fallback content generation');
+
+            // Show user-friendly message about fallback mode
+            toast({
+              title: "Using Backup Mode",
+              description: "Blog generation service is temporarily unavailable. Using our backup system to create your content.",
+              variant: "default"
+            });
 
             // Use fallback content generation
             data = await generateFallbackBlogPost(targetUrl, primaryKeyword);
@@ -192,6 +199,7 @@ export function HomepageBlogGenerator() {
               console.log('✅ Fallback content generated successfully');
               // Continue with the fallback data - skip the response.json() call
             } else {
+              console.error('❌ Fallback generation failed:', data.error);
               throw new Error(data.error || 'Fallback generation failed');
             }
           } else {
