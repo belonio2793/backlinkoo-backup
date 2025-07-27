@@ -181,6 +181,7 @@ export function HomepageBlogGenerator() {
       });
       setIsGenerating(false);
       setShowProgress(false);
+      setForceComplete(false);
     }
   };
 
