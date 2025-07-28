@@ -231,19 +231,19 @@ export function FreeBacklinkMonitor() {
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-green-600" />
               <div>
-                <div className="text-2xl font-bold text-green-600">{realTimeData.activeUsers}</div>
+                <div className="text-2xl font-bold text-green-600">{metrics.activeUsers}</div>
                 <div className="text-xs text-gray-600">Active Users</div>
               </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <Globe className="h-4 w-4 text-blue-600" />
               <div>
-                <div className="text-2xl font-bold text-blue-600">{stats.completedToday}</div>
+                <div className="text-2xl font-bold text-blue-600">{metrics.todayRequests}</div>
                 <div className="text-xs text-gray-600">Today's Generations</div>
               </div>
             </div>
@@ -255,8 +255,8 @@ export function FreeBacklinkMonitor() {
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-purple-600" />
               <div>
-                <div className="text-2xl font-bold text-purple-600">{stats.conversionRate}%</div>
-                <div className="text-xs text-gray-600">Conversion Rate</div>
+                <div className="text-2xl font-bold text-purple-600">{metrics.claimRate}%</div>
+                <div className="text-xs text-gray-600">Claim Rate</div>
               </div>
             </div>
           </CardContent>
@@ -267,7 +267,7 @@ export function FreeBacklinkMonitor() {
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-orange-600" />
               <div>
-                <div className="text-2xl font-bold text-orange-600">{stats.avgGenerationTime}s</div>
+                <div className="text-2xl font-bold text-orange-600">{metrics.avgGenerationTime}s</div>
                 <div className="text-xs text-gray-600">Avg Gen Time</div>
               </div>
             </div>
@@ -279,8 +279,8 @@ export function FreeBacklinkMonitor() {
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-green-600" />
               <div>
-                <div className="text-2xl font-bold text-green-600">{stats.claimedPosts}</div>
-                <div className="text-xs text-gray-600">Claimed</div>
+                <div className="text-2xl font-bold text-green-600">{metrics.completionRate}%</div>
+                <div className="text-xs text-gray-600">Completion Rate</div>
               </div>
             </div>
           </CardContent>
@@ -289,10 +289,10 @@ export function FreeBacklinkMonitor() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertCircle className="h-4 w-4 text-blue-600" />
               <div>
-                <div className="text-2xl font-bold text-red-600">{stats.expiredPosts}</div>
-                <div className="text-xs text-gray-600">Expired</div>
+                <div className="text-2xl font-bold text-blue-600">{metrics.totalRequests}</div>
+                <div className="text-xs text-gray-600">Total Requests</div>
               </div>
             </div>
           </CardContent>
