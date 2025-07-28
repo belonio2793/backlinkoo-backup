@@ -68,7 +68,7 @@ export class OpenAIService {
     }
 
     const {
-      model = 'gpt-4',
+      model = 'gpt-3.5-turbo',
       maxTokens = 3500,
       temperature = 0.7,
       systemPrompt = 'You are a professional SEO content writer who creates high-quality, engaging blog posts with natural backlink integration.'
