@@ -164,7 +164,7 @@ export function ClaimTrialPostDialog({
             links_delivered: 1,
             completed_backlinks: [`${window.location.origin}/blog/${trialPostSlug}`],
             user_id: currentUser.id,
-            credits_used: 1
+            credits_used: 0
           });
 
         if (campaignError) {
