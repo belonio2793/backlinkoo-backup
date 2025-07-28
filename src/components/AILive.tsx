@@ -123,11 +123,9 @@ export function AILive() {
       console.log(`Mock health check result for ${provider}:`, mockResult.healthy);
       return mockResult.healthy;
     } catch (error) {
-      // Network error or other failure, use mock service
-      console.log(`${provider} health check network error, using mock service`);
-      const mockResult = await MockAIService.checkProviderHealth(provider);
-      console.log(`Mock health check result for ${provider}:`, mockResult.healthy);
-      return mockResult.healthy;
+      // Network error or other failure - no mock fallback
+      console.log(`${provider} health check failed: ${error.message}`);
+      return false;
     }
   };
 
@@ -278,26 +276,11 @@ export function AILive() {
           result = await response.json();
           console.log('Content generated using Netlify function');
         } else {
-          console.log('Netlify content generation function unavailable, using mock service...');
-          result = await MockAIService.generateContent(selectedProvider, prompt, keyword, anchorText, url);
-
-          if (!result.success) {
-            throw new Error(result.error || 'Content generation failed');
-          }
-          console.log('Content generated using mock service');
+          throw new Error(`${selectedProvider} API not available. Please configure proper API keys.`);
         }
       } catch (error) {
-        if (error.message?.includes('Content generation failed')) {
-          throw error; // Re-throw if it's already a content generation error
-        }
-
-        console.log('Network error, using mock service...');
-        result = await MockAIService.generateContent(selectedProvider, prompt, keyword, anchorText, url);
-
-        if (!result.success) {
-          throw new Error(result.error || 'Content generation failed');
-        }
-        console.log('Content generated using mock service');
+        // No mock fallback - require real API configuration
+        throw new Error(`Content generation failed: ${error.message}. Please configure OpenAI or Grok API keys.`);
       }
       updateLastStep('success', `Generated ${result.wordCount} words`);
 
@@ -341,30 +324,11 @@ export function AILive() {
           publishResult = await publishResponse.json();
           console.log('Post published using Netlify function');
         } else {
-          console.log('Netlify publish function unavailable, using mock service...');
-          publishResult = await MockAIService.publishPost({
-            content: result.content,
-            slug,
-            keyword,
-            anchorText,
-            url,
-            provider: selectedProvider,
-            promptIndex: index
-          });
-          console.log('Post published using mock service');
+          throw new Error('Publishing service not available. Please configure proper database connection.');
         }
       } catch (error) {
-        console.log('Network error, using mock service for publishing...');
-        publishResult = await MockAIService.publishPost({
-          content: result.content,
-          slug,
-          keyword,
-          anchorText,
-          url,
-          provider: selectedProvider,
-          promptIndex: index
-        });
-        console.log('Post published using mock service');
+        // No mock fallback for publishing either
+        throw new Error(`Publishing failed: ${error.message}. Please configure database properly.`);
       }
       updateLastStep('success', `Published to ${publishResult.url}`);
 
