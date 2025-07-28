@@ -227,13 +227,23 @@ export function MinimalAITest() {
     return { score, isValid: score >= 50, issues };
   };
 
-  const generateContentFromProvider = async (provider: string): Promise<GeneratedContent> => {
+  const generateContentFromProvider = async (provider: string, promptIndex: number = 0): Promise<GeneratedContent> => {
     const startTime = Date.now();
-    addLog('info', provider.toUpperCase(), `Generating content...`);
+
+    // 3-prompt rotation system
+    const prompts = [
+      `Generate a 1000 word article on ${keyword} including the ${anchorText} hyperlinked to ${url}`,
+      `Write a 1000 word blog post about ${keyword} with a hyperlinked ${anchorText} linked to ${url}`,
+      `Produce a 1000-word reader friendly post on ${keyword} that links ${anchorText}`
+    ];
+
+    const currentPrompt = prompts[promptIndex % 3];
+    const promptLabel = `Prompt ${(promptIndex % 3) + 1}`;
+
+    addLog('info', provider.toUpperCase(), `Using ${promptLabel}: "${currentPrompt}"`);
 
     try {
-      // Create SEO-optimized prompt
-      const prompt = `Write a comprehensive, SEO-optimized blog post about "${keyword}". The article should be at least 800 words and naturally incorporate a link to ${url} using the anchor text "${anchorText}". Include proper headings, engaging content, and valuable information for readers. Ensure the content is grammatically correct and well-structured.`;
+      const prompt = currentPrompt;
 
       // Simulate content generation (replace with actual API calls)
       await new Promise(resolve => setTimeout(resolve, Math.random() * 3000 + 1000));
