@@ -96,9 +96,15 @@ export function EnhancedAIContentTest() {
           "API providers have issues, using intelligent fallback",
       });
 
-      // Step 2: Generate blog content
+      // Step 2: Generate blog content with real-time display
       setCurrentStep('Generating blog post with validated providers...');
       setProgress(60);
+      setIsGeneratingContent(true);
+      setRealTimeContent('');
+      setWordCount(0);
+
+      // Start real-time content generation simulation
+      const fullContent = await generateRealTimeContent();
 
       const blogResult = await aiTestWorkflow.generateBlogContent({
         websiteUrl: url,
