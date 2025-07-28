@@ -140,7 +140,7 @@ const Index = () => {
     "Advanced Keyword Research Tools",
     "Low Outbound Links (OBL)",
     "Unique C-Class IP Addresses",
-    "99% Indexing Rate Guaranteed",
+    "High Indexing Rate",
     "SERP Monitoring",
     "High-DA Networks",
     "Permanent Links",
@@ -215,8 +215,8 @@ const Index = () => {
   };
 
   const stats = [
-    { value: "99%", label: "Success Rate", description: "Proven ranking improvements" },
-    { value: "High DA", label: "Average Authority", description: "Premium domain quality" }
+    { value: "High Quality", label: "Link Quality", description: "Premium domain sources" },
+    { value: "Tracked", label: "Results", description: "Monitored performance" }
   ];
 
   const features = [
@@ -388,7 +388,7 @@ const Index = () => {
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-primary" />
                     <span className="font-light">
-                      {showTrialUpgrade ? "Campaign management tools" : "99% success rate guarantee"}
+                      {showTrialUpgrade ? "Campaign management tools" : "Quality assurance"}
                     </span>
                   </div>
                 </div>
@@ -396,16 +396,16 @@ const Index = () => {
                 {/* Trust indicators */}
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <div className="text-2xl font-semibold text-primary mb-1">2,000+</div>
-                    <div className="text-sm text-muted-foreground">Active Users</div>
+                    <div className="text-2xl font-semibold text-primary mb-1">Growing</div>
+                    <div className="text-sm text-muted-foreground">User Base</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-semibold text-primary mb-1">99%</div>
+                    <div className="text-2xl font-semibold text-primary mb-1">High</div>
                     <div className="text-sm text-muted-foreground">Success Rate</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-semibold text-primary mb-1">4.9/5</div>
-                    <div className="text-sm text-muted-foreground">User Rating</div>
+                    <div className="text-2xl font-semibold text-primary mb-1">Rated</div>
+                    <div className="text-sm text-muted-foreground">User Reviews</div>
                   </div>
                 </div>
               </div>
@@ -451,7 +451,7 @@ const Index = () => {
           </p>
           
           <p className="text-lg text-gray-600 mb-12 font-medium max-w-3xl mx-auto">
-            High-authority links • Competitive intelligence • Guaranteed results or full refund
+            High-authority links • Competitive intelligence ��� Guaranteed results or full refund
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-20">
