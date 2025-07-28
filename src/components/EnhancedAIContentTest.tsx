@@ -452,8 +452,170 @@ Start your ${keyword} journey today and take your business to the next level!`;
         </Card>
       )}
 
+      {/* Real-time Content Generation */}
+      {(isGeneratingContent || realTimeContent) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {isGeneratingContent ? (
+                <>
+                  <RefreshCw className="h-5 w-5 animate-spin text-blue-600" />
+                  Generating Content in Real-Time
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  Content Generated
+                </>
+              )}
+            </CardTitle>
+            {wordCount > 0 && (
+              <div className="text-sm text-muted-foreground">
+                Words generated: {wordCount} {isGeneratingContent && '(continuing...)'}
+              </div>
+            )}
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="max-h-96 overflow-y-auto bg-gray-50 rounded-lg p-4">
+              <div className="prose max-w-none text-sm">
+                {realTimeContent.split('\n').map((line, index) => (
+                  <p key={index} className="mb-2">{line}</p>
+                ))}
+                {isGeneratingContent && (
+                  <span className="inline-block w-2 h-4 bg-blue-600 animate-pulse ml-1"></span>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Slug Generator */}
+      {generatedSlug && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Link className="h-5 w-5" />
+              Blog URL Slug
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">backlinkoo.com/blog/</span>
+              {isSlugEditable ? (
+                <Input
+                  value={generatedSlug}
+                  onChange={(e) => setGeneratedSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
+                  className="flex-1"
+                  onBlur={() => setIsSlugEditable(false)}
+                  onKeyPress={(e) => e.key === 'Enter' && setIsSlugEditable(false)}
+                  autoFocus
+                />
+              ) : (
+                <span className="flex-1 font-mono text-sm p-2 bg-gray-50 rounded cursor-pointer"
+                      onClick={() => setIsSlugEditable(true)}>
+                  {generatedSlug}
+                </span>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsSlugEditable(!isSlugEditable)}
+              >
+                Edit
+              </Button>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Click to edit the URL slug. Preview: https://backlinkoo.com/blog/{generatedSlug}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Save to Blog Options */}
+      {showSaveOptions && !generatedBlog?.saved && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Save to Blog - Free Backlink Protocol
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="p-4 border-2 border-blue-200">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-semibold">24-Hour Trial</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Get your backlink live immediately with a 24-hour trial period.
+                    Perfect for testing and immediate SEO benefits.
+                  </p>
+                  <ul className="text-xs space-y-1">
+                    <li>✅ Immediate publication</li>
+                    <li>✅ Full SEO benefits for 24 hours</li>
+                    <li>✅ No upfront cost</li>
+                    <li>⏰ Expires after 24 hours</li>
+                  </ul>
+                  <Button
+                    onClick={() => saveToBlog('trial')}
+                    disabled={saveMode === 'trial'}
+                    className="w-full"
+                  >
+                    {saveMode === 'trial' ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating Trial...
+                      </>
+                    ) : (
+                      'Start 24-Hour Trial'
+                    )}
+                  </Button>
+                </div>
+              </Card>
+
+              <Card className="p-4 border-2 border-green-200">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <h3 className="font-semibold">Claim Permanent Link</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Claim this backlink permanently under our free backlink protocol.
+                    Subject to quality guidelines and approval.
+                  </p>
+                  <ul className="text-xs space-y-1">
+                    <li>✅ Permanent placement</li>
+                    <li>✅ Long-term SEO value</li>
+                    <li>✅ Quality content requirement</li>
+                    <li>📋 Subject to approval</li>
+                  </ul>
+                  <Button
+                    onClick={() => saveToBlog('claim')}
+                    disabled={saveMode === 'claim'}
+                    variant="outline"
+                    className="w-full border-green-200"
+                  >
+                    {saveMode === 'claim' ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing Claim...
+                      </>
+                    ) : (
+                      'Claim Permanent Link'
+                    )}
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Generated Blog Results */}
-      {generatedBlog && (
+      {generatedBlog?.saved && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
