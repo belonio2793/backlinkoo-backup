@@ -23,7 +23,8 @@ import {
   ExternalLink,
   RefreshCw,
   Link,
-  Loader2
+  Loader2,
+  Share
 } from 'lucide-react';
 
 export function EnhancedAIContentTest() {
