@@ -161,104 +161,127 @@ export function EnhancedAIContentTest() {
       setShowPromptDisplay(true);
       console.log('🎯 Using prompt variant:', selectedPrompt.substring(0, 50) + '...');
 
-      // Generate longer content (1000+ words minimum)
-      const rawContent = `# ${keyword}: Complete Guide ${new Date().getFullYear()}
+      // Generate contextual content based on keyword analysis
+      const generateContextualContent = (keyword: string, anchorText: string, url: string): string => {
+        const foodKeywords = ['sushi', 'pizza', 'burger', 'pasta', 'chicken', 'beef', 'seafood', 'restaurant', 'dining', 'food', 'cuisine', 'recipe'];
+        const isFood = foodKeywords.some(word => keyword.toLowerCase().includes(word));
 
-## Introduction to ${keyword}
+        if (isFood) {
+          return `# The Complete Guide to ${keyword.charAt(0).toUpperCase() + keyword.slice(1)}: Everything You Need to Know
 
-Understanding ${keyword} is essential for businesses looking to enhance their digital presence in today's competitive marketplace. This comprehensive guide will walk you through everything you need to know about ${keyword}, from fundamental concepts to advanced implementation strategies that drive real results.
+## Introduction
 
-The digital landscape has evolved dramatically over recent years, making ${keyword} more critical than ever before. Organizations across industries are recognizing the transformative power of effective ${keyword} implementation, leading to increased investment and focus on this crucial area.
+When it comes to ${keyword}, there's a world of flavors, techniques, and cultural significance waiting to be explored. This comprehensive guide covers everything from the basics of ${keyword} to advanced preparation methods and cultural context.
 
-## What is ${keyword}?
+## What is ${keyword.charAt(0).toUpperCase() + keyword.slice(1)}?
 
-${keyword} represents a multifaceted approach to modern digital marketing that can significantly impact your online success and business growth. Whether you're a small business owner just starting out or part of a large enterprise looking to optimize existing processes, mastering ${keyword} will give you a substantial competitive advantage in today's digital landscape.
+${keyword.charAt(0).toUpperCase() + keyword.slice(1)} is more than just food—it's a culinary experience that reflects tradition, craftsmanship, and cultural heritage. Understanding the fundamentals of ${keyword} helps you appreciate both its simplicity and complexity.
 
-The core principles underlying ${keyword} involve strategic planning, careful execution, and continuous optimization. These elements work together to create a comprehensive system that delivers measurable results and sustainable growth over time.
+### Origins and History
+The history of ${keyword} spans centuries, with roots deeply embedded in cultural traditions. From its humble beginnings to its modern interpretations, ${keyword} has evolved while maintaining its essential character.
 
-## The Evolution of ${keyword}
+### Types and Varieties
+There are numerous varieties of ${keyword}, each with unique characteristics:
+- **Traditional ${keyword}**: The classic preparation that started it all
+- **Modern Variations**: Contemporary twists on traditional recipes
+- **Regional Specialties**: How different regions interpret ${keyword}
+- **Fusion Styles**: International influences on ${keyword} preparation
 
-The field of ${keyword} has undergone significant changes in recent years, driven by technological advances, changing consumer behavior, and evolving industry standards. Understanding this evolution is crucial for anyone looking to implement effective ${keyword} strategies.
+## How to Enjoy ${keyword.charAt(0).toUpperCase() + keyword.slice(1)}
 
-Historical context shows that early approaches to ${keyword} were often simplistic and one-dimensional. However, modern ${keyword} requires a sophisticated understanding of multiple interconnected factors, including user experience, technical implementation, and strategic alignment with business objectives.
+### Choosing Quality ${keyword}
+When selecting ${keyword}, look for these key indicators:
+- Freshness and appearance
+- Proper preparation techniques
+- Authentic ingredients
+- Proper presentation
 
-## Key Benefits of ${keyword}
+### Preparation Methods
+Proper preparation is essential for the best ${keyword} experience:
+1. **Traditional Methods**: Time-tested techniques passed down through generations
+2. **Modern Approaches**: Contemporary methods that enhance flavor
+3. **Home Preparation**: Tips for making ${keyword} at home
+4. **Professional Techniques**: Methods used by expert chefs
 
-The advantages of implementing effective ${keyword} strategies extend far beyond basic metrics, creating value across multiple dimensions of your business:
+## Health and Nutrition
+${keyword.charAt(0).toUpperCase() + keyword.slice(1)} offers various nutritional benefits:
+- **Nutritional Value**: Essential nutrients found in ${keyword}
+- **Health Benefits**: How ${keyword} contributes to a balanced diet
+- **Dietary Considerations**: Important factors for different dietary needs
 
-- **Enhanced Visibility**: Dramatically improve your online presence with targeted ${keyword} strategies that reach your ideal audience
-- **Increased Traffic**: Drive significantly more qualified visitors to your website through optimized ${keyword} implementation
-- **Better Engagement**: Connect with your target audience more effectively using data-driven ${keyword} approaches
-- **Higher Conversions**: Convert more visitors into customers through strategic ${keyword} optimization
-- **Long-term Growth**: Build sustainable business growth through comprehensive ${keyword} frameworks
-- **Competitive Advantage**: Gain market positioning through superior ${keyword} execution
-- **Cost Efficiency**: Achieve better ROI through optimized ${keyword} resource allocation
-- **Brand Authority**: Establish thought leadership in your industry through expert ${keyword} implementation
+## Where to Experience the Best ${keyword}
+For authentic ${keyword} experiences, consider visiting [${anchorText}](${url}), where traditional preparation meets modern excellence.
 
-## Getting Started with ${keyword}
+## Cultural Significance
+The cultural importance of ${keyword} extends beyond mere sustenance, playing roles in traditional ceremonies, social gatherings, and regional celebrations.
 
-The most effective approach to implementing ${keyword} involves developing a comprehensive understanding of your audience, setting clear and measurable objectives, and following proven methodologies that have demonstrated success across various industries and market conditions.
+## Making ${keyword} at Home
+### Essential Ingredients
+- High-quality base ingredients
+- Proper seasonings and accompaniments
+- Fresh complementary ingredients
 
-Initial steps should include thorough market research, competitive analysis, and establishing baseline metrics to measure progress. For comprehensive tools, expert guidance, and proven strategies, [${anchorText}](${url}) provides everything you need to succeed in your ${keyword} implementation journey.
+### Step-by-Step Guide
+1. **Preparation**: Gather and prepare all ingredients
+2. **Initial Setup**: Arrange your workspace and tools
+3. **Main Preparation**: Follow traditional techniques
+4. **Final Assembly**: Proper presentation and serving
 
-## Advanced ${keyword} Strategies
-
-### 1. Strategic Research and Planning
-Begin with extensive research to understand your market landscape, competitive positioning, and target audience behavior. This foundational work guides all subsequent ${keyword} strategy decisions and ensures optimal resource allocation.
-
-Effective planning involves creating detailed implementation timelines, establishing key performance indicators, and developing contingency plans for various scenarios. The planning phase should also include stakeholder alignment and resource requirements assessment.
-
-### 2. Implementation Best Practices
-Follow established industry best practices when implementing ${keyword} strategies, ensuring compliance with current standards and guidelines. This includes staying current with latest trends, emerging technologies, and evolving best practices.
-
-Implementation should be systematic and methodical, with regular checkpoints to ensure progress aligns with established objectives. Quality assurance processes should be built into every phase of implementation to maintain high standards.
-
-### 3. Monitoring and Optimization
-Develop robust monitoring systems to track performance across all relevant metrics and key performance indicators. Use data-driven insights to continuously optimize your approach and improve results over time.
-
-Regular optimization cycles should include A/B testing, performance analysis, and strategic adjustments based on real-world data and changing market conditions.
-
-### 4. Scaling and Growth
-Once initial ${keyword} implementations prove successful, develop scaling strategies to expand impact and reach. This involves systematic growth planning and resource optimization to maximize long-term value.
-
-## Common Mistakes to Avoid
-
-When working with ${keyword}, organizations frequently encounter specific pitfalls that can undermine success and waste valuable resources:
-
-- **Insufficient Research**: Neglecting comprehensive market research and competitive analysis
-- **Poor Planning**: Failing to develop detailed implementation strategies and timelines
-- **Inadequate Monitoring**: Not establishing proper tracking and measurement systems
-- **Mobile Neglect**: Ignoring mobile optimization and responsive design considerations
-- **User Experience Oversight**: Overlooking user experience factors that impact success
-- **Resource Misallocation**: Inefficient distribution of budget and personnel resources
-- **Technology Gaps**: Using outdated tools and platforms that limit effectiveness
-- **Inconsistent Execution**: Failing to maintain consistent quality across all initiatives
-
-## Tools and Resources for Success
-
-The right combination of tools, resources, and expertise can make a dramatic difference in your ${keyword} success rates and overall return on investment. Professional-grade solutions provide the foundation for effective implementation and long-term growth.
-
-[${anchorText}](${url}) offers comprehensive, professional-grade solutions specifically designed to help organizations achieve their ${keyword} objectives efficiently and effectively.
-
-## Measuring Success and ROI
-
-Establishing clear success metrics and return on investment calculations is essential for demonstrating value and guiding future ${keyword} investments. Key metrics should align with overall business objectives and provide actionable insights for optimization.
-
-Regular performance reviews should include both quantitative metrics and qualitative assessments to provide a complete picture of ${keyword} effectiveness and impact on business goals.
-
-## Future Trends and Considerations
-
-The ${keyword} landscape continues to evolve rapidly, with emerging technologies, changing consumer expectations, and new industry standards shaping future requirements. Staying ahead of these trends is crucial for maintaining competitive advantage.
-
-Organizations should develop forward-thinking strategies that anticipate future changes while building flexible systems that can adapt to evolving requirements and opportunities.
+## Tips from the Experts
+- **Quality Matters**: Never compromise on ingredient quality
+- **Technique is Key**: Proper preparation makes all the difference
+- **Practice Makes Perfect**: Skills improve with experience
+- **Respect Tradition**: Understanding traditional methods enhances appreciation
 
 ## Conclusion
+${keyword.charAt(0).toUpperCase() + keyword.slice(1)} represents a perfect blend of tradition, craftsmanship, and culinary artistry. For the most authentic ${keyword} experience, visit [${anchorText}](${url}) and discover what makes exceptional ${keyword} truly special.
 
-Mastering ${keyword} requires dedication, strategic thinking, continuous learning, and access to high-quality tools and resources. Success depends on understanding both current best practices and emerging trends that will shape the future of ${keyword} implementation.
+Start your culinary journey with ${keyword} today!`;
+        }
 
-By following the comprehensive strategies outlined in this guide and leveraging professional resources like those available at [${anchorText}](${url}), you can achieve exceptional results and build sustainable competitive advantages in your market.
+        // Default general content
+        return `# ${keyword.charAt(0).toUpperCase() + keyword.slice(1)}: Complete Guide and Overview
 
-Start your ${keyword} transformation journey today and unlock the full potential of strategic ${keyword} implementation for your organization!`;
+## Introduction
+Exploring the world of ${keyword} opens up numerous possibilities and opportunities. This comprehensive guide provides insights and expert perspectives on ${keyword}.
+
+## Understanding ${keyword}
+${keyword.charAt(0).toUpperCase() + keyword.slice(1)} encompasses various aspects important for anyone interested in this topic. From fundamental concepts to advanced applications, ${keyword} offers rich possibilities.
+
+## Key Aspects
+### Fundamental Elements
+- **Core Concepts**: Essential knowledge about ${keyword}
+- **Practical Applications**: How ${keyword} is used in real scenarios
+- **Benefits**: What makes ${keyword} valuable
+- **Best Practices**: Proven approaches to ${keyword}
+
+### Advanced Considerations
+- **Expert Techniques**: Professional approaches to ${keyword}
+- **Innovation**: Latest developments in ${keyword}
+- **Quality Standards**: Benchmarks for excellence
+- **Future Perspectives**: Where ${keyword} is heading
+
+## Getting Started
+1. **Research and Planning**: Understanding your needs
+2. **Initial Steps**: First actions to take
+3. **Building Knowledge**: Developing expertise
+4. **Implementation**: Putting ${keyword} into practice
+
+For expert guidance and resources related to ${keyword}, [${anchorText}](${url}) offers comprehensive solutions.
+
+## Tips for Success
+- **Research Thoroughly**: Understand all aspects before beginning
+- **Start with Quality**: Invest in proper resources
+- **Learn from Experts**: Seek professional guidance
+- **Practice Regularly**: Consistent engagement improves results
+
+## Conclusion
+${keyword.charAt(0).toUpperCase() + keyword.slice(1)} offers numerous opportunities for those willing to invest time and effort. For expert resources and support, visit [${anchorText}](${url}) to access specialized knowledge.
+
+Begin your journey with ${keyword} today!`;
+      };
+
+      const rawContent = generateContextualContent(keyword, anchorText, url);
 
       // Apply grammatical formatting
       const fullContent = formatTextWithGrammar(rawContent);
