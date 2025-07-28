@@ -25,7 +25,7 @@ import {
   Users,
   Shield
 } from 'lucide-react';
-import { builderAIGenerator, type GenerationStatus, type BuilderAIResult } from '@/services/builderAIGenerator';
+import { BuilderAIGenerator, type GenerationStatus, type BuilderAIResult } from '@/services/builderAIGenerator';
 import { useAuth } from '@/hooks/useAuth';
 import { blogPublishingService } from '@/services/blogPublishingService';
 import { toast } from 'sonner';
