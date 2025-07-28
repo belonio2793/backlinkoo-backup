@@ -57,7 +57,12 @@ export class GrokService {
     error?: string;
   }> {
     if (!this.apiKey) {
-      throw new Error('Grok API key not configured');
+      return {
+        content: '',
+        usage: { tokens: 0, cost: 0 },
+        success: false,
+        error: 'Grok API key not configured'
+      };
     }
 
     const {
