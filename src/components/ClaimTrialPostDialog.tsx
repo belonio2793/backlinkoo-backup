@@ -331,7 +331,7 @@ export function ClaimTrialPostDialog({
 
           {!currentUser && (
             <p className="text-xs text-gray-500 text-center">
-              New users get 3 free credits to claim trial posts
+              Sign up to claim one free trial post permanently
             </p>
           )}
         </div>
