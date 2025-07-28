@@ -275,10 +275,14 @@ class GlobalBlogGeneratorService {
       throw new Error(`Generated content was flagged for moderation: The AI-generated content contains terms that require review before publication.`);
     }
 
+    const rawTitle = `${request.primaryKeyword}: A Comprehensive Guide for ${new Date().getFullYear()}`;
+    const formattedTitle = formatBlogTitle(rawTitle);
+    const formattedContent = formatBlogContent(content);
+
     const blogPost = {
       id: crypto.randomUUID(),
-      title: `${request.primaryKeyword}: A Comprehensive Guide for ${new Date().getFullYear()}`,
-      content: content,
+      title: formattedTitle,
+      content: formattedContent,
       excerpt: `Discover everything you need to know about ${request.primaryKeyword}. Expert insights, practical tips, and actionable strategies.`,
       slug: `${request.primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
       keywords: [request.primaryKeyword, ...this.generateRelatedKeywords(request.primaryKeyword)],
