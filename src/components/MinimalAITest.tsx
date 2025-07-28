@@ -364,6 +364,17 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
     setEditingSlug(null);
   };
 
+  const handleUrlChange = (value: string) => {
+    let correctedUrl = value.trim();
+
+    // Auto-correct URL to include https://
+    if (correctedUrl && !correctedUrl.startsWith('http://') && !correctedUrl.startsWith('https://')) {
+      correctedUrl = 'https://' + correctedUrl;
+    }
+
+    setUrl(correctedUrl);
+  };
+
   // Auto-scroll logs
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
