@@ -261,6 +261,9 @@ const AdminDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
