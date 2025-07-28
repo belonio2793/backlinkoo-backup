@@ -203,7 +203,7 @@ export function ClaimTrialPostDialog({
   };
 
   const handleOpenDialog = async () => {
-    const { hasCredits } = await checkUserCredits();
+    const { canClaim } = await checkUserFreeClaims();
     setIsOpen(true);
   };
 
