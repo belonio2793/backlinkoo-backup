@@ -99,6 +99,57 @@ export function EnhancedAIContentTest() {
       .replace(/^-+|-+$/g, '');
   };
 
+  // Grammatical and punctuation formatting function
+  const formatTextWithGrammar = (text: string): string => {
+    let formatted = text;
+
+    // 1. Autocapitalization
+    // Capitalize first letter of sentences
+    formatted = formatted.replace(/([.!?]+\s*)([a-z])/g, (match, punctuation, letter) => {
+      return punctuation + letter.toUpperCase();
+    });
+
+    // Capitalize first letter of text
+    formatted = formatted.replace(/^([a-z])/, (match, letter) => letter.toUpperCase());
+
+    // Capitalize after line breaks (new paragraphs)
+    formatted = formatted.replace(/(\n\s*)([a-z])/g, (match, lineBreak, letter) => {
+      return lineBreak + letter.toUpperCase();
+    });
+
+    // 2. Fix common punctuation issues
+    // Ensure space after punctuation
+    formatted = formatted.replace(/([.!?,:;])([a-zA-Z])/g, '$1 $2');
+
+    // Remove multiple spaces
+    formatted = formatted.replace(/\s{2,}/g, ' ');
+
+    // Fix comma spacing
+    formatted = formatted.replace(/\s+,/g, ',');
+    formatted = formatted.replace(/,([a-zA-Z])/g, ', $1');
+
+    // 3. Heading capitalization (title case for headings)
+    formatted = formatted.replace(/^(#{1,6})\s*(.+)$/gm, (match, hashes, title) => {
+      const titleCase = title.replace(/\b\w+/g, (word: string) => {
+        // Don't capitalize articles, conjunctions, prepositions unless they're the first word
+        const lowercase = ['a', 'an', 'the', 'and', 'but', 'or', 'for', 'nor', 'on', 'at', 'to', 'from', 'by', 'of', 'in'];
+        if (lowercase.includes(word.toLowerCase()) && title.indexOf(word) !== 0) {
+          return word.toLowerCase();
+        }
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      });
+      return `${hashes} ${titleCase}`;
+    });
+
+    // 4. Fix quote marks
+    formatted = formatted.replace(/"/g, '"').replace(/"/g, '"');
+
+    // 5. Ensure proper paragraph spacing
+    formatted = formatted.replace(/\n{3,}/g, '\n\n');
+
+    return formatted.trim();
+  };
+
   // Simulate real-time content generation using selected prompt
   const generateRealTimeContent = (): Promise<string> => {
     return new Promise((resolve) => {
