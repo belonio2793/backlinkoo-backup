@@ -480,6 +480,9 @@ export function BlogPost() {
           color: inherit;
         }
       `}</style>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
