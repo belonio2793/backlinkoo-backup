@@ -83,9 +83,12 @@ export function EnhancedAIContentTest() {
       .replace(/^-+|-+$/g, '');
   };
 
-  // Simulate real-time content generation
+  // Simulate real-time content generation using selected prompt
   const generateRealTimeContent = (): Promise<string> => {
     return new Promise((resolve) => {
+      const selectedPrompt = getSelectedPrompt();
+      console.log('🎯 Using prompt variant:', selectedPrompt.substring(0, 50) + '...');
+
       const fullContent = `# ${keyword}: Complete Guide ${new Date().getFullYear()}
 
 ## Introduction to ${keyword}
