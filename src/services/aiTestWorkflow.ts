@@ -22,6 +22,7 @@ export interface ProviderStatus {
   configured: boolean;
   quotaStatus: 'available' | 'low' | 'exhausted';
   quotaResetTime?: string;
+  usagePercentage?: number;
   lastError?: string;
 }
 
