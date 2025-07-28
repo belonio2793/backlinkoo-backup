@@ -14,6 +14,7 @@ export interface TestWorkflowRequest {
   anchorText?: string;
   userId?: string;
   sessionId?: string;
+  currentDomain?: string;
 }
 
 export interface ProviderStatus {
