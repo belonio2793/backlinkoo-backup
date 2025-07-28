@@ -503,13 +503,86 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
           </div>
         </div>
 
+        {/* Generated Content */}
+        {generatedContent.length > 0 && (
+          <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {generatedContent.map((content, i) => (
+              <div key={i} className={`bg-white rounded border p-4 ${!content.isValid ? 'opacity-50' : ''}`}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-sm font-medium">{content.provider}</span>
+                    {content.isValid ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                    )}
+                  </div>
+                  <div className="text-xs font-mono text-gray-500">
+                    {content.wordCount} words | {content.quality}% quality
+                  </div>
+                </div>
+
+                {/* Slug Editor */}
+                <div className="mb-3">
+                  <label className="text-xs font-mono text-gray-600">SLUG</label>
+                  <div className="flex gap-2 mt-1">
+                    {editingSlug === content.provider ? (
+                      <Input
+                        value={content.slug}
+                        onChange={(e) => updateSlug(content.provider, e.target.value)}
+                        onBlur={() => setEditingSlug(null)}
+                        onKeyPress={(e) => e.key === 'Enter' && setEditingSlug(null)}
+                        className="font-mono text-xs"
+                        autoFocus
+                      />
+                    ) : (
+                      <div
+                        className="flex-1 p-2 bg-gray-50 rounded text-xs font-mono cursor-pointer hover:bg-gray-100"
+                        onClick={() => setEditingSlug(content.provider)}
+                      >
+                        /blog/{content.slug}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Content Preview */}
+                <div className="mb-3 max-h-32 overflow-y-auto text-xs text-gray-700 bg-gray-50 p-2 rounded">
+                  {content.content.substring(0, 300)}...
+                </div>
+
+                {/* Error or Publish Button */}
+                {!content.isValid ? (
+                  <div className="text-xs text-red-600 font-mono">
+                    INVALID: {content.error}
+                  </div>
+                ) : selectedContent === content.provider ? (
+                  <div className="flex items-center gap-2 text-xs text-green-600 font-mono">
+                    <CheckCircle2 className="h-4 w-4" />
+                    PUBLISHED - 24h timer active
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={() => publishContent(content)}
+                    className="w-full font-mono text-xs"
+                    disabled={isRunning}
+                  >
+                    PUBLISH THIS CONTENT
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* System Logs */}
         <div className="mt-4 bg-black rounded border p-4">
           <div className="flex items-center gap-2 mb-3">
             <Terminal className="h-4 w-4 text-green-400" />
             <h2 className="font-mono text-sm font-medium text-green-400">System Logs</h2>
           </div>
-          <div className="h-64 overflow-y-auto font-mono text-xs space-y-1">
+          <div className="h-40 overflow-y-auto font-mono text-xs space-y-1">
             {logs.length === 0 ? (
               <div className="text-gray-500">System ready...</div>
             ) : (
