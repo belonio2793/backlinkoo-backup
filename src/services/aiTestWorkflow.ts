@@ -417,86 +417,256 @@ export class AITestWorkflow {
   }
 
   /**
-   * Generate fallback content when no API providers are available
+   * Generate contextual content based on keyword analysis
    */
   private generateFallbackContent(request: TestWorkflowRequest): string {
     const { keyword, websiteUrl, anchorText } = request;
     const anchor = anchorText || keyword;
     const currentYear = new Date().getFullYear();
 
-    return `# ${keyword}: Your Ultimate Guide for ${currentYear}
+    // Analyze keyword to determine content type and context
+    const keywordAnalysis = this.analyzeKeyword(keyword.toLowerCase());
+
+    return this.generateContextualContent(keyword, anchor, websiteUrl, keywordAnalysis, currentYear);
+  }
+
+  /**
+   * Analyze keyword to determine appropriate content context
+   */
+  private analyzeKeyword(keyword: string): { category: string; context: string } {
+    const foodKeywords = ['sushi', 'pizza', 'burger', 'pasta', 'chicken', 'beef', 'seafood', 'restaurant', 'dining', 'food', 'cuisine', 'recipe', 'cooking', 'meal', 'dish', 'lunch', 'dinner', 'breakfast', 'snack', 'dessert'];
+    const placeKeywords = ['city', 'town', 'location', 'place', 'destination', 'travel', 'tourism', 'hotel', 'resort', 'beach', 'mountain', 'park', 'country', 'state', 'region'];
+    const techKeywords = ['software', 'app', 'website', 'digital', 'ai', 'machine learning', 'coding', 'programming', 'computer', 'internet', 'online', 'tech', 'technology'];
+    const businessKeywords = ['marketing', 'seo', 'business', 'sales', 'finance', 'investment', 'company', 'startup', 'entrepreneur', 'management', 'strategy'];
+    const healthKeywords = ['health', 'fitness', 'wellness', 'exercise', 'medical', 'doctor', 'hospital', 'medicine', 'nutrition', 'diet', 'workout'];
+    const serviceKeywords = ['service', 'repair', 'maintenance', 'cleaning', 'delivery', 'shipping', 'support', 'consultation', 'installation'];
+
+    if (foodKeywords.some(word => keyword.includes(word))) {
+      return { category: 'food', context: 'culinary' };
+    }
+    if (placeKeywords.some(word => keyword.includes(word))) {
+      return { category: 'place', context: 'location' };
+    }
+    if (techKeywords.some(word => keyword.includes(word))) {
+      return { category: 'technology', context: 'technical' };
+    }
+    if (businessKeywords.some(word => keyword.includes(word))) {
+      return { category: 'business', context: 'professional' };
+    }
+    if (healthKeywords.some(word => keyword.includes(word))) {
+      return { category: 'health', context: 'wellness' };
+    }
+    if (serviceKeywords.some(word => keyword.includes(word))) {
+      return { category: 'service', context: 'commercial' };
+    }
+
+    return { category: 'general', context: 'informational' };
+  }
+
+  /**
+   * Generate contextual content based on keyword analysis
+   */
+  private generateContextualContent(keyword: string, anchor: string, websiteUrl: string, analysis: any, currentYear: number): string {
+    const capitalizedKeyword = keyword.charAt(0).toUpperCase() + keyword.slice(1);
+
+    if (analysis.category === 'food') {
+      return `# The Complete Guide to ${capitalizedKeyword}: Everything You Need to Know
 
 ## Introduction
 
-Understanding ${keyword} is essential in today's digital landscape. This comprehensive guide will provide you with everything you need to know about ${keyword}, from basic concepts to advanced strategies that can transform your approach.
+When it comes to ${keyword}, there's a world of flavors, techniques, and cultural significance waiting to be explored. This comprehensive guide covers everything from the basics of ${keyword} to advanced preparation methods and cultural context.
 
-## What is ${keyword}?
+## What is ${capitalizedKeyword}?
 
-${keyword} represents a crucial element that can significantly impact your success in the modern digital world. Whether you're a beginner looking to learn the fundamentals or an experienced professional seeking to refine your approach, mastering ${keyword} will give you a competitive advantage.
+${capitalizedKeyword} is more than just food—it's a culinary experience that reflects tradition, craftsmanship, and cultural heritage. Understanding the fundamentals of ${keyword} helps you appreciate both its simplicity and complexity.
 
-## Key Benefits of ${keyword}
+### Origins and History
 
-- **Enhanced Performance**: Improve your results with proven ${keyword} strategies
-- **Expert Guidance**: Learn from industry professionals and best practices
-- **Practical Solutions**: Get actionable insights you can implement immediately
-- **Long-term Success**: Build sustainable growth through effective ${keyword} implementation
-- **Competitive Advantage**: Stay ahead of the curve with cutting-edge techniques
+The history of ${keyword} spans centuries, with roots deeply embedded in cultural traditions. From its humble beginnings to its modern interpretations, ${keyword} has evolved while maintaining its essential character.
 
-## Getting Started with ${keyword}
+### Types and Varieties
 
-The best approach to ${keyword} combines theoretical knowledge with practical application. For comprehensive resources, expert tools, and professional guidance, [${anchor}](${websiteUrl}) provides everything you need to succeed in your ${keyword} journey.
+There are numerous varieties of ${keyword}, each with unique characteristics:
 
-## Essential ${keyword} Strategies
+- **Traditional ${capitalizedKeyword}**: The classic preparation that started it all
+- **Modern Variations**: Contemporary twists on the traditional recipes
+- **Regional Specialties**: How different regions interpret ${keyword}
+- **Fusion Styles**: International influences on ${keyword} preparation
 
-### 1. Foundation Building
-Start with a solid understanding of ${keyword} fundamentals. This includes learning the core principles, understanding industry standards, and familiarizing yourself with essential tools and techniques.
+## How to Enjoy ${capitalizedKeyword}
 
-### 2. Implementation Planning
-Develop a systematic approach to implementing ${keyword} strategies. Create a roadmap that aligns with your goals and resources, ensuring you can measure progress and adjust as needed.
+### Choosing Quality ${capitalizedKeyword}
 
-### 3. Performance Optimization
-Continuously monitor and optimize your ${keyword} performance. Use data-driven insights to refine your approach and maximize results.
+When selecting ${keyword}, look for these key indicators of quality:
 
-### 4. Advanced Techniques
-Once you've mastered the basics, explore advanced ${keyword} techniques that can set you apart from the competition.
+- Freshness and appearance
+- Proper preparation techniques
+- Authentic ingredients
+- Proper presentation
 
-## Best Practices for ${keyword}
+### Preparation Methods
 
-1. **Start with Clear Objectives**: Define what you want to achieve with ${keyword}
-2. **Follow Industry Standards**: Adhere to established best practices and guidelines
-3. **Stay Updated**: Keep up with the latest trends and developments in ${keyword}
-4. **Measure and Analyze**: Track your progress and analyze results regularly
-5. **Seek Professional Guidance**: Don't hesitate to consult experts when needed
+Proper preparation is essential for the best ${keyword} experience:
 
-## Common ${keyword} Mistakes to Avoid
+1. **Traditional Methods**: Time-tested techniques passed down through generations
+2. **Modern Approaches**: Contemporary methods that enhance flavor and presentation
+3. **Home Preparation**: Tips for making ${keyword} in your own kitchen
+4. **Professional Techniques**: Methods used by expert chefs
 
-- Neglecting to establish clear goals and metrics
-- Failing to stay updated with industry changes
-- Overlooking the importance of continuous learning
-- Not leveraging available tools and resources
-- Attempting to do everything without professional support
+## Health and Nutrition
 
-## Tools and Resources for ${keyword}
+${capitalizedKeyword} offers various nutritional benefits when prepared properly:
 
-The right tools can make a significant difference in your ${keyword} success. From planning and implementation to monitoring and optimization, having access to professional-grade resources is essential.
+- **Nutritional Value**: Essential nutrients found in ${keyword}
+- **Health Benefits**: How ${keyword} contributes to a balanced diet
+- **Dietary Considerations**: Important factors for different dietary needs
+- **Portion Guidelines**: Recommended serving sizes and frequency
 
-For comprehensive ${keyword} solutions and expert support, [${anchor}](${websiteUrl}) offers industry-leading tools and guidance to help you achieve your goals.
+## Cultural Significance
 
-## Future Trends in ${keyword}
+The cultural importance of ${keyword} extends beyond mere sustenance:
 
-As we look toward the future, ${keyword} continues to evolve with new technologies, methodologies, and best practices. Staying informed about emerging trends will help you maintain your competitive edge and adapt to changing market conditions.
+- **Traditional Ceremonies**: Role in cultural celebrations
+- **Social Aspects**: How ${keyword} brings people together
+- **Regional Variations**: Different cultural interpretations
+- **Modern Context**: ${capitalizedKeyword} in contemporary society
+
+## Where to Experience the Best ${capitalizedKeyword}
+
+For authentic ${keyword} experiences, consider visiting [${anchor}](${websiteUrl}), where traditional preparation meets modern excellence.
+
+### Restaurant Selection
+
+When choosing where to enjoy ${keyword}:
+
+- Look for authentic preparation methods
+- Check for fresh, quality ingredients
+- Consider the restaurant's reputation and reviews
+- Ask about sourcing and preparation techniques
+
+## Making ${capitalizedKeyword} at Home
+
+### Essential Ingredients
+
+To prepare ${keyword} at home, you'll need:
+
+- High-quality base ingredients
+- Proper seasonings and accompaniments
+- Fresh complementary ingredients
+- Traditional preparation tools
+
+### Step-by-Step Guide
+
+1. **Preparation**: Gather and prepare all ingredients
+2. **Initial Setup**: Arrange your workspace and tools
+3. **Main Preparation**: Follow traditional techniques
+4. **Final Assembly**: Proper presentation and serving
+5. **Serving**: Best practices for enjoying ${keyword}
+
+## Tips from the Experts
+
+Professional insights for the perfect ${keyword} experience:
+
+- **Quality Matters**: Never compromise on ingredient quality
+- **Technique is Key**: Proper preparation makes all the difference
+- **Practice Makes Perfect**: Skills improve with experience
+- **Respect Tradition**: Understanding traditional methods enhances appreciation
+
+## Common Mistakes to Avoid
+
+Avoid these common ${keyword} preparation errors:
+
+- Using subpar ingredients
+- Rushing the preparation process
+- Ignoring traditional techniques
+- Improper storage and handling
+- Inadequate seasoning or flavoring
+
+## The Future of ${capitalizedKeyword}
+
+As culinary trends evolve, ${keyword} continues to adapt while maintaining its core identity. Modern interpretations and fusion approaches are expanding the possibilities while respecting traditional foundations.
 
 ## Conclusion
 
-Mastering ${keyword} requires dedication, the right resources, and ongoing commitment to learning and improvement. By following the strategies outlined in this guide and leveraging professional tools and support, you can achieve exceptional results in your ${keyword} endeavors.
+${capitalizedKeyword} represents a perfect blend of tradition, craftsmanship, and culinary artistry. Whether you're a beginner exploring ${keyword} for the first time or an enthusiast looking to deepen your knowledge, understanding these fundamentals will enhance your appreciation and enjoyment.
 
-Ready to take your ${keyword} to the next level? Start your journey today with the comprehensive resources and expert guidance available at [${anchor}](${websiteUrl}).
+For the most authentic ${keyword} experience with traditional preparation and premium quality, visit [${anchor}](${websiteUrl}) and discover what makes exceptional ${keyword} truly special.
 
-Take action now and transform your approach to ${keyword} with proven strategies and professional support!
+Start your culinary journey with ${keyword} today and experience the rich traditions and flavors that have captivated food lovers for generations!`;
+    }
 
----
+    // Default general content for non-food keywords
+    return `# ${capitalizedKeyword}: Complete Guide and Overview
 
-*This guide provides a comprehensive overview of ${keyword} best practices and strategies. For personalized advice and advanced tools, visit [${anchor}](${websiteUrl}) to connect with industry experts.*`;
+## Introduction
+
+Exploring the world of ${keyword} opens up numerous possibilities and opportunities. This comprehensive guide provides insights, practical information, and expert perspectives on ${keyword}.
+
+## Understanding ${capitalizedKeyword}
+
+${capitalizedKeyword} encompasses various aspects that are important to understand for anyone interested in this topic. From fundamental concepts to advanced applications, ${keyword} offers rich possibilities for exploration and engagement.
+
+## Key Aspects of ${capitalizedKeyword}
+
+### Fundamental Elements
+
+The foundation of ${keyword} rests on several core principles:
+
+- **Core Concepts**: Essential knowledge about ${keyword}
+- **Practical Applications**: How ${keyword} is used in real-world scenarios
+- **Benefits and Advantages**: What makes ${keyword} valuable
+- **Best Practices**: Proven approaches to ${keyword}
+
+### Advanced Considerations
+
+For those looking to deepen their understanding of ${keyword}:
+
+- **Expert Techniques**: Professional approaches to ${keyword}
+- **Innovation and Trends**: Latest developments in ${keyword}
+- **Quality Standards**: Benchmarks for excellence in ${keyword}
+- **Future Perspectives**: Where ${keyword} is heading
+
+## Practical Guide to ${capitalizedKeyword}
+
+### Getting Started
+
+1. **Research and Planning**: Understanding your needs related to ${keyword}
+2. **Initial Steps**: First actions to take with ${keyword}
+3. **Building Knowledge**: Developing expertise in ${keyword}
+4. **Implementation**: Putting ${keyword} into practice
+
+### Professional Insights
+
+For expert guidance and professional-grade resources related to ${keyword}, [${anchor}](${websiteUrl}) offers comprehensive solutions and specialized knowledge.
+
+## Common Questions About ${capitalizedKeyword}
+
+### Frequently Asked Questions
+
+**What makes quality ${keyword}?**
+Quality ${keyword} is characterized by attention to detail, proper methodology, and consistent standards.
+
+**How do I choose the right approach to ${keyword}?**
+Consider your specific needs, available resources, and desired outcomes when selecting your ${keyword} approach.
+
+**What are the most important factors in ${keyword}?**
+Key factors include proper preparation, quality materials or information, and following established best practices.
+
+## Tips for Success with ${capitalizedKeyword}
+
+- **Research Thoroughly**: Understand all aspects before beginning
+- **Start with Quality**: Invest in proper resources from the beginning
+- **Learn from Experts**: Seek guidance from experienced professionals
+- **Practice Regularly**: Consistent engagement improves results
+- **Stay Updated**: Keep current with latest developments
+
+## Conclusion
+
+${capitalizedKeyword} offers numerous opportunities for those willing to invest time and effort in understanding its complexities. Whether you're just beginning your journey with ${keyword} or looking to enhance existing knowledge, the key is to approach it with dedication and proper guidance.
+
+For expert resources, professional advice, and comprehensive support in your ${keyword} endeavors, visit [${anchor}](${websiteUrl}) to access specialized knowledge and proven solutions.
+
+Begin your journey with ${keyword} today and discover the possibilities that await!`;
   }
 
   /**
