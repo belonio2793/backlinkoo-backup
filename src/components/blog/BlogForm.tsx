@@ -27,6 +27,9 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
   const [tone, setTone] = useState('professional');
   const [customInstructions, setCustomInstructions] = useState('');
   const [promptOverlayVisible, setPromptOverlayVisible] = useState(false);
+  const [testingProviders, setTestingProviders] = useState(false);
+  const [testWorkflowStep, setTestWorkflowStep] = useState('');
+  const [providerStatuses, setProviderStatuses] = useState<any[]>([]);
   const { toast } = useToast();
 
   const addSecondaryKeyword = () => {
