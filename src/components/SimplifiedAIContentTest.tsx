@@ -110,6 +110,12 @@ export function SimplifiedAIContentTest() {
 
       if (result.blogResult.success) {
         setGeneratedResult(result.blogResult);
+
+        // Extract provider information from metadata
+        const providers = result.blogResult.metadata?.providersUsed ||
+                         [result.blogResult.metadata?.generatedBy || 'Fallback'];
+        setApiProviders(providers);
+
         setShowSuccess(true);
         incrementCounter();
 
