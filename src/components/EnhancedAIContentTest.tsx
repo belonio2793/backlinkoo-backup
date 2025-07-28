@@ -78,12 +78,15 @@ export function EnhancedAIContentTest() {
       setProviderStatuses(testResult.providerStatuses);
 
       if (!testResult.canProceedToBlogGeneration) {
-        throw new Error(`API validation failed: ${testResult.errors.join(', ')}`);
+        console.warn('No working providers, but will use fallback generation');
       }
 
+      const workingCount = testResult.workingProviders.length;
       toast({
-        title: "Providers Validated",
-        description: `${testResult.workingProviders.length} providers available`,
+        title: workingCount > 0 ? "Providers Validated" : "Using Fallback Generation",
+        description: workingCount > 0 ?
+          `${workingCount} providers available` :
+          "API providers have issues, using intelligent fallback",
       });
 
       // Step 2: Generate blog content
