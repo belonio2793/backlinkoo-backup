@@ -2,6 +2,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { contentFilterService } from './contentFilterService';
 import { contentModerationService } from './contentModerationService';
 import { formatBlogTitle, formatBlogContent } from '@/utils/textFormatting';
+import { aiContentEngine } from './aiContentEngine';
+import { enhancedAIContentEngine } from './enhancedAIContentEngine';
 
 export interface GlobalBlogRequest {
   targetUrl: string;
@@ -239,11 +241,12 @@ class GlobalBlogGeneratorService {
         console.warn('Netlify function unavailable, using fallback:', netlifyError);
       }
 
-      // Fallback to local generation with OpenAI-style structure
-      const fallbackResult = await this.generateFallbackBlogPost(enhancedRequest);
+      // Use enhanced AI content engine as primary fallback
+      console.log('🚀 Using enhanced AI content engine for generation...');
+      const aiResult = await this.generateAIEnhancedBlogPost(enhancedRequest);
       this.updateRateLimit();
       
-      return fallbackResult;
+      return aiResult;
 
     } catch (error) {
       console.error('Global blog generation failed:', error);
@@ -254,8 +257,120 @@ class GlobalBlogGeneratorService {
     }
   }
 
+  private async generateAIEnhancedBlogPost(request: any): Promise<GlobalBlogResponse> {
+    try {
+      // Use the enhanced AI content engine for original content generation
+      const aiResult = await enhancedAIContentEngine.generateContent({
+        keyword: request.primaryKeyword,
+        targetUrl: request.targetUrl,
+        anchorText: request.anchorText,
+        userLocation: request.userLocation,
+        contentLength: request.additionalContext?.contentLength || 'medium',
+        contentTone: request.additionalContext?.contentTone || 'professional',
+        seoFocus: request.additionalContext?.seoFocus === 'high',
+        industry: request.additionalContext?.industry
+      });
+
+      if (aiResult.bestContent && aiResult.bestContent.length > 200) {
+        console.log('✅ AI content generation successful:', {
+          provider: aiResult.selectedProvider,
+          wordCount: aiResult.metadata.wordCount,
+          seoScore: aiResult.metadata.seoScore,
+          cost: `$${aiResult.totalCost.toFixed(4)}`
+        });
+
+        const content = aiResult.finalContent;
+        const title = aiResult.metadata.title;
+        const keywords = aiResult.metadata.keywords;
+        const metaDescription = aiResult.metadata.metaDescription;
+        const seoScore = aiResult.metadata.seoScore;
+        const readingTime = aiResult.metadata.readingTime;
+        const wordCount = aiResult.metadata.wordCount;
+
+        // Enhanced moderation of AI-generated content
+        const generatedContentModeration = await contentModerationService.moderateContent(
+          `${title} ${content}`,
+          request.targetUrl,
+          request.primaryKeyword,
+          request.anchorText,
+          undefined,
+          'ai_generated_content'
+        );
+
+        if (!generatedContentModeration.allowed) {
+          throw new Error(`AI-generated content was flagged for moderation: The content contains terms that require review before publication.`);
+        }
+
+        const formattedTitle = formatBlogTitle(title);
+        const formattedContent = formatBlogContent(content);
+
+        const blogPost = {
+          id: crypto.randomUUID(),
+          title: formattedTitle,
+          content: formattedContent,
+          excerpt: metaDescription,
+          slug: `${request.primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
+          keywords: keywords,
+          tags: keywords,
+          meta_description: metaDescription,
+          target_url: request.targetUrl,
+          anchor_text: request.anchorText || request.primaryKeyword,
+          seo_score: seoScore,
+          reading_time: readingTime,
+          word_count: wordCount,
+          view_count: 0,
+          author_name: 'Backlink ∞ AI',
+          category: 'AI-Generated SEO Guide',
+          ai_provider: aiResult.selectedProvider,
+          ai_generation_cost: aiResult.totalCost,
+          ai_processing_time: aiResult.processingTime,
+          published_url: `https://backlinkoo.com/blog/${request.primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
+          published_at: new Date().toISOString(),
+          is_trial_post: true,
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          contextual_links: []
+        };
+
+        await this.storeGlobalBlogPost(blogPost);
+
+        return {
+          success: true,
+          data: {
+            blogPost,
+            contextualLinks: {
+              primary: {
+                url: request.targetUrl,
+                anchor: request.anchorText || request.primaryKeyword,
+                context: 'AI-optimized backlink naturally integrated into content'
+              },
+              secondary: [
+                { url: request.targetUrl, anchor: 'learn more', context: 'Additional reference with AI enhancement' },
+                { url: request.targetUrl, anchor: 'get started', context: 'Call-to-action optimized by AI' }
+              ]
+            },
+            globalMetrics: {
+              totalRequestsToday: null,
+              averageGenerationTime: aiResult.processingTime,
+              successRate: null,
+              userCountry: request.userLocation || 'Unknown',
+              aiProvider: aiResult.selectedProvider,
+              contentQuality: seoScore
+            }
+          }
+        };
+      } else {
+        throw new Error('AI content generation produced insufficient content');
+      }
+    } catch (aiError) {
+      console.warn('AI content engine failed, falling back to template generation:', aiError);
+      return this.generateFallbackBlogPost(request);
+    }
+  }
+
   private async generateFallbackBlogPost(request: any): Promise<GlobalBlogResponse> {
-    // Simulate AI generation with realistic content
+    // Fallback to template-based generation when AI fails
     const content = this.generateFallbackContent(request);
 
     // Enhanced moderation of generated content
