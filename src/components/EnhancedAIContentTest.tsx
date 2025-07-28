@@ -50,11 +50,32 @@ export function EnhancedAIContentTest() {
 
   const { toast } = useToast();
 
-  // Dynamic prompts based on user inputs
-  const dynamicPrompts = [
-    `Write 2000 words on "${keyword}" and hyperlink the "${anchorText}" with the ${url} in a search engine optimized manner`,
-    `Create a 2000 word original blog post that encapsulates user intent and website correlation based on "${keyword}" and hyperlink the "${anchorText}" with the ${url} following search engine optimized principles and abide by strict grammar and punctuality.`
+  // Internal prompt templates that rotate on each instance
+  const promptTemplates = [
+    `Write 2000 words on "{keyword}" and hyperlink the "{anchorText}" with the {url} in a search engine optimized manner`,
+    `Create a 2000 word original blog post that encapsulates user intent and website correlation based on "{keyword}" and hyperlink the "{anchorText}" with the {url} following search engine optimized principles and abide by strict grammar and punctuality.`,
+    `Develop a comprehensive {wordCount} word article about "{keyword}" that naturally incorporates "{anchorText}" linking to {url} while maintaining excellent SEO practices and engaging readability.`,
+    `Generate an authoritative blog post covering "{keyword}" in {wordCount} words, strategically placing "{anchorText}" as a contextual link to {url} following modern content marketing best practices.`,
+    `Craft an in-depth guide on "{keyword}" spanning {wordCount} words, seamlessly integrating "{anchorText}" with a reference to {url} while optimizing for search engines and user experience.`
   ];
+
+  // Select prompt based on session (rotates per refresh/instance)
+  const getSelectedPrompt = (): string => {
+    const sessionSeed = sessionStorage.getItem('aitest-prompt-seed') || Date.now().toString();
+    if (!sessionStorage.getItem('aitest-prompt-seed')) {
+      sessionStorage.setItem('aitest-prompt-seed', sessionSeed);
+    }
+
+    const promptIndex = parseInt(sessionSeed) % promptTemplates.length;
+    const selectedTemplate = promptTemplates[promptIndex];
+
+    // Replace placeholders with actual values
+    return selectedTemplate
+      .replace('{keyword}', keyword)
+      .replace('{anchorText}', anchorText)
+      .replace('{url}', url)
+      .replace('{wordCount}', '2000');
+  };
 
   // Generate slug from keyword
   const generateSlug = (keyword: string): string => {
