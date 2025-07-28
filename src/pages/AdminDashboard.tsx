@@ -20,6 +20,7 @@ import { SupabaseEmailTest } from "@/components/SupabaseEmailTest";
 import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
+import { Footer } from "@/components/Footer";
 
 import { SystemStatusCheck } from "@/components/SystemStatusCheck";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
