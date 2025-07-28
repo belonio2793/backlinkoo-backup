@@ -197,14 +197,14 @@ export class ProductionAIContentManager {
       case 'OpenAI':
         return await provider.service.generateContent(prompt, {
           ...options,
-          model: 'gpt-4',
+          model: 'gpt-3.5-turbo',
           systemPrompt: this.getSystemPrompt(params.contentType)
         });
-      
+
       case 'Grok':
         return await provider.service.generateContent(prompt, {
           ...options,
-          model: 'grok-beta',
+          model: 'grok-2-1212',
           systemPrompt: this.getSystemPrompt(params.contentType)
         });
       
