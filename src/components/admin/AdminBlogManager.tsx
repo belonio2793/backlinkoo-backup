@@ -564,17 +564,25 @@ export function AdminBlogManager() {
                     <div className="flex flex-col gap-2 ml-4 min-w-[200px]">
                       {/* Published URL */}
                       <div className="text-xs">
-                        <div className="text-gray-500 mb-1">Published URL:</div>
+                        <div className="text-gray-500 mb-1">
+                          {post.published_url?.includes('fly.dev') ? 'External URL:' : 'Published URL:'}
+                        </div>
                         <div className="flex items-center gap-1 bg-gray-50 p-2 rounded border">
                           <code className="text-xs text-blue-600 truncate max-w-[150px]">
-                            {window.location.origin}/blog/{post.slug}
+                            {post.published_url?.includes('fly.dev')
+                              ? post.published_url
+                              : `${window.location.origin}/blog/${post.slug}`
+                            }
                           </code>
                           <Button
                             variant="ghost"
                             size="sm"
                             className="h-6 w-6 p-0"
                             onClick={() => {
-                              navigator.clipboard.writeText(`${window.location.origin}/blog/${post.slug}`);
+                              const url = post.published_url?.includes('fly.dev')
+                                ? post.published_url
+                                : `${window.location.origin}/blog/${post.slug}`;
+                              navigator.clipboard.writeText(url);
                               toast({ title: "URL copied to clipboard" });
                             }}
                           >
@@ -586,7 +594,14 @@ export function AdminBlogManager() {
                             className="h-6 w-6 p-0"
                             asChild
                           >
-                            <a href={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer">
+                            <a
+                              href={post.published_url?.includes('fly.dev')
+                                ? post.published_url
+                                : `/blog/${post.slug}`
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
                               <ExternalLink className="h-3 w-3" />
                             </a>
                           </Button>
