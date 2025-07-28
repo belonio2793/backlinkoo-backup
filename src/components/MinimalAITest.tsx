@@ -60,6 +60,89 @@ export function MinimalAITest() {
     setLogs(prev => [...prev.slice(-49), log]); // Keep last 50 logs
   };
 
+  const validateInputs = () => {
+    if (!keyword.trim()) {
+      addLog('error', 'VALIDATION', 'Keyword is required');
+      return false;
+    }
+    if (!url.trim()) {
+      addLog('error', 'VALIDATION', 'Target URL is required');
+      return false;
+    }
+    if (!anchorText.trim()) {
+      addLog('error', 'VALIDATION', 'Anchor text is required');
+      return false;
+    }
+
+    // URL validation
+    try {
+      new URL(url);
+    } catch {
+      addLog('error', 'VALIDATION', 'Invalid URL format');
+      return false;
+    }
+
+    // Keyword validation
+    if (keyword.length < 2) {
+      addLog('error', 'VALIDATION', 'Keyword too short (minimum 2 characters)');
+      return false;
+    }
+
+    if (anchorText.length < 3) {
+      addLog('error', 'VALIDATION', 'Anchor text too short (minimum 3 characters)');
+      return false;
+    }
+
+    addLog('success', 'VALIDATION', 'All inputs validated successfully');
+    return true;
+  };
+
+  const generateSlug = (keyword: string, provider: string) => {
+    const baseSlug = keyword.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    return `${baseSlug}-${provider.toLowerCase().replace(/\s/g, '')}-${randomSuffix}`;
+  };
+
+  const validateContent = (content: string, keyword: string, url: string, anchorText: string) => {
+    let score = 0;
+    const issues = [];
+
+    // Check content length
+    if (content.length < 500) {
+      issues.push('Content too short');
+    } else {
+      score += 20;
+    }
+
+    // Check keyword presence
+    if (content.toLowerCase().includes(keyword.toLowerCase())) {
+      score += 30;
+    } else {
+      issues.push('Keyword not found in content');
+    }
+
+    // Check URL presence
+    if (content.includes(url)) {
+      score += 25;
+    } else {
+      issues.push('Target URL not included');
+    }
+
+    // Check anchor text
+    if (content.includes(anchorText)) {
+      score += 25;
+    } else {
+      issues.push('Anchor text not found');
+    }
+
+    return { score, isValid: score >= 50, issues };
+  };
+
   const testApiProviders = async () => {
     addLog('info', 'SYSTEM', 'Initializing API provider tests...');
     setCurrentProcess('Testing API providers...');
