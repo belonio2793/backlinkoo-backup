@@ -199,6 +199,34 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
         </Card>
       </div>
 
+      {/* Prompt Overlay Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5" />
+              Auto-Generated Content Prompt
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPromptOverlayVisible(!promptOverlayVisible)}
+            >
+              {promptOverlayVisible ? 'Hide Prompt' : 'Show Prompt'}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <PromptOverlay
+            websiteUrl={targetUrl}
+            keyword={primaryKeyword}
+            anchorText={secondaryKeywords[0]} // Use first secondary keyword as anchor text
+            isVisible={promptOverlayVisible}
+            onToggleVisibility={() => setPromptOverlayVisible(!promptOverlayVisible)}
+          />
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
