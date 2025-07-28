@@ -143,7 +143,11 @@ export class HuggingFaceService {
     error?: string;
   }> {
     if (!this.token) {
-      throw new Error('HuggingFace token not configured');
+      return {
+        summary: '',
+        success: false,
+        error: 'HuggingFace token not configured'
+      };
     }
 
     const {
