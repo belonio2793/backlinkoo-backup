@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { PromptOverlay } from '@/components/ui/prompt-overlay';
 import { useToast } from '@/hooks/use-toast';
 import { productionAIContentManager } from '@/services/productionAIContentManager';
-import { Loader2, Plus, X, Link, Target, Hash, Eye } from 'lucide-react';
+import { aiTestWorkflow } from '@/services/aiTestWorkflow';
+import { Loader2, Plus, X, Link, Target, Hash, Eye, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 interface BlogFormProps {
   onContentGenerated: (content: any) => void;
