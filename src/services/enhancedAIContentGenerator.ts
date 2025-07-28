@@ -451,7 +451,7 @@ Format the response as JSON with:
           },
           body: JSON.stringify({
             messages: [{ role: 'user', content: 'test' }],
-            model: 'grok-beta',
+            model: 'grok-2-1212',
             max_tokens: 10
           })
         });
