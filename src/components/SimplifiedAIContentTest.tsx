@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { aiTestWorkflow } from '@/services/aiTestWorkflow';
+import { multiApiContentGenerator } from '@/services/multiApiContentGenerator';
 import {
   CheckCircle2,
   ExternalLink,
