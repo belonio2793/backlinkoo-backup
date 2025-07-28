@@ -98,7 +98,7 @@ export function ClaimTrialPostDialog({
     setIsClaiming(true);
 
     try {
-      const { hasCredits, credits } = await checkUserCredits();
+      const { canClaim, hasExistingClaim } = await checkUserFreeClaims();
 
       if (!currentUser) {
         // Redirect to signup with claim intent
@@ -106,13 +106,12 @@ export function ClaimTrialPostDialog({
         return;
       }
 
-      if (!hasCredits) {
+      if (!canClaim || hasExistingClaim) {
         toast({
-          title: "No Credits Available",
-          description: "You need at least 1 credit to claim this trial post. Purchase credits to continue.",
+          title: "Free Claim Limit Reached",
+          description: "You already have a free blog post saved. Each account can only claim one free trial post since they auto-delete after 24 hours unless claimed.",
           variant: "destructive"
         });
-        navigate('/dashboard');
         return;
       }
 
