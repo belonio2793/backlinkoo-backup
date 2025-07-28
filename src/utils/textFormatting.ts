@@ -47,91 +47,90 @@ function capitalizeWord(word: string): string {
 /**
  * Formats blog content to fix common issues:
  * - Proper title case for headings
- * - Consistent bullet point structure
+ * - Convert bullet points to hyphenated format
  * - Proper spacing around asterisks
  */
 export function formatBlogContent(content: string): string {
   if (!content) return '';
-  
+
   let formattedContent = content;
-  
-  // Fix heading capitalization
+
+  // Fix heading capitalization for ALL heading tags (h1-h6)
   formattedContent = formattedContent.replace(
     /<h([1-6])>(.*?)<\/h[1-6]>/gi,
     (match, level, text) => {
-      const titleCased = toTitleCase(text.replace(/<[^>]*>/g, '')); // Remove any inner HTML
+      // Strip any HTML tags from the text content
+      const cleanText = text.replace(/<[^>]*>/g, '');
+      const titleCased = toTitleCase(cleanText);
       return `<h${level}>${titleCased}</h${level}>`;
     }
   );
-  
-  // Fix broken bullet point structures
-  formattedContent = fixBulletPoints(formattedContent);
-  
+
+  // Convert bullet points to hyphenated format
+  formattedContent = convertBulletPointsToHyphens(formattedContent);
+
   // Fix spacing around asterisks
   formattedContent = fixAsteriskSpacing(formattedContent);
-  
+
   return formattedContent;
 }
 
 /**
- * Fixes broken bullet point structures and ensures consistency
+ * Converts bullet points from ul/ol/li structure to simple hyphenated format
  */
-function fixBulletPoints(content: string): string {
+function convertBulletPointsToHyphens(content: string): string {
   let fixed = content;
-  
-  // Fix broken nested structures like <ol><ul><li>
-  fixed = fixed.replace(/<ol>\s*<ul>/gi, '<ul>');
-  fixed = fixed.replace(/<\/ul>\s*<\/ol>/gi, '</ul>');
-  
-  // Fix orphaned <li> elements (not inside ul or ol)
-  fixed = fixed.replace(/(?<!<ul[^>]*>|<ol[^>]*>)(\s*<li[^>]*>.*?<\/li>)/gi, '<ul>$1</ul>');
-  
-  // Fix multiple consecutive ul/ol tags
-  fixed = fixed.replace(/<\/ul>\s*<ul>/gi, '');
-  fixed = fixed.replace(/<\/ol>\s*<ol>/gi, '');
-  
-  // Ensure proper nesting - no direct ul inside ol or vice versa without li
-  fixed = fixed.replace(/<ol>(\s*<ul>)/gi, '<ol><li><ul>');
-  fixed = fixed.replace(/(<\/ul>\s*)<\/ol>/gi, '</ul></li></ol>');
-  
-  // Fix unclosed list tags by finding orphaned opening tags
-  const openUl = (fixed.match(/<ul[^>]*>/gi) || []).length;
-  const closeUl = (fixed.match(/<\/ul>/gi) || []).length;
-  const openOl = (fixed.match(/<ol[^>]*>/gi) || []).length;
-  const closeOl = (fixed.match(/<\/ol>/gi) || []).length;
-  
-  // Add missing closing tags
-  if (openUl > closeUl) {
-    fixed += '</ul>'.repeat(openUl - closeUl);
-  }
-  if (openOl > closeOl) {
-    fixed += '</ol>'.repeat(openOl - closeOl);
-  }
-  
+
+  // Convert ul/li structures to hyphenated lists
+  fixed = fixed.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (match, listContent) => {
+    // Extract list items and convert to hyphens
+    const items = listContent.match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || [];
+    const hyphenItems = items.map((item: string) => {
+      const content = item.replace(/<\/?li[^>]*>/gi, '').trim();
+      return `- ${content}`;
+    });
+    return hyphenItems.join('\n');
+  });
+
+  // Convert ol/li structures to hyphenated lists (instead of numbered)
+  fixed = fixed.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (match, listContent) => {
+    const items = listContent.match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || [];
+    const hyphenItems = items.map((item: string) => {
+      const content = item.replace(/<\/?li[^>]*>/gi, '').trim();
+      return `- ${content}`;
+    });
+    return hyphenItems.join('\n');
+  });
+
+  // Clean up any orphaned li tags
+  fixed = fixed.replace(/<\/?li[^>]*>/gi, '');
+
   return fixed;
 }
 
 /**
- * Fixes spacing around asterisk characters
+ * Fixes spacing around asterisk characters and ensures proper formatting
  */
 function fixAsteriskSpacing(content: string): string {
   let fixed = content;
-  
-  // Fix cases where asterisk is stuck to words without spaces
-  // e.g., "word*another" becomes "word * another"
+
+  // Fix asterisks at the beginning of sentences - ensure single asterisk with space
+  // Transform "*This comprehensive guide" to "* This comprehensive guide"
+  fixed = fixed.replace(/^\s*\*+\s*([A-Z])/gm, '* $1');
+
+  // Fix mid-sentence asterisks - ensure spaces around them
   fixed = fixed.replace(/(\w)\*(\w)/g, '$1 * $2');
-  
-  // Fix cases where there's no space before asterisk at start of emphasis
-  // e.g., "word*emphasis*" becomes "word *emphasis*"
+
+  // Fix emphasis asterisks - ensure proper spacing
   fixed = fixed.replace(/(\w)\*([^*\s])/g, '$1 *$2');
-  
-  // Fix cases where there's no space after asterisk at end of emphasis
-  // e.g., "*emphasis*word" becomes "*emphasis* word"
   fixed = fixed.replace(/([^*\s])\*(\w)/g, '$1* $2');
-  
+
+  // Clean up multiple consecutive asterisks
+  fixed = fixed.replace(/\*{2,}/g, '*');
+
   // Fix double spaces that might have been created
   fixed = fixed.replace(/\s+/g, ' ');
-  
+
   return fixed;
 }
 
