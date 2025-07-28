@@ -166,14 +166,14 @@ The goal is to create content so valuable and engaging that other sites want to 
         let result;
         if (provider.name === 'openai') {
           result = await provider.service.generateContent(selectedPrompt, {
-            model: 'gpt-4',
+            model: 'gpt-3.5-turbo',
             maxTokens: this.getMaxTokens(request.contentLength),
             temperature: 0.7,
             systemPrompt
           });
         } else if (provider.name === 'grok') {
           result = await provider.service.generateContent(selectedPrompt, {
-            model: 'grok-beta',
+            model: 'grok-2-1212',
             maxTokens: this.getMaxTokens(request.contentLength),
             temperature: 0.7,
             systemPrompt

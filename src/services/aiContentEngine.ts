@@ -51,18 +51,18 @@ export interface AIContentResult {
 
 export class AIContentEngine {
   private readonly providers = [
-    { 
-      name: 'openai', 
-      service: openAIService, 
+    {
+      name: 'openai',
+      service: openAIService,
       weight: 0.25,
-      model: 'gpt-4',
+      model: 'gpt-3.5-turbo',
       maxTokens: 3500
     },
-    { 
-      name: 'grok', 
-      service: grokService, 
+    {
+      name: 'grok',
+      service: grokService,
       weight: 0.20,
-      model: 'grok-beta',
+      model: 'grok-2-1212',
       maxTokens: 3000
     },
     { 

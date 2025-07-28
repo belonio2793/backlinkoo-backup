@@ -57,11 +57,16 @@ export class GrokService {
     error?: string;
   }> {
     if (!this.apiKey) {
-      throw new Error('Grok API key not configured');
+      return {
+        content: '',
+        usage: { tokens: 0, cost: 0 },
+        success: false,
+        error: 'Grok API key not configured'
+      };
     }
 
     const {
-      model = 'grok-beta',
+      model = 'grok-2-1212',
       maxTokens = 3000,
       temperature = 0.7,
       systemPrompt = 'You are Grok, a witty and knowledgeable AI assistant. Create engaging, SEO-optimized content with natural backlink integration.'
@@ -94,7 +99,23 @@ export class GrokService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Grok API error: ${response.status} - ${errorData.error?.message || response.statusText}`);
+        let errorMessage = `Grok API error: ${response.status}`;
+
+        if (response.status === 403) {
+          errorMessage += ' - Access forbidden. Check if your Grok API key is valid and has the required permissions.';
+        } else if (response.status === 404) {
+          errorMessage += ' - Model not found. Check if the model name is correct and available.';
+        } else if (response.status === 401) {
+          errorMessage += ' - Invalid API key. Check your Grok API key.';
+        } else if (response.status === 429) {
+          errorMessage += ' - Rate limit exceeded. Try again later.';
+        } else if (errorData.error?.message) {
+          errorMessage += ` - ${errorData.error.message}`;
+        } else {
+          errorMessage += ` - ${response.statusText}`;
+        }
+
+        throw new Error(errorMessage);
       }
 
       const data: GrokResponse = await response.json();
@@ -140,7 +161,7 @@ export class GrokService {
         },
         body: JSON.stringify({
           messages: [{ role: 'user', content: 'test' }],
-          model: 'grok-beta',
+          model: 'grok-2-1212',
           max_tokens: 10
         })
       });

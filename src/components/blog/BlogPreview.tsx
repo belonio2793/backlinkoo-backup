@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { blogPublisher } from '@/services/blogPublisher';
 import {
@@ -16,7 +17,11 @@ import {
   Hash,
   FileText,
   ExternalLink,
-  Loader2
+  Loader2,
+  CheckCircle2,
+  Clock,
+  Zap,
+  Link
 } from 'lucide-react';
 
 interface BlogPreviewProps {
@@ -99,10 +104,11 @@ export function BlogPreview({ content }: BlogPreviewProps) {
   };
 
   const copyToClipboard = async () => {
-    await navigator.clipboard.writeText(content.content);
+    const textToCopy = content.blogUrl || content.content;
+    await navigator.clipboard.writeText(textToCopy);
     toast({
       title: "Copied to Clipboard",
-      description: "Blog post HTML content has been copied.",
+      description: content.blogUrl ? "Blog URL has been copied." : "Blog post HTML content has been copied.",
     });
   };
 
@@ -112,6 +118,89 @@ export function BlogPreview({ content }: BlogPreviewProps) {
 
   return (
     <div className="space-y-6">
+      {/* AI Workflow Results */}
+      {content.blogUrl && (
+        <Alert className="border-green-200 bg-green-50">
+          <CheckCircle2 className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-800">
+            <strong>Blog Successfully Generated!</strong> Your blog post is now live at:{' '}
+            <a
+              href={content.blogUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium underline hover:no-underline"
+            >
+              {content.blogUrl}
+            </a>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* AI Test Workflow Results */}
+      {content.metadata?.testResult && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-blue-600" />
+              AI Workflow Results
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-1">
+                <p className="text-sm font-medium flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  Test Duration
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {content.metadata.testResult.testDuration}ms
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Working Providers</p>
+                <p className="text-sm text-muted-foreground">
+                  {content.metadata.testResult.workingProviders.length} available
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Recommended Provider</p>
+                <Badge variant="outline" className="text-xs">
+                  {content.metadata.testResult.recommendedProvider}
+                </Badge>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Provider Status Summary</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {content.metadata.testResult.providerStatuses.map((provider: any, index: number) => (
+                  <div key={index} className="p-2 border rounded text-xs">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium capitalize">{provider.provider}</span>
+                      {provider.available ? (
+                        <CheckCircle2 className="h-3 w-3 text-green-600" />
+                      ) : (
+                        <div className="h-3 w-3 bg-red-600 rounded-full" />
+                      )}
+                    </div>
+                    <div className={`text-xs px-1 py-0.5 rounded ${
+                      provider.quotaStatus === 'available' ? 'bg-green-100 text-green-800' :
+                      provider.quotaStatus === 'low' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {provider.quotaStatus}
+                      {provider.usagePercentage && ` (${provider.usagePercentage}%)`}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Post Metadata */}
       <Card>
         <CardHeader>
@@ -232,23 +321,44 @@ export function BlogPreview({ content }: BlogPreviewProps) {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3">
-            <Button
-              onClick={publishPost}
-              disabled={isPublishing}
-              className="flex items-center gap-2"
-            >
-              {isPublishing ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Publishing...
-                </>
-              ) : (
-                <>
-                  <Share className="h-4 w-4" />
-                  Publish & Create Backlink
-                </>
-              )}
-            </Button>
+            {content.blogUrl ? (
+              <>
+                <Button asChild>
+                  <a
+                    href={content.blogUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    View Published Blog
+                  </a>
+                </Button>
+                <Button variant="outline" onClick={copyToClipboard}>
+                  <Link className="h-4 w-4 mr-2" />
+                  Copy Blog URL
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={publishPost}
+                disabled={isPublishing}
+                className="flex items-center gap-2"
+              >
+                {isPublishing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Publishing...
+                  </>
+                ) : (
+                  <>
+                    <Share className="h-4 w-4" />
+                    Publish & Create Backlink
+                  </>
+                )}
+              </Button>
+            )}
+
             <Button variant="outline" onClick={copyToClipboard}>
               <Code className="h-4 w-4 mr-2" />
               Copy HTML

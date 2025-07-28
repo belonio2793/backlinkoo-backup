@@ -6,9 +6,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { PromptOverlay } from '@/components/ui/prompt-overlay';
 import { useToast } from '@/hooks/use-toast';
 import { productionAIContentManager } from '@/services/productionAIContentManager';
-import { Loader2, Plus, X, Link, Target, Hash } from 'lucide-react';
+import { aiTestWorkflow } from '@/services/aiTestWorkflow';
+import { Loader2, Plus, X, Link, Target, Hash, Eye, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 interface BlogFormProps {
   onContentGenerated: (content: any) => void;
@@ -24,6 +26,10 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
   const [wordCount, setWordCount] = useState('1500');
   const [tone, setTone] = useState('professional');
   const [customInstructions, setCustomInstructions] = useState('');
+  const [promptOverlayVisible, setPromptOverlayVisible] = useState(false);
+  const [testingProviders, setTestingProviders] = useState(false);
+  const [testWorkflowStep, setTestWorkflowStep] = useState('');
+  const [providerStatuses, setProviderStatuses] = useState<any[]>([]);
   const { toast } = useToast();
 
   const addSecondaryKeyword = () => {
@@ -48,33 +54,66 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
     }
 
     setIsGenerating(true);
-    
+    setTestingProviders(true);
+
     try {
-      // Generate content using Production AI service with intelligent provider selection
-      const generatedContent = await productionAIContentManager.generateContent({
-        targetUrl,
-        primaryKeyword,
-        secondaryKeywords,
-        contentType: contentType as 'blog-post' | 'editorial' | 'guest-post' | 'resource-page',
-        wordCount: parseInt(wordCount),
-        tone,
-        customInstructions
+      // Step 1: Run AI test workflow to validate providers
+      setTestWorkflowStep('Testing AI provider connectivity...');
+
+      const workflowResult = await aiTestWorkflow.processCompleteWorkflow({
+        websiteUrl: targetUrl,
+        keyword: primaryKeyword,
+        anchorText: secondaryKeywords[0] || primaryKeyword,
+        sessionId: crypto.randomUUID()
       });
 
-      onContentGenerated(generatedContent);
-      
-      toast({
-        title: "Content Generated Successfully",
-        description: `Generated ${wordCount}-word blog post about "${primaryKeyword}"`,
-      });
+      const { testResult, blogResult } = workflowResult;
+      setProviderStatuses(testResult.providerStatuses);
+
+      if (!testResult.success) {
+        throw new Error(`AI provider validation failed: ${testResult.errors.join(', ')}`);
+      }
+
+      setTestWorkflowStep('Generating optimized blog content...');
+
+      if (blogResult.success && blogResult.blogUrl) {
+        // Success! Return the published blog URL
+        onContentGenerated({
+          ...blogResult,
+          metadata: {
+            ...blogResult.metadata,
+            targetUrl,
+            primaryKeyword,
+            secondaryKeywords,
+            contentType,
+            wordCount: parseInt(wordCount),
+            tone,
+            customInstructions,
+            testResult,
+            workingProviders: testResult.workingProviders,
+            recommendedProvider: testResult.recommendedProvider
+          }
+        });
+
+        toast({
+          title: "Blog Generated Successfully!",
+          description: `Your blog post is now live at: ${blogResult.blogUrl}`,
+        });
+      } else {
+        throw new Error(blogResult.error || 'Blog generation failed after successful provider validation');
+      }
+
     } catch (error) {
+      console.error('Content generation failed:', error);
       toast({
         title: "Generation Failed",
-        description: "Failed to generate content. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate content. Please try again.",
         variant: "destructive"
       });
     } finally {
       setIsGenerating(false);
+      setTestingProviders(false);
+      setTestWorkflowStep('');
     }
   };
 
@@ -197,6 +236,34 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
         </Card>
       </div>
 
+      {/* Prompt Overlay Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5" />
+              Auto-Generated Content Prompt
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPromptOverlayVisible(!promptOverlayVisible)}
+            >
+              {promptOverlayVisible ? 'Hide Prompt' : 'Show Prompt'}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <PromptOverlay
+            websiteUrl={targetUrl}
+            keyword={primaryKeyword}
+            anchorText={secondaryKeywords[0]} // Use first secondary keyword as anchor text
+            isVisible={promptOverlayVisible}
+            onToggleVisibility={() => setPromptOverlayVisible(!promptOverlayVisible)}
+          />
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -214,19 +281,75 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
         </CardContent>
       </Card>
 
-      <Button 
-        onClick={generateContent} 
-        disabled={isGenerating} 
+      {/* AI Provider Status Display */}
+      {(testingProviders || providerStatuses.length > 0) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5" />
+              AI Provider Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {testingProviders && (
+              <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                  <span className="text-sm font-medium text-blue-700">{testWorkflowStep}</span>
+                </div>
+              </div>
+            )}
+
+            {providerStatuses.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {providerStatuses.map((provider, index) => (
+                  <div key={index} className="p-3 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium capitalize text-sm">{provider.provider}</span>
+                      {provider.available ? (
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <AlertTriangle className="h-4 w-4 text-red-600" />
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <div className={`text-xs px-2 py-1 rounded ${
+                        provider.quotaStatus === 'available' ? 'bg-green-100 text-green-800' :
+                        provider.quotaStatus === 'low' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        Quota: {provider.quotaStatus}
+                        {provider.usagePercentage && (
+                          <span className="ml-1">({provider.usagePercentage}%)</span>
+                        )}
+                      </div>
+                      {provider.quotaResetTime && (
+                        <div className="text-xs text-muted-foreground">
+                          Resets: {new Date(provider.quotaResetTime).toLocaleTimeString()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <Button
+        onClick={generateContent}
+        disabled={isGenerating}
         size="lg"
         className="w-full"
       >
         {isGenerating ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Generating Content...
+            {testWorkflowStep || 'Generating Content...'}
           </>
         ) : (
-          'Generate SEO Blog Post'
+          'Generate SEO Blog Post with AI Validation'
         )}
       </Button>
     </div>

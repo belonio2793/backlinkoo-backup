@@ -60,7 +60,12 @@ export class CohereService {
     error?: string;
   }> {
     if (!this.apiKey) {
-      throw new Error('Cohere API key not configured');
+      return {
+        content: '',
+        usage: { tokens: 0, cost: 0 },
+        success: false,
+        error: 'Cohere API key not configured'
+      };
     }
 
     const {
@@ -144,7 +149,11 @@ export class CohereService {
     error?: string;
   }> {
     if (!this.apiKey) {
-      throw new Error('Cohere API key not configured');
+      return {
+        classifications: [],
+        success: false,
+        error: 'Cohere API key not configured'
+      };
     }
 
     try {

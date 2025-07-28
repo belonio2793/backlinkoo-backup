@@ -131,7 +131,7 @@ export class EnhancedAIContentGenerator {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 3500,
         temperature: 0.7
@@ -163,7 +163,7 @@ export class EnhancedAIContentGenerator {
       },
       body: JSON.stringify({
         messages: [{ role: 'user', content: prompt }],
-        model: 'grok-beta',
+        model: 'grok-2-1212',
         stream: false,
         temperature: 0.7
       })
@@ -451,7 +451,7 @@ Format the response as JSON with:
           },
           body: JSON.stringify({
             messages: [{ role: 'user', content: 'test' }],
-            model: 'grok-beta',
+            model: 'grok-2-1212',
             max_tokens: 10
           })
         });
