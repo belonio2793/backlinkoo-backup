@@ -806,7 +806,7 @@ Begin your journey with ${keyword} today!`;
               </Button>
             </div>
             <div className="text-xs text-muted-foreground">
-              Click to edit the URL slug. Preview: https://backlinkoo.com/blog/{generatedSlug}
+              Click to edit the URL slug. Preview: {window.location.origin}/blog/{generatedSlug}
             </div>
           </CardContent>
         </Card>
