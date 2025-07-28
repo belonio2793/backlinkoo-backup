@@ -33,6 +33,8 @@ interface GeneratedContent {
   isValid: boolean;
   error?: string;
   generateTime: number;
+  promptUsed: string;
+  promptIndex: number;
 }
 
 export function MinimalAITest() {
