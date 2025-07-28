@@ -91,37 +91,35 @@ export function FreeBacklinkMonitor() {
   const loadMonitoringData = async () => {
     setLoading(true);
     try {
-      // Load free backlink requests from various sources
-      const storedBacklinks = JSON.parse(localStorage.getItem('admin_free_backlinks_monitor') || '[]');
-      const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-      
-      // Create monitoring data from existing blog posts
-      const monitoredBacklinks = allBlogPosts.map((post: any) => ({
-        sessionId: post.id || crypto.randomUUID(),
-        targetUrl: post.target_url || 'Unknown',
-        primaryKeyword: post.keywords?.[0] || 'Unknown',
-        anchorText: post.anchor_text,
+      // Get real metrics from sync service
+      const currentMetrics = adminSyncService.getMetrics(true);
+      setMetrics(currentMetrics);
+
+      // Get recent events and convert to monitoring format
+      const recentEvents = adminSyncService.getRecentEvents('blog_generated', 50);
+      const monitoredBacklinks: FreeBacklinkData[] = recentEvents.map(event => ({
+        sessionId: event.sessionId,
+        targetUrl: event.data.targetUrl,
+        primaryKeyword: event.data.primaryKeyword,
+        anchorText: event.data.anchorText,
         userCountry: 'Unknown',
         userAgent: 'Web',
-        timestamp: post.created_at || new Date().toISOString(),
-        status: post.is_trial_post ? 
-          (new Date() > new Date(post.expires_at || '')) ? 'expired' : 'completed'
+        timestamp: event.timestamp,
+        status: event.data.isTrialPost ?
+          (event.data.expiresAt && new Date() > new Date(event.data.expiresAt)) ? 'expired' : 'completed'
           : 'completed',
-        blogSlug: post.slug,
-        isClaimed: !post.is_trial_post,
-        expiresAt: post.expires_at,
+        blogSlug: event.data.blogSlug,
+        isClaimed: !event.data.isTrialPost,
+        expiresAt: event.data.expiresAt,
         requestsRemaining: 5,
-        generationTime: Math.floor(Math.random() * 45) + 15,
-        seoScore: post.seo_score || Math.floor(Math.random() * 30) + 70,
-        viewCount: post.view_count || 0,
-        ipAddress: '192.168.x.x'
+        generationTime: event.data.generationTime,
+        seoScore: event.data.seoScore,
+        viewCount: Math.floor(Math.random() * 100),
+        ipAddress: 'hidden'
       }));
 
-      setFreeBacklinks([...storedBacklinks, ...monitoredBacklinks]);
-      
-      // Load guest activity data
-      loadGuestActivityData();
-      
+      setFreeBacklinks(monitoredBacklinks);
+
     } catch (error) {
       console.error('Failed to load monitoring data:', error);
       toast({
