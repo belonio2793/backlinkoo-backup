@@ -281,19 +281,72 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
         </CardContent>
       </Card>
 
-      <Button 
-        onClick={generateContent} 
-        disabled={isGenerating} 
+      {/* AI Provider Status Display */}
+      {(testingProviders || providerStatuses.length > 0) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5" />
+              AI Provider Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {testingProviders && (
+              <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                  <span className="text-sm font-medium text-blue-700">{testWorkflowStep}</span>
+                </div>
+              </div>
+            )}
+
+            {providerStatuses.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {providerStatuses.map((provider, index) => (
+                  <div key={index} className="p-3 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium capitalize text-sm">{provider.provider}</span>
+                      {provider.available ? (
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <AlertTriangle className="h-4 w-4 text-red-600" />
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <div className={`text-xs px-2 py-1 rounded ${
+                        provider.quotaStatus === 'available' ? 'bg-green-100 text-green-800' :
+                        provider.quotaStatus === 'low' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        Quota: {provider.quotaStatus}
+                      </div>
+                      {provider.quotaResetTime && (
+                        <div className="text-xs text-muted-foreground">
+                          Resets: {new Date(provider.quotaResetTime).toLocaleTimeString()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <Button
+        onClick={generateContent}
+        disabled={isGenerating}
         size="lg"
         className="w-full"
       >
         {isGenerating ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Generating Content...
+            {testWorkflowStep || 'Generating Content...'}
           </>
         ) : (
-          'Generate SEO Blog Post'
+          'Generate SEO Blog Post with AI Validation'
         )}
       </Button>
     </div>
