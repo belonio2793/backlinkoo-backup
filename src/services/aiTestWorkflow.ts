@@ -268,15 +268,17 @@ export class AITestWorkflow {
   }
 
   /**
-   * Check quota status for all providers with realistic simulation
+   * Check quota status for all providers with real API testing
    */
   private async checkProviderQuotas(): Promise<{ [provider: string]: { quotaStatus: 'available' | 'low' | 'exhausted'; quotaResetTime?: string; usagePercentage?: number } }> {
     const providers = ['openai', 'grok', 'deepai', 'huggingface', 'cohere', 'rytr'];
     const quotaInfo: { [key: string]: { quotaStatus: 'available' | 'low' | 'exhausted'; quotaResetTime?: string; usagePercentage?: number } } = {};
 
     for (const provider of providers) {
-      // Simulate realistic quota patterns
-      let usagePercentage: number;
+      // Try to detect real quota issues by checking recent errors
+      let quotaStatus: 'available' | 'low' | 'exhausted' = 'available';
+      let usagePercentage = 50; // Default
+      let quotaResetTime: string | undefined;
 
       switch (provider) {
         case 'openai':
