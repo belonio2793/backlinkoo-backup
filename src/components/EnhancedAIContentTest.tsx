@@ -466,7 +466,8 @@ Begin your journey with ${keyword} today!`;
         websiteUrl: url,
         keyword,
         anchorText,
-        sessionId: crypto.randomUUID()
+        sessionId: crypto.randomUUID(),
+        currentDomain: window.location.origin
       });
 
       setProviderStatuses(testResult.providerStatuses);
