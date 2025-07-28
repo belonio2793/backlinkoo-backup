@@ -214,6 +214,35 @@ export function GlobalBlogGenerator({
           description: `Your contextual backlink post is ready. ${result.data.globalMetrics.userCountry !== 'Unknown' ? `Generated from ${result.data.globalMetrics.userCountry}` : ''}`,
         });
 
+        // Store monitoring data for admin dashboard
+        const monitoringData = {
+          sessionId: request.sessionId,
+          targetUrl: request.targetUrl,
+          primaryKeyword: request.primaryKeyword,
+          anchorText: request.anchorText,
+          userCountry: result.data.globalMetrics.userCountry,
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString(),
+          status: 'completed' as const,
+          blogSlug: result.data.blogPost.slug,
+          isClaimed: false,
+          expiresAt: result.data.blogPost.expires_at,
+          requestsRemaining: remainingRequests - 1,
+          generationTime: 45, // Approximate generation time
+          seoScore: result.data.blogPost.seo_score,
+          viewCount: 0,
+          ipAddress: 'hidden'
+        };
+
+        // Store in admin monitoring storage
+        const adminMonitorData = JSON.parse(localStorage.getItem('admin_free_backlinks_monitor') || '[]');
+        adminMonitorData.unshift(monitoringData);
+        // Keep only last 100 entries
+        if (adminMonitorData.length > 100) {
+          adminMonitorData.splice(100);
+        }
+        localStorage.setItem('admin_free_backlinks_monitor', JSON.stringify(adminMonitorData));
+
         onSuccess?.(result.data.blogPost);
 
         // Navigate to blog post if in blog variant
