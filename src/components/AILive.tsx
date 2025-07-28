@@ -159,16 +159,9 @@ export function AILive() {
     const onlineProviders = updatedProviders.filter(p => p.status === 'online');
 
     if (onlineProviders.length === 0) {
-      // Fallback: Assume at least one provider is online for demo
-      console.log('No providers responded, enabling demo mode...');
-      const demoProviders = updatedProviders.map((p, index) => ({
-        ...p,
-        status: index === 0 ? 'online' as const : 'offline' as const,
-        error: index === 0 ? undefined : 'Demo mode - API unavailable'
-      }));
-      setProviders(demoProviders);
-      updateLastStep('success', 'Demo mode enabled - OpenAI provider available');
-      return true;
+      updateLastStep('error', 'No AI providers available. Please configure OpenAI or Grok API keys.');
+      setError('All AI providers are offline. Please configure proper API keys to generate content.');
+      return false;
     } else {
       updateLastStep('success', `${onlineProviders.length} providers online: ${onlineProviders.map(p => p.name).join(', ')}`);
       return true;
