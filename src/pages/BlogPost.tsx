@@ -332,8 +332,8 @@ export function BlogPost() {
 
         {/* Article Content */}
         <div className="prose prose-lg prose-gray max-w-none">
-          <div 
-            dangerouslySetInnerHTML={{ __html: blogPost.content }}
+          <div
+            dangerouslySetInnerHTML={{ __html: formatBlogContent(blogPost.content) }}
             className="blog-content"
           />
         </div>
