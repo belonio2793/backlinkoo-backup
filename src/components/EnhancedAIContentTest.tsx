@@ -22,8 +22,6 @@ import {
   FileText,
   ExternalLink,
   RefreshCw,
-  Eye,
-  EyeOff,
   Link,
   Loader2
 } from 'lucide-react';
