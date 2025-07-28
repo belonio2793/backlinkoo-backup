@@ -276,6 +276,11 @@ Start your ${keyword} transformation journey today and unlock the full potential
           setIsGeneratingContent(false);
           setGeneratedSlug(generateSlug(keyword));
           setShowSaveOptions(true);
+
+          // Convert to HTML for preview
+          const htmlContent = convertToHtml(fullContent);
+          setFinalHtmlContent(htmlContent);
+
           resolve(fullContent);
         }
       }, 200); // Update every 200ms
