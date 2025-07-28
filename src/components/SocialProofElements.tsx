@@ -14,32 +14,15 @@ import {
   AlertCircle
 } from "lucide-react";
 
-// Real-time user activity simulation
+// Static activity indicator (removed fake simulation)
 export function LiveUserActivity({ className = "" }: { className?: string }) {
-  const [recentSignups, setRecentSignups] = useState(3);
-  const [timeAgo, setTimeAgo] = useState("2 minutes");
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulate new signups
-      const signups = Math.floor(Math.random() * 5) + 1;
-      const times = ["just now", "1 minute", "2 minutes", "3 minutes", "5 minutes"];
-      const randomTime = times[Math.floor(Math.random() * times.length)];
-      
-      setRecentSignups(signups);
-      setTimeAgo(randomTime);
-    }, 30000); // Update every 30 seconds
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <div className={`flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg border border-green-200 ${className}`}>
       <div className="relative">
-        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
       </div>
       <span className="font-medium">
-        {recentSignups} people signed up {timeAgo}
+        Active community
       </span>
     </div>
   );
