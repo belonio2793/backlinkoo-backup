@@ -58,13 +58,17 @@ export function EnhancedAIContentTest() {
     }
   }, []);
 
-  // Internal prompt templates that rotate on each instance
+  // Internal prompt templates that rotate on each instance (minimum 1000 words)
   const promptTemplates = [
-    `Write 2000 words on "{keyword}" and hyperlink the "{anchorText}" with the {url} in a search engine optimized manner`,
-    `Create a 2000 word original blog post that encapsulates user intent and website correlation based on "{keyword}" and hyperlink the "{anchorText}" with the {url} following search engine optimized principles and abide by strict grammar and punctuality.`,
-    `Develop a comprehensive {wordCount} word article about "{keyword}" that naturally incorporates "{anchorText}" linking to {url} while maintaining excellent SEO practices and engaging readability.`,
-    `Generate an authoritative blog post covering "{keyword}" in {wordCount} words, strategically placing "{anchorText}" as a contextual link to {url} following modern content marketing best practices.`,
-    `Craft an in-depth guide on "{keyword}" spanning {wordCount} words, seamlessly integrating "{anchorText}" with a reference to {url} while optimizing for search engines and user experience.`
+    `Write a comprehensive 1500+ word article on "{keyword}" and strategically hyperlink the "{anchorText}" with the {url} in a search engine optimized manner. Follow strict grammatical guidelines: use proper capitalization, correct punctuation, active voice when possible, and maintain professional tone throughout. Ensure sentences are well-structured with varied length and complexity.`,
+
+    `Create a detailed 1200+ word original blog post that encapsulates user intent and website correlation based on "{keyword}" and hyperlink the "{anchorText}" with the {url} following search engine optimized principles. Adhere to strict grammar and punctuation standards: capitalize all proper nouns, use serial commas, maintain consistent verb tenses, and ensure error-free spelling throughout.`,
+
+    `Develop a comprehensive 1800+ word article about "{keyword}" that naturally incorporates "{anchorText}" linking to {url} while maintaining excellent SEO practices and engaging readability. Apply rigorous editorial standards: proper sentence structure, accurate punctuation placement, appropriate capitalization of headings and key terms, and clear paragraph transitions.`,
+
+    `Generate an authoritative 1400+ word blog post covering "{keyword}", strategically placing "{anchorText}" as a contextual link to {url} following modern content marketing best practices. Enforce grammatical excellence: correct subject-verb agreement, proper use of articles (a, an, the), consistent point of view, and professional formatting with proper heading hierarchy.`,
+
+    `Craft an in-depth 1600+ word guide on "{keyword}" seamlessly integrating "{anchorText}" with a reference to {url} while optimizing for search engines and user experience. Maintain impeccable writing standards: precise word choice, error-free grammar, appropriate use of technical terminology, proper citation format, and engaging yet professional prose style.`
   ];
 
   // Select prompt based on session (rotates per refresh/instance)
