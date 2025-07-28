@@ -99,7 +99,23 @@ export class GrokService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Grok API error: ${response.status} - ${errorData.error?.message || response.statusText}`);
+        let errorMessage = `Grok API error: ${response.status}`;
+
+        if (response.status === 403) {
+          errorMessage += ' - Access forbidden. Check if your Grok API key is valid and has the required permissions.';
+        } else if (response.status === 404) {
+          errorMessage += ' - Model not found. Check if the model name is correct and available.';
+        } else if (response.status === 401) {
+          errorMessage += ' - Invalid API key. Check your Grok API key.';
+        } else if (response.status === 429) {
+          errorMessage += ' - Rate limit exceeded. Try again later.';
+        } else if (errorData.error?.message) {
+          errorMessage += ` - ${errorData.error.message}`;
+        } else {
+          errorMessage += ` - ${response.statusText}`;
+        }
+
+        throw new Error(errorMessage);
       }
 
       const data: GrokResponse = await response.json();
