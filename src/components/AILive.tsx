@@ -52,9 +52,9 @@ interface GeneratedPost {
 }
 
 const AI_PROMPTS = [
-  "Generate a 1000 word article on <user_input_keyword> including the <user_input_anchor_text> hyperlinked to <user_input_url>.",
-  "Write a 1000 word blog post about <user_input_keyword> with a hyperlinked <user_input_anchor_text> linked to <user_input_url>.",
-  "Produce a 1000-word reader friendly post on <user_input_keyword> that links <user_input_anchor_text> to <user_input_url>."
+  "Generate a comprehensive 700+ word article on <user_input_keyword> including the <user_input_anchor_text> hyperlinked to <user_input_url>.",
+  "Write a detailed 700+ word blog post about <user_input_keyword> with a hyperlinked <user_input_anchor_text> linked to <user_input_url>.",
+  "Produce a comprehensive 700+ word reader friendly post on <user_input_keyword> that links <user_input_anchor_text> to <user_input_url>."
 ];
 
 export function AILive() {
