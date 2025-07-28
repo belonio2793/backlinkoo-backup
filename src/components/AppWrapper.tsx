@@ -29,6 +29,7 @@ import NoHandsSEO from "../pages/NoHandsSEO";
 import AffiliateProgram from "../pages/AffiliateProgram";
 import PromotionMaterials from "../pages/PromotionMaterials";
 import AIContentTest from "../pages/AIContentTest";
+import { AILive } from "../components/AILive";
 
 export const AppWrapper = () => {
   // Initialize referral tracking
@@ -52,6 +53,7 @@ export const AppWrapper = () => {
       <Route path="/blog/:slug" element={<BlogPost />} />
       <Route path="/trial-dashboard" element={<GuestDashboard />} />
       <Route path="/ai-test" element={<AIContentTest />} />
+      <Route path="/ai-live" element={<AILive />} />
       <Route path="*" element={<NotFound />} />
 
       {/* Protected routes - require authentication and email verification */}
