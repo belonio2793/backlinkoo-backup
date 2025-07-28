@@ -218,7 +218,7 @@ For fellow marketers looking to scale their SEO efforts, I recommend checking ou
       description: "Great for vertical sidebar spaces",
       sizes: "160x600px",
       formats: ["JPG", "PNG", "GIF"],
-      preview: "Backlink ∞\n\n🎯 Premium\nBacklinks\n\n💰 $0.70\nper link\n\n📈 99%\nIndexing\n\n[START]"
+      preview: "Backlink ∞\n\n🎯 Premium\nBacklinks\n\n💰 $0.70\nper link\n\n📈 High\nIndexing\n\n[START]"
     }
   ];
 
