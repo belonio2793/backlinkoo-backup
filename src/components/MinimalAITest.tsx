@@ -24,6 +24,17 @@ interface ApiStatus {
   error?: string;
 }
 
+interface GeneratedContent {
+  provider: string;
+  content: string;
+  slug: string;
+  wordCount: number;
+  quality: number;
+  isValid: boolean;
+  error?: string;
+  generateTime: number;
+}
+
 export function MinimalAITest() {
   const [keyword, setKeyword] = useState('');
   const [url, setUrl] = useState('');
