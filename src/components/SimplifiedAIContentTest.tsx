@@ -245,7 +245,7 @@ export function SimplifiedAIContentTest() {
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-gray-700">Blog URL</p>
                   <p className="text-sm text-gray-600 break-all font-mono">
-                    {generatedResult.blogUrl?.replace('https://', '')}
+                    {getCurrentDomain().replace('https://', '').replace('http://', '')}/blog/{keyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}
                   </p>
                 </div>
                 <div className="space-y-1">
