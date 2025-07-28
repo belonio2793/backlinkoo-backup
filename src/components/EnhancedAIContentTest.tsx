@@ -781,7 +781,7 @@ Begin your journey with ${keyword} today!`;
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">backlinkoo.com/blog/</span>
+              <span className="text-sm text-muted-foreground">{window.location.origin.replace('https://', '').replace('http://', '')}/blog/</span>
               {isSlugEditable ? (
                 <Input
                   value={generatedSlug}
