@@ -329,5 +329,6 @@ Format the response as clean HTML with proper semantic structure.`;
   }
 }
 
-// Export singleton instance
+// Export class and singleton instance
+export { BuilderAIGenerator };
 export const builderAIGenerator = new BuilderAIGenerator();
