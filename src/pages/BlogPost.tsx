@@ -194,21 +194,49 @@ export function BlogPost() {
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => navigate('/')}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Home
             </Button>
-            
-            {blogPost.is_trial_post && (
-              <Badge variant="secondary" className="bg-amber-100 text-amber-800">
-                <Sparkles className="mr-1 h-3 w-3" />
-                Trial Post
-              </Badge>
-            )}
+
+            <div className="flex items-center gap-3">
+              {blogPost.is_trial_post && (
+                <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+                  <Sparkles className="mr-1 h-3 w-3" />
+                  Trial Post
+                </Badge>
+              )}
+
+              {!currentUser ? (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate('/login')}
+                  >
+                    Sign In
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => navigate('/login')}
+                  >
+                    Register
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/dashboard')}
+                >
+                  Dashboard
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
