@@ -450,14 +450,15 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
                   disabled={isRunning}
                 />
               </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={autoImprove}
-                  onChange={(e) => setAutoImprove(e.target.checked)}
+              <div>
+                <label className="text-xs font-mono text-gray-600">ANCHOR_TEXT</label>
+                <Input
+                  value={anchorText}
+                  onChange={(e) => setAnchorText(e.target.value)}
+                  placeholder="Enter anchor text for the backlink"
+                  className="font-mono text-sm"
                   disabled={isRunning}
                 />
-                <label className="text-xs font-mono">AUTO_IMPROVE</label>
               </div>
             </div>
           </div>
