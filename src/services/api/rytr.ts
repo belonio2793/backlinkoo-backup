@@ -139,7 +139,11 @@ export class RytrService {
     error?: string;
   }> {
     if (!this.apiKey) {
-      throw new Error('Rytr API key not configured');
+      return {
+        useCases: [],
+        success: false,
+        error: 'Rytr API key not configured'
+      };
     }
 
     try {
