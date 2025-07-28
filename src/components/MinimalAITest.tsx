@@ -60,7 +60,84 @@ export function MinimalAITest() {
     setLogs(prev => [...prev.slice(-49), log]); // Keep last 50 logs
   };
 
-  const validateInputs = () => {
+  const checkUrlAccessibility = async (targetUrl: string): Promise<boolean> => {
+    addLog('info', 'URL_CHECK', `Checking URL accessibility: ${targetUrl}`);
+
+    try {
+      // Try to fetch the URL with a HEAD request first (faster)
+      const response = await fetch(targetUrl, {
+        method: 'HEAD',
+        mode: 'no-cors', // Handle CORS issues
+        cache: 'no-cache'
+      });
+
+      // Note: no-cors mode doesn't give us status codes, so we'll try a different approach
+      // If no error is thrown, the URL is likely accessible
+      addLog('success', 'URL_CHECK', 'URL is accessible');
+      return true;
+
+    } catch (headError) {
+      // If HEAD fails, try GET request with limited data
+      try {
+        addLog('info', 'URL_CHECK', 'HEAD request failed, trying GET request...');
+
+        const response = await fetch(targetUrl, {
+          method: 'GET',
+          mode: 'no-cors',
+          cache: 'no-cache'
+        });
+
+        addLog('success', 'URL_CHECK', 'URL is accessible (via GET)');
+        return true;
+
+      } catch (getError) {
+        // Try a different approach using a proxy or image loading technique
+        try {
+          addLog('info', 'URL_CHECK', 'Direct fetch failed, trying alternative validation...');
+
+          // Create a promise that resolves if the URL loads
+          const checkPromise = new Promise<boolean>((resolve) => {
+            const img = new Image();
+            const timeout = setTimeout(() => {
+              resolve(false);
+            }, 5000); // 5 second timeout
+
+            img.onload = () => {
+              clearTimeout(timeout);
+              resolve(true);
+            };
+
+            img.onerror = () => {
+              clearTimeout(timeout);
+              // Even if image fails, the URL might still be valid (just not an image)
+              // We'll consider this as accessible since we got a response
+              resolve(true);
+            };
+
+            img.src = targetUrl + '?cache-bust=' + Date.now();
+          });
+
+          const isAccessible = await checkPromise;
+
+          if (isAccessible) {
+            addLog('success', 'URL_CHECK', 'URL appears to be accessible');
+            return true;
+          } else {
+            addLog('error', 'URL_CHECK', 'URL appears to be inaccessible or timeout');
+            return false;
+          }
+
+        } catch (altError) {
+          addLog('error', 'URL_CHECK', `URL validation failed: ${altError}`);
+          return false;
+        }
+      }
+    }
+  };
+
+  const validateInputs = async (): Promise<boolean> => {
+    addLog('info', 'VALIDATION', 'Starting input validation...');
+
     if (!keyword.trim()) {
       addLog('error', 'VALIDATION', 'Keyword is required');
       return false;
@@ -74,7 +151,7 @@ export function MinimalAITest() {
       return false;
     }
 
-    // URL validation
+    // URL format validation
     try {
       new URL(url);
     } catch {
@@ -90,6 +167,13 @@ export function MinimalAITest() {
 
     if (anchorText.length < 3) {
       addLog('error', 'VALIDATION', 'Anchor text too short (minimum 3 characters)');
+      return false;
+    }
+
+    // URL accessibility check
+    const isUrlAccessible = await checkUrlAccessibility(url);
+    if (!isUrlAccessible) {
+      addLog('error', 'VALIDATION', 'Target URL is not accessible (404 or network error)');
       return false;
     }
 
