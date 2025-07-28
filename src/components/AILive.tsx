@@ -232,6 +232,7 @@ export function AILive() {
 
     setIsGenerating(true);
     setSteps([]);
+    stepCounterRef.current = 0; // Reset step counter for new generation
     setCurrentContent('');
     setGeneratedPost(null);
     setError(null);
