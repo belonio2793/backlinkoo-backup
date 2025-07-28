@@ -33,6 +33,8 @@ interface GeneratedContent {
   isValid: boolean;
   error?: string;
   generateTime: number;
+  promptUsed: string;
+  promptIndex: number;
 }
 
 export function MinimalAITest() {
@@ -227,13 +229,23 @@ export function MinimalAITest() {
     return { score, isValid: score >= 50, issues };
   };
 
-  const generateContentFromProvider = async (provider: string): Promise<GeneratedContent> => {
+  const generateContentFromProvider = async (provider: string, promptIndex: number = 0): Promise<GeneratedContent> => {
     const startTime = Date.now();
-    addLog('info', provider.toUpperCase(), `Generating content...`);
+
+    // 3-prompt rotation system
+    const prompts = [
+      `Generate a 1000 word article on ${keyword} including the ${anchorText} hyperlinked to ${url}`,
+      `Write a 1000 word blog post about ${keyword} with a hyperlinked ${anchorText} linked to ${url}`,
+      `Produce a 1000-word reader friendly post on ${keyword} that links ${anchorText}`
+    ];
+
+    const currentPrompt = prompts[promptIndex % 3];
+    const promptLabel = `Prompt ${(promptIndex % 3) + 1}`;
+
+    addLog('info', provider.toUpperCase(), `Using ${promptLabel}: "${currentPrompt}"`);
 
     try {
-      // Create SEO-optimized prompt
-      const prompt = `Write a comprehensive, SEO-optimized blog post about "${keyword}". The article should be at least 800 words and naturally incorporate a link to ${url} using the anchor text "${anchorText}". Include proper headings, engaging content, and valuable information for readers. Ensure the content is grammatically correct and well-structured.`;
+      const prompt = currentPrompt;
 
       // Simulate content generation (replace with actual API calls)
       await new Promise(resolve => setTimeout(resolve, Math.random() * 3000 + 1000));
@@ -293,7 +305,9 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
         quality: validation.score,
         isValid: validation.isValid,
         error: validation.issues.length > 0 ? validation.issues.join(', ') : undefined,
-        generateTime
+        generateTime,
+        promptUsed: currentPrompt,
+        promptIndex: promptIndex % 3
       };
 
     } catch (error) {
@@ -306,7 +320,9 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
         quality: 0,
         isValid: false,
         error: error instanceof Error ? error.message : 'Generation failed',
-        generateTime: Date.now() - startTime
+        generateTime: Date.now() - startTime,
+        promptUsed: currentPrompt,
+        promptIndex: promptIndex % 3
       };
     }
   };
@@ -358,10 +374,12 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
 
     const generatedResults: GeneratedContent[] = [];
 
-    // Generate content from each provider
-    for (const provider of workingProviders) {
-      setCurrentProcess(`Generating from ${provider.provider}...`);
-      const result = await generateContentFromProvider(provider.provider);
+    // Generate content from each provider using prompt rotation
+    for (let i = 0; i < workingProviders.length; i++) {
+      const provider = workingProviders[i];
+      const promptIndex = i; // Use different prompt for each provider
+      setCurrentProcess(`Generating from ${provider.provider} (Prompt ${(promptIndex % 3) + 1})...`);
+      const result = await generateContentFromProvider(provider.provider, promptIndex);
       generatedResults.push(result);
 
       if (result.isValid) {
@@ -615,6 +633,13 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
                   </div>
                   <div className="text-xs font-mono text-gray-500">
                     {content.wordCount} words | {content.quality}% quality
+                  </div>
+                </div>
+
+                {/* Prompt Used */}
+                <div className="mb-3 p-2 bg-blue-50 rounded border">
+                  <div className="text-xs font-mono text-blue-800">
+                    <strong>Prompt {content.promptIndex + 1}:</strong> {content.promptUsed}
                   </div>
                 </div>
 

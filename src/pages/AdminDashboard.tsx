@@ -13,6 +13,7 @@ import { FreeBacklinkMonitor } from "@/components/admin/FreeBacklinkMonitor";
 import { TrialPostCleanupManager } from "@/components/admin/TrialPostCleanupManager";
 import { ContentFilterManager } from "@/components/admin/ContentFilterManager";
 import { ContentModerationQueue } from "@/components/admin/ContentModerationQueue";
+import { AIPostsManager } from "@/components/admin/AIPostsManager";
 import { AuthEmailTest } from "@/components/AuthEmailTest";
 
 import { EmailTest } from "@/components/EmailTest";
@@ -31,7 +32,8 @@ import {
   CreditCard,
   Clock,
   Infinity,
-  LogOut
+  LogOut,
+  Brain
 } from "lucide-react";
 
 const AdminDashboard = () => {
@@ -179,6 +181,7 @@ const AdminDashboard = () => {
           <TabsList>
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
             <TabsTrigger value="blog-posts">Blog Posts</TabsTrigger>
+            <TabsTrigger value="ai-posts">AI Posts</TabsTrigger>
             <TabsTrigger value="free-backlinks">Free Backlinks</TabsTrigger>
             <TabsTrigger value="content-filter">Content Filter</TabsTrigger>
             <TabsTrigger value="moderation-queue">Moderation Queue</TabsTrigger>
@@ -198,6 +201,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="blog-posts">
             <AdminBlogManager />
+          </TabsContent>
+
+          <TabsContent value="ai-posts">
+            <AIPostsManager />
           </TabsContent>
 
           <TabsContent value="free-backlinks">
