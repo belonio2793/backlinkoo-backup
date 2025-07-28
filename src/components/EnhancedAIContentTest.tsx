@@ -13,18 +13,19 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { aiTestWorkflow } from '@/services/aiTestWorkflow';
-import { 
-  Play, 
-  CheckCircle2, 
-  AlertCircle, 
-  Clock, 
-  Zap, 
+import {
+  Play,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  Zap,
   FileText,
   ExternalLink,
   RefreshCw,
   Eye,
   EyeOff,
-  Link
+  Link,
+  Loader2
 } from 'lucide-react';
 
 export function EnhancedAIContentTest() {
