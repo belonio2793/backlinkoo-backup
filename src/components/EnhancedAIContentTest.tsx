@@ -351,52 +351,7 @@ Start your ${keyword} journey today and take your business to the next level!`;
         </CardContent>
       </Card>
 
-      {/* Dynamic Prompts Overlay */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              Dynamic Prompts (Uneditable)
-            </CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowPrompts(!showPrompts)}
-            >
-              {showPrompts ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </Button>
-          </div>
-        </CardHeader>
-        {showPrompts && (
-          <CardContent className="space-y-4">
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                These prompts are automatically generated based on your inputs and cannot be edited.
-              </AlertDescription>
-            </Alert>
-            
-            {dynamicPrompts.map((prompt, index) => (
-              <div key={index} className="relative">
-                <div className="bg-gray-50 rounded-lg p-4 border">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline">Prompt {index + 1}</Badge>
-                    <Badge variant="secondary" className="text-xs">Auto-generated</Badge>
-                  </div>
-                  <div className="relative">
-                    <pre className="text-sm whitespace-pre-wrap font-mono text-gray-700">
-                      {prompt}
-                    </pre>
-                    {/* Overlay to prevent editing */}
-                    <div className="absolute inset-0 bg-transparent cursor-not-allowed" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        )}
-      </Card>
+
 
       {/* Processing Status */}
       {isProcessing && (
