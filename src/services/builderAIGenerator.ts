@@ -220,7 +220,7 @@ Format the response as clean HTML with proper semantic structure.`;
       slug,
       publishedUrl: `/blog/${slug}`,
       wordCount,
-      provider: provider as 'openai' | 'grok',
+      provider: provider as 'huggingface' | 'cohere',
       generationTime,
       expiresAt,
       metadata: {
