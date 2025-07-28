@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { publishedBlogService, type PublishedBlogPost } from '@/services/publishedBlogService';
 import { ClaimTrialPostDialog } from '@/components/ClaimTrialPostDialog';
 import { supabase } from '@/integrations/supabase/client';
+import { formatBlogTitle } from '@/utils/textFormatting';
 import { 
   Calendar, 
   Clock, 
