@@ -1,6 +1,6 @@
 /**
- * Enhanced AI Content Test Component
- * Test the new AI content generation system with sample keywords and URLs
+ * AI Test Buffer Page
+ * Tests API providers, generates blog content, and returns published results
  */
 
 import { useState } from 'react';
@@ -10,496 +10,385 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { enhancedAIContentEngine } from '@/services/enhancedAIContentEngine';
-import { aiContentEngine } from '@/services/aiContentEngine';
-import { globalBlogGenerator } from '@/services/globalBlogGenerator';
+import { aiTestWorkflow } from '@/services/aiTestWorkflow';
 import { 
   Play, 
   CheckCircle2, 
   AlertCircle, 
   Clock, 
   Zap, 
-  BarChart3, 
   FileText,
   ExternalLink,
   RefreshCw,
   Eye,
-  Settings
+  EyeOff,
+  Link
 } from 'lucide-react';
 
-interface TestResult {
-  testName: string;
-  success: boolean;
-  duration: number;
-  result?: any;
-  error?: string;
-}
-
 export function EnhancedAIContentTest() {
-  const [isRunning, setIsRunning] = useState(false);
-  const [currentTest, setCurrentTest] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentStep, setCurrentStep] = useState('');
   const [progress, setProgress] = useState(0);
-  const [testResults, setTestResults] = useState<TestResult[]>([]);
-  const [providerStatus, setProviderStatus] = useState<any>(null);
-  const [selectedResult, setSelectedResult] = useState<any>(null);
+  const [providerStatuses, setProviderStatuses] = useState<any[]>([]);
+  const [generatedBlog, setGeneratedBlog] = useState<any>(null);
+  const [showPrompts, setShowPrompts] = useState(true);
   
-  // Test inputs
-  const [testKeyword, setTestKeyword] = useState('digital marketing');
-  const [testUrl, setTestUrl] = useState('https://example.com');
-  const [testAnchorText, setTestAnchorText] = useState('best digital marketing tools');
+  // User inputs
+  const [keyword, setKeyword] = useState('digital marketing');
+  const [url, setUrl] = useState('https://example.com');
+  const [anchorText, setAnchorText] = useState('best digital marketing tools');
 
   const { toast } = useToast();
 
-  const sampleTestCases = [
-    {
-      keyword: 'SEO optimization',
-      url: 'https://example-seo.com',
-      anchorText: 'advanced SEO tools'
-    },
-    {
-      keyword: 'content marketing',
-      url: 'https://content-example.com',
-      anchorText: 'content marketing platform'
-    },
-    {
-      keyword: 'email automation',
-      url: 'https://email-tools.com',
-      anchorText: 'email automation software'
-    }
+  // Dynamic prompts based on user inputs
+  const dynamicPrompts = [
+    `Write 2000 words on "${keyword}" and hyperlink the "${anchorText}" with the ${url} in a search engine optimized manner`,
+    `Create a 2000 word original blog post that encapsulates user intent and website correlation based on "${keyword}" and hyperlink the "${anchorText}" with the ${url} following search engine optimized principles and abide by strict grammar and punctuality.`
   ];
 
-  const runAllTests = async () => {
-    setIsRunning(true);
+  const runBlogGeneration = async () => {
+    if (!keyword || !url) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide both keyword and URL",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsProcessing(true);
     setProgress(0);
-    setTestResults([]);
+    setGeneratedBlog(null);
+    setProviderStatuses([]);
     
-    const tests = [
-      { name: 'Provider Status Check', fn: testProviderStatus },
-      { name: 'Enhanced AI Engine Test', fn: testEnhancedAIEngine },
-      { name: 'Full AI Content Engine Test', fn: testFullAIEngine },
-      { name: 'Global Blog Generator Test', fn: testGlobalBlogGenerator },
-      { name: 'Sample Test Cases', fn: testSampleCases }
-    ];
+    try {
+      // Step 1: Check API providers
+      setCurrentStep('Checking all AI provider connections...');
+      setProgress(20);
+      
+      const testResult = await aiTestWorkflow.runTestWorkflow({
+        websiteUrl: url,
+        keyword,
+        anchorText,
+        sessionId: crypto.randomUUID()
+      });
 
-    for (let i = 0; i < tests.length; i++) {
-      const test = tests[i];
-      setCurrentTest(test.name);
-      setProgress(((i + 1) / tests.length) * 100);
+      setProviderStatuses(testResult.providerStatuses);
 
-      try {
-        const startTime = Date.now();
-        const result = await test.fn();
-        const duration = Date.now() - startTime;
-
-        setTestResults(prev => [...prev, {
-          testName: test.name,
-          success: true,
-          duration,
-          result
-        }]);
-
-        toast({
-          title: `${test.name} completed`,
-          description: `Test completed successfully in ${duration}ms`,
-        });
-
-      } catch (error) {
-        const duration = Date.now() - Date.now();
-        setTestResults(prev => [...prev, {
-          testName: test.name,
-          success: false,
-          duration,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        }]);
-
-        toast({
-          title: `${test.name} failed`,
-          description: error instanceof Error ? error.message : 'Unknown error',
-          variant: "destructive",
-        });
+      if (!testResult.canProceedToBlogGeneration) {
+        throw new Error(`API validation failed: ${testResult.errors.join(', ')}`);
       }
+
+      toast({
+        title: "Providers Validated",
+        description: `${testResult.workingProviders.length} providers available`,
+      });
+
+      // Step 2: Generate blog content
+      setCurrentStep('Generating blog post with validated providers...');
+      setProgress(60);
+
+      const blogResult = await aiTestWorkflow.generateBlogContent({
+        websiteUrl: url,
+        keyword,
+        anchorText,
+        sessionId: crypto.randomUUID()
+      }, testResult);
+
+      if (!blogResult.success) {
+        throw new Error(blogResult.error || 'Blog generation failed');
+      }
+
+      // Step 3: Create blog slug and return results
+      setCurrentStep('Creating blog slug and finalizing...');
+      setProgress(90);
+
+      // Generate slug from keyword
+      const slug = keyword.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+      const finalBlogUrl = blogResult.blogUrl || `https://backlinkoo.com/blog/${slug}`;
+
+      setGeneratedBlog({
+        ...blogResult,
+        blogUrl: finalBlogUrl,
+        slug,
+        testResult,
+        prompts: dynamicPrompts,
+        userInputs: { keyword, url, anchorText }
+      });
+
+      setProgress(100);
+
+      toast({
+        title: "Blog Generated Successfully!",
+        description: `Your blog post is ready at: ${finalBlogUrl}`,
+      });
+
+    } catch (error) {
+      console.error('Blog generation workflow failed:', error);
+      toast({
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "Failed to generate blog. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+      setCurrentStep('');
     }
-
-    setIsRunning(false);
-    setCurrentTest('');
-    setProgress(100);
-  };
-
-  const testProviderStatus = async () => {
-    console.log('🔍 Testing provider status...');
-    const status = await aiContentEngine.testProviders();
-    setProviderStatus(status);
-    return status;
-  };
-
-  const testEnhancedAIEngine = async () => {
-    console.log('🚀 Testing enhanced AI engine...');
-    const result = await enhancedAIContentEngine.generateContent({
-      keyword: testKeyword,
-      targetUrl: testUrl,
-      anchorText: testAnchorText,
-      contentLength: 'medium',
-      contentTone: 'professional',
-      seoFocus: true
-    });
-    return result;
-  };
-
-  const testFullAIEngine = async () => {
-    console.log('🤖 Testing full AI content engine...');
-    const result = await aiContentEngine.generateContent({
-      keyword: testKeyword,
-      targetUrl: testUrl,
-      anchorText: testAnchorText,
-      wordCount: 1500
-    });
-    return result;
-  };
-
-  const testGlobalBlogGenerator = async () => {
-    console.log('🌍 Testing global blog generator...');
-    const sessionId = crypto.randomUUID();
-    const result = await globalBlogGenerator.generateGlobalBlogPost({
-      targetUrl: testUrl,
-      primaryKeyword: testKeyword,
-      anchorText: testAnchorText,
-      sessionId,
-      additionalContext: {
-        contentTone: 'professional',
-        contentLength: 'medium',
-        seoFocus: 'high'
-      }
-    });
-    return result;
-  };
-
-  const testSampleCases = async () => {
-    console.log('📋 Testing sample cases...');
-    const results = [];
-    
-    for (const testCase of sampleTestCases) {
-      try {
-        const result = await enhancedAIContentEngine.generateContent({
-          keyword: testCase.keyword,
-          targetUrl: testCase.url,
-          anchorText: testCase.anchorText,
-          contentLength: 'short',
-          contentTone: 'professional'
-        });
-        results.push({
-          testCase,
-          success: true,
-          wordCount: result.metadata.wordCount,
-          provider: result.bestProvider
-        });
-      } catch (error) {
-        results.push({
-          testCase,
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
-      }
-    }
-    
-    return results;
-  };
-
-  const renderProviderStatus = () => {
-    if (!providerStatus) return null;
-
-    return (
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            AI Provider Status
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {Object.entries(providerStatus).map(([provider, status]: [string, any]) => (
-              <div key={provider} className="p-3 border rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium capitalize">{provider}</span>
-                  {status.available ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <AlertCircle className="h-4 w-4 text-red-600" />
-                  )}
-                </div>
-                <div className="text-xs space-y-1">
-                  <div className={`px-2 py-1 rounded ${status.configured ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {status.configured ? 'Configured' : 'Not Configured'}
-                  </div>
-                  <div className={`px-2 py-1 rounded ${status.available ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                    {status.available ? 'Available' : 'Unavailable'}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const renderTestResults = () => {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            Test Results
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {testResults.map((result, index) => (
-              <div key={index} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    {result.success ? (
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <AlertCircle className="h-4 w-4 text-red-600" />
-                    )}
-                    <span className="font-medium">{result.testName}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    {result.duration}ms
-                  </div>
-                </div>
-                
-                {result.error && (
-                  <Alert variant="destructive" className="mt-2">
-                    <AlertDescription>{result.error}</AlertDescription>
-                  </Alert>
-                )}
-                
-                {result.result && (
-                  <div className="mt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedResult(result.result)}
-                    >
-                      <Eye className="h-3 w-3 mr-1" />
-                      View Result
-                    </Button>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const renderResultModal = () => {
-    if (!selectedResult) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Test Result Details
-            </CardTitle>
-            <Button variant="ghost" onClick={() => setSelectedResult(null)}>×</Button>
-          </CardHeader>
-          
-          <CardContent className="overflow-y-auto max-h-[70vh]">
-            <Tabs defaultValue="content">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="content">Content</TabsTrigger>
-                <TabsTrigger value="metadata">Metadata</TabsTrigger>
-                <TabsTrigger value="providers">Providers</TabsTrigger>
-                <TabsTrigger value="raw">Raw Data</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="content" className="space-y-4">
-                {selectedResult.finalContent && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Generated Content</h3>
-                    <div className="prose max-w-none text-sm p-4 bg-gray-50 rounded-lg max-h-96 overflow-y-auto"
-                         dangerouslySetInnerHTML={{ __html: selectedResult.finalContent }} />
-                  </div>
-                )}
-                {selectedResult.bestContent && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Best Content</h3>
-                    <div className="prose max-w-none text-sm p-4 bg-gray-50 rounded-lg max-h-96 overflow-y-auto"
-                         dangerouslySetInnerHTML={{ __html: selectedResult.bestContent }} />
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="metadata" className="space-y-4">
-                {selectedResult.metadata && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Title</Label>
-                      <p className="text-sm p-2 bg-gray-50 rounded">{selectedResult.metadata.title}</p>
-                    </div>
-                    <div>
-                      <Label>Word Count</Label>
-                      <p className="text-sm p-2 bg-gray-50 rounded">{selectedResult.metadata.wordCount}</p>
-                    </div>
-                    <div>
-                      <Label>SEO Score</Label>
-                      <p className="text-sm p-2 bg-gray-50 rounded">{selectedResult.metadata.seoScore}/100</p>
-                    </div>
-                    <div>
-                      <Label>Reading Time</Label>
-                      <p className="text-sm p-2 bg-gray-50 rounded">{selectedResult.metadata.readingTime} min</p>
-                    </div>
-                    <div className="col-span-2">
-                      <Label>Meta Description</Label>
-                      <p className="text-sm p-2 bg-gray-50 rounded">{selectedResult.metadata.metaDescription}</p>
-                    </div>
-                    <div className="col-span-2">
-                      <Label>Keywords</Label>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {selectedResult.metadata.keywords?.map((keyword: string, index: number) => (
-                          <Badge key={index} variant="outline">{keyword}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="providers" className="space-y-4">
-                {selectedResult.allResults && (
-                  <div className="space-y-3">
-                    {selectedResult.allResults.map((provider: any, index: number) => (
-                      <div key={index} className="p-3 border rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <Badge variant={provider.success ? "default" : "destructive"}>
-                            {provider.provider}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {provider.generationTime}ms
-                          </span>
-                        </div>
-                        {provider.success && (
-                          <div className="text-xs space-y-1">
-                            <p>Tokens: {provider.usage?.tokens || 0}</p>
-                            <p>Cost: ${(provider.usage?.cost || 0).toFixed(4)}</p>
-                            <p>Quality: {provider.quality || 0}/100</p>
-                          </div>
-                        )}
-                        {provider.error && (
-                          <p className="text-xs text-red-600">{provider.error}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="raw" className="space-y-4">
-                <pre className="text-xs bg-gray-50 p-4 rounded-lg overflow-auto max-h-96">
-                  {JSON.stringify(selectedResult, null, 2)}
-                </pre>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
-    );
   };
 
   return (
     <div className="w-full max-w-6xl mx-auto p-6 space-y-6">
+      {/* Header */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="h-6 w-6 text-blue-600" />
-            Enhanced AI Content Generation Test Suite
+            AI Test Buffer - Blog Generation
           </CardTitle>
           <p className="text-muted-foreground">
-            Test the new AI content generation system with multiple providers and enhanced prompts
+            Test API providers and generate optimized blog content with dynamic prompts
           </p>
         </CardHeader>
-        
-        <CardContent className="space-y-6">
-          {/* Test Configuration */}
+      </Card>
+
+      {/* User Inputs */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Blog Parameters
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label>Test Keyword</Label>
+              <Label htmlFor="keyword">Keyword</Label>
               <Input
-                value={testKeyword}
-                onChange={(e) => setTestKeyword(e.target.value)}
-                placeholder="digital marketing"
+                id="keyword"
+                placeholder="e.g., digital marketing"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label>Test URL</Label>
+              <Label htmlFor="url">Target URL</Label>
               <Input
-                value={testUrl}
-                onChange={(e) => setTestUrl(e.target.value)}
+                id="url"
                 placeholder="https://example.com"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label>Anchor Text</Label>
+              <Label htmlFor="anchorText">Anchor Text</Label>
               <Input
-                value={testAnchorText}
-                onChange={(e) => setTestAnchorText(e.target.value)}
+                id="anchorText"
                 placeholder="best marketing tools"
+                value={anchorText}
+                onChange={(e) => setAnchorText(e.target.value)}
               />
             </div>
-          </div>
-
-          {/* Progress */}
-          {isRunning && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
-                <span className="text-sm font-medium">Running: {currentTest}</span>
-              </div>
-              <Progress value={progress} className="w-full" />
-            </div>
-          )}
-
-          {/* Controls */}
-          <div className="flex gap-3">
-            <Button 
-              onClick={runAllTests}
-              disabled={isRunning}
-              className="bg-gradient-to-r from-blue-600 to-purple-600"
-            >
-              <Play className="h-4 w-4 mr-2" />
-              Run All Tests
-            </Button>
-            
-            <Button 
-              variant="outline"
-              onClick={testProviderStatus}
-              disabled={isRunning}
-            >
-              <Settings className="h-4 w-4 mr-2" />
-              Check Providers
-            </Button>
           </div>
         </CardContent>
       </Card>
 
+      {/* Dynamic Prompts Overlay */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5" />
+              Dynamic Prompts (Uneditable)
+            </CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowPrompts(!showPrompts)}
+            >
+              {showPrompts ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </Button>
+          </div>
+        </CardHeader>
+        {showPrompts && (
+          <CardContent className="space-y-4">
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                These prompts are automatically generated based on your inputs and cannot be edited.
+              </AlertDescription>
+            </Alert>
+            
+            {dynamicPrompts.map((prompt, index) => (
+              <div key={index} className="relative">
+                <div className="bg-gray-50 rounded-lg p-4 border">
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge variant="outline">Prompt {index + 1}</Badge>
+                    <Badge variant="secondary" className="text-xs">Auto-generated</Badge>
+                  </div>
+                  <div className="relative">
+                    <pre className="text-sm whitespace-pre-wrap font-mono text-gray-700">
+                      {prompt}
+                    </pre>
+                    {/* Overlay to prevent editing */}
+                    <div className="absolute inset-0 bg-transparent cursor-not-allowed" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        )}
+      </Card>
+
+      {/* Processing Status */}
+      {isProcessing && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <RefreshCw className="h-5 w-5 animate-spin" />
+              Processing
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">{currentStep}</span>
+              </div>
+              <Progress value={progress} className="w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Provider Status */}
-      {renderProviderStatus()}
+      {providerStatuses.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5" />
+              API Provider Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {providerStatuses.map((provider, index) => (
+                <div key={index} className="p-3 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium capitalize text-sm">{provider.provider}</span>
+                    {provider.available ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <div className={`text-xs px-2 py-1 rounded ${
+                      provider.quotaStatus === 'available' ? 'bg-green-100 text-green-800' :
+                      provider.quotaStatus === 'low' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      Quota: {provider.quotaStatus}
+                      {provider.usagePercentage && ` (${provider.usagePercentage}%)`}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Test Results */}
-      {testResults.length > 0 && renderTestResults()}
+      {/* Generated Blog Results */}
+      {generatedBlog && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              Blog Generation Complete
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert className="border-green-200 bg-green-50">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                <strong>Success!</strong> Your blog post has been generated and is available at:{' '}
+                <a 
+                  href={generatedBlog.blogUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="font-medium underline hover:no-underline"
+                >
+                  {generatedBlog.blogUrl}
+                </a>
+              </AlertDescription>
+            </Alert>
 
-      {/* Result Modal */}
-      {renderResultModal()}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Blog Slug</p>
+                <p className="text-sm text-muted-foreground font-mono">/blog/{generatedBlog.slug}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Generation Time</p>
+                <p className="text-sm text-muted-foreground">
+                  {generatedBlog.testResult?.testDuration}ms
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Recommended Provider</p>
+                <Badge variant="outline">
+                  {generatedBlog.testResult?.recommendedProvider}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button asChild>
+                <a 
+                  href={generatedBlog.blogUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  View Published Blog
+                </a>
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => navigator.clipboard.writeText(generatedBlog.blogUrl)}
+              >
+                <Link className="h-4 w-4 mr-2" />
+                Copy URL
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Generate Button */}
+      <Button 
+        onClick={runBlogGeneration} 
+        disabled={isProcessing || !keyword || !url} 
+        size="lg"
+        className="w-full"
+      >
+        {isProcessing ? (
+          <>
+            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+            {currentStep || 'Processing...'}
+          </>
+        ) : (
+          <>
+            <Play className="mr-2 h-4 w-4" />
+            Test APIs & Generate Blog Post
+          </>
+        )}
+      </Button>
     </div>
   );
 }
