@@ -32,7 +32,7 @@ export interface BuilderAIResult {
   slug: string;
   publishedUrl: string;
   wordCount: number;
-  provider: 'openai' | 'grok';
+  provider: 'huggingface' | 'cohere';
   generationTime: number;
   expiresAt: Date;
   metadata: {
