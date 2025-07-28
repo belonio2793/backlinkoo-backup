@@ -304,8 +304,8 @@ export function AILive() {
       // Step 4: Validate Content
       addStep('Validation', 'running', 'Validating content quality...');
       
-      if (result.wordCount < 1000) {
-        updateLastStep('error', `Content too short: ${result.wordCount} words`);
+      if (result.wordCount < 700) {
+        updateLastStep('error', `Content too short: ${result.wordCount} words (minimum 700 required)`);
         throw new Error('Generated content does not meet minimum word count');
       }
 
