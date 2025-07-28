@@ -163,7 +163,7 @@ export class EnhancedAIContentGenerator {
       },
       body: JSON.stringify({
         messages: [{ role: 'user', content: prompt }],
-        model: 'grok-beta',
+        model: 'grok-2-1212',
         stream: false,
         temperature: 0.7
       })
