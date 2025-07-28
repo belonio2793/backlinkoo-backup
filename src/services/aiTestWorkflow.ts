@@ -162,8 +162,42 @@ export class AITestWorkflow {
         };
       }
 
-      // Try to use the global blog generator with validated providers
+      // Try multi-API content generation first, then fallback to global blog generator
       try {
+        console.log('🚀 Attempting multi-API content generation...');
+
+        const multiApiResult = await multiApiContentGenerator.generateBlogContent(
+          request.keyword,
+          request.websiteUrl,
+          request.anchorText || request.keyword
+        );
+
+        if (multiApiResult.success && multiApiResult.bestResponse) {
+          console.log('✅ Multi-API generation successful:', multiApiResult.bestResponse.provider);
+
+          const baseUrl = request.currentDomain || 'https://backlinkoo.com';
+          const slug = request.keyword.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+
+          return {
+            success: true,
+            blogUrl: `${baseUrl}/blog/${slug}`,
+            content: multiApiResult.bestResponse.content,
+            publishedAt: new Date().toISOString(),
+            metadata: {
+              title: `${request.keyword}: Complete Guide ${new Date().getFullYear()}`,
+              slug,
+              generatedBy: `multi-api-${multiApiResult.bestResponse.provider}`,
+              wordCount: multiApiResult.bestResponse.content.split(' ').length,
+              providersUsed: multiApiResult.responses.map(r => r.provider),
+              processingTime: multiApiResult.processingTime
+            }
+          };
+        }
+
+        // Fallback to global blog generator if multi-API fails
+        console.log('⚠️ Multi-API generation failed, trying global blog generator...');
         const blogResult = await globalBlogGenerator.generateGlobalBlogPost({
           targetUrl: request.websiteUrl,
           primaryKeyword: request.keyword,
