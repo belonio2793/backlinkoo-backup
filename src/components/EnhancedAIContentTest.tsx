@@ -297,12 +297,19 @@ Start your ${keyword} journey today and take your business to the next level!`;
       {/* Header */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-6 w-6 text-blue-600" />
-            AI Test Buffer - Blog Generation
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Zap className="h-6 w-6 text-blue-600" />
+              AI Test Buffer - Blog Generation
+            </div>
+            {keyword && (
+              <Badge variant="outline" className="text-xs">
+                Prompt Engine: v{((sessionStorage.getItem('aitest-prompt-seed') || Date.now().toString()) as any % 5) + 1}
+              </Badge>
+            )}
           </CardTitle>
           <p className="text-muted-foreground">
-            Test API providers and generate optimized blog content with dynamic prompts
+            Test API providers and generate optimized blog content with intelligent prompt rotation
           </p>
         </CardHeader>
       </Card>
