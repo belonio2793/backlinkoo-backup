@@ -247,6 +247,7 @@ export function MinimalAITest() {
                 <Input
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
+                  placeholder="Enter target keyword for content generation"
                   className="font-mono text-sm"
                   disabled={isRunning}
                 />
@@ -256,6 +257,7 @@ export function MinimalAITest() {
                 <Input
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
+                  placeholder="Enter destination URL for backlink placement"
                   className="font-mono text-sm"
                   disabled={isRunning}
                 />
