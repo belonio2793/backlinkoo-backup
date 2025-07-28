@@ -54,13 +54,16 @@ export class PublishedBlogService {
       const uniqueSlug = `${generatedPost.slug}-${Date.now()}`;
       const publishedUrl = `${window.location.origin}/blog/${uniqueSlug}`;
       
-      // Create blog post data
+      // Create blog post data with formatting
+      const formattedTitle = formatBlogTitle(generatedPost.title);
+      const formattedContent = formatBlogContent(generatedPost.content);
+
       const blogPost: PublishedBlogPost = {
         id: `blog_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         user_id: userId,
         slug: uniqueSlug,
-        title: generatedPost.title,
-        content: generatedPost.content,
+        title: formattedTitle,
+        content: formattedContent,
         meta_description: generatedPost.metaDescription,
         excerpt: generatedPost.excerpt,
         keywords: [keyword, ...this.extractKeywordsFromContent(generatedPost.content)],
