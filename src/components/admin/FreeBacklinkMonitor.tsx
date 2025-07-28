@@ -162,9 +162,10 @@ export function FreeBacklinkMonitor() {
   };
 
   const handleConfigureRateLimit = () => {
-    const newLimit = prompt('Set new rate limit per hour (current: 5):');
+    const config = adminSyncService.getConfiguration();
+    const newLimit = prompt(`Set new rate limit per hour (current: ${config.rateLimit}):`);
     if (newLimit && !isNaN(Number(newLimit))) {
-      localStorage.setItem('admin_rate_limit_config', newLimit);
+      adminSyncService.updateConfiguration({ rateLimit: Number(newLimit) });
       toast({
         title: 'Rate Limit Updated',
         description: `New rate limit set to ${newLimit} requests per hour`
@@ -173,9 +174,10 @@ export function FreeBacklinkMonitor() {
   };
 
   const handleConfigureExpiration = () => {
-    const newExpiration = prompt('Set trial post expiration hours (current: 24):');
+    const config = adminSyncService.getConfiguration();
+    const newExpiration = prompt(`Set trial post expiration hours (current: ${config.expirationHours}):`);
     if (newExpiration && !isNaN(Number(newExpiration))) {
-      localStorage.setItem('admin_expiration_config', newExpiration);
+      adminSyncService.updateConfiguration({ expirationHours: Number(newExpiration) });
       toast({
         title: 'Expiration Updated',
         description: `Trial posts will now expire after ${newExpiration} hours`
