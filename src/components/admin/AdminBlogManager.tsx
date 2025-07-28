@@ -67,7 +67,7 @@ export function AdminBlogManager() {
         reading_time: 8,
         word_count: 1850,
         featured_image: '/placeholder.svg',
-        author_name: 'Backlinkoo AI',
+        author_name: 'Backlink ∞',
         author_avatar: '/placeholder.svg',
         tags: ['marketing', 'automation', 'CRM'],
         category: 'Marketing Tools',
