@@ -41,6 +41,8 @@ export function EnhancedAIContentTest() {
   const [saveMode, setSaveMode] = useState<'trial' | 'claim' | null>(null);
   const [currentPrompt, setCurrentPrompt] = useState('');
   const [showPromptDisplay, setShowPromptDisplay] = useState(false);
+  const [contentViewMode, setContentViewMode] = useState<'text' | 'html'>('text');
+  const [finalHtmlContent, setFinalHtmlContent] = useState('');
   
   // User inputs
   const [keyword, setKeyword] = useState('digital marketing');
@@ -584,7 +586,7 @@ Start your ${keyword} transformation journey today and unlock the full potential
               <div className="text-sm text-muted-foreground">
                 Words generated: {wordCount} / 1000+ minimum {isGeneratingContent && '(continuing...)'}
                 {wordCount >= 1000 && (
-                  <span className="ml-2 text-green-600 font-medium">�� Target reached</span>
+                  <span className="ml-2 text-green-600 font-medium">✓ Target reached</span>
                 )}
               </div>
             )}
