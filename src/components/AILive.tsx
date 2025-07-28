@@ -71,12 +71,14 @@ export function AILive() {
   const [currentContent, setCurrentContent] = useState('');
   const [hasGenerated, setHasGenerated] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const stepsEndRef = useRef<HTMLDivElement>(null);
+  const stepCounterRef = useRef(0);
 
   const addStep = (step: string, status: GenerationStep['status'], message: string) => {
+    stepCounterRef.current += 1;
     const newStep: GenerationStep = {
-      id: Date.now().toString(),
+      id: `step-${stepCounterRef.current}-${Date.now()}`,
       step,
       status,
       message,
