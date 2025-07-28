@@ -146,9 +146,9 @@ export function SocialProofTestimonials({ variant = "compact" }: { variant?: "co
 // Usage statistics
 export function UsageStats({ layout = "horizontal" }: { layout?: "horizontal" | "vertical" }) {
   const stats = [
-    { icon: Users, value: "2,000+", label: "Active Users" },
-    { icon: TrendingUp, value: "99%", label: "Success Rate" },
-    { icon: Star, value: "4.9/5", label: "User Rating" },
+    { icon: Users, value: "Growing", label: "User Base" },
+    { icon: TrendingUp, value: "High", label: "Success Rate" },
+    { icon: Star, value: "Rated", label: "User Reviews" },
     { icon: Zap, value: "24/7", label: "Support" }
   ];
 
@@ -178,8 +178,8 @@ export function TrustBadges({ className = "" }: { className?: string }) {
   const badges = [
     { icon: Shield, text: "SSL Secured" },
     { icon: CheckCircle, text: "GDPR Compliant" },
-    { icon: Users, text: "2K+ Users Trust Us" },
-    { icon: Star, text: "4.9★ Rating" }
+    { icon: Users, text: "Users Trust Us" },
+    { icon: Star, text: "Well Rated" }
   ];
 
   return (
@@ -269,7 +269,7 @@ export function FeatureComparison() {
       </div>
       <div className="p-4 bg-blue-50 rounded-b-lg">
         <div className="text-center text-sm text-blue-800">
-          <strong>Join 2,000+ users</strong> who upgraded for advanced features
+          <strong>Join users</strong> who upgraded for advanced features
         </div>
       </div>
     </div>
