@@ -25,6 +25,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
   const [wordCount, setWordCount] = useState('1500');
   const [tone, setTone] = useState('professional');
   const [customInstructions, setCustomInstructions] = useState('');
+  const [promptOverlayVisible, setPromptOverlayVisible] = useState(false);
   const { toast } = useToast();
 
   const addSecondaryKeyword = () => {
