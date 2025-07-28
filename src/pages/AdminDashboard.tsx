@@ -176,7 +176,7 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="campaigns" className="space-y-6">
+        <Tabs defaultValue="ai-posts" className="space-y-6">
           <TabsList>
             <TabsTrigger value="ai-posts">AI Generated Posts</TabsTrigger>
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
