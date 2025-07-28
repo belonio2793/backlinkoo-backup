@@ -62,26 +62,33 @@ export function ClaimTrialPostDialog({
     return { hours, minutes };
   };
 
-  const checkUserCredits = async () => {
+  const checkUserFreeClaims = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
 
-      if (!user) return { hasCredits: false, credits: 0 };
+      if (!user) return { canClaim: true, hasExistingClaim: false };
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('credits')
-        .eq('id', user.id)
-        .single();
+      // Check if user already has a claimed free blog post
+      const { data: userPosts } = await supabase
+        .from('published_blog_posts')
+        .select('id, is_trial_post, user_id')
+        .eq('user_id', user.id)
+        .eq('is_trial_post', false); // Claimed posts are no longer trial posts
 
-      return { 
-        hasCredits: (profile?.credits || 0) > 0, 
-        credits: profile?.credits || 0 
+      const hasExistingClaim = (userPosts?.length || 0) > 0;
+
+      // Also check localStorage for any claimed posts
+      const localClaims = localStorage.getItem(`user_claimed_posts_${user.id}`);
+      const hasLocalClaims = localClaims ? JSON.parse(localClaims).length > 0 : false;
+
+      return {
+        canClaim: !hasExistingClaim && !hasLocalClaims,
+        hasExistingClaim: hasExistingClaim || hasLocalClaims
       };
     } catch (error) {
-      console.warn('Failed to check user credits:', error);
-      return { hasCredits: false, credits: 0 };
+      console.warn('Failed to check user claims:', error);
+      return { canClaim: true, hasExistingClaim: false };
     }
   };
 
