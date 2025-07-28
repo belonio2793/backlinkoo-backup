@@ -1,16 +1,10 @@
 /**
  * AI Content Test Page
- * Test the enhanced AI content generation system
+ * Clean, Builder.io-inspired interface for instant backlink generation
  */
 
-import { EnhancedAIContentTest } from '@/components/EnhancedAIContentTest';
+import { SimplifiedAIContentTest } from '@/components/SimplifiedAIContentTest';
 
 export default function AIContentTest() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      <div className="container mx-auto py-8">
-        <EnhancedAIContentTest />
-      </div>
-    </div>
-  );
+  return <SimplifiedAIContentTest />;
 }
