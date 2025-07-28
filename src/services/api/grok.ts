@@ -66,7 +66,7 @@ export class GrokService {
     }
 
     const {
-      model = 'grok-beta',
+      model = 'grok-2-1212',
       maxTokens = 3000,
       temperature = 0.7,
       systemPrompt = 'You are Grok, a witty and knowledgeable AI assistant. Create engaging, SEO-optimized content with natural backlink integration.'
