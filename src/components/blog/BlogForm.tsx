@@ -54,33 +54,66 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
     }
 
     setIsGenerating(true);
-    
+    setTestingProviders(true);
+
     try {
-      // Generate content using Production AI service with intelligent provider selection
-      const generatedContent = await productionAIContentManager.generateContent({
-        targetUrl,
-        primaryKeyword,
-        secondaryKeywords,
-        contentType: contentType as 'blog-post' | 'editorial' | 'guest-post' | 'resource-page',
-        wordCount: parseInt(wordCount),
-        tone,
-        customInstructions
+      // Step 1: Run AI test workflow to validate providers
+      setTestWorkflowStep('Testing AI provider connectivity...');
+
+      const workflowResult = await aiTestWorkflow.processCompleteWorkflow({
+        websiteUrl: targetUrl,
+        keyword: primaryKeyword,
+        anchorText: secondaryKeywords[0] || primaryKeyword,
+        sessionId: crypto.randomUUID()
       });
 
-      onContentGenerated(generatedContent);
-      
-      toast({
-        title: "Content Generated Successfully",
-        description: `Generated ${wordCount}-word blog post about "${primaryKeyword}"`,
-      });
+      const { testResult, blogResult } = workflowResult;
+      setProviderStatuses(testResult.providerStatuses);
+
+      if (!testResult.success) {
+        throw new Error(`AI provider validation failed: ${testResult.errors.join(', ')}`);
+      }
+
+      setTestWorkflowStep('Generating optimized blog content...');
+
+      if (blogResult.success && blogResult.blogUrl) {
+        // Success! Return the published blog URL
+        onContentGenerated({
+          ...blogResult,
+          metadata: {
+            ...blogResult.metadata,
+            targetUrl,
+            primaryKeyword,
+            secondaryKeywords,
+            contentType,
+            wordCount: parseInt(wordCount),
+            tone,
+            customInstructions,
+            testResult,
+            workingProviders: testResult.workingProviders,
+            recommendedProvider: testResult.recommendedProvider
+          }
+        });
+
+        toast({
+          title: "Blog Generated Successfully!",
+          description: `Your blog post is now live at: ${blogResult.blogUrl}`,
+        });
+      } else {
+        throw new Error(blogResult.error || 'Blog generation failed after successful provider validation');
+      }
+
     } catch (error) {
+      console.error('Content generation failed:', error);
       toast({
         title: "Generation Failed",
-        description: "Failed to generate content. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate content. Please try again.",
         variant: "destructive"
       });
     } finally {
       setIsGenerating(false);
+      setTestingProviders(false);
+      setTestWorkflowStep('');
     }
   };
 
