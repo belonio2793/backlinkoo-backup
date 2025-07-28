@@ -306,7 +306,7 @@ export function InlineAuthForm({
         <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <Users className="h-3 w-3" />
-            <span>2,000+ users</span>
+            <span>Growing community</span>
           </div>
           <div className="flex items-center gap-1">
             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
