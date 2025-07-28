@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { blogPublisher } from '@/services/blogPublisher';
 import {
@@ -16,7 +17,11 @@ import {
   Hash,
   FileText,
   ExternalLink,
-  Loader2
+  Loader2,
+  CheckCircle2,
+  Clock,
+  Zap,
+  Link
 } from 'lucide-react';
 
 interface BlogPreviewProps {
