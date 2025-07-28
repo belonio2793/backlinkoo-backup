@@ -7,6 +7,8 @@ import { useToast } from '@/hooks/use-toast';
 import { publishedBlogService, type PublishedBlogPost } from '@/services/publishedBlogService';
 import { ClaimTrialPostDialog } from '@/components/ClaimTrialPostDialog';
 import { supabase } from '@/integrations/supabase/client';
+import { formatBlogTitle, formatBlogContent, getTrendingLabel } from '@/utils/textFormatting';
+import { Footer } from '@/components/Footer';
 import { 
   Calendar, 
   Clock, 
@@ -192,21 +194,49 @@ export function BlogPost() {
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => navigate('/')}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Home
             </Button>
-            
-            {blogPost.is_trial_post && (
-              <Badge variant="secondary" className="bg-amber-100 text-amber-800">
-                <Sparkles className="mr-1 h-3 w-3" />
-                Trial Post
-              </Badge>
-            )}
+
+            <div className="flex items-center gap-3">
+              {blogPost.is_trial_post && (
+                <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+                  <Sparkles className="mr-1 h-3 w-3" />
+                  Trial Post
+                </Badge>
+              )}
+
+              {!currentUser ? (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate('/login')}
+                  >
+                    Sign In
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => navigate('/login')}
+                  >
+                    Register
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/dashboard')}
+                >
+                  Dashboard
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -231,7 +261,7 @@ export function BlogPost() {
 
             {/* Title */}
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-              {blogPost.title}
+              {formatBlogTitle(blogPost.title)}
             </h1>
 
             {/* Meta Description */}
@@ -245,7 +275,7 @@ export function BlogPost() {
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 pt-4 border-t border-gray-200">
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                <span>{blogPost.author_name || 'Backlinkoo AI'}</span>
+                <span>{blogPost.author_name || 'Backlink ∞'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
@@ -261,7 +291,7 @@ export function BlogPost() {
               </div>
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
-                <span>SEO Score: {blogPost.seo_score || 85}/100</span>
+                <span>{getTrendingLabel()}</span>
               </div>
             </div>
 
@@ -278,7 +308,7 @@ export function BlogPost() {
               >
                 <a href={blogPost.target_url} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="mr-2 h-4 w-4" />
-                  Visit Target Site
+                  Learn More
                 </a>
               </Button>
             </div>
@@ -302,8 +332,8 @@ export function BlogPost() {
 
         {/* Article Content */}
         <div className="prose prose-lg prose-gray max-w-none">
-          <div 
-            dangerouslySetInnerHTML={{ __html: blogPost.content }}
+          <div
+            dangerouslySetInnerHTML={{ __html: formatBlogContent(blogPost.content) }}
             className="blog-content"
           />
         </div>
@@ -432,9 +462,15 @@ export function BlogPost() {
           margin-bottom: 1.5rem;
           padding-left: 1.5rem;
         }
-        
+
         .blog-content li {
           margin-bottom: 0.5rem;
+        }
+
+        /* Handle hyphenated bullet points */
+        .blog-content p:has-text("- ") {
+          margin-left: 1rem;
+          text-indent: -1rem;
         }
         
         .blog-content a {
@@ -478,6 +514,9 @@ export function BlogPost() {
           color: inherit;
         }
       `}</style>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

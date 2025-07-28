@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { blogTemplateEngine } from './blogTemplateEngine';
+import { formatBlogTitle, formatBlogContent } from '@/utils/textFormatting';
 
 export interface PublishedBlogPost {
   id: string;
@@ -53,13 +54,16 @@ export class PublishedBlogService {
       const uniqueSlug = `${generatedPost.slug}-${Date.now()}`;
       const publishedUrl = `${window.location.origin}/blog/${uniqueSlug}`;
       
-      // Create blog post data
+      // Create blog post data with formatting
+      const formattedTitle = formatBlogTitle(generatedPost.title);
+      const formattedContent = formatBlogContent(generatedPost.content);
+
       const blogPost: PublishedBlogPost = {
         id: `blog_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         user_id: userId,
         slug: uniqueSlug,
-        title: generatedPost.title,
-        content: generatedPost.content,
+        title: formattedTitle,
+        content: formattedContent,
         meta_description: generatedPost.metaDescription,
         excerpt: generatedPost.excerpt,
         keywords: [keyword, ...this.extractKeywordsFromContent(generatedPost.content)],
@@ -74,7 +78,7 @@ export class PublishedBlogService {
         reading_time: generatedPost.readingTime,
         word_count: generatedPost.wordCount,
         featured_image: this.generateFeaturedImage(keyword),
-        author_name: 'Backlinkoo Team',
+        author_name: 'Backlink ∞',
         author_avatar: '/placeholder.svg',
         tags: this.generateTags(keyword, targetUrl),
         category: this.categorizeContent(keyword),

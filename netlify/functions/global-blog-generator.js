@@ -66,7 +66,7 @@ const generateContextualContent = (request) => {
     
     `## Getting Started Today\n\nReady to implement ${primaryKeyword} strategies for your business? The most successful approaches combine proven methodologies with cutting-edge tools. \n\nFor comprehensive ${primaryKeyword} solutions and expert guidance, explore the resources available at [${targetUrl}](${targetUrl}). Our platform serves thousands of users globally, providing tailored strategies that work across different markets and industries.\n\n`,
     
-    `## Conclusion\n\n${primaryKeyword} success requires the right combination of strategy, tools, and execution. ${userLocation ? `For businesses in ${userLocation}, ` : 'For organizations worldwide, '}the opportunity to leverage advanced ${primaryKeyword} techniques has never been greater.\n\nStart your journey today and join the thousands of successful businesses already benefiting from strategic ${primaryKeyword} implementation.\n\n---\n\n*Ready to take your ${primaryKeyword} efforts to the next level? [Get started now](${targetUrl}) and discover why businesses ${userLocation ? `in ${userLocation} ` : 'worldwide '}trust our platform for their growth initiatives.*`
+    `## Conclusion\n\n${primaryKeyword} success requires the right combination of strategy, tools, and execution. ${userLocation ? `For businesses in ${userLocation}, ` : 'For organizations worldwide, '}the opportunity to leverage advanced ${primaryKeyword} techniques has never been greater.\n\nStart your journey today and join the thousands of successful businesses already benefiting from strategic ${primaryKeyword} implementation.\n\n---\n\n* Ready to take your ${primaryKeyword} efforts to the next level? [Get started now](${targetUrl}) and discover why businesses ${userLocation ? `in ${userLocation} ` : 'worldwide '}trust our platform for their growth initiatives.`
   ];
 
   return sections.join('');
@@ -262,7 +262,7 @@ exports.handler = async (event, context) => {
       anchor_text: anchorText || primaryKeyword,
       published_url: `https://backlinkoo.com/blog/${primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
       published_at: new Date().toISOString(),
-      author_name: 'Backlinkoo AI',
+      author_name: 'Backlink ∞',
       category: 'SEO Guide',
       view_count: 0,
       word_count: Math.floor(content.length / 6),

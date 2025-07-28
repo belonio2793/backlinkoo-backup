@@ -14,32 +14,15 @@ import {
   AlertCircle
 } from "lucide-react";
 
-// Real-time user activity simulation
+// Static activity indicator (removed fake simulation)
 export function LiveUserActivity({ className = "" }: { className?: string }) {
-  const [recentSignups, setRecentSignups] = useState(3);
-  const [timeAgo, setTimeAgo] = useState("2 minutes");
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulate new signups
-      const signups = Math.floor(Math.random() * 5) + 1;
-      const times = ["just now", "1 minute", "2 minutes", "3 minutes", "5 minutes"];
-      const randomTime = times[Math.floor(Math.random() * times.length)];
-      
-      setRecentSignups(signups);
-      setTimeAgo(randomTime);
-    }, 30000); // Update every 30 seconds
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <div className={`flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg border border-green-200 ${className}`}>
       <div className="relative">
-        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
       </div>
       <span className="font-medium">
-        {recentSignups} people signed up {timeAgo}
+        Active community
       </span>
     </div>
   );
@@ -49,28 +32,28 @@ export function LiveUserActivity({ className = "" }: { className?: string }) {
 export function SocialProofTestimonials({ variant = "compact" }: { variant?: "compact" | "full" }) {
   const testimonials = [
     {
-      name: "Sarah Chen",
-      role: "SEO Manager",
-      company: "TechCorp",
-      avatar: "SC",
+      name: "SEO Professional",
+      role: "Marketing Manager",
+      company: "Technology Company",
+      avatar: "SP",
       rating: 5,
-      text: "This platform increased our organic traffic by 300% in just 3 months. The backlink quality is outstanding."
+      text: "Quality backlink service with professional support and reliable delivery."
     },
     {
-      name: "Mike Rodriguez",
-      role: "Digital Marketer", 
-      company: "GrowthAgency",
-      avatar: "MR",
+      name: "Digital Marketer",
+      role: "Growth Specialist",
+      company: "Marketing Agency",
+      avatar: "DM",
       rating: 5,
-      text: "Best ROI we've ever seen from a backlink service. The automation saves us 20+ hours per week."
+      text: "Effective backlink solutions that integrate well into our SEO strategies."
     },
     {
-      name: "Jennifer Park",
+      name: "Business Owner",
       role: "Founder",
-      company: "EcomBrand",
-      avatar: "JP",
+      company: "Online Business",
+      avatar: "BO",
       rating: 5,
-      text: "Went from page 3 to page 1 for our main keyword in 2 months. Customer support is incredible."
+      text: "Professional service with transparent processes and helpful customer support."
     }
   ];
 
@@ -146,9 +129,9 @@ export function SocialProofTestimonials({ variant = "compact" }: { variant?: "co
 // Usage statistics
 export function UsageStats({ layout = "horizontal" }: { layout?: "horizontal" | "vertical" }) {
   const stats = [
-    { icon: Users, value: "2,000+", label: "Active Users" },
-    { icon: TrendingUp, value: "99%", label: "Success Rate" },
-    { icon: Star, value: "4.9/5", label: "User Rating" },
+    { icon: Users, value: "Growing", label: "User Base" },
+    { icon: TrendingUp, value: "High", label: "Success Rate" },
+    { icon: Star, value: "Rated", label: "User Reviews" },
     { icon: Zap, value: "24/7", label: "Support" }
   ];
 
@@ -178,8 +161,8 @@ export function TrustBadges({ className = "" }: { className?: string }) {
   const badges = [
     { icon: Shield, text: "SSL Secured" },
     { icon: CheckCircle, text: "GDPR Compliant" },
-    { icon: Users, text: "2K+ Users Trust Us" },
-    { icon: Star, text: "4.9★ Rating" }
+    { icon: Users, text: "Users Trust Us" },
+    { icon: Star, text: "Well Rated" }
   ];
 
   return (
@@ -269,7 +252,7 @@ export function FeatureComparison() {
       </div>
       <div className="p-4 bg-blue-50 rounded-b-lg">
         <div className="text-center text-sm text-blue-800">
-          <strong>Join 2,000+ users</strong> who upgraded for advanced features
+          <strong>Join users</strong> who upgraded for advanced features
         </div>
       </div>
     </div>
@@ -286,36 +269,14 @@ export function MoneyBackGuarantee({ className = "" }: { className?: string }) {
   );
 }
 
-// Recent activity feed
+// Platform activity indicator (removed fake simulation)
 export function RecentActivity() {
-  const activities = [
-    { user: "Alex M.", action: "upgraded to Pro", time: "2m ago", location: "New York" },
-    { user: "Sarah K.", action: "created first campaign", time: "5m ago", location: "London" },
-    { user: "Mike R.", action: "generated 5 backlinks", time: "8m ago", location: "Toronto" },
-    { user: "Lisa T.", action: "upgraded to Pro", time: "12m ago", location: "Sydney" }
-  ];
-
-  const [currentActivity, setCurrentActivity] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentActivity((prev) => (prev + 1) % activities.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [activities.length]);
-
-  const activity = activities[currentActivity];
-
   return (
-    <div className="bg-gray-50 border rounded-lg p-3 transition-all duration-500">
+    <div className="bg-gray-50 border rounded-lg p-3">
       <div className="flex items-center gap-2 text-sm">
-        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-        <span className="font-medium">{activity.user}</span>
-        <span className="text-muted-foreground">{activity.action}</span>
-        <span className="text-xs text-muted-foreground ml-auto">{activity.time}</span>
-      </div>
-      <div className="text-xs text-muted-foreground mt-1 ml-4">
-        📍 {activity.location}
+        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+        <span className="font-medium">Platform Activity</span>
+        <span className="text-muted-foreground">Users actively using the service</span>
       </div>
     </div>
   );

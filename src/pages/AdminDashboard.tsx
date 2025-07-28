@@ -9,6 +9,7 @@ import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager"
 
 import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
 import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
+import { FreeBacklinkMonitor } from "@/components/admin/FreeBacklinkMonitor";
 import { TrialPostCleanupManager } from "@/components/admin/TrialPostCleanupManager";
 import { ContentFilterManager } from "@/components/admin/ContentFilterManager";
 import { ContentModerationQueue } from "@/components/admin/ContentModerationQueue";
@@ -19,6 +20,7 @@ import { SupabaseEmailTest } from "@/components/SupabaseEmailTest";
 import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
+import { Footer } from "@/components/Footer";
 
 import { SystemStatusCheck } from "@/components/SystemStatusCheck";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
@@ -177,6 +179,7 @@ const AdminDashboard = () => {
           <TabsList>
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
             <TabsTrigger value="blog-posts">Blog Posts</TabsTrigger>
+            <TabsTrigger value="free-backlinks">Free Backlinks</TabsTrigger>
             <TabsTrigger value="content-filter">Content Filter</TabsTrigger>
             <TabsTrigger value="moderation-queue">Moderation Queue</TabsTrigger>
             <TabsTrigger value="trial-cleanup">Trial Cleanup</TabsTrigger>
@@ -195,6 +198,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="blog-posts">
             <AdminBlogManager />
+          </TabsContent>
+
+          <TabsContent value="free-backlinks">
+            <FreeBacklinkMonitor />
           </TabsContent>
 
           <TabsContent value="content-filter">
@@ -254,6 +261,9 @@ const AdminDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

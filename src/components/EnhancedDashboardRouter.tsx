@@ -255,16 +255,16 @@ function GuestOnboardingDashboard({
           <h2 className="text-2xl font-light mb-8">Why Choose Our Platform?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-6">
-              <div className="text-3xl font-semibold text-blue-600 mb-2">99%</div>
+              <div className="text-3xl font-semibold text-blue-600 mb-2">High</div>
               <div className="text-sm text-muted-foreground">Success Rate</div>
             </div>
             <div className="p-6">
-              <div className="text-3xl font-semibold text-blue-600 mb-2">2,000+</div>
-              <div className="text-sm text-muted-foreground">Active Users</div>
+              <div className="text-3xl font-semibold text-blue-600 mb-2">Growing</div>
+              <div className="text-sm text-muted-foreground">User Base</div>
             </div>
             <div className="p-6">
-              <div className="text-3xl font-semibold text-blue-600 mb-2">4.9/5</div>
-              <div className="text-sm text-muted-foreground">User Rating</div>
+              <div className="text-3xl font-semibold text-blue-600 mb-2">Rated</div>
+              <div className="text-sm text-muted-foreground">User Reviews</div>
             </div>
           </div>
         </div>

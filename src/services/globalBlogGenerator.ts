@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { contentFilterService } from './contentFilterService';
 import { contentModerationService } from './contentModerationService';
+import { formatBlogTitle, formatBlogContent } from '@/utils/textFormatting';
 
 export interface GlobalBlogRequest {
   targetUrl: string;
@@ -226,9 +227,9 @@ class GlobalBlogGeneratorService {
                 primary: { url: request.targetUrl, anchor: request.anchorText || request.primaryKeyword, context: 'Main target link' }
               },
               globalMetrics: data.globalMetrics || {
-                totalRequestsToday: Math.floor(Math.random() * 500) + 100,
-                averageGenerationTime: 45,
-                successRate: 96.5,
+                totalRequestsToday: null, // Remove mock metrics
+                averageGenerationTime: null,
+                successRate: null,
                 userCountry: locationData?.country || 'Unknown'
               }
             }
@@ -274,10 +275,14 @@ class GlobalBlogGeneratorService {
       throw new Error(`Generated content was flagged for moderation: The AI-generated content contains terms that require review before publication.`);
     }
 
+    const rawTitle = `${request.primaryKeyword}: A Comprehensive Guide for ${new Date().getFullYear()}`;
+    const formattedTitle = formatBlogTitle(rawTitle);
+    const formattedContent = formatBlogContent(content);
+
     const blogPost = {
       id: crypto.randomUUID(),
-      title: `${request.primaryKeyword}: A Comprehensive Guide for ${new Date().getFullYear()}`,
-      content: content,
+      title: formattedTitle,
+      content: formattedContent,
       excerpt: `Discover everything you need to know about ${request.primaryKeyword}. Expert insights, practical tips, and actionable strategies.`,
       slug: `${request.primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
       keywords: [request.primaryKeyword, ...this.generateRelatedKeywords(request.primaryKeyword)],
@@ -289,7 +294,7 @@ class GlobalBlogGeneratorService {
       reading_time: Math.floor(Math.random() * 5) + 3,
       word_count: Math.floor(content.length / 6), // Approximate word count
       view_count: 0,
-      author_name: 'Backlinkoo AI',
+      author_name: 'Backlink ∞',
       category: 'SEO Guide',
       published_url: `https://backlinkoo.com/blog/${request.primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
       published_at: new Date().toISOString(),
@@ -317,9 +322,9 @@ class GlobalBlogGeneratorService {
           ]
         },
         globalMetrics: {
-          totalRequestsToday: Math.floor(Math.random() * 500) + 100,
-          averageGenerationTime: 35,
-          successRate: 94.2,
+          totalRequestsToday: null, // Remove artificial metrics
+          averageGenerationTime: null,
+          successRate: null,
           userCountry: request.userLocation || 'Unknown'
         }
       }
@@ -332,31 +337,26 @@ class GlobalBlogGeneratorService {
       
       `<h2>What is ${request.primaryKeyword}?</h2><p>${request.primaryKeyword} is a crucial aspect of modern digital strategies. Understanding its fundamentals can significantly impact your success in today's competitive landscape.</p>`,
 
-      `<h2>Key Benefits of ${request.primaryKeyword}</h2><ol><li><strong>Enhanced Performance</strong>: Implementing ${request.primaryKeyword} strategies can dramatically improve your results</li><li><strong>Cost Efficiency</strong>: Smart ${request.primaryKeyword} approaches often reduce overhead while maximizing output</li><li><strong>Competitive Advantage</strong>: Stay ahead of competitors with advanced ${request.primaryKeyword} techniques</li><li><strong>Long-term Growth</strong>: Build sustainable success through proven ${request.primaryKeyword} methodologies</li></ol>`,
+      `<h2>Key Benefits of ${request.primaryKeyword}</h2><ul><li><strong>Enhanced Performance</strong>: Implementing ${request.primaryKeyword} strategies can dramatically improve your results</li><li><strong>Cost Efficiency</strong>: Smart ${request.primaryKeyword} approaches often reduce overhead while maximizing output</li><li><strong>Competitive Advantage</strong>: Stay ahead of competitors with advanced ${request.primaryKeyword} techniques</li><li><strong>Long-term Growth</strong>: Build sustainable success through proven ${request.primaryKeyword} methodologies</li></ul>`,
       
-      `## Best Practices for ${request.primaryKeyword}\n\nTo get the most out of ${request.primaryKeyword}, consider these expert-recommended practices:\n\n### Strategy Development\nBegin with a clear understanding of your goals. ${request.primaryKeyword} works best when aligned with your overall objectives.\n\n### Implementation Tips\n- Start with small, manageable steps\n- Monitor progress regularly\n- Adjust strategies based on results\n- Stay updated with latest trends in ${request.primaryKeyword}\n\n`,
+      `<h2>Best Practices for ${request.primaryKeyword}</h2><p>To get the most out of ${request.primaryKeyword}, consider these expert-recommended practices:</p><h3>Strategy Development</h3><p>Begin with a clear understanding of your goals. ${request.primaryKeyword} works best when aligned with your overall objectives.</p><h3>Implementation Tips</h3><ul><li>Start with small, manageable steps</li><li>Monitor progress regularly</li><li>Adjust strategies based on results</li><li>Stay updated with latest trends in ${request.primaryKeyword}</li></ul>`,
       
       `## Advanced ${request.primaryKeyword} Techniques\n\nFor those ready to take their ${request.primaryKeyword} efforts to the next level, these advanced techniques can provide significant advantages:\n\n### Professional Tools and Resources\nLeverage specialized tools and platforms designed for ${request.primaryKeyword}. For comprehensive solutions, consider exploring [advanced ${request.primaryKeyword} tools](${request.targetUrl}) that can streamline your workflow.\n\n`,
       
-      `## Common Mistakes to Avoid\n\nEven experienced practitioners can fall into these ${request.primaryKeyword} traps:\n\n- Neglecting regular monitoring and optimization\n- Focusing on quantity over quality\n- Ignoring user experience considerations\n- Failing to adapt to industry changes\n\n`,
+      `<h2>Common Mistakes to Avoid</h2><p>Even experienced practitioners can fall into these ${request.primaryKeyword} traps:</p><ul><li>Neglecting regular monitoring and optimization</li><li>Focusing on quantity over quality</li><li>Ignoring user experience considerations</li><li>Failing to adapt to industry changes</li></ul>`,
       
-      `## Future of ${request.primaryKeyword}\n\nAs technology continues to evolve, ${request.primaryKeyword} is becoming increasingly sophisticated. Stay ahead by:\n\n- Embracing new technologies and methodologies\n- Investing in continuous learning\n- Building adaptable strategies\n- Networking with industry experts\n\n`,
+      `<h2>Future of ${request.primaryKeyword}</h2><p>As technology continues to evolve, ${request.primaryKeyword} is becoming increasingly sophisticated. Stay ahead by:</p><ul><li>Embracing new technologies and methodologies</li><li>Investing in continuous learning</li><li>Building adaptable strategies</li><li>Networking with industry experts</li></ul>`,
       
-      `## Conclusion\n\n${request.primaryKeyword} represents a significant opportunity for growth and success. By implementing the strategies outlined in this guide, you'll be well-positioned to achieve your objectives.\n\nReady to get started? [Explore our ${request.primaryKeyword} solutions](${request.targetUrl}) and take your efforts to the next level.\n\n---\n\n*This comprehensive guide provides actionable insights for ${request.primaryKeyword} success. For more detailed strategies and tools, visit our resource center.*`
+      `## Conclusion\n\n${request.primaryKeyword} represents a significant opportunity for growth and success. By implementing the strategies outlined in this guide, you'll be well-positioned to achieve your objectives.\n\nReady to get started? [Explore our ${request.primaryKeyword} solutions](${request.targetUrl}) and take your efforts to the next level.\n\n---\n\n* This comprehensive guide provides actionable insights for ${request.primaryKeyword} success. For more detailed strategies and tools, visit our resource center.`
     ];
 
-    // Convert markdown to basic HTML
+    // Join sections and clean up any remaining markdown
     let content = sections.join('');
+
+    // Fix any remaining markdown patterns
     content = content
-      .replace(/## (.*?)\n\n/g, '<h2>$1</h2>')
-      .replace(/### (.*?)\n/g, '<h3>$1</h3>')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/^/, '<p>')
-      .replace(/$/, '</p>')
-      .replace(/- (.*?)\n/g, '<li>$1</li>')
-      .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
 
     return content;
   }
@@ -397,7 +397,7 @@ class GlobalBlogGeneratorService {
         if (error) {
           console.warn('Could not store in database:', error);
         } else {
-          console.log('✅ Blog post stored globally in database');
+          console.log('��� Blog post stored globally in database');
         }
       } catch (dbError) {
         console.warn('Database storage failed, using localStorage only:', dbError);
@@ -419,12 +419,18 @@ class GlobalBlogGeneratorService {
       console.warn('Could not fetch global stats:', error);
     }
 
-    // Fallback stats
+    // Return actual usage stats or minimal fallback
+    const storedPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+    const today = new Date().toDateString();
+    const postsToday = storedPosts.filter((post: any) =>
+      new Date(post.created_at).toDateString() === today
+    ).length;
+
     return {
-      totalPosts: Math.floor(Math.random() * 1000) + 500,
-      postsToday: Math.floor(Math.random() * 50) + 20,
-      activeUsers: Math.floor(Math.random() * 200) + 100,
-      averageQuality: 94.5
+      totalPosts: storedPosts.length,
+      postsToday: postsToday,
+      activeUsers: null, // Remove inflated user count
+      averageQuality: null // Remove artificial quality score
     };
   }
 

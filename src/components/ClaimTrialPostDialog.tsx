@@ -62,26 +62,33 @@ export function ClaimTrialPostDialog({
     return { hours, minutes };
   };
 
-  const checkUserCredits = async () => {
+  const checkUserFreeClaims = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
 
-      if (!user) return { hasCredits: false, credits: 0 };
+      if (!user) return { canClaim: true, hasExistingClaim: false };
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('credits')
-        .eq('id', user.id)
-        .single();
+      // Check if user already has a claimed free blog post
+      const { data: userPosts } = await supabase
+        .from('published_blog_posts')
+        .select('id, is_trial_post, user_id')
+        .eq('user_id', user.id)
+        .eq('is_trial_post', false); // Claimed posts are no longer trial posts
 
-      return { 
-        hasCredits: (profile?.credits || 0) > 0, 
-        credits: profile?.credits || 0 
+      const hasExistingClaim = (userPosts?.length || 0) > 0;
+
+      // Also check localStorage for any claimed posts
+      const localClaims = localStorage.getItem(`user_claimed_posts_${user.id}`);
+      const hasLocalClaims = localClaims ? JSON.parse(localClaims).length > 0 : false;
+
+      return {
+        canClaim: !hasExistingClaim && !hasLocalClaims,
+        hasExistingClaim: hasExistingClaim || hasLocalClaims
       };
     } catch (error) {
-      console.warn('Failed to check user credits:', error);
-      return { hasCredits: false, credits: 0 };
+      console.warn('Failed to check user claims:', error);
+      return { canClaim: true, hasExistingClaim: false };
     }
   };
 
@@ -91,7 +98,7 @@ export function ClaimTrialPostDialog({
     setIsClaiming(true);
 
     try {
-      const { hasCredits, credits } = await checkUserCredits();
+      const { canClaim, hasExistingClaim } = await checkUserFreeClaims();
 
       if (!currentUser) {
         // Redirect to signup with claim intent
@@ -99,13 +106,12 @@ export function ClaimTrialPostDialog({
         return;
       }
 
-      if (!hasCredits) {
+      if (!canClaim || hasExistingClaim) {
         toast({
-          title: "No Credits Available",
-          description: "You need at least 1 credit to claim this trial post. Purchase credits to continue.",
+          title: "Free Claim Limit Reached",
+          description: "You already have a free blog post saved. Each account can only claim one free trial post since they auto-delete after 24 hours unless claimed.",
           variant: "destructive"
         });
-        navigate('/dashboard');
         return;
       }
 
@@ -135,18 +141,15 @@ export function ClaimTrialPostDialog({
         throw new Error(data.error || 'Failed to claim blog post');
       }
 
-      // Deduct 1 credit from user
-      const { error: creditError } = await supabase
-        .from('credits')
-        .update({
-          amount: credits - 1,
-          total_used: credits - 1
-        })
-        .eq('user_id', currentUser.id);
-
-      if (creditError) {
-        console.warn('Failed to deduct credit:', creditError);
-      }
+      // Track the claimed post for this user
+      const userClaimedPosts = localStorage.getItem(`user_claimed_posts_${currentUser.id}`);
+      const claimedPosts = userClaimedPosts ? JSON.parse(userClaimedPosts) : [];
+      claimedPosts.push({
+        slug: trialPostSlug,
+        title: trialPostTitle,
+        claimedAt: new Date().toISOString()
+      });
+      localStorage.setItem(`user_claimed_posts_${currentUser.id}`, JSON.stringify(claimedPosts));
 
       // Create campaign entry
       try {
@@ -161,7 +164,7 @@ export function ClaimTrialPostDialog({
             links_delivered: 1,
             completed_backlinks: [`${window.location.origin}/blog/${trialPostSlug}`],
             user_id: currentUser.id,
-            credits_used: 1
+            credits_used: 0
           });
 
         if (campaignError) {
@@ -200,7 +203,7 @@ export function ClaimTrialPostDialog({
   };
 
   const handleOpenDialog = async () => {
-    const { hasCredits } = await checkUserCredits();
+    const { canClaim } = await checkUserFreeClaims();
     setIsOpen(true);
   };
 
@@ -214,11 +217,11 @@ export function ClaimTrialPostDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Crown className="h-5 w-5 text-yellow-600" />
-            Claim Your Trial Post
+            <Crown className="h-5 w-5 text-green-600" />
+            Claim Your Free Trial Post
           </DialogTitle>
           <DialogDescription>
-            Convert your trial post to a permanent backlink that never expires
+            Save this trial post permanently. Each account gets one free claim since posts auto-delete after 24 hours.
           </DialogDescription>
         </DialogHeader>
 
@@ -277,12 +280,15 @@ export function ClaimTrialPostDialog({
             </div>
           </div>
 
-          {/* Cost */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          {/* Free Claim Notice */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Cost to claim:</span>
-              <Badge className="bg-blue-600 text-white">1 Credit</Badge>
+              <span className="text-sm font-medium">Free one-time claim:</span>
+              <Badge className="bg-green-600 text-white">No Cost</Badge>
             </div>
+            <p className="text-xs text-green-700 mt-1">
+              Each account can claim one free trial post to prevent it from auto-deletion
+            </p>
           </div>
 
           {/* Action Buttons */}
@@ -301,7 +307,7 @@ export function ClaimTrialPostDialog({
                 ) : (
                   <>
                     <Crown className="mr-2 h-4 w-4" />
-                    Claim Now (1 Credit)
+                    Claim Free
                   </>
                 )}
               </Button>
@@ -325,7 +331,7 @@ export function ClaimTrialPostDialog({
 
           {!currentUser && (
             <p className="text-xs text-gray-500 text-center">
-              New users get 3 free credits to claim trial posts
+              Sign up to claim one free trial post permanently
             </p>
           )}
         </div>

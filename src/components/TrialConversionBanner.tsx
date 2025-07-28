@@ -154,7 +154,7 @@ export function TrialConversionBanner({
           </div>
           <div className="flex items-center gap-1">
             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-            <span>4.9/5 satisfaction</span>
+            <span>Well rated</span>
           </div>
           <div className="flex items-center gap-1">
             <Zap className="h-3 w-3" />

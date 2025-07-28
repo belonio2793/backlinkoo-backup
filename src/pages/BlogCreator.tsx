@@ -109,11 +109,11 @@ export function BlogCreator() {
             <div className="flex items-center justify-center gap-6 text-sm text-gray-500 mb-8">
               <div className="flex items-center gap-1">
                 <Users className="h-4 w-4" />
-                <span>2,000+ active users</span>
+                <span>Active user community</span>
               </div>
               <div className="flex items-center gap-1">
                 <TrendingUp className="h-4 w-4" />
-                <span>99% success rate</span>
+                <span>High success rate</span>
               </div>
               <div className="flex items-center gap-1">
                 <Zap className="h-4 w-4" />

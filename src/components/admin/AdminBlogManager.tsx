@@ -46,6 +46,43 @@ export function AdminBlogManager() {
     try {
       // For admin, we want to see all posts including trials
       const posts = await publishedBlogService.getRecentBlogPosts(100);
+
+      // Add sample built link if not already present
+      const sampleBuiltLink = {
+        id: 'built-link-sample-1',
+        slug: 'go-high-level-guide-1753674784638',
+        title: 'Go High Level: A Comprehensive Guide for 2024',
+        content: 'Comprehensive guide content...',
+        meta_description: 'Complete guide to Go High Level platform',
+        excerpt: 'Discover everything you need to know about Go High Level',
+        keywords: ['go high level', 'marketing automation', 'CRM'],
+        target_url: 'https://example.com/go-high-level',
+        published_url: 'https://c9ddf89a9adf4854a791dfeb1224489a-fd5229bc39d54b7ca3bffa1d9.fly.dev/blog/go-high-level-guide-1753674784638',
+        status: 'published' as const,
+        is_trial_post: true,
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        view_count: 142,
+        seo_score: 87,
+        contextual_links: [],
+        reading_time: 8,
+        word_count: 1850,
+        featured_image: '/placeholder.svg',
+        author_name: 'Backlink ∞',
+        author_avatar: '/placeholder.svg',
+        tags: ['marketing', 'automation', 'CRM'],
+        category: 'Marketing Tools',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        published_at: new Date().toISOString(),
+        user_id: undefined
+      };
+
+      // Check if sample already exists
+      const hasSample = posts.some(post => post.slug === sampleBuiltLink.slug);
+      if (!hasSample) {
+        posts.unshift(sampleBuiltLink);
+      }
+
       setBlogPosts(posts);
     } catch (error) {
       console.error('Failed to load blog posts:', error);
@@ -445,9 +482,15 @@ export function AdminBlogManager() {
           ) : (
             <div className="space-y-4">
               {filteredPosts.map((post) => (
-                <div 
-                  key={post.id} 
-                  className={`border rounded-lg p-4 ${isExpired(post) ? 'bg-red-50 border-red-200' : 'bg-white'}`}
+                <div
+                  key={post.id}
+                  className={`border rounded-lg p-4 transition-all hover:shadow-md ${
+                    isExpired(post)
+                      ? 'bg-red-50 border-red-200'
+                      : post.published_url?.includes('fly.dev')
+                        ? 'bg-blue-50 border-blue-200 border-l-4 border-l-blue-500'
+                        : 'bg-white hover:bg-gray-50'
+                  }`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
@@ -464,6 +507,12 @@ export function AdminBlogManager() {
                             {info.label}
                           </Badge>
                         ))}
+                        {post.published_url?.includes('fly.dev') && (
+                          <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">
+                            <ExternalLink className="mr-1 h-3 w-3" />
+                            Built Link
+                          </Badge>
+                        )}
                         {isExpired(post) && (
                           <Badge variant="destructive" className="animate-pulse">
                             EXPIRED
@@ -512,25 +561,94 @@ export function AdminBlogManager() {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2 ml-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                      >
-                        <a href={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                      >
-                        <a href={post.target_url} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      </Button>
+                    <div className="flex flex-col gap-2 ml-4 min-w-[200px]">
+                      {/* Published URL */}
+                      <div className="text-xs">
+                        <div className="text-gray-500 mb-1">
+                          {post.published_url?.includes('fly.dev') ? 'External URL:' : 'Published URL:'}
+                        </div>
+                        <div className="flex items-center gap-1 bg-gray-50 p-2 rounded border">
+                          <code className="text-xs text-blue-600 truncate max-w-[150px]">
+                            {post.published_url?.includes('fly.dev')
+                              ? post.published_url
+                              : `${window.location.origin}/blog/${post.slug}`
+                            }
+                          </code>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={() => {
+                              const url = post.published_url?.includes('fly.dev')
+                                ? post.published_url
+                                : `${window.location.origin}/blog/${post.slug}`;
+                              navigator.clipboard.writeText(url);
+                              toast({ title: "URL copied to clipboard" });
+                            }}
+                          >
+                            📋
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            asChild
+                          >
+                            <a
+                              href={post.published_url?.includes('fly.dev')
+                                ? post.published_url
+                                : `/blog/${post.slug}`
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs px-2 py-1"
+                          onClick={() => {
+                            // Edit functionality (placeholder)
+                            toast({
+                              title: "Edit Feature",
+                              description: "Edit functionality coming soon"
+                            });
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs px-2 py-1"
+                          onClick={() => {
+                            // Settings functionality (placeholder)
+                            toast({
+                              title: "Settings",
+                              description: "Settings panel coming soon"
+                            });
+                          }}
+                        >
+                          Settings
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs px-2 py-1"
+                          asChild
+                        >
+                          <a href={post.target_url} target="_blank" rel="noopener noreferrer">
+                            Target
+                          </a>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
