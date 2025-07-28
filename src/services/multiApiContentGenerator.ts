@@ -1,407 +1,350 @@
-import { aiContentGenerator } from './aiContentGenerator';
-import { supabase } from '@/integrations/supabase/client';
+/**
+ * Multi-API Content Generation Service
+ * Fetches content from multiple AI providers for enhanced blog generation
+ * Based on ChatGPT conversation specifications
+ */
 
-interface MultiAPIContentParams {
-  targetUrl: string;
-  primaryKeyword: string;
-  secondaryKeywords: string[];
-  contentType: 'blog-post' | 'editorial' | 'guest-post' | 'resource-page';
-  wordCount: number;
-  tone: string;
-  autoDelete: boolean;
-  userEmail?: string;
-  userId?: string;
+export interface ApiProvider {
+  name: string;
+  baseUrl: string;
+  endpoint: string;
+  model?: string;
+  available: boolean;
 }
 
-interface GeneratedCampaign {
-  id: string;
-  content: {
-    title: string;
-    slug: string;
-    metaDescription: string;
-    content: string;
-    targetUrl: string;
-    keywords: string[];
-    contextualLinks: ContextualLink[];
+export interface ApiResponse {
+  provider: string;
+  content: string;
+  success: boolean;
+  error?: string;
+  processingTime: number;
+}
+
+export interface ContentGenerationRequest {
+  prompt: string;
+  providers?: string[];
+  maxConcurrent?: number;
+}
+
+export interface ContentGenerationResult {
+  success: boolean;
+  responses: ApiResponse[];
+  bestResponse?: ApiResponse;
+  aggregatedContent?: string;
+  processingTime: number;
+}
+
+export class MultiApiContentGenerator {
+  private apiConfigs = {
+    openai: {
+      name: 'OpenAI',
+      baseUrl: 'https://api.openai.com/v1',
+      endpoint: '/chat/completions',
+      model: 'gpt-4o',
+      getHeaders: () => ({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY || process.env.OPENAI_API_KEY || ''}`
+      }),
+      getBody: (prompt: string) => ({
+        model: 'gpt-4o',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 2000
+      }),
+      parseResponse: (data: any) => data.choices?.[0]?.message?.content || 'No content generated'
+    },
+
+    grok: {
+      name: 'xAI Grok',
+      baseUrl: 'https://api.x.ai/v1',
+      endpoint: '/chat/completions',
+      model: 'grok-beta',
+      getHeaders: () => ({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_GROK_API_KEY || process.env.GROK_API_KEY || ''}`
+      }),
+      getBody: (prompt: string) => ({
+        model: 'grok-beta',
+        messages: [{ role: 'user', content: prompt }]
+      }),
+      parseResponse: (data: any) => data.choices?.[0]?.message?.content || 'No content generated'
+    },
+
+    deepai: {
+      name: 'DeepAI',
+      baseUrl: 'https://api.deepai.org/api',
+      endpoint: '/text-generator',
+      getHeaders: () => ({
+        'api-key': import.meta.env.VITE_DEEPAI_API_KEY || process.env.DEEPAI_API_KEY || ''
+      }),
+      getBody: (prompt: string) => new URLSearchParams({ text: prompt }),
+      parseResponse: (data: any) => data.output || 'No content generated',
+      method: 'POST'
+    },
+
+    huggingface: {
+      name: 'Hugging Face',
+      baseUrl: 'https://router.huggingface.co/v1',
+      endpoint: '/chat/completions',
+      model: 'meta-llama/Llama-3.1-8B-Instruct',
+      getHeaders: () => ({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_HF_ACCESS_TOKEN || process.env.HF_ACCESS_TOKEN || ''}`
+      }),
+      getBody: (prompt: string) => ({
+        model: 'meta-llama/Llama-3.1-8B-Instruct',
+        messages: [{ role: 'user', content: prompt }]
+      }),
+      parseResponse: (data: any) => data.choices?.[0]?.message?.content || 'No content generated'
+    },
+
+    cohere: {
+      name: 'Cohere',
+      baseUrl: 'https://api.cohere.ai/v1',
+      endpoint: '/chat',
+      getHeaders: () => ({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_COHERE_API_KEY || process.env.COHERE_API_KEY || ''}`
+      }),
+      getBody: (prompt: string) => ({
+        message: prompt
+      }),
+      parseResponse: (data: any) => data.text || 'No content generated'
+    },
+
+    rytr: {
+      name: 'Rytr',
+      baseUrl: 'https://api.rytr.me/v1',
+      endpoint: '/contents',
+      getHeaders: () => ({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_RYTR_API_KEY || process.env.RYTR_API_KEY || ''}`
+      }),
+      getBody: (prompt: string) => ({
+        useCaseId: 'blog-idea',
+        input: { topic: prompt },
+        toneId: 'formal',
+        languageId: 'en'
+      }),
+      parseResponse: (data: any) => data.data?.output || data.output || 'No content generated'
+    }
   };
-  seoMetrics: {
-    readabilityScore: number;
-    keywordDensity: number;
-    seoScore: number;
-  };
-  status: 'active' | 'scheduled_for_deletion';
-  createdAt: string;
-  deleteAt?: string;
-  isRegistered: boolean;
-}
 
-interface ContextualLink {
-  anchorText: string;
-  targetUrl: string;
-  position: number;
-  context: string;
-  seoRelevance: number;
-}
-
-interface SEOAnalysis {
-  titleOptimization: number;
-  metaDescriptionScore: number;
-  keywordDistribution: number;
-  contentStructure: number;
-  readability: number;
-  overallScore: number;
-}
-
-export class MultiAPIContentGenerator {
-  private openAIKey?: string;
-  private anthropicKey?: string;
-  private geminiKey?: string;
-
-  constructor(apiKeys?: { openai?: string; anthropic?: string; gemini?: string }) {
-    this.openAIKey = apiKeys?.openai;
-    this.anthropicKey = apiKeys?.anthropic;
-    this.geminiKey = apiKeys?.gemini;
+  /**
+   * Get available API providers with configuration status
+   */
+  async getAvailableProviders(): Promise<ApiProvider[]> {
+    return Object.entries(this.apiConfigs).map(([key, config]) => ({
+      name: config.name,
+      baseUrl: config.baseUrl,
+      endpoint: config.endpoint,
+      model: config.model,
+      available: this.hasApiKey(key)
+    }));
   }
 
-  async generateCampaignContent(params: MultiAPIContentParams): Promise<GeneratedCampaign> {
-    // Generate base content using existing AI generator
-    const baseContent = await aiContentGenerator.generateContent({
-      targetUrl: params.targetUrl,
-      primaryKeyword: params.primaryKeyword,
-      secondaryKeywords: params.secondaryKeywords,
-      contentType: this.mapContentType(params.contentType),
-      wordCount: params.wordCount,
-      tone: params.tone,
-      customInstructions: 'Focus on SEO optimization and natural contextual link placement'
+  /**
+   * Check if API key is available for a provider
+   */
+  private hasApiKey(provider: string): boolean {
+    const envKeys = {
+      openai: import.meta.env.VITE_OPENAI_API_KEY || process.env.OPENAI_API_KEY,
+      grok: import.meta.env.VITE_GROK_API_KEY || process.env.GROK_API_KEY,
+      deepai: import.meta.env.VITE_DEEPAI_API_KEY || process.env.DEEPAI_API_KEY,
+      huggingface: import.meta.env.VITE_HF_ACCESS_TOKEN || process.env.HF_ACCESS_TOKEN,
+      cohere: import.meta.env.VITE_COHERE_API_KEY || process.env.COHERE_API_KEY,
+      rytr: import.meta.env.VITE_RYTR_API_KEY || process.env.RYTR_API_KEY
+    };
+
+    return Boolean(envKeys[provider as keyof typeof envKeys]);
+  }
+
+  /**
+   * Fetch content from a single API provider
+   */
+  private async fetchFromProvider(provider: string, prompt: string): Promise<ApiResponse> {
+    const startTime = Date.now();
+    const config = this.apiConfigs[provider as keyof typeof this.apiConfigs];
+
+    if (!config) {
+      return {
+        provider,
+        content: '',
+        success: false,
+        error: 'Provider not configured',
+        processingTime: Date.now() - startTime
+      };
+    }
+
+    if (!this.hasApiKey(provider)) {
+      return {
+        provider: config.name,
+        content: '',
+        success: false,
+        error: 'API key not configured',
+        processingTime: Date.now() - startTime
+      };
+    }
+
+    try {
+      const headers = config.getHeaders();
+      const body = config.getBody(prompt);
+      const method = config.method || 'POST';
+
+      const response = await fetch(`${config.baseUrl}${config.endpoint}`, {
+        method,
+        headers,
+        body: body instanceof URLSearchParams ? body : JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const content = config.parseResponse(data);
+
+      return {
+        provider: config.name,
+        content,
+        success: true,
+        processingTime: Date.now() - startTime
+      };
+
+    } catch (error) {
+      console.error(`Error fetching from ${config.name}:`, error);
+      return {
+        provider: config.name,
+        content: '',
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        processingTime: Date.now() - startTime
+      };
+    }
+  }
+
+  /**
+   * Generate content from multiple API providers concurrently
+   */
+  async generateContent(request: ContentGenerationRequest): Promise<ContentGenerationResult> {
+    const startTime = Date.now();
+    
+    // Determine which providers to use
+    const requestedProviders = request.providers || Object.keys(this.apiConfigs);
+    const availableProviders = requestedProviders.filter(provider => this.hasApiKey(provider));
+    
+    console.log('🚀 Multi-API Content Generation:', {
+      requested: requestedProviders,
+      available: availableProviders,
+      prompt: request.prompt.substring(0, 50) + '...'
     });
 
-    // Enhance content with multiple API providers
-    const enhancedContent = await this.enhanceWithMultipleAPIs(baseContent, params);
+    if (availableProviders.length === 0) {
+      return {
+        success: false,
+        responses: [],
+        processingTime: Date.now() - startTime
+      };
+    }
 
-    // Generate contextual links
-    const contextualLinks = await this.generateContextualLinks(
-      enhancedContent.content,
-      params.targetUrl,
-      params.primaryKeyword,
-      params.secondaryKeywords
+    // Limit concurrent requests
+    const maxConcurrent = request.maxConcurrent || 3;
+    const providersToUse = availableProviders.slice(0, maxConcurrent);
+
+    // Fetch from all providers concurrently
+    const providerPromises = providersToUse.map(provider => 
+      this.fetchFromProvider(provider, request.prompt)
     );
 
-    // Calculate SEO metrics
-    const seoMetrics = this.calculateSEOMetrics(enhancedContent, params);
+    const responses = await Promise.all(providerPromises);
+    const successfulResponses = responses.filter(r => r.success);
 
-    // Create campaign in database
-    const campaignId = await this.createCampaign(params, enhancedContent, contextualLinks);
+    // Find the best response (longest content that's successful)
+    const bestResponse = successfulResponses.reduce((best, current) => {
+      if (!best || (current.content.length > best.content.length)) {
+        return current;
+      }
+      return best;
+    }, undefined as ApiResponse | undefined);
 
-    // Set auto-deletion timer if user is not registered
-    const deleteAt = params.autoDelete && !params.userId 
-      ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() 
-      : undefined;
+    // Create aggregated content
+    const aggregatedContent = this.aggregateResponses(successfulResponses);
 
-    if (deleteAt) {
-      await this.scheduleAutoDeletion(campaignId, deleteAt);
-    }
-
-    return {
-      id: campaignId,
-      content: {
-        ...enhancedContent,
-        contextualLinks
-      },
-      seoMetrics,
-      status: deleteAt ? 'scheduled_for_deletion' : 'active',
-      createdAt: new Date().toISOString(),
-      deleteAt,
-      isRegistered: !!params.userId
+    const result: ContentGenerationResult = {
+      success: successfulResponses.length > 0,
+      responses,
+      bestResponse,
+      aggregatedContent,
+      processingTime: Date.now() - startTime
     };
+
+    console.log('✅ Multi-API Generation Complete:', {
+      total: responses.length,
+      successful: successfulResponses.length,
+      bestProvider: bestResponse?.provider,
+      totalTime: `${result.processingTime}ms`
+    });
+
+    return result;
   }
 
-  private async enhanceWithMultipleAPIs(
-    baseContent: any,
-    params: MultiAPIContentParams
-  ): Promise<any> {
-    let enhancedContent = { ...baseContent };
+  /**
+   * Aggregate responses from multiple providers into a single content piece
+   */
+  private aggregateResponses(responses: ApiResponse[]): string {
+    if (responses.length === 0) return '';
+    if (responses.length === 1) return responses[0].content;
 
-    // Try enhancing with different API providers
-    try {
-      // Use OpenAI for title optimization
-      if (this.openAIKey) {
-        enhancedContent.title = await this.optimizeTitleWithOpenAI(
-          enhancedContent.title,
-          params.primaryKeyword
-        );
-      }
-
-      // Use Anthropic for content flow and readability
-      if (this.anthropicKey) {
-        enhancedContent.content = await this.enhanceReadabilityWithAnthropic(
-          enhancedContent.content,
-          params.tone
-        );
-      }
-
-      // Use Gemini for SEO optimization
-      if (this.geminiKey) {
-        enhancedContent.metaDescription = await this.optimizeMetaWithGemini(
-          enhancedContent.metaDescription,
-          params.primaryKeyword
-        );
-      }
-    } catch (error) {
-      console.warn('API enhancement failed, using base content:', error);
-    }
-
-    return enhancedContent;
+    // Use the longest response as the base and add insights from others
+    const sortedByLength = responses.sort((a, b) => b.content.length - a.content.length);
+    const primary = sortedByLength[0];
+    
+    // For now, just return the best response
+    // In future, could implement content merging logic
+    return primary.content;
   }
 
-  private async generateContextualLinks(
-    content: string,
-    targetUrl: string,
-    primaryKeyword: string,
-    secondaryKeywords: string[]
-  ): Promise<ContextualLink[]> {
-    const links: ContextualLink[] = [];
-    
-    // Find natural anchor text opportunities
-    const keywordPhrases = [primaryKeyword, ...secondaryKeywords];
-    
-    keywordPhrases.forEach((keyword, index) => {
-      const variations = this.generateAnchorTextVariations(keyword);
-      
-      variations.forEach(variation => {
-        const regex = new RegExp(`\\b${variation}\\b(?![^<]*>)`, 'gi');
-        const matches = content.match(regex);
-        
-        if (matches && matches.length > 0) {
-          // Use first occurrence for primary keyword, distribute others
-          const position = content.indexOf(matches[0]);
-          
-          if (position > -1) {
-            links.push({
-              anchorText: variation,
-              targetUrl,
-              position,
-              context: this.extractContext(content, position, 100),
-              seoRelevance: index === 0 ? 1.0 : 0.7 // Primary keyword gets highest relevance
-            });
+  /**
+   * Test API connectivity for all providers
+   */
+  async testProviders(): Promise<{ [provider: string]: { available: boolean; configured: boolean; error?: string } }> {
+    const testPrompt = "Test connection";
+    const results: { [provider: string]: { available: boolean; configured: boolean; error?: string } } = {};
+
+    for (const [key, config] of Object.entries(this.apiConfigs)) {
+      const hasKey = this.hasApiKey(key);
+      results[config.name] = {
+        available: false,
+        configured: hasKey,
+        error: hasKey ? undefined : 'API key not configured'
+      };
+
+      if (hasKey) {
+        try {
+          const response = await this.fetchFromProvider(key, testPrompt);
+          results[config.name].available = response.success;
+          if (!response.success) {
+            results[config.name].error = response.error;
           }
+        } catch (error) {
+          results[config.name].error = error instanceof Error ? error.message : 'Connection test failed';
         }
-      });
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Generate blog content with SEO optimization
+   */
+  async generateBlogContent(keyword: string, targetUrl: string, anchorText: string): Promise<ContentGenerationResult> {
+    const prompt = `Write a comprehensive, SEO-optimized blog post about "${keyword}". The article should be at least 1000 words and naturally incorporate a link to ${targetUrl} using the anchor text "${anchorText}". Include proper headings, engaging content, and valuable information for readers. Format with markdown headers and ensure high-quality, grammatically correct content.`;
+
+    return this.generateContent({
+      prompt,
+      maxConcurrent: 3 // Limit to avoid rate limits
     });
-
-    // Ensure we have at least one contextual link
-    if (links.length === 0) {
-      links.push({
-        anchorText: `learn more about ${primaryKeyword}`,
-        targetUrl,
-        position: content.length - 200,
-        context: 'Conclusion section',
-        seoRelevance: 0.8
-      });
-    }
-
-    return links.slice(0, 3); // Limit to 3 contextual links for natural flow
-  }
-
-  private generateAnchorTextVariations(keyword: string): string[] {
-    return [
-      keyword,
-      `${keyword} solutions`,
-      `best ${keyword}`,
-      `${keyword} services`,
-      `professional ${keyword}`,
-      `${keyword} experts`,
-      `comprehensive ${keyword}`,
-      `effective ${keyword}`
-    ];
-  }
-
-  private extractContext(content: string, position: number, length: number): string {
-    const start = Math.max(0, position - length / 2);
-    const end = Math.min(content.length, position + length / 2);
-    return content.substring(start, end).replace(/<[^>]*>/g, ''); // Remove HTML tags
-  }
-
-  private calculateSEOMetrics(content: any, params: MultiAPIContentParams) {
-    const text = content.content.replace(/<[^>]*>/g, ''); // Strip HTML
-    const wordCount = text.split(/\s+/).length;
-    
-    // Calculate keyword density
-    const primaryKeywordCount = (text.match(new RegExp(params.primaryKeyword, 'gi')) || []).length;
-    const keywordDensity = (primaryKeywordCount / wordCount) * 100;
-    
-    // Calculate readability (simplified Flesch reading ease)
-    const sentences = text.split(/[.!?]+/).length;
-    const avgWordsPerSentence = wordCount / sentences;
-    const readabilityScore = Math.max(0, Math.min(100, 206.835 - 1.015 * avgWordsPerSentence));
-    
-    // Calculate overall SEO score
-    const seoScore = this.calculateOverallSEOScore({
-      titleOptimization: content.title.toLowerCase().includes(params.primaryKeyword.toLowerCase()) ? 90 : 50,
-      metaDescriptionScore: content.metaDescription.length >= 150 && content.metaDescription.length <= 160 ? 95 : 70,
-      keywordDistribution: keywordDensity >= 1 && keywordDensity <= 3 ? 85 : 60,
-      contentStructure: content.content.includes('<h2>') && content.content.includes('<h3>') ? 90 : 70,
-      readability: readabilityScore,
-      overallScore: 0
-    });
-
-    return {
-      readabilityScore: Math.round(readabilityScore),
-      keywordDensity: Math.round(keywordDensity * 10) / 10,
-      seoScore: Math.round(seoScore)
-    };
-  }
-
-  private calculateOverallSEOScore(metrics: SEOAnalysis): number {
-    const weights = {
-      titleOptimization: 0.2,
-      metaDescriptionScore: 0.15,
-      keywordDistribution: 0.25,
-      contentStructure: 0.2,
-      readability: 0.2
-    };
-
-    return (
-      metrics.titleOptimization * weights.titleOptimization +
-      metrics.metaDescriptionScore * weights.metaDescriptionScore +
-      metrics.keywordDistribution * weights.keywordDistribution +
-      metrics.contentStructure * weights.contentStructure +
-      metrics.readability * weights.readability
-    );
-  }
-
-  private async createCampaign(
-    params: MultiAPIContentParams,
-    content: any,
-    contextualLinks: ContextualLink[]
-  ): Promise<string> {
-    if (!params.userId) {
-      // For guest users, create a temporary campaign
-      return `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .insert({
-          name: `AI Generated: ${content.title}`,
-          target_url: params.targetUrl,
-          keywords: [params.primaryKeyword, ...params.secondaryKeywords],
-          status: 'completed',
-          links_requested: contextualLinks.length,
-          links_delivered: contextualLinks.length,
-          completed_backlinks: contextualLinks.map(link => link.targetUrl),
-          user_id: params.userId
-        })
-        .select('id')
-        .single();
-
-      if (error) throw error;
-      return data.id;
-    } catch (error) {
-      console.error('Failed to create campaign:', error);
-      return `error_${Date.now()}`;
-    }
-  }
-
-  private async scheduleAutoDeletion(campaignId: string, deleteAt: string): Promise<void> {
-    // In a real implementation, this would use a job queue or cron job
-    // For now, we'll store the deletion schedule and check it periodically
-    try {
-      const { error } = await supabase
-        .from('campaigns')
-        .update({ 
-          status: 'scheduled_for_deletion',
-          updated_at: deleteAt 
-        })
-        .eq('id', campaignId);
-
-      if (error) throw error;
-    } catch (error) {
-      console.warn('Failed to schedule auto-deletion:', error);
-    }
-  }
-
-  async cleanupExpiredCampaigns(): Promise<number> {
-    try {
-      const now = new Date().toISOString();
-      
-      const { data, error } = await supabase
-        .from('campaigns')
-        .delete()
-        .eq('status', 'scheduled_for_deletion')
-        .lt('updated_at', now)
-        .select('id');
-
-      if (error) throw error;
-      return data?.length || 0;
-    } catch (error) {
-      console.error('Failed to cleanup expired campaigns:', error);
-      return 0;
-    }
-  }
-
-  async saveCampaignForUser(campaignId: string, userId: string): Promise<boolean> {
-    try {
-      const { error } = await supabase
-        .from('campaigns')
-        .update({ 
-          status: 'active',
-          user_id: userId,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', campaignId);
-
-      return !error;
-    } catch (error) {
-      console.error('Failed to save campaign for user:', error);
-      return false;
-    }
-  }
-
-  private mapContentType(type: string): string {
-    const typeMap: Record<string, string> = {
-      'blog-post': 'how-to',
-      'editorial': 'opinion',
-      'guest-post': 'review',
-      'resource-page': 'listicle'
-    };
-    return typeMap[type] || 'how-to';
-  }
-
-  // Mock API enhancement methods (replace with actual API calls)
-  private async optimizeTitleWithOpenAI(title: string, keyword: string): Promise<string> {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock optimization
-    if (!title.toLowerCase().includes(keyword.toLowerCase())) {
-      return `${keyword}: ${title}`;
-    }
-    return title;
-  }
-
-  private async enhanceReadabilityWithAnthropic(content: string, tone: string): Promise<string> {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Mock enhancement - add transition words
-    return content.replace(/\. ([A-Z])/g, '. Furthermore, $1');
-  }
-
-  private async optimizeMetaWithGemini(metaDescription: string, keyword: string): Promise<string> {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Mock optimization
-    if (!metaDescription.toLowerCase().includes(keyword.toLowerCase())) {
-      return `${metaDescription} Learn more about ${keyword} solutions.`;
-    }
-    return metaDescription;
   }
 }
 
-// Export singleton instance
-export const multiApiContentGenerator = new MultiAPIContentGenerator();
-
-// Export types
-export type { MultiAPIContentParams, GeneratedCampaign, ContextualLink };
+export const multiApiContentGenerator = new MultiApiContentGenerator();

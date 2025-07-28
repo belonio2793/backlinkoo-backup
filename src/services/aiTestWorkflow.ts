@@ -7,6 +7,7 @@
 import { aiContentEngine } from './aiContentEngine';
 import { enhancedAIContentEngine } from './enhancedAIContentEngine';
 import { globalBlogGenerator } from './globalBlogGenerator';
+import { multiApiContentGenerator } from './multiApiContentGenerator';
 
 export interface TestWorkflowRequest {
   websiteUrl: string;
@@ -14,6 +15,7 @@ export interface TestWorkflowRequest {
   anchorText?: string;
   userId?: string;
   sessionId?: string;
+  currentDomain?: string;
 }
 
 export interface ProviderStatus {
@@ -145,9 +147,10 @@ export class AITestWorkflow {
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-+|-+$/g, '');
 
+        const baseUrl = request.currentDomain || 'https://backlinkoo.com';
         return {
           success: true,
-          blogUrl: `https://backlinkoo.com/blog/${slug}`,
+          blogUrl: `${baseUrl}/blog/${slug}`,
           content: fallbackContent,
           publishedAt: new Date().toISOString(),
           metadata: {
@@ -159,8 +162,42 @@ export class AITestWorkflow {
         };
       }
 
-      // Try to use the global blog generator with validated providers
+      // Try multi-API content generation first, then fallback to global blog generator
       try {
+        console.log('🚀 Attempting multi-API content generation...');
+
+        const multiApiResult = await multiApiContentGenerator.generateBlogContent(
+          request.keyword,
+          request.websiteUrl,
+          request.anchorText || request.keyword
+        );
+
+        if (multiApiResult.success && multiApiResult.bestResponse) {
+          console.log('✅ Multi-API generation successful:', multiApiResult.bestResponse.provider);
+
+          const baseUrl = request.currentDomain || 'https://backlinkoo.com';
+          const slug = request.keyword.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+
+          return {
+            success: true,
+            blogUrl: `${baseUrl}/blog/${slug}`,
+            content: multiApiResult.bestResponse.content,
+            publishedAt: new Date().toISOString(),
+            metadata: {
+              title: `${request.keyword}: Complete Guide ${new Date().getFullYear()}`,
+              slug,
+              generatedBy: `multi-api-${multiApiResult.bestResponse.provider}`,
+              wordCount: multiApiResult.bestResponse.content.split(' ').length,
+              providersUsed: multiApiResult.responses.map(r => r.provider),
+              processingTime: multiApiResult.processingTime
+            }
+          };
+        }
+
+        // Fallback to global blog generator if multi-API fails
+        console.log('⚠️ Multi-API generation failed, trying global blog generator...');
         const blogResult = await globalBlogGenerator.generateGlobalBlogPost({
           targetUrl: request.websiteUrl,
           primaryKeyword: request.keyword,
@@ -196,9 +233,10 @@ export class AITestWorkflow {
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-+|-+$/g, '');
 
+        const baseUrl = request.currentDomain || 'https://backlinkoo.com';
         return {
           success: true,
-          blogUrl: `https://backlinkoo.com/blog/${slug}`,
+          blogUrl: `${baseUrl}/blog/${slug}`,
           content: fallbackContent,
           publishedAt: new Date().toISOString(),
           metadata: {
@@ -250,16 +288,23 @@ export class AITestWorkflow {
    */
   private async testAllProviders(): Promise<ProviderStatus[]> {
     console.log('🔍 Testing all AI providers...');
-    
+
     try {
-      const providerTests = await aiContentEngine.testProviders();
-      
-      return Object.entries(providerTests).map(([provider, status]) => ({
+      // Test both legacy providers and new multi-API providers
+      const [legacyTests, multiApiTests] = await Promise.all([
+        aiContentEngine.testProviders().catch(() => ({})),
+        multiApiContentGenerator.testProviders().catch(() => ({}))
+      ]);
+
+      // Combine results, prioritizing multi-API tests
+      const allTests = { ...legacyTests, ...multiApiTests };
+
+      return Object.entries(allTests).map(([provider, status]) => ({
         provider,
         available: status.available,
         configured: status.configured,
         quotaStatus: 'available' as const, // Will be updated by quota check
-        lastError: status.available ? undefined : 'Connection failed'
+        lastError: status.available ? undefined : (status.error || 'Connection failed')
       }));
     } catch (error) {
       console.error('Provider test failed:', error);

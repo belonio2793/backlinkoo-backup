@@ -361,17 +361,18 @@ Begin your journey with ${keyword} today!`;
         body: JSON.stringify(blogData)
       });
 
+      const baseUrl = window.location.origin;
       if (response.ok) {
         const result = await response.json();
-        return result.url || `https://backlinkoo.com/blog/${blogData.slug}`;
+        return result.url || `${baseUrl}/blog/${blogData.slug}`;
       } else {
         // Fallback: Create static blog URL
-        return `https://backlinkoo.com/blog/${blogData.slug}`;
+        return `${baseUrl}/blog/${blogData.slug}`;
       }
     } catch (error) {
       console.error('Blog creation error:', error);
       // Return fallback URL
-      return `https://backlinkoo.com/blog/${blogData.slug}`;
+      return `${baseUrl}/blog/${blogData.slug}`;
     }
   };
 
@@ -465,7 +466,8 @@ Begin your journey with ${keyword} today!`;
         websiteUrl: url,
         keyword,
         anchorText,
-        sessionId: crypto.randomUUID()
+        sessionId: crypto.randomUUID(),
+        currentDomain: window.location.origin
       });
 
       setProviderStatuses(testResult.providerStatuses);
@@ -496,7 +498,8 @@ Begin your journey with ${keyword} today!`;
         websiteUrl: url,
         keyword,
         anchorText,
-        sessionId: crypto.randomUUID()
+        sessionId: crypto.randomUUID(),
+        currentDomain: window.location.origin
       }, testResult);
 
       if (!blogResult.success) {
@@ -780,7 +783,7 @@ Begin your journey with ${keyword} today!`;
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">backlinkoo.com/blog/</span>
+              <span className="text-sm text-muted-foreground">{window.location.origin.replace('https://', '').replace('http://', '')}/blog/</span>
               {isSlugEditable ? (
                 <Input
                   value={generatedSlug}
@@ -805,7 +808,7 @@ Begin your journey with ${keyword} today!`;
               </Button>
             </div>
             <div className="text-xs text-muted-foreground">
-              Click to edit the URL slug. Preview: https://backlinkoo.com/blog/{generatedSlug}
+              Click to edit the URL slug. Preview: {window.location.origin}/blog/{generatedSlug}
             </div>
           </CardContent>
         </Card>
@@ -929,7 +932,7 @@ Begin your journey with ${keyword} today!`;
               <div className="space-y-1">
                 <p className="text-sm font-medium">Blog URL</p>
                 <p className="text-xs text-muted-foreground font-mono break-all">
-                  backlinkoo.com/blog/{generatedBlog.slug}
+                  {window.location.origin.replace('https://', '').replace('http://', '')}/blog/{generatedBlog.slug}
                 </p>
               </div>
               <div className="space-y-1">
