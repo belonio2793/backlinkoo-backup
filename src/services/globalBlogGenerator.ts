@@ -347,7 +347,7 @@ class GlobalBlogGeneratorService {
       
       `<h2>Future of ${request.primaryKeyword}</h2><p>As technology continues to evolve, ${request.primaryKeyword} is becoming increasingly sophisticated. Stay ahead by:</p><ul><li>Embracing new technologies and methodologies</li><li>Investing in continuous learning</li><li>Building adaptable strategies</li><li>Networking with industry experts</li></ul>`,
       
-      `## Conclusion\n\n${request.primaryKeyword} represents a significant opportunity for growth and success. By implementing the strategies outlined in this guide, you'll be well-positioned to achieve your objectives.\n\nReady to get started? [Explore our ${request.primaryKeyword} solutions](${request.targetUrl}) and take your efforts to the next level.\n\n---\n\n*This comprehensive guide provides actionable insights for ${request.primaryKeyword} success. For more detailed strategies and tools, visit our resource center.*`
+      `## Conclusion\n\n${request.primaryKeyword} represents a significant opportunity for growth and success. By implementing the strategies outlined in this guide, you'll be well-positioned to achieve your objectives.\n\nReady to get started? [Explore our ${request.primaryKeyword} solutions](${request.targetUrl}) and take your efforts to the next level.\n\n---\n\n* This comprehensive guide provides actionable insights for ${request.primaryKeyword} success. For more detailed strategies and tools, visit our resource center.`
     ];
 
     // Join sections and clean up any remaining markdown
