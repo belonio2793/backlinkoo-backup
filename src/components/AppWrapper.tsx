@@ -29,6 +29,7 @@ import NoHandsSEO from "../pages/NoHandsSEO";
 import AffiliateProgram from "../pages/AffiliateProgram";
 import PromotionMaterials from "../pages/PromotionMaterials";
 import AIContentTest from "../pages/AIContentTest";
+import AILive from "../pages/AILive";
 
 export const AppWrapper = () => {
   // Initialize referral tracking
