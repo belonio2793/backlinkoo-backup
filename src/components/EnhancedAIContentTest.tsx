@@ -582,7 +582,10 @@ Start your ${keyword} transformation journey today and unlock the full potential
             </CardTitle>
             {wordCount > 0 && (
               <div className="text-sm text-muted-foreground">
-                Words generated: {wordCount} {isGeneratingContent && '(continuing...)'}
+                Words generated: {wordCount} / 1000+ minimum {isGeneratingContent && '(continuing...)'}
+                {wordCount >= 1000 && (
+                  <span className="ml-2 text-green-600 font-medium">�� Target reached</span>
+                )}
               </div>
             )}
           </CardHeader>
