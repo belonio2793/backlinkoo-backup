@@ -390,9 +390,10 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
 
     try {
       // Step 1: Validate inputs
-      setCurrentProcess('Validating inputs...');
-      if (!validateInputs()) {
-        addLog('error', 'SYSTEM', 'Protocol aborted - Invalid inputs');
+      setCurrentProcess('Validating inputs and checking URL...');
+      const isValid = await validateInputs();
+      if (!isValid) {
+        addLog('error', 'SYSTEM', 'Protocol aborted - Invalid inputs or inaccessible URL');
         return;
       }
 
