@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
+import { adminSyncService, type FreeBacklinkMetrics } from '@/services/adminSyncService';
 import {
   Users,
   Globe,
