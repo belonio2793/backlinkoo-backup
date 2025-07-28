@@ -11,7 +11,15 @@ declare global {
 
 export const safeEthereumAccess = (): any | null => {
   try {
-    return window.ethereum || null;
+    // Handle cases where ethereum might be accessed during redefinition conflicts
+    if (typeof window !== 'undefined') {
+      const descriptor = Object.getOwnPropertyDescriptor(window, 'ethereum');
+      if (descriptor && descriptor.value) {
+        return descriptor.value;
+      }
+      return window.ethereum || null;
+    }
+    return null;
   } catch (error) {
     console.warn('Ethereum object access blocked:', error);
     return null;
@@ -28,14 +36,16 @@ export const isWeb3Available = (): boolean => {
 
 export const waitForEthereum = (timeout = 3000): Promise<any> => {
   return new Promise((resolve) => {
-    if (safeEthereumAccess()) {
-      resolve(window.ethereum);
+    const ethereum = safeEthereumAccess();
+    if (ethereum) {
+      resolve(ethereum);
       return;
     }
 
     const checkEthereum = () => {
-      if (safeEthereumAccess()) {
-        resolve(window.ethereum);
+      const current = safeEthereumAccess();
+      if (current) {
+        resolve(current);
       } else {
         setTimeout(checkEthereum, 100);
       }
