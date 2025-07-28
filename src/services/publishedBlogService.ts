@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { blogTemplateEngine } from './blogTemplateEngine';
+// Deprecated: import { blogTemplateEngine } from './blogTemplateEngine';
 import { formatBlogTitle, formatBlogContent } from '@/utils/textFormatting';
 
 export interface PublishedBlogPost {
@@ -47,8 +47,31 @@ export class PublishedBlogService {
     const { keyword, targetUrl, userId, isTrialPost = false, wordCount = 1200 } = params;
 
     try {
-      // Generate the blog post content using existing AI services
-      const generatedPost = await blogTemplateEngine.generateBlogPost(keyword, targetUrl, wordCount);
+      // Template engine deprecated - redirect to AI Live Generator
+      console.warn('Template engine deprecated. Please use /ai-live for fresh AI content generation.');
+
+      // Return a placeholder directing users to AI Live Generator
+      const generatedPost = {
+        title: `Fresh AI Content Available: ${keyword}`,
+        slug: `ai-live-redirect-${Date.now()}`,
+        content: `<div style="padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; text-align: center;">
+          <h1>🚀 Fresh AI Content Generation</h1>
+          <p style="font-size: 1.2em; margin: 1rem 0;">Templates have been replaced with fresh AI generation!</p>
+          <p>Visit <strong><a href="/ai-live" style="color: #fff; text-decoration: underline;">AI Live Blog Generator</a></strong> for:</p>
+          <ul style="text-align: left; max-width: 400px; margin: 1rem auto;">
+            <li>✨ Unique content every time</li>
+            <li>🎯 SEO-optimized structure</li>
+            <li>📝 1000+ words of quality content</li>
+            <li>🔗 Natural anchor text integration</li>
+            <li>⚡ Real-time generation</li>
+          </ul>
+          <p style="margin-top: 2rem;"><a href="/ai-live" style="background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 5px; color: white; text-decoration: none; border: 1px solid rgba(255,255,255,0.3);">Generate Fresh Content Now →</a></p>
+        </div>`,
+        wordCount: 300,
+        excerpt: 'Templates deprecated. Use AI Live Generator for fresh content.',
+        readingTime: 2,
+        contextualLinks: []
+      };
       
       // Create unique slug
       const uniqueSlug = `${generatedPost.slug}-${Date.now()}`;
