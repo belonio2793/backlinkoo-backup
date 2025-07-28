@@ -146,9 +146,10 @@ export class AITestWorkflow {
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-+|-+$/g, '');
 
+        const baseUrl = request.currentDomain || 'https://backlinkoo.com';
         return {
           success: true,
-          blogUrl: `https://backlinkoo.com/blog/${slug}`,
+          blogUrl: `${baseUrl}/blog/${slug}`,
           content: fallbackContent,
           publishedAt: new Date().toISOString(),
           metadata: {
