@@ -254,16 +254,23 @@ export class AITestWorkflow {
    */
   private async testAllProviders(): Promise<ProviderStatus[]> {
     console.log('🔍 Testing all AI providers...');
-    
+
     try {
-      const providerTests = await aiContentEngine.testProviders();
-      
-      return Object.entries(providerTests).map(([provider, status]) => ({
+      // Test both legacy providers and new multi-API providers
+      const [legacyTests, multiApiTests] = await Promise.all([
+        aiContentEngine.testProviders().catch(() => ({})),
+        multiApiContentGenerator.testProviders().catch(() => ({}))
+      ]);
+
+      // Combine results, prioritizing multi-API tests
+      const allTests = { ...legacyTests, ...multiApiTests };
+
+      return Object.entries(allTests).map(([provider, status]) => ({
         provider,
         available: status.available,
         configured: status.configured,
         quotaStatus: 'available' as const, // Will be updated by quota check
-        lastError: status.available ? undefined : 'Connection failed'
+        lastError: status.available ? undefined : (status.error || 'Connection failed')
       }));
     } catch (error) {
       console.error('Provider test failed:', error);
