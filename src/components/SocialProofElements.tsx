@@ -269,36 +269,14 @@ export function MoneyBackGuarantee({ className = "" }: { className?: string }) {
   );
 }
 
-// Recent activity feed
+// Platform activity indicator (removed fake simulation)
 export function RecentActivity() {
-  const activities = [
-    { user: "Alex M.", action: "upgraded to Pro", time: "2m ago", location: "New York" },
-    { user: "Sarah K.", action: "created first campaign", time: "5m ago", location: "London" },
-    { user: "Mike R.", action: "generated 5 backlinks", time: "8m ago", location: "Toronto" },
-    { user: "Lisa T.", action: "upgraded to Pro", time: "12m ago", location: "Sydney" }
-  ];
-
-  const [currentActivity, setCurrentActivity] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentActivity((prev) => (prev + 1) % activities.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [activities.length]);
-
-  const activity = activities[currentActivity];
-
   return (
-    <div className="bg-gray-50 border rounded-lg p-3 transition-all duration-500">
+    <div className="bg-gray-50 border rounded-lg p-3">
       <div className="flex items-center gap-2 text-sm">
-        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-        <span className="font-medium">{activity.user}</span>
-        <span className="text-muted-foreground">{activity.action}</span>
-        <span className="text-xs text-muted-foreground ml-auto">{activity.time}</span>
-      </div>
-      <div className="text-xs text-muted-foreground mt-1 ml-4">
-        📍 {activity.location}
+        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+        <span className="font-medium">Platform Activity</span>
+        <span className="text-muted-foreground">Users actively using the service</span>
       </div>
     </div>
   );
