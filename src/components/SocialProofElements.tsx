@@ -32,28 +32,28 @@ export function LiveUserActivity({ className = "" }: { className?: string }) {
 export function SocialProofTestimonials({ variant = "compact" }: { variant?: "compact" | "full" }) {
   const testimonials = [
     {
-      name: "Sarah Chen",
-      role: "SEO Manager",
-      company: "TechCorp",
-      avatar: "SC",
+      name: "SEO Professional",
+      role: "Marketing Manager",
+      company: "Technology Company",
+      avatar: "SP",
       rating: 5,
-      text: "This platform increased our organic traffic by 300% in just 3 months. The backlink quality is outstanding."
+      text: "Quality backlink service with professional support and reliable delivery."
     },
     {
-      name: "Mike Rodriguez",
-      role: "Digital Marketer", 
-      company: "GrowthAgency",
-      avatar: "MR",
+      name: "Digital Marketer",
+      role: "Growth Specialist",
+      company: "Marketing Agency",
+      avatar: "DM",
       rating: 5,
-      text: "Best ROI we've ever seen from a backlink service. The automation saves us 20+ hours per week."
+      text: "Effective backlink solutions that integrate well into our SEO strategies."
     },
     {
-      name: "Jennifer Park",
+      name: "Business Owner",
       role: "Founder",
-      company: "EcomBrand",
-      avatar: "JP",
+      company: "Online Business",
+      avatar: "BO",
       rating: 5,
-      text: "Went from page 3 to page 1 for our main keyword in 2 months. Customer support is incredible."
+      text: "Professional service with transparent processes and helpful customer support."
     }
   ];
 
