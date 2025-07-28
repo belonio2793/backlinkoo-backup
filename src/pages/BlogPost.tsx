@@ -291,7 +291,7 @@ export function BlogPost() {
               </div>
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
-                <span>SEO Score: {blogPost.seo_score || 85}/100</span>
+                <span>{getTrendingLabel()}</span>
               </div>
             </div>
 
