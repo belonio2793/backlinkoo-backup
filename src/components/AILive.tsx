@@ -98,7 +98,7 @@ export function AILive() {
 
   const checkApiHealth = async (provider: string): Promise<boolean> => {
     try {
-      const response = await fetch('/api/check-ai-provider', {
+      const response = await fetch('/.netlify/functions/check-ai-provider', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ provider })
@@ -229,7 +229,7 @@ export function AILive() {
       // Step 3: Generate Content
       addStep('Generation', 'running', `Generating content with ${selectedProvider}...`);
       
-      const response = await fetch('/api/generate-ai-content', {
+      const response = await fetch('/.netlify/functions/generate-ai-content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -267,7 +267,7 @@ export function AILive() {
       addStep('Publishing', 'running', 'Publishing to /blog...');
       
       const slug = generateSlug(keyword);
-      const publishResponse = await fetch('/api/publish-blog-post', {
+      const publishResponse = await fetch('/.netlify/functions/publish-blog-post', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
