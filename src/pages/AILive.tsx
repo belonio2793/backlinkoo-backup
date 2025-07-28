@@ -73,7 +73,7 @@ export default function AILive() {
 
     try {
       // Set up status updates
-      const generator = new builderAIGenerator((status) => {
+      const generator = new BuilderAIGenerator((status) => {
         setGenerationStatus(status);
       });
 
