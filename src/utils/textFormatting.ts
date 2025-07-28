@@ -150,10 +150,10 @@ export function capitalizeSentences(text: string): string {
  */
 export function formatBlogTitle(title: string): string {
   if (!title) return '';
-  
+
   // Apply title case
   let formatted = toTitleCase(title);
-  
+
   // Special handling for common patterns
   formatted = formatted.replace(/\bSeo\b/gi, 'SEO');
   formatted = formatted.replace(/\bAi\b/gi, 'AI');
@@ -163,6 +163,39 @@ export function formatBlogTitle(title: string): string {
   formatted = formatted.replace(/\bCeo\b/gi, 'CEO');
   formatted = formatted.replace(/\bCto\b/gi, 'CTO');
   formatted = formatted.replace(/\bCfo\b/gi, 'CFO');
-  
+
   return formatted;
+}
+
+/**
+ * Gets a rotating trending adjective for blog posts
+ */
+export function getTrendingLabel(): string {
+  const trendingAdjectives = [
+    'Trending',
+    'Popular',
+    'Hot',
+    'Viral',
+    'Buzzworthy',
+    'Rising',
+    'Must-Read',
+    'Featured',
+    'Top Pick',
+    'Editor\'s Choice',
+    'Spotlight',
+    'Breaking',
+    'Fresh',
+    'Latest',
+    'Exclusive'
+  ];
+
+  // Use current date to ensure consistent rotation per day
+  const today = new Date().toDateString();
+  const hash = today.split('').reduce((a, b) => {
+    a = ((a << 5) - a) + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+
+  const index = Math.abs(hash) % trendingAdjectives.length;
+  return trendingAdjectives[index];
 }
