@@ -455,7 +455,7 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
                 <label className="text-xs font-mono text-gray-600">TARGET_URL</label>
                 <Input
                   value={url}
-                  onChange={(e) => setUrl(e.target.value)}
+                  onChange={(e) => handleUrlChange(e.target.value)}
                   placeholder="Enter destination URL for backlink placement"
                   className="font-mono text-sm"
                   disabled={isRunning}
