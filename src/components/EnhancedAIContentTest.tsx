@@ -126,9 +126,12 @@ export function EnhancedAIContentTest() {
 
       setProgress(100);
 
+      const generatedBy = blogResult.metadata?.generatedBy || 'AI';
+      const isFallback = generatedBy.includes('fallback');
+
       toast({
         title: "Blog Generated Successfully!",
-        description: `Your blog post is ready at: ${finalBlogUrl}`,
+        description: `Your blog post is ready at: ${finalBlogUrl}${isFallback ? ' (using intelligent fallback)' : ''}`,
       });
 
     } catch (error) {
