@@ -117,11 +117,14 @@ export function AILive() {
         return data.healthy === true;
       }
 
-      // If Netlify function fails, use mock service
-      throw new Error('Netlify function unavailable');
+      // If response is not ok, fall back to mock service
+      console.log(`${provider} Netlify function unavailable, using mock service`);
+      const mockResult = await MockAIService.checkProviderHealth(provider);
+      console.log(`Mock health check result for ${provider}:`, mockResult.healthy);
+      return mockResult.healthy;
     } catch (error) {
-      console.error(`Health check failed for ${provider}, using mock service:`, error);
-      // Use mock service as fallback
+      // Network error or other failure, use mock service
+      console.log(`${provider} health check network error, using mock service`);
       const mockResult = await MockAIService.checkProviderHealth(provider);
       console.log(`Mock health check result for ${provider}:`, mockResult.healthy);
       return mockResult.healthy;
@@ -273,16 +276,28 @@ export function AILive() {
 
         if (response.ok) {
           result = await response.json();
+          console.log('Content generated using Netlify function');
         } else {
-          throw new Error('Netlify function failed');
+          console.log('Netlify content generation function unavailable, using mock service...');
+          result = await MockAIService.generateContent(selectedProvider, prompt, keyword, anchorText, url);
+
+          if (!result.success) {
+            throw new Error(result.error || 'Content generation failed');
+          }
+          console.log('Content generated using mock service');
         }
       } catch (error) {
-        console.log('Netlify function unavailable, using mock service...');
+        if (error.message?.includes('Content generation failed')) {
+          throw error; // Re-throw if it's already a content generation error
+        }
+
+        console.log('Network error, using mock service...');
         result = await MockAIService.generateContent(selectedProvider, prompt, keyword, anchorText, url);
 
         if (!result.success) {
-          throw new Error(result.error || 'Mock content generation failed');
+          throw new Error(result.error || 'Content generation failed');
         }
+        console.log('Content generated using mock service');
       }
       updateLastStep('success', `Generated ${result.wordCount} words`);
 
@@ -324,11 +339,22 @@ export function AILive() {
 
         if (publishResponse.ok) {
           publishResult = await publishResponse.json();
+          console.log('Post published using Netlify function');
         } else {
-          throw new Error('Netlify function failed');
+          console.log('Netlify publish function unavailable, using mock service...');
+          publishResult = await MockAIService.publishPost({
+            content: result.content,
+            slug,
+            keyword,
+            anchorText,
+            url,
+            provider: selectedProvider,
+            promptIndex: index
+          });
+          console.log('Post published using mock service');
         }
       } catch (error) {
-        console.log('Netlify publish function unavailable, using mock service...');
+        console.log('Network error, using mock service for publishing...');
         publishResult = await MockAIService.publishPost({
           content: result.content,
           slug,
@@ -338,6 +364,7 @@ export function AILive() {
           provider: selectedProvider,
           promptIndex: index
         });
+        console.log('Post published using mock service');
       }
       updateLastStep('success', `Published to ${publishResult.url}`);
 
