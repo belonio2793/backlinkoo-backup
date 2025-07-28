@@ -368,10 +368,12 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
 
     const generatedResults: GeneratedContent[] = [];
 
-    // Generate content from each provider
-    for (const provider of workingProviders) {
-      setCurrentProcess(`Generating from ${provider.provider}...`);
-      const result = await generateContentFromProvider(provider.provider);
+    // Generate content from each provider using prompt rotation
+    for (let i = 0; i < workingProviders.length; i++) {
+      const provider = workingProviders[i];
+      const promptIndex = i; // Use different prompt for each provider
+      setCurrentProcess(`Generating from ${provider.provider} (Prompt ${(promptIndex % 3) + 1})...`);
+      const result = await generateContentFromProvider(provider.provider, promptIndex);
       generatedResults.push(result);
 
       if (result.isValid) {
