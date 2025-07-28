@@ -194,6 +194,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="security">Security & Roles</TabsTrigger>
           </TabsList>
 
+          <TabsContent value="ai-posts">
+            <AIPostManager />
+          </TabsContent>
+
           <TabsContent value="campaigns">
             <CampaignManager />
           </TabsContent>
