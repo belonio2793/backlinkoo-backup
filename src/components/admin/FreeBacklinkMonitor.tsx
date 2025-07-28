@@ -309,19 +309,21 @@ export function FreeBacklinkMonitor() {
             <div className="bg-blue-50 p-4 rounded-lg">
               <h4 className="font-medium mb-2">Rate Limiting</h4>
               <p className="text-sm text-gray-600 mb-2">
-                Current: {localStorage.getItem('admin_rate_limit_config') || '5'} requests/hour
+                Current: {adminSyncService.getConfiguration().rateLimit} requests/hour
               </p>
-              <Progress value={80} className="h-2" />
-              <p className="text-xs text-gray-500 mt-1">80% of hourly limit used</p>
+              <Progress value={(metrics.todayRequests / adminSyncService.getConfiguration().rateLimit) * 100} className="h-2" />
+              <p className="text-xs text-gray-500 mt-1">
+                {Math.round((metrics.todayRequests / adminSyncService.getConfiguration().rateLimit) * 100)}% of hourly limit used
+              </p>
             </div>
 
             <div className="bg-green-50 p-4 rounded-lg">
               <h4 className="font-medium mb-2">Trial Expiration</h4>
               <p className="text-sm text-gray-600 mb-2">
-                Current: {localStorage.getItem('admin_expiration_config') || '24'} hours
+                Current: {adminSyncService.getConfiguration().expirationHours} hours
               </p>
               <div className="text-xs text-gray-500">
-                {stats.expiredPosts} posts expired today
+                Auto-cleanup: {adminSyncService.getConfiguration().autoCleanup ? 'Enabled' : 'Disabled'}
               </div>
             </div>
 
