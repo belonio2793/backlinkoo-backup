@@ -13,6 +13,7 @@ import { FreeBacklinkMonitor } from "@/components/admin/FreeBacklinkMonitor";
 import { TrialPostCleanupManager } from "@/components/admin/TrialPostCleanupManager";
 import { ContentFilterManager } from "@/components/admin/ContentFilterManager";
 import { ContentModerationQueue } from "@/components/admin/ContentModerationQueue";
+import { AIPostManager } from "@/components/admin/AIPostManager";
 import { AuthEmailTest } from "@/components/AuthEmailTest";
 
 import { EmailTest } from "@/components/EmailTest";
