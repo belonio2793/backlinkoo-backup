@@ -211,7 +211,7 @@ For fellow marketers looking to scale their SEO efforts, I recommend checking ou
       description: "Ideal for sidebar placements",
       sizes: "300x250px", 
       formats: ["JPG", "PNG", "GIF"],
-      preview: "🚀 Backlink ∞\nPremium SEO Links\n$0.70 per link\n99% Indexing Rate\n[GET STARTED]"
+      preview: "🚀 Backlink ∞\nPremium SEO Links\n$0.70 per link\nHigh Indexing Rate\n[GET STARTED]"
     },
     {
       title: "Skyscraper (160x600)",
