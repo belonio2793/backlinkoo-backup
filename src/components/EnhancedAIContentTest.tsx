@@ -154,9 +154,12 @@ export function EnhancedAIContentTest() {
   const generateRealTimeContent = (): Promise<string> => {
     return new Promise((resolve) => {
       const selectedPrompt = getSelectedPrompt();
+      setCurrentPrompt(selectedPrompt);
+      setShowPromptDisplay(true);
       console.log('🎯 Using prompt variant:', selectedPrompt.substring(0, 50) + '...');
 
-      const fullContent = `# ${keyword}: Complete Guide ${new Date().getFullYear()}
+      // Generate longer content (1000+ words minimum)
+      const rawContent = `# ${keyword}: Complete Guide ${new Date().getFullYear()}
 
 ## Introduction to ${keyword}
 
