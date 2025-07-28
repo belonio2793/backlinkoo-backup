@@ -512,25 +512,79 @@ export function AdminBlogManager() {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2 ml-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                      >
-                        <a href={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                      >
-                        <a href={post.target_url} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      </Button>
+                    <div className="flex flex-col gap-2 ml-4 min-w-[200px]">
+                      {/* Published URL */}
+                      <div className="text-xs">
+                        <div className="text-gray-500 mb-1">Published URL:</div>
+                        <div className="flex items-center gap-1 bg-gray-50 p-2 rounded border">
+                          <code className="text-xs text-blue-600 truncate max-w-[150px]">
+                            {window.location.origin}/blog/{post.slug}
+                          </code>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={() => {
+                              navigator.clipboard.writeText(`${window.location.origin}/blog/${post.slug}`);
+                              toast({ title: "URL copied to clipboard" });
+                            }}
+                          >
+                            📋
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            asChild
+                          >
+                            <a href={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs px-2 py-1"
+                          onClick={() => {
+                            // Edit functionality (placeholder)
+                            toast({
+                              title: "Edit Feature",
+                              description: "Edit functionality coming soon"
+                            });
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs px-2 py-1"
+                          onClick={() => {
+                            // Settings functionality (placeholder)
+                            toast({
+                              title: "Settings",
+                              description: "Settings panel coming soon"
+                            });
+                          }}
+                        >
+                          Settings
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs px-2 py-1"
+                          asChild
+                        >
+                          <a href={post.target_url} target="_blank" rel="noopener noreferrer">
+                            Target
+                          </a>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
