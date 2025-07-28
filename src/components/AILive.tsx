@@ -466,7 +466,7 @@ export function AILive() {
 
                 <Button
                   onClick={generateContent}
-                  disabled={isGenerating || providers.every(p => p.status !== 'online')}
+                  disabled={isGenerating || (!apiCheckComplete || providers.every(p => p.status !== 'online'))}
                   className="w-full"
                   size="lg"
                 >
