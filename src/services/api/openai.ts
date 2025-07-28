@@ -59,7 +59,12 @@ export class OpenAIService {
     error?: string;
   }> {
     if (!this.apiKey) {
-      throw new Error('OpenAI API key not configured');
+      return {
+        content: '',
+        usage: { tokens: 0, cost: 0 },
+        success: false,
+        error: 'OpenAI API key not configured'
+      };
     }
 
     const {
