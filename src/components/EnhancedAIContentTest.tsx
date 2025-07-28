@@ -930,7 +930,7 @@ Begin your journey with ${keyword} today!`;
               <div className="space-y-1">
                 <p className="text-sm font-medium">Blog URL</p>
                 <p className="text-xs text-muted-foreground font-mono break-all">
-                  backlinkoo.com/blog/{generatedBlog.slug}
+                  {window.location.origin.replace('https://', '').replace('http://', '')}/blog/{generatedBlog.slug}
                 </p>
               </div>
               <div className="space-y-1">
