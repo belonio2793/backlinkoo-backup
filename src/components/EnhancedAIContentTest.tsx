@@ -55,6 +55,137 @@ export function EnhancedAIContentTest() {
     `Create a 2000 word original blog post that encapsulates user intent and website correlation based on "${keyword}" and hyperlink the "${anchorText}" with the ${url} following search engine optimized principles and abide by strict grammar and punctuality.`
   ];
 
+  // Generate slug from keyword
+  const generateSlug = (keyword: string): string => {
+    return keyword.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  // Simulate real-time content generation
+  const generateRealTimeContent = (): Promise<string> => {
+    return new Promise((resolve) => {
+      const fullContent = `# ${keyword}: Complete Guide ${new Date().getFullYear()}
+
+## Introduction to ${keyword}
+
+Understanding ${keyword} is essential for businesses looking to enhance their digital presence. This comprehensive guide will walk you through everything you need to know about ${keyword}, from basic concepts to advanced implementation strategies.
+
+## What is ${keyword}?
+
+${keyword} represents a crucial aspect of modern digital marketing that can significantly impact your online success. Whether you're a small business owner or part of a large enterprise, mastering ${keyword} will give you a competitive advantage in today's digital landscape.
+
+## Key Benefits of ${keyword}
+
+- **Enhanced Visibility**: Improve your online presence with effective ${keyword} strategies
+- **Increased Traffic**: Drive more qualified visitors to your website
+- **Better Engagement**: Connect with your target audience more effectively
+- **Higher Conversions**: Convert more visitors into customers
+- **Long-term Growth**: Build sustainable business growth through ${keyword}
+
+## Getting Started with ${keyword}
+
+The best approach to implementing ${keyword} involves understanding your audience, setting clear objectives, and following proven methodologies. For comprehensive tools and expert guidance, [${anchorText}](${url}) provides everything you need to succeed.
+
+## Advanced ${keyword} Strategies
+
+### 1. Research and Planning
+Start with thorough research to understand your market and competition. This foundation will guide your ${keyword} strategy and help you make informed decisions.
+
+### 2. Implementation Best Practices
+Follow industry best practices when implementing ${keyword} strategies. This includes staying up-to-date with latest trends and technologies.
+
+### 3. Monitoring and Optimization
+Continuously monitor your results and optimize your approach based on data-driven insights.
+
+## Common Mistakes to Avoid
+
+When working with ${keyword}, avoid these common pitfalls:
+- Neglecting proper research and planning
+- Failing to track and measure results
+- Ignoring mobile optimization
+- Overlooking user experience considerations
+
+## Tools and Resources
+
+The right tools can make a significant difference in your ${keyword} success. [${anchorText}](${url}) offers professional-grade solutions designed to help you achieve your goals.
+
+## Conclusion
+
+Mastering ${keyword} requires dedication, the right approach, and quality tools. By following this guide and leveraging professional resources like those available at [${anchorText}](${url}), you can achieve exceptional results.
+
+Start your ${keyword} journey today and take your business to the next level!`;
+
+      const words = fullContent.split(' ');
+      let currentIndex = 0;
+
+      const interval = setInterval(() => {
+        if (currentIndex < words.length) {
+          const nextChunk = words.slice(0, currentIndex + 5).join(' ');
+          setRealTimeContent(nextChunk);
+          setWordCount(currentIndex + 5);
+          currentIndex += 5;
+        } else {
+          clearInterval(interval);
+          setIsGeneratingContent(false);
+          setGeneratedSlug(generateSlug(keyword));
+          setShowSaveOptions(true);
+          resolve(fullContent);
+        }
+      }, 200); // Update every 200ms
+    });
+  };
+
+  // Save to blog with trial/claim system
+  const saveToBlog = async (mode: 'trial' | 'claim') => {
+    setSaveMode(mode);
+
+    try {
+      const finalSlug = generatedSlug || generateSlug(keyword);
+      const blogUrl = `https://backlinkoo.com/blog/${finalSlug}`;
+
+      const blogData = {
+        title: `${keyword}: Complete Guide ${new Date().getFullYear()}`,
+        slug: finalSlug,
+        content: realTimeContent,
+        keyword,
+        targetUrl: url,
+        anchorText,
+        mode,
+        createdAt: new Date().toISOString(),
+        expiresAt: mode === 'trial' ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null
+      };
+
+      // Simulate save operation
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      toast({
+        title: mode === 'trial' ? "24-Hour Trial Created!" : "Permanent Link Claimed!",
+        description: mode === 'trial' ?
+          `Trial link active for 24 hours: ${blogUrl}` :
+          `Permanent backlink created: ${blogUrl}`,
+      });
+
+      setGeneratedBlog({
+        ...blogData,
+        blogUrl,
+        saved: true,
+        saveMode: mode
+      });
+
+    } catch (error) {
+      toast({
+        title: "Save Failed",
+        description: "Failed to save blog post. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSaveMode(null);
+    }
+  };
+
   const runBlogGeneration = async () => {
     if (!keyword || !url) {
       toast({
