@@ -36,49 +36,20 @@ export class MockAIService {
     anchorText: string,
     url: string
   ): Promise<MockAIResponse> {
-    console.log(`Mock generating content with ${provider}...`);
-    
-    // Simulate generation delay
-    await this.delay(2000 + Math.random() * 3000);
-    
-    try {
-      const content = this.generateUniqueContent(keyword, anchorText, url);
-      const wordCount = content.split(/\s+/).length;
-      
-      return {
-        success: true,
-        content,
-        wordCount,
-        provider: `${provider} (Demo)`,
-        demo: true
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Mock generation failed',
-        provider
-      };
-    }
+    console.log(`API-only mode: No mock content generation available for ${provider}`);
+
+    // No more mock generation - force real API usage
+    return {
+      success: false,
+      error: 'Template generation disabled. Please configure real AI API keys (OpenAI, Grok) for content generation.',
+      provider
+    };
   }
 
   private static generateUniqueContent(keyword: string, anchorText: string, url: string): string {
-    const keywordLower = keyword.toLowerCase();
-    const keywordCap = keyword.charAt(0).toUpperCase() + keyword.slice(1);
-    
-    // Detect keyword context and generate appropriate content
-    if (this.isFoodRelated(keywordLower)) {
-      return this.generateFoodContent(keyword, anchorText, url);
-    } else if (this.isTechRelated(keywordLower)) {
-      return this.generateTechContent(keyword, anchorText, url);
-    } else if (this.isBusinessRelated(keywordLower)) {
-      return this.generateBusinessContent(keyword, anchorText, url);
-    } else if (this.isHealthRelated(keywordLower)) {
-      return this.generateHealthContent(keyword, anchorText, url);
-    } else if (this.isTravelRelated(keywordLower)) {
-      return this.generateTravelContent(keyword, anchorText, url);
-    } else {
-      return this.generateGeneralContent(keyword, anchorText, url);
-    }
+    // No more templates - this should only be used if API calls are completely unavailable
+    // Return a simple error message directing users to use real APIs
+    throw new Error('Template generation disabled - API-only mode. Please configure proper AI API keys.');
   }
 
   private static isFoodRelated(keyword: string): boolean {
