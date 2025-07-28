@@ -14,7 +14,7 @@ export interface BlogPost {
   anchor_text: string;
   target_url: string;
   word_count: number;
-  provider: 'openai' | 'grok';
+  provider: 'huggingface' | 'cohere';
   generation_time: number;
   seo_score: number;
   reading_time: number;
