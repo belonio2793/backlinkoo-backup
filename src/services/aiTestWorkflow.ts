@@ -7,6 +7,7 @@
 import { aiContentEngine } from './aiContentEngine';
 import { enhancedAIContentEngine } from './enhancedAIContentEngine';
 import { globalBlogGenerator } from './globalBlogGenerator';
+import { multiApiContentGenerator } from './multiApiContentGenerator';
 
 export interface TestWorkflowRequest {
   websiteUrl: string;
