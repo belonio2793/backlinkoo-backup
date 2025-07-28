@@ -3,6 +3,75 @@
  * Handles content generation using OpenAI or Grok APIs
  */
 
+function generateDemoContent(keyword, anchorText, url) {
+  return `<h1>${keyword.charAt(0).toUpperCase() + keyword.slice(1)}: Complete Guide</h1>
+
+<h2>Introduction</h2>
+
+<p>Understanding ${keyword} is essential in today's digital landscape. This comprehensive guide explores the key aspects and practical applications of ${keyword}, providing valuable insights for businesses and individuals alike.</p>
+
+<h2>What is ${keyword.charAt(0).toUpperCase() + keyword.slice(1)}?</h2>
+
+<p>${keyword.charAt(0).toUpperCase() + keyword.slice(1)} encompasses various strategies and techniques that are crucial for success in the modern digital world. From basic concepts to advanced implementations, ${keyword} offers numerous opportunities for growth and improvement.</p>
+
+<p>The importance of ${keyword} cannot be overstated. Organizations worldwide are recognizing its potential to drive engagement, improve efficiency, and create lasting value for their stakeholders.</p>
+
+<h2>Key Benefits of ${keyword}</h2>
+
+<ul>
+<li>Enhanced visibility and reach across digital platforms</li>
+<li>Improved user engagement and interaction rates</li>
+<li>Better conversion rates and ROI optimization</li>
+<li>Long-term sustainable growth strategies</li>
+<li>Competitive advantage in the marketplace</li>
+</ul>
+
+<h2>Best Practices and Implementation</h2>
+
+<p>When implementing ${keyword} strategies, it's important to focus on quality and consistency. Successful implementation requires careful planning, execution, and continuous monitoring of results.</p>
+
+<p>For professional guidance and expert solutions in ${keyword}, consider consulting <a href="${url}" target="_blank" rel="noopener noreferrer">${anchorText}</a> for comprehensive support and industry-leading expertise.</p>
+
+<h3>Implementation Strategies</h3>
+
+<ol>
+<li><strong>Research and Planning</strong>: Understand your target audience and set clear objectives</li>
+<li><strong>Content Creation</strong>: Develop high-quality, valuable content that resonates with your audience</li>
+<li><strong>Optimization</strong>: Fine-tune your approach based on performance data and analytics</li>
+<li><strong>Monitoring</strong>: Track results and adjust strategies accordingly for continuous improvement</li>
+</ol>
+
+<h2>Common Challenges and Solutions</h2>
+
+<p>Many businesses face challenges when implementing ${keyword} strategies. These can include resource constraints, technical limitations, changing market conditions, and evolving user expectations.</p>
+
+<p>The key to overcoming these challenges lies in developing a comprehensive understanding of the ${keyword} landscape and staying up-to-date with the latest trends and best practices.</p>
+
+<h3>Technical Considerations</h3>
+
+<p>From a technical standpoint, ${keyword} implementation requires attention to detail and a systematic approach. Consider factors such as scalability, performance, security, and user experience when developing your ${keyword} strategy.</p>
+
+<h2>Future Trends and Opportunities</h2>
+
+<p>The landscape of ${keyword} continues to evolve with new technologies and methodologies. Staying informed about emerging trends is crucial for maintaining competitive advantage and achieving long-term success.</p>
+
+<p>Key trends to watch include automation, artificial intelligence integration, personalization, and data-driven decision making. These developments are reshaping how organizations approach ${keyword} and creating new opportunities for innovation.</p>
+
+<h2>Measuring Success</h2>
+
+<p>Success in ${keyword} can be measured through various metrics and key performance indicators (KPIs). These may include engagement rates, conversion metrics, reach and impressions, customer satisfaction scores, and return on investment.</p>
+
+<p>Regular monitoring and analysis of these metrics help organizations understand the effectiveness of their ${keyword} efforts and identify areas for improvement.</p>
+
+<h2>Conclusion</h2>
+
+<p>Mastering ${keyword} requires dedication, proper planning, and expert guidance. The strategies and best practices outlined in this guide provide a solid foundation for success in ${keyword} implementation.</p>
+
+<p>For those looking to excel in this area and achieve outstanding results, <a href="${url}" target="_blank" rel="noopener noreferrer">${anchorText}</a> provides valuable resources, professional support, and industry expertise to help you achieve your goals.</p>
+
+<p>Start your journey with ${keyword} today and unlock new possibilities for growth, engagement, and success in the digital landscape.</p>`;
+}
+
 exports.handler = async (event, context) => {
   // CORS headers
   const headers = {
@@ -57,10 +126,21 @@ exports.handler = async (event, context) => {
     }
 
     if (!apiKey) {
+      // For demo purposes, generate mock content when API key is not available
+      console.log(`${provider} API key not configured, generating demo content...`);
+
+      const demoContent = generateDemoContent(keyword, anchorText, url);
+
       return {
-        statusCode: 500,
+        statusCode: 200,
         headers,
-        body: JSON.stringify({ error: `${provider} API key not configured` })
+        body: JSON.stringify({
+          content: demoContent,
+          wordCount: demoContent.split(/\s+/).length,
+          provider: `${provider} (Demo)`,
+          success: true,
+          demo: true
+        })
       };
     }
 
