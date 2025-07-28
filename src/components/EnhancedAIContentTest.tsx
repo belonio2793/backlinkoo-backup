@@ -656,39 +656,91 @@ Start your ${keyword} transformation journey today and unlock the full potential
       {(isGeneratingContent || realTimeContent) && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {isGeneratingContent ? (
-                <>
-                  <RefreshCw className="h-5 w-5 animate-spin text-blue-600" />
-                  Generating Content in Real-Time
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
-                  Content Generated
-                </>
-              )}
-            </CardTitle>
-            {wordCount > 0 && (
-              <div className="text-sm text-muted-foreground">
-                Words generated: {wordCount} / 1000+ minimum {isGeneratingContent && '(continuing...)'}
-                {wordCount >= 1000 && (
-                  <span className="ml-2 text-green-600 font-medium">✓ Target reached</span>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  {isGeneratingContent ? (
+                    <>
+                      <RefreshCw className="h-5 w-5 animate-spin text-blue-600" />
+                      Generating Content in Real-Time
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      Content Generated - Ready for Blog
+                    </>
+                  )}
+                </CardTitle>
+                {wordCount > 0 && (
+                  <div className="text-sm text-muted-foreground mt-1">
+                    Words generated: {wordCount} / 1000+ minimum {isGeneratingContent && '(continuing...)'}
+                    {wordCount >= 1000 && (
+                      <span className="ml-2 text-green-600 font-medium">✓ Target reached</span>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
+
+              {!isGeneratingContent && realTimeContent && (
+                <div className="flex gap-2">
+                  <Button
+                    variant={contentViewMode === 'text' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setContentViewMode('text')}
+                  >
+                    <FileText className="h-4 w-4 mr-1" />
+                    Text
+                  </Button>
+                  <Button
+                    variant={contentViewMode === 'html' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setContentViewMode('html')}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-1" />
+                    HTML Preview
+                  </Button>
+                </div>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="max-h-96 overflow-y-auto bg-gray-50 rounded-lg p-4">
-              <div className="prose max-w-none text-sm">
-                {realTimeContent.split('\n').map((line, index) => (
-                  <p key={index} className="mb-2">{line}</p>
-                ))}
-                {isGeneratingContent && (
-                  <span className="inline-block w-2 h-4 bg-blue-600 animate-pulse ml-1"></span>
-                )}
-              </div>
+            <div className="max-h-96 overflow-y-auto bg-gray-50 rounded-lg p-4 border">
+              {contentViewMode === 'text' ? (
+                <div className="prose max-w-none text-sm font-mono">
+                  {realTimeContent.split('\n').map((line, index) => (
+                    <p key={index} className="mb-2">{line}</p>
+                  ))}
+                  {isGeneratingContent && (
+                    <span className="inline-block w-2 h-4 bg-blue-600 animate-pulse ml-1"></span>
+                  )}
+                </div>
+              ) : (
+                <div className="prose max-w-none text-sm">
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: finalHtmlContent || convertToHtml(realTimeContent)
+                    }}
+                  />
+                </div>
+              )}
             </div>
+
+            {!isGeneratingContent && realTimeContent && (
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3 text-green-600" />
+                  Content formatted with proper grammar and punctuation
+                </div>
+                <div className="flex items-center gap-1">
+                  <Link className="h-3 w-3 text-blue-600" />
+                  Backlink integrated: "{anchorText}" → {url}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Zap className="h-3 w-3 text-purple-600" />
+                  Ready for immediate publication
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
