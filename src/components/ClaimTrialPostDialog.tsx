@@ -217,11 +217,11 @@ export function ClaimTrialPostDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Crown className="h-5 w-5 text-yellow-600" />
-            Claim Your Trial Post
+            <Crown className="h-5 w-5 text-green-600" />
+            Claim Your Free Trial Post
           </DialogTitle>
           <DialogDescription>
-            Convert your trial post to a permanent backlink that never expires
+            Save this trial post permanently. Each account gets one free claim since posts auto-delete after 24 hours.
           </DialogDescription>
         </DialogHeader>
 
