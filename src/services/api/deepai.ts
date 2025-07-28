@@ -36,7 +36,12 @@ export class DeepAIService {
     error?: string;
   }> {
     if (!this.apiKey) {
-      throw new Error('DeepAI API key not configured');
+      return {
+        content: '',
+        usage: { tokens: 0, cost: 0 },
+        success: false,
+        error: 'DeepAI API key not configured'
+      };
     }
 
     const { model = 'text-generator' } = options;
