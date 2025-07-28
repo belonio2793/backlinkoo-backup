@@ -25,8 +25,8 @@ interface ApiStatus {
 }
 
 export function MinimalAITest() {
-  const [keyword, setKeyword] = useState('digital marketing');
-  const [url, setUrl] = useState('https://example.com');
+  const [keyword, setKeyword] = useState('');
+  const [url, setUrl] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<SystemLog[]>([]);
   const [apiStatuses, setApiStatuses] = useState<ApiStatus[]>([]);
