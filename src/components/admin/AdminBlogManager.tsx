@@ -482,9 +482,15 @@ export function AdminBlogManager() {
           ) : (
             <div className="space-y-4">
               {filteredPosts.map((post) => (
-                <div 
-                  key={post.id} 
-                  className={`border rounded-lg p-4 ${isExpired(post) ? 'bg-red-50 border-red-200' : 'bg-white'}`}
+                <div
+                  key={post.id}
+                  className={`border rounded-lg p-4 transition-all hover:shadow-md ${
+                    isExpired(post)
+                      ? 'bg-red-50 border-red-200'
+                      : post.published_url?.includes('fly.dev')
+                        ? 'bg-blue-50 border-blue-200 border-l-4 border-l-blue-500'
+                        : 'bg-white hover:bg-gray-50'
+                  }`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
