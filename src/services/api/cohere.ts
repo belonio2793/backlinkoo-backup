@@ -149,7 +149,11 @@ export class CohereService {
     error?: string;
   }> {
     if (!this.apiKey) {
-      throw new Error('Cohere API key not configured');
+      return {
+        classifications: [],
+        success: false,
+        error: 'Cohere API key not configured'
+      };
     }
 
     try {
