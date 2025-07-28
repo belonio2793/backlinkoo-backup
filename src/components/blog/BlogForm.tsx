@@ -6,9 +6,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { PromptOverlay } from '@/components/ui/prompt-overlay';
 import { useToast } from '@/hooks/use-toast';
 import { productionAIContentManager } from '@/services/productionAIContentManager';
-import { Loader2, Plus, X, Link, Target, Hash } from 'lucide-react';
+import { Loader2, Plus, X, Link, Target, Hash, Eye } from 'lucide-react';
 
 interface BlogFormProps {
   onContentGenerated: (content: any) => void;
