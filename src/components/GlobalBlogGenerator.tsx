@@ -187,11 +187,12 @@ export function GlobalBlogGenerator({
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
+      const sessionId = crypto.randomUUID();
       const request: GlobalBlogRequest = {
         targetUrl: targetUrl.trim(),
         primaryKeyword: primaryKeyword.trim(),
         anchorText: anchorText.trim() || undefined,
-        sessionId: crypto.randomUUID(),
+        sessionId,
         additionalContext: showAdvancedOptions ? {
           industry: industry || undefined,
           contentTone,
@@ -199,6 +200,14 @@ export function GlobalBlogGenerator({
           seoFocus
         } : undefined
       };
+
+      // Track the request for admin monitoring
+      adminSyncService.trackFreeBacklinkRequest({
+        targetUrl: request.targetUrl,
+        primaryKeyword: request.primaryKeyword,
+        anchorText: request.anchorText,
+        sessionId: request.sessionId
+      });
 
       const result = await globalBlogGenerator.generateGlobalBlogPost(request);
 
