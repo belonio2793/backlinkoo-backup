@@ -490,6 +490,15 @@ export function AILive() {
                   </Alert>
                 )}
 
+                {apiCheckComplete && providers.filter(p => p.status === 'online').length > 0 && (
+                  <Alert className="border-blue-200 bg-blue-50">
+                    <CheckCircle2 className="h-4 w-4 text-blue-600" />
+                    <AlertDescription className="text-blue-800">
+                      {providers.filter(p => p.status === 'online').length} AI provider(s) online and ready to generate content!
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 {hasGenerated && (
                   <Alert>
                     <CheckCircle2 className="h-4 w-4" />
