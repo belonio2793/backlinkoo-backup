@@ -507,6 +507,12 @@ export function AdminBlogManager() {
                             {info.label}
                           </Badge>
                         ))}
+                        {post.published_url?.includes('fly.dev') && (
+                          <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">
+                            <ExternalLink className="mr-1 h-3 w-3" />
+                            Built Link
+                          </Badge>
+                        )}
                         {isExpired(post) && (
                           <Badge variant="destructive" className="animate-pulse">
                             EXPIRED
