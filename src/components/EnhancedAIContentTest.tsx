@@ -47,6 +47,15 @@ export function EnhancedAIContentTest() {
 
   const { toast } = useToast();
 
+  // Initialize prompt rotation on component mount
+  useEffect(() => {
+    // Generate new seed for this session if none exists
+    if (!sessionStorage.getItem('aitest-prompt-seed')) {
+      const newSeed = Date.now() + Math.floor(Math.random() * 1000);
+      sessionStorage.setItem('aitest-prompt-seed', newSeed.toString());
+    }
+  }, []);
+
   // Internal prompt templates that rotate on each instance
   const promptTemplates = [
     `Write 2000 words on "{keyword}" and hyperlink the "{anchorText}" with the {url} in a search engine optimized manner`,
