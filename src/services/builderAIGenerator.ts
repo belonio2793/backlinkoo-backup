@@ -75,18 +75,18 @@ export class BuilderAIGenerator {
   /**
    * Test API connectivity before generation
    */
-  async checkApiAvailability(): Promise<{ openai: boolean; grok: boolean }> {
+  async checkApiAvailability(): Promise<{ huggingface: boolean; cohere: boolean }> {
     this.updateStatus('checking_apis', 'Testing API connectivity...', 10);
-    
-    const openaiAvailable = await openAIService.testConnection();
-    const grokAvailable = await grokService.testConnection();
-    
-    this.updateStatus('checking_apis', 
-      `APIs checked - OpenAI: ${openaiAvailable ? 'available' : 'unavailable'}, Grok: ${grokAvailable ? 'available' : 'unavailable'}`, 
+
+    const huggingfaceAvailable = await huggingFaceService.testConnection();
+    const cohereAvailable = await cohereService.testConnection();
+
+    this.updateStatus('checking_apis',
+      `APIs checked - Hugging Face: ${huggingfaceAvailable ? 'available' : 'unavailable'}, Cohere: ${cohereAvailable ? 'available' : 'unavailable'}`,
       25
     );
-    
-    return { openai: openaiAvailable, grok: grokAvailable };
+
+    return { huggingface: huggingfaceAvailable, cohere: cohereAvailable };
   }
 
   /**
