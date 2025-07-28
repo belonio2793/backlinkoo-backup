@@ -33,6 +33,7 @@ export function SimplifiedAIContentTest() {
   const [generatedResult, setGeneratedResult] = useState<any>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [sessionCounter, setSessionCounter] = useState(0);
+  const [apiProviders, setApiProviders] = useState<string[]>([]);
 
   const { toast } = useToast();
 
