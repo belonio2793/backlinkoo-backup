@@ -58,6 +58,10 @@ export function SimplifiedAIContentTest() {
     localStorage.setItem('daily-posts-count', newCount.toString());
   };
 
+  const getCurrentDomain = () => {
+    return window.location.origin;
+  };
+
   const handleGenerate = async () => {
     if (!keyword.trim() || !url.trim()) {
       toast({
