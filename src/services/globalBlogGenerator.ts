@@ -289,7 +289,7 @@ class GlobalBlogGeneratorService {
       reading_time: Math.floor(Math.random() * 5) + 3,
       word_count: Math.floor(content.length / 6), // Approximate word count
       view_count: 0,
-      author_name: 'Backlinkoo AI',
+      author_name: 'Backlink ∞',
       category: 'SEO Guide',
       published_url: `https://backlinkoo.com/blog/${request.primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
       published_at: new Date().toISOString(),
