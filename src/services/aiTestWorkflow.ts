@@ -394,6 +394,89 @@ export class AITestWorkflow {
   }
 
   /**
+   * Generate fallback content when no API providers are available
+   */
+  private generateFallbackContent(request: TestWorkflowRequest): string {
+    const { keyword, websiteUrl, anchorText } = request;
+    const anchor = anchorText || keyword;
+    const currentYear = new Date().getFullYear();
+
+    return `# ${keyword}: Your Ultimate Guide for ${currentYear}
+
+## Introduction
+
+Understanding ${keyword} is essential in today's digital landscape. This comprehensive guide will provide you with everything you need to know about ${keyword}, from basic concepts to advanced strategies that can transform your approach.
+
+## What is ${keyword}?
+
+${keyword} represents a crucial element that can significantly impact your success in the modern digital world. Whether you're a beginner looking to learn the fundamentals or an experienced professional seeking to refine your approach, mastering ${keyword} will give you a competitive advantage.
+
+## Key Benefits of ${keyword}
+
+- **Enhanced Performance**: Improve your results with proven ${keyword} strategies
+- **Expert Guidance**: Learn from industry professionals and best practices
+- **Practical Solutions**: Get actionable insights you can implement immediately
+- **Long-term Success**: Build sustainable growth through effective ${keyword} implementation
+- **Competitive Advantage**: Stay ahead of the curve with cutting-edge techniques
+
+## Getting Started with ${keyword}
+
+The best approach to ${keyword} combines theoretical knowledge with practical application. For comprehensive resources, expert tools, and professional guidance, [${anchor}](${websiteUrl}) provides everything you need to succeed in your ${keyword} journey.
+
+## Essential ${keyword} Strategies
+
+### 1. Foundation Building
+Start with a solid understanding of ${keyword} fundamentals. This includes learning the core principles, understanding industry standards, and familiarizing yourself with essential tools and techniques.
+
+### 2. Implementation Planning
+Develop a systematic approach to implementing ${keyword} strategies. Create a roadmap that aligns with your goals and resources, ensuring you can measure progress and adjust as needed.
+
+### 3. Performance Optimization
+Continuously monitor and optimize your ${keyword} performance. Use data-driven insights to refine your approach and maximize results.
+
+### 4. Advanced Techniques
+Once you've mastered the basics, explore advanced ${keyword} techniques that can set you apart from the competition.
+
+## Best Practices for ${keyword}
+
+1. **Start with Clear Objectives**: Define what you want to achieve with ${keyword}
+2. **Follow Industry Standards**: Adhere to established best practices and guidelines
+3. **Stay Updated**: Keep up with the latest trends and developments in ${keyword}
+4. **Measure and Analyze**: Track your progress and analyze results regularly
+5. **Seek Professional Guidance**: Don't hesitate to consult experts when needed
+
+## Common ${keyword} Mistakes to Avoid
+
+- Neglecting to establish clear goals and metrics
+- Failing to stay updated with industry changes
+- Overlooking the importance of continuous learning
+- Not leveraging available tools and resources
+- Attempting to do everything without professional support
+
+## Tools and Resources for ${keyword}
+
+The right tools can make a significant difference in your ${keyword} success. From planning and implementation to monitoring and optimization, having access to professional-grade resources is essential.
+
+For comprehensive ${keyword} solutions and expert support, [${anchor}](${websiteUrl}) offers industry-leading tools and guidance to help you achieve your goals.
+
+## Future Trends in ${keyword}
+
+As we look toward the future, ${keyword} continues to evolve with new technologies, methodologies, and best practices. Staying informed about emerging trends will help you maintain your competitive edge and adapt to changing market conditions.
+
+## Conclusion
+
+Mastering ${keyword} requires dedication, the right resources, and ongoing commitment to learning and improvement. By following the strategies outlined in this guide and leveraging professional tools and support, you can achieve exceptional results in your ${keyword} endeavors.
+
+Ready to take your ${keyword} to the next level? Start your journey today with the comprehensive resources and expert guidance available at [${anchor}](${websiteUrl}).
+
+Take action now and transform your approach to ${keyword} with proven strategies and professional support!
+
+---
+
+*This guide provides a comprehensive overview of ${keyword} best practices and strategies. For personalized advice and advanced tools, visit [${anchor}](${websiteUrl}) to connect with industry experts.*`;
+  }
+
+  /**
    * Get real-time provider status for display
    */
   async getProviderStatusDisplay(): Promise<ProviderStatus[]> {
