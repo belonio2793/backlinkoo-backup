@@ -322,7 +322,7 @@ Format the response as clean HTML with proper semantic structure.`;
   /**
    * Update status callback
    */
-  private updateStatus(stage: GenerationStatus['stage'], message: string, progress: number, provider?: 'openai' | 'grok'): void {
+  private updateStatus(stage: GenerationStatus['stage'], message: string, progress: number, provider?: 'huggingface' | 'cohere'): void {
     if (this.onStatusUpdate) {
       this.onStatusUpdate({ stage, message, progress, provider });
     }
