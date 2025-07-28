@@ -51,6 +51,7 @@ export const AppWrapper = () => {
       <Route path="/blog/create" element={<BlogCreator />} />
       <Route path="/blog/:slug" element={<BlogPost />} />
       <Route path="/trial-dashboard" element={<GuestDashboard />} />
+      <Route path="/ai-test" element={<AIContentTest />} />
       <Route path="*" element={<NotFound />} />
 
       {/* Protected routes - require authentication and email verification */}
