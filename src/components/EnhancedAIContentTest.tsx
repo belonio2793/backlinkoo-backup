@@ -39,6 +39,8 @@ export function EnhancedAIContentTest() {
   const [isSlugEditable, setIsSlugEditable] = useState(false);
   const [showSaveOptions, setShowSaveOptions] = useState(false);
   const [saveMode, setSaveMode] = useState<'trial' | 'claim' | null>(null);
+  const [currentPrompt, setCurrentPrompt] = useState('');
+  const [showPromptDisplay, setShowPromptDisplay] = useState(false);
   
   // User inputs
   const [keyword, setKeyword] = useState('digital marketing');
