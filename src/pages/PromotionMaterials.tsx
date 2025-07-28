@@ -204,7 +204,7 @@ For fellow marketers looking to scale their SEO efforts, I recommend checking ou
       description: "Perfect for website headers and blog tops",
       sizes: "728x90px",
       formats: ["JPG", "PNG", "GIF"],
-      preview: "🎯 PREMIUM BACKLINKS • 99% INDEXING RATE • $0.70/LINK • GET STARTED →"
+      preview: "🎯 PREMIUM BACKLINKS • HIGH INDEXING RATE • $0.70/LINK • GET STARTED →"
     },
     {
       title: "Medium Rectangle (300x250)",
