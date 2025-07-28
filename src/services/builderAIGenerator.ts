@@ -140,15 +140,15 @@ Format the response as clean HTML with proper semantic structure.`;
 
     // Check API availability
     const apiStatus = await this.checkApiAvailability();
-    
-    if (!apiStatus.openai && !apiStatus.grok) {
+
+    if (!apiStatus.huggingface && !apiStatus.cohere) {
       throw new Error('No AI providers are currently available');
     }
 
-    // Determine provider (OpenAI primary, Grok backup)
-    const useOpenAI = apiStatus.openai;
-    const provider = useOpenAI ? 'openai' : 'grok';
-    const service = useOpenAI ? openAIService : grokService;
+    // Determine provider (Hugging Face primary, Cohere backup)
+    const useHuggingFace = apiStatus.huggingface;
+    const provider = useHuggingFace ? 'huggingface' : 'cohere';
+    const service = useHuggingFace ? huggingFaceService : cohereService;
 
     this.updateStatus('generating', `Generating content using ${provider.toUpperCase()}...`, 50, provider);
 
@@ -158,34 +158,34 @@ Format the response as clean HTML with proper semantic structure.`;
     // Generate content
     let content: string;
     try {
-      if (useOpenAI) {
-        content = await openAIService.generateContent(prompt, {
-          model: 'gpt-3.5-turbo',
+      if (useHuggingFace) {
+        content = await huggingFaceService.generateContent(prompt, {
+          model: 'microsoft/DialoGPT-large',
           maxTokens: 2000,
           temperature: 0.7
         });
       } else {
-        content = await grokService.generateContent(prompt, {
-          model: 'grok-2-1212',
+        content = await cohereService.generateContent(prompt, {
+          model: 'command',
           maxTokens: 2000,
           temperature: 0.7
         });
       }
     } catch (error) {
       // Try backup provider if primary fails
-      const backupProvider = useOpenAI ? 'grok' : 'openai';
-      if ((useOpenAI && apiStatus.grok) || (!useOpenAI && apiStatus.openai)) {
+      const backupProvider = useHuggingFace ? 'cohere' : 'huggingface';
+      if ((useHuggingFace && apiStatus.cohere) || (!useHuggingFace && apiStatus.huggingface)) {
         this.updateStatus('generating', `Primary provider failed, trying ${backupProvider.toUpperCase()}...`, 60, backupProvider as any);
-        
-        if (backupProvider === 'grok') {
-          content = await grokService.generateContent(prompt, {
-            model: 'grok-2-1212',
+
+        if (backupProvider === 'cohere') {
+          content = await cohereService.generateContent(prompt, {
+            model: 'command',
             maxTokens: 2000,
             temperature: 0.7
           });
         } else {
-          content = await openAIService.generateContent(prompt, {
-            model: 'gpt-3.5-turbo',
+          content = await huggingFaceService.generateContent(prompt, {
+            model: 'microsoft/DialoGPT-large',
             maxTokens: 2000,
             temperature: 0.7
           });
