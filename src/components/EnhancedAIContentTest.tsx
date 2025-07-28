@@ -82,11 +82,12 @@ export function EnhancedAIContentTest() {
     const selectedTemplate = promptTemplates[promptIndex];
 
     // Replace placeholders with actual values
-    return selectedTemplate
-      .replace('{keyword}', keyword)
-      .replace('{anchorText}', anchorText)
-      .replace('{url}', url)
-      .replace('{wordCount}', '2000');
+    const finalPrompt = selectedTemplate
+      .replace(/\{keyword\}/g, keyword)
+      .replace(/\{anchorText\}/g, anchorText)
+      .replace(/\{url\}/g, url);
+
+    return finalPrompt;
   };
 
   // Generate slug from keyword
