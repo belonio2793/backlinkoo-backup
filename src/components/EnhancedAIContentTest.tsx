@@ -871,68 +871,135 @@ Start your ${keyword} transformation journey today and unlock the full potential
 
       {/* Generated Blog Results */}
       {generatedBlog?.saved && (
-        <Card>
+        <Card className="border-green-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-green-600" />
-              Blog Generation Complete
+              Free Backlink Created Successfully! 🎉
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <Alert className="border-green-200 bg-green-50">
               <CheckCircle2 className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-800">
-                <strong>Success!</strong> Your blog post has been generated and is available at:{' '}
-                <a 
-                  href={generatedBlog.blogUrl} 
-                  target="_blank" 
+                <strong>Your free backlink is now live!</strong> The blog post has been published to your personal blog at:{' '}
+                <a
+                  href={generatedBlog.blogUrl}
+                  target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium underline hover:no-underline"
+                  className="font-medium underline hover:no-underline break-all"
                 >
                   {generatedBlog.blogUrl}
                 </a>
+                <br />
+                <span className="text-sm">
+                  {generatedBlog.saveMode === 'trial' ?
+                    '⏰ Trial active for 24 hours - claim permanent link to keep forever!' :
+                    '✅ Permanent backlink - this link will remain active indefinitely!'
+                  }
+                </span>
               </AlertDescription>
             </Alert>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-1">
-                <p className="text-sm font-medium">Blog Slug</p>
-                <p className="text-sm text-muted-foreground font-mono">/blog/{generatedBlog.slug}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Generation Time</p>
-                <p className="text-sm text-muted-foreground">
-                  {generatedBlog.testResult?.testDuration}ms
+                <p className="text-sm font-medium">Blog URL</p>
+                <p className="text-xs text-muted-foreground font-mono break-all">
+                  backlinkoo.com/blog/{generatedBlog.slug}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium">Recommended Provider</p>
-                <Badge variant="outline">
-                  {generatedBlog.testResult?.recommendedProvider}
+                <p className="text-sm font-medium">Status</p>
+                <Badge variant={generatedBlog.saveMode === 'trial' ? 'outline' : 'default'}>
+                  {generatedBlog.saveMode === 'trial' ? '24h Trial' : 'Permanent'}
                 </Badge>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Word Count</p>
+                <p className="text-sm text-muted-foreground">
+                  {generatedBlog.metadata?.wordCount || wordCount} words
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Backlink Target</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {generatedBlog.targetUrl}
+                </p>
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <Button asChild>
-                <a 
-                  href={generatedBlog.blogUrl} 
-                  target="_blank" 
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-blue-800 mb-2">SEO Benefits Included:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-blue-700">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  DoFollow backlink to {new URL(generatedBlog.targetUrl).hostname}
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Optimized anchor text: "{generatedBlog.anchorText}"
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  High-quality content (1000+ words)
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Proper HTML structure and formatting
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Button asChild className="bg-green-600 hover:bg-green-700">
+                <a
+                  href={generatedBlog.blogUrl}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2"
                 >
                   <ExternalLink className="h-4 w-4" />
-                  View Published Blog
+                  View Live Blog Post
                 </a>
               </Button>
-              <Button 
+              <Button
                 variant="outline"
-                onClick={() => navigator.clipboard.writeText(generatedBlog.blogUrl)}
+                onClick={() => {
+                  navigator.clipboard.writeText(generatedBlog.blogUrl);
+                  toast({
+                    title: "URL Copied!",
+                    description: "Blog URL has been copied to clipboard",
+                  });
+                }}
               >
                 <Link className="h-4 w-4 mr-2" />
-                Copy URL
+                Copy Blog URL
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const shareText = `Check out this blog post about ${generatedBlog.keyword}: ${generatedBlog.blogUrl}`;
+                  navigator.clipboard.writeText(shareText);
+                  toast({
+                    title: "Share Text Copied!",
+                    description: "Share text has been copied to clipboard",
+                  });
+                }}
+              >
+                <Share className="h-4 w-4 mr-2" />
+                Share Post
               </Button>
             </div>
+
+            {generatedBlog.saveMode === 'trial' && (
+              <Alert className="border-orange-200 bg-orange-50">
+                <Clock className="h-4 w-4 text-orange-600" />
+                <AlertDescription className="text-orange-800">
+                  <strong>Trial Reminder:</strong> This backlink will expire in 24 hours.
+                  To make it permanent, contact our team or upgrade to a premium plan.
+                </AlertDescription>
+              </Alert>
+            )}
           </CardContent>
         </Card>
       )}
