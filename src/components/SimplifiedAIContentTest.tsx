@@ -91,7 +91,8 @@ export function SimplifiedAIContentTest() {
         websiteUrl: url,
         keyword,
         anchorText: keyword,
-        sessionId: crypto.randomUUID()
+        sessionId: crypto.randomUUID(),
+        currentDomain: getCurrentDomain()
       });
 
       setProgress(60);
