@@ -101,7 +101,12 @@ export class DeepAIService {
     error?: string;
   }> {
     if (!this.apiKey) {
-      throw new Error('DeepAI API key not configured');
+      return {
+        isNSFW: false,
+        confidence: 0,
+        success: false,
+        error: 'DeepAI API key not configured'
+      };
     }
 
     try {
