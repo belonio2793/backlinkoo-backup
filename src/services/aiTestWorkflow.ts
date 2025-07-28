@@ -283,13 +283,14 @@ export class AITestWorkflow {
    * Merge provider connection and quota information
    */
   private mergeProviderInfo(
-    providerStatuses: ProviderStatus[], 
-    quotaStatuses: { [provider: string]: { quotaStatus: 'available' | 'low' | 'exhausted'; quotaResetTime?: string } }
+    providerStatuses: ProviderStatus[],
+    quotaStatuses: { [provider: string]: { quotaStatus: 'available' | 'low' | 'exhausted'; quotaResetTime?: string; usagePercentage?: number } }
   ): ProviderStatus[] {
     return providerStatuses.map(status => ({
       ...status,
       quotaStatus: quotaStatuses[status.provider]?.quotaStatus || 'available',
-      quotaResetTime: quotaStatuses[status.provider]?.quotaResetTime
+      quotaResetTime: quotaStatuses[status.provider]?.quotaResetTime,
+      usagePercentage: quotaStatuses[status.provider]?.usagePercentage
     }));
   }
 
