@@ -22,7 +22,7 @@ export interface GenerationStatus {
   stage: 'initializing' | 'checking_apis' | 'generating' | 'publishing' | 'completed' | 'error';
   message: string;
   progress: number;
-  provider?: 'openai' | 'grok';
+  provider?: 'huggingface' | 'cohere';
   error?: string;
 }
 
