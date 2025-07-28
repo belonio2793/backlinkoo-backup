@@ -636,6 +636,13 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
                   </div>
                 </div>
 
+                {/* Prompt Used */}
+                <div className="mb-3 p-2 bg-blue-50 rounded border">
+                  <div className="text-xs font-mono text-blue-800">
+                    <strong>Prompt {content.promptIndex + 1}:</strong> {content.promptUsed}
+                  </div>
+                </div>
+
                 {/* Slug Editor */}
                 <div className="mb-3">
                   <label className="text-xs font-mono text-gray-600">SLUG</label>
