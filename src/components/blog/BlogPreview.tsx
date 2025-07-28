@@ -104,10 +104,11 @@ export function BlogPreview({ content }: BlogPreviewProps) {
   };
 
   const copyToClipboard = async () => {
-    await navigator.clipboard.writeText(content.content);
+    const textToCopy = content.blogUrl || content.content;
+    await navigator.clipboard.writeText(textToCopy);
     toast({
       title: "Copied to Clipboard",
-      description: "Blog post HTML content has been copied.",
+      description: content.blogUrl ? "Blog URL has been copied." : "Blog post HTML content has been copied.",
     });
   };
 
