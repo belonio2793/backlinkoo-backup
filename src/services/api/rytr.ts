@@ -52,7 +52,12 @@ export class RytrService {
     error?: string;
   }> {
     if (!this.apiKey) {
-      throw new Error('Rytr API key not configured');
+      return {
+        content: '',
+        usage: { tokens: 0, cost: 0 },
+        success: false,
+        error: 'Rytr API key not configured'
+      };
     }
 
     const {
