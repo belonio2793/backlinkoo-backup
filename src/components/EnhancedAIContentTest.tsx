@@ -361,17 +361,18 @@ Begin your journey with ${keyword} today!`;
         body: JSON.stringify(blogData)
       });
 
+      const baseUrl = window.location.origin;
       if (response.ok) {
         const result = await response.json();
-        return result.url || `https://backlinkoo.com/blog/${blogData.slug}`;
+        return result.url || `${baseUrl}/blog/${blogData.slug}`;
       } else {
         // Fallback: Create static blog URL
-        return `https://backlinkoo.com/blog/${blogData.slug}`;
+        return `${baseUrl}/blog/${blogData.slug}`;
       }
     } catch (error) {
       console.error('Blog creation error:', error);
       // Return fallback URL
-      return `https://backlinkoo.com/blog/${blogData.slug}`;
+      return `${baseUrl}/blog/${blogData.slug}`;
     }
   };
 
