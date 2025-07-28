@@ -141,18 +141,15 @@ export function ClaimTrialPostDialog({
         throw new Error(data.error || 'Failed to claim blog post');
       }
 
-      // Deduct 1 credit from user
-      const { error: creditError } = await supabase
-        .from('credits')
-        .update({
-          amount: credits - 1,
-          total_used: credits - 1
-        })
-        .eq('user_id', currentUser.id);
-
-      if (creditError) {
-        console.warn('Failed to deduct credit:', creditError);
-      }
+      // Track the claimed post for this user
+      const userClaimedPosts = localStorage.getItem(`user_claimed_posts_${currentUser.id}`);
+      const claimedPosts = userClaimedPosts ? JSON.parse(userClaimedPosts) : [];
+      claimedPosts.push({
+        slug: trialPostSlug,
+        title: trialPostTitle,
+        claimedAt: new Date().toISOString()
+      });
+      localStorage.setItem(`user_claimed_posts_${currentUser.id}`, JSON.stringify(claimedPosts));
 
       // Create campaign entry
       try {
