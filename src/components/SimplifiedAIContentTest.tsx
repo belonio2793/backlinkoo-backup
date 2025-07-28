@@ -144,9 +144,9 @@ export function SimplifiedAIContentTest() {
           </p>
           
           {/* Social Proof */}
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-            <TrendingUp className="h-4 w-4" />
-            <span>Generated <strong>{sessionCounter}</strong> posts today</span>
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-500 animate-fade-in">
+            <TrendingUp className="h-4 w-4 text-green-500" />
+            <span>Generated <strong className="text-green-600">{sessionCounter}</strong> posts today</span>
           </div>
         </div>
 
