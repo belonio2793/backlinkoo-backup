@@ -34,6 +34,13 @@ export function EnhancedAIContentTest() {
   const [providerStatuses, setProviderStatuses] = useState<any[]>([]);
   const [generatedBlog, setGeneratedBlog] = useState<any>(null);
   const [showPrompts, setShowPrompts] = useState(true);
+  const [realTimeContent, setRealTimeContent] = useState('');
+  const [wordCount, setWordCount] = useState(0);
+  const [isGeneratingContent, setIsGeneratingContent] = useState(false);
+  const [generatedSlug, setGeneratedSlug] = useState('');
+  const [isSlugEditable, setIsSlugEditable] = useState(false);
+  const [showSaveOptions, setShowSaveOptions] = useState(false);
+  const [saveMode, setSaveMode] = useState<'trial' | 'claim' | null>(null);
   
   // User inputs
   const [keyword, setKeyword] = useState('digital marketing');
