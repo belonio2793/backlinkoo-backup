@@ -199,6 +199,10 @@ const AdminDashboard = () => {
             <AdminBlogManager />
           </TabsContent>
 
+          <TabsContent value="free-backlinks">
+            <FreeBacklinkMonitor />
+          </TabsContent>
+
           <TabsContent value="content-filter">
             <ContentFilterManager />
           </TabsContent>
