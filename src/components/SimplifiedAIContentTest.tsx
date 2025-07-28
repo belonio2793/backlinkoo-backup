@@ -272,6 +272,26 @@ export function SimplifiedAIContentTest() {
                 </div>
               </div>
 
+              {/* API Provider Information */}
+              {apiProviders.length > 0 && (
+                <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                  <h4 className="font-semibold text-purple-800 mb-3">AI Generation Details:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {apiProviders.map((provider, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium"
+                      >
+                        {provider}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-sm text-purple-600 mt-2">
+                    Content generated using {apiProviders.length > 1 ? 'multiple AI providers' : 'AI provider'} for enhanced quality
+                  </p>
+                </div>
+              )}
+
               {/* SEO Benefits */}
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <h4 className="font-semibold text-blue-800 mb-3">SEO Benefits Included:</h4>
@@ -290,7 +310,7 @@ export function SimplifiedAIContentTest() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-blue-700">
                     <CheckCircle2 className="h-4 w-4" />
-                    Search engine friendly
+                    Multi-AI enhanced content
                   </div>
                 </div>
               </div>
