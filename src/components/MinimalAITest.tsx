@@ -299,26 +299,34 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
     setIsRunning(true);
     setCurrentProcess('Initializing...');
     setLogs([]);
+    setGeneratedContent([]);
+    setSelectedContent(null);
 
-    addLog('info', 'SYSTEM', '=== AI Engine Protocol Started ===');
-    addLog('info', 'CONFIG', `Target: ${keyword} -> ${url}`);
+    addLog('info', 'SYSTEM', '=== AI Content Generation Protocol Started ===');
 
     try {
-      // Step 1: Test API providers
+      // Step 1: Validate inputs
+      setCurrentProcess('Validating inputs...');
+      if (!validateInputs()) {
+        addLog('error', 'SYSTEM', 'Protocol aborted - Invalid inputs');
+        return;
+      }
+
+      addLog('info', 'CONFIG', `Keyword: "${keyword}" | URL: ${url} | Anchor: "${anchorText}"`);
+
+      // Step 2: Test API providers
       const providers = await testApiProviders();
 
-      // Step 2: Run content generation
+      // Step 3: Generate content from all working providers
       const success = await runContentGeneration(providers);
 
-      // Step 3: Finalize
-      setCurrentProcess(success ? 'Protocol completed' : 'Protocol failed');
+      // Step 4: Finalize
+      setCurrentProcess(success ? 'Content generation completed' : 'Generation failed');
 
       if (success) {
-        addLog('success', 'SYSTEM', '=== Blog post generation successful ===');
-        const blogUrl = `${window.location.origin}/blog/${keyword.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-        addLog('info', 'OUTPUT', `Blog URL: ${blogUrl}`);
+        addLog('success', 'SYSTEM', '=== Content generation completed - Select content to publish ===');
       } else {
-        addLog('error', 'SYSTEM', '=== Protocol execution failed ===');
+        addLog('error', 'SYSTEM', '=== No valid content generated ===');
       }
 
     } catch (error) {
@@ -328,6 +336,32 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
       setIsRunning(false);
       setCurrentProcess('');
     }
+  };
+
+  const publishContent = async (content: GeneratedContent) => {
+    addLog('info', 'PUBLISH', `Publishing content from ${content.provider}...`);
+
+    // Simulate publishing process
+    setCurrentProcess('Publishing...');
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const blogUrl = `${window.location.origin}/blog/${content.slug}`;
+    addLog('success', 'PUBLISH', `Published: ${blogUrl}`);
+    addLog('info', 'PROTOCOL', '24h auto-delete timer started. Use claim protocol to make permanent.');
+
+    setSelectedContent(content.provider);
+    setCurrentProcess('');
+  };
+
+  const updateSlug = (provider: string, newSlug: string) => {
+    setGeneratedContent(prev =>
+      prev.map(content =>
+        content.provider === provider
+          ? { ...content, slug: newSlug.toLowerCase().replace(/[^a-z0-9-]/g, '-') }
+          : content
+      )
+    );
+    setEditingSlug(null);
   };
 
   // Auto-scroll logs
