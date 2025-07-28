@@ -247,30 +247,7 @@ export function GlobalBlogGenerator({
     setShowPreview(false);
   };
 
-  const renderGlobalStats = () => {
-    if (!globalStats) return null;
 
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="text-center p-3 bg-blue-50 rounded-lg">
-          <div className="text-lg font-semibold text-blue-600">{globalStats.totalPosts?.toLocaleString()}</div>
-          <div className="text-xs text-blue-500">Total Posts</div>
-        </div>
-        <div className="text-center p-3 bg-green-50 rounded-lg">
-          <div className="text-lg font-semibold text-green-600">{globalStats.postsToday}</div>
-          <div className="text-xs text-green-500">Today</div>
-        </div>
-        <div className="text-center p-3 bg-purple-50 rounded-lg">
-          <div className="text-lg font-semibold text-purple-600">{globalStats.activeUsers}</div>
-          <div className="text-xs text-purple-500">Active Users</div>
-        </div>
-        <div className="text-center p-3 bg-orange-50 rounded-lg">
-          <div className="text-lg font-semibold text-orange-600">{globalStats.averageQuality}%</div>
-          <div className="text-xs text-orange-500">Avg Quality</div>
-        </div>
-      </div>
-    );
-  };
 
   const renderGenerationProgress = () => {
     if (!isGenerating && !generatedPost) return null;
