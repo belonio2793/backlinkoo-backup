@@ -34,7 +34,6 @@ export function EnhancedAIContentTest() {
   const [progress, setProgress] = useState(0);
   const [providerStatuses, setProviderStatuses] = useState<any[]>([]);
   const [generatedBlog, setGeneratedBlog] = useState<any>(null);
-  const [showPrompts, setShowPrompts] = useState(true);
   const [realTimeContent, setRealTimeContent] = useState('');
   const [wordCount, setWordCount] = useState(0);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
