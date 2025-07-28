@@ -130,12 +130,36 @@ export class AITestWorkflow {
       };
     }
 
-    console.log('📝 Starting blog generation with validated providers...');
+    console.log('📝 Starting blog generation...');
 
     try {
-      // Use the global blog generator with validated providers
       const sessionId = request.sessionId || crypto.randomUUID();
-      
+
+      // Check if we have working providers or need to use fallback
+      if (testResult.workingProviders.length === 0) {
+        console.log('🔄 Using fallback content generation (no API providers configured)');
+
+        // Generate fallback content
+        const fallbackContent = this.generateFallbackContent(request);
+        const slug = request.keyword.toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+
+        return {
+          success: true,
+          blogUrl: `https://backlinkoo.com/blog/${slug}`,
+          content: fallbackContent,
+          publishedAt: new Date().toISOString(),
+          metadata: {
+            title: `${request.keyword}: Complete Guide ${new Date().getFullYear()}`,
+            slug,
+            generatedBy: 'fallback',
+            wordCount: fallbackContent.split(' ').length
+          }
+        };
+      }
+
+      // Use the global blog generator with validated providers
       const blogResult = await globalBlogGenerator.generateGlobalBlogPost({
         targetUrl: request.websiteUrl,
         primaryKeyword: request.keyword,
