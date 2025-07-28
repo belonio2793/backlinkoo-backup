@@ -178,6 +178,7 @@ const AdminDashboard = () => {
 
         <Tabs defaultValue="campaigns" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="ai-posts">AI Generated Posts</TabsTrigger>
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
             <TabsTrigger value="blog-posts">Blog Posts</TabsTrigger>
             <TabsTrigger value="free-backlinks">Free Backlinks</TabsTrigger>
