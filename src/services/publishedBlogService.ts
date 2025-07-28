@@ -74,7 +74,7 @@ export class PublishedBlogService {
         reading_time: generatedPost.readingTime,
         word_count: generatedPost.wordCount,
         featured_image: this.generateFeaturedImage(keyword),
-        author_name: 'Backlinkoo Team',
+        author_name: 'Backlink ∞',
         author_avatar: '/placeholder.svg',
         tags: this.generateTags(keyword, targetUrl),
         category: this.categorizeContent(keyword),
