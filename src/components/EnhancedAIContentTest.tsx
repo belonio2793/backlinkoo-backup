@@ -538,6 +538,31 @@ Start your ${keyword} transformation journey today and unlock the full potential
         </Card>
       )}
 
+      {/* Current Prompt Display */}
+      {showPromptDisplay && currentPrompt && (
+        <Card className="border-blue-200 bg-blue-50/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-blue-800">
+              <Zap className="h-5 w-5" />
+              Active Generation Prompt
+            </CardTitle>
+            <p className="text-sm text-blue-700">
+              This is the prompt being used for content generation (rotates per session for output diversity)
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-white rounded-lg p-4 border border-blue-200">
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {currentPrompt}
+              </p>
+            </div>
+            <div className="mt-2 text-xs text-blue-600">
+              ✨ Prompt includes grammatical guidelines: proper capitalization, punctuation, active voice, and professional tone
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Real-time Content Generation */}
       {(isGeneratingContent || realTimeContent) && (
         <Card>
