@@ -143,44 +143,119 @@ export function MinimalAITest() {
     return { score, isValid: score >= 50, issues };
   };
 
-  const testApiProviders = async () => {
-    addLog('info', 'SYSTEM', 'Initializing API provider tests...');
-    setCurrentProcess('Testing API providers...');
+  const generateContentFromProvider = async (provider: string): Promise<GeneratedContent> => {
+    const startTime = Date.now();
+    addLog('info', provider.toUpperCase(), `Generating content...`);
 
     try {
-      const providers = ['OpenAI', 'xAI Grok', 'DeepAI', 'Hugging Face', 'Cohere', 'Rytr'];
-      const statuses: ApiStatus[] = [];
+      // Create SEO-optimized prompt
+      const prompt = `Write a comprehensive, SEO-optimized blog post about "${keyword}". The article should be at least 800 words and naturally incorporate a link to ${url} using the anchor text "${anchorText}". Include proper headings, engaging content, and valuable information for readers. Ensure the content is grammatically correct and well-structured.`;
 
-      for (const provider of providers) {
-        const startTime = Date.now();
-        setApiStatuses(prev => [...prev.filter(p => p.provider !== provider),
-          { provider, status: 'testing' }]);
+      // Simulate content generation (replace with actual API calls)
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 3000 + 1000));
 
-        addLog('info', 'API_TEST', `Testing ${provider}...`);
+      // Generate mock content for testing
+      const mockContent = `# ${keyword.charAt(0).toUpperCase() + keyword.slice(1)}: Complete Guide
 
-        // Simulate API test with actual timing
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
+## Introduction
 
-        const latency = Date.now() - startTime;
-        const success = Math.random() > 0.3; // 70% success rate for simulation
+Understanding ${keyword} is essential in today's digital landscape. This comprehensive guide explores the key aspects and practical applications of ${keyword}.
 
-        if (success) {
-          statuses.push({ provider, status: 'online', latency });
-          addLog('success', 'API_TEST', `${provider} online (${latency}ms)`);
-        } else {
-          statuses.push({ provider, status: 'error', error: 'Connection timeout' });
-          addLog('error', 'API_TEST', `${provider} failed - Connection timeout`);
-          setErrorCount(prev => prev + 1);
-        }
-      }
+## What is ${keyword.charAt(0).toUpperCase() + keyword.slice(1)}?
 
-      setApiStatuses(statuses);
-      return statuses;
+${keyword.charAt(0).toUpperCase() + keyword.slice(1)} encompasses various strategies and techniques that are crucial for success. From basic concepts to advanced implementations, ${keyword} offers numerous opportunities for growth and improvement.
+
+## Key Benefits of ${keyword}
+
+- Enhanced visibility and reach
+- Improved user engagement
+- Better conversion rates
+- Long-term sustainable growth
+
+## Best Practices
+
+When implementing ${keyword} strategies, it's important to focus on quality and consistency. For professional guidance and expert solutions, consider consulting [${anchorText}](${url}) for comprehensive support.
+
+## Implementation Strategies
+
+1. **Research and Planning**: Understand your target audience and objectives
+2. **Content Creation**: Develop high-quality, valuable content
+3. **Optimization**: Fine-tune your approach based on performance data
+4. **Monitoring**: Track results and adjust strategies accordingly
+
+## Common Challenges
+
+Many businesses face challenges when implementing ${keyword} strategies. These can include resource constraints, technical limitations, and changing market conditions.
+
+## Future Trends
+
+The landscape of ${keyword} continues to evolve with new technologies and methodologies. Staying informed about emerging trends is crucial for maintaining competitive advantage.
+
+## Conclusion
+
+Mastering ${keyword} requires dedication, proper planning, and expert guidance. For those looking to excel in this area, [${anchorText}](${url}) provides valuable resources and professional support to achieve your goals.
+
+Start your journey with ${keyword} today and unlock new possibilities for success.`;
+
+      const generateTime = Date.now() - startTime;
+      const slug = generateSlug(keyword, provider);
+      const validation = validateContent(mockContent, keyword, url, anchorText);
+
+      return {
+        provider,
+        content: mockContent,
+        slug,
+        wordCount: mockContent.split(' ').length,
+        quality: validation.score,
+        isValid: validation.isValid,
+        error: validation.issues.length > 0 ? validation.issues.join(', ') : undefined,
+        generateTime
+      };
+
     } catch (error) {
-      addLog('error', 'API_TEST', `Provider test failed: ${error}`);
-      setErrorCount(prev => prev + 1);
-      return [];
+      addLog('error', provider.toUpperCase(), `Generation failed: ${error}`);
+      return {
+        provider,
+        content: '',
+        slug: '',
+        wordCount: 0,
+        quality: 0,
+        isValid: false,
+        error: error instanceof Error ? error.message : 'Generation failed',
+        generateTime: Date.now() - startTime
+      };
     }
+  };
+
+  const testApiProviders = async () => {
+    addLog('info', 'SYSTEM', 'Testing API providers...');
+    setCurrentProcess('Testing API connectivity...');
+
+    const providers = ['OpenAI', 'xAI Grok', 'DeepAI', 'Hugging Face', 'Cohere', 'Rytr'];
+    const statuses: ApiStatus[] = [];
+
+    for (const provider of providers) {
+      const startTime = Date.now();
+      setApiStatuses(prev => [...prev.filter(p => p.provider !== provider),
+        { provider, status: 'testing' }]);
+
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      const latency = Date.now() - startTime;
+      const success = Math.random() > 0.2; // 80% success rate
+
+      if (success) {
+        statuses.push({ provider, status: 'online', latency });
+        addLog('success', 'API_TEST', `${provider} online (${latency}ms)`);
+      } else {
+        statuses.push({ provider, status: 'error', error: 'Connection timeout' });
+        addLog('error', 'API_TEST', `${provider} failed`);
+        setErrorCount(prev => prev + 1);
+      }
+    }
+
+    setApiStatuses(statuses);
+    return statuses;
   };
 
   const runContentGeneration = async (availableProviders: ApiStatus[]) => {
