@@ -319,6 +319,9 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                         'bg-red-100 text-red-800'
                       }`}>
                         Quota: {provider.quotaStatus}
+                        {provider.usagePercentage && (
+                          <span className="ml-1">({provider.usagePercentage}%)</span>
+                        )}
                       </div>
                       {provider.quotaResetTime && (
                         <div className="text-xs text-muted-foreground">
