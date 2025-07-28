@@ -38,13 +38,16 @@ interface GeneratedContent {
 export function MinimalAITest() {
   const [keyword, setKeyword] = useState('');
   const [url, setUrl] = useState('');
+  const [anchorText, setAnchorText] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<SystemLog[]>([]);
   const [apiStatuses, setApiStatuses] = useState<ApiStatus[]>([]);
+  const [generatedContent, setGeneratedContent] = useState<GeneratedContent[]>([]);
   const [currentProcess, setCurrentProcess] = useState('');
   const [errorCount, setErrorCount] = useState(0);
   const [successCount, setSuccessCount] = useState(0);
-  const [autoImprove, setAutoImprove] = useState(true);
+  const [selectedContent, setSelectedContent] = useState<string | null>(null);
+  const [editingSlug, setEditingSlug] = useState<string | null>(null);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   const addLog = (level: SystemLog['level'], process: string, message: string) => {
