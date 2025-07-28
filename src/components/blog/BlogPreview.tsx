@@ -320,23 +320,44 @@ export function BlogPreview({ content }: BlogPreviewProps) {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3">
-            <Button
-              onClick={publishPost}
-              disabled={isPublishing}
-              className="flex items-center gap-2"
-            >
-              {isPublishing ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Publishing...
-                </>
-              ) : (
-                <>
-                  <Share className="h-4 w-4" />
-                  Publish & Create Backlink
-                </>
-              )}
-            </Button>
+            {content.blogUrl ? (
+              <>
+                <Button asChild>
+                  <a
+                    href={content.blogUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    View Published Blog
+                  </a>
+                </Button>
+                <Button variant="outline" onClick={copyToClipboard}>
+                  <Link className="h-4 w-4 mr-2" />
+                  Copy Blog URL
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={publishPost}
+                disabled={isPublishing}
+                className="flex items-center gap-2"
+              >
+                {isPublishing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Publishing...
+                  </>
+                ) : (
+                  <>
+                    <Share className="h-4 w-4" />
+                    Publish & Create Backlink
+                  </>
+                )}
+              </Button>
+            )}
+
             <Button variant="outline" onClick={copyToClipboard}>
               <Code className="h-4 w-4 mr-2" />
               Copy HTML
