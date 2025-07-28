@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { blogTemplateEngine } from './blogTemplateEngine';
+import { formatBlogTitle, formatBlogContent } from '@/utils/textFormatting';
 
 export interface PublishedBlogPost {
   id: string;
