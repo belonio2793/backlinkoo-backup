@@ -1,0 +1,337 @@
+/**
+ * Blog Publishing Service
+ * Handles automatic publishing, lifecycle management, and admin integration
+ */
+
+import { supabase } from '@/integrations/supabase/client';
+
+export interface BlogPost {
+  id?: string;
+  title: string;
+  slug: string;
+  content: string;
+  keyword: string;
+  anchor_text: string;
+  target_url: string;
+  word_count: number;
+  provider: 'openai' | 'grok';
+  generation_time: number;
+  seo_score: number;
+  reading_time: number;
+  keyword_density: number;
+  created_at?: string;
+  expires_at: string;
+  claimed_by?: string;
+  claimed_at?: string;
+  status: 'published' | 'claimed' | 'expired' | 'deleted';
+  generated_by_account?: string;
+}
+
+export interface BlogListItem {
+  id: string;
+  title: string;
+  slug: string;
+  status: string;
+  created_at: string;
+  expires_at: string;
+  word_count: number;
+  claimed_by?: string;
+}
+
+export class BlogPublishingService {
+  
+  /**
+   * Publish blog post to database and make it available on /blog
+   */
+  async publishBlogPost(postData: Omit<BlogPost, 'id' | 'created_at' | 'status'>): Promise<BlogPost> {
+    const { data, error } = await supabase
+      .from('ai_generated_posts')
+      .insert([{
+        ...postData,
+        status: 'published',
+        created_at: new Date().toISOString()
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to publish blog post: ${error.message}`);
+    }
+
+    return data as BlogPost;
+  }
+
+  /**
+   * Get blog post by slug (for public viewing)
+   */
+  async getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+    const { data, error } = await supabase
+      .from('ai_generated_posts')
+      .select('*')
+      .eq('slug', slug)
+      .eq('status', 'published')
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return data as BlogPost;
+  }
+
+  /**
+   * Get all published blog posts (for /blog listing)
+   */
+  async getPublishedBlogPosts(limit: number = 20, offset: number = 0): Promise<BlogListItem[]> {
+    const { data, error } = await supabase
+      .from('ai_generated_posts')
+      .select('id, title, slug, status, created_at, expires_at, word_count, claimed_by')
+      .eq('status', 'published')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      throw new Error(`Failed to fetch blog posts: ${error.message}`);
+    }
+
+    return data as BlogListItem[];
+  }
+
+  /**
+   * Claim a blog post by user account
+   */
+  async claimBlogPost(postId: string, userId: string): Promise<BlogPost> {
+    const { data, error } = await supabase
+      .from('ai_generated_posts')
+      .update({
+        status: 'claimed',
+        claimed_by: userId,
+        claimed_at: new Date().toISOString()
+      })
+      .eq('id', postId)
+      .eq('status', 'published')
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to claim blog post: ${error.message}`);
+    }
+
+    return data as BlogPost;
+  }
+
+  /**
+   * Check if user has already generated content (one per account limit)
+   */
+  async hasUserGeneratedContent(accountId: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('ai_generated_posts')
+      .select('id')
+      .eq('generated_by_account', accountId)
+      .limit(1);
+
+    if (error) {
+      throw new Error(`Failed to check user generation limit: ${error.message}`);
+    }
+
+    return (data?.length || 0) > 0;
+  }
+
+  /**
+   * Auto-delete expired posts (run via scheduled job)
+   */
+  async deleteExpiredPosts(): Promise<number> {
+    const now = new Date().toISOString();
+    
+    const { data, error } = await supabase
+      .from('ai_generated_posts')
+      .update({ status: 'expired' })
+      .lt('expires_at', now)
+      .eq('status', 'published')
+      .select('id');
+
+    if (error) {
+      throw new Error(`Failed to expire posts: ${error.message}`);
+    }
+
+    return data?.length || 0;
+  }
+
+  /**
+   * Get all posts for admin dashboard
+   */
+  async getPostsForAdmin(limit: number = 50, offset: number = 0): Promise<BlogPost[]> {
+    const { data, error } = await supabase
+      .from('ai_generated_posts')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      throw new Error(`Failed to fetch posts for admin: ${error.message}`);
+    }
+
+    return data as BlogPost[];
+  }
+
+  /**
+   * Admin delete post
+   */
+  async adminDeletePost(postId: string): Promise<void> {
+    const { error } = await supabase
+      .from('ai_generated_posts')
+      .update({ status: 'deleted' })
+      .eq('id', postId);
+
+    if (error) {
+      throw new Error(`Failed to delete post: ${error.message}`);
+    }
+  }
+
+  /**
+   * Admin edit post
+   */
+  async adminUpdatePost(postId: string, updates: Partial<BlogPost>): Promise<BlogPost> {
+    const { data, error } = await supabase
+      .from('ai_generated_posts')
+      .update(updates)
+      .eq('id', postId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update post: ${error.message}`);
+    }
+
+    return data as BlogPost;
+  }
+
+  /**
+   * Get post statistics for admin
+   */
+  async getPostStatistics(): Promise<{
+    total: number;
+    published: number;
+    claimed: number;
+    expired: number;
+    deleted: number;
+  }> {
+    const { data, error } = await supabase
+      .from('ai_generated_posts')
+      .select('status');
+
+    if (error) {
+      throw new Error(`Failed to fetch statistics: ${error.message}`);
+    }
+
+    const stats = {
+      total: data.length,
+      published: 0,
+      claimed: 0,
+      expired: 0,
+      deleted: 0
+    };
+
+    data.forEach(post => {
+      stats[post.status as keyof typeof stats]++;
+    });
+
+    return stats;
+  }
+
+  /**
+   * Generate blog HTML template for SEO-friendly display
+   */
+  generateBlogHTML(post: BlogPost): string {
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${post.title}</title>
+    <meta name="description" content="${this.generateMetaDescription(post.content)}">
+    <meta name="keywords" content="${post.keyword}">
+    <meta property="og:title" content="${post.title}">
+    <meta property="og:description" content="${this.generateMetaDescription(post.content)}">
+    <meta property="og:type" content="article">
+    <link rel="canonical" href="/blog/${post.slug}">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 { color: #2563eb; margin-bottom: 10px; }
+        h2 { color: #1e40af; margin-top: 30px; }
+        h3 { color: #1e3a8a; margin-top: 25px; }
+        p { margin-bottom: 15px; }
+        a { color: #2563eb; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .meta {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .claim-banner {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="claim-banner">
+        <strong>Auto-Generated Content</strong> - This post will be removed in 24 hours unless claimed by a registered user.
+        <br><a href="/login">Login to claim this content</a>
+    </div>
+    
+    <article>
+        <header>
+            <h1>${post.title}</h1>
+            <div class="meta">
+                Published: ${new Date(post.created_at || '').toLocaleDateString()} | 
+                Reading time: ${post.reading_time} min | 
+                Words: ${post.word_count} |
+                Generated by: ${post.provider.toUpperCase()}
+            </div>
+        </header>
+        
+        <main>
+            ${post.content}
+        </main>
+    </article>
+    
+    <script>
+        // Add claim functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-redirect expired posts
+            const expiresAt = new Date('${post.expires_at}');
+            if (new Date() > expiresAt) {
+                document.body.innerHTML = '<div style="text-align: center; padding: 50px;"><h2>Content Expired</h2><p>This content has expired and is no longer available.</p><a href="/blog">← Back to Blog</a></div>';
+            }
+        });
+    </script>
+</body>
+</html>`;
+  }
+
+  /**
+   * Generate meta description from content
+   */
+  private generateMetaDescription(content: string): string {
+    const text = content.replace(/<[^>]*>/g, ''); // Strip HTML
+    const words = text.split(' ').slice(0, 25).join(' ');
+    return words.length > 150 ? words.substring(0, 150) + '...' : words;
+  }
+}
+
+export const blogPublishingService = new BlogPublishingService();
