@@ -451,7 +451,7 @@ const Index = () => {
           </p>
           
           <p className="text-lg text-gray-600 mb-12 font-medium max-w-3xl mx-auto">
-            High-authority links • Competitive intelligence ��� Guaranteed results or full refund
+            High-authority links • Competitive intelligence
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-20">
