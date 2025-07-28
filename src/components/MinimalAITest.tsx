@@ -259,58 +259,40 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
   };
 
   const runContentGeneration = async (availableProviders: ApiStatus[]) => {
-    setCurrentProcess('Generating content...');
-    addLog('info', 'GENERATOR', 'Starting content generation pipeline...');
+    setCurrentProcess('Generating content from all providers...');
+    addLog('info', 'GENERATOR', 'Starting multi-provider content generation...');
 
     const workingProviders = availableProviders.filter(p => p.status === 'online');
 
     if (workingProviders.length === 0) {
       addLog('error', 'GENERATOR', 'No working providers available');
-      if (autoImprove) {
-        addLog('warn', 'AUTO_IMPROVE', 'Activating fallback content engine...');
-        setCurrentProcess('Using fallback engine...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        addLog('success', 'AUTO_IMPROVE', 'Fallback content generated');
-        setSuccessCount(prev => prev + 1);
-        return true;
-      }
-      return false;
-    }
-
-    addLog('info', 'GENERATOR', `Using ${workingProviders.length} providers: ${workingProviders.map(p => p.provider).join(', ')}`);
-
-    // Simulate prompt optimization
-    setCurrentProcess('Optimizing prompts...');
-    addLog('info', 'PROMPT_OPT', 'Analyzing keyword context and SEO requirements...');
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    // Simulate content generation
-    setCurrentProcess('AI content generation...');
-    addLog('info', 'AI_GEN', `Generating content for "${keyword}"...`);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Simulate quality checks
-    setCurrentProcess('Quality validation...');
-    addLog('info', 'QA_CHECK', 'Running content quality validation...');
-    await new Promise(resolve => setTimeout(resolve, 600));
-
-    const qualityScore = Math.random();
-    if (qualityScore > 0.7) {
-      addLog('success', 'QA_CHECK', `Quality score: ${(qualityScore * 100).toFixed(1)}% - PASSED`);
-      setSuccessCount(prev => prev + 1);
-      return true;
-    } else if (autoImprove) {
-      addLog('warn', 'QA_CHECK', `Quality score: ${(qualityScore * 100).toFixed(1)}% - RETRYING`);
-      addLog('info', 'AUTO_IMPROVE', 'Applying improvement protocols...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      addLog('success', 'AUTO_IMPROVE', 'Content improved and validated');
-      setSuccessCount(prev => prev + 1);
-      return true;
-    } else {
-      addLog('error', 'QA_CHECK', `Quality score: ${(qualityScore * 100).toFixed(1)}% - FAILED`);
       setErrorCount(prev => prev + 1);
       return false;
     }
+
+    addLog('info', 'GENERATOR', `Generating from ${workingProviders.length} providers: ${workingProviders.map(p => p.provider).join(', ')}`);
+
+    const generatedResults: GeneratedContent[] = [];
+
+    // Generate content from each provider
+    for (const provider of workingProviders) {
+      setCurrentProcess(`Generating from ${provider.provider}...`);
+      const result = await generateContentFromProvider(provider.provider);
+      generatedResults.push(result);
+
+      if (result.isValid) {
+        addLog('success', 'GENERATOR', `${provider.provider}: Valid content (${result.wordCount} words, ${result.quality}% quality)`);
+        setSuccessCount(prev => prev + 1);
+      } else {
+        addLog('warn', 'GENERATOR', `${provider.provider}: Invalid content - ${result.error}`);
+        setErrorCount(prev => prev + 1);
+      }
+    }
+
+    setGeneratedContent(generatedResults);
+    addLog('info', 'GENERATOR', `Generated ${generatedResults.length} articles, ${generatedResults.filter(r => r.isValid).length} valid`);
+
+    return generatedResults.some(r => r.isValid);
   };
 
   const runSystemProtocol = async () => {
