@@ -113,7 +113,7 @@ export function BlogCreator() {
               </div>
               <div className="flex items-center gap-1">
                 <TrendingUp className="h-4 w-4" />
-                <span>99% success rate</span>
+                <span>High success rate</span>
               </div>
               <div className="flex items-center gap-1">
                 <Zap className="h-4 w-4" />
