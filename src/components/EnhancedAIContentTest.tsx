@@ -249,34 +249,16 @@ Start your ${keyword} journey today and take your business to the next level!`;
         throw new Error(blogResult.error || 'Blog generation failed');
       }
 
-      // Step 3: Create blog slug and return results
-      setCurrentStep('Creating blog slug and finalizing...');
-      setProgress(90);
-
-      // Generate slug from keyword
-      const slug = keyword.toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-
-      const finalBlogUrl = blogResult.blogUrl || `https://backlinkoo.com/blog/${slug}`;
-
-      setGeneratedBlog({
-        ...blogResult,
-        blogUrl: finalBlogUrl,
-        slug,
-        testResult,
-        prompts: dynamicPrompts,
-        userInputs: { keyword, url, anchorText }
-      });
-
+      // Step 3: Content is ready, waiting for save action
+      setCurrentStep('Content generation complete!');
       setProgress(100);
 
       const generatedBy = blogResult.metadata?.generatedBy || 'AI';
       const isFallback = generatedBy.includes('fallback');
 
       toast({
-        title: "Blog Generated Successfully!",
-        description: `Your blog post is ready at: ${finalBlogUrl}${isFallback ? ' (using intelligent fallback)' : ''}`,
+        title: "Content Ready!",
+        description: `Blog content generated successfully${isFallback ? ' (using intelligent fallback)' : ''}. Choose save option below.`,
       });
 
     } catch (error) {
