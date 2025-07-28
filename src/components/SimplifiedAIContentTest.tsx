@@ -204,9 +204,12 @@ export function SimplifiedAIContentTest() {
 
               {/* Progress Bar */}
               {isLoading && (
-                <div className="space-y-2">
+                <div className="space-y-3 animate-fade-in">
                   <Progress value={progress} className="h-3" />
-                  <p className="text-sm text-center text-gray-600">{currentStep}</p>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 mb-1">{currentStep}</p>
+                    <p className="text-xs text-gray-400">{progress}% complete</p>
+                  </div>
                 </div>
               )}
             </div>
