@@ -54,20 +54,38 @@ interface GuestActivityData {
 
 export function FreeBacklinkMonitor() {
   const [freeBacklinks, setFreeBacklinks] = useState<FreeBacklinkData[]>([]);
-  const [guestActivity, setGuestActivity] = useState<GuestActivityData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [realTimeData, setRealTimeData] = useState({
-    activeUsers: 0,
-    todayGenerations: 0,
-    conversionRate: 0,
-    avgSessionTime: 0
+  const [metrics, setMetrics] = useState<FreeBacklinkMetrics>({
+    totalRequests: 0,
+    todayRequests: 0,
+    completionRate: 0,
+    avgGenerationTime: 0,
+    claimRate: 0,
+    activeUsers: 0
   });
   const { toast } = useToast();
 
   useEffect(() => {
     loadMonitoringData();
-    const interval = setInterval(loadRealTimeData, 30000); // Update every 30 seconds
-    return () => clearInterval(interval);
+
+    // Set up real-time updates
+    const interval = setInterval(() => {
+      setMetrics(adminSyncService.getMetrics(true));
+    }, 30000);
+
+    // Subscribe to real-time events
+    const unsubscribe = adminSyncService.subscribe('blog_generated', (event) => {
+      toast({
+        title: 'New Free Backlink Generated',
+        description: `${event.data.primaryKeyword} → ${event.data.targetUrl}`,
+      });
+      loadMonitoringData();
+    });
+
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
   }, []);
 
   const loadMonitoringData = async () => {
