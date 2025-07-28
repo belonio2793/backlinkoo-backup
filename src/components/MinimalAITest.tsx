@@ -320,7 +320,9 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
         quality: 0,
         isValid: false,
         error: error instanceof Error ? error.message : 'Generation failed',
-        generateTime: Date.now() - startTime
+        generateTime: Date.now() - startTime,
+        promptUsed: currentPrompt,
+        promptIndex: promptIndex % 3
       };
     }
   };
