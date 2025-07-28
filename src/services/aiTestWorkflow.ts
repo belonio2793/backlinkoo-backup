@@ -74,14 +74,17 @@ export class AITestWorkflow {
       // Step 5: Recommend best provider
       const recommendedProvider = this.selectRecommendedProvider(mergedStatuses);
       
-      // Step 6: Determine if we can proceed
-      const canProceedToBlogGeneration = workingProviders.length >= this.MIN_WORKING_PROVIDERS;
-      
+      // Step 6: Determine if we can proceed (allow fallback if no providers configured)
+      const hasConfiguredProviders = mergedStatuses.some(status => status.configured);
+      const canProceedToBlogGeneration = workingProviders.length >= this.MIN_WORKING_PROVIDERS || !hasConfiguredProviders;
+
       const testDuration = Date.now() - startTime;
       const errors: string[] = [];
 
-      if (!canProceedToBlogGeneration) {
+      if (!canProceedToBlogGeneration && hasConfiguredProviders) {
         errors.push('Insufficient working AI providers available for blog generation');
+      } else if (!hasConfiguredProviders) {
+        console.warn('⚠️ No API providers configured - will use fallback content generation');
       }
 
       console.log('✅ AI test workflow completed:', {
