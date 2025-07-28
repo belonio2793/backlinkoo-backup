@@ -137,7 +137,7 @@ export class AITestWorkflow {
 
       // Check if we have working providers or need to use fallback
       if (testResult.workingProviders.length === 0) {
-        console.log('🔄 Using fallback content generation (no API providers configured)');
+        console.log('🔄 Using fallback content generation (no working API providers)');
 
         // Generate fallback content
         const fallbackContent = this.generateFallbackContent(request);
