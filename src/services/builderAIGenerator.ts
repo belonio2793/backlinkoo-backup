@@ -7,8 +7,8 @@
  * - Auto-publishing and lifecycle management
  */
 
-import { openAIService } from './api/openai';
-import { grokService } from './api/grok';
+import { huggingFaceService } from './api/huggingface';
+import { cohereService } from './api/cohere';
 
 export interface BuilderAIRequest {
   keyword: string;
