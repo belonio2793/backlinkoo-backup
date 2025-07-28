@@ -226,9 +226,9 @@ class GlobalBlogGeneratorService {
                 primary: { url: request.targetUrl, anchor: request.anchorText || request.primaryKeyword, context: 'Main target link' }
               },
               globalMetrics: data.globalMetrics || {
-                totalRequestsToday: Math.floor(Math.random() * 500) + 100,
-                averageGenerationTime: 45,
-                successRate: 96.5,
+                totalRequestsToday: null, // Remove mock metrics
+                averageGenerationTime: null,
+                successRate: null,
                 userCountry: locationData?.country || 'Unknown'
               }
             }
@@ -317,9 +317,9 @@ class GlobalBlogGeneratorService {
           ]
         },
         globalMetrics: {
-          totalRequestsToday: Math.floor(Math.random() * 500) + 100,
-          averageGenerationTime: 35,
-          successRate: 94.2,
+          totalRequestsToday: null, // Remove artificial metrics
+          averageGenerationTime: null,
+          successRate: null,
           userCountry: request.userLocation || 'Unknown'
         }
       }
@@ -397,7 +397,7 @@ class GlobalBlogGeneratorService {
         if (error) {
           console.warn('Could not store in database:', error);
         } else {
-          console.log('✅ Blog post stored globally in database');
+          console.log('��� Blog post stored globally in database');
         }
       } catch (dbError) {
         console.warn('Database storage failed, using localStorage only:', dbError);
@@ -419,12 +419,18 @@ class GlobalBlogGeneratorService {
       console.warn('Could not fetch global stats:', error);
     }
 
-    // Fallback stats
+    // Return actual usage stats or minimal fallback
+    const storedPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+    const today = new Date().toDateString();
+    const postsToday = storedPosts.filter((post: any) =>
+      new Date(post.created_at).toDateString() === today
+    ).length;
+
     return {
-      totalPosts: Math.floor(Math.random() * 1000) + 500,
-      postsToday: Math.floor(Math.random() * 50) + 20,
-      activeUsers: Math.floor(Math.random() * 200) + 100,
-      averageQuality: 94.5
+      totalPosts: storedPosts.length,
+      postsToday: postsToday,
+      activeUsers: null, // Remove inflated user count
+      averageQuality: null // Remove artificial quality score
     };
   }
 
