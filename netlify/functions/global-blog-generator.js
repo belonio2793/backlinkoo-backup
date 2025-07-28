@@ -262,7 +262,7 @@ exports.handler = async (event, context) => {
       anchor_text: anchorText || primaryKeyword,
       published_url: `https://backlinkoo.com/blog/${primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
       published_at: new Date().toISOString(),
-      author_name: 'Backlinkoo AI',
+      author_name: 'Backlink ∞',
       category: 'SEO Guide',
       view_count: 0,
       word_count: Math.floor(content.length / 6),
