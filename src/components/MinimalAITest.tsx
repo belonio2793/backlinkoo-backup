@@ -305,7 +305,9 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
         quality: validation.score,
         isValid: validation.isValid,
         error: validation.issues.length > 0 ? validation.issues.join(', ') : undefined,
-        generateTime
+        generateTime,
+        promptUsed: currentPrompt,
+        promptIndex: promptIndex % 3
       };
 
     } catch (error) {
