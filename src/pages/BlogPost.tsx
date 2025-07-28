@@ -462,9 +462,15 @@ export function BlogPost() {
           margin-bottom: 1.5rem;
           padding-left: 1.5rem;
         }
-        
+
         .blog-content li {
           margin-bottom: 0.5rem;
+        }
+
+        /* Handle hyphenated bullet points */
+        .blog-content p:has-text("- ") {
+          margin-left: 1rem;
+          text-indent: -1rem;
         }
         
         .blog-content a {
