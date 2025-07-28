@@ -216,31 +216,63 @@ export class AITestWorkflow {
   }
 
   /**
-   * Check quota status for all providers
+   * Check quota status for all providers with realistic simulation
    */
-  private async checkProviderQuotas(): Promise<{ [provider: string]: { quotaStatus: 'available' | 'low' | 'exhausted'; quotaResetTime?: string } }> {
-    // This would integrate with actual provider APIs to check quotas
-    // For now, return simulated quota information
+  private async checkProviderQuotas(): Promise<{ [provider: string]: { quotaStatus: 'available' | 'low' | 'exhausted'; quotaResetTime?: string; usagePercentage?: number } }> {
     const providers = ['openai', 'grok', 'deepai', 'huggingface', 'cohere', 'rytr'];
-    const quotaInfo: { [key: string]: { quotaStatus: 'available' | 'low' | 'exhausted'; quotaResetTime?: string } } = {};
+    const quotaInfo: { [key: string]: { quotaStatus: 'available' | 'low' | 'exhausted'; quotaResetTime?: string; usagePercentage?: number } } = {};
 
     for (const provider of providers) {
-      // Simulate quota check - in real implementation, this would call provider APIs
-      const quotaPercentage = Math.random() * 100;
-      
-      if (quotaPercentage > 50) {
-        quotaInfo[provider] = { quotaStatus: 'available' };
-      } else if (quotaPercentage > 10) {
-        quotaInfo[provider] = { 
-          quotaStatus: 'low',
-          quotaResetTime: new Date(Date.now() + 3600000).toISOString() // 1 hour from now
-        };
-      } else {
-        quotaInfo[provider] = { 
-          quotaStatus: 'exhausted',
-          quotaResetTime: new Date(Date.now() + 86400000).toISOString() // 24 hours from now
-        };
+      // Simulate realistic quota patterns
+      let usagePercentage: number;
+
+      switch (provider) {
+        case 'openai':
+          // OpenAI typically has good availability
+          usagePercentage = Math.random() * 40 + 10; // 10-50%
+          break;
+        case 'grok':
+          // Newer service, variable availability
+          usagePercentage = Math.random() * 60 + 20; // 20-80%
+          break;
+        case 'deepai':
+          // More limited free tier
+          usagePercentage = Math.random() * 80 + 10; // 10-90%
+          break;
+        case 'huggingface':
+          // Open source, generally available
+          usagePercentage = Math.random() * 30 + 5; // 5-35%
+          break;
+        case 'cohere':
+          // Enterprise focused, good availability
+          usagePercentage = Math.random() * 45 + 5; // 5-50%
+          break;
+        case 'rytr':
+          // Content-specific, moderate usage
+          usagePercentage = Math.random() * 50 + 25; // 25-75%
+          break;
+        default:
+          usagePercentage = Math.random() * 100;
       }
+
+      let quotaStatus: 'available' | 'low' | 'exhausted';
+      let quotaResetTime: string | undefined;
+
+      if (usagePercentage < 70) {
+        quotaStatus = 'available';
+      } else if (usagePercentage < 95) {
+        quotaStatus = 'low';
+        quotaResetTime = new Date(Date.now() + Math.random() * 7200000 + 3600000).toISOString(); // 1-3 hours
+      } else {
+        quotaStatus = 'exhausted';
+        quotaResetTime = new Date(Date.now() + Math.random() * 43200000 + 86400000).toISOString(); // 24-36 hours
+      }
+
+      quotaInfo[provider] = {
+        quotaStatus,
+        quotaResetTime,
+        usagePercentage: Math.round(usagePercentage)
+      };
     }
 
     return quotaInfo;
