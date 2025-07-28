@@ -215,7 +215,7 @@ export function SimplifiedAIContentTest() {
 
         {/* Success Result */}
         {showSuccess && generatedResult && (
-          <Card className={`border-green-200 bg-green-50 shadow-lg ${showSuccess ? 'animate-fade-in' : ''}`}>
+          <Card className="border-green-200 bg-green-50 shadow-lg animate-fade-in">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-green-800">
                 <CheckCircle2 className="h-6 w-6" />
