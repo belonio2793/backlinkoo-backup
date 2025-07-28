@@ -293,38 +293,75 @@ export class AITestWorkflow {
   }
 
   /**
-   * Select the best provider based on availability and quota
+   * Select the best provider with intelligent fallback logic
    */
   private selectRecommendedProvider(statuses: ProviderStatus[]): string {
-    // Priority: Available > Low quota > Provider weight
+    // Enhanced provider weights with reliability factors
     const providerWeights = {
-      openai: 0.25,
-      grok: 0.20,
-      deepai: 0.15,
-      huggingface: 0.15,
-      cohere: 0.15,
-      rytr: 0.10
+      openai: { weight: 0.25, reliability: 0.95 },
+      grok: { weight: 0.20, reliability: 0.85 },
+      deepai: { weight: 0.15, reliability: 0.80 },
+      huggingface: { weight: 0.15, reliability: 0.90 },
+      cohere: { weight: 0.15, reliability: 0.88 },
+      rytr: { weight: 0.10, reliability: 0.82 }
     };
 
     const availableProviders = statuses.filter(s => s.available && s.quotaStatus !== 'exhausted');
-    
+
     if (availableProviders.length === 0) {
+      // Fallback: Check for providers with low quota but still available
+      const lowQuotaProviders = statuses.filter(s => s.available && s.quotaStatus === 'low');
+
+      if (lowQuotaProviders.length > 0) {
+        console.warn('⚠️ Using provider with low quota as fallback');
+        return lowQuotaProviders[0].provider;
+      }
+
       return '';
     }
 
-    // Sort by quota status (available > low) then by weight
-    availableProviders.sort((a, b) => {
-      if (a.quotaStatus !== b.quotaStatus) {
-        return a.quotaStatus === 'available' ? -1 : 1;
-      }
-      
-      const weightA = providerWeights[a.provider as keyof typeof providerWeights] || 0;
-      const weightB = providerWeights[b.provider as keyof typeof providerWeights] || 0;
-      
-      return weightB - weightA;
+    // Calculate composite scores
+    const scoredProviders = availableProviders.map(provider => {
+      const weights = providerWeights[provider.provider as keyof typeof providerWeights];
+      const baseWeight = weights?.weight || 0;
+      const reliability = weights?.reliability || 0.5;
+
+      // Bonus for available quota vs low quota
+      const quotaBonus = provider.quotaStatus === 'available' ? 0.2 : 0.1;
+
+      // Calculate composite score
+      const compositeScore = (baseWeight * reliability) + quotaBonus;
+
+      return {
+        ...provider,
+        compositeScore
+      };
     });
 
-    return availableProviders[0].provider;
+    // Sort by composite score (highest first)
+    scoredProviders.sort((a, b) => b.compositeScore - a.compositeScore);
+
+    console.log('🎯 Provider selection results:', scoredProviders.map(p => ({
+      provider: p.provider,
+      score: p.compositeScore.toFixed(3),
+      quota: p.quotaStatus
+    })));
+
+    return scoredProviders[0].provider;
+  }
+
+  /**
+   * Get fallback provider list in order of preference
+   */
+  getFallbackProviders(statuses: ProviderStatus[]): string[] {
+    const availableProviders = statuses.filter(s => s.available);
+
+    // Sort all available providers by preference
+    const providerOrder = ['openai', 'grok', 'cohere', 'huggingface', 'deepai', 'rytr'];
+
+    return providerOrder.filter(provider =>
+      availableProviders.some(s => s.provider === provider && s.quotaStatus !== 'exhausted')
+    );
   }
 
   /**
