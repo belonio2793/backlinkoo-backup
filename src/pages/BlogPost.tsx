@@ -330,9 +330,13 @@ export function BlogPost() {
 
     } catch (error) {
       console.error('Failed to regenerate content:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+
       toast({
         title: "Regeneration failed",
-        description: "An error occurred while generating new content. Please try again.",
+        description: errorMessage.includes('AI providers')
+          ? "All AI providers are currently unavailable. Please check your API keys and try again later."
+          : errorMessage,
         variant: "destructive",
       });
     } finally {
