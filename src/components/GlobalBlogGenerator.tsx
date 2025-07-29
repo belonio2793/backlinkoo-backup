@@ -104,15 +104,26 @@ export function GlobalBlogGenerator({
       updateRemainingRequests();
       checkApiStatus();
 
-      // Set up periodic API status refresh every 5 minutes
+      // Set up aggressive retry mechanism - retry every 10 seconds until connected
       const statusInterval = setInterval(() => {
-        if (apiStatus.status === 'error') {
-          // Only auto-retry if there was an error
+        if (apiStatus.status === 'error' || apiStatus.status === 'checking') {
+          console.log('🔄 Auto-retrying API connection...');
           checkApiStatus();
         }
-      }, 5 * 60 * 1000); // 5 minutes
+      }, 10 * 1000); // 10 seconds for aggressive retry
 
-      return () => clearInterval(statusInterval);
+      // Additional long-term monitoring every 2 minutes for maintenance
+      const maintenanceInterval = setInterval(() => {
+        if (apiStatus.status === 'ready') {
+          // Occasional health check when ready
+          checkApiStatus();
+        }
+      }, 2 * 60 * 1000); // 2 minutes
+
+      return () => {
+        clearInterval(statusInterval);
+        clearInterval(maintenanceInterval);
+      };
     } catch (error) {
       console.error('Error initializing GlobalBlogGenerator:', error);
       // Set safe defaults
