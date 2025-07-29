@@ -749,8 +749,8 @@ export function GlobalBlogGenerator({
             )}
           </div>
 
-          {/* Rate Limit Warning */}
-          {remainingRequests <= 2 && (
+          {/* Rate Limit Warning - Only show for authenticated users */}
+          {isLoggedIn && remainingRequests <= 2 && (
             <div className="flex items-center justify-between gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 text-amber-600" />
