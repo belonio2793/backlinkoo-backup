@@ -218,7 +218,7 @@ export default function AILive() {
                       value={targetUrl}
                       onChange={(e) => setTargetUrl(e.target.value)}
                       className="mt-2 h-12 text-base"
-                      disabled={isGenerating || hasUsedLimit}
+                      disabled={isGenerating}
                     />
                     <p className="text-xs text-gray-500 mt-1">Where the anchor text will link to</p>
                   </div>
