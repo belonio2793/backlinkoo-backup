@@ -173,7 +173,6 @@ class ErrorLoggingService {
       this.saveErrorToLocalStorage(entry);
 
       // Retry logic for temporary failures (but not for missing table/mock mode)
-      const errorMessage = error instanceof Error ? error.message : String(error);
       const isRetryableError = !errorMessage.includes('does not exist') &&
                               !errorMessage.includes('Mock mode') &&
                               !errorMessage.includes('Database not available');
