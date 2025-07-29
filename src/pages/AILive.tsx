@@ -253,11 +253,9 @@ export default function AILive() {
                           {generationStatus.message}
                         </span>
                       </div>
-                      {generationStatus.provider && (
-                        <Badge variant="secondary" className="text-xs">
-                          {generationStatus.provider.toUpperCase()}
-                        </Badge>
-                      )}
+                      <Badge variant="secondary" className="text-xs">
+                        Backlink ∞
+                      </Badge>
                     </div>
                     <Progress value={generationStatus.progress} className="h-2" />
 
