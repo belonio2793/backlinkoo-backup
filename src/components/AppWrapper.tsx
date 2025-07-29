@@ -11,7 +11,7 @@ import TermsOfService from '@/pages/TermsOfService';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import BlogPreview from '@/pages/BlogPreview';
 import StreamlinedBlog from '@/pages/StreamlinedBlog';
-import BlogCreator from '@/pages/BlogCreator';
+import { BlogCreator } from '@/pages/BlogCreator';
 import BlogPost from '@/pages/BlogPost';
 import AIContentTest from '@/pages/AIContentTest';
 import FreeBacklink from '@/pages/FreeBacklink';
