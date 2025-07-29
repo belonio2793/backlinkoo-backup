@@ -54,22 +54,41 @@ export class SimpleAIContentEngine {
       contentType = 'how-to'
     } = request;
 
+    let result: any = { success: false, content: '', usage: { tokens: 0, cost: 0 } };
+    let usingFallback = false;
+
     try {
-      // Generate comprehensive prompt for OpenAI
-      const prompt = this.generatePrompt(request);
-      
-      console.log('🤖 Generating free backlink content with OpenAI...');
+      // Check if OpenAI is configured before attempting to use it
+      if (openAIService.isConfigured()) {
+        // Generate comprehensive prompt for OpenAI
+        const prompt = this.generatePrompt(request);
 
-      // Use OpenAI to generate content
-      const result = await openAIService.generateContent(prompt, {
-        model: 'gpt-3.5-turbo',
-        maxTokens: Math.min(4000, Math.floor(wordCount * 2.5)),
-        temperature: 0.7,
-        systemPrompt: this.getSystemPrompt(contentType, tone)
-      });
+        console.log('🤖 Generating free backlink content with OpenAI...');
 
-      if (!result.success || !result.content) {
-        throw new Error(result.error || 'Failed to generate content');
+        // Use OpenAI to generate content
+        result = await openAIService.generateContent(prompt, {
+          model: 'gpt-3.5-turbo',
+          maxTokens: Math.min(4000, Math.floor(wordCount * 2.5)),
+          temperature: 0.7,
+          systemPrompt: this.getSystemPrompt(contentType, tone)
+        });
+
+        if (!result.success || !result.content) {
+          console.log('🔄 OpenAI generation failed, using fallback content...');
+          usingFallback = true;
+        }
+      } else {
+        console.log('⚠️ OpenAI not configured, using fallback content...');
+        usingFallback = true;
+      }
+
+      // If OpenAI failed or not configured, use fallback
+      if (usingFallback) {
+        result = {
+          success: true,
+          content: this.generateFallbackContent(request),
+          usage: { tokens: 0, cost: 0 }
+        };
       }
 
       // Process and format the content
