@@ -354,24 +354,21 @@ Focus on creating valuable, informative content that genuinely helps readers whi
    * Test OpenAI connection
    */
   async testConnection(): Promise<boolean> {
-    const result = await enhancedOpenAIService.testConnection();
-    return result.success;
+    return simpleOpenAIService.isConfigured();
   }
 
   /**
    * Get OpenAI status
    */
   async getProviderStatus(): Promise<{ openai: boolean }> {
-    const isConfigured = enhancedOpenAIService.isConfigured();
-    const isConnected = isConfigured ? await this.testConnection() : false;
-    return { openai: isConnected };
+    return { openai: simpleOpenAIService.isConfigured() };
   }
 
   /**
    * Check if OpenAI is configured
    */
   isConfigured(): boolean {
-    return enhancedOpenAIService.isConfigured();
+    return simpleOpenAIService.isConfigured();
   }
 }
 
