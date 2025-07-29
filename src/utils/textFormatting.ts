@@ -476,8 +476,13 @@ export function cleanHTMLContent(content: string): string {
   cleaned = cleaned.replace(/Designed for [A-Za-z\s]+ market\./g, '');
   cleaned = cleaned.replace(/Localized for [A-Za-z\s]+\./g, '');
 
-  // Ensure proper paragraph structure around bullet points
-  cleaned = cleaned.replace(/(\n- [^\n]+(?:\n- [^\n]+)*)/g, '\n<div class="bullet-list">$1\n</div>\n');
+  // Fix paragraph and list alignment issues
+  cleaned = cleaned.replace(/(<\/p>)\s*(<ul|<ol)/g, '$1\n\n$2');
+  cleaned = cleaned.replace(/(<\/ul>|<\/ol>)\s*(<p)/g, '$1\n\n$2');
+  cleaned = cleaned.replace(/(<\/h[1-6]>)\s*(<ul|<ol|<p)/g, '$1\n\n$2');
+
+  // Fix broken sentence continuations
+  cleaned = cleaned.replace(/([a-z])\s*\n\s*([A-Z][a-z])/g, '$1 $2');
 
   // Clean up excessive line breaks
   cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
