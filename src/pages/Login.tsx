@@ -791,17 +791,7 @@ const Login = () => {
         </Card>
       </div>
 
-      {/* Debug info - remove in production */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-8 space-y-4">
-          <div className="max-w-md mx-auto">
-            <SimpleAuthTest />
-          </div>
-          <div className="max-w-2xl mx-auto">
-            <AuthDebugStatus />
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };
