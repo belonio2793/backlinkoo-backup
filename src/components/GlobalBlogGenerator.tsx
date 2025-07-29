@@ -943,21 +943,35 @@ export function GlobalBlogGenerator({
               )}
               <span className="font-medium">{apiStatus.message}</span>
               {apiStatus.details && (
-                <Badge
-                  variant="outline"
-                  className={`text-xs font-medium ${
-                    apiStatus.status === 'ready' ? 'border-green-300 bg-green-50 text-green-700' :
-                    apiStatus.status === 'error' ? 'border-red-300 bg-red-50 text-red-700' :
-                    apiStatus.status === 'retrying' ? 'border-orange-300 bg-orange-50 text-orange-700' :
-                    'border-yellow-300 bg-yellow-50 text-yellow-700'
-                  }`}
-                  title={apiStatus.details}
-                >
-                  {apiStatus.status === 'ready' ? '✅ Ready' :
-                   apiStatus.status === 'error' ? '❌ Error' :
-                   apiStatus.status === 'retrying' ? `🔄 ${apiStatus.retryAttempt}/${apiStatus.maxRetries}` :
-                   '🔍 Checking'}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant="outline"
+                    className={`text-xs font-medium ${
+                      apiStatus.status === 'ready' ? 'border-green-300 bg-green-50 text-green-700' :
+                      apiStatus.status === 'error' ? 'border-red-300 bg-red-50 text-red-700' :
+                      apiStatus.status === 'retrying' ? 'border-orange-300 bg-orange-50 text-orange-700' :
+                      'border-yellow-300 bg-yellow-50 text-yellow-700'
+                    }`}
+                    title={apiStatus.details}
+                  >
+                    {apiStatus.status === 'ready' ? '✅ Ready' :
+                     apiStatus.status === 'error' ? '❌ Error' :
+                     apiStatus.status === 'retrying' ? `🔄 ${apiStatus.retryAttempt}/${apiStatus.maxRetries}` :
+                     '🔍 Checking'}
+                  </Badge>
+
+                  {/* Progress bar for retry attempts */}
+                  {(apiStatus.status === 'retrying' || apiStatus.status === 'checking') && apiStatus.retryAttempt && apiStatus.maxRetries && (
+                    <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-blue-500 transition-all duration-300 ease-out"
+                        style={{
+                          width: `${(apiStatus.retryAttempt / apiStatus.maxRetries) * 100}%`
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
               )}
               {(apiStatus.status === 'error' || apiStatus.status === 'ready') && (
                 <Button
