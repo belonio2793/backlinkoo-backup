@@ -306,12 +306,27 @@ export function GlobalBlogGenerator({
         <CardContent className="p-6">
           {isGenerating ? (
             <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
-                <span className="font-medium">Generating your global backlink post...</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
+                  <span className="font-medium">Generating your AI-powered backlink post...</span>
+                </div>
+                {aiProvider && (
+                  <Badge variant="secondary" className="flex items-center space-x-1">
+                    <Zap className="h-3 w-3" />
+                    <span>{aiProvider}</span>
+                  </Badge>
+                )}
               </div>
               <Progress value={progress} className="w-full" />
               <p className="text-sm text-muted-foreground">{generationStage}</p>
+              {generationStatus && generationStatus.stage === 'generating' && (
+                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-xs text-blue-800">
+                    🤖 AI is crafting your content with advanced language models...
+                  </p>
+                </div>
+              )}
             </div>
           ) : generatedPost ? (
             <div className="space-y-4">
