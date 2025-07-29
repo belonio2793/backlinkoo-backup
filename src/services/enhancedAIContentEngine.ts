@@ -242,28 +242,13 @@ Balance creativity with SEO requirements to create content that ranks well and e
         const systemPrompt = this.getSystemPrompt(provider.name, request);
         
         let result;
-        if (provider.name === 'openai') {
-          result = await provider.service.generateContent(selectedPrompt, {
-            model: 'gpt-3.5-turbo',
-            maxTokens: this.getMaxTokens(request.contentLength),
-            temperature: 0.7,
-            systemPrompt
-          });
-        } else if (provider.name === 'huggingface') {
-          const fullPrompt = `${systemPrompt}\n\n${selectedPrompt}`;
-          result = await provider.service.generateText(fullPrompt, {
-            model: 'gpt2',
-            maxLength: Math.min(this.getMaxTokens(request.contentLength), 1500),
-            temperature: 0.7
-          });
-        } else if (provider.name === 'cohere') {
-          const fullPrompt = `${systemPrompt}\n\n${selectedPrompt}`;
-          result = await provider.service.generateText(fullPrompt, {
-            model: 'command',
-            maxTokens: this.getMaxTokens(request.contentLength),
-            temperature: 0.7
-          });
-        }
+        // Only OpenAI provider
+        result = await provider.service.generateContent(selectedPrompt, {
+          model: 'gpt-3.5-turbo',
+          maxTokens: this.getMaxTokens(request.contentLength),
+          temperature: 0.7,
+          systemPrompt
+        });
 
         const generationTime = Date.now() - providerStartTime;
 
