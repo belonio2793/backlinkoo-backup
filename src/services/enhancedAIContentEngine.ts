@@ -363,8 +363,11 @@ Balance creativity with SEO requirements to create content that ranks well and e
     const successfulResults = results.filter(r => r.success && r.content.length > 100);
     
     if (successfulResults.length === 0) {
-      // Throw error instead of using fallback content
-      throw new Error('Content generation failed: All AI providers are unavailable or returned invalid content. Please check your API keys and try again.');
+      // Provide detailed error information for debugging
+      const errorDetails = results.map(r => `${r.provider}: ${r.error || 'unknown error'}`).join('; ');
+      console.error('❌ All providers failed:', errorDetails);
+
+      throw new Error(`Content generation failed: All AI providers failed. Details: ${errorDetails}. Please check your API keys and network connection.`);
     }
 
     // Score each result based on multiple factors
