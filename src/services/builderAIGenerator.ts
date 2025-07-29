@@ -110,21 +110,66 @@ export class BuilderAIGenerator {
 
     return `${prompt}
 
-Please follow these SEO best practices:
-1. Use H1, H2, H3 headings appropriately
-2. Include the keyword naturally throughout the content
-3. Write in a conversational, engaging tone
-4. Include relevant subheadings
-5. Add a compelling introduction and conclusion
-6. IMPORTANT: Include the anchor text "${request.anchorText}" as a link to ${request.targetUrl} at least 2-3 times throughout the content
-7. Make the content readable and valuable to users
-8. Use proper paragraph breaks and formatting
-9. Include relevant keywords and semantic variations
-10. Write exactly 1000 words
+FOLLOW THESE STRICT SEO FORMATTING GUIDELINES:
 
-CRITICAL REQUIREMENT: You MUST include at least 2 instances of the anchor text "${request.anchorText}" linked to ${request.targetUrl} in natural, contextual ways throughout the article. This is essential for backlink optimization.
+🔹 HEADLINE STRUCTURE (CRITICAL):
+- Use ONLY ONE <h1> tag (the main title)
+- Use <h2> for major section headings (Introduction, Benefits, How It Works, etc.)
+- Use <h3> for subpoints under each <h2>
+- NEVER use multiple <h1> tags
 
-Format the response as clean HTML with proper semantic structure.`;
+🔹 CONTENT STRUCTURE:
+- Minimum 1000 words (this is mandatory)
+- Keep paragraphs short (2-4 sentences maximum)
+- Use line breaks between paragraphs
+- Include compelling introduction and conclusion sections
+
+🔹 KEYWORD OPTIMIZATION:
+- Include main keyword "${request.keyword}" in the <h1> tag
+- Use main keyword in the first 100 words
+- Include keyword 3-5 times naturally throughout content
+- Use related keywords and synonyms
+
+🔹 ANCHOR TEXT REQUIREMENTS (CRITICAL):
+- Include anchor text "${request.anchorText}" linked to ${request.targetUrl} at least 3 times
+- Use: <a href="${request.targetUrl}" target="_blank" rel="noopener noreferrer">${request.anchorText}</a>
+- Place links naturally within different sections
+- Vary the context around each link
+
+🔹 TEXT EMPHASIS:
+- Use <strong> for important keywords and value points
+- Use <em> for stylistic emphasis
+- Bold key benefits and main points
+
+🔹 FORMATTING:
+- Use bullet points (<ul><li>) or numbered lists (<ol><li>) where helpful
+- Include proper paragraph tags <p></p>
+- Ensure mobile-responsive structure
+- Add whitespace for readability
+
+🔹 CONTENT SECTIONS (Include these):
+1. Introduction (with keyword in first 100 words)
+2. What is [keyword]? (explanation section)
+3. Benefits/Advantages (use bullet points)
+4. Best Practices/How to implement
+5. Common mistakes to avoid
+6. Future trends/outlook
+7. Conclusion (summarize key points)
+
+EXAMPLE STRUCTURE:
+<h1>Complete Guide to [Keyword]</h1>
+<p>Introduction paragraph with <strong>keyword</strong> in first 100 words...</p>
+
+<h2>What is [Keyword]?</h2>
+<p>Explanation content with <a href="${request.targetUrl}" target="_blank" rel="noopener noreferrer">${request.anchorText}</a>...</p>
+
+<h3>Key Components</h3>
+<ul>
+<li><strong>First benefit</strong>: Description</li>
+<li><strong>Second benefit</strong>: Description</li>
+</ul>
+
+FORMAT AS CLEAN HTML WITH PROPER SEMANTIC STRUCTURE.`;
   }
 
   /**
