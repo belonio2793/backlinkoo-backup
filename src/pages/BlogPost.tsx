@@ -376,25 +376,25 @@ export function BlogPost() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30">
+      {/* Enhanced Header */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-purple-100 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
               onClick={() => navigate('/')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 hover:bg-purple-50 transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Home
+              <span className="font-medium">Back to Home</span>
             </Button>
 
             <div className="flex items-center gap-3">
               {blogPost.is_trial_post && (
-                <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+                <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 shadow-md">
                   <Sparkles className="mr-1 h-3 w-3" />
-                  Trial Post
+                  Free Generated Content
                 </Badge>
               )}
 
@@ -404,12 +404,14 @@ export function BlogPost() {
                     variant="outline"
                     size="sm"
                     onClick={() => setShowLoginModal(true)}
+                    className="border-purple-200 text-purple-700 hover:bg-purple-50"
                   >
                     Sign In
                   </Button>
                   <Button
                     size="sm"
                     onClick={() => setShowLoginModal(true)}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-md"
                   >
                     Register
                   </Button>
@@ -419,6 +421,7 @@ export function BlogPost() {
                   variant="outline"
                   size="sm"
                   onClick={() => navigate('/dashboard')}
+                  className="border-purple-200 text-purple-700 hover:bg-purple-50"
                 >
                   Dashboard
                 </Button>
