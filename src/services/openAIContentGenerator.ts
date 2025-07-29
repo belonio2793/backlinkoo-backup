@@ -12,6 +12,14 @@ export interface ContentGenerationRequest {
   wordCount?: number;
   tone?: 'professional' | 'casual' | 'technical' | 'friendly' | 'convincing';
   contentType?: 'how-to' | 'listicle' | 'review' | 'comparison' | 'news' | 'opinion';
+  retryConfig?: {
+    maxRetries?: number;
+    baseDelay?: number;
+    maxDelay?: number;
+    exponentialBackoff?: boolean;
+    retryOnRateLimit?: boolean;
+    retryOnServerError?: boolean;
+  };
 }
 
 export interface GeneratedContentResult {
