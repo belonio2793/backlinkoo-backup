@@ -15,8 +15,11 @@ export class SmartFallbackContent {
     
     // Detect keyword category to generate appropriate content
     const contentTemplate = this.detectKeywordCategory(keywordLower);
-    
-    return this.generateContextualContent(capitalizedKeyword, targetUrl, anchor, contentTemplate);
+
+    const content = this.generateContextualContent(capitalizedKeyword, targetUrl, anchor, contentTemplate);
+
+    // Apply enhanced formatting for bullet points and capitalization
+    return formatBlogContent(content);
   }
 
   private static detectKeywordCategory(keyword: string): string {
