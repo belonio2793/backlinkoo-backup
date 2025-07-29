@@ -204,6 +204,13 @@ Balance creativity with SEO requirements to create content that ranks well and e
    */
   async generateContent(request: ContentGenerationRequest): Promise<EnhancedContentResult> {
     console.log('🚀 Starting enhanced Backlink ∞ Algorithm content generation:', request);
+
+    // Debug environment variables
+    console.log('🔑 Environment check:', {
+      hasOpenAI: !!import.meta.env.VITE_OPENAI_API_KEY,
+      hasHF: !!import.meta.env.VITE_HF_ACCESS_TOKEN,
+      hasCohere: !!import.meta.env.VITE_COHERE_API_KEY
+    });
     
     const startTime = Date.now();
     const prompts = this.generatePromptTemplates(request);
