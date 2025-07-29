@@ -148,6 +148,13 @@ export function BlogPost() {
     loadBlogPost();
   }, [slug]);
 
+  // Update document title when blog post changes
+  useEffect(() => {
+    if (blogPost) {
+      document.title = `${blogPost.title} | Backlink ∞`;
+    }
+  }, [blogPost?.title, blogPost?.updated_at]);
+
   const handleShare = async () => {
     if (blogPost) {
       try {
