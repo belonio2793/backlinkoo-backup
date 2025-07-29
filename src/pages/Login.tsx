@@ -101,8 +101,6 @@ const Login = () => {
           description: "We've sent you a password reset link. Please check your email and spam folder.",
         });
 
-
-
         setShowForgotPassword(false);
         setForgotPasswordEmail("");
       } else {
@@ -117,60 +115,6 @@ const Login = () => {
       toast({
         title: "Password reset failed",
         description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleResendConfirmation = async () => {
-    if (isLoading) {
-      console.log('Resend already in progress, ignoring click');
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const result = await AuthService.resendConfirmation(resendEmail.trim());
-
-      if (result.success) {
-        toast({
-          title: "Confirmation email sent!",
-          description: "We've sent you a new confirmation link. Please check your email and spam folder.",
-        });
-
-
-
-        setShowResendConfirmation(false);
-      } else {
-        const errorMessage = result.error || 'Failed to send confirmation email.';
-
-        if (errorMessage.includes('already verified')) {
-          toast({
-            title: "Email already verified!",
-            description: "Your email address is already confirmed. You can now sign in to your account.",
-          });
-          setShowResendConfirmation(false);
-          // Switch to login tab
-          setTimeout(() => {
-            setActiveTab("login");
-            setLoginEmail(resendEmail);
-          }, 100);
-        } else {
-          toast({
-            title: "Failed to resend confirmation",
-            description: errorMessage,
-            variant: "destructive",
-          });
-        }
-      }
-    } catch (error: any) {
-      console.error('Resend confirmation exception:', error);
-      toast({
-        title: "Failed to resend confirmation",
-        description: "An unexpected error occurred. Please try again or contact support.",
         variant: "destructive",
       });
     } finally {
