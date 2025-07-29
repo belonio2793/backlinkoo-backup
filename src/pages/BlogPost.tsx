@@ -431,74 +431,113 @@ export function BlogPost() {
         </div>
       </div>
 
-      {/* Article Content */}
-      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Article Header */}
-        <header className="mb-8">
-          <div className="space-y-4">
+      {/* Enhanced Article Content */}
+      <article className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Enhanced Article Header */}
+        <header className="mb-12">
+          <div className="space-y-8">
             {/* Category and Tags */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-3">
               {blogPost.category && (
-                <Badge variant="secondary">{blogPost.category}</Badge>
+                <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-md px-4 py-2">
+                  {blogPost.category}
+                </Badge>
               )}
-              {(blogPost.tags || blogPost.keywords || []).slice(0, 3).map((tag, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
+              {(blogPost.tags || blogPost.keywords || []).slice(0, 4).map((tag, index) => (
+                <Badge
+                  key={index}
+                  variant="outline"
+                  className="bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 transition-colors px-3 py-1"
+                >
                   <Tag className="mr-1 h-3 w-3" />
-                  {tag}
+                  #{tag}
                 </Badge>
               ))}
             </div>
 
-            {/* Title */}
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-              {formatBlogTitle(blogPost.title)}
-            </h1>
+            {/* Enhanced Title */}
+            <div className="text-center space-y-6">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 leading-tight tracking-tight">
+                {formatBlogTitle(blogPost.title)}
+              </h1>
 
-            {/* Meta Description */}
+              {/* SEO Score Badge */}
+              {blogPost.seo_score && (
+                <div className="flex justify-center">
+                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-lg px-6 py-2 text-base">
+                    <TrendingUp className="mr-2 h-5 w-5" />
+                    SEO Score: {blogPost.seo_score}/100
+                  </Badge>
+                </div>
+              )}
+            </div>
+
+            {/* Enhanced Meta Description */}
             {blogPost.meta_description && (
-              <p className="text-xl text-gray-600 leading-relaxed">
-                {blogPost.meta_description}
-              </p>
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-8 border border-purple-100 shadow-sm">
+                <p className="text-2xl text-gray-700 leading-relaxed text-center font-medium">
+                  {blogPost.meta_description}
+                </p>
+              </div>
             )}
 
-            {/* Article Meta */}
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 pt-4 border-t border-gray-200">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span>{blogPost.author_name || 'Backlink ∞'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>{formatDate(blogPost.published_at || blogPost.created_at)}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                <span>{blogPost.reading_time || 5} min read</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Eye className="h-4 w-4" />
-                <span>{blogPost.view_count || 0} views</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                <span>{getTrendingLabel()}</span>
+            {/* Enhanced Article Meta */}
+            <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="flex flex-col items-center text-center">
+                  <div className="p-3 bg-blue-100 rounded-full mb-2">
+                    <User className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Author</span>
+                  <span className="text-sm font-semibold text-gray-900">{blogPost.author_name || 'Backlink ∞'}</span>
+                </div>
+
+                <div className="flex flex-col items-center text-center">
+                  <div className="p-3 bg-green-100 rounded-full mb-2">
+                    <Calendar className="h-5 w-5 text-green-600" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Published</span>
+                  <span className="text-sm font-semibold text-gray-900">{formatDate(blogPost.published_at || blogPost.created_at)}</span>
+                </div>
+
+                <div className="flex flex-col items-center text-center">
+                  <div className="p-3 bg-purple-100 rounded-full mb-2">
+                    <Clock className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Read Time</span>
+                  <span className="text-sm font-semibold text-gray-900">{blogPost.reading_time || 5} min</span>
+                </div>
+
+                <div className="flex flex-col items-center text-center">
+                  <div className="p-3 bg-orange-100 rounded-full mb-2">
+                    <Eye className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Views</span>
+                  <span className="text-sm font-semibold text-gray-900">{blogPost.view_count || 0}</span>
+                </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-4">
-              <Button onClick={handleShare} variant="outline" size="sm">
-                <Share2 className="mr-2 h-4 w-4" />
-                Share
+            {/* Enhanced Action Buttons */}
+            <div className="flex flex-wrap justify-center gap-4 pt-6">
+              <Button
+                onClick={handleShare}
+                variant="outline"
+                size="lg"
+                className="border-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 px-6 py-3"
+              >
+                <Share2 className="mr-2 h-5 w-5" />
+                Share Post
               </Button>
-              <Button 
-                asChild 
-                variant="outline" 
-                size="sm"
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="border-2 border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 px-6 py-3"
               >
                 <a href={blogPost.target_url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Learn More
+                  <ExternalLink className="mr-2 h-5 w-5" />
+                  Visit Target Site
                 </a>
               </Button>
             </div>
@@ -520,12 +559,32 @@ export function BlogPost() {
           </div>
         )}
 
-        {/* Article Content */}
-        <div className="prose prose-lg prose-gray max-w-none">
-          <div
-            dangerouslySetInnerHTML={{ __html: formatBlogContent(blogPost.content) }}
-            className="blog-content"
-          />
+        {/* Enhanced Article Content */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 lg:p-12 mb-12">
+          <div className="prose prose-xl prose-purple max-w-none
+            prose-headings:font-bold prose-headings:text-gray-900 prose-headings:tracking-tight
+            prose-h1:text-5xl prose-h1:mb-8 prose-h1:leading-tight prose-h1:text-center
+            prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:text-purple-800 prose-h2:border-b prose-h2:border-purple-100 prose-h2:pb-4
+            prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4 prose-h3:text-purple-700
+            prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-p:text-lg
+            prose-a:text-purple-600 prose-a:font-semibold prose-a:no-underline prose-a:bg-purple-50 prose-a:px-3 prose-a:py-2 prose-a:rounded-lg prose-a:transition-all prose-a:shadow-sm hover:prose-a:bg-purple-100 hover:prose-a:text-purple-700 hover:prose-a:shadow-md
+            prose-strong:text-purple-800 prose-strong:font-bold
+            prose-em:text-purple-600 prose-em:font-medium
+            prose-ul:space-y-4 prose-ol:space-y-4
+            prose-li:text-gray-700 prose-li:leading-relaxed prose-li:text-lg prose-li:pl-2
+            prose-blockquote:border-l-4 prose-blockquote:border-purple-200 prose-blockquote:bg-purple-50 prose-blockquote:pl-8 prose-blockquote:py-6 prose-blockquote:italic prose-blockquote:rounded-r-lg
+            prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-purple-600 prose-code:font-mono
+            prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:rounded-xl prose-pre:p-6 prose-pre:shadow-lg
+            prose-table:border-collapse prose-table:border prose-table:border-gray-200 prose-table:rounded-lg prose-table:overflow-hidden
+            prose-th:bg-purple-50 prose-th:border prose-th:border-gray-200 prose-th:p-4 prose-th:font-semibold prose-th:text-purple-800
+            prose-td:border prose-td:border-gray-200 prose-td:p-4
+            prose-img:rounded-xl prose-img:shadow-lg prose-img:border prose-img:border-gray-200"
+          >
+            <div
+              dangerouslySetInnerHTML={{ __html: formatBlogContent(blogPost.content) }}
+              className="blog-content"
+            />
+          </div>
         </div>
 
         {/* Trial Post Notice with Claim Option */}
