@@ -240,16 +240,33 @@ export function GlobalBlogGenerator({
     }
   };
 
-  const testApiConnectivity = async (): Promise<{
+  const testApiConnectivity = async (retryCount: number = 0): Promise<{
     success: boolean;
     responseTime?: number;
     error?: string;
+    attempt?: number;
   }> => {
+    const maxRetries = 5;
+    const baseDelay = 1000; // 1 second base delay
+    const maxDelay = 10000; // 10 second max delay
+
     const startTime = Date.now();
 
     try {
+      // Update status to show retry attempt
+      if (retryCount > 0) {
+        setApiStatus({
+          status: 'checking',
+          message: `Retrying API connection... (${retryCount}/${maxRetries})`,
+          details: 'Attempting to establish connection'
+        });
+      }
+
       // Test with a minimal OpenAI API request
       const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout per attempt
 
       const response = await fetch('https://api.openai.com/v1/models', {
         method: 'GET',
@@ -257,49 +274,111 @@ export function GlobalBlogGenerator({
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
         },
-        signal: AbortSignal.timeout(10000) // 10 second timeout
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
       const responseTime = Date.now() - startTime;
 
       if (response.ok) {
         return {
           success: true,
-          responseTime
+          responseTime,
+          attempt: retryCount + 1
         };
       } else if (response.status === 401) {
+        // Don't retry on authentication errors
         return {
           success: false,
-          error: 'Invalid API key or insufficient permissions'
+          error: 'Invalid API key or insufficient permissions',
+          attempt: retryCount + 1
         };
       } else if (response.status === 429) {
-        return {
-          success: false,
-          error: 'Rate limit exceeded - API temporarily unavailable'
-        };
+        // Retry on rate limits with exponential backoff
+        if (retryCount < maxRetries) {
+          const delay = Math.min(baseDelay * Math.pow(2, retryCount), maxDelay);
+          setApiStatus({
+            status: 'checking',
+            message: `Rate limited - waiting ${delay/1000}s before retry`,
+            details: `Attempt ${retryCount + 1}/${maxRetries + 1}`
+          });
+
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return testApiConnectivity(retryCount + 1);
+        } else {
+          return {
+            success: false,
+            error: 'Rate limit exceeded - maximum retries reached',
+            attempt: retryCount + 1
+          };
+        }
       } else {
-        return {
-          success: false,
-          error: `API returned status ${response.status}`
-        };
+        // Retry on other HTTP errors
+        if (retryCount < maxRetries) {
+          const delay = Math.min(baseDelay * Math.pow(1.5, retryCount), maxDelay);
+          setApiStatus({
+            status: 'checking',
+            message: `API error ${response.status} - retrying in ${delay/1000}s`,
+            details: `Attempt ${retryCount + 1}/${maxRetries + 1}`
+          });
+
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return testApiConnectivity(retryCount + 1);
+        } else {
+          return {
+            success: false,
+            error: `API returned status ${response.status} - maximum retries reached`,
+            attempt: retryCount + 1
+          };
+        }
       }
     } catch (error: any) {
       const responseTime = Date.now() - startTime;
 
-      if (error.name === 'TimeoutError') {
-        return {
-          success: false,
-          error: 'Request timeout - API not responding'
-        };
+      if (error.name === 'AbortError') {
+        // Retry on timeouts
+        if (retryCount < maxRetries) {
+          const delay = Math.min(baseDelay * Math.pow(1.5, retryCount), maxDelay);
+          setApiStatus({
+            status: 'checking',
+            message: `Request timeout - retrying in ${delay/1000}s`,
+            details: `Attempt ${retryCount + 1}/${maxRetries + 1}`
+          });
+
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return testApiConnectivity(retryCount + 1);
+        } else {
+          return {
+            success: false,
+            error: 'Request timeout - maximum retries reached',
+            attempt: retryCount + 1
+          };
+        }
       } else if (error.message?.includes('Failed to fetch')) {
-        return {
-          success: false,
-          error: 'Network error - check internet connection'
-        };
+        // Retry on network errors
+        if (retryCount < maxRetries) {
+          const delay = Math.min(baseDelay * Math.pow(2, retryCount), maxDelay);
+          setApiStatus({
+            status: 'checking',
+            message: `Network error - retrying in ${delay/1000}s`,
+            details: `Attempt ${retryCount + 1}/${maxRetries + 1}`
+          });
+
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return testApiConnectivity(retryCount + 1);
+        } else {
+          return {
+            success: false,
+            error: 'Network error - maximum retries reached. Check internet connection.',
+            attempt: retryCount + 1
+          };
+        }
       } else {
+        // Don't retry on unknown errors
         return {
           success: false,
-          error: `Connection failed: ${error.message}`
+          error: `Connection failed: ${error.message}`,
+          attempt: retryCount + 1
         };
       }
     }
