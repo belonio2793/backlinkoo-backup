@@ -281,7 +281,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
             <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
               <Zap className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-2xl mb-2">NO Hands SEO Tools</CardTitle>
+            <CardTitle className="text-2xl mb-2">∞ Backlinks Automation (Beta) Tools</CardTitle>
             <p className="text-muted-foreground">
               Automate your link building with our advanced blog scraping and posting system
             </p>
@@ -374,7 +374,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="no-hands-seo">NO Hands SEO</TabsTrigger>
+          <TabsTrigger value="no-hands-seo">∞ Backlinks Automation (Beta)</TabsTrigger>
           <TabsTrigger value="keyword-research">Keyword Research</TabsTrigger>
           <TabsTrigger value="rank-tracker">Rankings</TabsTrigger>
         </TabsList>
