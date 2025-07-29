@@ -390,11 +390,9 @@ export function GlobalBlogGenerator({
                   <span className="font-medium">AI Blog post generated successfully!</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  {generatedPost.provider && (
-                    <Badge variant="outline" className="text-xs">
-                      {generatedPost.provider.toUpperCase()} AI
-                    </Badge>
-                  )}
+                  <Badge variant="outline" className="text-xs">
+                    Backlink ∞ AI
+                  </Badge>
                   <Badge variant="secondary" className="text-xs">
                     {generatedPost.word_count} words
                   </Badge>
