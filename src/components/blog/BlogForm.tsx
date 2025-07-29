@@ -169,7 +169,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                 id="targetUrl"
                 placeholder="https://example.com/target-page"
                 value={targetUrl}
-                onChange={(e) => setTargetUrl(e.target.value)}
+                onChange={(e) => handleUrlChange(e.target.value)}
+                onBlur={handleUrlBlur}
               />
             </div>
             
