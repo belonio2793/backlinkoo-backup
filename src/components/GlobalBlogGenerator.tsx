@@ -176,11 +176,13 @@ export function GlobalBlogGenerator({
 
   const checkApiStatus = async () => {
     try {
-      // Set initial checking state
+      // Set initial checking state with encouraging message
       setApiStatus({
         status: 'checking',
-        message: 'Testing API connectivity...',
-        details: 'Verifying service availability'
+        message: 'Connecting to AI service...',
+        details: 'Establishing secure connection',
+        retryAttempt: 1,
+        maxRetries: 8
       });
 
       const multiApiGenerator = new MultiApiContentGenerator();
