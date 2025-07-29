@@ -166,17 +166,7 @@ Focus on ranking factors while maintaining user value and engagement.`;
     const basePrompt = `You are a world-class SEO content writer and digital marketing expert specializing in creating original, high-quality content that ranks well while providing genuine value.`;
 
     const providerPrompts = {
-      openai: `${basePrompt} Focus on expertise, authoritativeness, and trustworthiness. Use data-driven insights, professional tone, and comprehensive coverage. Create content that demonstrates deep subject matter expertise.`,
-      
-      grok: `${basePrompt} Bring wit, personality, and engaging elements while maintaining professionalism. Use current trends, real-world examples, and make complex topics accessible. Add your unique perspective.`,
-      
-      deepai: `${basePrompt} Focus on creating structured, logical content with clear progression. Emphasize practical value and actionable insights. Keep the content well-organized and easy to follow.`,
-      
-      huggingface: `${basePrompt} Create coherent, well-structured content with natural flow. Focus on readability and user experience. Ensure logical progression and clear communication throughout.`,
-      
-      cohere: `${basePrompt} Emphasize clarity, coherence, and natural language. Create content that flows well and maintains reader engagement. Focus on answering user questions comprehensively.`,
-      
-      rytr: `${basePrompt} Focus on persuasive, conversion-oriented content. Use convincing tone and compelling arguments. Create content that drives action while maintaining SEO value.`
+      openai: `${basePrompt} Focus on expertise, authoritativeness, and trustworthiness. Use data-driven insights, professional tone, and comprehensive coverage. Create content that demonstrates deep subject matter expertise.`
     };
 
     return providerPrompts[provider as keyof typeof providerPrompts] || basePrompt;
