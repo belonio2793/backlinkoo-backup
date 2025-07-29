@@ -266,8 +266,10 @@ export function GlobalBlogGenerator({
         setProgress(100);
         setGenerationStage('Generation complete!');
 
-        // Generate a unique slug for the blog post
-        const uniqueSlug = `${result.slug}-${Date.now().toString(36)}`;
+        // Generate a unique slug for the blog post with enhanced randomization
+        const timestamp = Date.now().toString(36);
+        const randomSuffix = Math.random().toString(36).substring(2, 8);
+        const uniqueSlug = `${result.slug}-${timestamp}-${randomSuffix}`;
 
         // Convert free backlink result to match the expected format
         const blogPost = {
