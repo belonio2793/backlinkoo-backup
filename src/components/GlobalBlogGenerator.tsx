@@ -710,9 +710,33 @@ export function GlobalBlogGenerator({
               </Badge>
             </div>
             
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Users className="h-4 w-4" />
-              <span>Unlimited requests</span>
+            <div className={`flex items-center gap-2 text-sm ${
+              apiStatus.status === 'ready' ? 'text-green-600' :
+              apiStatus.status === 'error' ? 'text-red-600' :
+              'text-yellow-600'
+            }`}>
+              {apiStatus.status === 'ready' ? (
+                <CheckCircle2 className="h-4 w-4" />
+              ) : apiStatus.status === 'error' ? (
+                <AlertCircle className="h-4 w-4" />
+              ) : (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              )}
+              <span>{apiStatus.message}</span>
+              {apiStatus.details && (
+                <Badge
+                  variant="outline"
+                  className={`text-xs ${
+                    apiStatus.status === 'ready' ? 'border-green-200 text-green-700' :
+                    apiStatus.status === 'error' ? 'border-red-200 text-red-700' :
+                    'border-yellow-200 text-yellow-700'
+                  }`}
+                  title={apiStatus.details}
+                >
+                  {apiStatus.status === 'ready' ? 'Active' :
+                   apiStatus.status === 'error' ? 'Error' : 'Checking'}
+                </Badge>
+              )}
             </div>
           </div>
           
