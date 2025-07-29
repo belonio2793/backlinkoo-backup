@@ -1,3 +1,5 @@
+import { useReferralTracking } from '@/hooks/useReferralTracking';
+
 export const AppWrapper = () => {
   useReferralTracking();
 
