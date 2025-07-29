@@ -170,6 +170,7 @@ export class OpenAIService {
     maxTokens?: number;
     temperature?: number;
     systemPrompt?: string;
+    retryConfig?: Partial<typeof this.defaultRetryConfig>;
   } = {}): Promise<{
     content: string;
     usage: { tokens: number; cost: number };
@@ -189,78 +190,100 @@ export class OpenAIService {
       model = 'gpt-3.5-turbo',
       maxTokens = 3500,
       temperature = 0.7,
-      systemPrompt = 'You are a professional SEO content writer who creates high-quality, engaging blog posts with natural backlink integration.'
+      systemPrompt = 'You are a professional SEO content writer who creates high-quality, engaging blog posts with natural backlink integration.',
+      retryConfig = {}
     } = options;
 
+    const finalRetryConfig = { ...this.defaultRetryConfig, ...retryConfig };
+
     try {
-      const messages = [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: prompt }
-      ];
-
-      const requestBody: OpenAIRequest = {
+      console.log('🚀 Starting OpenAI content generation with retry logic:', {
         model,
-        messages,
-        max_tokens: maxTokens,
+        maxTokens,
         temperature,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0
-      };
-
-      console.log('🤖 OpenAI API Request:', { model, maxTokens, temperature });
-
-      const response = await fetch(`${this.baseURL}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
+        maxRetries: finalRetryConfig.maxRetries
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        let errorMessage = `OpenAI API error: ${response.status}`;
+      const result = await this.retryWithBackoff(async () => {
+        const messages = [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: prompt }
+        ];
 
-        if (response.status === 404) {
-          errorMessage += ' - Model not found. Check if the model name is correct and available.';
-        } else if (response.status === 401) {
-          errorMessage += ' - Invalid API key. Check your OpenAI API key.';
-        } else if (response.status === 429) {
-          errorMessage += ' - Rate limit exceeded. Try again later.';
-        } else if (errorData.error?.message) {
-          errorMessage += ` - ${errorData.error.message}`;
-        } else {
-          errorMessage += ` - ${response.statusText}`;
+        const requestBody: OpenAIRequest = {
+          model,
+          messages,
+          max_tokens: maxTokens,
+          temperature,
+          top_p: 1,
+          frequency_penalty: 0,
+          presence_penalty: 0
+        };
+
+        const response = await fetch(`${this.baseURL}/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          let errorMessage = `OpenAI API error: ${response.status}`;
+
+          if (response.status === 404) {
+            errorMessage += ' - Model not found. Check if the model name is correct and available.';
+          } else if (response.status === 401) {
+            errorMessage += ' - Invalid API key. Check your OpenAI API key.';
+          } else if (response.status === 429) {
+            errorMessage += ' - Rate limit exceeded. Will retry automatically.';
+          } else if (errorData.error?.message) {
+            errorMessage += ` - ${errorData.error.message}`;
+          } else {
+            errorMessage += ` - ${response.statusText}`;
+          }
+
+          throw new Error(errorMessage);
         }
 
-        throw new Error(errorMessage);
-      }
+        const data: OpenAIResponse = await response.json();
 
-      const data: OpenAIResponse = await response.json();
-      
-      if (!data.choices || data.choices.length === 0) {
-        throw new Error('No content generated from OpenAI');
-      }
+        if (!data.choices || data.choices.length === 0) {
+          throw new Error('No content generated from OpenAI');
+        }
 
-      const content = data.choices[0].message.content;
-      const tokens = data.usage.total_tokens;
-      
-      // Estimate cost based on model (approximate pricing)
-      const costPerToken = model.includes('gpt-4') ? 0.00003 : 0.000002;
-      const cost = tokens * costPerToken;
+        const content = data.choices[0].message.content;
 
-      console.log('✅ OpenAI generation successful:', { tokens, cost: `$${cost.toFixed(4)}` });
+        // Validate content quality - retry if content is too short or empty
+        if (!content || content.trim().length < 100) {
+          throw new Error('Generated content is too short or empty, retrying...');
+        }
 
-      return {
-        content,
-        usage: { tokens, cost },
-        success: true
-      };
+        const tokens = data.usage.total_tokens;
+
+        // Estimate cost based on model (approximate pricing)
+        const costPerToken = model.includes('gpt-4') ? 0.00003 : 0.000002;
+        const cost = tokens * costPerToken;
+
+        console.log('✅ OpenAI generation successful:', {
+          contentLength: content.length,
+          tokens,
+          cost: `$${cost.toFixed(4)}`
+        });
+
+        return {
+          content,
+          usage: { tokens, cost },
+          success: true
+        };
+      }, finalRetryConfig);
+
+      return result;
 
     } catch (error) {
-      console.error('❌ OpenAI API error:', error);
+      console.error('❌ OpenAI API failed after all retries:', error);
       return {
         content: '',
         usage: { tokens: 0, cost: 0 },
