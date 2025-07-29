@@ -207,27 +207,34 @@ export class BlogPublishingService {
    * Get all published blog posts (for /blog listing)
    */
   async getPublishedBlogPosts(limit: number = 20, offset: number = 0): Promise<BlogListItem[]> {
+    // Use localStorage as primary source for AI Live posts
+    const localPosts = this.getPostsFromLocalStorage();
+
+    // Try to supplement with database posts (with timeout)
     try {
-      const { data, error } = await supabase
-        .from('ai_generated_posts')
-        .select('id, title, slug, status, created_at, expires_at, word_count, claimed_by')
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
+      const { data, error } = await Promise.race([
+        supabase.from('ai_generated_posts').select('id, title, slug, status, created_at, expires_at, word_count, claimed_by').eq('status', 'published').order('created_at', { ascending: false }).range(offset, offset + limit - 1),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Database timeout')), 1000))
+      ]) as any;
 
-      if (error) {
-        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
-          // Return posts from localStorage
-          return this.getPostsFromLocalStorage();
-        }
-        throw new Error(`Failed to fetch blog posts: ${error.message}`);
+      if (!error && data && Array.isArray(data)) {
+        // Combine database and localStorage posts, removing duplicates
+        const combinedPosts = [...localPosts];
+        data.forEach((dbPost: any) => {
+          if (!combinedPosts.find(local => local.slug === dbPost.slug)) {
+            combinedPosts.push(dbPost);
+          }
+        });
+
+        // Sort by created_at descending
+        combinedPosts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        return combinedPosts.slice(offset, offset + limit);
       }
-
-      return data as BlogListItem[];
     } catch (error) {
-      console.warn('Database error, using localStorage fallback:', error);
-      return this.getPostsFromLocalStorage();
+      // Silent fallback
     }
+
+    return localPosts.slice(offset, offset + limit);
   }
 
   /**
