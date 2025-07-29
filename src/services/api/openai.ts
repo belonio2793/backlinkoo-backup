@@ -3,6 +3,8 @@
  * Handles GPT-4 content generation, text completion, and chat completions
  */
 
+import { SecureConfig } from '@/lib/secure-config';
+
 interface OpenAIRequest {
   model: string;
   messages: Array<{ role: string; content: string }>;
