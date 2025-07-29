@@ -249,8 +249,8 @@ export function GlobalBlogGenerator({
         sessionId: request.sessionId
       });
 
-      // Use the new free backlink service (it has fallback content when OpenAI is not available)
-      const freeBacklinkRequest = {
+      // Use the new OpenAI-only content generator
+      const contentRequest: ContentGenerationRequest = {
         targetUrl: request.targetUrl,
         primaryKeyword: request.primaryKeyword,
         anchorText: request.anchorText,
@@ -259,9 +259,12 @@ export function GlobalBlogGenerator({
         contentType: 'how-to' as const
       };
 
-      const result = await freeBacklinkService.generateFreeBacklink(freeBacklinkRequest);
+      const result = await openAIContentGenerator.generateContent(contentRequest);
 
-      // Accept the result even if it has an error (fallback content)
+      // Store the result for 24-hour management
+      freeBacklinkService.storeFreeBacklink(result);
+
+      // Process the successful result
       if (result && result.content) {
         setProgress(100);
         setGenerationStage('Generation complete!');
