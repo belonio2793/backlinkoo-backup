@@ -96,48 +96,10 @@ export function GlobalBlogGenerator({
   const { isLoggedIn } = useAuthStatus();
 
   useEffect(() => {
-    try {
-      loadGlobalStats();
-      updateRemainingRequests();
-      checkApiStatus();
-
-      // Set up aggressive retry mechanism - retry every 10 seconds until connected
-      const statusInterval = setInterval(() => {
-        if (apiStatus.status === 'error' || apiStatus.status === 'checking') {
-          console.log('🔄 Auto-retrying API connection...');
-          checkApiStatus();
-        }
-      }, 10 * 1000); // 10 seconds for aggressive retry
-
-      // Additional long-term monitoring every 2 minutes for maintenance
-      const maintenanceInterval = setInterval(() => {
-        if (apiStatus.status === 'ready') {
-          // Occasional health check when ready
-          checkApiStatus();
-        }
-      }, 2 * 60 * 1000); // 2 minutes
-
-      return () => {
-        clearInterval(statusInterval);
-        clearInterval(maintenanceInterval);
-      };
-    } catch (error) {
-      console.error('Error initializing GlobalBlogGenerator:', error);
-      // Set safe defaults
-      setGlobalStats({
-        totalPosts: 0,
-        postsToday: 0,
-        activeUsers: null,
-        averageQuality: null
-      });
-      setRemainingRequests(5);
-      setApiStatus({
-        status: 'error',
-        message: 'Initialization error',
-        details: 'Failed to initialize the blog generator'
-      });
-    }
-  }, [apiStatus.status]);
+    loadGlobalStats();
+    updateRemainingRequests();
+    trackBlogGeneration();
+  }, []);
 
   const loadGlobalStats = async () => {
     // Simple stats from localStorage for OpenAI-only system
