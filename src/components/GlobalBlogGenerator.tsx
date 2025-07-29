@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { globalBlogGenerator, type GlobalBlogRequest } from '@/services/globalBlogGenerator';
+import { openAIContentGenerator, ContentGenerationRequest } from '@/services/openAIContentGenerator';
 import { freeBacklinkService } from '@/services/freeBacklinkService';
 import { contentModerationService } from '@/services/contentModerationService';
 import { adminSyncService } from '@/services/adminSyncService';
