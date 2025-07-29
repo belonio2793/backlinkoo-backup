@@ -304,20 +304,11 @@ export class BlogPublishingService {
   }
 
   /**
-   * Check if user has already generated content (one per account limit)
+   * Check if user has already generated content (disabled for AI Live)
    */
   async hasUserGeneratedContent(accountId: string): Promise<boolean> {
-    const { data, error } = await supabase
-      .from('ai_generated_posts')
-      .select('id')
-      .eq('generated_by_account', accountId)
-      .limit(1);
-
-    if (error) {
-      throw new Error(`Failed to check user generation limit: ${error.message}`);
-    }
-
-    return (data?.length || 0) > 0;
+    // Always return false for AI Live - no limits
+    return false;
   }
 
   /**
