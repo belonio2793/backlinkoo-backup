@@ -21,6 +21,7 @@ interface AuthFormTabsProps {
   isCompact?: boolean;
   onForgotPassword?: () => void;
   className?: string;
+  defaultTab?: "login" | "signup";
 }
 
 export function AuthFormTabs({ 
