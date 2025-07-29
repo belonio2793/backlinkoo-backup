@@ -269,18 +269,13 @@ export default function AILive() {
                 {/* Generate Button */}
                 <Button
                   onClick={handleGenerate}
-                  disabled={isGenerating || hasUsedLimit || !keyword.trim() || !anchorText.trim() || !targetUrl.trim()}
+                  disabled={isGenerating || !keyword.trim() || !anchorText.trim() || !targetUrl.trim()}
                   className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg"
                 >
                   {isGenerating ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       Generating...
-                    </>
-                  ) : hasUsedLimit ? (
-                    <>
-                      <Shield className="mr-2 h-5 w-5" />
-                      Generation Limit Used
                     </>
                   ) : (
                     <>
