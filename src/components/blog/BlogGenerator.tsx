@@ -44,24 +44,17 @@ export function BlogGenerator() {
         </TabsList>
 
         <TabsContent value="generate" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Generate SEO-Optimized Blog Post</CardTitle>
-                  <CardDescription>
-                    Enter a target URL and keywords to generate high-quality content with automatic backlink creation
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <BlogForm onContentGenerated={setGeneratedContent} />
-                </CardContent>
-              </Card>
-            </div>
-            <div className="space-y-4">
-              <OpenAIStatusIndicator />
-            </div>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Generate SEO-Optimized Blog Post</CardTitle>
+              <CardDescription>
+                Enter a target URL and keywords to generate high-quality content with automatic backlink creation
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <BlogForm onContentGenerated={setGeneratedContent} />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="preview" className="space-y-6">
