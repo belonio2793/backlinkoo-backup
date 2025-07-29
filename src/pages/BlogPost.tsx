@@ -557,6 +557,15 @@ export function BlogPost() {
                       Create More Backlinks
                     </Button>
                     <Button
+                      onClick={handleRegenerateContent}
+                      disabled={isRegenerating}
+                      variant="outline"
+                      className="border-blue-400 text-blue-600 hover:bg-blue-50"
+                    >
+                      <RefreshCw className={`mr-2 h-4 w-4 ${isRegenerating ? 'animate-spin' : ''}`} />
+                      {isRegenerating ? 'Regenerating...' : 'Regenerate Content'}
+                    </Button>
+                    <Button
                       onClick={handleDeletePost}
                       disabled={isDeleting}
                       variant="outline"
