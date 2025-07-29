@@ -331,7 +331,7 @@ export function ClaimTrialPostDialog({
               </Button>
             ) : (
               <Button
-                onClick={() => navigate('/auth-callback?action=signup&claim=true')}
+                onClick={() => navigate('/auth/callback?action=signup&claim=true')}
                 className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               >
                 Sign Up to Claim
