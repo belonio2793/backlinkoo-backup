@@ -80,7 +80,7 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
     setIsGenerating(true);
 
     try {
-      const request: FreeBacklinkRequest = {
+      const request: ContentGenerationRequest = {
         targetUrl,
         primaryKeyword,
         anchorText: anchorText || primaryKeyword,
@@ -89,11 +89,10 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
         contentType
       };
 
-      const result = await freeBacklinkService.generateFreeBacklink(request);
+      const result = await openAIContentGenerator.generateContent(request);
 
-      if (result.error) {
-        throw new Error(result.error);
-      }
+      // Store the result for 24-hour management
+      freeBacklinkService.storeFreeBacklink(result);
 
       onContentGenerated(result);
 
