@@ -10,17 +10,18 @@ import { LoginModal } from '@/components/LoginModal';
 import { supabase } from '@/integrations/supabase/client';
 import { formatBlogTitle, formatBlogContent, getTrendingLabel } from '@/utils/textFormatting';
 import { Footer } from '@/components/Footer';
-import { 
-  Calendar, 
-  Clock, 
-  Eye, 
-  ArrowLeft, 
-  ExternalLink, 
+import {
+  Calendar,
+  Clock,
+  Eye,
+  ArrowLeft,
+  ExternalLink,
   Share2,
   Tag,
   User,
   TrendingUp,
-  Sparkles
+  Sparkles,
+  Trash2
 } from 'lucide-react';
 
 export function BlogPost() {
