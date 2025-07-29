@@ -334,18 +334,8 @@ Balance creativity with SEO requirements to create content that ranks well and e
     const successfulResults = results.filter(r => r.success && r.content.length > 100);
     
     if (successfulResults.length === 0) {
-      // Return the first result as fallback
-      return results[0] || {
-        content: SmartFallbackContent.generateContent(
-          request.keyword,
-          request.targetUrl,
-          request.anchorText
-        ),
-        provider: 'fallback',
-        success: true,
-        usage: { tokens: 0, cost: 0 },
-        generationTime: 0
-      };
+      // Throw error instead of using fallback content
+      throw new Error('Content generation failed: All AI providers are unavailable or returned invalid content. Please check your API keys and try again.');
     }
 
     // Score each result based on multiple factors
