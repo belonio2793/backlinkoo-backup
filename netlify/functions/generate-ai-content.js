@@ -104,25 +104,63 @@ exports.handler = async (event, context) => {
       };
     }
 
-    let apiKey, endpoint, model;
+    // Provider configurations in priority order
+    const providers = [
+      {
+        name: 'OpenAI',
+        apiKey: process.env.OPENAI_API_KEY,
+        endpoint: 'https://api.openai.com/v1/chat/completions',
+        model: 'gpt-3.5-turbo'  // Primary model as requested
+      },
+      {
+        name: 'HuggingFace',
+        apiKey: process.env.HF_ACCESS_TOKEN,
+        endpoint: 'https://api-inference.huggingface.co/models/microsoft/DialoGPT-large/v1/chat/completions',
+        model: 'microsoft/DialoGPT-large'
+      },
+      {
+        name: 'Cohere',
+        apiKey: process.env.COHERE_API_KEY,
+        endpoint: 'https://api.cohere.ai/v1/generate',
+        model: 'command'
+      },
+      {
+        name: 'Grok',
+        apiKey: process.env.GROK_API_KEY,
+        endpoint: 'https://api.x.ai/v1/chat/completions',
+        model: 'grok-beta'
+      },
+      {
+        name: 'DeepAI',
+        apiKey: process.env.DEEPAI_API_KEY,
+        endpoint: 'https://api.deepai.org/api/text-generator',
+        model: 'text-generator'
+      }
+    ];
 
-    switch (provider) {
-      case 'OpenAI':
-        apiKey = process.env.OPENAI_API_KEY;
-        endpoint = 'https://api.openai.com/v1/chat/completions';
-        model = 'gpt-4o-mini'; // More cost-effective model
-        break;
-      case 'Grok':
-        apiKey = process.env.GROK_API_KEY;
-        endpoint = 'https://api.x.ai/v1/chat/completions';
-        model = 'grok-beta';
-        break;
-      default:
+    // Try providers in order until one succeeds
+    let lastError = null;
+    for (const providerConfig of providers) {
+      if (!providerConfig.apiKey) {
+        console.log(`${providerConfig.name} API key not configured, skipping...`);
+        continue;
+      }
+
+      try {
+        console.log(`Attempting content generation with ${providerConfig.name}...`);
+        const result = await generateWithProvider(providerConfig, prompt, keyword, anchorText, url);
+
+        console.log(`✅ ${providerConfig.name} succeeded: ${result.wordCount} words`);
         return {
-          statusCode: 400,
+          statusCode: 200,
           headers,
-          body: JSON.stringify({ error: 'Unsupported provider' })
+          body: JSON.stringify(result)
         };
+      } catch (error) {
+        console.error(`❌ ${providerConfig.name} failed:`, error.message);
+        lastError = error;
+        continue;
+      }
     }
 
     if (!apiKey) {
