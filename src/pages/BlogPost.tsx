@@ -24,7 +24,10 @@ import {
   TrendingUp,
   Sparkles,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  Zap,
+  Gift,
+  Home
 } from 'lucide-react';
 
 export function BlogPost() {
