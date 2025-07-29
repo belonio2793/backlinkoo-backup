@@ -80,6 +80,9 @@ export function formatBlogContent(content: string): string {
   // Capitalize first letter of every sentence
   formattedContent = capitalizeSentences(formattedContent);
 
+  // Convert text formatting to proper HTML tags
+  formattedContent = convertToProperHTML(formattedContent);
+
   // Clean up multiple consecutive line breaks
   formattedContent = formattedContent.replace(/\n{3,}/g, '\n\n');
 
