@@ -249,38 +249,69 @@ export function GlobalBlogGenerator({
         sessionId: request.sessionId
       });
 
-      const result = await globalBlogGenerator.generateGlobalBlogPost(request);
+      // Use the new free backlink service instead of the old globalBlogGenerator
+      const freeBacklinkRequest = {
+        targetUrl: request.targetUrl,
+        primaryKeyword: request.primaryKeyword,
+        anchorText: request.anchorText,
+        wordCount: 1500,
+        tone: 'professional' as const,
+        contentType: 'how-to' as const
+      };
 
-      if (result.success && result.data) {
+      const result = await freeBacklinkService.generateFreeBacklink(freeBacklinkRequest);
+
+      if (!result.error) {
         setProgress(100);
         setGenerationStage('Generation complete!');
-        setGeneratedPost(result.data.blogPost);
-        
+
+        // Convert free backlink result to match the expected format
+        const blogPost = {
+          id: result.id,
+          title: result.title,
+          content: result.content,
+          excerpt: result.metaDescription,
+          slug: result.slug,
+          keywords: result.keywords,
+          meta_description: result.metaDescription,
+          target_url: result.targetUrl,
+          anchor_text: result.anchorText,
+          seo_score: result.seoScore,
+          reading_time: result.readingTime,
+          published_url: `${window.location.origin}/free-backlink/${result.id}`,
+          is_trial_post: true,
+          expires_at: result.expiresAt,
+          created_at: result.createdAt,
+          updated_at: result.createdAt
+        };
+
+        setGeneratedPost(blogPost);
+
         // Update remaining requests
         updateRemainingRequests();
 
         toast({
-          title: "Blog post generated successfully! 🎉",
-          description: `Your contextual backlink post is ready. ${result.data.globalMetrics.userCountry !== 'Unknown' ? `Generated from ${result.data.globalMetrics.userCountry}` : ''}`,
+          title: "Blog post generated successfully! ���",
+          description: "Your free backlink post is ready! It will auto-delete in 24 hours unless you register an account.",
         });
 
         // Track successful blog generation for admin monitoring
         adminSyncService.trackBlogGenerated({
           sessionId: request.sessionId,
-          blogSlug: result.data.blogPost.slug,
+          blogSlug: result.slug,
           targetUrl: request.targetUrl,
           primaryKeyword: request.primaryKeyword,
-          seoScore: result.data.blogPost.seo_score,
+          seoScore: result.seoScore,
           generationTime: 45, // Approximate generation time
-          isTrialPost: result.data.blogPost.is_trial_post,
-          expiresAt: result.data.blogPost.expires_at
+          isTrialPost: true,
+          expiresAt: result.expiresAt
         });
 
-        onSuccess?.(result.data.blogPost);
+        onSuccess?.(blogPost);
 
         // Navigate to blog post if in blog variant
         if (variant === 'blog') {
-          navigate(`/blog/${result.data.blogPost.slug}`);
+          navigate(`/blog/${result.slug}`);
         }
 
       } else {
