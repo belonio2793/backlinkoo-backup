@@ -275,12 +275,68 @@ export function GlobalBlogGenerator({
       }
 
     } catch (error: any) {
-      console.error('Global blog generation error:', error);
-      toast({
-        title: "Generation failed",
-        description: error.message || "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
+      console.warn('AI generation failed, falling back to original system:', error);
+
+      // Fallback to original global blog generator
+      try {
+        setGenerationStage('Falling back to standard generation...');
+        setProgress(50);
+        setAiProvider('FALLBACK');
+
+        const request: GlobalBlogRequest = {
+          targetUrl: targetUrl.trim(),
+          primaryKeyword: primaryKeyword.trim(),
+          anchorText: anchorText.trim() || undefined,
+          sessionId: crypto.randomUUID(),
+          additionalContext: showAdvancedOptions ? {
+            industry: industry || undefined,
+            contentTone,
+            contentLength,
+            seoFocus
+          } : undefined
+        };
+
+        const result = await globalBlogGenerator.generateGlobalBlogPost(request);
+
+        if (result.success && result.data) {
+          setProgress(100);
+          setGenerationStage('Generation complete via fallback!');
+          setGeneratedPost(result.data.blogPost);
+
+          updateRemainingRequests();
+
+          toast({
+            title: "Blog post generated successfully! 🎉",
+            description: `Your backlink post is ready via fallback system.`,
+          });
+
+          adminSyncService.trackBlogGenerated({
+            sessionId: request.sessionId,
+            blogSlug: result.data.blogPost.slug,
+            targetUrl: request.targetUrl,
+            primaryKeyword: request.primaryKeyword,
+            seoScore: result.data.blogPost.seo_score,
+            generationTime: 45,
+            isTrialPost: result.data.blogPost.is_trial_post,
+            expiresAt: result.data.blogPost.expires_at
+          });
+
+          onSuccess?.(result.data.blogPost);
+
+          if (variant === 'blog') {
+            navigate(`/blog/${result.data.blogPost.slug}`);
+          }
+        } else {
+          throw new Error(result.error || 'Fallback generation also failed');
+        }
+      } catch (fallbackError: any) {
+        console.error('Both AI and fallback generation failed:', fallbackError);
+        toast({
+          title: "Generation failed",
+          description: "Both AI and standard generation failed. Please try again later.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsGenerating(false);
     }
