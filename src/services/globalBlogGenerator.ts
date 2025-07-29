@@ -365,8 +365,8 @@ class GlobalBlogGeneratorService {
         throw new Error('AI content generation produced insufficient content');
       }
     } catch (aiError) {
-      console.warn('AI content engine failed, falling back to template generation:', aiError);
-      return this.generateFallbackBlogPost(request);
+      console.error('AI content engine failed:', aiError);
+      throw new Error(`Content generation failed: ${aiError.message}`);
     }
   }
 
