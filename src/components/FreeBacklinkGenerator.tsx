@@ -121,19 +121,46 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-2">
-          <Gift className="h-8 w-8 text-purple-600" />
-          <h1 className="text-3xl font-bold tracking-tight">Create Free Backlink</h1>
-          <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-            FREE
-          </Badge>
+      {/* Enhanced Header */}
+      <div className="text-center space-y-6 mb-8">
+        <div className="flex items-center justify-center gap-3">
+          <div className="p-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl shadow-lg">
+            <Gift className="h-8 w-8 text-white" />
+          </div>
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Create Free Backlink
+            </h1>
+            <Badge className="mt-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md">
+              🎉 100% FREE - No Signup Required
+            </Badge>
+          </div>
         </div>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Generate a high-quality SEO blog post with a backlink to your website. 
-          <strong className="text-purple-600"> Completely free, no signup required!</strong>
-        </p>
+
+        <div className="max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 leading-relaxed mb-4">
+            Generate professional, SEO-optimized blog posts with natural backlinks to your website using our advanced AI technology.
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+            <div className="flex items-center gap-2 text-purple-600">
+              <Sparkles className="h-4 w-4" />
+              <span className="font-medium">AI-Powered Content</span>
+            </div>
+            <div className="flex items-center gap-2 text-green-600">
+              <CheckCircle2 className="h-4 w-4" />
+              <span className="font-medium">SEO Optimized</span>
+            </div>
+            <div className="flex items-center gap-2 text-blue-600">
+              <Link className="h-4 w-4" />
+              <span className="font-medium">Natural Backlinks</span>
+            </div>
+            <div className="flex items-center gap-2 text-orange-600">
+              <Clock className="h-4 w-4" />
+              <span className="font-medium">Ready in Minutes</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Service Status Alert */}
