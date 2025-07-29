@@ -291,18 +291,15 @@ const Index = () => {
                 <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
               ) : user ? (
                 <>
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      setLoginModalTab("signup");
-                      setShowLoginModal(true);
-                    }}
-                    className="font-medium"
-                  >
-                    Sign Up
-                  </Button>
                   <Button onClick={() => navigate("/dashboard")} className="font-medium">
                     Dashboard
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={handleSignOut}
+                    className="font-medium"
+                  >
+                    Sign Out
                   </Button>
                 </>
               ) : (
