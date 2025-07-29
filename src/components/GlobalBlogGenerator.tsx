@@ -89,6 +89,18 @@ export function GlobalBlogGenerator({
     setRemainingRequests(remaining);
   };
 
+  const autocorrectUrl = (url: string): string => {
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl) return trimmedUrl;
+
+    // If URL doesn't start with http:// or https://, add https://
+    if (!trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://')) {
+      return `https://${trimmedUrl}`;
+    }
+
+    return trimmedUrl;
+  };
+
   const validateForm = (): boolean => {
     if (!targetUrl.trim()) {
       toast({
