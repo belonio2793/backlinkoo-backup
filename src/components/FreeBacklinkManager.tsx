@@ -43,7 +43,7 @@ import {
 } from 'lucide-react';
 
 interface FreeBacklinkManagerProps {
-  onViewPost?: (post: FreeBacklinkResult) => void;
+  onViewPost?: (post: GeneratedContentResult) => void;
 }
 
 export function FreeBacklinkManager({ onViewPost }: FreeBacklinkManagerProps) {
