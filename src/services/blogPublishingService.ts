@@ -157,27 +157,27 @@ export class BlogPublishingService {
    * Get blog post by slug (for public viewing)
    */
   async getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
-    try {
-      const { data, error } = await supabase
-        .from('ai_generated_posts')
-        .select('*')
-        .eq('slug', slug)
-        .eq('status', 'published')
-        .single();
-
-      if (error) {
-        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
-          // Try localStorage fallback
-          return this.getPostFromLocalStorage(slug);
-        }
-        return null;
-      }
-
-      return data as BlogPost;
-    } catch (error) {
-      console.warn('Database error, trying localStorage fallback:', error);
-      return this.getPostFromLocalStorage(slug);
+    // Try localStorage first for faster response
+    const localPost = this.getPostFromLocalStorage(slug);
+    if (localPost) {
+      return localPost;
     }
+
+    // Try database as backup with timeout
+    try {
+      const { data, error } = await Promise.race([
+        supabase.from('ai_generated_posts').select('*').eq('slug', slug).eq('status', 'published').single(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Database timeout')), 1000))
+      ]) as any;
+
+      if (!error && data) {
+        return data as BlogPost;
+      }
+    } catch (error) {
+      // Silent fallback
+    }
+
+    return null;
   }
 
   /**
