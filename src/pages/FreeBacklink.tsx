@@ -4,7 +4,7 @@ import { FreeBacklinkGenerator } from '@/components/FreeBacklinkGenerator';
 import { FreeBacklinkPreview } from '@/components/FreeBacklinkPreview';
 import { FreeBacklinkManager } from '@/components/FreeBacklinkManager';
 import { FreeBacklinkResult } from '@/services/simpleAIContentEngine';
-import { Sparkles, FileText, Settings, Gift } from 'lucide-react';
+import { Sparkles, FileText, Settings, Gift, Zap, CheckCircle2 } from 'lucide-react';
 
 export function FreeBacklink() {
   const [activeTab, setActiveTab] = useState('generate');
