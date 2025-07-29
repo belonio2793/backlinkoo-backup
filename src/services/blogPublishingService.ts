@@ -363,21 +363,84 @@ export class BlogPublishingService {
   }
 
   /**
-   * Admin edit post
+   * Update blog post (general method)
+   */
+  async updateBlogPost(postId: string, updates: Partial<BlogPost>): Promise<BlogPost> {
+    // Try database first
+    try {
+      const { data, error } = await supabase
+        .from('ai_generated_posts')
+        .update(updates)
+        .eq('id', postId)
+        .select()
+        .single();
+
+      if (error) {
+        throw new Error(`Database update failed: ${error.message}`);
+      }
+
+      // Also update localStorage if exists
+      const localPosts = this.getLocalStoragePosts();
+      const index = localPosts.findIndex(p => p.id === postId);
+      if (index !== -1) {
+        localPosts[index] = { ...localPosts[index], ...updates };
+        localStorage.setItem('ai_blog_posts', JSON.stringify(localPosts));
+      }
+
+      return data as BlogPost;
+    } catch (error) {
+      // Fallback to localStorage only
+      console.warn('Database update failed, using localStorage fallback:', error);
+      const localPosts = this.getLocalStoragePosts();
+      const index = localPosts.findIndex(p => p.id === postId);
+
+      if (index === -1) {
+        throw new Error(`Post not found: ${postId}`);
+      }
+
+      localPosts[index] = { ...localPosts[index], ...updates };
+      localStorage.setItem('ai_blog_posts', JSON.stringify(localPosts));
+
+      return localPosts[index] as BlogPost;
+    }
+  }
+
+  /**
+   * Get all blog posts for migration
+   */
+  async getAllBlogPosts(): Promise<BlogPost[]> {
+    // Try database first
+    try {
+      const { data, error } = await supabase
+        .from('ai_generated_posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw new Error(`Failed to fetch posts: ${error.message}`);
+      }
+
+      // Merge with localStorage posts
+      const localPosts = this.getLocalStoragePosts();
+      const dbPosts = data as BlogPost[];
+
+      // Remove duplicates (database takes precedence)
+      const dbSlugs = new Set(dbPosts.map(p => p.slug));
+      const uniqueLocalPosts = localPosts.filter(p => !dbSlugs.has(p.slug));
+
+      return [...dbPosts, ...uniqueLocalPosts];
+    } catch (error) {
+      // Fallback to localStorage only
+      console.warn('Database query failed, using localStorage fallback:', error);
+      return this.getLocalStoragePosts();
+    }
+  }
+
+  /**
+   * Admin edit post (legacy method - uses updateBlogPost)
    */
   async adminUpdatePost(postId: string, updates: Partial<BlogPost>): Promise<BlogPost> {
-    const { data, error } = await supabase
-      .from('ai_generated_posts')
-      .update(updates)
-      .eq('id', postId)
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Failed to update post: ${error.message}`);
-    }
-
-    return data as BlogPost;
+    return this.updateBlogPost(postId, updates);
   }
 
   /**
