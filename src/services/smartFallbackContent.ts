@@ -6,20 +6,44 @@
 import { formatBlogContent } from '../utils/textFormatting';
 
 export class SmartFallbackContent {
-  
+
   static generateContent(keyword: string, targetUrl: string, anchorText?: string): string {
     const keywordLower = keyword.toLowerCase();
     const capitalizedKeyword = keyword;
     const anchor = anchorText || `${keyword} resources`;
     const currentYear = new Date().getFullYear();
-    
+
+    // Add randomization to make content unique
+    const contentVariant = this.getRandomVariant();
+    const uniqueSeed = this.generateUniqueSeed(keyword);
+
     // Detect keyword category to generate appropriate content
     const contentTemplate = this.detectKeywordCategory(keywordLower);
 
-    const content = this.generateContextualContent(capitalizedKeyword, targetUrl, anchor, contentTemplate);
+    const content = this.generateContextualContent(
+      capitalizedKeyword,
+      targetUrl,
+      anchor,
+      contentTemplate,
+      contentVariant,
+      uniqueSeed
+    );
 
     // Apply enhanced formatting for bullet points and capitalization
     return formatBlogContent(content);
+  }
+
+  private static getRandomVariant(): number {
+    return Math.floor(Math.random() * 3) + 1; // Returns 1, 2, or 3
+  }
+
+  private static generateUniqueSeed(keyword: string): string {
+    // Create a unique identifier based on keyword and current time
+    const hash = keyword.split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0);
+    return Math.abs(hash).toString();
   }
 
   private static detectKeywordCategory(keyword: string): string {
@@ -57,9 +81,19 @@ export class SmartFallbackContent {
     return 'informational';
   }
 
-  private static generateContextualContent(keyword: string, targetUrl: string, anchor: string, template: string): string {
+  private static generateContextualContent(
+    keyword: string,
+    targetUrl: string,
+    anchor: string,
+    template: string,
+    variant: number = 1,
+    uniqueSeed: string = '1'
+  ): string {
     const currentYear = new Date().getFullYear();
-    
+
+    // Generate unique content elements based on variant and seed
+    const uniqueElements = this.generateUniqueElements(keyword, variant, uniqueSeed);
+
     switch (template) {
       case 'food':
         return `<h1>${keyword}: Complete Guide for ${currentYear}</h1>
@@ -255,37 +289,131 @@ export class SmartFallbackContent {
 <p>Mastering ${keyword} is an ongoing journey. With the right strategy, tools, and commitment, your business can achieve remarkable results and sustainable growth.</p>`;
 
       default: // informational
-        return `<h1>${keyword}: Complete Guide for ${currentYear}</h1>
+        return this.generateInformationalContent(keyword, targetUrl, anchor, currentYear, uniqueElements, variant);
+    }
+  }
 
-<p>Welcome to your comprehensive guide about <strong>${keyword}</strong>. This detailed resource provides valuable insights and practical information to help you understand and make the most of ${keyword}.</p>
+  private static generateUniqueElements(keyword: string, variant: number, uniqueSeed: string) {
+    const keywordSpecific = this.getKeywordSpecificTerms(keyword);
+    const trendingTopics = this.getTrendingTopics(variant);
+    const uniqueAngles = this.getUniqueAngles(keyword, variant);
 
-<h2>Introduction to ${keyword}</h2>
-<p>Understanding <em>${keyword}</em> is important for anyone looking to expand their knowledge in this area. This guide covers the essential information you need to know.</p>
+    return {
+      keywordSpecific,
+      trendingTopics,
+      uniqueAngles,
+      dynamicContent: this.generateDynamicContent(keyword, variant, uniqueSeed)
+    };
+  }
 
-<h2>Key Aspects of ${keyword}</h2>
+  private static getKeywordSpecificTerms(keyword: string): string[] {
+    const terms = keyword.toLowerCase().split(' ');
+    const relatedTerms = [];
 
-- <strong>Fundamentals</strong>: Core concepts and principles
-- <strong>Applications</strong>: Real-world uses and examples
-- <strong>Benefits</strong>: Advantages and positive outcomes
-- <strong>Considerations</strong>: Important factors to keep in mind
+    // Generate contextually related terms
+    for (const term of terms) {
+      relatedTerms.push(`${term} optimization`);
+      relatedTerms.push(`${term} strategies`);
+      relatedTerms.push(`${term} best practices`);
+      relatedTerms.push(`${term} solutions`);
+    }
 
-<h2>Getting Started</h2>
-<p>If you're new to ${keyword}, start with the basics and gradually build your understanding. Learning about ${keyword} can be rewarding and beneficial in many ways.</p>
+    return relatedTerms.slice(0, 6);
+  }
 
-<h2>Practical Applications</h2>
-<p>Discover how ${keyword} can be applied in various situations and contexts. Understanding practical applications helps you see the real value and potential.</p>
+  private static getTrendingTopics(variant: number): string[] {
+    const topicSets = [
+      ['AI integration', 'automation', 'digital transformation', 'user experience'],
+      ['sustainability', 'remote work', 'data privacy', 'personalization'],
+      ['innovation', 'scalability', 'efficiency', 'competitive advantage']
+    ];
 
-<h2>Expert Resources</h2>
-<p>For more detailed information and expert insights about ${keyword}, <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a> offers comprehensive resources and professional guidance.</p>
+    return topicSets[variant - 1] || topicSets[0];
+  }
 
-<h2>Tips for Success</h2>
-<p>Make the most of your ${keyword} experience by following proven tips and avoiding common pitfalls. Learning from others' experiences can save time and effort.</p>
+  private static getUniqueAngles(keyword: string, variant: number): string[] {
+    const angleSets = [
+      ['expert insights', 'proven methodologies', 'industry standards', 'cutting-edge approaches'],
+      ['practical applications', 'real-world examples', 'case studies', 'success stories'],
+      ['future trends', 'emerging technologies', 'innovative solutions', 'next-generation tools']
+    ];
 
-<h2>Looking Forward</h2>
-<p>The field of ${keyword} continues to evolve and develop. Staying informed about new developments and trends helps you maintain current knowledge.</p>
+    return angleSets[variant - 1] || angleSets[0];
+  }
+
+  private static generateDynamicContent(keyword: string, variant: number, uniqueSeed: string): string {
+    const seedNum = parseInt(uniqueSeed) % 100;
+    const dynamicElements = [
+      `${keyword} has evolved significantly in ${new Date().getFullYear()}`,
+      `Recent developments in ${keyword} have opened new possibilities`,
+      `The ${keyword} landscape continues to transform with innovative approaches`
+    ];
+
+    return dynamicElements[seedNum % dynamicElements.length];
+  }
+
+  private static generateInformationalContent(
+    keyword: string,
+    targetUrl: string,
+    anchor: string,
+    currentYear: number,
+    uniqueElements: any,
+    variant: number
+  ): string {
+    const introVariations = [
+      `Discover everything you need to know about <strong>${keyword}</strong> in this comprehensive ${currentYear} guide.`,
+      `Master the fundamentals of <strong>${keyword}</strong> with expert insights and practical strategies.`,
+      `Unlock the potential of <strong>${keyword}</strong> through this detailed exploration of key concepts and applications.`
+    ];
+
+    const sectionVariations = [
+      {
+        title: 'Understanding',
+        content: `<em>${keyword}</em> represents a crucial element in today's landscape. ${uniqueElements.dynamicContent}, making it essential to understand its core principles and applications.`
+      },
+      {
+        title: 'Exploring',
+        content: `The world of <em>${keyword}</em> offers numerous opportunities for growth and innovation. ${uniqueElements.dynamicContent}, providing new avenues for success.`
+      },
+      {
+        title: 'Mastering',
+        content: `Developing expertise in <em>${keyword}</em> requires dedication and the right approach. ${uniqueElements.dynamicContent}, creating exciting possibilities.`
+      }
+    ];
+
+    const selectedIntro = introVariations[variant - 1] || introVariations[0];
+    const selectedSection = sectionVariations[variant - 1] || sectionVariations[0];
+
+    return `<h1>${keyword}: ${uniqueElements.uniqueAngles[0]} Guide for ${currentYear}</h1>
+
+<p>${selectedIntro} Whether you're new to ${keyword} or looking to enhance your knowledge, this resource provides valuable insights and actionable information.</p>
+
+<h2>${selectedSection.title} ${keyword}</h2>
+<p>${selectedSection.content}</p>
+
+<h2>Core Benefits of ${keyword}</h2>
+
+- <strong>${uniqueElements.uniqueAngles[1]}</strong>: Advanced approaches that deliver results
+- <strong>${uniqueElements.trendingTopics[0]}</strong>: Modern solutions for today's challenges
+- <strong>${uniqueElements.trendingTopics[1]}</strong>: Adaptable strategies for various contexts
+- <strong>${uniqueElements.uniqueAngles[2]}</strong>: Innovative methods for optimal outcomes
+
+<h2>Getting Started with ${keyword}</h2>
+<p>Beginning your ${keyword} journey requires a strategic approach. Focus on ${uniqueElements.keywordSpecific[0]} and ${uniqueElements.keywordSpecific[1]} to establish a solid foundation.</p>
+
+<h2>${uniqueElements.trendingTopics[2]} and ${keyword}</h2>
+<p>The integration of ${uniqueElements.trendingTopics[2].toLowerCase()} with ${keyword} creates new opportunities for ${uniqueElements.keywordSpecific[2]} and enhanced performance.</p>
+
+<h2>Professional Resources and Tools</h2>
+<p>For comprehensive ${keyword} solutions and ${uniqueElements.uniqueAngles[3].toLowerCase()}, <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a> provides the resources and expertise needed to achieve your goals.</p>
+
+<h2>Advanced ${keyword} Strategies</h2>
+<p>Implementing advanced ${keyword} strategies involves leveraging ${uniqueElements.keywordSpecific[3]} and focusing on ${uniqueElements.keywordSpecific[4]} for maximum impact.</p>
+
+<h2>Future of ${keyword}</h2>
+<p>Looking ahead, ${keyword} will continue to evolve with ${uniqueElements.trendingTopics[3]} and emerging technologies. Staying informed about these developments ensures continued success.</p>
 
 <h2>Conclusion</h2>
-<p>Whether you're just beginning to learn about ${keyword} or looking to deepen your understanding, this guide provides a solid foundation for your journey.</p>`;
-    }
+<p>Your ${keyword} journey is unique and valuable. By applying the ${uniqueElements.uniqueAngles[0].toLowerCase()} and strategies outlined in this guide, you'll be well-equipped to achieve meaningful results and long-term success.</p>`;
   }
 }

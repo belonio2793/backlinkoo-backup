@@ -10,7 +10,7 @@ import { LoginModal } from '@/components/LoginModal';
 import { supabase } from '@/integrations/supabase/client';
 import { formatBlogTitle, formatBlogContent, getTrendingLabel, calculateWordCount, cleanHTMLContent } from '@/utils/textFormatting';
 import { runImmediateContentCleanup } from '@/utils/immediateContentCleanup';
-import { enhancedAIContentEngine } from '@/services/enhancedAIContentEngine';
+import { globalBlogGenerator } from '@/services/globalBlogGenerator';
 import { Footer } from '@/components/Footer';
 import {
   Calendar,
@@ -265,27 +265,33 @@ export function BlogPost() {
         description: "Please wait while we generate fresh content with AI.",
       });
 
-      // Generate new content using the enhanced AI engine
-      const result = await enhancedAIContentEngine.generateContent({
-        keyword: primaryKeyword,
+      // Generate new content using the global blog generator
+      const sessionId = crypto.randomUUID();
+      const result = await globalBlogGenerator.generateGlobalBlogPost({
         targetUrl: blogPost.target_url,
+        primaryKeyword: primaryKeyword,
         anchorText: anchorText,
-        contentLength: 'medium',
-        contentTone: 'professional',
-        seoFocus: 'high'
+        sessionId,
+        additionalContext: {
+          contentLength: 'medium',
+          contentTone: 'professional',
+          seoFocus: 'high'
+        }
       });
 
-      if (!result.finalContent) {
-        throw new Error('Failed to generate content');
+      if (!result.success || !result.data?.blogPost) {
+        throw new Error(result.error || "We're currently experiencing a large volume of requests. Please register or sign in to try one of our alternatives.");
       }
 
       // Update the blog post with new content
+      const newBlogPost = result.data.blogPost;
       const updatedBlogPost = {
         ...blogPost,
-        content: result.finalContent,
-        word_count: result.metadata.wordCount,
-        reading_time: result.metadata.readingTime,
-        seo_score: result.metadata.seoScore,
+        content: newBlogPost.content,
+        title: newBlogPost.title,
+        word_count: newBlogPost.word_count,
+        reading_time: newBlogPost.reading_time,
+        seo_score: newBlogPost.seo_score,
         updated_at: new Date().toISOString()
       };
 
@@ -305,10 +311,11 @@ export function BlogPost() {
         const { error } = await supabase
           .from('published_blog_posts')
           .update({
-            content: result.finalContent,
-            word_count: result.metadata.wordCount,
-            reading_time: result.metadata.readingTime,
-            seo_score: result.metadata.seoScore,
+            content: newBlogPost.content,
+            title: newBlogPost.title,
+            word_count: newBlogPost.word_count,
+            reading_time: newBlogPost.reading_time,
+            seo_score: newBlogPost.seo_score,
             updated_at: new Date().toISOString()
           })
           .eq('slug', blogPost.slug);

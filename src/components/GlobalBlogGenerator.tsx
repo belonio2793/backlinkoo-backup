@@ -71,8 +71,20 @@ export function GlobalBlogGenerator({
   const { isLoggedIn } = useAuthStatus();
 
   useEffect(() => {
-    loadGlobalStats();
-    updateRemainingRequests();
+    try {
+      loadGlobalStats();
+      updateRemainingRequests();
+    } catch (error) {
+      console.error('Error initializing GlobalBlogGenerator:', error);
+      // Set safe defaults
+      setGlobalStats({
+        totalPosts: 0,
+        postsToday: 0,
+        activeUsers: null,
+        averageQuality: null
+      });
+      setRemainingRequests(5);
+    }
   }, []);
 
   const loadGlobalStats = async () => {
@@ -81,12 +93,32 @@ export function GlobalBlogGenerator({
       setGlobalStats(stats);
     } catch (error) {
       console.warn('Could not load global stats:', error);
+      // Set safe fallback stats to prevent component errors
+      setGlobalStats({
+        totalPosts: 0,
+        postsToday: 0,
+        activeUsers: null,
+        averageQuality: null
+      });
     }
   };
 
   const updateRemainingRequests = () => {
     const remaining = globalBlogGenerator.getRemainingRequests();
     setRemainingRequests(remaining);
+  };
+
+  const formatUrl = (url: string): string => {
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl) return trimmedUrl;
+
+    // If URL already has protocol, return as is
+    if (trimmedUrl.match(/^https?:\/\//)) {
+      return trimmedUrl;
+    }
+
+    // Add https:// protocol if missing
+    return `https://${trimmedUrl}`;
   };
 
   const validateForm = (): boolean => {
@@ -101,15 +133,21 @@ export function GlobalBlogGenerator({
 
     if (!primaryKeyword.trim()) {
       toast({
-        title: "Primary keyword required", 
+        title: "Primary keyword required",
         description: "Please enter the main keyword for your blog post.",
         variant: "destructive",
       });
       return false;
     }
 
+    // Auto-format URL and update state
+    const formattedUrl = formatUrl(targetUrl);
+    if (formattedUrl !== targetUrl) {
+      setTargetUrl(formattedUrl);
+    }
+
     try {
-      new URL(targetUrl);
+      new URL(formattedUrl);
     } catch {
       toast({
         title: "Invalid URL",
@@ -188,8 +226,9 @@ export function GlobalBlogGenerator({
       }
 
       const sessionId = crypto.randomUUID();
+      const formattedTargetUrl = formatUrl(targetUrl.trim());
       const request: GlobalBlogRequest = {
-        targetUrl: targetUrl.trim(),
+        targetUrl: formattedTargetUrl,
         primaryKeyword: primaryKeyword.trim(),
         anchorText: anchorText.trim() || undefined,
         sessionId,
@@ -451,9 +490,15 @@ export function GlobalBlogGenerator({
               <Label htmlFor="targetUrl">Target URL *</Label>
               <Input
                 id="targetUrl"
-                placeholder="https://example.com/your-page"
+                placeholder="example.com (https:// will be added automatically)"
                 value={targetUrl}
                 onChange={(e) => setTargetUrl(e.target.value)}
+                onBlur={(e) => {
+                  const formatted = formatUrl(e.target.value);
+                  if (formatted !== e.target.value && formatted.trim()) {
+                    setTargetUrl(formatted);
+                  }
+                }}
                 disabled={isGenerating}
               />
             </div>

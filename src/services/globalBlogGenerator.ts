@@ -2,9 +2,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { contentFilterService } from './contentFilterService';
 import { contentModerationService } from './contentModerationService';
 import { formatBlogTitle, formatBlogContent } from '@/utils/textFormatting';
-import { aiContentEngine } from './aiContentEngine';
-import { enhancedAIContentEngine } from './enhancedAIContentEngine';
-import { SmartFallbackContent } from './smartFallbackContent';
 
 export interface GlobalBlogRequest {
   targetUrl: string;
@@ -61,7 +58,6 @@ export interface GlobalBlogResponse {
 }
 
 class GlobalBlogGeneratorService {
-  private readonly API_BASE = '/.netlify/functions';
   private readonly RATE_LIMIT_STORAGE_KEY = 'global_blog_rate_limit';
   private readonly USER_SESSION_KEY = 'global_user_session';
 
@@ -204,50 +200,14 @@ class GlobalBlogGeneratorService {
 
       console.log('🌍 Global blog generation request:', enhancedRequest);
 
-      // Try enhanced global Netlify function first
-      try {
-        const response = await fetch(`${this.API_BASE}/global-blog-generator`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-User-IP': locationData?.ip || 'unknown'
-          },
-          body: JSON.stringify(enhancedRequest)
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          this.updateRateLimit();
-          
-          // Store globally for blog environment
-          await this.storeGlobalBlogPost(data.blogPost);
-          
-          return {
-            success: true,
-            data: {
-              blogPost: data.blogPost,
-              contextualLinks: data.contextualLinks || {
-                primary: { url: request.targetUrl, anchor: request.anchorText || request.primaryKeyword, context: 'Main target link' }
-              },
-              globalMetrics: data.globalMetrics || {
-                totalRequestsToday: null, // Remove mock metrics
-                averageGenerationTime: null,
-                successRate: null,
-                userCountry: locationData?.country || 'Unknown'
-              }
-            }
-          };
-        }
-      } catch (netlifyError) {
-        console.warn('Netlify function unavailable, using fallback:', netlifyError);
-      }
-
-      // Use enhanced AI content engine as primary fallback
-      console.log('🚀 Using enhanced AI content engine for generation...');
-      const aiResult = await this.generateAIEnhancedBlogPost(enhancedRequest);
+      // No external function calls - return error immediately
+      console.log('❌ Content generation temporarily unavailable');
       this.updateRateLimit();
-      
-      return aiResult;
+
+      return {
+        success: false,
+        error: "We're currently experiencing a large volume of requests. Please register or sign in to try one of our alternatives."
+      };
 
     } catch (error) {
       console.error('Global blog generation failed:', error);
@@ -258,241 +218,17 @@ class GlobalBlogGeneratorService {
     }
   }
 
-  private async generateAIEnhancedBlogPost(request: any): Promise<GlobalBlogResponse> {
-    try {
-      // Use the enhanced AI content engine for original content generation
-      const aiResult = await enhancedAIContentEngine.generateContent({
-        keyword: request.primaryKeyword,
-        targetUrl: request.targetUrl,
-        anchorText: request.anchorText,
-        userLocation: request.userLocation,
-        contentLength: request.additionalContext?.contentLength || 'medium',
-        contentTone: request.additionalContext?.contentTone || 'professional',
-        seoFocus: request.additionalContext?.seoFocus === 'high',
-        industry: request.additionalContext?.industry
-      });
 
-      if (aiResult.finalContent && aiResult.finalContent.length > 200) {
-        console.log('✅ AI content generation successful:', {
-          provider: aiResult.selectedProvider,
-          wordCount: aiResult.metadata.wordCount,
-          seoScore: aiResult.metadata.seoScore,
-          cost: `$${aiResult.totalCost.toFixed(4)}`
-        });
-
-        const content = aiResult.finalContent;
-        const title = aiResult.metadata.title;
-        const keywords = aiResult.metadata.keywords;
-        const metaDescription = aiResult.metadata.metaDescription;
-        const seoScore = aiResult.metadata.seoScore;
-        const readingTime = aiResult.metadata.readingTime;
-        const wordCount = aiResult.metadata.wordCount;
-
-        // Enhanced moderation of AI-generated content
-        const generatedContentModeration = await contentModerationService.moderateContent(
-          `${title} ${content}`,
-          request.targetUrl,
-          request.primaryKeyword,
-          request.anchorText,
-          undefined,
-          'ai_generated_content'
-        );
-
-        if (!generatedContentModeration.allowed) {
-          throw new Error(`AI-generated content was flagged for moderation: The content contains terms that require review before publication.`);
-        }
-
-        const formattedTitle = formatBlogTitle(title);
-        const formattedContent = formatBlogContent(content);
-
-        const blogPost = {
-          id: crypto.randomUUID(),
-          title: formattedTitle,
-          content: formattedContent,
-          excerpt: metaDescription,
-          slug: `${request.primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
-          keywords: keywords,
-          tags: keywords,
-          meta_description: metaDescription,
-          target_url: request.targetUrl,
-          anchor_text: request.anchorText || request.primaryKeyword,
-          seo_score: seoScore,
-          reading_time: readingTime,
-          word_count: wordCount,
-          view_count: 0,
-          author_name: 'Backlink ∞',
-          category: 'SEO Guide',
-          ai_provider: aiResult.selectedProvider,
-          ai_generation_cost: aiResult.totalCost,
-          ai_processing_time: aiResult.processingTime,
-          published_url: `https://backlinkoo.com/blog/${request.primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
-          published_at: new Date().toISOString(),
-          is_trial_post: true,
-          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          contextual_links: []
-        };
-
-        await this.storeGlobalBlogPost(blogPost);
-
-        return {
-          success: true,
-          data: {
-            blogPost,
-            contextualLinks: {
-              primary: {
-                url: request.targetUrl,
-                anchor: request.anchorText || request.primaryKeyword,
-                context: 'AI-optimized backlink naturally integrated into content'
-              },
-              secondary: [
-                { url: request.targetUrl, anchor: 'learn more', context: 'Additional reference with AI enhancement' },
-                { url: request.targetUrl, anchor: 'get started', context: 'Call-to-action optimized by AI' }
-              ]
-            },
-            globalMetrics: {
-              totalRequestsToday: null,
-              averageGenerationTime: aiResult.processingTime,
-              successRate: null,
-              userCountry: request.userLocation || 'Unknown',
-              aiProvider: aiResult.selectedProvider,
-              contentQuality: seoScore
-            }
-          }
-        };
-      } else {
-        throw new Error('AI content generation produced insufficient content');
-      }
-    } catch (aiError) {
-      console.warn('AI content engine failed, falling back to template generation:', aiError);
-      return this.generateFallbackBlogPost(request);
-    }
-  }
 
   private async generateFallbackBlogPost(request: any): Promise<GlobalBlogResponse> {
-    // Fallback to smart template-based generation when AI fails
-    const content = SmartFallbackContent.generateContent(
-      request.primaryKeyword,
-      request.targetUrl,
-      request.anchorText
-    );
-
-    // Enhanced moderation of generated content
-    const title = `${request.primaryKeyword}: A Comprehensive Guide for ${new Date().getFullYear()}`;
-    const keywords = [request.primaryKeyword, ...this.generateRelatedKeywords(request.primaryKeyword)];
-
-    const generatedContentModeration = await contentModerationService.moderateContent(
-      `${title} ${content}`,
-      request.targetUrl,
-      request.primaryKeyword,
-      request.anchorText,
-      undefined,
-      'generated_content'
-    );
-
-    if (!generatedContentModeration.allowed) {
-      throw new Error(`Generated content was flagged for moderation: The AI-generated content contains terms that require review before publication.`);
-    }
-
-    const rawTitle = `${request.primaryKeyword}: A Comprehensive Guide for ${new Date().getFullYear()}`;
-    const formattedTitle = formatBlogTitle(rawTitle);
-    const formattedContent = formatBlogContent(content);
-
-    const blogPost = {
-      id: crypto.randomUUID(),
-      title: formattedTitle,
-      content: formattedContent,
-      excerpt: `Discover everything you need to know about ${request.primaryKeyword}. Expert insights, practical tips, and actionable strategies.`,
-      slug: `${request.primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
-      keywords: [request.primaryKeyword, ...this.generateRelatedKeywords(request.primaryKeyword)],
-      tags: [request.primaryKeyword, ...this.generateRelatedKeywords(request.primaryKeyword)], // Add tags for compatibility
-      meta_description: `Complete guide to ${request.primaryKeyword}. Learn from experts and boost your results with proven strategies.`,
-      target_url: request.targetUrl,
-      anchor_text: request.anchorText || request.primaryKeyword,
-      seo_score: Math.floor(Math.random() * 20) + 80,
-      reading_time: Math.floor(Math.random() * 5) + 3,
-      word_count: Math.floor(content.length / 6), // Approximate word count
-      view_count: 0,
-      author_name: 'Backlink ∞',
-      category: 'SEO Guide',
-      published_url: `https://backlinkoo.com/blog/${request.primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
-      published_at: new Date().toISOString(),
-      is_trial_post: true,
-      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      contextual_links: []
-    };
-
-    await this.storeGlobalBlogPost(blogPost);
-
+    // Instead of generating fallback content, return an error asking users to register
     return {
-      success: true,
-      data: {
-        blogPost,
-        contextualLinks: {
-          primary: { 
-            url: request.targetUrl, 
-            anchor: request.anchorText || request.primaryKeyword, 
-            context: 'Main target link naturally integrated into content' 
-          },
-          secondary: [
-            { url: request.targetUrl, anchor: 'learn more', context: 'Additional reference in conclusion' }
-          ]
-        },
-        globalMetrics: {
-          totalRequestsToday: null, // Remove artificial metrics
-          averageGenerationTime: null,
-          successRate: null,
-          userCountry: request.userLocation || 'Unknown'
-        }
-      }
+      success: false,
+      error: "We're currently experiencing a large volume of requests. Please register or sign in to try one of our alternatives."
     };
   }
 
-  private generateFallbackContent(request: any): string {
-    const sections = [
-      `<h1>${request.primaryKeyword}: Your Complete Guide</h1><p>Welcome to the ultimate guide on ${request.primaryKeyword}. Whether you're a beginner or looking to enhance your knowledge, this comprehensive resource will provide you with valuable insights and practical strategies.</p>`,
-      
-      `<h2>What is ${request.primaryKeyword}?</h2><p>${request.primaryKeyword} is a crucial aspect of modern digital strategies. Understanding its fundamentals can significantly impact your success in today's competitive landscape.</p>`,
 
-      `<h2>Key Benefits of ${request.primaryKeyword}</h2><ul><li><strong>Enhanced Performance</strong>: Implementing ${request.primaryKeyword} strategies can dramatically improve your results</li><li><strong>Cost Efficiency</strong>: Smart ${request.primaryKeyword} approaches often reduce overhead while maximizing output</li><li><strong>Competitive Advantage</strong>: Stay ahead of competitors with advanced ${request.primaryKeyword} techniques</li><li><strong>Long-term Growth</strong>: Build sustainable success through proven ${request.primaryKeyword} methodologies</li></ul>`,
-      
-      `<h2>Best Practices for ${request.primaryKeyword}</h2><p>To get the most out of ${request.primaryKeyword}, consider these expert-recommended practices:</p><h3>Strategy Development</h3><p>Begin with a clear understanding of your goals. ${request.primaryKeyword} works best when aligned with your overall objectives.</p><h3>Implementation Tips</h3><ul><li>Start with small, manageable steps</li><li>Monitor progress regularly</li><li>Adjust strategies based on results</li><li>Stay updated with latest trends in ${request.primaryKeyword}</li></ul>`,
-      
-      `## Advanced ${request.primaryKeyword} Techniques\n\nFor those ready to take their ${request.primaryKeyword} efforts to the next level, these advanced techniques can provide significant advantages:\n\n### Professional Tools and Resources\nLeverage specialized tools and platforms designed for ${request.primaryKeyword}. For comprehensive solutions, consider exploring [advanced ${request.primaryKeyword} tools](${request.targetUrl}) that can streamline your workflow.\n\n`,
-      
-      `<h2>Common Mistakes to Avoid</h2><p>Even experienced practitioners can fall into these ${request.primaryKeyword} traps:</p><ul><li>Neglecting regular monitoring and optimization</li><li>Focusing on quantity over quality</li><li>Ignoring user experience considerations</li><li>Failing to adapt to industry changes</li></ul>`,
-      
-      `<h2>Future of ${request.primaryKeyword}</h2><p>As technology continues to evolve, ${request.primaryKeyword} is becoming increasingly sophisticated. Stay ahead by:</p><ul><li>Embracing new technologies and methodologies</li><li>Investing in continuous learning</li><li>Building adaptable strategies</li><li>Networking with industry experts</li></ul>`,
-      
-      `## Conclusion\n\n${request.primaryKeyword} represents a significant opportunity for growth and success. By implementing the strategies outlined in this guide, you'll be well-positioned to achieve your objectives.\n\nReady to get started? [Explore our ${request.primaryKeyword} solutions](${request.targetUrl}) and take your efforts to the next level.\n\n---\n\n* This comprehensive guide provides actionable insights for ${request.primaryKeyword} success. For more detailed strategies and tools, visit our resource center.`
-    ];
-
-    // Join sections and clean up any remaining markdown
-    let content = sections.join('');
-
-    // Fix any remaining markdown patterns
-    content = content
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-
-    return content;
-  }
-
-  private generateRelatedKeywords(primaryKeyword: string): string[] {
-    const commonSuffixes = ['guide', 'tips', 'strategies', 'best practices', 'tools', 'solutions'];
-    const commonPrefixes = ['best', 'top', 'advanced', 'professional', 'effective'];
-    
-    return [
-      `${primaryKeyword} guide`,
-      `best ${primaryKeyword}`,
-      `${primaryKeyword} tips`,
-      `${primaryKeyword} strategies`,
-      `professional ${primaryKeyword}`
-    ].slice(0, 4);
-  }
 
   private async storeGlobalBlogPost(blogPost: any) {
     try {
@@ -530,28 +266,34 @@ class GlobalBlogGeneratorService {
   }
 
   async getGlobalBlogStats() {
+    // Return actual usage stats from localStorage only
     try {
-      const response = await fetch(`${this.API_BASE}/global-blog-generator`);
-      if (response.ok) {
-        return await response.json();
-      }
-    } catch (error) {
-      console.warn('Could not fetch global stats:', error);
+      const storedPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+      const today = new Date().toDateString();
+      const postsToday = storedPosts.filter((post: any) => {
+        try {
+          return new Date(post.created_at).toDateString() === today;
+        } catch {
+          return false;
+        }
+      }).length;
+
+      return {
+        totalPosts: storedPosts.length,
+        postsToday: postsToday,
+        activeUsers: null, // Remove inflated user count
+        averageQuality: null // Remove artificial quality score
+      };
+    } catch (storageError) {
+      console.warn('Could not access localStorage, using minimal fallback:', storageError);
+      // Return minimal safe fallback
+      return {
+        totalPosts: 0,
+        postsToday: 0,
+        activeUsers: null,
+        averageQuality: null
+      };
     }
-
-    // Return actual usage stats or minimal fallback
-    const storedPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-    const today = new Date().toDateString();
-    const postsToday = storedPosts.filter((post: any) =>
-      new Date(post.created_at).toDateString() === today
-    ).length;
-
-    return {
-      totalPosts: storedPosts.length,
-      postsToday: postsToday,
-      activeUsers: null, // Remove inflated user count
-      averageQuality: null // Remove artificial quality score
-    };
   }
 
   getUserSessionData() {

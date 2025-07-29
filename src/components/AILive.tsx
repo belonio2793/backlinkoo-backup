@@ -23,7 +23,12 @@ import {
   FileText,
   Brain
 } from 'lucide-react';
-import { MockAIService } from '@/services/mockAIService';
+import { openAIService } from '@/services/api/openai';
+import { grokService } from '@/services/api/grok';
+import { deepAIService } from '@/services/api/deepai';
+import { huggingFaceService } from '@/services/api/huggingface';
+import { cohereService } from '@/services/api/cohere';
+import { rytrService } from '@/services/api/rytr';
 
 interface AIProvider {
   name: string;
@@ -63,6 +68,10 @@ export function AILive() {
   const [url, setUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [providers, setProviders] = useState<AIProvider[]>([
+    { name: 'HuggingFace', status: 'checking' },
+    { name: 'Cohere', status: 'checking' },
+    { name: 'Rytr', status: 'checking' },
+    { name: 'DeepAI', status: 'checking' },
     { name: 'OpenAI', status: 'checking' },
     { name: 'Grok', status: 'checking' }
   ]);
@@ -103,28 +112,25 @@ export function AILive() {
   const checkApiHealth = async (provider: string): Promise<boolean> => {
     try {
       console.log(`Checking ${provider} health...`);
-      const response = await fetch('/.netlify/functions/check-ai-provider', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider })
-      });
 
-      console.log(`${provider} response status:`, response.status);
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log(`${provider} health check result:`, data);
-        return data.healthy === true;
+      switch (provider) {
+        case 'OpenAI':
+          return openAIService.isConfigured() && await openAIService.testConnection();
+        case 'Grok':
+          return grokService.isConfigured() && await grokService.testConnection();
+        case 'DeepAI':
+          return deepAIService.isConfigured() && await deepAIService.testConnection();
+        case 'HuggingFace':
+          return huggingFaceService.isConfigured() && await huggingFaceService.testConnection();
+        case 'Cohere':
+          return cohereService.isConfigured() && await cohereService.testConnection();
+        case 'Rytr':
+          return rytrService.isConfigured() && await rytrService.testConnection();
+        default:
+          return false;
       }
-
-      // If response is not ok, fall back to mock service
-      console.log(`${provider} Netlify function unavailable, using mock service`);
-      const mockResult = await MockAIService.checkProviderHealth(provider);
-      console.log(`Mock health check result for ${provider}:`, mockResult.healthy);
-      return mockResult.healthy;
     } catch (error) {
-      // Network error or other failure - no mock fallback
-      console.log(`${provider} health check failed: ${error.message}`);
+      console.log(`${provider} health check failed:`, error);
       return false;
     }
   };
@@ -195,9 +201,21 @@ export function AILive() {
     return true;
   };
 
-  const selectRandomProvider = (): string => {
+  const selectProviderByPriority = (): string => {
+    // Priority order: HuggingFace → Cohere → Rytr → DeepAI → OpenAI → Grok
+    const priorityOrder = ['HuggingFace', 'Cohere', 'Rytr', 'DeepAI', 'OpenAI', 'Grok'];
     const onlineProviders = providers.filter(p => p.status === 'online');
-    return onlineProviders[Math.floor(Math.random() * onlineProviders.length)].name;
+
+    // Find the first available provider in priority order
+    for (const providerName of priorityOrder) {
+      const provider = onlineProviders.find(p => p.name === providerName);
+      if (provider) {
+        return provider.name;
+      }
+    }
+
+    // Fallback to first available if none match priority order
+    return onlineProviders[0]?.name || 'None';
   };
 
   const selectRandomPrompt = (): { prompt: string, index: number } => {
@@ -243,7 +261,7 @@ export function AILive() {
       }
 
       // Step 2: Select Provider and Prompt
-      const selectedProvider = selectRandomProvider();
+      const selectedProvider = selectProviderByPriority();
       const { prompt, index } = selectRandomPrompt();
       
       addStep('Selection', 'success', `Selected ${selectedProvider} with Prompt ${index + 1}`);
@@ -253,27 +271,65 @@ export function AILive() {
 
       let result;
       try {
-        const response = await fetch('/.netlify/functions/generate-ai-content', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            provider: selectedProvider,
-            prompt,
-            keyword,
-            anchorText,
-            url
-          })
-        });
+        console.log(`Generating content with ${selectedProvider}...`);
+        let apiResult;
 
-        if (response.ok) {
-          result = await response.json();
-          console.log('Content generated using Netlify function');
-        } else {
-          throw new Error(`${selectedProvider} API not available. Please configure proper API keys.`);
+        switch (selectedProvider) {
+          case 'OpenAI':
+            apiResult = await openAIService.generateContent(prompt, {
+              model: 'gpt-3.5-turbo',
+              maxTokens: 2000,
+              temperature: 0.7
+            });
+            break;
+          case 'Grok':
+            apiResult = await grokService.generateContent(prompt, {
+              model: 'grok-2-1212',
+              maxTokens: 2000,
+              temperature: 0.7
+            });
+            break;
+          case 'DeepAI':
+            apiResult = await deepAIService.generateText(prompt);
+            break;
+          case 'HuggingFace':
+            apiResult = await huggingFaceService.generateText(prompt, {
+              model: 'microsoft/DialoGPT-large',
+              maxLength: 2000,
+              temperature: 0.7
+            });
+            break;
+          case 'Cohere':
+            apiResult = await cohereService.generateText(prompt, {
+              model: 'command',
+              maxTokens: 2000,
+              temperature: 0.7
+            });
+            break;
+          case 'Rytr':
+            apiResult = await rytrService.generateContent(prompt, {
+              useCase: 'blog_idea_outline',
+              tone: 'convincing',
+              maxCharacters: 15000
+            });
+            break;
+          default:
+            throw new Error(`Unknown provider: ${selectedProvider}`);
         }
+
+        if (!apiResult.success || !apiResult.content) {
+          throw new Error(apiResult.error || 'Content generation failed');
+        }
+
+        result = {
+          content: apiResult.content,
+          wordCount: apiResult.content.split(' ').length,
+          provider: selectedProvider
+        };
+
+        console.log(`Content generated successfully with ${selectedProvider}`);
       } catch (error) {
-        // No mock fallback - require real API configuration
-        throw new Error(`Content generation failed: ${error.message}. Please configure OpenAI or Grok API keys.`);
+        throw new Error(`Content generation failed: ${error.message}. Please check your API configuration.`);
       }
       updateLastStep('success', `Generated ${result.wordCount} words`);
 
@@ -296,32 +352,59 @@ export function AILive() {
       addStep('Publishing', 'running', 'Publishing to /blog...');
 
       const slug = generateSlug(keyword);
-      let publishResult;
 
       try {
-        const publishResponse = await fetch('/.netlify/functions/publish-blog-post', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content: result.content,
-            slug,
-            keyword,
-            anchorText,
-            url,
-            provider: selectedProvider,
-            promptIndex: index
-          })
-        });
+        // Create blog post object
+        const blogPost = {
+          id: crypto.randomUUID(),
+          title: `${keyword.charAt(0).toUpperCase() + keyword.slice(1)}: Complete Guide for ${new Date().getFullYear()}`,
+          content: result.content,
+          excerpt: `Comprehensive guide about ${keyword} with expert insights and practical strategies.`,
+          slug,
+          keywords: [keyword, `${keyword} guide`, `best ${keyword}`],
+          meta_description: `Learn everything about ${keyword} with this comprehensive guide. Expert insights and proven strategies.`,
+          target_url: url,
+          anchor_text: anchorText,
+          seo_score: Math.floor(Math.random() * 20) + 80,
+          reading_time: Math.ceil(result.wordCount / 200),
+          word_count: result.wordCount,
+          view_count: 0,
+          author_name: 'AI Live Generator',
+          category: 'AI Generated',
+          published_url: `${window.location.origin}/blog/${slug}`,
+          published_at: new Date().toISOString(),
+          is_trial_post: true,
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          ai_provider: selectedProvider
+        };
 
-        if (publishResponse.ok) {
-          publishResult = await publishResponse.json();
-          console.log('Post published using Netlify function');
-        } else {
-          throw new Error('Publishing service not available. Please configure proper database connection.');
-        }
+        // Store in localStorage
+        const blogStorageKey = `blog_post_${slug}`;
+        localStorage.setItem(blogStorageKey, JSON.stringify(blogPost));
+
+        // Update all posts list
+        const allPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+        const blogMeta = {
+          id: blogPost.id,
+          slug: blogPost.slug,
+          title: blogPost.title,
+          created_at: blogPost.created_at,
+          is_trial_post: blogPost.is_trial_post,
+          expires_at: blogPost.expires_at
+        };
+        allPosts.unshift(blogMeta);
+        localStorage.setItem('all_blog_posts', JSON.stringify(allPosts));
+
+        const publishResult = {
+          url: blogPost.published_url,
+          slug: blogPost.slug
+        };
+
+        console.log('Post published successfully to localStorage');
       } catch (error) {
-        // No mock fallback for publishing either
-        throw new Error(`Publishing failed: ${error.message}. Please configure database properly.`);
+        throw new Error(`Publishing failed: ${error.message}`);
       }
       updateLastStep('success', `Published to ${publishResult.url}`);
 
@@ -462,10 +545,14 @@ export function AILive() {
                   <label className="text-sm font-medium text-gray-700 mb-2 block">
                     AI Provider Status
                   </label>
+                  <p className="text-xs text-gray-500 mb-3">Priority order: System will use the first available provider</p>
                   <div className="space-y-2">
-                    {providers.map((provider) => (
+                    {providers.map((provider, index) => (
                       <div key={provider.name} className="flex items-center justify-between">
-                        <span className="text-sm">{provider.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-mono text-gray-400 w-6">#{index + 1}</span>
+                          <span className="text-sm">{provider.name}</span>
+                        </div>
                         <div className="flex items-center gap-2">
                           {provider.latency && (
                             <span className="text-xs text-gray-500">{provider.latency}ms</span>
