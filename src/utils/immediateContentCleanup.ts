@@ -69,19 +69,40 @@ export function runImmediateContentCleanup(): void {
         let listUpdated = false;
         
         const cleanedPosts = allPosts.map((post: any) => {
+          let needsUpdate = false;
+          let updatedPost = { ...post };
+
           if (post.content) {
             const originalContent = post.content;
             const cleanedContent = cleanHTMLContent(originalContent);
-            
+
             if (originalContent !== cleanedContent) {
-              listUpdated = true;
-              return {
-                ...post,
-                content: cleanedContent,
-                updated_at: new Date().toISOString()
-              };
+              updatedPost.content = cleanedContent;
+              needsUpdate = true;
             }
           }
+
+          if (post.meta_description) {
+            const originalMetaDesc = post.meta_description;
+            let cleanedMetaDesc = originalMetaDesc
+              .replace(/Optimized for [A-Za-z\s]+\./g, '')
+              .replace(/Tailored for [A-Za-z\s]+\./g, '')
+              .replace(/Designed for [A-Za-z\s]+ market\./g, '')
+              .replace(/Localized for [A-Za-z\s]+\./g, '')
+              .trim();
+
+            if (originalMetaDesc !== cleanedMetaDesc) {
+              updatedPost.meta_description = cleanedMetaDesc;
+              needsUpdate = true;
+            }
+          }
+
+          if (needsUpdate) {
+            listUpdated = true;
+            updatedPost.updated_at = new Date().toISOString();
+            return updatedPost;
+          }
+
           return post;
         });
         
