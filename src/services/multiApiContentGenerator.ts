@@ -459,18 +459,15 @@ export class MultiApiContentGenerator {
         Focus on actionable insights that readers can actually implement rather than theoretical business concepts.`;
 
       default: // informational
-        return `Write a comprehensive, informative guide about "${keyword}" for ${currentYear}. Cover:
+        return `Create an informative article about "${keyword}" that provides genuine value to curious readers. Approach the topic from an angle that offers fresh insights or practical information.
 
-        - Introduction and fundamental concepts
-        - Key aspects and important considerations
-        - Practical applications and examples
-        - Getting started guidance
-        - Tips for success and common pitfalls
-        - Future outlook and developments
+        Think about what aspects of "${keyword}" people are most curious about, common misconceptions that need clearing up, or practical applications that readers might not have considered.
 
-        The article should be at least 1000 words, informative and well-structured, and naturally incorporate a link to ${targetUrl} using the anchor text "${anchorText}" where it provides value.
+        Share specific examples, current developments, or interesting facts that help readers understand why "${keyword}" matters and how it might be relevant to their interests or needs.
 
-        Format with proper HTML headers and ensure content is genuinely useful for readers interested in ${keyword}.`;
+        The article should be at least 1000 words, written in an engaging and informative tone, and include a helpful link to ${targetUrl} using the anchor text "${anchorText}" where it adds value.
+
+        Focus on being genuinely helpful and interesting rather than following standard informational article templates.`;
     }
   }
 
