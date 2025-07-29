@@ -3,32 +3,67 @@
  * Handles content generation using OpenAI or Grok APIs
  */
 
-function generateDemoContent(keyword, anchorText, url) {
-  return `<h1>${keyword.charAt(0).toUpperCase() + keyword.slice(1)}: Complete Guide</h1>
+function detectKeywordCategory(keyword) {
+  const keywordLower = keyword.toLowerCase();
+
+  // Food and cuisine keywords
+  if (['sushi', 'pizza', 'pasta', 'burger', 'tacos', 'ramen', 'curry', 'salad', 'sandwich', 'soup', 'steak', 'chicken', 'seafood', 'dessert', 'cake', 'coffee', 'tea', 'wine', 'beer', 'cocktail', 'recipe', 'cooking', 'cuisine', 'restaurant', 'food'].some(food => keywordLower.includes(food))) {
+    return 'food';
+  }
+
+  // Technology keywords
+  if (['software', 'app', 'technology', 'computer', 'mobile', 'ai', 'artificial intelligence', 'machine learning', 'coding', 'programming', 'web development', 'database', 'cloud', 'cybersecurity', 'tech', 'digital'].some(tech => keywordLower.includes(tech))) {
+    return 'technology';
+  }
+
+  // Health and fitness keywords
+  if (['health', 'fitness', 'exercise', 'workout', 'nutrition', 'diet', 'wellness', 'medicine', 'doctor', 'therapy', 'mental health', 'yoga', 'meditation', 'medical'].some(health => keywordLower.includes(health))) {
+    return 'health';
+  }
+
+  // Travel keywords
+  if (['travel', 'vacation', 'tourism', 'hotel', 'flight', 'destination', 'trip', 'adventure', 'backpacking', 'cruise', 'resort', 'city', 'country', 'place'].some(travel => keywordLower.includes(travel))) {
+    return 'travel';
+  }
+
+  // Business and marketing keywords
+  if (['marketing', 'business', 'strategy', 'seo', 'analytics', 'sales', 'entrepreneur', 'startup', 'investment', 'finance', 'management'].some(biz => keywordLower.includes(biz))) {
+    return 'business';
+  }
+
+  return 'informational';
+}
+
+function generateFoodContent(keyword, anchorText, url) {
+  const currentYear = new Date().getFullYear();
+  return `<h1>${keyword.charAt(0).toUpperCase() + keyword.slice(1)}: Complete Guide for ${currentYear}</h1>
 
 <h2>Introduction</h2>
 
-<p>Understanding ${keyword} is essential in today's digital landscape. This comprehensive guide explores the key aspects and practical applications of ${keyword}, providing valuable insights for businesses and individuals alike.</p>
+<p>Welcome to your comprehensive guide to <strong>${keyword}</strong>. Whether you're a complete beginner or looking to expand your culinary knowledge, this guide covers everything you need to know about ${keyword}.</p>
 
 <h2>What is ${keyword.charAt(0).toUpperCase() + keyword.slice(1)}?</h2>
 
-<p>${keyword.charAt(0).toUpperCase() + keyword.slice(1)} encompasses various strategies and techniques that are crucial for success in the modern digital world. From basic concepts to advanced implementations, ${keyword} offers numerous opportunities for growth and improvement.</p>
+<p><em>${keyword}</em> is a beloved culinary delight that has captured the hearts and taste buds of food enthusiasts worldwide. Understanding its origins, preparation methods, and cultural significance can enhance your appreciation and enjoyment.</p>
 
-<p>The importance of ${keyword} cannot be overstated. Organizations worldwide are recognizing its potential to drive engagement, improve efficiency, and create lasting value for their stakeholders.</p>
+<h2>History and Origins</h2>
 
-<h2>Key Benefits of ${keyword}</h2>
+<p>The rich history of ${keyword} spans centuries, with deep cultural roots and traditional preparation methods that have been passed down through generations. Learning about its background helps us appreciate the craftsmanship involved.</p>
+
+<h2>Types and Varieties</h2>
+
+<p>There are numerous varieties of ${keyword}, each with unique characteristics:</p>
 
 <ul>
-<li>Enhanced visibility and reach across digital platforms</li>
-<li>Improved user engagement and interaction rates</li>
-<li>Better conversion rates and ROI optimization</li>
-<li>Long-term sustainable growth strategies</li>
-<li>Competitive advantage in the marketplace</li>
+<li><strong>Traditional varieties</strong>: Classic preparations that honor original recipes</li>
+<li><strong>Modern interpretations</strong>: Contemporary twists on traditional favorites</li>
+<li><strong>Regional specialties</strong>: Unique local variations worth exploring</li>
+<li><strong>Fusion styles</strong>: Creative combinations with other culinary traditions</li>
 </ul>
 
-<h2>Best Practices and Implementation</h2>
+<h2>How to Enjoy ${keyword}</h2>
 
-<p>When implementing ${keyword} strategies, it's important to focus on quality and consistency. Successful implementation requires careful planning, execution, and continuous monitoring of results.</p>
+<p>Getting the most out of your ${keyword} experience involves understanding proper etiquette, pairing suggestions, and quality indicators. Whether dining out or preparing at home, these tips will enhance your enjoyment.</p>
 
 <p>For professional guidance and expert solutions in ${keyword}, consider consulting <a href="${url}" target="_blank" rel="noopener noreferrer">${anchorText}</a> for comprehensive support and industry-leading expertise.</p>
 
