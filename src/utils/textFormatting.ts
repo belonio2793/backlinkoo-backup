@@ -276,6 +276,13 @@ export function cleanHTMLContent(content: string): string {
   cleaned = cleaned.replace(/<!-- SEO Meta Tags[\s\S]*?-->/g, '');
   cleaned = cleaned.replace(/<!-- Structured Data[\s\S]*?-->/g, '');
 
+  // Remove content structure comments and references
+  cleaned = cleaned.replace(/<!-- Rest of the sections[\s\S]*?-->/gi, '');
+  cleaned = cleaned.replace(/<!-- The complete implementation[\s\S]*?-->/gi, '');
+  cleaned = cleaned.replace(/\{\/\*[\s\S]*?\*\/\}/g, '');
+  cleaned = cleaned.replace(/\{\/\* Rest of the sections[\s\S]*?\*\/\}/gi, '');
+  cleaned = cleaned.replace(/\{\/\* The complete implementation[\s\S]*?\*\/\}/gi, '');
+
   // Remove JSON-LD structured data that appears as text
   cleaned = cleaned.replace(/\{\s*"@context"[\s\S]*?\}/g, '');
 
