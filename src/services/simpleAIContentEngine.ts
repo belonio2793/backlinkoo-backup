@@ -1,8 +1,8 @@
 /**
  * DEPRECATED: This file has been replaced by openAIContentGenerator.ts
  * 
- * This service used to provide enhanced AI content generation with smart fallback templates.
- * The new system uses only OpenAI and does not provide fallback content.
+ * This service used to provide fallback content when OpenAI was not available.
+ * The new system requires OpenAI configuration and does not provide fallback templates.
  * 
  * Use openAIContentGenerator.ts instead.
  */

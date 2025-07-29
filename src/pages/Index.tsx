@@ -294,6 +294,7 @@ const Index = () => {
                       }} className="font-medium">
                         Sign In
                       </Button>
+
                       <Button onClick={() => {
                         console.log('Get Started button clicked');
                         navigate("/login");

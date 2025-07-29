@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { publishedBlogService, type PublishedBlogPost } from '@/services/publishedBlogService';
+import { freeBacklinkService } from '@/services/freeBacklinkService';
+import { BlogDebugInfo } from '@/components/BlogDebugInfo';
 import { 
   Calendar, 
   Clock, 
@@ -36,7 +38,7 @@ export function Blog() {
           console.warn('Database unavailable, using localStorage:', dbError);
         }
 
-        // Also load from localStorage
+        // Also load from localStorage (traditional blog posts)
         const localBlogPosts: PublishedBlogPost[] = [];
         try {
           const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
@@ -70,6 +72,46 @@ export function Blog() {
           console.warn('Failed to load from localStorage:', storageError);
         }
 
+        // Also load from free backlink service
+        try {
+          const freeBacklinkPosts = freeBacklinkService.getAllPosts();
+          freeBacklinkPosts.forEach(freePost => {
+            // Convert free backlink post to PublishedBlogPost format
+            const convertedPost: PublishedBlogPost = {
+              id: freePost.id,
+              title: freePost.title,
+              slug: freePost.slug,
+              content: freePost.content,
+              excerpt: freePost.metaDescription,
+              meta_description: freePost.metaDescription,
+              keywords: freePost.keywords,
+              tags: freePost.keywords, // Use keywords as tags
+              category: 'Free Backlink',
+              author_name: 'AI Generator',
+              target_url: freePost.targetUrl,
+              anchor_text: freePost.anchorText,
+              seo_score: freePost.seoScore,
+              reading_time: freePost.readingTime,
+              word_count: freePost.wordCount,
+              view_count: (freePost as any).viewCount || 0,
+              published_at: freePost.createdAt,
+              created_at: freePost.createdAt,
+              updated_at: freePost.createdAt,
+              published_url: `${window.location.origin}/blog/${freePost.slug}`,
+              is_trial_post: true,
+              expires_at: freePost.expiresAt,
+              status: freePost.status as 'published'
+            };
+
+            // Only add if not already in localBlogPosts
+            if (!localBlogPosts.find(post => post.id === convertedPost.id)) {
+              localBlogPosts.push(convertedPost);
+            }
+          });
+        } catch (freeBacklinkError) {
+          console.warn('Failed to load free backlink posts:', freeBacklinkError);
+        }
+
         // Combine database and localStorage posts, removing duplicates
         const allPosts = [...posts];
         localBlogPosts.forEach(localPost => {
@@ -82,6 +124,13 @@ export function Blog() {
         allPosts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
         setBlogPosts(allPosts);
+
+        console.log('Blog posts loaded:', {
+          databasePosts: posts.length,
+          localBlogPosts: localBlogPosts.length,
+          totalPosts: allPosts.length,
+          freeBacklinkPosts: freeBacklinkService.getAllPosts().length
+        });
       } catch (error) {
         console.error('Failed to load blog posts:', error);
       } finally {
@@ -195,14 +244,27 @@ export function Blog() {
               {searchTerm || selectedCategory ? 'No matching posts found' : 'No blog posts yet'}
             </h3>
             <p className="text-gray-600 mb-6">
-              {searchTerm || selectedCategory 
+              {searchTerm || selectedCategory
                 ? 'Try adjusting your search or filter criteria'
-                : 'Blog posts will appear here as they are generated'
+                : 'Blog posts will appear here when you generate content. Create backlinks using our AI tools to see posts displayed here.'
               }
             </p>
-            <Button onClick={() => navigate('/')}>
-              Create Your First Backlink
-            </Button>
+            <div className="space-y-3">
+              <Button
+                onClick={() => navigate('/')}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
+                Create Your First Backlink
+              </Button>
+              <br />
+              <Button
+                variant="outline"
+                onClick={() => navigate('/free-backlink')}
+                className="ml-2"
+              >
+                Try Free Backlink Generator
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -238,7 +300,7 @@ export function Blog() {
                 
                 <CardContent className="pt-0">
                   <div className="flex flex-wrap gap-1 mb-4">
-                    {post.tags.slice(0, 3).map((tag, index) => (
+                    {(post.tags || post.keywords || []).slice(0, 3).map((tag, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         <Tag className="mr-1 h-2 w-2" />
                         {tag}
@@ -253,7 +315,7 @@ export function Blog() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      <span>{formatDate(post.published_at)}</span>
+                      <span>{formatDate(post.published_at || post.created_at)}</span>
                     </div>
                   </div>
                   
@@ -261,15 +323,15 @@ export function Blog() {
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        <span>{post.reading_time}m</span>
+                        <span>{post.reading_time || 5}m</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Eye className="h-3 w-3" />
-                        <span>{post.view_count}</span>
+                        <span>{post.view_count || 0}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <TrendingUp className="h-3 w-3" />
-                        <span>{post.seo_score}/100</span>
+                        <span>{post.seo_score || 75}/100</span>
                       </div>
                     </div>
                     
@@ -316,6 +378,9 @@ export function Blog() {
           </Button>
         </div>
       </div>
+
+      {/* Debug component for development */}
+      <BlogDebugInfo />
     </div>
   );
 }

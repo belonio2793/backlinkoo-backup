@@ -9,7 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { globalBlogGenerator, type GlobalBlogRequest } from '@/services/globalBlogGenerator';
+import { openAIContentGenerator, ContentGenerationRequest } from '@/services/openAIContentGenerator';
+import { freeBacklinkService } from '@/services/freeBacklinkService';
+import { WordCountProgress } from './WordCountProgress';
 import { contentModerationService } from '@/services/contentModerationService';
 import { adminSyncService } from '@/services/adminSyncService';
 import { useAuthStatus } from '@/hooks/useAuth';
@@ -88,12 +90,22 @@ export function GlobalBlogGenerator({
   }, []);
 
   const loadGlobalStats = async () => {
+    // Simple stats from localStorage for OpenAI-only system
     try {
-      const stats = await globalBlogGenerator.getGlobalBlogStats();
-      setGlobalStats(stats);
+      const allPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+      const today = new Date().toDateString();
+      const postsToday = allPosts.filter((post: any) =>
+        new Date(post.created_at).toDateString() === today
+      ).length;
+
+      setGlobalStats({
+        totalPosts: allPosts.length,
+        postsToday,
+        activeUsers: null,
+        averageQuality: null
+      });
     } catch (error) {
-      console.warn('Could not load global stats:', error);
-      // Set safe fallback stats to prevent component errors
+      console.warn('Could not load stats:', error);
       setGlobalStats({
         totalPosts: 0,
         postsToday: 0,
@@ -104,7 +116,8 @@ export function GlobalBlogGenerator({
   };
 
   const updateRemainingRequests = () => {
-    const remaining = globalBlogGenerator.getRemainingRequests();
+    // Simple rate limiting - just check if OpenAI is configured
+    const remaining = openAIContentGenerator.isConfigured() ? 10 : 0;
     setRemainingRequests(remaining);
   };
 
@@ -248,42 +261,125 @@ export function GlobalBlogGenerator({
         sessionId: request.sessionId
       });
 
-      const result = await globalBlogGenerator.generateGlobalBlogPost(request);
+      // Use the new OpenAI-only content generator
+      const contentRequest: ContentGenerationRequest = {
+        targetUrl: request.targetUrl,
+        primaryKeyword: request.primaryKeyword,
+        anchorText: request.anchorText,
+        wordCount: 1500,
+        tone: 'professional' as const,
+        contentType: 'how-to' as const
+      };
 
-      if (result.success && result.data) {
+      const result = await openAIContentGenerator.generateContent(contentRequest);
+
+      // Store the result for 24-hour management
+      freeBacklinkService.storeFreeBacklink(result);
+
+      // Process the successful result
+      if (result && result.content) {
         setProgress(100);
         setGenerationStage('Generation complete!');
-        setGeneratedPost(result.data.blogPost);
-        
+
+        // Generate a unique slug for the blog post with enhanced randomization
+        const timestamp = Date.now().toString(36);
+        const randomSuffix = Math.random().toString(36).substring(2, 8);
+        const uniqueSlug = `${result.slug}-${timestamp}-${randomSuffix}`;
+
+        // Convert free backlink result to match the expected format
+        const blogPost = {
+          id: result.id,
+          title: result.title,
+          content: result.content,
+          excerpt: result.metaDescription,
+          slug: uniqueSlug,
+          keywords: result.keywords,
+          meta_description: result.metaDescription,
+          target_url: result.targetUrl,
+          anchor_text: result.anchorText,
+          seo_score: result.seoScore,
+          reading_time: result.readingTime,
+          published_url: `${window.location.origin}/blog/${uniqueSlug}`,
+          is_trial_post: true,
+          expires_at: result.expiresAt,
+          created_at: result.createdAt,
+          updated_at: result.createdAt
+        };
+
+        // Store the blog post for /blog/[slug] access
+        try {
+          localStorage.setItem(`blog_post_${uniqueSlug}`, JSON.stringify(blogPost));
+
+          // Also add to the global blog posts list
+          const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+          const blogMeta = {
+            id: blogPost.id,
+            slug: uniqueSlug,
+            title: blogPost.title,
+            excerpt: blogPost.excerpt,
+            created_at: blogPost.created_at,
+            is_trial_post: blogPost.is_trial_post,
+            expires_at: blogPost.expires_at,
+            seo_score: blogPost.seo_score,
+            reading_time: blogPost.reading_time
+          };
+
+          allBlogPosts.unshift(blogMeta);
+          localStorage.setItem('all_blog_posts', JSON.stringify(allBlogPosts));
+
+          console.log('✅ Blog post published successfully:', {
+            slug: uniqueSlug,
+            url: `${window.location.origin}/blog/${uniqueSlug}`
+          });
+        } catch (error) {
+          console.error('❌ Failed to store blog post:', error);
+        }
+
+        setGeneratedPost(blogPost);
+
         // Update remaining requests
         updateRemainingRequests();
 
+        // Check if this was generated with fallback content (when OpenAI is not available)
+        const isFromFallback = result.error || result.usage.tokens === 0;
+
         toast({
           title: "Blog post generated successfully! 🎉",
-          description: `Your contextual backlink post is ready. ${result.data.globalMetrics.userCountry !== 'Unknown' ? `Generated from ${result.data.globalMetrics.userCountry}` : ''}`,
+          description: isFromFallback
+            ? "Your free backlink post is ready! Generated using our reliable fallback system. It will auto-delete in 24 hours unless you register an account."
+            : "Your free backlink post is ready! It will auto-delete in 24 hours unless you register an account.",
+          action: (
+            <Button
+              size="sm"
+              onClick={() => navigate(`/blog/${uniqueSlug}`)}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              View Blog Post
+            </Button>
+          ),
         });
 
         // Track successful blog generation for admin monitoring
         adminSyncService.trackBlogGenerated({
           sessionId: request.sessionId,
-          blogSlug: result.data.blogPost.slug,
+          blogSlug: result.slug,
           targetUrl: request.targetUrl,
           primaryKeyword: request.primaryKeyword,
-          seoScore: result.data.blogPost.seo_score,
+          seoScore: result.seoScore,
           generationTime: 45, // Approximate generation time
-          isTrialPost: result.data.blogPost.is_trial_post,
-          expiresAt: result.data.blogPost.expires_at
+          isTrialPost: true,
+          expiresAt: result.expiresAt
         });
 
-        onSuccess?.(result.data.blogPost);
+        onSuccess?.(blogPost);
 
         // Navigate to blog post if in blog variant
         if (variant === 'blog') {
-          navigate(`/blog/${result.data.blogPost.slug}`);
+          navigate(`/blog/${uniqueSlug}`);
         }
 
       } else {
-        throw new Error(result.error || 'Generation failed');
+        throw new Error('Content generation failed completely. Please try again or use the dedicated Free Backlink feature.');
       }
 
     } catch (error: any) {
@@ -294,11 +390,59 @@ export function GlobalBlogGenerator({
       setGenerationStage('');
       setGeneratedPost(null);
 
+      // Provide specific error handling
+      const errorMessage = error.message || 'Unknown error';
+      let title = "Generation failed";
+      let description = "An unexpected error occurred. Please try again.";
+
+      const isConfigError = errorMessage.includes('not configured') ||
+                           errorMessage.includes('Invalid API key') ||
+                           errorMessage.includes('401');
+
+      if (errorMessage.includes('Invalid API key') || errorMessage.includes('401')) {
+        title = "🔑 OpenAI API Key Required";
+        description = "A valid OpenAI API key is required for content generation. Please configure your API key.";
+      } else if (errorMessage.includes('OpenAI API key is not configured')) {
+        title = "🔑 API Key Missing";
+        description = "OpenAI API key is not configured. Please set up your API key to generate content.";
+      } else if (errorMessage.includes('rate limit') || errorMessage.includes('429')) {
+        title = "⏱️ Rate Limit Exceeded";
+        description = "OpenAI rate limit reached. Please wait a few minutes before trying again.";
+      } else if (errorMessage.includes('quota') || errorMessage.includes('insufficient_quota')) {
+        title = "💳 Quota Exceeded";
+        description = "Your OpenAI account has exceeded its usage quota. Please check your billing settings.";
+      } else if (isConfigError) {
+        title = "🔧 API Configuration Issue";
+        description = "AI service configuration issue detected. Please check your OpenAI API key settings.";
+      } else {
+        description = errorMessage;
+      }
+
       toast({
-        title: "Generation failed",
-        description: error.message || "An unexpected error occurred. Please try again.",
+        title,
+        description,
         variant: "destructive",
+        duration: 8000,
       });
+
+      // If it's a config error, suggest the free backlink feature
+      if (isConfigError) {
+        setTimeout(() => {
+          toast({
+            title: "💡 Try Free Backlink Feature",
+            description: "Generate high-quality blog posts with our dedicated free backlink tool!",
+            action: (
+              <Button
+                size="sm"
+                onClick={() => navigate('/free-backlink')}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                Try Free Backlink
+              </Button>
+            ),
+          });
+        }, 2000);
+      }
     } finally {
       setIsGenerating(false);
       // Ensure progress is reset in case of any hanging state
@@ -333,6 +477,17 @@ export function GlobalBlogGenerator({
               </div>
               <Progress value={progress} className="w-full" />
               <p className="text-sm text-muted-foreground">{generationStage}</p>
+
+              {/* Word Count Progress */}
+              <div className="mt-4">
+                <WordCountProgress
+                  targetWords={1500}
+                  isGenerating={isGenerating}
+                  onComplete={(finalCount) => {
+                    console.log('Global blog generation completed with', finalCount, 'words');
+                  }}
+                />
+              </div>
             </div>
           ) : generatedPost ? (
             <div className="space-y-4">
