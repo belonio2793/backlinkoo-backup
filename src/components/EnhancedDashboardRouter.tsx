@@ -24,13 +24,35 @@ export function EnhancedDashboardRouter() {
 
   // Failsafe timeout to prevent infinite loading
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      console.warn('⏰ Dashboard loading timeout reached, forcing load completion');
-      setIsLoading(false);
-    }, 5000);
+    // Show warning after 3 seconds
+    const warningTimeout = setTimeout(() => {
+      if (isLoading) {
+        toast({
+          title: "Dashboard loading slowly",
+          description: "Your dashboard is taking longer than expected to load. Please wait...",
+          variant: "default",
+        });
+      }
+    }, 3000);
 
-    return () => clearTimeout(timeout);
-  }, []);
+    // Force completion after 8 seconds
+    const forceTimeout = setTimeout(() => {
+      if (isLoading) {
+        console.warn('⏰ Dashboard loading timeout reached, forcing load completion');
+        toast({
+          title: "Loading timeout",
+          description: "Dashboard took too long to load. If issues persist, please refresh the page.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+      }
+    }, 8000);
+
+    return () => {
+      clearTimeout(warningTimeout);
+      clearTimeout(forceTimeout);
+    };
+  }, [isLoading, toast]);
 
   useEffect(() => {
     let isMounted = true;
