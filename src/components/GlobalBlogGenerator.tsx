@@ -249,7 +249,7 @@ export function GlobalBlogGenerator({
 
     try {
       // Test with a minimal OpenAI API request
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
       const response = await fetch('https://api.openai.com/v1/models', {
         method: 'GET',
