@@ -222,7 +222,7 @@ export class EmailService {
 
       return {
         success: false,
-        error: this.sanitizeErrorMessage(error.message) || 'Unknown error occurred',
+        error: this.sanitizeErrorMessage(errorMessage) || 'Unknown error occurred',
         provider: 'netlify_resend'
       };
     }
@@ -336,7 +336,7 @@ Why verify your email?
 ✅ Secure your account
 ✅ Access all platform features
 ✅ Receive important updates
-✅ Start your first backlink campaign
+�� Start your first backlink campaign
 
 This link will expire in 24 hours for security reasons.
 
