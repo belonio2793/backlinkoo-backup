@@ -182,6 +182,7 @@ const AdminDashboard = () => {
           <TabsList>
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
             <TabsTrigger value="blog-posts">Blog Posts</TabsTrigger>
+            <TabsTrigger value="blog-claims">Blog Claims</TabsTrigger>
             <TabsTrigger value="ai-posts">AI Posts</TabsTrigger>
             <TabsTrigger value="free-backlinks">Free Backlinks</TabsTrigger>
             <TabsTrigger value="content-filter">Content Filter</TabsTrigger>
