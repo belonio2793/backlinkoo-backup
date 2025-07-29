@@ -83,6 +83,9 @@ export function formatBlogContent(content: string): string {
   // Clean up multiple consecutive line breaks
   formattedContent = formattedContent.replace(/\n{3,}/g, '\n\n');
 
+  // Clean HTML comments and fix structure
+  formattedContent = cleanHTMLContent(formattedContent);
+
   return formattedContent;
 }
 
