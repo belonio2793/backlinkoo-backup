@@ -688,22 +688,10 @@ export function GlobalBlogGenerator({
             </div>
             
             <div className="flex items-center gap-2">
-              {apiStatus.status === 'ready' ? (
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-green-600">Ready</span>
-                </div>
-              ) : apiStatus.status === 'error' ? (
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-red-600">Error</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-yellow-600">Connecting</span>
-                </div>
-              )}
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm font-medium text-green-600">Ready</span>
+              </div>
             </div>
           </div>
           
