@@ -168,7 +168,7 @@ const AdminVerificationQueue = () => {
             <Shield className="h-6 w-6 text-amber-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">NO Hands SEO Verification Queue</h2>
+            <h2 className="text-2xl font-bold">∞ Backlinks Automation (Beta) Verification Queue</h2>
             <p className="text-muted-foreground">Review and approve campaign submissions</p>
           </div>
         </div>
@@ -326,7 +326,7 @@ const AdminVerificationQueue = () => {
                 <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium mb-2">No Pending Verifications</h3>
                 <p className="text-muted-foreground">
-                  All NO Hands SEO campaigns have been reviewed.
+                  All ∞ Backlinks Automation (Beta) campaigns have been reviewed.
                 </p>
               </CardContent>
             </Card>
