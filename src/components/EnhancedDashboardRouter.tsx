@@ -20,6 +20,16 @@ export function EnhancedDashboardRouter() {
   const navigate = useNavigate();
   const { getGuestData, getSessionDuration, shouldShowConversionPrompt, trackInteraction } = useGuestTracking();
 
+  // Failsafe timeout to prevent infinite loading
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      console.warn('⏰ Dashboard loading timeout reached, forcing load completion');
+      setIsLoading(false);
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
   useEffect(() => {
     const checkUserAndTrialPosts = async () => {
       try {
