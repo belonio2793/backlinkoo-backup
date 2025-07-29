@@ -63,8 +63,7 @@ export function AILive() {
   const [url, setUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [providers, setProviders] = useState<AIProvider[]>([
-    { name: 'OpenAI', status: 'checking' },
-    { name: 'Grok', status: 'checking' }
+    { name: 'OpenAI', status: 'checking' }
   ]);
   const [apiCheckComplete, setApiCheckComplete] = useState(false);
   const [steps, setSteps] = useState<GenerationStep[]>([]);
