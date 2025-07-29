@@ -80,10 +80,11 @@ export class MultiProviderContentGenerator {
       requestId
     });
 
+    // Try client-side providers first
     for (let i = 0; i < providerOrder.length; i++) {
       const provider = providerOrder[i];
       const attemptNumber = i + 1;
-      const isLastAttempt = attemptNumber === providerOrder.length;
+      const isClientSideAttempt = true;
 
       console.log(`🔄 Attempting provider ${attemptNumber}/${providerOrder.length}: ${provider}`);
 
