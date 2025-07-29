@@ -349,7 +349,7 @@ export function GlobalBlogGenerator({
 
         // Navigate to blog post if in blog variant
         if (variant === 'blog') {
-          navigate(`/blog/${result.slug}`);
+          navigate(`/blog/${uniqueSlug}`);
         }
 
       } else {
