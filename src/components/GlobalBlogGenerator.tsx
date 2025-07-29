@@ -915,7 +915,7 @@ export function GlobalBlogGenerator({
               ) : apiStatus.status === 'ready' ? (
                 <>
                   <Zap className="h-4 w-4 mr-2" />
-                  ✨ Ready! Create Your First Backlink For Free! 🚀
+                  Create Permanent Link
                 </>
               ) : (
                 <>
