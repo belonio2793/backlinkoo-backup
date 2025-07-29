@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { freeBacklinkService } from '@/services/freeBacklinkService';
-import { GeneratedContentResult } from '@/services/openAIContentGenerator';
+import { GeneratedContentResult } from '@/services/openAIOnlyContentGenerator';
 import RegistrationModal from './RegistrationModal';
 import {
   Eye,
