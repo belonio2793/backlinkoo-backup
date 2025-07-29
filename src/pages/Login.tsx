@@ -125,7 +125,7 @@ const Login = () => {
         });
 
 
-        navigate('/my-dashboard');
+        navigate('/dashboard');
       } else {
         if (result.requiresEmailVerification) {
           setShowResendConfirmation(true);
