@@ -16,6 +16,7 @@ import { contentModerationService } from '@/services/contentModerationService';
 import { adminSyncService } from '@/services/adminSyncService';
 import { useAuthStatus } from '@/hooks/useAuth';
 import { trackBlogGeneration } from '@/hooks/useGuestTracking';
+import { MultiApiContentGenerator } from '@/services/multiApiContentGenerator';
 import {
   Globe,
   Zap,
@@ -81,6 +82,16 @@ export function GlobalBlogGenerator({
   const [showPreview, setShowPreview] = useState(false);
   const [previewMode, setPreviewMode] = useState<'content' | 'seo' | 'links'>('content');
 
+  // API status state
+  const [apiStatus, setApiStatus] = useState<{
+    status: 'checking' | 'ready' | 'error' | 'partial';
+    message: string;
+    details?: string;
+  }>({
+    status: 'checking',
+    message: 'Checking API status...'
+  });
+
   const { toast } = useToast();
   const navigate = useNavigate();
   const { isLoggedIn } = useAuthStatus();
@@ -89,6 +100,17 @@ export function GlobalBlogGenerator({
     try {
       loadGlobalStats();
       updateRemainingRequests();
+      checkApiStatus();
+
+      // Set up periodic API status refresh every 5 minutes
+      const statusInterval = setInterval(() => {
+        if (apiStatus.status === 'error') {
+          // Only auto-retry if there was an error
+          checkApiStatus();
+        }
+      }, 5 * 60 * 1000); // 5 minutes
+
+      return () => clearInterval(statusInterval);
     } catch (error) {
       console.error('Error initializing GlobalBlogGenerator:', error);
       // Set safe defaults
@@ -99,8 +121,13 @@ export function GlobalBlogGenerator({
         averageQuality: null
       });
       setRemainingRequests(5);
+      setApiStatus({
+        status: 'error',
+        message: 'Initialization error',
+        details: 'Failed to initialize the blog generator'
+      });
     }
-  }, []);
+  }, [apiStatus.status]);
 
   const loadGlobalStats = async () => {
     // Simple stats from localStorage for OpenAI-only system
@@ -132,6 +159,229 @@ export function GlobalBlogGenerator({
     // All users get unlimited requests if OpenAI is configured
     const remaining = openAIContentGenerator.isConfigured() ? 999 : 0;
     setRemainingRequests(remaining);
+  };
+
+  const checkApiStatus = async () => {
+    try {
+      // Set initial checking state
+      setApiStatus({
+        status: 'checking',
+        message: 'Testing API connectivity...',
+        details: 'Verifying service availability'
+      });
+
+      const multiApiGenerator = new MultiApiContentGenerator();
+      const availableProviders = await multiApiGenerator.getAvailableProviders();
+
+      // Check OpenAI specifically since it's our primary provider
+      const openAIConfigured = openAIContentGenerator.isConfigured();
+      const hasApiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+      if (!hasApiKey) {
+        setApiStatus({
+          status: 'error',
+          message: 'API not configured',
+          details: 'OpenAI API key is missing'
+        });
+        return;
+      }
+
+      if (!openAIConfigured) {
+        setApiStatus({
+          status: 'error',
+          message: 'Configuration error',
+          details: 'OpenAI service not properly configured'
+        });
+        return;
+      }
+
+      // Check if we have any available providers
+      const activeProviders = availableProviders.filter(p => p.available);
+
+      if (activeProviders.length === 0) {
+        setApiStatus({
+          status: 'error',
+          message: 'No APIs available',
+          details: 'No configured API providers found'
+        });
+        return;
+      }
+
+      // Now perform actual API connectivity test
+      setApiStatus({
+        status: 'checking',
+        message: 'Testing API response...',
+        details: 'Sending test request'
+      });
+
+      const connectivityTest = await testApiConnectivity();
+
+      if (connectivityTest.success) {
+        setApiStatus({
+          status: 'ready',
+          message: 'API fully operational',
+          details: `Connected in ${connectivityTest.attempt || 1} attempt${(connectivityTest.attempt || 1) > 1 ? 's' : ''} (${connectivityTest.responseTime}ms)`
+        });
+      } else {
+        setApiStatus({
+          status: 'error',
+          message: 'API connectivity failed',
+          details: `${connectivityTest.error || 'Service unavailable'} (${connectivityTest.attempt || 1} attempts)`
+        });
+      }
+
+    } catch (error) {
+      console.error('API status check failed:', error);
+      setApiStatus({
+        status: 'error',
+        message: 'Status check failed',
+        details: 'Unable to verify API connectivity'
+      });
+    }
+  };
+
+  const testApiConnectivity = async (retryCount: number = 0): Promise<{
+    success: boolean;
+    responseTime?: number;
+    error?: string;
+    attempt?: number;
+  }> => {
+    const maxRetries = 5;
+    const baseDelay = 1000; // 1 second base delay
+    const maxDelay = 10000; // 10 second max delay
+
+    const startTime = Date.now();
+
+    try {
+      // Update status to show retry attempt
+      if (retryCount > 0) {
+        setApiStatus({
+          status: 'checking',
+          message: `Retrying API connection... (${retryCount}/${maxRetries})`,
+          details: 'Attempting to establish connection'
+        });
+      }
+
+      // Test with a minimal OpenAI API request
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout per attempt
+
+      const response = await fetch('https://api.openai.com/v1/models', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+      const responseTime = Date.now() - startTime;
+
+      if (response.ok) {
+        return {
+          success: true,
+          responseTime,
+          attempt: retryCount + 1
+        };
+      } else if (response.status === 401) {
+        // Don't retry on authentication errors
+        return {
+          success: false,
+          error: 'Invalid API key or insufficient permissions',
+          attempt: retryCount + 1
+        };
+      } else if (response.status === 429) {
+        // Retry on rate limits with exponential backoff
+        if (retryCount < maxRetries) {
+          const delay = Math.min(baseDelay * Math.pow(2, retryCount), maxDelay);
+          setApiStatus({
+            status: 'checking',
+            message: `Rate limited - waiting ${delay/1000}s before retry`,
+            details: `Attempt ${retryCount + 1}/${maxRetries + 1}`
+          });
+
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return testApiConnectivity(retryCount + 1);
+        } else {
+          return {
+            success: false,
+            error: 'Rate limit exceeded - maximum retries reached',
+            attempt: retryCount + 1
+          };
+        }
+      } else {
+        // Retry on other HTTP errors
+        if (retryCount < maxRetries) {
+          const delay = Math.min(baseDelay * Math.pow(1.5, retryCount), maxDelay);
+          setApiStatus({
+            status: 'checking',
+            message: `API error ${response.status} - retrying in ${delay/1000}s`,
+            details: `Attempt ${retryCount + 1}/${maxRetries + 1}`
+          });
+
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return testApiConnectivity(retryCount + 1);
+        } else {
+          return {
+            success: false,
+            error: `API returned status ${response.status} - maximum retries reached`,
+            attempt: retryCount + 1
+          };
+        }
+      }
+    } catch (error: any) {
+      const responseTime = Date.now() - startTime;
+
+      if (error.name === 'AbortError') {
+        // Retry on timeouts
+        if (retryCount < maxRetries) {
+          const delay = Math.min(baseDelay * Math.pow(1.5, retryCount), maxDelay);
+          setApiStatus({
+            status: 'checking',
+            message: `Request timeout - retrying in ${delay/1000}s`,
+            details: `Attempt ${retryCount + 1}/${maxRetries + 1}`
+          });
+
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return testApiConnectivity(retryCount + 1);
+        } else {
+          return {
+            success: false,
+            error: 'Request timeout - maximum retries reached',
+            attempt: retryCount + 1
+          };
+        }
+      } else if (error.message?.includes('Failed to fetch')) {
+        // Retry on network errors
+        if (retryCount < maxRetries) {
+          const delay = Math.min(baseDelay * Math.pow(2, retryCount), maxDelay);
+          setApiStatus({
+            status: 'checking',
+            message: `Network error - retrying in ${delay/1000}s`,
+            details: `Attempt ${retryCount + 1}/${maxRetries + 1}`
+          });
+
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return testApiConnectivity(retryCount + 1);
+        } else {
+          return {
+            success: false,
+            error: 'Network error - maximum retries reached. Check internet connection.',
+            attempt: retryCount + 1
+          };
+        }
+      } else {
+        // Don't retry on unknown errors
+        return {
+          success: false,
+          error: `Connection failed: ${error.message}`,
+          attempt: retryCount + 1
+        };
+      }
+    }
   };
 
   const formatUrl = (url: string): string => {
@@ -637,9 +887,44 @@ export function GlobalBlogGenerator({
               </Badge>
             </div>
             
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Users className="h-4 w-4" />
-              <span>Unlimited requests</span>
+            <div className={`flex items-center gap-2 text-sm ${
+              apiStatus.status === 'ready' ? 'text-green-600' :
+              apiStatus.status === 'error' ? 'text-red-600' :
+              'text-yellow-600'
+            }`}>
+              {apiStatus.status === 'ready' ? (
+                <CheckCircle2 className="h-4 w-4" />
+              ) : apiStatus.status === 'error' ? (
+                <AlertCircle className="h-4 w-4" />
+              ) : (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              )}
+              <span>{apiStatus.message}</span>
+              {apiStatus.details && (
+                <Badge
+                  variant="outline"
+                  className={`text-xs ${
+                    apiStatus.status === 'ready' ? 'border-green-200 text-green-700' :
+                    apiStatus.status === 'error' ? 'border-red-200 text-red-700' :
+                    'border-yellow-200 text-yellow-700'
+                  }`}
+                  title={apiStatus.details}
+                >
+                  {apiStatus.status === 'ready' ? 'Active' :
+                   apiStatus.status === 'error' ? 'Error' : 'Checking'}
+                </Badge>
+              )}
+              {apiStatus.status !== 'checking' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 hover:bg-transparent"
+                  onClick={checkApiStatus}
+                  title="Refresh API status"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                </Button>
+              )}
             </div>
           </div>
           
@@ -659,10 +944,24 @@ export function GlobalBlogGenerator({
               <Label htmlFor="targetUrl">Target URL *</Label>
               <Input
                 id="targetUrl"
-                placeholder="example.com (https:// will be added automatically)"
+                placeholder="example.com"
                 value={targetUrl}
-                onChange={(e) => setTargetUrl(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setTargetUrl(value);
+
+                  // Auto-format as user types (after they stop typing for 500ms)
+                  clearTimeout((window as any).urlFormatTimeout);
+                  (window as any).urlFormatTimeout = setTimeout(() => {
+                    const formatted = formatUrl(value);
+                    if (formatted !== value && formatted.trim() && value.trim()) {
+                      setTargetUrl(formatted);
+                    }
+                  }, 500);
+                }}
                 onBlur={(e) => {
+                  // Immediate format on blur
+                  clearTimeout((window as any).urlFormatTimeout);
                   const formatted = formatUrl(e.target.value);
                   if (formatted !== e.target.value && formatted.trim()) {
                     setTargetUrl(formatted);

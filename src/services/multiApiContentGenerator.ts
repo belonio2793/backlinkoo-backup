@@ -43,7 +43,7 @@ export class MultiApiContentGenerator {
       model: 'gpt-4o',
       getHeaders: () => ({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY || process.env.OPENAI_API_KEY || ''}`
+        'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY || ''}`
       }),
       getBody: (prompt: string) => ({
         model: 'gpt-4o',
@@ -82,7 +82,7 @@ export class MultiApiContentGenerator {
    */
   private hasApiKey(provider: string): boolean {
     const envKeys = {
-      openai: import.meta.env.VITE_OPENAI_API_KEY || process.env.OPENAI_API_KEY
+      openai: import.meta.env.VITE_OPENAI_API_KEY
     };
 
     return Boolean(envKeys[provider as keyof typeof envKeys]);

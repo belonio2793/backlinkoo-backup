@@ -21,18 +21,22 @@ interface AuthFormTabsProps {
   isCompact?: boolean;
   onForgotPassword?: () => void;
   className?: string;
+  defaultTab?: "login" | "signup";
 }
 
-export function AuthFormTabs({ 
-  onAuthSuccess, 
+export function AuthFormTabs({
+  onAuthSuccess,
   showTrialUpgrade = false,
   isCompact = false,
   onForgotPassword,
-  className = ""
+  className = "",
+  defaultTab
 }: AuthFormTabsProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"login" | "signup">(showTrialUpgrade ? "signup" : "login");
+  const [activeTab, setActiveTab] = useState<"login" | "signup">(
+    defaultTab || (showTrialUpgrade ? "signup" : "login")
+  );
 
   // Form states
   const [loginEmail, setLoginEmail] = useState("");
@@ -82,6 +86,12 @@ export function AuthFormTabs({
 
     setIsLoading(true);
 
+    // Show loading notification
+    toast({
+      title: "Signing you in...",
+      description: "Please wait while we verify your credentials.",
+    });
+
     try {
       const result = await AuthService.signIn({
         email: loginEmail,
@@ -91,11 +101,11 @@ export function AuthFormTabs({
       if (result.success && result.user) {
         toast({
           title: "Welcome back!",
-          description: "You have been successfully signed in.",
+          description: `Successfully signed in as ${result.user.email}`,
         });
-        
+
         onAuthSuccess?.(result.user);
-        
+
         // Reset form
         setLoginEmail("");
         setLoginPassword("");
@@ -108,7 +118,7 @@ export function AuthFormTabs({
       } else {
         toast({
           title: "Sign in failed",
-          description: result.error || 'An error occurred during sign in.',
+          description: result.error || 'Invalid email or password. Please check your credentials and try again.',
           variant: "destructive",
         });
       }
@@ -116,7 +126,7 @@ export function AuthFormTabs({
       console.error('Login error:', error);
       toast({
         title: "Sign in failed",
-        description: "An unexpected error occurred. Please try again.",
+        description: "Network error or server unavailable. Please check your connection and try again.",
         variant: "destructive",
       });
     } finally {
@@ -168,6 +178,12 @@ export function AuthFormTabs({
     }
 
     setIsLoading(true);
+
+    // Show loading notification
+    toast({
+      title: showTrialUpgrade ? "Upgrading your trial..." : "Creating your account...",
+      description: "Please wait while we set up your account.",
+    });
 
     try {
       // Use trial conversion service if we're upgrading a trial
@@ -319,7 +335,7 @@ export function AuthFormTabs({
 
           <Button
             type="submit"
-            className={`w-full ${inputHeight}`}
+            className={`w-full ${inputHeight} ${isLoading ? 'bg-primary/80' : ''}`}
             disabled={isLoading || !loginEmail || !loginPassword}
           >
             {isLoading ? (
@@ -426,13 +442,13 @@ export function AuthFormTabs({
 
           <Button
             type="submit"
-            className={`w-full ${inputHeight}`}
+            className={`w-full ${inputHeight} ${isLoading ? 'bg-primary/80' : ''}`}
             disabled={isLoading || !signupEmail || !signupPassword || !confirmPassword || !firstName}
           >
             {isLoading ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Creating account...
+                {showTrialUpgrade ? "Upgrading trial..." : "Creating account..."}
               </>
             ) : (
               <>

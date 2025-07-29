@@ -28,6 +28,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
+import { AuthService } from "@/services/authService";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 import { LoginModal } from "@/components/LoginModal";
 import { InlineAuthForm } from "@/components/InlineAuthForm";
@@ -49,6 +50,7 @@ const Index = () => {
   const [customCredits, setCustomCredits] = useState<number>(0);
   const [isCustomPackage, setIsCustomPackage] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginModalTab, setLoginModalTab] = useState<"login" | "signup">("login");
   const [useProductionGenerator, setUseProductionGenerator] = useState(false);
   const [showTrialUpgrade, setShowTrialUpgrade] = useState(false);
   const [showInlineAuth, setShowInlineAuth] = useState(false);
@@ -130,6 +132,31 @@ const Index = () => {
       clearTimeout(fallbackTimeout);
     };
   }, [authChecked]);
+
+  const handleSignOut = async () => {
+    try {
+      console.log('🚪 Signing out user...');
+      const result = await AuthService.signOut();
+
+      if (result.success) {
+        setUser(null);
+        toast({
+          title: "Signed out successfully",
+          description: "You have been signed out of your account.",
+        });
+      } else {
+        console.warn('Sign out had issues but continuing...');
+        setUser(null); // Clear user state anyway
+      }
+    } catch (error) {
+      console.error('Sign out error:', error);
+      setUser(null); // Clear user state anyway
+      toast({
+        title: "Signed out",
+        description: "You have been signed out.",
+      });
+    }
+  };
 
   const headlineVariations = [
     "Enterprise Backlinks",
@@ -263,9 +290,20 @@ const Index = () => {
               {!authChecked ? (
                 <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
               ) : user ? (
-                <Button onClick={() => navigate("/dashboard")} className="font-medium">
-                  Dashboard
-                </Button>
+                <>
+                  <Button
+                    onClick={() => navigate("/dashboard")}
+                    className="bg-transparent hover:bg-blue-50/50 border border-blue-200/60 text-blue-700 hover:text-blue-800 hover:border-blue-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+                  >
+                    Dashboard
+                  </Button>
+                  <Button
+                    onClick={handleSignOut}
+                    className="bg-transparent hover:bg-red-50/50 border border-red-200/60 text-red-600 hover:text-red-700 hover:border-red-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+                  >
+                    Sign Out
+                  </Button>
+                </>
               ) : (
                 <>
                   {/* Show trial upgrade button if user has trial posts */}
@@ -281,6 +319,7 @@ const Index = () => {
                         className="bg-amber-600 hover:bg-amber-700 text-white"
                       />
                       <Button variant="ghost" onClick={() => {
+                        setLoginModalTab("login");
                         setShowLoginModal(true);
                       }} className="font-medium">
                         Sign In
@@ -290,6 +329,7 @@ const Index = () => {
                     <>
                       <Button variant="ghost" onClick={() => {
                         console.log('Sign In button clicked');
+                        setLoginModalTab("login");
                         setShowLoginModal(true);
                       }} className="font-medium">
                         Sign In
@@ -899,6 +939,7 @@ const Index = () => {
         <GuestSessionReminder
           onSignUp={() => {
             trackInteraction('guest_reminder_signup');
+            setLoginModalTab("signup");
             setShowLoginModal(true);
           }}
           variant="floating"
@@ -921,7 +962,7 @@ const Index = () => {
             description: "You have been successfully signed in.",
           });
         }}
-        defaultTab="login"
+        defaultTab={loginModalTab}
       />
     </div>
   );
