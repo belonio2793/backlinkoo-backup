@@ -865,10 +865,24 @@ export function GlobalBlogGenerator({
               <Label htmlFor="targetUrl">Target URL *</Label>
               <Input
                 id="targetUrl"
-                placeholder="example.com (https:// will be added automatically)"
+                placeholder="example.com"
                 value={targetUrl}
-                onChange={(e) => setTargetUrl(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setTargetUrl(value);
+
+                  // Auto-format as user types (after they stop typing for 500ms)
+                  clearTimeout((window as any).urlFormatTimeout);
+                  (window as any).urlFormatTimeout = setTimeout(() => {
+                    const formatted = formatUrl(value);
+                    if (formatted !== value && formatted.trim() && value.trim()) {
+                      setTargetUrl(formatted);
+                    }
+                  }, 500);
+                }}
                 onBlur={(e) => {
+                  // Immediate format on blur
+                  clearTimeout((window as any).urlFormatTimeout);
                   const formatted = formatUrl(e.target.value);
                   if (formatted !== e.target.value && formatted.trim()) {
                     setTargetUrl(formatted);
