@@ -153,13 +153,17 @@ export function BlogPost() {
           };
           setBlogPost(cleanedPost);
         } else {
+          // Enhanced debugging for missing blog posts
+          console.error('❌ Blog post not found:', {
+            searchedSlug: slug,
+            searchedKey: `blog_post_${slug}`,
+            availableKeys: allKeys,
+            freeBacklinkPosts: freeBacklinkService.getAllPosts().map(p => ({ id: p.id, slug: p.slug, title: p.title })),
+            allBlogPostsMeta: JSON.parse(localStorage.getItem('all_blog_posts') || '[]')
+          });
+
           // Show debug information if in development
           if (allKeys.length > 0) {
-            console.error('❌ Blog post not found:', {
-              searchedSlug: slug,
-              searchedKey: blogStorageKey,
-              availableKeys: allKeys
-            });
 
             // Try to find a similar slug
             const similarKey = allKeys.find(key => key.includes(slug.split('-')[0]));
