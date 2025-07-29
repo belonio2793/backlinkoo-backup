@@ -60,14 +60,16 @@ export function BlogPost() {
           console.warn('Database unavailable, trying localStorage:', dbError);
         }
 
+        // Debug: Show all localStorage keys that start with 'blog_post_'
+        let allKeys: string[] = [];
+
         // If not found in database, try localStorage
         if (!post) {
           try {
             const blogStorageKey = `blog_post_${slug}`;
             console.log('🔍 Looking for blog post with key:', blogStorageKey);
 
-            // Debug: Show all localStorage keys that start with 'blog_post_'
-            const allKeys = Object.keys(localStorage).filter(key => key.startsWith('blog_post_'));
+            allKeys = Object.keys(localStorage).filter(key => key.startsWith('blog_post_'));
             console.log('📋 Available blog post keys:', allKeys);
 
             const storedBlogData = localStorage.getItem(blogStorageKey);
