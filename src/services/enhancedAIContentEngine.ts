@@ -335,7 +335,11 @@ Balance creativity with SEO requirements to create content that ranks well and e
     if (successfulResults.length === 0) {
       // Return the first result as fallback
       return results[0] || {
-        content: this.generateFallbackContent(request),
+        content: SmartFallbackContent.generateContent(
+          request.keyword,
+          request.targetUrl,
+          request.anchorText
+        ),
         provider: 'fallback',
         success: true,
         usage: { tokens: 0, cost: 0 },
