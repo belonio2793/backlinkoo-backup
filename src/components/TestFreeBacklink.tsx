@@ -43,7 +43,7 @@ export function TestFreeBacklink() {
       // Test 2: Test OpenAI connection (if configured)
       if (openAIOnlyContentGenerator.isConfigured()) {
         try {
-          const connectionTest = await openAIContentGenerator.testConnection();
+          const connectionTest = await openAIOnlyContentGenerator.testConnection();
           results.push({
             name: 'OpenAI Connection',
             status: connectionTest ? 'success' : 'error',
