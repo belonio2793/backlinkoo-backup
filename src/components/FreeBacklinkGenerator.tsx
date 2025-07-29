@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { freeBacklinkService } from '@/services/freeBacklinkService';
 import { openAIContentGenerator, ContentGenerationRequest, GeneratedContentResult } from '@/services/openAIContentGenerator';
 import RegistrationModal from './RegistrationModal';
+import { WordCountProgress } from './WordCountProgress';
 import { 
   Loader2, 
   Sparkles, 
