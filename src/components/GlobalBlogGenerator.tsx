@@ -321,7 +321,7 @@ export function GlobalBlogGenerator({
         }
 
       } else {
-        throw new Error(result.error || 'Generation failed');
+        throw new Error('Content generation failed completely. Please try again or use the dedicated Free Backlink feature.');
       }
 
     } catch (error: any) {
