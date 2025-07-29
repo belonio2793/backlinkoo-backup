@@ -5,7 +5,6 @@ import { BlogForm } from './BlogForm';
 import { BlogPreview } from './BlogPreview';
 import { BlogManager } from './BlogManager';
 import { BlogTemplate } from './BlogTemplate';
-import { OpenAIStatusIndicator } from '@/components/OpenAIStatusIndicator';
 import { Sparkles, FileText, Settings, BarChart3 } from 'lucide-react';
 
 export function BlogGenerator() {
