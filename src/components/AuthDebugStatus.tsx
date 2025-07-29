@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { SecureConfig } from '@/lib/secure-config';
-import { CheckCircle, XCircle, AlertCircle, Refresh } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
 export function AuthDebugStatus() {
   const [authStatus, setAuthStatus] = useState<any>(null);
