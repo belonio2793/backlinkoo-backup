@@ -412,7 +412,7 @@ export function GlobalBlogGenerator({
       };
 
       // Update progress to show content generation with retry attempts
-      setGenerationStage('Generating high-quality content with AI (retries if needed)...');
+      setGenerationStage('Generating high-quality content with AI (up to 12 automatic retries if needed)...');
       setProgress(60);
 
       const result = await openAIContentGenerator.generateContent(contentRequest);
