@@ -8,6 +8,7 @@ import { BetaNotification } from "@/components/BetaNotification";
 import { AppWrapper } from "@/components/AppWrapper";
 import { AuthProfileChecker } from "@/components/AuthProfileChecker";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 
 const queryClient = new QueryClient();
 
