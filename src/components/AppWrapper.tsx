@@ -13,13 +13,9 @@ import BlogPreview from '@/pages/BlogPreview';
 import StreamlinedBlog from '@/pages/StreamlinedBlog';
 import BlogCreator from '@/pages/BlogCreator';
 import BlogPost from '@/pages/BlogPost';
-import GuestDashboard from '@/pages/GuestDashboard';
 import AIContentTest from '@/pages/AIContentTest';
-import AILive from '@/pages/AILive';
 import FreeBacklink from '@/pages/FreeBacklink';
-import TestFreeBacklink from '@/pages/TestFreeBacklink';
 import NotFound from '@/pages/NotFound';
-import EnhancedDashboardRouter from '@/pages/EnhancedDashboardRouter';
 import AdminDashboard from '@/pages/AdminDashboard';
 import PaymentSuccess from '@/pages/PaymentSuccess';
 import PaymentCancelled from '@/pages/PaymentCancelled';
@@ -31,10 +27,14 @@ import NoHandsSEO from '@/pages/NoHandsSEO';
 import AffiliateProgram from '@/pages/AffiliateProgram';
 import PromotionMaterials from '@/pages/PromotionMaterials';
 
-// Import guard components
+// Import components (not pages)
 import AdminAuthGuard from '@/components/AdminAuthGuard';
 import EmailVerificationGuard from '@/components/EmailVerificationGuard';
 import TrialNotificationBanner from '@/components/TrialNotificationBanner';
+import GuestDashboard from '@/components/GuestDashboard';
+import AILive from '@/components/AILive';
+import TestFreeBacklink from '@/components/TestFreeBacklink';
+import EnhancedDashboardRouter from '@/components/EnhancedDashboardRouter';
 
 export const AppWrapper = () => {
   useReferralTracking();
