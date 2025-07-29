@@ -159,17 +159,25 @@ Format the response as clean HTML with proper semantic structure.`;
     let content: string;
     try {
       if (useHuggingFace) {
-        content = await huggingFaceService.generateContent(prompt, {
+        const result = await huggingFaceService.generateText(prompt, {
           model: 'microsoft/DialoGPT-large',
-          maxTokens: 2000,
+          maxLength: 2000,
           temperature: 0.7
         });
+        if (!result.success) {
+          throw new Error(result.error || 'Hugging Face generation failed');
+        }
+        content = result.content;
       } else {
-        content = await cohereService.generateContent(prompt, {
+        const result = await cohereService.generateText(prompt, {
           model: 'command',
           maxTokens: 2000,
           temperature: 0.7
         });
+        if (!result.success) {
+          throw new Error(result.error || 'Cohere generation failed');
+        }
+        content = result.content;
       }
     } catch (error) {
       // Try backup provider if primary fails
@@ -178,17 +186,25 @@ Format the response as clean HTML with proper semantic structure.`;
         this.updateStatus('generating', `Primary provider failed, trying ${backupProvider.toUpperCase()}...`, 60, backupProvider as any);
 
         if (backupProvider === 'cohere') {
-          content = await cohereService.generateContent(prompt, {
+          const result = await cohereService.generateText(prompt, {
             model: 'command',
             maxTokens: 2000,
             temperature: 0.7
           });
+          if (!result.success) {
+            throw new Error(result.error || 'Cohere backup generation failed');
+          }
+          content = result.content;
         } else {
-          content = await huggingFaceService.generateContent(prompt, {
+          const result = await huggingFaceService.generateText(prompt, {
             model: 'microsoft/DialoGPT-large',
-            maxTokens: 2000,
+            maxLength: 2000,
             temperature: 0.7
           });
+          if (!result.success) {
+            throw new Error(result.error || 'Hugging Face backup generation failed');
+          }
+          content = result.content;
         }
       } else {
         throw new Error(`Content generation failed: ${error}`);
