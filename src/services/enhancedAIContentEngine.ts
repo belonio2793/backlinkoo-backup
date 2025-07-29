@@ -425,36 +425,56 @@ Create content that readers would want to bookmark, share, or reference later be
    * Enhance and optimize the selected content according to SEO guidelines
    */
   private async enhanceContent(content: string, request: ContentGenerationRequest): Promise<string> {
+    console.log('🔧 Starting content enhancement:', {
+      originalLength: content.length,
+      keyword: request.keyword,
+      hasH1: content.includes('<h1>') || content.includes('# ')
+    });
+
     let enhanced = content;
     const anchorText = request.anchorText || request.keyword;
-    
+
     // Ensure proper heading structure (only one H1 per page)
     if (!enhanced.includes('<h1>') && !enhanced.includes('# ')) {
       // Let the AI-generated content provide its own title - don't force a template
       console.warn('⚠️ Generated content missing H1 tag - content may need manual review');
     }
-    
+
     // Convert markdown to proper HTML structure
+    console.log('📝 Converting markdown to HTML...');
     enhanced = this.convertMarkdownToSEOHTML(enhanced);
-    
+    console.log('📝 After markdown conversion:', { length: enhanced.length });
+
     // Ensure proper paragraph structure (short paragraphs, 2-4 sentences)
     enhanced = this.optimizeParagraphStructure(enhanced);
-    
+    console.log('📝 After paragraph optimization:', { length: enhanced.length });
+
     // Integrate backlink naturally with proper anchor text
     enhanced = this.integrateBacklinkNaturally(enhanced, request);
-    
+    console.log('📝 After backlink integration:', { length: enhanced.length });
+
     // Add proper keyword emphasis using strong and em tags
     enhanced = this.addKeywordEmphasis(enhanced, request);
-    
+    console.log('📝 After keyword emphasis:', { length: enhanced.length });
+
     // Ensure proper content length (minimum 1000 words)
     enhanced = await this.ensureContentLength(enhanced, request);
-    
+    console.log('📝 After content length check:', { length: enhanced.length });
+
     // Note: Meta tags and structured data should be handled by the page template, not inline content
 
     // Apply enhanced text formatting (bullet points, capitalization)
     enhanced = formatBlogContent(enhanced);
+    console.log('📝 After text formatting:', { length: enhanced.length });
 
-    return enhanced.trim();
+    const finalContent = enhanced.trim();
+    console.log('✅ Content enhancement complete:', {
+      originalLength: content.length,
+      finalLength: finalContent.length,
+      success: finalContent.length > 50
+    });
+
+    return finalContent;
   }
   
   /**
