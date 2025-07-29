@@ -212,7 +212,23 @@ Balance creativity with SEO requirements to create content that ranks well and e
     // Generate content from multiple providers in parallel
     const generationPromises = this.providers.map(async (provider, index) => {
       const providerStartTime = Date.now();
-      
+
+      // Check if provider is configured
+      const isConfigured = provider.service.isConfigured();
+      console.log(`🔧 Provider ${provider.name} configured: ${isConfigured}`);
+
+      if (!isConfigured) {
+        console.warn(`⚠️ ${provider.name} not configured, skipping...`);
+        return {
+          content: '',
+          provider: provider.name,
+          success: false,
+          usage: { tokens: 0, cost: 0 },
+          error: 'Provider not configured',
+          generationTime: Date.now() - providerStartTime
+        };
+      }
+
       try {
         console.log(`🤖 Generating content with ${provider.name}...`);
         
