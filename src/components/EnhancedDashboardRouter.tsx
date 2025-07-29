@@ -54,9 +54,8 @@ export function EnhancedDashboardRouter() {
 
         // Routing logic
         if (session?.user) {
-          // User is logged in - redirect to protected dashboard
+          // User is logged in - show dashboard directly
           setIsLoading(false);
-          navigate('/my-dashboard');
           return;
         } else {
           // User not logged in - show appropriate dashboard or redirect
