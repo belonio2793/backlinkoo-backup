@@ -277,8 +277,9 @@ export class OpenAIService {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), finalRetryConfig.timeoutMs || 30000);
 
+        let response;
         try {
-          const response = await fetch(`${this.baseURL}/chat/completions`, {
+          response = await fetch(`${this.baseURL}/chat/completions`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${this.apiKey}`,
@@ -291,8 +292,6 @@ export class OpenAIService {
           });
 
           clearTimeout(timeoutId);
-
-          return response;
         } catch (fetchError) {
           clearTimeout(timeoutId);
 
