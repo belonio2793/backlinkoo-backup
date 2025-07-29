@@ -46,12 +46,13 @@ export class OpenAIService {
   };
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY ||
-                  (typeof process !== 'undefined' ? process.env.OPENAI_API_KEY : '') ||
-                  '';
+    // Get API key from environment variables
+    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
 
     if (!this.apiKey) {
-      console.warn('OpenAI API key not configured');
+      console.warn('OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable.');
+    } else {
+      console.log('✅ OpenAI API key configured successfully');
     }
   }
 

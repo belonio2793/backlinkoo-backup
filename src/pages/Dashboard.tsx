@@ -33,7 +33,10 @@ import {
   Zap,
   User,
   Settings,
-  ChevronDown
+  ChevronDown,
+  Eye,
+  Sparkles,
+  Crown
 } from "lucide-react";
 import { PaymentModal } from "@/components/PaymentModal";
 import { CampaignForm } from "@/components/CampaignForm";
@@ -306,25 +309,23 @@ const Dashboard = () => {
         } catch (timeoutError) {
           console.warn('🏠 Dashboard - Auth check timed out, trying fallback...');
 
-          // If auth times out, redirect to login
-          console.log('🏠 Dashboard - Auth timeout, redirecting to login');
-          if (isMounted) {
-            navigate('/login');
-          }
+          // If auth times out, continue with demo mode
+          console.log('🏠 Dashboard - Auth timeout, continuing in demo mode');
+          setLoading(false);
           return;
         }
 
         if (!isMounted) return;
 
         if (error && !session) {
-          console.log('🏠 Dashboard - Auth error:', error);
-          navigate('/login');
+          console.log('🏠 Dashboard - Auth error, continuing in demo mode:', error);
+          setLoading(false);
           return;
         }
 
         if (!session?.user) {
-          console.log('🏠 Dashboard - No valid session, redirecting to login');
-          navigate('/login');
+          console.log('🏠 Dashboard - No valid session, continuing in demo mode');
+          setLoading(false);
           return;
         }
 
@@ -380,7 +381,7 @@ const Dashboard = () => {
       const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (!isMounted) return;
 
-        console.log('🏠 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
+        console.log('���� Dashboard - Auth state change:', { event, hasUser: !!session?.user });
 
         if (event === 'SIGNED_OUT' || !session) {
           console.log('🏠 Dashboard - User signed out, redirecting to login...');
@@ -648,10 +649,7 @@ const Dashboard = () => {
     );
   }
 
-  // Don't render dashboard if user is not authenticated
-  if (!user) {
-    return null;
-  }
+  // Show dashboard regardless of authentication state
 
   return (
     <div className="min-h-screen bg-background">

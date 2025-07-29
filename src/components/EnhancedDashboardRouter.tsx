@@ -45,16 +45,9 @@ export function EnhancedDashboardRouter() {
 
         setUser(session?.user || null);
 
-        // Simple logic: if user is authenticated, show dashboard; otherwise redirect to home
-        if (session?.user) {
-          console.log('✅ User authenticated, showing dashboard');
-          setIsLoading(false);
-          return;
-        } else {
-          console.log('❌ User not authenticated, redirecting to home');
-          navigate('/');
-          return;
-        }
+        // Set loading to false regardless of auth state to show dashboard
+        console.log('✅ Setting loading to false, will show dashboard');
+        setIsLoading(false);
       } catch (error) {
         console.error('Dashboard router error:', error);
         if (isMounted) {
@@ -85,28 +78,9 @@ export function EnhancedDashboardRouter() {
     );
   }
 
-  // If user is authenticated, show protected dashboard
-  if (user) {
-    console.log('👤 Rendering authenticated dashboard');
-    return <Dashboard />;
-  }
-
-  // For non-authenticated users, show a simple message or redirect
-  console.log('🚫 No authenticated user, showing fallback');
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="text-center">
-        <h2 className="text-xl font-semibold mb-2">Access Required</h2>
-        <p className="text-muted-foreground mb-4">Please log in to access your dashboard.</p>
-        <button
-          onClick={() => navigate('/login')}
-          className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
-        >
-          Go to Login
-        </button>
-      </div>
-    </div>
-  );
+  // Show dashboard when not loading
+  console.log('👤 Rendering dashboard');
+  return <Dashboard />;
 }
 
 // Guest Onboarding Dashboard Component
