@@ -553,15 +553,27 @@ export function GlobalBlogGenerator({
         sessionId: request.sessionId
       });
 
-      // Use the new OpenAI-only content generator
+      // Use the new OpenAI-only content generator with enhanced retry configuration
       const contentRequest: ContentGenerationRequest = {
         targetUrl: request.targetUrl,
         primaryKeyword: request.primaryKeyword,
         anchorText: request.anchorText,
         wordCount: 1500,
         tone: 'professional' as const,
-        contentType: 'how-to' as const
+        contentType: 'how-to' as const,
+        retryConfig: {
+          maxRetries: 8,
+          baseDelay: 2000,
+          maxDelay: 20000,
+          exponentialBackoff: true,
+          retryOnRateLimit: true,
+          retryOnServerError: true
+        }
       };
+
+      // Update progress to show content generation with retry attempts
+      setGenerationStage('Generating content with AI - this may take a few attempts...');
+      setProgress(60);
 
       const result = await openAIContentGenerator.generateContent(contentRequest);
 
