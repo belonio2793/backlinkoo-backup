@@ -200,11 +200,27 @@ function enhanceContentForSEO(content: string, keyword: string, anchorText: stri
     content = `<h1>${title}</h1>\n\n${content}`;
   }
 
-  // Ensure anchor text is linked if not already
+  // Ensure anchor text is linked multiple times for better SEO
   if (!content.includes(anchorText) || !content.includes(targetUrl)) {
-    const linkParagraph = `\n\n<p>For more information about this topic, explore our comprehensive resource on <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchorText}</a>.</p>`;
-    content += linkParagraph;
+    // Add anchor text in introduction
+    const introLink = `\n\n<p>This comprehensive guide covers everything you need to know about ${keyword.toLowerCase()}, including insights from <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchorText}</a>.</p>`;
+
+    // Add anchor text in conclusion
+    const conclusionLink = `\n\n<p>For more detailed information and advanced strategies, visit our dedicated resource on <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchorText}</a> to enhance your understanding.</p>`;
+
+    content = introLink + content + conclusionLink;
   }
+
+  // Add backlink information section at the end
+  const backlinkInfo = `
+  <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(to right, #eff6ff, #f3e8ff); border: 1px solid #3b82f6; border-radius: 0.5rem;">
+    <h3 style="color: #1e40af; margin-bottom: 1rem; font-size: 1.125rem; font-weight: 600;">🔗 Backlink Information</h3>
+    <p style="margin-bottom: 0.5rem; font-size: 0.875rem; color: #374151;"><strong>Anchor Text:</strong> <code style="background: #e5e7eb; padding: 0.25rem 0.5rem; border-radius: 0.25rem; color: #1e40af;">${anchorText}</code></p>
+    <p style="margin-bottom: 0.5rem; font-size: 0.875rem; color: #374151;"><strong>Target URL:</strong> <a href="${targetUrl}" target="_blank" rel="noopener noreferrer" style="color: #1e40af; text-decoration: underline;">${targetUrl}</a></p>
+    <p style="font-size: 0.75rem; color: #059669; margin-top: 0.75rem;">✅ This content naturally integrates the anchor text "${anchorText}" with high-quality, contextual backlinks.</p>
+  </div>`;
+
+  content += backlinkInfo;
 
   // Add proper paragraph tags if missing
   content = content.replace(/\n\n/g, '</p>\n<p>');
