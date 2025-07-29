@@ -63,12 +63,7 @@ export function AILive() {
   const [url, setUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [providers, setProviders] = useState<AIProvider[]>([
-    { name: 'HuggingFace', status: 'checking' },
-    { name: 'Cohere', status: 'checking' },
-    { name: 'Rytr', status: 'checking' },
-    { name: 'DeepAI', status: 'checking' },
-    { name: 'OpenAI', status: 'checking' },
-    { name: 'Grok', status: 'checking' }
+    { name: 'OpenAI', status: 'checking' }
   ]);
   const [apiCheckComplete, setApiCheckComplete] = useState(false);
   const [steps, setSteps] = useState<GenerationStep[]>([]);
@@ -108,22 +103,11 @@ export function AILive() {
     try {
       console.log(`Checking ${provider} health...`);
 
-      switch (provider) {
-        case 'OpenAI':
-          return openAIService.isConfigured() && await openAIService.testConnection();
-        case 'Grok':
-          return grokService.isConfigured() && await grokService.testConnection();
-        case 'DeepAI':
-          return deepAIService.isConfigured() && await deepAIService.testConnection();
-        case 'HuggingFace':
-          return huggingFaceService.isConfigured() && await huggingFaceService.testConnection();
-        case 'Cohere':
-          return cohereService.isConfigured() && await cohereService.testConnection();
-        case 'Rytr':
-          return rytrService.isConfigured() && await rytrService.testConnection();
-        default:
-          return false;
+      if (provider === 'OpenAI') {
+        return openAIService.isConfigured() && await openAIService.testConnection();
       }
+
+      return false;
     } catch (error) {
       console.log(`${provider} health check failed:`, error);
       return false;
