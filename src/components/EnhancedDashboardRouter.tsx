@@ -71,6 +71,14 @@ export function EnhancedDashboardRouter() {
     };
   }, [navigate]);
 
+  // Additional useEffect to handle fallback redirect if somehow we reach an unauthenticated state
+  useEffect(() => {
+    if (!isLoading && !user) {
+      console.log('🚫 Fallback redirect to login');
+      navigate('/login');
+    }
+  }, [isLoading, user, navigate]);
+
   console.log('📊 Dashboard Router State:', { isLoading, user: !!user, hasTrialPosts, guestAnalytics });
 
   if (isLoading) {
