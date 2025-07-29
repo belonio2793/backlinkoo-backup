@@ -467,6 +467,15 @@ export function MinimalAITest() {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [logs]);
 
+  // Auto-run API test on mount
+  useEffect(() => {
+    const runInitialTest = async () => {
+      addLog('info', 'SYSTEM', 'Auto-running API connectivity test...');
+      await testApiProviders();
+    };
+    runInitialTest();
+  }, []);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'online': return 'text-green-600';
