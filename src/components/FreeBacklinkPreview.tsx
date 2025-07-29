@@ -226,64 +226,70 @@ export function FreeBacklinkPreview({ content, onRegenerate, onDelete }: FreeBac
         </CardContent>
       </Card>
 
-      {/* Post Overview */}
-      <Card className="border-purple-200">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-purple-600" />
-              Your Free Backlink Post
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button
-                variant={viewMode === 'preview' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('preview')}
-                className={viewMode === 'preview' ? 'bg-purple-600 hover:bg-purple-700' : ''}
-              >
-                <Eye className="h-4 w-4 mr-1" />
-                Preview
-              </Button>
-              <Button
-                variant={viewMode === 'html' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('html')}
-                className={viewMode === 'html' ? 'bg-purple-600 hover:bg-purple-700' : ''}
-              >
-                <Code className="h-4 w-4 mr-1" />
-                HTML
-              </Button>
+      {/* Enhanced Post Overview */}
+      <Card className="border-purple-200 shadow-lg bg-gradient-to-br from-white to-purple-50/30">
+        <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg">
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-6 w-6" />
+              <span className="text-xl font-bold">Your AI-Generated Blog Post</span>
             </div>
-          </div>
+            <Badge className="bg-white/20 text-white border-white/30">
+              Free Content
+            </Badge>
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Metadata Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-purple-50 rounded-lg">
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-purple-800">Title</p>
-              <p className="text-sm text-purple-700 font-semibold">{content.title}</p>
+        <CardContent className="space-y-6 p-6">
+          {/* Enhanced Metadata Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white rounded-xl p-4 border border-purple-100 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <FileText className="h-4 w-4 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Title</p>
+                  <p className="text-sm font-semibold text-gray-900 line-clamp-2">{content.title}</p>
+                </div>
+              </div>
             </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-purple-800">Word Count</p>
-              <p className="text-sm text-purple-700 flex items-center gap-1">
-                <FileText className="h-3 w-3" />
-                {content.wordCount} words
-              </p>
+
+            <div className="bg-white rounded-xl p-4 border border-green-100 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <BarChart3 className="h-4 w-4 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Word Count</p>
+                  <p className="text-lg font-bold text-green-600">{content.wordCount}</p>
+                </div>
+              </div>
             </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-purple-800">Reading Time</p>
-              <p className="text-sm text-purple-700 flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {content.readingTime} min
-              </p>
+
+            <div className="bg-white rounded-xl p-4 border border-blue-100 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Clock className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Reading Time</p>
+                  <p className="text-lg font-bold text-blue-600">{content.readingTime} min</p>
+                </div>
+              </div>
             </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-purple-800">SEO Score</p>
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-3 w-3 text-purple-600" />
-                <Badge variant="outline" className="bg-purple-100 text-purple-800">
-                  {content.seoScore}/100
-                </Badge>
+
+            <div className="bg-white rounded-xl p-4 border border-orange-100 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-orange-100 rounded-lg">
+                  <TrendingUp className="h-4 w-4 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">SEO Score</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-lg font-bold text-orange-600">{content.seoScore}</p>
+                    <span className="text-sm text-gray-500">/100</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
