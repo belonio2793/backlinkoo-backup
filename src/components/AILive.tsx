@@ -1,6 +1,6 @@
 /**
  * AI Live Blog Generator
- * Real-time AI content generation with OpenAI and Grok APIs
+ * Real-time AI content generation with OpenAI API
  */
 
 import { useState, useEffect, useRef } from 'react';
@@ -24,11 +24,6 @@ import {
   Brain
 } from 'lucide-react';
 import { openAIService } from '@/services/api/openai';
-import { grokService } from '@/services/api/grok';
-import { deepAIService } from '@/services/api/deepai';
-import { huggingFaceService } from '@/services/api/huggingface';
-import { cohereService } from '@/services/api/cohere';
-import { rytrService } from '@/services/api/rytr';
 
 interface AIProvider {
   name: string;
