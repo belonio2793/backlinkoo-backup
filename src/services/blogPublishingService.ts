@@ -65,7 +65,9 @@ export class BlogPublishingService {
         // Since we're having database issues and the table likely doesn't exist,
         // use fallback for any error until database is properly set up
         console.warn('Database error detected, using fallback post creation');
-        return this.createFallbackPost(postData);
+        const fallbackPost = this.createFallbackPost(postData);
+        console.log('✅ Successfully created fallback post from database error:', fallbackPost.id);
+        return fallbackPost;
       }
 
       return data as BlogPost;
@@ -153,7 +155,7 @@ export class BlogPublishingService {
         localStorage.setItem('ai_posts_list', JSON.stringify(existingPosts));
       }
 
-      console.log('✅ Fallback post stored in localStorage:', postKey);
+      console.log('�� Fallback post stored in localStorage:', postKey);
     } catch (err) {
       console.warn('❌ Could not store fallback post in localStorage:', err);
     }
