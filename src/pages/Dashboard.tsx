@@ -752,10 +752,7 @@ const Dashboard = () => {
                 <span className="sm:hidden">Trial</span>
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
               </TabsTrigger>
-              <TabsTrigger value="free-blog" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
-                <span className="hidden sm:inline">Free Blog Post</span>
-                <span className="sm:hidden">Blog</span>
-              </TabsTrigger>
+
               <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Campaigns</span>
                 <span className="sm:hidden">Camps</span>
