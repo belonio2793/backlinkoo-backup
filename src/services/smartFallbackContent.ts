@@ -74,12 +74,11 @@ export class SmartFallbackContent {
 
 <h2>Types and Varieties</h2>
 <p>There are numerous varieties of ${keyword}, each with unique characteristics:</p>
-<ul>
-<li><strong>Traditional varieties</strong>: Classic preparations that honor original recipes</li>
-<li><strong>Modern interpretations</strong>: Contemporary twists on traditional favorites</li>
-<li><strong>Regional specialties</strong>: Unique local variations worth exploring</li>
-<li><strong>Fusion styles</strong>: Creative combinations with other culinary traditions</li>
-</ul>
+
+- <strong>Traditional varieties</strong>: Classic preparations that honor original recipes
+- <strong>Modern interpretations</strong>: Contemporary twists on traditional favorites
+- <strong>Regional specialties</strong>: Unique local variations worth exploring
+- <strong>Fusion styles</strong>: Creative combinations with other culinary traditions
 
 <h2>How to Enjoy ${keyword}</h2>
 <p>Getting the most out of your ${keyword} experience involves understanding proper etiquette, pairing suggestions, and quality indicators. Whether dining out or preparing at home, these tips will enhance your enjoyment.</p>
