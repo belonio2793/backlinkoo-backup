@@ -534,61 +534,106 @@ export function FreeBacklinkPreview({ content, onRegenerate, onDelete }: FreeBac
         </CardContent>
       </Card>
 
-      {/* Action Buttons */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Actions</CardTitle>
+      {/* Enhanced Action Buttons */}
+      <Card className="shadow-lg border-gray-200">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5 text-gray-600" />
+            <span className="text-gray-800">Post Actions</span>
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* Primary Actions */}
-            <Button 
-              onClick={handleSaveAccount}
-              className="bg-green-600 hover:bg-green-700 text-white font-semibold"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              Save Forever
-            </Button>
+        <CardContent className="p-6">
+          {/* Primary Actions Section */}
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <Star className="h-4 w-4 text-yellow-500" />
+                Primary Actions
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Button
+                  onClick={handleSaveAccount}
+                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 h-12"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Forever
+                  <Badge className="ml-2 bg-white/20 text-white text-xs">
+                    Recommended
+                  </Badge>
+                </Button>
 
-            <Button 
-              onClick={handleRegenerate}
-              disabled={isRegenerating || timeRemaining.expired}
-              variant="outline"
-              className="border-purple-200 text-purple-700 hover:bg-purple-50"
-            >
-              {isRegenerating ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Regenerating...
-                </>
-              ) : (
-                <>
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  Regenerate
-                </>
-              )}
-            </Button>
+                <Button
+                  onClick={handleRegenerate}
+                  disabled={isRegenerating || timeRemaining.expired}
+                  variant="outline"
+                  className="border-2 border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 font-semibold transition-all duration-200 h-12"
+                >
+                  {isRegenerating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Regenerating...
+                    </>
+                  ) : (
+                    <>
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      Regenerate Content
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
 
-            {/* Secondary Actions */}
-            <Button variant="outline" onClick={handleCopyUrl}>
-              <Copy className="h-4 w-4 mr-2" />
-              Copy URL
-            </Button>
+            {/* Secondary Actions Section */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <Share className="h-4 w-4 text-blue-500" />
+                Share & Export
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <Button
+                  variant="outline"
+                  onClick={handleCopyUrl}
+                  className="border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy URL
+                </Button>
 
-            <Button variant="outline" onClick={exportPost}>
-              <Download className="h-4 w-4 mr-2" />
-              Export JSON
-            </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleCopyContent}
+                  className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:border-indigo-300 transition-all duration-200"
+                >
+                  <Code className="h-4 w-4 mr-2" />
+                  Copy HTML
+                </Button>
 
-            {/* Destructive Action */}
-            <Button 
-              variant="destructive" 
-              onClick={handleDelete}
-              className="sm:col-span-2 lg:col-span-4"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Post Now
-            </Button>
+                <Button
+                  variant="outline"
+                  onClick={exportPost}
+                  className="border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 transition-all duration-200"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export JSON
+                </Button>
+              </div>
+            </div>
+
+            {/* Danger Zone */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-red-500" />
+                Danger Zone
+              </h3>
+              <Button
+                variant="outline"
+                onClick={handleDelete}
+                className="border-2 border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300 transition-all duration-200 w-full sm:w-auto"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Post Now
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
