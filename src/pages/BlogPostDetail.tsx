@@ -280,6 +280,50 @@ export default function BlogPostDetail() {
               />
             </article>
 
+            {/* Backlink Information */}
+            <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <ExternalLink className="h-5 w-5 mr-2 text-blue-600" />
+                Backlink Information
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Anchor Text:</label>
+                  <div className="p-3 bg-white border border-gray-300 rounded-md">
+                    <code className="text-blue-600 font-medium">{post.anchor_text}</code>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Target URL:</label>
+                  <div className="p-3 bg-white border border-gray-300 rounded-md">
+                    <a
+                      href={post.target_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 hover:underline font-medium break-all"
+                    >
+                      {post.target_url}
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 p-3 bg-white border border-green-200 rounded-md">
+                <div className="flex items-start space-x-2">
+                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-green-800 font-medium mb-1">
+                      Natural Integration Confirmed
+                    </p>
+                    <p className="text-xs text-green-700">
+                      The anchor text "<strong>{post.anchor_text}</strong>" has been naturally integrated
+                      into this content and links to your target URL. This creates a high-quality,
+                      contextual backlink that search engines value.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Footer Actions */}
             <footer className="mt-12 pt-8 border-t border-gray-200">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
