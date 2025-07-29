@@ -103,6 +103,11 @@ export function FreeBacklink() {
         </div>
       </div>
 
+      {/* API Key Status */}
+      <div className="mb-6">
+        <APIKeyStatus />
+      </div>
+
       {/* Main Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-8">
