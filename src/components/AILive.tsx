@@ -181,20 +181,15 @@ export function AILive() {
   };
 
   const selectProviderByPriority = (): string => {
-    // Priority order: HuggingFace → Cohere → Rytr → DeepAI → OpenAI → Grok
-    const priorityOrder = ['HuggingFace', 'Cohere', 'Rytr', 'DeepAI', 'OpenAI', 'Grok'];
     const onlineProviders = providers.filter(p => p.status === 'online');
 
-    // Find the first available provider in priority order
-    for (const providerName of priorityOrder) {
-      const provider = onlineProviders.find(p => p.name === providerName);
-      if (provider) {
-        return provider.name;
-      }
+    // Always use OpenAI if available
+    const openAI = onlineProviders.find(p => p.name === 'OpenAI');
+    if (openAI) {
+      return 'OpenAI';
     }
 
-    // Fallback to first available if none match priority order
-    return onlineProviders[0]?.name || 'None';
+    return 'None';
   };
 
   const selectRandomPrompt = (): { prompt: string, index: number } => {
@@ -253,47 +248,14 @@ export function AILive() {
         console.log(`Generating content with ${selectedProvider}...`);
         let apiResult;
 
-        switch (selectedProvider) {
-          case 'OpenAI':
-            apiResult = await openAIService.generateContent(prompt, {
-              model: 'gpt-3.5-turbo',
-              maxTokens: 2000,
-              temperature: 0.7
-            });
-            break;
-          case 'Grok':
-            apiResult = await grokService.generateContent(prompt, {
-              model: 'grok-2-1212',
-              maxTokens: 2000,
-              temperature: 0.7
-            });
-            break;
-          case 'DeepAI':
-            apiResult = await deepAIService.generateText(prompt);
-            break;
-          case 'HuggingFace':
-            apiResult = await huggingFaceService.generateText(prompt, {
-              model: 'microsoft/DialoGPT-large',
-              maxLength: 2000,
-              temperature: 0.7
-            });
-            break;
-          case 'Cohere':
-            apiResult = await cohereService.generateText(prompt, {
-              model: 'command',
-              maxTokens: 2000,
-              temperature: 0.7
-            });
-            break;
-          case 'Rytr':
-            apiResult = await rytrService.generateContent(prompt, {
-              useCase: 'blog_idea_outline',
-              tone: 'convincing',
-              maxCharacters: 15000
-            });
-            break;
-          default:
-            throw new Error(`Unknown provider: ${selectedProvider}`);
+        if (selectedProvider === 'OpenAI') {
+          apiResult = await openAIService.generateContent(prompt, {
+            model: 'gpt-4',
+            maxTokens: 3000,
+            temperature: 0.7
+          });
+        } else {
+          throw new Error('OpenAI is the only available provider');
         }
 
         if (!apiResult.success || !apiResult.content) {
