@@ -230,22 +230,50 @@ export function cleanHTMLContent(content: string): string {
 
   let cleaned = content;
 
-  // Remove HTML comments completely
+  // Remove all HTML comments completely (including malformed ones)
   cleaned = cleaned.replace(/<!--[\s\S]*?-->/g, '');
+
+  // Remove orphaned comment markers that might appear as text
+  cleaned = cleaned.replace(/-->/g, '');
+  cleaned = cleaned.replace(/<!--/g, '');
 
   // Remove meta tags hints that shouldn't be visible
   cleaned = cleaned.replace(/<!-- SEO Meta Tags[\s\S]*?-->/g, '');
   cleaned = cleaned.replace(/<!-- Structured Data[\s\S]*?-->/g, '');
 
+  // Remove JSON-LD structured data that appears as text
+  cleaned = cleaned.replace(/\{\s*"@context"[\s\S]*?\}/g, '');
+
+  // Clean up malformed bullet points with HTML entities
+  cleaned = cleaned.replace(/- &lt;div class=["']bullet["'][^&]*?&gt;/g, '-');
+  cleaned = cleaned.replace(/&lt;\/div&gt;/g, '');
+
+  // Fix HTML entities that shouldn't be visible
+  cleaned = cleaned.replace(/&lt;/g, '<');
+  cleaned = cleaned.replace(/&gt;/g, '>');
+  cleaned = cleaned.replace(/&quot;/g, '"');
+  cleaned = cleaned.replace(/&amp;/g, '&');
+
   // Fix malformed bullet points that are inline
   cleaned = cleaned.replace(/- <(strong|b)>/g, '\n- <$1>');
   cleaned = cleaned.replace(/<\/(strong|b)> - /g, '</$1>\n- ');
+
+  // Fix broken bullet point structures
+  cleaned = cleaned.replace(/- <div[^>]*>/g, '-');
+  cleaned = cleaned.replace(/<\/div>\s*(?=\n|$)/g, '');
 
   // Ensure proper paragraph structure around bullet points
   cleaned = cleaned.replace(/(\n- [^\n]+(?:\n- [^\n]+)*)/g, '\n<div class="bullet-list">$1\n</div>\n');
 
   // Clean up excessive line breaks
   cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+
+  // Remove any remaining malformed HTML patterns
+  cleaned = cleaned.replace(/class=["'][^"']*bullet["'][^>]*>/g, '');
+
+  // Clean up any text that looks like comment markers
+  cleaned = cleaned.replace(/^\s*-->\s*/gm, '');
+  cleaned = cleaned.replace(/\s*<!--\s*$/gm, '');
 
   // Ensure content starts cleanly (no leading whitespace/comments)
   cleaned = cleaned.trim();
