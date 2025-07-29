@@ -295,10 +295,12 @@ Create content that readers would want to bookmark, share, or reference later be
 
     if (!enhancedContent || enhancedContent.length < 50) {
       console.error('❌ Enhanced content is empty or too short:', {
-        enhancedContent: enhancedContent,
+        enhancedContentPreview: enhancedContent?.substring(0, 100) + '...',
         enhancedContentLength: enhancedContent?.length,
-        bestResultContent: bestResult.content,
-        bestResultContentLength: bestResult.content?.length
+        bestResultContentPreview: bestResult.content?.substring(0, 100) + '...',
+        bestResultContentLength: bestResult.content?.length,
+        bestResultProvider: bestResult.provider,
+        bestResultSuccess: bestResult.success
       });
     }
 
