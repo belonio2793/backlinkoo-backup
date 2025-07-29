@@ -309,11 +309,9 @@ const Dashboard = () => {
         } catch (timeoutError) {
           console.warn('🏠 Dashboard - Auth check timed out, trying fallback...');
 
-          // If auth times out, redirect to login
-          console.log('🏠 Dashboard - Auth timeout, redirecting to login');
-          if (isMounted) {
-            navigate('/login');
-          }
+          // If auth times out, continue with demo mode
+          console.log('🏠 Dashboard - Auth timeout, continuing in demo mode');
+          setLoading(false);
           return;
         }
 
@@ -386,7 +384,7 @@ const Dashboard = () => {
         console.log('🏠 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
 
         if (event === 'SIGNED_OUT' || !session) {
-          console.log('🏠 Dashboard - User signed out, redirecting to login...');
+          console.log('��� Dashboard - User signed out, redirecting to login...');
           navigate('/login');
         } else if (event === 'SIGNED_IN' && session) {
           console.log('🏠 Dashboard - User signed in, updating user state');
