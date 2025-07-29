@@ -326,7 +326,7 @@ export function BlogPost() {
       });
 
       // Generate new content using the OpenAI-only service
-      const result = await openAIContentGenerator.generateContent({
+      const result = await openAIOnlyContentGenerator.generateContent({
         targetUrl: blogPost.target_url,
         primaryKeyword: primaryKeyword,
         anchorText: anchorText,
