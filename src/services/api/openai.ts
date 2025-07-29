@@ -37,12 +37,14 @@ export class OpenAIService {
   private apiKey: string;
   private baseURL = 'https://api.openai.com/v1';
   private defaultRetryConfig = {
-    maxRetries: 5,
-    baseDelay: 1000,
-    maxDelay: 30000,
+    maxRetries: 8,
+    baseDelay: 500,
+    maxDelay: 45000,
     exponentialBackoff: true,
     retryOnRateLimit: true,
-    retryOnServerError: true
+    retryOnServerError: true,
+    timeoutMs: 30000,
+    jitterFactor: 0.1
   };
 
   constructor() {
@@ -109,8 +111,9 @@ export class OpenAIService {
           ? Math.min(config.baseDelay * Math.pow(2, attempt - 1), config.maxDelay)
           : config.baseDelay;
 
-        // Add some jitter to prevent thundering herd
-        const jitteredDelay = delay + Math.random() * 1000;
+        // Add jitter to prevent thundering herd (more sophisticated)
+        const jitterRange = delay * config.jitterFactor;
+        const jitteredDelay = delay + (Math.random() * 2 - 1) * jitterRange;
 
         console.warn(`⏳ OpenAI API attempt ${attempt} failed: ${lastError.message}. Retrying in ${Math.round(jitteredDelay)}ms...`);
 
@@ -128,7 +131,12 @@ export class OpenAIService {
     const message = error.message.toLowerCase();
 
     // Always retry on network errors
-    if (message.includes('network error') || message.includes('fetch error')) {
+    if (message.includes('network error') ||
+        message.includes('fetch error') ||
+        message.includes('connection refused') ||
+        message.includes('connection reset') ||
+        message.includes('econnreset') ||
+        message.includes('enotfound')) {
       return true;
     }
 
@@ -143,36 +151,64 @@ export class OpenAIService {
       message.includes('502') ||
       message.includes('503') ||
       message.includes('504') ||
+      message.includes('507') ||
+      message.includes('508') ||
+      message.includes('520') ||
+      message.includes('521') ||
+      message.includes('522') ||
+      message.includes('523') ||
+      message.includes('524') ||
       message.includes('internal server error') ||
       message.includes('bad gateway') ||
       message.includes('service unavailable') ||
-      message.includes('gateway timeout')
+      message.includes('gateway timeout') ||
+      message.includes('server overloaded')
     )) {
       return true;
     }
 
     // Retry on timeout errors
-    if (message.includes('timeout') || message.includes('timed out')) {
+    if (message.includes('timeout') ||
+        message.includes('timed out') ||
+        message.includes('request timeout') ||
+        message.includes('read timeout')) {
       return true;
     }
 
-    // Don't retry on authentication errors
+    // Retry on temporary OpenAI issues
+    if (message.includes('overloaded') ||
+        message.includes('temporarily unavailable') ||
+        message.includes('try again later')) {
+      return true;
+    }
+
+    // Don't retry on authentication errors (but log them)
     if (message.includes('401') || message.includes('unauthorized') || message.includes('invalid api key')) {
+      console.error('🔑 Authentication error - check API key validity');
       return false;
     }
 
     // Don't retry on quota exceeded
     if (message.includes('quota') || message.includes('insufficient_quota')) {
+      console.error('💳 Quota exceeded - check billing');
       return false;
     }
 
     // Don't retry on model not found
     if (message.includes('404') || message.includes('model not found')) {
+      console.error('🤖 Model not found - check model availability');
       return false;
     }
 
-    // Default to no retry for unknown errors
-    return false;
+    // Don't retry on content policy violations
+    if (message.includes('content_filter') || message.includes('policy')) {
+      console.error('🚫 Content policy violation');
+      return false;
+    }
+
+    // Default to retry for unknown errors (defensive approach)
+    console.warn('🔄 Unknown error, attempting retry:', message);
+    return true;
   }
 
   /**
