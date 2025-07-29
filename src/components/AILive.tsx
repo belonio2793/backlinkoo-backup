@@ -23,7 +23,12 @@ import {
   FileText,
   Brain
 } from 'lucide-react';
-import { MockAIService } from '@/services/mockAIService';
+import { openAIService } from '@/services/api/openai';
+import { grokService } from '@/services/api/grok';
+import { deepAIService } from '@/services/api/deepai';
+import { huggingFaceService } from '@/services/api/huggingface';
+import { cohereService } from '@/services/api/cohere';
+import { rytrService } from '@/services/api/rytr';
 
 interface AIProvider {
   name: string;
