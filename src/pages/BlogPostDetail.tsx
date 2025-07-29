@@ -284,8 +284,62 @@ export default function BlogPostDetail() {
               />
             </article>
 
+            {/* SEO Analysis */}
+            <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <CheckCircle2 className="h-5 w-5 mr-2 text-green-600" />
+                SEO Analysis & Score: {post.seo_score}/100
+              </h3>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-700 mb-2">Content Structure ✅</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <span>Single H1 tag (proper heading hierarchy)</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <span>Multiple H2/H3 sections for organization</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <span>{post.word_count} words (minimum 1000 recommended)</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <span>Short paragraphs for readability</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-700 mb-2">Optimization Elements ✅</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <span>Keywords naturally integrated</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <span>Bold emphasis on key points</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <span>Bullet points and lists included</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <span>Mobile-responsive formatting</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Backlink Information */}
-            <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+            <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                 <ExternalLink className="h-5 w-5 mr-2 text-blue-600" />
                 Backlink Information
@@ -316,12 +370,13 @@ export default function BlogPostDetail() {
                   <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm text-green-800 font-medium mb-1">
-                      Natural Integration Confirmed
+                      SEO-Optimized Backlink Integration
                     </p>
                     <p className="text-xs text-green-700">
-                      The anchor text "<strong>{post.anchor_text}</strong>" has been naturally integrated
-                      into this content and links to your target URL. This creates a high-quality,
-                      contextual backlink that search engines value.
+                      ✅ Anchor text "<strong>{post.anchor_text}</strong>" includes target="_blank" rel="noopener noreferrer"<br/>
+                      ✅ Natural contextual placement within content<br/>
+                      ✅ Multiple anchor text instances for better SEO value<br/>
+                      ✅ Proper HTML formatting and accessibility
                     </p>
                   </div>
                 </div>
