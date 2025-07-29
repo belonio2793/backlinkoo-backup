@@ -8,6 +8,7 @@ import { openAIService } from './api/openai';
 import { grokService } from './api/grok';
 import { cohereService } from './api/cohere';
 import { huggingFaceService } from './api/huggingface';
+import { SmartFallbackContent } from './smartFallbackContent';
 
 export interface ContentGenerationRequest {
   keyword: string;
