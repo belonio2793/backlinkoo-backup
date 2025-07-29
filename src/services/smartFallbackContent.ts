@@ -6,20 +6,44 @@
 import { formatBlogContent } from '../utils/textFormatting';
 
 export class SmartFallbackContent {
-  
+
   static generateContent(keyword: string, targetUrl: string, anchorText?: string): string {
     const keywordLower = keyword.toLowerCase();
     const capitalizedKeyword = keyword;
     const anchor = anchorText || `${keyword} resources`;
     const currentYear = new Date().getFullYear();
-    
+
+    // Add randomization to make content unique
+    const contentVariant = this.getRandomVariant();
+    const uniqueSeed = this.generateUniqueSeed(keyword);
+
     // Detect keyword category to generate appropriate content
     const contentTemplate = this.detectKeywordCategory(keywordLower);
 
-    const content = this.generateContextualContent(capitalizedKeyword, targetUrl, anchor, contentTemplate);
+    const content = this.generateContextualContent(
+      capitalizedKeyword,
+      targetUrl,
+      anchor,
+      contentTemplate,
+      contentVariant,
+      uniqueSeed
+    );
 
     // Apply enhanced formatting for bullet points and capitalization
     return formatBlogContent(content);
+  }
+
+  private static getRandomVariant(): number {
+    return Math.floor(Math.random() * 3) + 1; // Returns 1, 2, or 3
+  }
+
+  private static generateUniqueSeed(keyword: string): string {
+    // Create a unique identifier based on keyword and current time
+    const hash = keyword.split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0);
+    return Math.abs(hash).toString();
   }
 
   private static detectKeywordCategory(keyword: string): string {
