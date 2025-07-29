@@ -80,7 +80,12 @@ export class SecureConfig {
   static get SUPABASE_ACCESS_TOKEN() {
     return decode(SECURE_STORE.supabase_access_token);
   }
-  
+
+  // API keys
+  static get OPENAI_API_KEY() {
+    return decode(SECURE_STORE.openai_api_key);
+  }
+
   /**
    * Helper method to add new credentials (for development use)
    */
