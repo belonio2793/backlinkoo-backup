@@ -274,6 +274,15 @@ export function BlogPost() {
 
       // Generate new content using the enhanced AI engine
       console.log('🔄 Starting content regeneration for:', primaryKeyword);
+      console.log('📝 Generation parameters:', {
+        keyword: primaryKeyword,
+        targetUrl: blogPost.target_url,
+        anchorText: anchorText,
+        contentLength: 'medium',
+        contentTone: 'professional',
+        seoFocus: 'high'
+      });
+
       const result = await enhancedAIContentEngine.generateContent({
         keyword: primaryKeyword,
         targetUrl: blogPost.target_url,
@@ -283,8 +292,20 @@ export function BlogPost() {
         seoFocus: 'high'
       });
 
-      if (!result.finalContent) {
-        throw new Error('Failed to generate content');
+      console.log('🔍 AI Generation result:', {
+        hasFinalContent: !!result.finalContent,
+        finalContentLength: result.finalContent?.length || 0,
+        provider: result.selectedProvider,
+        processingTime: result.processingTime
+      });
+
+      if (!result.finalContent || result.finalContent.trim().length < 50) {
+        console.error('❌ Generated content is empty or too short:', {
+          finalContent: result.finalContent,
+          finalContentLength: result.finalContent?.length,
+          result: result
+        });
+        throw new Error(`Failed to generate content: ${result.finalContent ? 'Content too short' : 'No content returned'}`);
       }
 
       console.log('✅ Content generated successfully, updating post...');
