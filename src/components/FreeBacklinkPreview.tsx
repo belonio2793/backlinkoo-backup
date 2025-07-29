@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { freeBacklinkService } from '@/services/freeBacklinkService';
 import { FreeBacklinkResult } from '@/services/simpleAIContentEngine';
+import { RegistrationModal } from './RegistrationModal';
 import {
   Eye,
   Code,
