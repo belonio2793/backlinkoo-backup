@@ -82,6 +82,16 @@ export function GlobalBlogGenerator({
   const [showPreview, setShowPreview] = useState(false);
   const [previewMode, setPreviewMode] = useState<'content' | 'seo' | 'links'>('content');
 
+  // API status state
+  const [apiStatus, setApiStatus] = useState<{
+    status: 'checking' | 'ready' | 'error' | 'partial';
+    message: string;
+    details?: string;
+  }>({
+    status: 'checking',
+    message: 'Checking API status...'
+  });
+
   const { toast } = useToast();
   const navigate = useNavigate();
   const { isLoggedIn } = useAuthStatus();
