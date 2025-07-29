@@ -3,9 +3,9 @@
  * Manages free blog posts with 24-hour auto-delete functionality
  */
 
-import { simpleAIContentEngine, FreeBacklinkRequest, FreeBacklinkResult } from './simpleAIContentEngine';
+import { GeneratedContentResult } from './openAIContentGenerator';
 
-interface StoredPost extends FreeBacklinkResult {
+interface StoredPost extends GeneratedContentResult {
   viewCount: number;
   lastViewed?: string;
 }
