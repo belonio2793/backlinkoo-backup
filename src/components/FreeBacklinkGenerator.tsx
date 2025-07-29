@@ -12,6 +12,7 @@ import { freeBacklinkService } from '@/services/freeBacklinkService';
 import { openAIContentGenerator, ContentGenerationRequest, GeneratedContentResult } from '@/services/openAIContentGenerator';
 import RegistrationModal from './RegistrationModal';
 import { WordCountProgress } from './WordCountProgress';
+import { ProviderStatus } from './ui/provider-status';
 import { 
   Loader2, 
   Sparkles, 
@@ -87,7 +88,16 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
         anchorText: anchorText || primaryKeyword,
         wordCount,
         tone,
-        contentType
+        contentType,
+        // Multi-provider system handles retries automatically
+        retryConfig: {
+          maxRetries: 5, // Reduced per-provider retries since we have multiple providers
+          baseDelay: 1000,
+          maxDelay: 15000,
+          exponentialBackoff: true,
+          retryOnRateLimit: true,
+          retryOnServerError: true
+        }
       };
 
       const result = await openAIContentGenerator.generateContent(request);
@@ -97,9 +107,15 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
 
       onContentGenerated(result);
 
+      // Enhanced success message with provider info
+      const providerInfo = result.provider ? ` (Generated using ${result.provider.toUpperCase()})` : '';
+      const fallbackInfo = result.fallbacksUsed && result.fallbacksUsed.length > 0
+        ? ` Used ${result.fallbacksUsed.length} fallback provider(s).`
+        : '';
+
       toast({
         title: "Free Backlink Generated! 🎉",
-        description: "Your blog post is ready! Remember, it will auto-delete in 24 hours unless you register an account.",
+        description: `Your blog post is ready!${providerInfo} Remember, it will auto-delete in 24 hours unless you register an account.${fallbackInfo}`,
       });
 
       // Reset form
@@ -108,34 +124,78 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
       setAnchorText('');
 
     } catch (error) {
-      console.error('Content generation failed:', error);
+      console.error('Content generation failed:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        context: (error as any)?.context,
+        timestamp: new Date().toISOString()
+      });
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorContext = (error as any)?.context;
 
       let title = "Generation Failed";
       let description = "Failed to generate content. Please try again.";
+      let detailedInfo = "";
+
+      // Extract detailed error information
+      if (errorContext) {
+        detailedInfo = ` (Error ${errorContext.status} at ${new Date(errorContext.timestamp).toLocaleTimeString()})`;
+      }
 
       if (errorMessage.includes('Invalid API key') || errorMessage.includes('401')) {
         title = "🔑 OpenAI API Key Required";
-        description = "A valid OpenAI API key is required for content generation. Please configure your API key to use this feature.";
+        description = "A valid OpenAI API key is required for content generation. Please configure your API key to use this feature." + detailedInfo;
       } else if (errorMessage.includes('OpenAI API key is not configured')) {
         title = "🔑 API Key Missing";
-        description = "OpenAI API key is not configured. Content generation requires a valid OpenAI API key.";
+        description = "OpenAI API key is not configured. Content generation requires a valid OpenAI API key." + detailedInfo;
       } else if (errorMessage.includes('rate limit') || errorMessage.includes('429')) {
         title = "⏱️ Rate Limit Exceeded";
-        description = "OpenAI rate limit reached. Please wait a few minutes before generating more content.";
+        description = "OpenAI rate limit reached. Please wait a few minutes before generating more content." + detailedInfo;
       } else if (errorMessage.includes('quota') || errorMessage.includes('insufficient_quota')) {
         title = "💳 Quota Exceeded";
-        description = "Your OpenAI account has exceeded its usage quota. Please check your OpenAI billing settings.";
+        description = "Your OpenAI account has exceeded its usage quota. Please check your OpenAI billing settings." + detailedInfo;
+      } else if (errorMessage.includes('timeout') || errorMessage.includes('timed out')) {
+        title = "⏱️ Request Timeout";
+        description = "The request took too long to complete. We automatically retry, but you can try again if needed." + detailedInfo;
+      } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        title = "🌐 Network Error";
+        description = "Network connection issue. We automatically retry, but please check your internet connection." + detailedInfo;
+      } else if (errorMessage.includes('500') || errorMessage.includes('server error')) {
+        title = "🔧 Server Error";
+        description = "OpenAI server is temporarily unavailable. We automatically retry, please wait a moment." + detailedInfo;
+      } else if (errorMessage.includes('failed after') && errorMessage.includes('attempts')) {
+        title = "🔄 Multiple Retry Attempts Failed";
+        description = "Despite multiple automatic retry attempts, the generation failed. Please try again in a few moments." + detailedInfo;
+      } else if (errorMessage.includes('All content providers failed')) {
+        title = "🔥 All AI Providers Failed";
+        description = "All available AI providers failed to generate content. This is rare - please try again in a moment." + detailedInfo;
       } else if (errorMessage.includes('platform.openai.com')) {
-        description = errorMessage;
+        description = errorMessage + detailedInfo;
+      } else {
+        // Show the actual error message for debugging
+        description = `Content generation error: ${errorMessage}` + detailedInfo;
+        // Add provider fallback info if available
+        if (errorMessage.includes('Tried') && errorMessage.includes('providers')) {
+          title = "🔄 Multi-Provider Attempt Failed";
+        }
       }
 
       toast({
         title,
         description,
         variant: "destructive",
-        duration: 8000,
+        duration: 10000, // Longer duration for error messages
       });
+
+      // Log additional debugging information in development
+      if (import.meta.env.DEV) {
+        console.log('📊 Debugging info:', {
+          originalError: errorMessage,
+          errorContext,
+          timestamp: new Date().toISOString()
+        });
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -184,6 +244,9 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
           </div>
         </div>
       </div>
+
+      {/* Provider Status */}
+      <ProviderStatus showDetails={true} className="mb-4" />
 
       {/* Service Status Alert */}
       {!isReady && (

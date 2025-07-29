@@ -37,14 +37,16 @@ export class OpenAIService {
   private apiKey: string;
   private baseURL = 'https://api.openai.com/v1';
   private defaultRetryConfig = {
-    maxRetries: 8,
-    baseDelay: 500,
-    maxDelay: 45000,
+    maxRetries: 12,
+    baseDelay: 1000,
+    maxDelay: 60000,
     exponentialBackoff: true,
     retryOnRateLimit: true,
     retryOnServerError: true,
-    timeoutMs: 30000,
-    jitterFactor: 0.1
+    timeoutMs: 45000,
+    jitterFactor: 0.15,
+    retryOnNetworkError: true,
+    retryOnTimeout: true
   };
 
   constructor() {
@@ -86,7 +88,7 @@ export class OpenAIService {
 
     while (attempt < config.maxRetries) {
       try {
-        console.log(`🔄 OpenAI API attempt ${attempt + 1}/${config.maxRetries}`);
+        console.log(`🔄 OpenAI API attempt ${attempt + 1}/${config.maxRetries}${attempt > 0 ? ' (retry)' : ''}`);
         const result = await fn();
 
         if (attempt > 0) {
@@ -102,8 +104,17 @@ export class OpenAIService {
         const shouldRetry = this.shouldRetryError(error as Error, config);
 
         if (!shouldRetry || attempt >= config.maxRetries) {
-          console.error(`❌ OpenAI API failed after ${attempt} attempts:`, lastError.message);
-          throw lastError;
+          console.error(`❌ OpenAI API failed after ${attempt} attempts:`, {
+            error: lastError.message,
+            stack: lastError.stack,
+            attempt,
+            maxRetries: config.maxRetries,
+            shouldRetry
+          });
+          // Add more detailed error information for debugging
+          const enhancedError = new Error(`OpenAI API failed after ${attempt} attempts: ${lastError.message}`);
+          enhancedError.cause = lastError;
+          throw enhancedError;
         }
 
         // Calculate delay with exponential backoff
@@ -115,7 +126,13 @@ export class OpenAIService {
         const jitterRange = delay * config.jitterFactor;
         const jitteredDelay = delay + (Math.random() * 2 - 1) * jitterRange;
 
-        console.warn(`⏳ OpenAI API attempt ${attempt} failed: ${lastError.message}. Retrying in ${Math.round(jitteredDelay)}ms...`);
+        console.warn(`⏳ OpenAI API attempt ${attempt} failed: ${lastError.message}. Retrying in ${Math.round(jitteredDelay)}ms...`, {
+          error: lastError.message,
+          attempt,
+          maxRetries: config.maxRetries,
+          delay: Math.round(jitteredDelay),
+          shouldRetry
+        });
 
         await this.delay(jitteredDelay);
       }
@@ -136,12 +153,18 @@ export class OpenAIService {
         message.includes('connection refused') ||
         message.includes('connection reset') ||
         message.includes('econnreset') ||
-        message.includes('enotfound')) {
+        message.includes('enotfound') ||
+        message.includes('failed to fetch') ||
+        message.includes('networkerror') ||
+        message.includes('connection timed out') ||
+        message.includes('socket hang up')) {
+      console.log('🔄 Retrying due to network error:', message);
       return true;
     }
 
     // Retry on rate limits if configured
     if (config.retryOnRateLimit && (message.includes('429') || message.includes('rate limit'))) {
+      console.log('🔄 Retrying due to rate limit:', message);
       return true;
     }
 
@@ -171,14 +194,21 @@ export class OpenAIService {
     if (message.includes('timeout') ||
         message.includes('timed out') ||
         message.includes('request timeout') ||
-        message.includes('read timeout')) {
+        message.includes('read timeout') ||
+        message.includes('aborterror') ||
+        message.includes('operation timed out')) {
+      console.log('🔄 Retrying due to timeout error:', message);
       return true;
     }
 
     // Retry on temporary OpenAI issues
     if (message.includes('overloaded') ||
         message.includes('temporarily unavailable') ||
-        message.includes('try again later')) {
+        message.includes('try again later') ||
+        message.includes('service unavailable') ||
+        message.includes('temporarily_unavailable') ||
+        message.includes('model_overloaded')) {
+      console.log('🔄 Retrying due to temporary OpenAI issue:', message);
       return true;
     }
 
@@ -305,6 +335,12 @@ export class OpenAIService {
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           let errorMessage = `OpenAI API error: ${response.status}`;
+          let fullErrorContext = {
+            status: response.status,
+            statusText: response.statusText,
+            errorData,
+            timestamp: new Date().toISOString()
+          };
 
           if (response.status === 404) {
             errorMessage += ' - Model not found. Check if the model name is correct and available.';
@@ -312,13 +348,23 @@ export class OpenAIService {
             errorMessage += ' - Invalid API key. Check your OpenAI API key.';
           } else if (response.status === 429) {
             errorMessage += ' - Rate limit exceeded. Will retry automatically.';
+            if (errorData.error?.message) {
+              errorMessage += ` Details: ${errorData.error.message}`;
+            }
+          } else if (response.status === 403) {
+            errorMessage += ' - Access forbidden. Check your API key permissions or billing status.';
+          } else if (response.status >= 500) {
+            errorMessage += ' - OpenAI server error. Will retry automatically.';
           } else if (errorData.error?.message) {
             errorMessage += ` - ${errorData.error.message}`;
           } else {
             errorMessage += ` - ${response.statusText}`;
           }
 
-          throw new Error(errorMessage);
+          console.error('🔴 OpenAI API Error Details:', fullErrorContext);
+          const apiError = new Error(errorMessage);
+          (apiError as any).context = fullErrorContext;
+          throw apiError;
         }
 
         const data: OpenAIResponse = await response.json();
@@ -356,12 +402,28 @@ export class OpenAIService {
       return result;
 
     } catch (error) {
-      console.error('❌ OpenAI API failed after all retries:', error);
+      console.error('❌ OpenAI API failed after all retries:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        context: (error as any)?.context,
+        timestamp: new Date().toISOString()
+      });
+
+      let detailedError = 'Unknown error occurred';
+      if (error instanceof Error) {
+        detailedError = error.message;
+        // Add context information if available
+        if ((error as any).context) {
+          const ctx = (error as any).context;
+          detailedError += ` (Status: ${ctx.status}, Time: ${ctx.timestamp})`;
+        }
+      }
+
       return {
         content: '',
         usage: { tokens: 0, cost: 0 },
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: detailedError
       };
     }
   }

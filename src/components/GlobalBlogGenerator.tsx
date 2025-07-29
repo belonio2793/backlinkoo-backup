@@ -400,17 +400,19 @@ export function GlobalBlogGenerator({
         tone: 'professional' as const,
         contentType: 'how-to' as const,
         retryConfig: {
-          maxRetries: 8,
+          maxRetries: 12,
           baseDelay: 2000,
-          maxDelay: 20000,
+          maxDelay: 60000,
           exponentialBackoff: true,
           retryOnRateLimit: true,
-          retryOnServerError: true
+          retryOnServerError: true,
+          retryOnNetworkError: true,
+          retryOnTimeout: true
         }
       };
 
       // Update progress to show content generation with retry attempts
-      setGenerationStage('Generating high-quality content with AI (retries if needed)...');
+      setGenerationStage('Generating high-quality content with AI (up to 12 automatic retries if needed)...');
       setProgress(60);
 
       const result = await openAIContentGenerator.generateContent(contentRequest);
@@ -529,17 +531,29 @@ export function GlobalBlogGenerator({
       }
 
     } catch (error: any) {
-      console.error('Global blog generation error:', error);
+      console.error('Global blog generation error:', {
+        error: error.message || 'Unknown error',
+        stack: error.stack,
+        context: error.context,
+        timestamp: new Date().toISOString()
+      });
 
       // Reset all generation state
       setProgress(0);
       setGenerationStage('');
       setGeneratedPost(null);
 
-      // Provide specific error handling
+      // Provide specific error handling with more details
       const errorMessage = error.message || 'Unknown error';
+      const errorContext = error.context;
       let title = "Generation failed";
       let description = "An unexpected error occurred. Please try again.";
+      let detailedInfo = "";
+
+      // Add timing and context information if available
+      if (errorContext) {
+        detailedInfo = ` (Error ${errorContext.status} at ${new Date(errorContext.timestamp).toLocaleTimeString()})`;
+      }
 
       const isConfigError = errorMessage.includes('not configured') ||
                            errorMessage.includes('Invalid API key') ||
@@ -547,25 +561,44 @@ export function GlobalBlogGenerator({
 
       if (errorMessage.includes('Invalid API key') || errorMessage.includes('401') ||
           errorMessage.includes('OpenAI API key is not configured') || isConfigError) {
-        title = "Service Unavailable";
-        description = "Sorry, something went wrong. Please try again.";
+        title = "Service Configuration Issue";
+        description = "The AI service is not properly configured. Please try again or contact support." + detailedInfo;
       } else if (errorMessage.includes('rate limit') || errorMessage.includes('429')) {
-        title = "Service Busy";
-        description = "Sorry, something went wrong. Please try again.";
+        title = "Service Busy - Rate Limited";
+        description = "Too many requests right now. Please wait a few minutes and try again." + detailedInfo;
       } else if (errorMessage.includes('quota') || errorMessage.includes('insufficient_quota')) {
-        title = "Service Unavailable";
-        description = "Sorry, something went wrong. Please try again.";
+        title = "Service Quota Issue";
+        description = "Service quota reached. Please try again later." + detailedInfo;
+      } else if (errorMessage.includes('timeout') || errorMessage.includes('timed out')) {
+        title = "Request Timeout";
+        description = "The request took too long. We automatically retry, but you can try again if needed." + detailedInfo;
+      } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        title = "Connection Issue";
+        description = "Network connection problem. Please check your connection and try again." + detailedInfo;
+      } else if (errorMessage.includes('failed after') && errorMessage.includes('attempts')) {
+        title = "Multiple Attempts Failed";
+        description = "Despite automatic retries, generation failed. Please try again in a few moments." + detailedInfo;
       } else {
         title = "Generation Failed";
-        description = "Sorry, something went wrong. Please try again.";
+        description = `Generation error: ${errorMessage}` + detailedInfo;
       }
 
       toast({
         title,
         description,
         variant: "destructive",
-        duration: 8000,
+        duration: 10000,
       });
+
+      // Enhanced debugging in development
+      if (import.meta.env.DEV) {
+        console.log('📊 Enhanced debugging info:', {
+          originalError: errorMessage,
+          errorContext,
+          retryAttempts: 'Check retry logs above',
+          timestamp: new Date().toISOString()
+        });
+      }
 
       // If it's a config error, suggest the free backlink feature
       if (isConfigError) {

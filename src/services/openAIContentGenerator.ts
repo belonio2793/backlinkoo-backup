@@ -4,6 +4,7 @@
  */
 
 import { openAIService } from './api/openai';
+import { multiProviderContentGenerator, MultiProviderRequest } from './multiProviderContentGenerator';
 
 export interface ContentGenerationRequest {
   targetUrl: string;
@@ -43,6 +44,9 @@ export interface GeneratedContentResult {
     cost: number;
   };
   error?: string;
+  // Multi-provider information
+  provider?: string;
+  fallbacksUsed?: string[];
 }
 
 export class OpenAIContentGenerator {
@@ -52,7 +56,7 @@ export class OpenAIContentGenerator {
   async generateContent(request: ContentGenerationRequest): Promise<GeneratedContentResult> {
     const startTime = Date.now();
     const id = crypto.randomUUID();
-    
+
     const {
       targetUrl,
       primaryKeyword,
@@ -62,30 +66,40 @@ export class OpenAIContentGenerator {
       contentType = 'how-to'
     } = request;
 
-    // Check if OpenAI is configured
-    if (!openAIService.isConfigured()) {
-      throw new Error('OpenAI API key is not configured. Please set the VITE_OPENAI_API_KEY environment variable with a valid OpenAI API key from https://platform.openai.com/api-keys to enable content generation.');
-    }
-
     try {
-      // Generate comprehensive prompt for OpenAI
-      const prompt = this.createPrompt(request);
-      const systemPrompt = this.createSystemPrompt(contentType, tone);
+      console.log('🚀 Starting multi-provider content generation with intelligent fallback...');
 
-      console.log('🤖 Generating content with OpenAI...');
+      // Create multi-provider request
+      const multiProviderRequest: MultiProviderRequest = {
+        targetUrl,
+        primaryKeyword,
+        anchorText,
+        wordCount,
+        tone,
+        contentType
+      };
 
-      // Use OpenAI to generate content with retry configuration
-      const result = await openAIService.generateContent(prompt, {
-        model: 'gpt-3.5-turbo',
-        maxTokens: Math.min(4000, Math.floor(wordCount * 2.5)),
-        temperature: 0.7,
-        systemPrompt,
-        retryConfig: request.retryConfig
-      });
+      // Use multi-provider system with intelligent fallback
+      const multiResult = await multiProviderContentGenerator.generateContent(multiProviderRequest);
 
-      if (!result.success || !result.content) {
-        throw new Error(result.error || 'Failed to generate content with OpenAI');
+      if (!multiResult.success || !multiResult.result) {
+        // Log all failed attempts for debugging
+        console.error('🔥 All providers failed:', {
+          attemptLog: multiResult.attemptLog,
+          fallbacksUsed: multiResult.fallbacksUsed,
+          totalAttempts: multiResult.totalAttempts
+        });
+
+        const lastError = multiResult.attemptLog[multiResult.attemptLog.length - 1]?.error;
+        throw new Error(`All content providers failed. Last error: ${lastError || 'Unknown error'}. Tried ${multiResult.totalAttempts} providers with ${multiResult.fallbacksUsed.length} fallbacks.`);
       }
+
+      const result = multiResult.result;
+      console.log('✅ Multi-provider generation successful:', {
+        provider: result.provider,
+        attemptNumber: result.attemptNumber,
+        fallbacksUsed: multiResult.fallbacksUsed
+      });
 
       // Process and format the content
       const processedContent = this.processContent(result.content, request);
@@ -111,14 +125,20 @@ export class OpenAIContentGenerator {
         createdAt,
         expiresAt,
         claimed: false,
-        usage: result.usage
+        usage: result.usage,
+        // Add provider information for debugging
+        provider: result.provider,
+        fallbacksUsed: multiResult.fallbacksUsed
       };
 
       console.log('✅ Content generated successfully:', {
+        provider: result.provider,
         wordCount: metadata.wordCount,
         tokens: result.usage.tokens,
         cost: `$${result.usage.cost.toFixed(4)}`,
-        processingTime: `${Date.now() - startTime}ms`
+        processingTime: `${Date.now() - startTime}ms`,
+        fallbacksUsed: multiResult.fallbacksUsed,
+        totalAttempts: multiResult.totalAttempts
       });
 
       return contentResult;
@@ -126,16 +146,21 @@ export class OpenAIContentGenerator {
     } catch (error) {
       console.error('❌ Content generation failed:', error);
 
-      // Provide helpful error messages but DO NOT generate fallback content
+      // Enhanced error handling with multi-provider context
       if (error instanceof Error) {
-        if (error.message.includes('401') || error.message.includes('Invalid API key')) {
-          throw new Error('Invalid OpenAI API key. Please check that your API key is correct and has sufficient credits. Visit https://platform.openai.com/api-keys to manage your API keys.');
-        } else if (error.message.includes('429') || error.message.includes('rate limit')) {
-          throw new Error('OpenAI rate limit exceeded. Please wait a moment before trying again. If this persists, check your OpenAI account usage limits.');
-        } else if (error.message.includes('insufficient_quota')) {
-          throw new Error('OpenAI quota exceeded. Please check your OpenAI account billing and usage limits at https://platform.openai.com/usage');
-        } else if (error.message.includes('model_not_found')) {
-          throw new Error('The requested OpenAI model is not available. Please try again or contact support if the issue persists.');
+        const errorMessage = error.message;
+
+        if (errorMessage.includes('All content providers failed')) {
+          // This is already a comprehensive error from the multi-provider system
+          throw error;
+        } else if (errorMessage.includes('401') || errorMessage.includes('Invalid API key')) {
+          throw new Error('Authentication failed with available content providers. Please check your API keys configuration.');
+        } else if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
+          throw new Error('Rate limits exceeded across multiple content providers. Please wait a moment before trying again.');
+        } else if (errorMessage.includes('insufficient_quota')) {
+          throw new Error('Quota exceeded across available content providers. Please check your billing settings.');
+        } else {
+          throw new Error(`Content generation failed: ${errorMessage}`);
         }
       }
 
@@ -336,17 +361,26 @@ Focus on creating valuable, informative content that genuinely helps readers whi
   }
 
   /**
-   * Test OpenAI connection
+   * Test all provider connections
    */
   async testConnection(): Promise<boolean> {
-    return await openAIService.testConnection();
+    const results = await multiProviderContentGenerator.testAllProviders();
+    return Object.values(results).some(result => result); // Return true if any provider works
   }
 
   /**
-   * Check if OpenAI is configured
+   * Get detailed provider status
+   */
+  async getProviderStatus(): Promise<Record<string, boolean>> {
+    return await multiProviderContentGenerator.testAllProviders();
+  }
+
+  /**
+   * Check if any provider is configured
    */
   isConfigured(): boolean {
-    return openAIService.isConfigured();
+    const status = multiProviderContentGenerator.getProviderStatus();
+    return Object.values(status).some(configured => configured);
   }
 }
 
