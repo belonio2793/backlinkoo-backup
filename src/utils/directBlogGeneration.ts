@@ -6,6 +6,7 @@
 import { huggingFaceService } from '@/services/api/huggingface';
 import { cohereService } from '@/services/api/cohere';
 import { blogPublishingService } from '@/services/blogPublishingService';
+import { ContentFormatter } from '@/utils/contentFormatter';
 
 export async function createBlogPost() {
   const keyword = 'Digital Marketing Automation in 2024';
