@@ -12,6 +12,7 @@ import { freeBacklinkService } from '@/services/freeBacklinkService';
 import { openAIContentGenerator, ContentGenerationRequest, GeneratedContentResult } from '@/services/openAIContentGenerator';
 import RegistrationModal from './RegistrationModal';
 import { WordCountProgress } from './WordCountProgress';
+import { ProviderStatus } from './ui/provider-status';
 import { 
   Loader2, 
   Sparkles, 
@@ -88,15 +89,14 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
         wordCount,
         tone,
         contentType,
+        // Multi-provider system handles retries automatically
         retryConfig: {
-          maxRetries: 12,
-          baseDelay: 1500,
-          maxDelay: 60000,
+          maxRetries: 5, // Reduced per-provider retries since we have multiple providers
+          baseDelay: 1000,
+          maxDelay: 15000,
           exponentialBackoff: true,
           retryOnRateLimit: true,
-          retryOnServerError: true,
-          retryOnNetworkError: true,
-          retryOnTimeout: true
+          retryOnServerError: true
         }
       };
 
@@ -107,9 +107,15 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
 
       onContentGenerated(result);
 
+      // Enhanced success message with provider info
+      const providerInfo = result.provider ? ` (Generated using ${result.provider.toUpperCase()})` : '';
+      const fallbackInfo = result.fallbacksUsed && result.fallbacksUsed.length > 0
+        ? ` Used ${result.fallbacksUsed.length} fallback provider(s).`
+        : '';
+
       toast({
         title: "Free Backlink Generated! 🎉",
-        description: "Your blog post is ready! Remember, it will auto-delete in 24 hours unless you register an account.",
+        description: `Your blog post is ready!${providerInfo} Remember, it will auto-delete in 24 hours unless you register an account.${fallbackInfo}`,
       });
 
       // Reset form
@@ -161,11 +167,18 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
       } else if (errorMessage.includes('failed after') && errorMessage.includes('attempts')) {
         title = "🔄 Multiple Retry Attempts Failed";
         description = "Despite multiple automatic retry attempts, the generation failed. Please try again in a few moments." + detailedInfo;
+      } else if (errorMessage.includes('All content providers failed')) {
+        title = "🔥 All AI Providers Failed";
+        description = "All available AI providers failed to generate content. This is rare - please try again in a moment." + detailedInfo;
       } else if (errorMessage.includes('platform.openai.com')) {
         description = errorMessage + detailedInfo;
       } else {
         // Show the actual error message for debugging
-        description = `Failed to generate content: ${errorMessage}` + detailedInfo;
+        description = `Content generation error: ${errorMessage}` + detailedInfo;
+        // Add provider fallback info if available
+        if (errorMessage.includes('Tried') && errorMessage.includes('providers')) {
+          title = "🔄 Multi-Provider Attempt Failed";
+        }
       }
 
       toast({
@@ -231,6 +244,9 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
           </div>
         </div>
       </div>
+
+      {/* Provider Status */}
+      <ProviderStatus showDetails={true} className="mb-4" />
 
       {/* Service Status Alert */}
       {!isReady && (
