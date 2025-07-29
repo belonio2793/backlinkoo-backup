@@ -19,6 +19,7 @@ export function EnhancedDashboardRouter() {
   const [hasTrialPosts, setHasTrialPosts] = useState(false);
   const [guestAnalytics, setGuestAnalytics] = useState({ sessionDuration: 0, interactions: 0 });
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { getGuestData, getSessionDuration, shouldShowConversionPrompt, trackInteraction } = useGuestTracking();
 
   // Failsafe timeout to prevent infinite loading
