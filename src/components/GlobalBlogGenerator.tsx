@@ -330,9 +330,21 @@ export function GlobalBlogGenerator({
             </div>
           ) : generatedPost ? (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-green-600">
-                <CheckCircle2 className="h-5 w-5" />
-                <span className="font-medium">Blog post generated successfully!</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-green-600">
+                  <CheckCircle2 className="h-5 w-5" />
+                  <span className="font-medium">AI Blog post generated successfully!</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {generatedPost.provider && (
+                    <Badge variant="outline" className="text-xs">
+                      {generatedPost.provider.toUpperCase()} AI
+                    </Badge>
+                  )}
+                  <Badge variant="secondary" className="text-xs">
+                    {generatedPost.word_count} words
+                  </Badge>
+                </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
