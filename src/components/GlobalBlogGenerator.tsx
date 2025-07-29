@@ -407,7 +407,7 @@ export function GlobalBlogGenerator({
         title = "🔑 API Key Missing";
         description = "OpenAI API key is not configured. Please set up your API key to generate content.";
       } else if (errorMessage.includes('rate limit') || errorMessage.includes('429')) {
-        title = "⏱��� Rate Limit Exceeded";
+        title = "⏱️ Rate Limit Exceeded";
         description = "OpenAI rate limit reached. Please wait a few minutes before trying again.";
       } else if (errorMessage.includes('quota') || errorMessage.includes('insufficient_quota')) {
         title = "💳 Quota Exceeded";
@@ -725,9 +725,9 @@ export function GlobalBlogGenerator({
 
           {/* Action Buttons */}
           <div className="flex gap-3">
-            <Button 
+            <Button
               onClick={handleGenerate}
-              disabled={isGenerating || (isLoggedIn && remainingRequests <= 0)}
+              disabled={isGenerating || remainingRequests <= 0}
               className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             >
               {isGenerating ? (
