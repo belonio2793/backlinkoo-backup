@@ -339,14 +339,30 @@ function removeIndentations(content: string): string {
 function fixBrokenHTMLStructure(content: string): string {
   let fixed = content;
 
-  // Fix broken list items that contain paragraph content
-  fixed = fixed.replace(/<li[^>]*>(.*?)<\/li>/gis, (match, liContent) => {
-    // If the li content looks like regular paragraph text (not a bullet point), convert to paragraph
-    const cleanContent = liContent.trim();
-    if (cleanContent && !cleanContent.match(/^[-•·]\s/) && cleanContent.length > 100) {
+  // Fix list items that contain full paragraphs instead of being bullet points
+  fixed = fixed.replace(/<li[^>]*><p[^>]*>(.*?)<\/p><\/li>/gis, (match, innerContent) => {
+    const cleanContent = innerContent.trim();
+    // If it's a long paragraph, convert to regular paragraph
+    if (cleanContent.length > 100 && !cleanContent.match(/^[-•·]\s/)) {
       return `<p>${cleanContent}</p>`;
     }
-    return match;
+    // If it's a proper bullet point, keep as list item without nested paragraph
+    return `<li>${cleanContent}</li>`;
+  });
+
+  // Fix broken list items that contain paragraph content directly
+  fixed = fixed.replace(/<li[^>]*>(.*?)<\/li>/gis, (match, liContent) => {
+    const cleanContent = liContent.trim();
+    // Remove any nested paragraph tags within list items
+    const cleanedContent = cleanContent.replace(/<\/?p[^>]*>/gi, '');
+
+    // If the content looks like regular paragraph text (not a bullet point), convert to paragraph
+    if (cleanedContent && !cleanedContent.match(/^[-•·]\s/) && cleanedContent.length > 80) {
+      return `<p>${cleanedContent}</p>`;
+    }
+
+    // Keep as list item but ensure it's properly formatted
+    return `<li>${cleanedContent}</li>`;
   });
 
   // Fix broken paragraph tags and malformed content
@@ -368,6 +384,9 @@ function fixBrokenHTMLStructure(content: string): string {
   // Remove any empty or malformed list structures
   fixed = fixed.replace(/<[uo]l[^>]*>\s*<\/[uo]l>/gi, '');
   fixed = fixed.replace(/<[uo]l[^>]*>\s*(<li[^>]*>\s*<\/li>\s*)*<\/[uo]l>/gi, '');
+
+  // Fix sentences that are broken across multiple paragraph tags
+  fixed = fixed.replace(/(<p[^>]*>[^<]*?)([a-z,])\s*<\/p>\s*<p[^>]*>\s*([a-z][^<]*?<\/p>)/gi, '$1$2 $3');
 
   return fixed;
 }
