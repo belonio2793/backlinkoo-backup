@@ -220,6 +220,37 @@ export function capitalizeSentences(text: string): string {
 }
 
 /**
+ * Cleans HTML content by removing comments and fixing structure
+ */
+export function cleanHTMLContent(content: string): string {
+  if (!content) return '';
+
+  let cleaned = content;
+
+  // Remove HTML comments completely
+  cleaned = cleaned.replace(/<!--[\s\S]*?-->/g, '');
+
+  // Remove meta tags hints that shouldn't be visible
+  cleaned = cleaned.replace(/<!-- SEO Meta Tags[\s\S]*?-->/g, '');
+  cleaned = cleaned.replace(/<!-- Structured Data[\s\S]*?-->/g, '');
+
+  // Fix malformed bullet points that are inline
+  cleaned = cleaned.replace(/- <(strong|b)>/g, '\n- <$1>');
+  cleaned = cleaned.replace(/<\/(strong|b)> - /g, '</$1>\n- ');
+
+  // Ensure proper paragraph structure around bullet points
+  cleaned = cleaned.replace(/(\n- [^\n]+(?:\n- [^\n]+)*)/g, '\n<div class="bullet-list">$1\n</div>\n');
+
+  // Clean up excessive line breaks
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+
+  // Ensure content starts cleanly (no leading whitespace/comments)
+  cleaned = cleaned.trim();
+
+  return cleaned;
+}
+
+/**
  * Calculates accurate word count from HTML content
  * Strips HTML tags and counts actual words
  */
