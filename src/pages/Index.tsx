@@ -315,11 +315,6 @@ const Index = () => {
           {/* Optional: Advanced Generator Toggle (Hidden by default) */}
 
 
-          {/* API Test Component */}
-          <div className="max-w-6xl mx-auto mb-8">
-            <APITestComponent />
-          </div>
-
           {/* Generator Rendering */}
           <div className="max-w-6xl mx-auto">
             <GlobalBlogGenerator
