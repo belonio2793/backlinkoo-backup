@@ -240,7 +240,7 @@ export function QuickTrialUpgrade({
                 <Input
                   id="quick-password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Create a strong password"
+                  placeholder="Create a password (min 6 characters)"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
