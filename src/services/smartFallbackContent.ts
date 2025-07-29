@@ -255,7 +255,7 @@ export class SmartFallbackContent {
 <p>Mastering ${keyword} is an ongoing journey. With the right strategy, tools, and commitment, your business can achieve remarkable results and sustainable growth.</p>`;
 
       default: // informational
-        return `<h1>${keyword}: Complete Guide for ${currentYear}</h1>
+        return `<h1>Everything About ${keyword}: An Informative Guide</h1>
 
 <p>Welcome to your comprehensive guide about <strong>${keyword}</strong>. This detailed resource provides valuable insights and practical information to help you understand and make the most of ${keyword}.</p>
 
