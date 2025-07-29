@@ -87,12 +87,11 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
     <Dialog open={isOpen} onOpenChange={resetAndClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <Infinity className="h-6 w-6 text-blue-600" />
-            Join Backlink
-          </DialogTitle>
-          <div className="mt-3">
-            <LiveUserActivity />
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Infinity className="h-8 w-8 text-primary" />
+            </div>
+            <DialogTitle className="text-2xl font-bold text-foreground">Welcome Back</DialogTitle>
           </div>
         </DialogHeader>
 
