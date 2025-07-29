@@ -261,6 +261,56 @@ export function capitalizeSentences(text: string): string {
 }
 
 /**
+ * Converts text formatting to proper HTML tags
+ */
+function convertToProperHTML(content: string): string {
+  let formatted = content;
+
+  // Convert **bold** to <strong>
+  formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+  // Convert *italic* to <em>
+  formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+  // Convert bullet points to proper unordered lists
+  const bulletPointPattern = /(?:^|\n)((?:\s*-\s[^\n]+(?:\n|$))+)/gm;
+  formatted = formatted.replace(bulletPointPattern, (match, bulletGroup) => {
+    const items = bulletGroup.split('\n')
+      .map(line => line.trim())
+      .filter(line => line.startsWith('-'))
+      .map(line => {
+        const content = line.substring(1).trim();
+        return `<li>${content}</li>`;
+      });
+
+    return items.length > 0 ? `\n<ul>\n${items.join('\n')}\n</ul>\n` : match;
+  });
+
+  // Convert numbered lists to ordered lists (1. 2. 3. etc.)
+  const numberedListPattern = /(?:^|\n)((?:\s*\d+\.\s[^\n]+(?:\n|$))+)/gm;
+  formatted = formatted.replace(numberedListPattern, (match, listGroup) => {
+    const items = listGroup.split('\n')
+      .map(line => line.trim())
+      .filter(line => /^\d+\.\s/.test(line))
+      .map(line => {
+        const content = line.replace(/^\d+\.\s/, '').trim();
+        return `<li>${content}</li>`;
+      });
+
+    return items.length > 0 ? `\n<ol>\n${items.join('\n')}\n</ol>\n` : match;
+  });
+
+  // Ensure paragraphs are wrapped in <p> tags
+  formatted = formatted.replace(/^(?!<[huo]|<\/|<li|<strong|<em)([^\n<][^\n]*?)(?=\n\n|\n<|$)/gm, '<p>$1</p>');
+
+  // Clean up any malformed paragraph tags
+  formatted = formatted.replace(/<p>\s*<\/p>/g, '');
+  formatted = formatted.replace(/<p>\s*(<[huo])/g, '$1');
+
+  return formatted;
+}
+
+/**
  * Cleans HTML content by removing comments and fixing structure
  */
 export function cleanHTMLContent(content: string): string {
