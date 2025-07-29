@@ -92,9 +92,9 @@ const NoHandsSEOFeatures = () => {
       {/* Feature Overview */}
       <div>
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-4">Enhanced NO Hands SEO Platform</h2>
+          <h2 className="text-3xl font-bold mb-4">Enhanced Backlink ∞ Automation Link Building (beta) Platform</h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Our upgraded NO Hands SEO tool now includes comprehensive verification workflows, 
+            Our upgraded Backlink ∞ Automation Link Building (beta) tool now includes comprehensive verification workflows, 
             real-time monitoring, and detailed reporting capabilities for enterprise-level campaign management.
           </p>
         </div>
