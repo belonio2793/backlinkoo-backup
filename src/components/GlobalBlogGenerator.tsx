@@ -466,6 +466,12 @@ export function GlobalBlogGenerator({
                 placeholder="https://example.com/your-page"
                 value={targetUrl}
                 onChange={(e) => setTargetUrl(e.target.value)}
+                onBlur={(e) => {
+                  const correctedUrl = autocorrectUrl(e.target.value);
+                  if (correctedUrl !== e.target.value) {
+                    setTargetUrl(correctedUrl);
+                  }
+                }}
                 disabled={isGenerating}
               />
             </div>
