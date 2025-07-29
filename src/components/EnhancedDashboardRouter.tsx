@@ -45,14 +45,14 @@ export function EnhancedDashboardRouter() {
 
         setUser(session?.user || null);
 
-        // Simple logic: if user is authenticated, show dashboard; otherwise redirect to home
+        // Simple logic: if user is authenticated, show dashboard; otherwise redirect to /redirect
         if (session?.user) {
           console.log('✅ User authenticated, showing dashboard');
           setIsLoading(false);
           return;
         } else {
-          console.log('❌ User not authenticated, redirecting to home');
-          navigate('/');
+          console.log('❌ User not authenticated, redirecting to /redirect');
+          navigate('/redirect');
           return;
         }
       } catch (error) {
