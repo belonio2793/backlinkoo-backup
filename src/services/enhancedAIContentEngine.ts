@@ -305,16 +305,12 @@ Balance creativity with SEO requirements to create content that ranks well and e
 
   private getSystemPrompt(provider: string, request: ContentGenerationRequest): string {
     const basePrompt = `You are a world-class SEO content writer and digital marketing expert. Create original, high-quality content that ranks well in search engines while providing genuine value to readers.`;
-    
+
     switch (provider) {
-      case 'openai':
-        return `${basePrompt} Focus on expertise, authoritativeness, and trustworthiness. Use data-driven insights and professional tone.`;
-      case 'grok':
-        return `${basePrompt} Bring wit and engaging personality while maintaining professionalism. Use current trends and real-world examples.`;
-      case 'cohere':
-        return `${basePrompt} Emphasize clarity, coherence, and logical flow. Create well-structured, easy-to-read content.`;
       case 'huggingface':
-        return `${basePrompt} Focus on natural language generation with conversational flow. Create engaging, human-like content that connects with readers.`;
+        return `${basePrompt} Focus on natural language generation with conversational flow. Create engaging, human-like content that connects with readers. Generate comprehensive, SEO-optimized content with proper HTML structure.`;
+      case 'cohere':
+        return `${basePrompt} Emphasize clarity, coherence, and logical flow. Create well-structured, easy-to-read content with excellent SEO optimization.`;
       default:
         return basePrompt;
     }
