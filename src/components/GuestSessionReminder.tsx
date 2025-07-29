@@ -287,9 +287,9 @@ export function GuestSessionReminder({
             Create Free Account
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/login')}
+          <Button
+            variant="outline"
+            onClick={onSignUp}
             className="flex-shrink-0"
           >
             Sign In
