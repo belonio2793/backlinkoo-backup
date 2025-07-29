@@ -335,33 +335,61 @@ FORMAT AS CLEAN HTML WITH PROPER SEMANTIC STRUCTURE.`;
   }
 
   /**
-   * Calculate basic SEO score
+   * Calculate comprehensive SEO score based on best practices
    */
   private calculateSEOScore(content: string, keyword: string): number {
     let score = 0;
     const lowerContent = content.toLowerCase();
     const lowerKeyword = keyword.toLowerCase();
 
-    // Check for H1 tag
-    if (content.includes('<h1')) score += 20;
-    
-    // Check for multiple headings
-    const headingCount = (content.match(/<h[1-6]/g) || []).length;
-    if (headingCount >= 3) score += 15;
+    // 1. Single H1 tag (15 points)
+    const h1Count = (content.match(/<h1/g) || []).length;
+    if (h1Count === 1) score += 15;
+    else if (h1Count > 1) score -= 10; // Penalty for multiple H1s
 
-    // Check keyword presence
+    // 2. Proper heading hierarchy (15 points)
+    const h2Count = (content.match(/<h2/g) || []).length;
+    const h3Count = (content.match(/<h3/g) || []).length;
+    if (h2Count >= 2 && h3Count >= 1) score += 15;
+    else if (h2Count >= 1) score += 10;
+
+    // 3. Keyword optimization (20 points)
     const keywordCount = (lowerContent.match(new RegExp(lowerKeyword, 'g')) || []).length;
-    if (keywordCount >= 3 && keywordCount <= 8) score += 25;
+    if (keywordCount >= 3 && keywordCount <= 8) score += 20;
+    else if (keywordCount >= 2) score += 15;
 
-    // Check content length
+    // Check keyword in H1
+    const h1Text = content.match(/<h1[^>]*>(.*?)<\/h1>/i);
+    if (h1Text && h1Text[1].toLowerCase().includes(lowerKeyword)) score += 5;
+
+    // 4. Content length (15 points)
     const wordCount = this.countWords(content);
-    if (wordCount >= 800) score += 20;
+    if (wordCount >= 1000) score += 15;
+    else if (wordCount >= 800) score += 10;
+    else if (wordCount >= 500) score += 5;
 
-    // Check for proper HTML structure
-    if (content.includes('<p>') && content.includes('</p>')) score += 10;
+    // 5. Proper HTML structure (10 points)
+    if (content.includes('<p>') && content.includes('</p>')) score += 5;
+    if (content.includes('<strong>')) score += 3;
+    if (content.includes('<ul>') || content.includes('<ol>')) score += 2;
 
-    // Check for internal linking
-    if (content.includes('<a href=')) score += 10;
+    // 6. Link optimization (10 points)
+    const linkCount = (content.match(/<a href=/g) || []).length;
+    if (linkCount >= 2) score += 10;
+    else if (linkCount >= 1) score += 5;
+
+    // Check for proper link attributes
+    if (content.includes('target="_blank"') && content.includes('rel="noopener')) score += 5;
+
+    // 7. Text emphasis (5 points)
+    const strongCount = (content.match(/<strong>/g) || []).length;
+    if (strongCount >= 3) score += 5;
+    else if (strongCount >= 1) score += 3;
+
+    // 8. Paragraph structure (5 points)
+    const paragraphCount = (content.match(/<p>/g) || []).length;
+    if (paragraphCount >= 5) score += 5;
+    else if (paragraphCount >= 3) score += 3;
 
     return Math.min(score, 100);
   }
