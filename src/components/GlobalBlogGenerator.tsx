@@ -252,7 +252,7 @@ export function GlobalBlogGenerator({
 
       toast({
         title: "AI Blog post generated successfully! 🎉",
-        description: `Your high-quality backlink post is ready. Generated using ${aiProvider || generationResult.provider.toUpperCase()} AI with ${generationResult.wordCount} words.`,
+        description: `Your high-quality backlink post is ready. Generated using Backlink ∞ AI with ${generationResult.wordCount} words.`,
       });
 
       // Track successful blog generation for admin monitoring
