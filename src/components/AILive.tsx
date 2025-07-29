@@ -23,7 +23,7 @@ import {
   FileText,
   Brain
 } from 'lucide-react';
-import { MockAIService } from '@/services/mockAIService';
+
 
 interface AIProvider {
   name: string;
