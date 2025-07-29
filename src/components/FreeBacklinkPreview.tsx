@@ -28,7 +28,12 @@ import {
   Timer,
   TrendingUp,
   Link,
-  Sparkles
+  Sparkles,
+  Calendar,
+  BarChart3,
+  Settings,
+  Star,
+  Share
 } from 'lucide-react';
 
 interface FreeBacklinkPreviewProps {
