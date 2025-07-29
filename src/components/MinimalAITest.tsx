@@ -332,25 +332,45 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
     addLog('info', 'SYSTEM', 'Testing API providers...');
     setCurrentProcess('Testing API connectivity...');
 
-    const providers = ['Backlink ∞ AI Engine'];
+    const providers = [
+      { name: 'HuggingFace API', service: huggingFaceService },
+      { name: 'Cohere API', service: cohereService }
+    ];
     const statuses: ApiStatus[] = [];
 
     for (const provider of providers) {
       const startTime = Date.now();
-      setApiStatuses(prev => [...prev.filter(p => p.provider !== provider),
-        { provider, status: 'testing' }]);
+      setApiStatuses(prev => [...prev.filter(p => p.provider !== provider.name),
+        { provider: provider.name, status: 'testing' }]);
 
-      await new Promise(resolve => setTimeout(resolve, 300));
+      try {
+        addLog('info', 'API_TEST', `Testing ${provider.name}...`);
 
-      const latency = Date.now() - startTime;
-      const success = Math.random() > 0.2; // 80% success rate
+        // Test if the service is configured
+        if (!provider.service.isConfigured()) {
+          addLog('error', 'API_TEST', `${provider.name} not configured`);
+          statuses.push({ provider: provider.name, status: 'error', error: 'Not configured' });
+          setErrorCount(prev => prev + 1);
+          continue;
+        }
 
-      if (success) {
-        statuses.push({ provider, status: 'online', latency });
-        addLog('success', 'API_TEST', `${provider} online (${latency}ms)`);
-      } else {
-        statuses.push({ provider, status: 'error', error: 'Connection timeout' });
-        addLog('error', 'API_TEST', `${provider} failed`);
+        // Test connection
+        const isWorking = await provider.service.testConnection();
+        const latency = Date.now() - startTime;
+
+        if (isWorking) {
+          statuses.push({ provider: provider.name, status: 'online', latency });
+          addLog('success', 'API_TEST', `${provider.name} online (${latency}ms)`);
+          setSuccessCount(prev => prev + 1);
+        } else {
+          statuses.push({ provider: provider.name, status: 'error', error: 'Connection failed' });
+          addLog('error', 'API_TEST', `${provider.name} connection failed`);
+          setErrorCount(prev => prev + 1);
+        }
+      } catch (error) {
+        const latency = Date.now() - startTime;
+        statuses.push({ provider: provider.name, status: 'error', error: 'Connection timeout' });
+        addLog('error', 'API_TEST', `${provider.name} failed: ${error}`);
         setErrorCount(prev => prev + 1);
       }
     }
