@@ -291,7 +291,8 @@ const NoHandsSEO = () => {
                     id="targetUrl"
                     type="url"
                     value={targetUrl}
-                    onChange={(e) => setTargetUrl(e.target.value)}
+                    onChange={(e) => handleUrlChange(e.target.value)}
+                    onBlur={handleUrlBlur}
                     placeholder="https://yourwebsite.com/target-page"
                     className="h-12 text-base sm:text-lg"
                   />
