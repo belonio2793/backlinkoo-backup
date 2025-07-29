@@ -147,14 +147,12 @@ export default function AILive() {
             <div className="flex items-center space-x-4">
               <Badge variant="outline" className="flex items-center space-x-1">
                 <Users className="h-3 w-3" />
-                <span>Free Tier</span>
+                <span>Unlimited</span>
               </Badge>
-              {hasUsedLimit && (
-                <Badge variant="destructive" className="flex items-center space-x-1">
-                  <Shield className="h-3 w-3" />
-                  <span>Limit Used</span>
-                </Badge>
-              )}
+              <Badge variant="secondary" className="flex items-center space-x-1">
+                <Zap className="h-3 w-3" />
+                <span>AI Live</span>
+              </Badge>
             </div>
           </div>
         </div>
