@@ -479,9 +479,9 @@ export function BlogPost() {
                     <strong>Target Keywords:</strong> {(blogPost.keywords || blogPost.tags || []).join(', ')}
                   </p>
                 )}
-                {blogPost.word_count && (
+                {blogPost.content && (
                   <p className="text-sm text-gray-600">
-                    <strong>Word Count:</strong> {blogPost.word_count} words
+                    <strong>Word Count:</strong> {calculateWordCount(blogPost.content)} words
                   </p>
                 )}
                 {blogPost.contextual_links && blogPost.contextual_links.length > 0 && (
