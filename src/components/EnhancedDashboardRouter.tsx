@@ -23,15 +23,19 @@ export function EnhancedDashboardRouter() {
   useEffect(() => {
     const checkUserAndTrialPosts = async () => {
       try {
+        console.log('🔍 Checking user authentication...');
+
         // Check authentication
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('🔍 Session check result:', !!session?.user);
+
         setUser(session?.user || null);
 
         // Check for trial posts in localStorage
         const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
         const validTrialPosts = allBlogs.filter((post: any) => {
           if (!post.is_trial_post) return false;
-          
+
           // Check if expired
           if (post.expires_at) {
             const isExpired = new Date() > new Date(post.expires_at);
@@ -39,34 +43,46 @@ export function EnhancedDashboardRouter() {
           }
           return true;
         });
-        
+
         setHasTrialPosts(validTrialPosts.length > 0);
 
         // Get guest analytics for dashboard display
         let guestData = null;
         if (!session?.user) {
-          guestData = getGuestData();
-          setGuestAnalytics({
-            sessionDuration: getSessionDuration(),
-            interactions: guestData.interactions
-          });
+          try {
+            guestData = getGuestData();
+            setGuestAnalytics({
+              sessionDuration: getSessionDuration(),
+              interactions: guestData.interactions
+            });
+          } catch (guestError) {
+            console.warn('Guest tracking error:', guestError);
+            setGuestAnalytics({ sessionDuration: 0, interactions: 0 });
+          }
         }
 
         // Routing logic
         if (session?.user) {
           // User is logged in - show dashboard directly
+          console.log('✅ User authenticated, showing dashboard');
           setIsLoading(false);
           return;
         } else {
           // User not logged in - show appropriate dashboard or redirect
+          console.log('❌ User not authenticated, checking guest flow');
           if (validTrialPosts.length > 0) {
             // Show trial dashboard with conversion prompts
+            console.log('📄 Trial posts found, showing trial dashboard');
+            setIsLoading(false);
             return;
           } else if (guestData && (guestData.interactions > 0 || getSessionDuration() > 0)) {
             // Show guest onboarding dashboard for engaged visitors
+            console.log('👤 Guest engagement found, showing onboarding');
+            setIsLoading(false);
             return;
           } else {
             // No engagement, redirect to homepage
+            console.log('🏠 No engagement, redirecting to homepage');
             navigate('/');
             return;
           }
@@ -76,12 +92,13 @@ export function EnhancedDashboardRouter() {
         // Default to homepage on error
         navigate('/');
       } finally {
+        console.log('🏁 Setting loading to false');
         setIsLoading(false);
       }
     };
 
     checkUserAndTrialPosts();
-  }, [navigate, getGuestData, getSessionDuration]);
+  }, [navigate]);
 
   if (isLoading) {
     return (
