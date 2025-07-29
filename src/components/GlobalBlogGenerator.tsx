@@ -185,22 +185,20 @@ export function GlobalBlogGenerator({
         maxRetries: 8
       });
 
-      const multiApiGenerator = new MultiApiContentGenerator();
-      const availableProviders = await multiApiGenerator.getAvailableProviders();
-
-      // Check OpenAI specifically since it's our primary provider
-      const openAIConfigured = openAIContentGenerator.isConfigured();
+      // Check OpenAI API key first
       const hasApiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
-      if (!hasApiKey) {
+      if (!hasApiKey || hasApiKey === 'sk-proj-YOUR_ACTUAL_OPENAI_API_KEY_HERE') {
         setApiStatus({
           status: 'error',
-          message: 'API not configured',
-          details: 'OpenAI API key is missing'
+          message: 'API key required',
+          details: 'Please configure your OpenAI API key'
         });
         return;
       }
 
+      // Check OpenAI service configuration
+      const openAIConfigured = openAIContentGenerator.isConfigured();
       if (!openAIConfigured) {
         setApiStatus({
           status: 'error',
@@ -210,48 +208,27 @@ export function GlobalBlogGenerator({
         return;
       }
 
-      // Check if we have any available providers
-      const activeProviders = availableProviders.filter(p => p.available);
-
-      if (activeProviders.length === 0) {
-        setApiStatus({
-          status: 'error',
-          message: 'No APIs available',
-          details: 'No configured API providers found'
-        });
-        return;
-      }
-
-      // Now perform actual API connectivity test
+      // Use the OpenAI service's built-in connection test instead of manual fetch
+      // This avoids CORS issues and uses proper error handling
       setApiStatus({
         status: 'checking',
-        message: 'Testing API response...',
-        details: 'Sending test request'
+        message: 'Testing API connection...',
+        details: 'Verifying credentials'
       });
 
-      const connectivityTest = await testApiConnectivity();
+      const connectionSuccess = await openAIContentGenerator.testConnection();
 
-      if (connectivityTest.success) {
+      if (connectionSuccess) {
         setApiStatus({
           status: 'ready',
-          message: 'API fully operational',
-          details: `Connected in ${connectivityTest.attempt || 1} attempt${(connectivityTest.attempt || 1) > 1 ? 's' : ''} (${connectivityTest.responseTime}ms)`
+          message: 'AI service connected',
+          details: 'Ready to generate content'
         });
-
-        // Show success toast if it took multiple attempts
-        if ((connectivityTest.attempt || 1) > 1) {
-          toast({
-            title: "🎉 Successfully Connected!",
-            description: `AI service is now ready after ${connectivityTest.attempt} attempts. You can now create your free backlink!`,
-            variant: "default",
-            className: "border-green-200 bg-green-50"
-          });
-        }
       } else {
         setApiStatus({
           status: 'error',
-          message: 'API connectivity failed',
-          details: `${connectivityTest.error || 'Service unavailable'} (${connectivityTest.attempt || 1} attempts)`
+          message: 'Connection failed',
+          details: 'Unable to connect to OpenAI API'
         });
       }
 
@@ -259,8 +236,8 @@ export function GlobalBlogGenerator({
       console.error('API status check failed:', error);
       setApiStatus({
         status: 'error',
-        message: 'Status check failed',
-        details: 'Unable to verify API connectivity'
+        message: 'Connection error',
+        details: 'Failed to verify API status'
       });
     }
   };
