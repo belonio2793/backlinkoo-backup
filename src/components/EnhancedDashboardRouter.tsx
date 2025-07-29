@@ -82,11 +82,30 @@ export function EnhancedDashboardRouter() {
           navigate('/login');
           return;
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Dashboard router error:', error);
         if (isMounted) {
-          // Default to showing guest dashboard on error
+          // Show specific error message based on error type
+          let errorTitle = "Dashboard access error";
+          let errorDescription = "Unable to verify authentication status.";
+
+          if (error.message?.includes('fetch') || error.message?.includes('network')) {
+            errorTitle = "Connection error";
+            errorDescription = "Cannot connect to authentication servers. Please check your internet connection.";
+          } else if (error.message?.includes('timeout')) {
+            errorTitle = "Authentication timeout";
+            errorDescription = "Authentication check timed out. Please try refreshing the page.";
+          }
+
+          toast({
+            title: errorTitle,
+            description: errorDescription,
+            variant: "destructive",
+          });
+
           setIsLoading(false);
+          // Redirect to login on auth errors
+          navigate('/login');
         }
       }
     };
