@@ -1,7 +1,7 @@
 /**
  * Enhanced AI Content Engine
- * Implements the ChatGPT conversation requirements for original content generation
- * using multiple AI providers with sophisticated prompt templates including HuggingFace
+ * Implements advanced content generation for original SEO-optimized content
+ * using Backlink ∞ AI technology with sophisticated prompt templates
  */
 
 import { openAIService } from './api/openai';
