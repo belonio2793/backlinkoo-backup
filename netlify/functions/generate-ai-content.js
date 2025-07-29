@@ -152,6 +152,51 @@ function generateBusinessContent(keyword, anchorText, url) {
 <p>Start your journey with ${keyword} today and unlock new possibilities for growth, engagement, and success in the digital landscape.</p>`;
 }
 
+function generateDemoContent(keyword, anchorText, url) {
+  const category = detectKeywordCategory(keyword);
+  console.log(`🎯 Detected category for "${keyword}": ${category}`);
+
+  switch (category) {
+    case 'food':
+      return generateFoodContent(keyword, anchorText, url);
+    case 'business':
+      return generateBusinessContent(keyword, anchorText, url);
+    default:
+      // For other categories, use informational content
+      const currentYear = new Date().getFullYear();
+      return `<h1>${keyword.charAt(0).toUpperCase() + keyword.slice(1)}: Complete Guide for ${currentYear}</h1>
+
+<h2>Introduction</h2>
+
+<p>Welcome to your comprehensive guide about <strong>${keyword}</strong>. This detailed resource provides valuable insights and practical information to help you understand and make the most of ${keyword}.</p>
+
+<h2>Understanding ${keyword}</h2>
+
+<p>Learning about <em>${keyword}</em> is important for anyone looking to expand their knowledge in this area. This guide covers the essential information you need to know.</p>
+
+<h2>Key Aspects</h2>
+
+<ul>
+<li><strong>Fundamentals</strong>: Core concepts and principles</li>
+<li><strong>Applications</strong>: Real-world uses and examples</li>
+<li><strong>Benefits</strong>: Advantages and positive outcomes</li>
+<li><strong>Considerations</strong>: Important factors to keep in mind</li>
+</ul>
+
+<h2>Getting Started</h2>
+
+<p>If you're new to ${keyword}, start with the basics and gradually build your understanding. Learning about ${keyword} can be rewarding and beneficial in many ways.</p>
+
+<h2>Expert Resources</h2>
+
+<p>For more detailed information and expert insights about ${keyword}, <a href="${url}" target="_blank" rel="noopener noreferrer">${anchorText}</a> offers comprehensive resources and professional guidance.</p>
+
+<h2>Conclusion</h2>
+
+<p>Whether you're just beginning to learn about ${keyword} or looking to deepen your understanding, this guide provides a solid foundation for your journey.</p>`;
+  }
+}
+
 exports.handler = async (event, context) => {
   // CORS headers
   const headers = {
