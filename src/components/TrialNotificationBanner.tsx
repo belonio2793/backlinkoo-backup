@@ -99,7 +99,11 @@ export function TrialNotificationBanner({ onSignUp }: TrialNotificationBannerPro
   };
 
   const handleSignUp = () => {
-    navigate('/login');
+    if (onSignUp) {
+      onSignUp();
+    } else {
+      navigate('/login');
+    }
   };
 
   const handleQuickUpgrade = () => {
