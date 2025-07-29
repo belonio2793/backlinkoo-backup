@@ -378,6 +378,9 @@ export function Blog() {
           </Button>
         </div>
       </div>
+
+      {/* Debug component for development */}
+      <BlogDebugInfo />
     </div>
   );
 }
