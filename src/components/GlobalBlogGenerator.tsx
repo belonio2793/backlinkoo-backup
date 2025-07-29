@@ -100,6 +100,7 @@ export function GlobalBlogGenerator({
     try {
       loadGlobalStats();
       updateRemainingRequests();
+      checkApiStatus();
     } catch (error) {
       console.error('Error initializing GlobalBlogGenerator:', error);
       // Set safe defaults
@@ -110,6 +111,11 @@ export function GlobalBlogGenerator({
         averageQuality: null
       });
       setRemainingRequests(5);
+      setApiStatus({
+        status: 'error',
+        message: 'Initialization error',
+        details: 'Failed to initialize the blog generator'
+      });
     }
   }, []);
 
