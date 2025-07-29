@@ -488,7 +488,8 @@ export function GlobalBlogGenerator({
                 id="targetUrl"
                 placeholder="https://example.com/your-page"
                 value={targetUrl}
-                onChange={(e) => setTargetUrl(e.target.value)}
+                onChange={(e) => handleUrlChange(e.target.value)}
+                onBlur={handleUrlBlur}
                 disabled={isGenerating}
               />
             </div>
