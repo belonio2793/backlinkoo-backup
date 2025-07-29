@@ -60,6 +60,8 @@ export function AuthFormTabs({
     e.preventDefault();
     if (isLoading) return;
 
+    console.log('🔐 Login attempt with:', { email: loginEmail, hasPassword: !!loginPassword });
+
     if (!loginEmail || !loginPassword) {
       toast({
         title: "Missing credentials",
