@@ -34,16 +34,16 @@ export function TestFreeBacklink() {
       // Test 1: Check if OpenAI is configured
       results.push({
         name: 'OpenAI Configuration',
-        status: simpleAIContentEngine.isConfigured() ? 'success' : 'error',
-        message: simpleAIContentEngine.isConfigured() ? 
+        status: openAIContentGenerator.isConfigured() ? 'success' : 'error',
+        message: openAIContentGenerator.isConfigured() ? 
           'OpenAI is properly configured' : 
           'OpenAI API key is missing'
       });
 
       // Test 2: Test OpenAI connection (if configured)
-      if (simpleAIContentEngine.isConfigured()) {
+      if (openAIContentGenerator.isConfigured()) {
         try {
-          const connectionTest = await simpleAIContentEngine.testConnection();
+          const connectionTest = await openAIContentGenerator.testConnection();
           results.push({
             name: 'OpenAI Connection',
             status: connectionTest ? 'success' : 'error',
