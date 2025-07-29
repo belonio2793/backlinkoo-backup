@@ -34,6 +34,19 @@ import {
   Eye
 } from 'lucide-react';
 
+interface GlobalBlogRequest {
+  targetUrl: string;
+  primaryKeyword: string;
+  anchorText?: string;
+  sessionId: string;
+  additionalContext?: {
+    industry?: string;
+    contentTone: 'professional' | 'casual' | 'technical' | 'friendly';
+    contentLength: 'short' | 'medium' | 'long';
+    seoFocus: 'high' | 'medium' | 'balanced';
+  };
+}
+
 interface GlobalBlogGeneratorProps {
   onSuccess?: (blogPost: any) => void;
   variant?: 'homepage' | 'blog' | 'embedded';
