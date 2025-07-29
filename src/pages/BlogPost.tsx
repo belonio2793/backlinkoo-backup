@@ -200,6 +200,7 @@ export function BlogPost() {
         console.error('Failed to load blog post:', err);
         setError('Failed to load blog post');
       } finally {
+        clearTimeout(timeoutId);
         setLoading(false);
       }
     };
