@@ -68,15 +68,7 @@ export class OpenAIContentGenerator {
     try {
       console.log('🚀 Starting multi-provider content generation with intelligent fallback...');
 
-      // Create multi-provider request
-      const multiProviderRequest: MultiProviderRequest = {
-        targetUrl,
-        primaryKeyword,
-        anchorText,
-        wordCount,
-        tone,
-        contentType
-      };
+      // Prepare content generation
 
       // Use enhanced OpenAI service for maximum reliability
       const prompt = this.createPrompt(request);
