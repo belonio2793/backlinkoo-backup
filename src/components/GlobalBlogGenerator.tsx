@@ -572,10 +572,14 @@ export function GlobalBlogGenerator({
       };
 
       // Update progress to show content generation with retry attempts
-      setGenerationStage('Generating content with AI - this may take a few attempts...');
+      setGenerationStage('Generating high-quality content with AI (retries if needed)...');
       setProgress(60);
 
       const result = await openAIContentGenerator.generateContent(contentRequest);
+
+      // Update progress after successful generation
+      setProgress(80);
+      setGenerationStage('Content generated! Finalizing...');
 
       // Store the result for 24-hour management
       freeBacklinkService.storeFreeBacklink(result);
