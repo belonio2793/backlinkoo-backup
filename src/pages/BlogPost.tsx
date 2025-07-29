@@ -303,7 +303,9 @@ export function BlogPost() {
         console.error('❌ Generated content is empty or too short:', {
           finalContent: result.finalContent,
           finalContentLength: result.finalContent?.length,
-          result: result
+          selectedProvider: result.selectedProvider,
+          processingTime: result.processingTime,
+          hasMetadata: !!result.metadata
         });
         throw new Error(`Failed to generate content: ${result.finalContent ? 'Content too short' : 'No content returned'}`);
       }
