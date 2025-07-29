@@ -335,6 +335,19 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
         </CardContent>
       </Card>
 
+      {/* Word Count Progress */}
+      {isGenerating && (
+        <div className="mt-6">
+          <WordCountProgress
+            targetWords={wordCount}
+            isGenerating={isGenerating}
+            onComplete={(finalCount) => {
+              console.log('Content generation completed with', finalCount, 'words');
+            }}
+          />
+        </div>
+      )}
+
       {/* Enhanced Generate Button */}
       <div className="text-center space-y-4">
         <Button
