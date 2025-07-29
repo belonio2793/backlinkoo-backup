@@ -331,16 +331,17 @@ export function GlobalBlogGenerator({
       setGenerationStage('');
       setGeneratedPost(null);
 
-      // Check if this is an OpenAI configuration error
+      // Check if this is an OpenAI or configuration error
       const isConfigError = error.message && (
         error.message.includes('not configured') ||
-        error.message.includes('API key')
+        error.message.includes('API key') ||
+        error.message.includes('OpenAI')
       );
 
       toast({
         title: "Generation failed",
         description: isConfigError
-          ? "Content generation is temporarily unavailable. Try our dedicated Free Backlink feature for reliable generation!"
+          ? "AI service temporarily unavailable. Try our dedicated Free Backlink feature for reliable generation!"
           : error.message || "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
@@ -350,7 +351,7 @@ export function GlobalBlogGenerator({
         setTimeout(() => {
           toast({
             title: "💡 Try Free Backlink Feature",
-            description: "Generate high-quality blog posts with our dedicated free backlink tool - no configuration required!",
+            description: "Generate high-quality blog posts with our dedicated free backlink tool!",
             action: (
               <Button
                 size="sm"
