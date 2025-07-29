@@ -304,6 +304,7 @@ const Index = () => {
                     <>
                       <Button variant="ghost" onClick={() => {
                         console.log('Sign In button clicked');
+                        setLoginModalTab("login");
                         setShowLoginModal(true);
                       }} className="font-medium">
                         Sign In
