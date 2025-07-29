@@ -419,7 +419,10 @@ Balance creativity with SEO requirements to create content that ranks well and e
     
     // Add meta tags and structured data hints
     enhanced = this.addMetaTagsHints(enhanced, request);
-    
+
+    // Apply enhanced text formatting (bullet points, capitalization)
+    enhanced = formatBlogContent(enhanced);
+
     return enhanced.trim();
   }
   
