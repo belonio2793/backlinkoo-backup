@@ -163,18 +163,70 @@ export class BlogPublishingService {
    * Get all published blog posts (for /blog listing)
    */
   async getPublishedBlogPosts(limit: number = 20, offset: number = 0): Promise<BlogListItem[]> {
-    const { data, error } = await supabase
-      .from('ai_generated_posts')
-      .select('id, title, slug, status, created_at, expires_at, word_count, claimed_by')
-      .eq('status', 'published')
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+    try {
+      const { data, error } = await supabase
+        .from('ai_generated_posts')
+        .select('id, title, slug, status, created_at, expires_at, word_count, claimed_by')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
 
-    if (error) {
-      throw new Error(`Failed to fetch blog posts: ${error.message}`);
+      if (error) {
+        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
+          // Return posts from localStorage
+          return this.getPostsFromLocalStorage();
+        }
+        throw new Error(`Failed to fetch blog posts: ${error.message}`);
+      }
+
+      return data as BlogListItem[];
+    } catch (error) {
+      console.warn('Database error, using localStorage fallback:', error);
+      return this.getPostsFromLocalStorage();
+    }
+  }
+
+  /**
+   * Get posts from localStorage fallback
+   */
+  private getPostsFromLocalStorage(): BlogListItem[] {
+    const posts: BlogListItem[] = [];
+
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith('ai_post_')) {
+          const stored = localStorage.getItem(key);
+          if (stored) {
+            const post = JSON.parse(stored);
+
+            // Skip expired posts
+            if (new Date(post.expires_at) <= new Date() && post.status === 'published') {
+              localStorage.removeItem(key);
+              continue;
+            }
+
+            posts.push({
+              id: post.id,
+              title: post.title,
+              slug: post.slug,
+              status: post.status,
+              created_at: post.created_at,
+              expires_at: post.expires_at,
+              word_count: post.word_count,
+              claimed_by: post.claimed_by
+            });
+          }
+        }
+      }
+
+      // Sort by created_at descending
+      posts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    } catch (error) {
+      console.warn('Error reading posts from localStorage:', error);
     }
 
-    return data as BlogListItem[];
+    return posts;
   }
 
   /**
