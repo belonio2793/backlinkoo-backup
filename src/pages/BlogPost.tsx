@@ -554,7 +554,7 @@ export function BlogPost() {
                       variant="outline"
                       className="border-amber-600 text-amber-700 hover:bg-amber-100"
                     >
-                      Create More Backlinks
+                      Create More
                     </Button>
                     <Button
                       onClick={handleRegenerateContent}
