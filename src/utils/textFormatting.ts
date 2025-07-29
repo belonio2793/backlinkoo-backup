@@ -279,6 +279,12 @@ export function cleanHTMLContent(content: string): string {
   cleaned = cleaned.replace(/\bartificial intelligence\b/gi, 'Backlink ∞ Algorithm');
   cleaned = cleaned.replace(/\bmachine learning\b/gi, 'Backlink ∞ Algorithm');
 
+  // Remove geolocation specifics from content
+  cleaned = cleaned.replace(/Optimized for [A-Za-z\s]+\./g, '');
+  cleaned = cleaned.replace(/Tailored for [A-Za-z\s]+\./g, '');
+  cleaned = cleaned.replace(/Designed for [A-Za-z\s]+ market\./g, '');
+  cleaned = cleaned.replace(/Localized for [A-Za-z\s]+\./g, '');
+
   // Ensure proper paragraph structure around bullet points
   cleaned = cleaned.replace(/(\n- [^\n]+(?:\n- [^\n]+)*)/g, '\n<div class="bullet-list">$1\n</div>\n');
 
