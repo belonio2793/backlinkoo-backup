@@ -294,6 +294,7 @@ const Index = () => {
                         className="bg-amber-600 hover:bg-amber-700 text-white"
                       />
                       <Button variant="ghost" onClick={() => {
+                        setLoginModalTab("login");
                         setShowLoginModal(true);
                       }} className="font-medium">
                         Sign In
