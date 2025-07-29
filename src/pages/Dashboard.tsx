@@ -651,10 +651,7 @@ const Dashboard = () => {
     );
   }
 
-  // Don't render dashboard if user is not authenticated
-  if (!user) {
-    return null;
-  }
+  // Show dashboard regardless of authentication state
 
   return (
     <div className="min-h-screen bg-background">
