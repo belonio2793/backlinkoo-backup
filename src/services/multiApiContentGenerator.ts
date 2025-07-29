@@ -335,10 +335,161 @@ export class MultiApiContentGenerator {
   }
 
   /**
-   * Generate blog content with SEO optimization
+   * Detect keyword category for appropriate content prompts
+   */
+  private detectKeywordCategory(keyword: string): string {
+    const keywordLower = keyword.toLowerCase();
+
+    // Food and cuisine keywords
+    if (['sushi', 'pizza', 'pasta', 'burger', 'tacos', 'ramen', 'curry', 'salad', 'sandwich', 'soup', 'steak', 'chicken', 'seafood', 'dessert', 'cake', 'coffee', 'tea', 'wine', 'beer', 'cocktail', 'recipe', 'cooking', 'cuisine', 'restaurant', 'food'].some(food => keywordLower.includes(food))) {
+      return 'food';
+    }
+
+    // Technology keywords
+    if (['software', 'app', 'technology', 'computer', 'mobile', 'ai', 'artificial intelligence', 'machine learning', 'coding', 'programming', 'web development', 'database', 'cloud', 'cybersecurity', 'tech', 'digital'].some(tech => keywordLower.includes(tech))) {
+      return 'technology';
+    }
+
+    // Health and fitness keywords
+    if (['health', 'fitness', 'exercise', 'workout', 'nutrition', 'diet', 'wellness', 'medicine', 'doctor', 'therapy', 'mental health', 'yoga', 'meditation', 'medical'].some(health => keywordLower.includes(health))) {
+      return 'health';
+    }
+
+    // Travel keywords
+    if (['travel', 'vacation', 'tourism', 'hotel', 'flight', 'destination', 'trip', 'adventure', 'backpacking', 'cruise', 'resort', 'city', 'country', 'place'].some(travel => keywordLower.includes(travel))) {
+      return 'travel';
+    }
+
+    // Education keywords
+    if (['learn', 'study', 'education', 'course', 'tutorial', 'training', 'school', 'university', 'skill', 'knowledge'].some(edu => keywordLower.includes(edu))) {
+      return 'education';
+    }
+
+    // Business and marketing keywords
+    if (['marketing', 'business', 'strategy', 'seo', 'analytics', 'sales', 'entrepreneur', 'startup', 'investment', 'finance', 'management'].some(biz => keywordLower.includes(biz))) {
+      return 'business';
+    }
+
+    return 'informational';
+  }
+
+  /**
+   * Generate context-appropriate prompts based on keyword category
+   */
+  private generateCategoryPrompt(keyword: string, targetUrl: string, anchorText: string, category: string): string {
+    const currentYear = new Date().getFullYear();
+
+    switch (category) {
+      case 'food':
+        return `Write a comprehensive, engaging article about "${keyword}" that food enthusiasts will love. This should be a culinary guide covering:
+
+        - The origins and cultural significance of ${keyword}
+        - Different varieties and styles
+        - How to properly enjoy and appreciate ${keyword}
+        - Where to find the best ${keyword}
+        - Tips for making ${keyword} at home
+        - Nutritional aspects and benefits
+
+        The article should be at least 1000 words, written in an enthusiastic food lover's tone, and naturally incorporate a helpful link to ${targetUrl} using the anchor text "${anchorText}" where it makes sense for readers seeking more information or resources.
+
+        Format with proper HTML headers (h1, h2, h3) and ensure the content is genuinely useful for people interested in ${keyword}. Avoid business jargon - this is about food, not corporate strategies.`;
+
+      case 'technology':
+        return `Write a comprehensive, technical guide about "${keyword}" for ${currentYear}. Cover:
+
+        - What ${keyword} is and how it works
+        - Key features and capabilities
+        - Implementation best practices
+        - Real-world applications and use cases
+        - Getting started with ${keyword}
+        - Future trends and developments
+
+        The article should be at least 1000 words, technically accurate but accessible, and naturally incorporate a link to ${targetUrl} using the anchor text "${anchorText}" where it provides value to readers.
+
+        Format with proper HTML headers and ensure content is genuinely helpful for those learning about ${keyword}.`;
+
+      case 'health':
+        return `Write a comprehensive, evidence-based health guide about "${keyword}" for ${currentYear}. Include:
+
+        - Understanding what ${keyword} means for health
+        - Scientific benefits and research
+        - Safe practices and recommendations
+        - How to get started safely
+        - Professional guidance and resources
+        - Creating sustainable healthy habits
+
+        The article should be at least 1000 words, health-focused and responsible, and naturally incorporate a link to ${targetUrl} using the anchor text "${anchorText}" for additional resources.
+
+        Format with proper HTML headers and ensure all health advice is general and encourages professional consultation.`;
+
+      case 'travel':
+        return `Write an inspiring travel guide about "${keyword}" for ${currentYear}. Cover:
+
+        - Why ${keyword} is worth visiting/experiencing
+        - Planning and preparation tips
+        - What to expect and highlights
+        - Best times to visit
+        - Budget considerations
+        - Safety and practical advice
+
+        The article should be at least 1000 words, inspiring yet practical, and naturally incorporate a link to ${targetUrl} using the anchor text "${anchorText}" for travel planning resources.
+
+        Format with proper HTML headers and write from a traveler's perspective.`;
+
+      case 'education':
+        return `Write a comprehensive learning guide about "${keyword}" for ${currentYear}. Include:
+
+        - Understanding the fundamentals of ${keyword}
+        - Learning pathways and methods
+        - Practical applications and benefits
+        - Resources for continued learning
+        - Tips for effective study and practice
+        - Career and personal development opportunities
+
+        The article should be at least 1000 words, educational and motivating, and naturally incorporate a link to ${targetUrl} using the anchor text "${anchorText}" for additional learning resources.
+
+        Format with proper HTML headers and focus on genuine educational value.`;
+
+      case 'business':
+        return `Write a comprehensive business guide about "${keyword}" for ${currentYear}. Cover:
+
+        - Understanding ${keyword} in business context
+        - Strategic implementation approaches
+        - Benefits and ROI considerations
+        - Best practices and methodologies
+        - Common challenges and solutions
+        - Future trends and opportunities
+
+        The article should be at least 1000 words, professional and actionable, and naturally incorporate a link to ${targetUrl} using the anchor text "${anchorText}" for business solutions.
+
+        Format with proper HTML headers and focus on practical business value.`;
+
+      default: // informational
+        return `Write a comprehensive, informative guide about "${keyword}" for ${currentYear}. Cover:
+
+        - Introduction and fundamental concepts
+        - Key aspects and important considerations
+        - Practical applications and examples
+        - Getting started guidance
+        - Tips for success and common pitfalls
+        - Future outlook and developments
+
+        The article should be at least 1000 words, informative and well-structured, and naturally incorporate a link to ${targetUrl} using the anchor text "${anchorText}" where it provides value.
+
+        Format with proper HTML headers and ensure content is genuinely useful for readers interested in ${keyword}.`;
+    }
+  }
+
+  /**
+   * Generate blog content with SEO optimization and smart categorization
    */
   async generateBlogContent(keyword: string, targetUrl: string, anchorText: string): Promise<ContentGenerationResult> {
-    const prompt = `Write a comprehensive, SEO-optimized blog post about "${keyword}". The article should be at least 1000 words and naturally incorporate a link to ${targetUrl} using the anchor text "${anchorText}". Include proper headings, engaging content, and valuable information for readers. Format with markdown headers and ensure high-quality, grammatically correct content.`;
+    // Detect keyword category for appropriate content
+    const category = this.detectKeywordCategory(keyword);
+    console.log(`🎯 Detected keyword category for "${keyword}": ${category}`);
+
+    // Generate category-appropriate prompt
+    const prompt = this.generateCategoryPrompt(keyword, targetUrl, anchorText, category);
 
     return this.generateContent({
       prompt,
