@@ -6,8 +6,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { aiTestWorkflow } from '@/services/aiTestWorkflow';
-import { multiApiContentGenerator } from '@/services/multiApiContentGenerator';
+import { huggingFaceService } from '@/services/api/huggingface';
+import { cohereService } from '@/services/api/cohere';
+import { globalBlogGenerator } from '@/services/globalBlogGenerator';
 import { Activity, CheckCircle2, AlertCircle, Loader2, Terminal, Zap } from 'lucide-react';
 
 interface SystemLog {
