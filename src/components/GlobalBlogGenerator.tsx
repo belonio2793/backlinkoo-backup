@@ -175,80 +175,103 @@ export function GlobalBlogGenerator({
     }
 
     try {
-      // Simulate realistic generation progress
-      const progressStages = [
-        { stage: 'Analyzing target URL and keywords...', progress: 15 },
-        { stage: 'Gathering global context and trends...', progress: 30 },
-        { stage: 'Generating contextual content...', progress: 50 },
-        { stage: 'Optimizing for SEO and readability...', progress: 70 },
-        { stage: 'Creating natural backlink integration...', progress: 85 },
-        { stage: 'Finalizing and publishing...', progress: 95 }
-      ];
-
-      for (const { stage, progress: stageProgress } of progressStages) {
-        setGenerationStage(stage);
-        setProgress(stageProgress);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-
       const sessionId = crypto.randomUUID();
-      const request: GlobalBlogRequest = {
-        targetUrl: targetUrl.trim(),
-        primaryKeyword: primaryKeyword.trim(),
-        anchorText: anchorText.trim() || undefined,
-        sessionId,
-        additionalContext: showAdvancedOptions ? {
-          industry: industry || undefined,
-          contentTone,
-          contentLength,
-          seoFocus
-        } : undefined
-      };
 
       // Track the request for admin monitoring
       adminSyncService.trackFreeBacklinkRequest({
-        targetUrl: request.targetUrl,
-        primaryKeyword: request.primaryKeyword,
-        anchorText: request.anchorText,
-        sessionId: request.sessionId
+        targetUrl: targetUrl.trim(),
+        primaryKeyword: primaryKeyword.trim(),
+        anchorText: anchorText.trim() || undefined,
+        sessionId
       });
 
-      const result = await globalBlogGenerator.generateGlobalBlogPost(request);
-
-      if (result.success && result.data) {
-        setProgress(100);
-        setGenerationStage('Generation complete!');
-        setGeneratedPost(result.data.blogPost);
-        
-        // Update remaining requests
-        updateRemainingRequests();
-
-        toast({
-          title: "Blog post generated successfully! 🎉",
-          description: `Your contextual backlink post is ready. ${result.data.globalMetrics.userCountry !== 'Unknown' ? `Generated from ${result.data.globalMetrics.userCountry}` : ''}`,
-        });
-
-        // Track successful blog generation for admin monitoring
-        adminSyncService.trackBlogGenerated({
-          sessionId: request.sessionId,
-          blogSlug: result.data.blogPost.slug,
-          targetUrl: request.targetUrl,
-          primaryKeyword: request.primaryKeyword,
-          seoScore: result.data.blogPost.seo_score,
-          generationTime: 45, // Approximate generation time
-          isTrialPost: result.data.blogPost.is_trial_post,
-          expiresAt: result.data.blogPost.expires_at
-        });
-
-        onSuccess?.(result.data.blogPost);
-
-        // Navigate to blog post if in blog variant
-        if (variant === 'blog') {
-          navigate(`/blog/${result.data.blogPost.slug}`);
+      // Use advanced AI generator from AI Live
+      const aiGenerator = new BuilderAIGenerator((status) => {
+        setGenerationStatus(status);
+        setGenerationStage(status.message);
+        setProgress(status.progress);
+        if (status.provider) {
+          setAiProvider(status.provider.toUpperCase());
         }
+      });
 
-      } else {
-        throw new Error(result.error || 'Generation failed');
+      setGenerationStage('Starting AI content generation...');
+
+      const generationResult = await aiGenerator.generateContent({
+        keyword: primaryKeyword.trim(),
+        anchorText: anchorText.trim() || 'relevant link',
+        targetUrl: targetUrl.trim(),
+        userId: 'free-backlink-user'
+      });
+
+      setGenerationStage('Publishing blog post...');
+      setProgress(90);
+
+      // Publish the blog post using the same system as AI Live
+      const publishedPost = await blogPublishingService.publishBlogPost({
+        title: generationResult.title,
+        slug: generationResult.slug,
+        content: generationResult.content,
+        keyword: primaryKeyword.trim(),
+        anchor_text: anchorText.trim() || 'relevant link',
+        target_url: targetUrl.trim(),
+        word_count: generationResult.wordCount,
+        provider: generationResult.provider,
+        generation_time: generationResult.generationTime,
+        seo_score: generationResult.metadata.seoScore,
+        reading_time: generationResult.metadata.readingTime,
+        keyword_density: generationResult.metadata.keywordDensity,
+        expires_at: generationResult.expiresAt.toISOString(),
+        generated_by_account: 'free-backlink-service'
+      });
+
+      // Convert to expected format for compatibility with existing code
+      const blogPost = {
+        id: publishedPost.id,
+        title: publishedPost.title,
+        slug: publishedPost.slug,
+        content: publishedPost.content,
+        target_url: publishedPost.target_url,
+        anchor_text: publishedPost.anchor_text,
+        word_count: publishedPost.word_count,
+        seo_score: publishedPost.seo_score,
+        reading_time: publishedPost.reading_time,
+        created_at: publishedPost.created_at,
+        expires_at: publishedPost.expires_at,
+        is_trial_post: true,
+        view_count: 0,
+        provider: publishedPost.provider
+      };
+
+      setProgress(100);
+      setGenerationStage('Generation complete!');
+      setGeneratedPost(blogPost);
+
+      // Update remaining requests
+      updateRemainingRequests();
+
+      toast({
+        title: "AI Blog post generated successfully! 🎉",
+        description: `Your high-quality backlink post is ready. Generated using ${aiProvider || generationResult.provider.toUpperCase()} AI with ${generationResult.wordCount} words.`,
+      });
+
+      // Track successful blog generation for admin monitoring
+      adminSyncService.trackBlogGenerated({
+        sessionId,
+        blogSlug: blogPost.slug,
+        targetUrl: targetUrl.trim(),
+        primaryKeyword: primaryKeyword.trim(),
+        seoScore: blogPost.seo_score,
+        generationTime: generationResult.generationTime,
+        isTrialPost: true,
+        expiresAt: blogPost.expires_at
+      });
+
+      onSuccess?.(blogPost);
+
+      // Navigate to blog post if in blog variant
+      if (variant === 'blog') {
+        navigate(`/blog/${blogPost.slug}`);
       }
 
     } catch (error: any) {
