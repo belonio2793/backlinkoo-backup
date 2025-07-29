@@ -208,27 +208,47 @@ export function GlobalBlogGenerator({
         return;
       }
 
-      // Use the OpenAI service's built-in connection test instead of manual fetch
-      // This avoids CORS issues and uses proper error handling
+      // Use the OpenAI service's built-in connection test with timeout
       setApiStatus({
         status: 'checking',
         message: 'Testing API connection...',
         details: 'Verifying credentials'
       });
 
-      const connectionSuccess = await openAIContentGenerator.testConnection();
+      console.log('🔍 Starting OpenAI connection test...');
 
-      if (connectionSuccess) {
-        setApiStatus({
-          status: 'ready',
-          message: 'AI service connected',
-          details: 'Ready to generate content'
-        });
-      } else {
+      // Add a timeout to the connection test
+      const connectionPromise = openAIContentGenerator.testConnection();
+      const timeoutPromise = new Promise<boolean>((_, reject) =>
+        setTimeout(() => reject(new Error('Connection test timeout')), 15000)
+      );
+
+      try {
+        const connectionSuccess = await Promise.race([connectionPromise, timeoutPromise]);
+
+        console.log('🔍 Connection test result:', connectionSuccess);
+
+        if (connectionSuccess) {
+          setApiStatus({
+            status: 'ready',
+            message: 'AI service connected',
+            details: 'Ready to generate content'
+          });
+          console.log('✅ API status set to ready');
+        } else {
+          setApiStatus({
+            status: 'error',
+            message: 'Connection failed',
+            details: 'Unable to connect to OpenAI API'
+          });
+          console.log('❌ API connection failed');
+        }
+      } catch (error) {
+        console.error('❌ Connection test error:', error);
         setApiStatus({
           status: 'error',
-          message: 'Connection failed',
-          details: 'Unable to connect to OpenAI API'
+          message: 'Connection timeout',
+          details: 'API test timed out after 15 seconds'
         });
       }
 
