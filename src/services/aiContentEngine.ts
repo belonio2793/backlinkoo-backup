@@ -54,44 +54,50 @@ export class AIContentEngine {
     {
       name: 'openai',
       service: openAIService,
-      weight: 0.25,
+      weight: 0.95,  // Primary provider with highest weight
       model: 'gpt-3.5-turbo',
-      maxTokens: 3500
+      maxTokens: 3500,
+      priority: 1  // Highest priority for failover
+    },
+    {
+      name: 'huggingface',
+      service: huggingFaceService,
+      weight: 0.80,
+      model: 'microsoft/DialoGPT-large',
+      maxTokens: 2000,
+      priority: 2
+    },
+    {
+      name: 'cohere',
+      service: cohereService,
+      weight: 0.75,
+      model: 'command',
+      maxTokens: 3000,
+      priority: 3
     },
     {
       name: 'grok',
       service: grokService,
-      weight: 0.20,
+      weight: 0.70,
       model: 'grok-2-1212',
-      maxTokens: 3000
+      maxTokens: 3000,
+      priority: 4
     },
-    { 
-      name: 'deepai', 
-      service: deepAIService, 
-      weight: 0.15,
+    {
+      name: 'deepai',
+      service: deepAIService,
+      weight: 0.65,
       model: 'text-generator',
-      maxTokens: 0 // DeepAI doesn't use token limits in the same way
+      maxTokens: 0, // DeepAI doesn't use token limits in the same way
+      priority: 5
     },
-    { 
-      name: 'huggingface', 
-      service: huggingFaceService, 
-      weight: 0.15,
-      model: 'microsoft/DialoGPT-large',
-      maxTokens: 2000
-    },
-    { 
-      name: 'cohere', 
-      service: cohereService, 
-      weight: 0.15,
-      model: 'command',
-      maxTokens: 3000
-    },
-    { 
-      name: 'rytr', 
-      service: rytrService, 
-      weight: 0.10,
+    {
+      name: 'rytr',
+      service: rytrService,
+      weight: 0.60,
       model: 'blog_idea_outline',
-      maxTokens: 15000 // Rytr uses characters
+      maxTokens: 15000, // Rytr uses characters
+      priority: 6
     }
   ];
 
@@ -223,7 +229,63 @@ Focus on ranking factors while maintaining user value and engagement.`;
   }
 
   /**
-   * Generate content from all available providers
+   * Generate content with failover logic - try OpenAI first, then fallback in order
+   */
+  async generateContentWithFailover(request: ContentRequest): Promise<AIContentResult> {
+    const startTime = Date.now();
+    console.log('🚀 Starting primary AI content generation with failover:', request);
+
+    const prompts = this.generatePrompts(request);
+
+    // Sort providers by priority for failover
+    const sortedProviders = [...this.providers].sort((a, b) => (a.priority || 999) - (b.priority || 999));
+
+    for (const provider of sortedProviders) {
+      if (!provider.service.isConfigured()) {
+        console.log(`⚠️ ${provider.name} not configured, skipping...`);
+        continue;
+      }
+
+      try {
+        console.log(`🤖 Trying ${provider.name} as primary provider...`);
+        const result = await this.generateSingleProvider(provider, prompts.primary, request);
+
+        if (result.success && result.content.length > 100) {
+          console.log(`✅ ${provider.name} succeeded as primary provider`);
+
+          const metadata = this.generateMetadata(result.content, request);
+          return {
+            bestContent: result.content,
+            allResults: [result],
+            selectedProvider: provider.name,
+            metadata,
+            totalCost: result.usage.cost,
+            processingTime: Date.now() - startTime
+          };
+        }
+      } catch (error) {
+        console.error(`❌ ${provider.name} failed:`, error);
+        continue;
+      }
+    }
+
+    // If all providers fail, return fallback content
+    console.log('⚠️ All providers failed, using fallback content');
+    const fallbackContent = this.generateFallbackContent(request);
+    const metadata = this.generateMetadata(fallbackContent, request);
+
+    return {
+      bestContent: fallbackContent,
+      allResults: [],
+      selectedProvider: 'fallback',
+      metadata,
+      totalCost: 0,
+      processingTime: Date.now() - startTime
+    };
+  }
+
+  /**
+   * Generate content from all available providers (original method for comparison)
    */
   async generateContent(request: ContentRequest): Promise<AIContentResult> {
     const startTime = Date.now();
@@ -231,7 +293,7 @@ Focus on ranking factors while maintaining user value and engagement.`;
 
     const prompts = this.generatePrompts(request);
     const promptVariations = [prompts.primary, prompts.secondary, prompts.creative, prompts.seoOptimized];
-    
+
     const results: ProviderResult[] = [];
 
     // Generate content from all providers in parallel
@@ -360,6 +422,85 @@ Focus on ranking factors while maintaining user value and engagement.`;
       metadata,
       totalCost,
       processingTime
+    };
+  }
+
+  /**
+   * Generate content from a single provider
+   */
+  private async generateSingleProvider(provider: any, prompt: string, request: ContentRequest): Promise<ProviderResult> {
+    const providerStartTime = Date.now();
+    const systemPrompt = this.getSystemPrompt(provider.name, request);
+
+    let result;
+
+    switch (provider.name) {
+      case 'openai':
+        result = await provider.service.generateContent(prompt, {
+          model: provider.model,
+          maxTokens: provider.maxTokens,
+          temperature: 0.7,
+          systemPrompt
+        });
+        break;
+
+      case 'grok':
+        result = await provider.service.generateContent(prompt, {
+          model: provider.model,
+          maxTokens: provider.maxTokens,
+          temperature: 0.7,
+          systemPrompt
+        });
+        break;
+
+      case 'deepai':
+        const deepAIPrompt = `${systemPrompt}\n\n${prompt}`;
+        result = await provider.service.generateText(deepAIPrompt);
+        break;
+
+      case 'huggingface':
+        const hfPrompt = `${systemPrompt}\n\n${prompt}`;
+        result = await provider.service.generateText(hfPrompt, {
+          model: provider.model,
+          maxLength: provider.maxTokens,
+          temperature: 0.7
+        });
+        break;
+
+      case 'cohere':
+        const coherePrompt = `${systemPrompt}\n\n${prompt}`;
+        result = await provider.service.generateText(coherePrompt, {
+          model: provider.model,
+          maxTokens: provider.maxTokens,
+          temperature: 0.7
+        });
+        break;
+
+      case 'rytr':
+        result = await provider.service.generateContent(prompt, {
+          useCase: 'blog_idea_outline',
+          tone: request.tone || 'convincing',
+          maxCharacters: provider.maxTokens,
+          variations: 1
+        });
+        break;
+
+      default:
+        throw new Error(`Unknown provider: ${provider.name}`);
+    }
+
+    const generationTime = Date.now() - providerStartTime;
+    const quality = this.assessContentQuality(result?.content || '', request);
+    const enhancedContent = this.enhanceContent(result?.content || '', request);
+
+    return {
+      provider: provider.name,
+      content: enhancedContent,
+      success: result?.success || false,
+      usage: result?.usage || { tokens: 0, cost: 0 },
+      generationTime,
+      error: result?.error,
+      quality
     };
   }
 
