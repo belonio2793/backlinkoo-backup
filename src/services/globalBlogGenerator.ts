@@ -1,3 +1,11 @@
+/**
+ * DEPRECATED: This service has been replaced by openAIContentGenerator.ts
+ *
+ * This file is kept for compatibility but should not be used for new development.
+ * The system now uses only OpenAI for content generation.
+ * Use openAIContentGenerator.ts instead.
+ */
+
 import { supabase } from '@/integrations/supabase/client';
 import { contentFilterService } from './contentFilterService';
 import { contentModerationService } from './contentModerationService';
