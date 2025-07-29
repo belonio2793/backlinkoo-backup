@@ -426,7 +426,7 @@ export function InlineAuthForm({
                   <Input
                     id="inline-signup-password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Create a strong password"
+                    placeholder="Create a password (min 6 characters)"
                     value={signupPassword}
                     onChange={(e) => setSignupPassword(e.target.value)}
                     className="h-9 pr-9"
