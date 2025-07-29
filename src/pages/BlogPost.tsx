@@ -372,10 +372,63 @@ export function BlogPost() {
       }, 100);
 
     } catch (error) {
-      console.error('Failed to regenerate content:', error);
+      console.error('❌ Failed to regenerate content:', error);
+
+      // Try fallback content generation if main AI fails
+      try {
+        console.log('🔄 Attempting fallback content generation...');
+        const { SmartFallbackContent } = await import('@/services/smartFallbackContent');
+        const fallbackContent = SmartFallbackContent.generateContent(
+          primaryKeyword,
+          blogPost.target_url,
+          anchorText
+        );
+
+        if (fallbackContent && fallbackContent.length > 100) {
+          console.log('✅ Fallback content generated successfully');
+
+          // Extract title from fallback content
+          const titleMatch = fallbackContent.match(/<h1[^>]*>([^<]+)<\/h1>/);
+          const newTitle = titleMatch ? titleMatch[1] : `${primaryKeyword}: Complete Guide`;
+
+          const fallbackBlogPost = {
+            ...blogPost,
+            title: newTitle,
+            content: fallbackContent,
+            word_count: calculateWordCount(fallbackContent),
+            reading_time: Math.ceil(calculateWordCount(fallbackContent) / 200),
+            seo_score: 75, // Lower score for fallback content
+            updated_at: new Date().toISOString()
+          };
+
+          // Update localStorage and database
+          const blogStorageKey = `blog_post_${blogPost.slug}`;
+          localStorage.setItem(blogStorageKey, JSON.stringify(fallbackBlogPost));
+
+          const allPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+          const updatedPosts = allPosts.map((post: any) =>
+            post.slug === blogPost.slug ? fallbackBlogPost : post
+          );
+          localStorage.setItem('all_blog_posts', JSON.stringify(updatedPosts));
+
+          // Update component state
+          setBlogPost(fallbackBlogPost);
+
+          toast({
+            title: "Content regenerated with fallback",
+            description: "Generated alternative content when AI providers were unavailable.",
+          });
+
+          return; // Exit successfully
+        }
+      } catch (fallbackError) {
+        console.error('❌ Fallback content generation also failed:', fallbackError);
+      }
+
+      // If both main and fallback fail, show error
       toast({
         title: "Regeneration failed",
-        description: "An error occurred while generating new content. Please try again.",
+        description: "Unable to generate new content. Please try again later or contact support.",
         variant: "destructive",
       });
     } finally {
