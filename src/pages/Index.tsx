@@ -914,6 +914,7 @@ const Index = () => {
         <GuestSessionReminder
           onSignUp={() => {
             trackInteraction('guest_reminder_signup');
+            setLoginModalTab("signup");
             setShowLoginModal(true);
           }}
           variant="floating"
