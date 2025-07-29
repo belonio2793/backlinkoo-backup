@@ -100,7 +100,7 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
         }
       };
 
-      const result = await openAIContentGenerator.generateContent(request);
+      const result = await openAIOnlyContentGenerator.generateContent(request);
 
       // Store the result for 24-hour management
       freeBacklinkService.storeFreeBacklink(result);
