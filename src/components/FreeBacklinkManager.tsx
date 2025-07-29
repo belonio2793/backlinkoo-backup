@@ -378,7 +378,10 @@ export function FreeBacklinkManager({ onViewPost }: FreeBacklinkManagerProps) {
                 </p>
               </div>
             </div>
-            <Button className="bg-green-600 hover:bg-green-700 text-white">
+            <Button
+              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => setRegistrationModalOpen(true)}
+            >
               Register Free Account
             </Button>
           </div>
