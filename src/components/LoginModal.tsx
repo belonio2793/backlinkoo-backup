@@ -288,9 +288,8 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
     <Dialog open={isOpen} onOpenChange={resetAndClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <Infinity className="h-6 w-6 text-blue-600" />
-            Join Backlink
+          <DialogTitle className="text-3xl font-bold text-foreground" role="banner">
+            Welcome Back
           </DialogTitle>
           <div className="mt-3">
             <LiveUserActivity />
