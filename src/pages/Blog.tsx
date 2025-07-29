@@ -123,6 +123,13 @@ export function Blog() {
         allPosts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
         setBlogPosts(allPosts);
+
+        console.log('Blog posts loaded:', {
+          databasePosts: posts.length,
+          localBlogPosts: localBlogPosts.length,
+          totalPosts: allPosts.length,
+          freeBacklinkPosts: freeBacklinkService.getAllPosts().length
+        });
       } catch (error) {
         console.error('Failed to load blog posts:', error);
       } finally {
