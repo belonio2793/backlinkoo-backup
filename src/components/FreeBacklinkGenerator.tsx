@@ -161,9 +161,9 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
       } else if (errorMessage.includes('failed after') && errorMessage.includes('attempts')) {
         title = "🔄 Multiple Retry Attempts Failed";
         description = "Despite multiple automatic retry attempts, the generation failed. Please try again in a few moments." + detailedInfo;
-      } else if (errorMessage.includes('All content providers failed')) {
-        title = "🔥 All AI Providers Failed";
-        description = "All available AI providers failed to generate content. This is rare - please try again in a moment." + detailedInfo;
+      } else if (errorMessage.includes('OpenAI generation failed')) {
+        title = "🔥 OpenAI Generation Failed";
+        description = "OpenAI failed to generate content. Please try again in a moment." + detailedInfo;
       } else if (errorMessage.includes('platform.openai.com')) {
         description = errorMessage + detailedInfo;
       } else {
