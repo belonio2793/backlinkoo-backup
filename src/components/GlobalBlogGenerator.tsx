@@ -84,9 +84,11 @@ export function GlobalBlogGenerator({
 
   // API status state
   const [apiStatus, setApiStatus] = useState<{
-    status: 'checking' | 'ready' | 'error' | 'partial';
+    status: 'checking' | 'ready' | 'error' | 'partial' | 'retrying';
     message: string;
     details?: string;
+    retryAttempt?: number;
+    maxRetries?: number;
   }>({
     status: 'checking',
     message: 'Checking API status...'
@@ -246,19 +248,29 @@ export function GlobalBlogGenerator({
     error?: string;
     attempt?: number;
   }> => {
-    const maxRetries = 5;
+    const maxRetries = 8; // Increased retry attempts
     const baseDelay = 1000; // 1 second base delay
-    const maxDelay = 10000; // 10 second max delay
+    const maxDelay = 15000; // Increased max delay to 15 seconds
 
     const startTime = Date.now();
 
     try {
-      // Update status to show retry attempt
+      // Update status to show retry attempt with more detail
       if (retryCount > 0) {
         setApiStatus({
+          status: 'retrying',
+          message: `Establishing connection...`,
+          details: `Retry ${retryCount}/${maxRetries} - Please wait`,
+          retryAttempt: retryCount,
+          maxRetries
+        });
+      } else {
+        setApiStatus({
           status: 'checking',
-          message: `Retrying API connection... (${retryCount}/${maxRetries})`,
-          details: 'Attempting to establish connection'
+          message: 'Connecting to AI service...',
+          details: 'Initial connection attempt',
+          retryAttempt: 1,
+          maxRetries
         });
       }
 
@@ -266,7 +278,7 @@ export function GlobalBlogGenerator({
       const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout per attempt
+      const timeoutId = setTimeout(() => controller.abort(), 12000); // Increased timeout to 12 seconds
 
       const response = await fetch('https://api.openai.com/v1/models', {
         method: 'GET',
@@ -281,6 +293,14 @@ export function GlobalBlogGenerator({
       const responseTime = Date.now() - startTime;
 
       if (response.ok) {
+        // Success! Update to ready status immediately
+        setApiStatus({
+          status: 'ready',
+          message: 'AI service connected successfully! 🚀',
+          details: `Ready in ${retryCount + 1} attempt${(retryCount + 1) > 1 ? 's' : ''} (${responseTime}ms)`,
+          retryAttempt: retryCount + 1,
+          maxRetries
+        });
         return {
           success: true,
           responseTime,
@@ -298,9 +318,11 @@ export function GlobalBlogGenerator({
         if (retryCount < maxRetries) {
           const delay = Math.min(baseDelay * Math.pow(2, retryCount), maxDelay);
           setApiStatus({
-            status: 'checking',
-            message: `Rate limited - waiting ${delay/1000}s before retry`,
-            details: `Attempt ${retryCount + 1}/${maxRetries + 1}`
+            status: 'retrying',
+            message: `Rate limited - retrying in ${Math.ceil(delay/1000)}s`,
+            details: `Attempt ${retryCount + 1}/${maxRetries} - API busy`,
+            retryAttempt: retryCount + 1,
+            maxRetries
           });
 
           await new Promise(resolve => setTimeout(resolve, delay));
@@ -317,9 +339,11 @@ export function GlobalBlogGenerator({
         if (retryCount < maxRetries) {
           const delay = Math.min(baseDelay * Math.pow(1.5, retryCount), maxDelay);
           setApiStatus({
-            status: 'checking',
-            message: `API error ${response.status} - retrying in ${delay/1000}s`,
-            details: `Attempt ${retryCount + 1}/${maxRetries + 1}`
+            status: 'retrying',
+            message: `Connection issue - retrying in ${Math.ceil(delay/1000)}s`,
+            details: `Attempt ${retryCount + 1}/${maxRetries} - Error ${response.status}`,
+            retryAttempt: retryCount + 1,
+            maxRetries
           });
 
           await new Promise(resolve => setTimeout(resolve, delay));
@@ -338,11 +362,13 @@ export function GlobalBlogGenerator({
       if (error.name === 'AbortError') {
         // Retry on timeouts
         if (retryCount < maxRetries) {
-          const delay = Math.min(baseDelay * Math.pow(1.5, retryCount), maxDelay);
+          const delay = Math.min(baseDelay * Math.pow(1.8, retryCount), maxDelay);
           setApiStatus({
-            status: 'checking',
-            message: `Request timeout - retrying in ${delay/1000}s`,
-            details: `Attempt ${retryCount + 1}/${maxRetries + 1}`
+            status: 'retrying',
+            message: `Connection timeout - retrying in ${Math.ceil(delay/1000)}s`,
+            details: `Attempt ${retryCount + 1}/${maxRetries} - Timeout`,
+            retryAttempt: retryCount + 1,
+            maxRetries
           });
 
           await new Promise(resolve => setTimeout(resolve, delay));
@@ -354,14 +380,16 @@ export function GlobalBlogGenerator({
             attempt: retryCount + 1
           };
         }
-      } else if (error.message?.includes('Failed to fetch')) {
-        // Retry on network errors
+      } else if (error.message?.includes('Failed to fetch') || error.message?.includes('network')) {
+        // Retry on network errors with longer delays
         if (retryCount < maxRetries) {
-          const delay = Math.min(baseDelay * Math.pow(2, retryCount), maxDelay);
+          const delay = Math.min(baseDelay * Math.pow(2.2, retryCount), maxDelay);
           setApiStatus({
-            status: 'checking',
-            message: `Network error - retrying in ${delay/1000}s`,
-            details: `Attempt ${retryCount + 1}/${maxRetries + 1}`
+            status: 'retrying',
+            message: `Network issue - retrying in ${Math.ceil(delay/1000)}s`,
+            details: `Attempt ${retryCount + 1}/${maxRetries} - Connection lost`,
+            retryAttempt: retryCount + 1,
+            maxRetries
           });
 
           await new Promise(resolve => setTimeout(resolve, delay));
@@ -890,37 +918,41 @@ export function GlobalBlogGenerator({
             <div className={`flex items-center gap-2 text-sm ${
               apiStatus.status === 'ready' ? 'text-green-600' :
               apiStatus.status === 'error' ? 'text-red-600' :
+              apiStatus.status === 'retrying' ? 'text-orange-600' :
               'text-yellow-600'
             }`}>
               {apiStatus.status === 'ready' ? (
-                <CheckCircle2 className="h-4 w-4" />
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
               ) : apiStatus.status === 'error' ? (
-                <AlertCircle className="h-4 w-4" />
+                <AlertCircle className="h-4 w-4 text-red-500" />
               ) : (
-                <RefreshCw className="h-4 w-4 animate-spin" />
+                <RefreshCw className="h-4 w-4 animate-spin text-blue-500" />
               )}
-              <span>{apiStatus.message}</span>
+              <span className="font-medium">{apiStatus.message}</span>
               {apiStatus.details && (
                 <Badge
                   variant="outline"
-                  className={`text-xs ${
-                    apiStatus.status === 'ready' ? 'border-green-200 text-green-700' :
-                    apiStatus.status === 'error' ? 'border-red-200 text-red-700' :
-                    'border-yellow-200 text-yellow-700'
+                  className={`text-xs font-medium ${
+                    apiStatus.status === 'ready' ? 'border-green-300 bg-green-50 text-green-700' :
+                    apiStatus.status === 'error' ? 'border-red-300 bg-red-50 text-red-700' :
+                    apiStatus.status === 'retrying' ? 'border-orange-300 bg-orange-50 text-orange-700' :
+                    'border-yellow-300 bg-yellow-50 text-yellow-700'
                   }`}
                   title={apiStatus.details}
                 >
-                  {apiStatus.status === 'ready' ? 'Active' :
-                   apiStatus.status === 'error' ? 'Error' : 'Checking'}
+                  {apiStatus.status === 'ready' ? '✅ Ready' :
+                   apiStatus.status === 'error' ? '❌ Error' :
+                   apiStatus.status === 'retrying' ? `🔄 ${apiStatus.retryAttempt}/${apiStatus.maxRetries}` :
+                   '🔍 Checking'}
                 </Badge>
               )}
-              {apiStatus.status !== 'checking' && (
+              {(apiStatus.status === 'error' || apiStatus.status === 'ready') && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-6 w-6 p-0 hover:bg-transparent"
+                  className="h-6 w-6 p-0 hover:bg-gray-100"
                   onClick={checkApiStatus}
-                  title="Refresh API status"
+                  title="Test connection again"
                 >
                   <RefreshCw className="h-3 w-3" />
                 </Button>
@@ -1039,18 +1071,27 @@ export function GlobalBlogGenerator({
           <div className="flex gap-3">
             <Button
               onClick={handleGenerate}
-              disabled={isGenerating || remainingRequests <= 0}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              disabled={isGenerating || remainingRequests <= 0 || apiStatus.status !== 'ready'}
+              className={`flex-1 transition-all duration-300 ${
+                apiStatus.status === 'ready'
+                  ? 'bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg'
+                  : 'bg-gradient-to-r from-gray-400 to-gray-500'
+              }`}
             >
               {isGenerating ? (
                 <>
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                   Generating...
                 </>
-              ) : (
+              ) : apiStatus.status === 'ready' ? (
                 <>
                   <Zap className="h-4 w-4 mr-2" />
-                  Create Permanent Link
+                  Create Your First Backlink For Free! 🚀
+                </>
+              ) : (
+                <>
+                  <Clock className="h-4 w-4 mr-2" />
+                  {apiStatus.status === 'retrying' ? 'Connecting...' : 'Preparing...'}
                 </>
               )}
             </Button>
