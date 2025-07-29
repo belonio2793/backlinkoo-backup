@@ -335,6 +335,12 @@ export class OpenAIService {
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           let errorMessage = `OpenAI API error: ${response.status}`;
+          let fullErrorContext = {
+            status: response.status,
+            statusText: response.statusText,
+            errorData,
+            timestamp: new Date().toISOString()
+          };
 
           if (response.status === 404) {
             errorMessage += ' - Model not found. Check if the model name is correct and available.';
@@ -342,13 +348,23 @@ export class OpenAIService {
             errorMessage += ' - Invalid API key. Check your OpenAI API key.';
           } else if (response.status === 429) {
             errorMessage += ' - Rate limit exceeded. Will retry automatically.';
+            if (errorData.error?.message) {
+              errorMessage += ` Details: ${errorData.error.message}`;
+            }
+          } else if (response.status === 403) {
+            errorMessage += ' - Access forbidden. Check your API key permissions or billing status.';
+          } else if (response.status >= 500) {
+            errorMessage += ' - OpenAI server error. Will retry automatically.';
           } else if (errorData.error?.message) {
             errorMessage += ` - ${errorData.error.message}`;
           } else {
             errorMessage += ` - ${response.statusText}`;
           }
 
-          throw new Error(errorMessage);
+          console.error('🔴 OpenAI API Error Details:', fullErrorContext);
+          const apiError = new Error(errorMessage);
+          (apiError as any).context = fullErrorContext;
+          throw apiError;
         }
 
         const data: OpenAIResponse = await response.json();
@@ -386,12 +402,28 @@ export class OpenAIService {
       return result;
 
     } catch (error) {
-      console.error('❌ OpenAI API failed after all retries:', error);
+      console.error('❌ OpenAI API failed after all retries:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        context: (error as any)?.context,
+        timestamp: new Date().toISOString()
+      });
+
+      let detailedError = 'Unknown error occurred';
+      if (error instanceof Error) {
+        detailedError = error.message;
+        // Add context information if available
+        if ((error as any).context) {
+          const ctx = (error as any).context;
+          detailedError += ` (Status: ${ctx.status}, Time: ${ctx.timestamp})`;
+        }
+      }
+
       return {
         content: '',
         usage: { tokens: 0, cost: 0 },
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: detailedError
       };
     }
   }
