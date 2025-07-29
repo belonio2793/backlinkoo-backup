@@ -203,11 +203,11 @@ export function GlobalBlogGenerator({
       return;
     }
 
-    // Only apply rate limits to authenticated users
-    if (isLoggedIn && remainingRequests <= 0) {
+    // Check if API is configured
+    if (remainingRequests <= 0) {
       toast({
-        title: "Rate limit reached",
-        description: "You've reached the account tier limit. Please try again later or upgrade your plan.",
+        title: "API not configured",
+        description: "OpenAI API is not properly configured. Please check the configuration.",
         variant: "destructive",
       });
       return;
