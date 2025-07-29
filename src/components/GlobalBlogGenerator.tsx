@@ -266,25 +266,57 @@ export function GlobalBlogGenerator({
         setProgress(100);
         setGenerationStage('Generation complete!');
 
+        // Generate a unique slug for the blog post
+        const uniqueSlug = `${result.slug}-${Date.now().toString(36)}`;
+
         // Convert free backlink result to match the expected format
         const blogPost = {
           id: result.id,
           title: result.title,
           content: result.content,
           excerpt: result.metaDescription,
-          slug: result.slug,
+          slug: uniqueSlug,
           keywords: result.keywords,
           meta_description: result.metaDescription,
           target_url: result.targetUrl,
           anchor_text: result.anchorText,
           seo_score: result.seoScore,
           reading_time: result.readingTime,
-          published_url: `${window.location.origin}/free-backlink/${result.id}`,
+          published_url: `${window.location.origin}/blog/${uniqueSlug}`,
           is_trial_post: true,
           expires_at: result.expiresAt,
           created_at: result.createdAt,
           updated_at: result.createdAt
         };
+
+        // Store the blog post for /blog/[slug] access
+        try {
+          localStorage.setItem(`blog_post_${uniqueSlug}`, JSON.stringify(blogPost));
+
+          // Also add to the global blog posts list
+          const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+          const blogMeta = {
+            id: blogPost.id,
+            slug: uniqueSlug,
+            title: blogPost.title,
+            excerpt: blogPost.excerpt,
+            created_at: blogPost.created_at,
+            is_trial_post: blogPost.is_trial_post,
+            expires_at: blogPost.expires_at,
+            seo_score: blogPost.seo_score,
+            reading_time: blogPost.reading_time
+          };
+
+          allBlogPosts.unshift(blogMeta);
+          localStorage.setItem('all_blog_posts', JSON.stringify(allBlogPosts));
+
+          console.log('✅ Blog post published successfully:', {
+            slug: uniqueSlug,
+            url: `${window.location.origin}/blog/${uniqueSlug}`
+          });
+        } catch (error) {
+          console.error('❌ Failed to store blog post:', error);
+        }
 
         setGeneratedPost(blogPost);
 
