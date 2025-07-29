@@ -201,46 +201,8 @@ class GlobalBlogGeneratorService {
 
       console.log('🌍 Global blog generation request:', enhancedRequest);
 
-      // Try enhanced global Netlify function first
-      try {
-        const response = await fetch(`${this.API_BASE}/global-blog-generator`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-User-IP': locationData?.ip || 'unknown'
-          },
-          body: JSON.stringify(enhancedRequest)
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          this.updateRateLimit();
-          
-          // Store globally for blog environment
-          await this.storeGlobalBlogPost(data.blogPost);
-          
-          return {
-            success: true,
-            data: {
-              blogPost: data.blogPost,
-              contextualLinks: data.contextualLinks || {
-                primary: { url: request.targetUrl, anchor: request.anchorText || request.primaryKeyword, context: 'Main target link' }
-              },
-              globalMetrics: data.globalMetrics || {
-                totalRequestsToday: null, // Remove mock metrics
-                averageGenerationTime: null,
-                successRate: null,
-                userCountry: locationData?.country || 'Unknown'
-              }
-            }
-          };
-        }
-      } catch (netlifyError) {
-        console.warn('Netlify function unavailable, using fallback:', netlifyError);
-      }
-
-      // No fallback content generation - return error immediately
-      console.log('❌ Netlify function unavailable, no fallback content generation');
+      // No external function calls - return error immediately
+      console.log('❌ Content generation temporarily unavailable');
       this.updateRateLimit();
 
       return {
