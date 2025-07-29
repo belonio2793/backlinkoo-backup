@@ -9,6 +9,7 @@ import { ClaimTrialPostDialog } from '@/components/ClaimTrialPostDialog';
 import { LoginModal } from '@/components/LoginModal';
 import { supabase } from '@/integrations/supabase/client';
 import { formatBlogTitle, formatBlogContent, getTrendingLabel, calculateWordCount } from '@/utils/textFormatting';
+import { enhancedAIContentEngine } from '@/services/enhancedAIContentEngine';
 import { Footer } from '@/components/Footer';
 import {
   Calendar,
