@@ -271,26 +271,20 @@ export function BlogPost() {
         description: "Please wait while we generate fresh content with AI.",
       });
 
-      // Generate new content using the global blog generator
-      const sessionId = crypto.randomUUID();
-      const result = await globalBlogGenerator.generateGlobalBlogPost({
+      // Generate new content using the OpenAI-only service
+      const result = await openAIContentGenerator.generateContent({
         targetUrl: blogPost.target_url,
         primaryKeyword: primaryKeyword,
         anchorText: anchorText,
-        sessionId,
-        additionalContext: {
-          contentLength: 'medium',
-          contentTone: 'professional',
-          seoFocus: 'high'
-        }
+        wordCount: 1500,
+        tone: 'professional',
+        contentType: 'how-to'
       });
 
-      if (!result.success || !result.data?.blogPost) {
-        throw new Error(result.error || "We're currently experiencing a large volume of requests. Please register or sign in to try one of our alternatives.");
+      // Store the new content for 24-hour management if it's a trial post
+      if (blogPost.is_trial_post) {
+        freeBacklinkService.storeFreeBacklink(result);
       }
-
-      // Update the blog post with new content
-      const newBlogPost = result.data.blogPost;
       const updatedBlogPost = {
         ...blogPost,
         content: newBlogPost.content,
