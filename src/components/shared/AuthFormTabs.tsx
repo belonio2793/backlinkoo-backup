@@ -24,16 +24,19 @@ interface AuthFormTabsProps {
   defaultTab?: "login" | "signup";
 }
 
-export function AuthFormTabs({ 
-  onAuthSuccess, 
+export function AuthFormTabs({
+  onAuthSuccess,
   showTrialUpgrade = false,
   isCompact = false,
   onForgotPassword,
-  className = ""
+  className = "",
+  defaultTab
 }: AuthFormTabsProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"login" | "signup">(showTrialUpgrade ? "signup" : "login");
+  const [activeTab, setActiveTab] = useState<"login" | "signup">(
+    defaultTab || (showTrialUpgrade ? "signup" : "login")
+  );
 
   // Form states
   const [loginEmail, setLoginEmail] = useState("");
@@ -385,7 +388,7 @@ export function AuthFormTabs({
               <Input
                 id="signup-password"
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder="•��••••••"
                 value={signupPassword}
                 onChange={(e) => setSignupPassword(e.target.value)}
                 className={inputHeight}
