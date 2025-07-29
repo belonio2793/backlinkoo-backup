@@ -12,6 +12,7 @@ import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 import { useNavigate } from "react-router-dom";
 import { Infinity, Eye, EyeOff, Mail, RefreshCw, ArrowLeft, Shield, CheckCircle } from "lucide-react";
 import { AuthDebugStatus } from "@/components/AuthDebugStatus";
+import { SimpleAuthTest } from "@/components/SimpleAuthTest";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
