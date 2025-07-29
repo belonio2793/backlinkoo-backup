@@ -50,9 +50,9 @@ export interface EnhancedContentResult {
 
 export class EnhancedAIContentEngine {
   private providers = [
-    { name: 'huggingface', service: huggingFaceService, weight: 0.60 }, // Primary
-    { name: 'cohere', service: cohereService, weight: 0.40 } // Secondary
-    // OpenAI and Grok disabled as requested
+    { name: 'openai', service: openAIService, weight: 0.70 }, // Primary - as requested
+    { name: 'huggingface', service: huggingFaceService, weight: 0.20 },
+    { name: 'cohere', service: cohereService, weight: 0.10 } // Fallback
   ];
 
   /**
