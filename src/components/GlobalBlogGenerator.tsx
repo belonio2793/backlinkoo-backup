@@ -84,14 +84,11 @@ export function GlobalBlogGenerator({
 
   // API status state
   const [apiStatus, setApiStatus] = useState<{
-    status: 'checking' | 'ready' | 'error' | 'partial' | 'retrying';
+    status: 'ready' | 'error';
     message: string;
-    details?: string;
-    retryAttempt?: number;
-    maxRetries?: number;
   }>({
-    status: 'checking',
-    message: 'Checking API status...'
+    status: 'ready',
+    message: 'Ready'
   });
 
   const { toast } = useToast();
