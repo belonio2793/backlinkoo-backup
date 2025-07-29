@@ -33,7 +33,7 @@ import { EmailVerificationGuard } from '@/components/EmailVerificationGuard';
 import TrialNotificationBanner from '@/components/TrialNotificationBanner';
 import { GuestDashboard } from '@/components/GuestDashboard';
 import { AILive } from '@/components/AILive';
-import TestFreeBacklink from '@/components/TestFreeBacklink';
+import { TestFreeBacklink } from '@/components/TestFreeBacklink';
 import { EnhancedDashboardRouter } from '@/components/EnhancedDashboardRouter';
 
 export const AppWrapper = () => {
