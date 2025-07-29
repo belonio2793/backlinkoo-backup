@@ -905,6 +905,167 @@ const Dashboard = () => {
               )}
             </TabsContent>
 
+            <TabsContent value="trial" className="space-y-6">
+              <div className="relative overflow-hidden">
+                {/* Hero Section */}
+                <div className="relative bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 rounded-2xl p-8 mb-8 border border-purple-100">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-200/30 to-pink-200/30 rounded-full -translate-y-32 translate-x-32"></div>
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-200/30 to-cyan-200/30 rounded-full translate-y-24 -translate-x-24"></div>
+
+                  <div className="relative z-10 text-center max-w-4xl mx-auto">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-purple-200 mb-6">
+                      <Sparkles className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm font-medium text-purple-700">Free Trial Experience</span>
+                    </div>
+
+                    <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+                      Explore Premium Features
+                    </h1>
+
+                    <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+                      Experience the full power of our platform with free trial features. Generate high-quality content, build powerful backlinks, and watch your SEO soar.
+                    </p>
+
+                    <div className="flex flex-wrap justify-center gap-4">
+                      <div className="flex items-center gap-2 px-4 py-2 bg-white/70 backdrop-blur-sm rounded-full border border-blue-200">
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        <span className="text-sm font-medium text-gray-700">No Credit Card Required</span>
+                      </div>
+                      <div className="flex items-center gap-2 px-4 py-2 bg-white/70 backdrop-blur-sm rounded-full border border-blue-200">
+                        <Clock className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-medium text-gray-700">24-Hour Access</span>
+                      </div>
+                      <div className="flex items-center gap-2 px-4 py-2 bg-white/70 backdrop-blur-sm rounded-full border border-blue-200">
+                        <Zap className="h-4 w-4 text-yellow-600" />
+                        <span className="text-sm font-medium text-gray-700">Full Features Unlocked</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Main Content Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                  {/* Free Generated Blog Posts - Main Feature */}
+                  <div className="lg:col-span-2">
+                    <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white to-gray-50">
+                      <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                              <BarChart3 className="h-6 w-6" />
+                            </div>
+                            <div>
+                              <CardTitle className="text-xl font-bold">Free Generated Blog Posts</CardTitle>
+                              <p className="text-purple-100 text-sm">Your trial content library</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-white/20 text-white border-white/30">
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            Live
+                          </Badge>
+                        </div>
+                      </CardHeader>
+
+                      <CardContent className="p-6">
+                        <TrialBlogPostsDisplay />
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Side Panel - Trial Stats & Actions */}
+                  <div className="space-y-6">
+
+                    {/* Trial Progress */}
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-50 to-teal-50">
+                      <CardHeader className="pb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-emerald-100 rounded-lg">
+                            <TrendingUp className="h-5 w-5 text-emerald-600" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg text-emerald-800">Trial Progress</CardTitle>
+                            <p className="text-sm text-emerald-600">Track your exploration</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-gray-700">Blog Posts Generated</span>
+                            <span className="text-lg font-bold text-emerald-600">3/5</span>
+                          </div>
+                          <Progress value={60} className="h-2" />
+
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-gray-700">Features Explored</span>
+                            <span className="text-lg font-bold text-emerald-600">7/12</span>
+                          </div>
+                          <Progress value={58} className="h-2" />
+                        </div>
+
+                        <div className="p-3 bg-white/70 rounded-lg border border-emerald-200">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Clock className="h-4 w-4 text-emerald-600" />
+                            <span className="text-sm font-medium text-emerald-700">Trial Time Remaining</span>
+                          </div>
+                          <div className="text-2xl font-bold text-emerald-800">22h 47m</div>
+                          <div className="text-xs text-emerald-600">Expires tomorrow at 3:45 PM</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Quick Actions */}
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50">
+                      <CardHeader className="pb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <Zap className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <CardTitle className="text-lg text-blue-800">Quick Actions</CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0 shadow-lg">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create New Blog Post
+                        </Button>
+
+                        <Button variant="outline" className="w-full border-blue-200 text-blue-700 hover:bg-blue-50">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          View Analytics
+                        </Button>
+
+                        <Button variant="outline" className="w-full border-purple-200 text-purple-700 hover:bg-purple-50">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Customize Settings
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Upgrade Prompt */}
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-amber-50 to-orange-50 border-l-4 border-l-amber-400">
+                      <CardContent className="p-6">
+                        <div className="text-center">
+                          <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Crown className="h-6 w-6 text-amber-600" />
+                          </div>
+                          <h3 className="font-bold text-amber-800 mb-2">Love what you see?</h3>
+                          <p className="text-sm text-amber-700 mb-4">
+                            Upgrade to unlock unlimited access to all premium features.
+                          </p>
+                          <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0 shadow-lg">
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Upgrade Now
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
             <TabsContent value="free-blog" className="space-y-6">
               <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-8">
