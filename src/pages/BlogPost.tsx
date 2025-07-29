@@ -456,12 +456,29 @@ export function BlogPost() {
             </Button>
 
             <div className="flex items-center gap-3">
-              {blogPost.is_trial_post && (
-                <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 shadow-md">
-                  <Sparkles className="mr-1 h-3 w-3" />
-                  Free Generated Content
-                </Badge>
-              )}
+              {/* Claim Status Badge */}
+              {(() => {
+                // Check if this post has been claimed
+                const isClaimedPost = !blogPost.is_trial_post;
+                const isTrialPost = blogPost.is_trial_post;
+
+                if (isClaimedPost) {
+                  return (
+                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md">
+                      <CheckCircle2 className="mr-1 h-3 w-3" />
+                      Claimed & Linked
+                    </Badge>
+                  );
+                } else if (isTrialPost) {
+                  return (
+                    <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-md">
+                      <Clock className="mr-1 h-3 w-3" />
+                      Unclaimed Trial
+                    </Badge>
+                  );
+                }
+                return null;
+              })()}
 
               {!currentUser ? (
                 <div className="flex items-center gap-2">
