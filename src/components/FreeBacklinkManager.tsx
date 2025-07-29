@@ -50,6 +50,7 @@ export function FreeBacklinkManager({ onViewPost }: FreeBacklinkManagerProps) {
   const [posts, setPosts] = useState<any[]>([]);
   const [regeneratingIds, setRegeneratingIds] = useState<Set<string>>(new Set());
   const [timeRemainingMap, setTimeRemainingMap] = useState<Map<string, any>>(new Map());
+  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
