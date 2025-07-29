@@ -89,6 +89,19 @@ export function GlobalBlogGenerator({
     setRemainingRequests(remaining);
   };
 
+  const formatUrl = (url: string): string => {
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl) return trimmedUrl;
+
+    // If URL already has protocol, return as is
+    if (trimmedUrl.match(/^https?:\/\//)) {
+      return trimmedUrl;
+    }
+
+    // Add https:// protocol if missing
+    return `https://${trimmedUrl}`;
+  };
+
   const validateForm = (): boolean => {
     if (!targetUrl.trim()) {
       toast({
@@ -101,15 +114,21 @@ export function GlobalBlogGenerator({
 
     if (!primaryKeyword.trim()) {
       toast({
-        title: "Primary keyword required", 
+        title: "Primary keyword required",
         description: "Please enter the main keyword for your blog post.",
         variant: "destructive",
       });
       return false;
     }
 
+    // Auto-format URL and update state
+    const formattedUrl = formatUrl(targetUrl);
+    if (formattedUrl !== targetUrl) {
+      setTargetUrl(formattedUrl);
+    }
+
     try {
-      new URL(targetUrl);
+      new URL(formattedUrl);
     } catch {
       toast({
         title: "Invalid URL",
@@ -188,8 +207,9 @@ export function GlobalBlogGenerator({
       }
 
       const sessionId = crypto.randomUUID();
+      const formattedTargetUrl = formatUrl(targetUrl.trim());
       const request: GlobalBlogRequest = {
-        targetUrl: targetUrl.trim(),
+        targetUrl: formattedTargetUrl,
         primaryKeyword: primaryKeyword.trim(),
         anchorText: anchorText.trim() || undefined,
         sessionId,
