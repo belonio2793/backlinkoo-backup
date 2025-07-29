@@ -314,7 +314,7 @@ export function Blog() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      <span>{formatDate(post.published_at)}</span>
+                      <span>{formatDate(post.published_at || post.created_at)}</span>
                     </div>
                   </div>
                   
