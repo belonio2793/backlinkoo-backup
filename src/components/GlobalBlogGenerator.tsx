@@ -825,6 +825,17 @@ export function GlobalBlogGenerator({
                    apiStatus.status === 'error' ? 'Error' : 'Checking'}
                 </Badge>
               )}
+              {apiStatus.status !== 'checking' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 hover:bg-transparent"
+                  onClick={checkApiStatus}
+                  title="Refresh API status"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                </Button>
+              )}
             </div>
           </div>
           
