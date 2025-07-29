@@ -99,17 +99,8 @@ export function EnhancedDashboardRouter() {
     return <Dashboard />;
   }
 
-  // For non-authenticated users, redirect to login (this should not happen due to useEffect)
-  console.log('🚫 No authenticated user in fallback');
-
-  // Add useEffect to handle redirect if somehow we reach this state
-  useEffect(() => {
-    if (!isLoading && !user) {
-      console.log('🚫 Fallback redirect to login');
-      navigate('/login');
-    }
-  }, [isLoading, user, navigate]);
-
+  // For non-authenticated users, this should not happen due to useEffect redirects
+  console.log('🚫 No authenticated user in fallback - redirecting');
   return null;
 }
 
