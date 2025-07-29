@@ -335,7 +335,7 @@ export function AuthFormTabs({
 
           <Button
             type="submit"
-            className={`w-full ${inputHeight}`}
+            className={`w-full ${inputHeight} ${isLoading ? 'bg-primary/80' : ''}`}
             disabled={isLoading || !loginEmail || !loginPassword}
           >
             {isLoading ? (
