@@ -128,6 +128,12 @@ export class BlogPublishingService {
    * Create a fallback post when database is unavailable
    */
   private createFallbackPost(postData: Omit<BlogPost, 'id' | 'created_at' | 'status'>): BlogPost {
+    console.log('Creating fallback post with data:', {
+      title: postData.title,
+      slug: postData.slug,
+      word_count: postData.word_count
+    });
+
     const mockPost: BlogPost = {
       ...postData,
       id: `fallback-${Date.now()}`,
@@ -138,10 +144,27 @@ export class BlogPublishingService {
 
     // Store in localStorage as backup
     try {
-      localStorage.setItem(`ai_post_${mockPost.slug}`, JSON.stringify(mockPost));
-      console.log('Fallback post stored in localStorage');
+      const postKey = `ai_post_${mockPost.slug}`;
+      localStorage.setItem(postKey, JSON.stringify(mockPost));
+
+      // Also maintain a list of all posts
+      const existingPosts = JSON.parse(localStorage.getItem('ai_posts_list') || '[]');
+      const postSummary = {
+        id: mockPost.id,
+        slug: mockPost.slug,
+        title: mockPost.title,
+        created_at: mockPost.created_at
+      };
+
+      // Add if not already exists
+      if (!existingPosts.find((p: any) => p.slug === mockPost.slug)) {
+        existingPosts.unshift(postSummary);
+        localStorage.setItem('ai_posts_list', JSON.stringify(existingPosts));
+      }
+
+      console.log('✅ Fallback post stored in localStorage:', postKey);
     } catch (err) {
-      console.warn('Could not store fallback post in localStorage:', err);
+      console.warn('❌ Could not store fallback post in localStorage:', err);
     }
 
     return mockPost;
