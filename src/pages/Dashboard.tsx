@@ -318,14 +318,14 @@ const Dashboard = () => {
         if (!isMounted) return;
 
         if (error && !session) {
-          console.log('🏠 Dashboard - Auth error:', error);
-          navigate('/login');
+          console.log('🏠 Dashboard - Auth error, continuing in demo mode:', error);
+          setLoading(false);
           return;
         }
 
         if (!session?.user) {
-          console.log('🏠 Dashboard - No valid session, redirecting to login');
-          navigate('/login');
+          console.log('🏠 Dashboard - No valid session, continuing in demo mode');
+          setLoading(false);
           return;
         }
 
@@ -381,10 +381,10 @@ const Dashboard = () => {
       const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (!isMounted) return;
 
-        console.log('🏠 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
+        console.log('���� Dashboard - Auth state change:', { event, hasUser: !!session?.user });
 
         if (event === 'SIGNED_OUT' || !session) {
-          console.log('��� Dashboard - User signed out, redirecting to login...');
+          console.log('🏠 Dashboard - User signed out, redirecting to login...');
           navigate('/login');
         } else if (event === 'SIGNED_IN' && session) {
           console.log('🏠 Dashboard - User signed in, updating user state');
