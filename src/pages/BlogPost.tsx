@@ -276,7 +276,7 @@ export function BlogPost() {
       });
 
       if (!result.finalContent) {
-        throw new Error('Failed to generate content');
+        throw new Error("We're currently experiencing a large volume of requests. Please register or sign in to try one of our alternatives.");
       }
 
       // Update the blog post with new content
