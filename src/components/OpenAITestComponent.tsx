@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { openAIContentGenerator } from '@/services/openAIContentGenerator';
+import { OpenAIKeyGuide } from './OpenAIKeyGuide';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 export function OpenAITestComponent() {
