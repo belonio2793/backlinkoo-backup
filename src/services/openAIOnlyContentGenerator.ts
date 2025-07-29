@@ -3,7 +3,7 @@
  * Simplified content generation using only OpenAI API
  */
 
-import { enhancedOpenAIService } from './api/enhancedOpenAI';
+import { simpleOpenAIService } from './api/simpleOpenAI';
 
 export interface ContentGenerationRequest {
   targetUrl: string;
