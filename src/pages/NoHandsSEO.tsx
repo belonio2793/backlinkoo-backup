@@ -96,7 +96,7 @@ const NoHandsSEO = () => {
     try {
       // Extract domain from URL for campaign naming
       const domain = new URL(targetUrl).hostname.replace('www.', '');
-      const campaignName = `NO Hands SEO - ${domain} - ${keyword}`;
+      const campaignName = `Backlink ∞ Automation Link Building (beta) - ${domain} - ${keyword}`;
 
       // Create the campaign in Supabase with verification workflow
       const { data, error } = await supabase
@@ -106,7 +106,7 @@ const NoHandsSEO = () => {
           name: campaignName,
           target_url: targetUrl,
           keywords: [keyword],
-          links_requested: 10, // Default to 10 links for NO Hands SEO
+          links_requested: 10, // Default to 10 links for Backlink ∞ Automation Link Building (beta)
           status: 'pending',
           verification_status: 'pending',
           verification_notes: campaignNotes || null,
@@ -134,7 +134,7 @@ const NoHandsSEO = () => {
       
       toast({
         title: "Campaign Submitted for Verification!",
-        description: `Your NO Hands SEO campaign for "${keyword}" has been submitted and will be reviewed within 24-48 hours.`,
+        description: `Your Backlink ∞ Automation Link Building (beta) campaign for "${keyword}" has been submitted and will be reviewed within 24-48 hours.`,
       });
 
       // Reset form and redirect to dashboard
@@ -191,7 +191,7 @@ const NoHandsSEO = () => {
           <div className="flex items-center justify-center gap-2 mb-6">
             <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200 font-mono text-xs px-4 py-2">
               <Zap className="h-3 w-3 mr-2" />
-              NO HANDS SEO TOOL
+              BACKLINK ∞ AUTOMATION LINK BUILDING (BETA)
             </Badge>
             <Badge variant="secondary" className="text-xs">v2.0</Badge>
           </div>
@@ -243,7 +243,7 @@ const NoHandsSEO = () => {
                     <AlertDescription className="text-green-800">
                       <strong>Campaign Submitted Successfully!</strong>
                       <br />
-                      Your NO Hands SEO campaign has been submitted for verification. Our team will review your requirements and begin processing within 24-48 hours. You'll receive an email notification once verification is complete.
+                      Your Backlink ∞ Automation Link Building (beta) campaign has been submitted for verification. Our team will review your requirements and begin processing within 24-48 hours. You'll receive an email notification once verification is complete.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -377,7 +377,7 @@ const NoHandsSEO = () => {
             {/* Features Section */}
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">Why Choose NO Hands SEO?</h3>
+                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">Why Choose Backlink ∞ Automation Link Building (beta)?</h3>
                 
                 <div className="space-y-4">
                   {features.map((feature, index) => (

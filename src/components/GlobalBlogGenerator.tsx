@@ -116,9 +116,16 @@ export function GlobalBlogGenerator({
   };
 
   const updateRemainingRequests = () => {
-    // Simple rate limiting - just check if OpenAI is configured
-    const remaining = openAIContentGenerator.isConfigured() ? 10 : 0;
-    setRemainingRequests(remaining);
+    // Non-authenticated users get unlimited requests if OpenAI is configured
+    // Authenticated users have request limits
+    if (!isLoggedIn) {
+      const remaining = openAIContentGenerator.isConfigured() ? 999 : 0;
+      setRemainingRequests(remaining);
+    } else {
+      // Authenticated users have limited requests
+      const remaining = openAIContentGenerator.isConfigured() ? 10 : 0;
+      setRemainingRequests(remaining);
+    }
   };
 
   const formatUrl = (url: string): string => {
@@ -203,10 +210,11 @@ export function GlobalBlogGenerator({
       return;
     }
 
-    if (remainingRequests <= 0) {
+    // Only apply rate limits to authenticated users
+    if (isLoggedIn && remainingRequests <= 0) {
       toast({
         title: "Rate limit reached",
-        description: "You've reached the free tier limit. Please try again later or sign up for unlimited access.",
+        description: "You've reached the account tier limit. Please try again later or upgrade your plan.",
         variant: "destructive",
       });
       return;
@@ -344,7 +352,7 @@ export function GlobalBlogGenerator({
         const isFromFallback = result.error || result.usage.tokens === 0;
 
         toast({
-          title: "Blog post generated successfully! 🎉",
+          title: "Blog post generated successfully! ���",
           description: isFromFallback
             ? "Your free backlink post is ready! Generated using our reliable fallback system. It will auto-delete in 24 hours unless you register an account."
             : "Your free backlink post is ready! It will auto-delete in 24 hours unless you register an account.",
@@ -625,7 +633,7 @@ export function GlobalBlogGenerator({
             
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Users className="h-4 w-4" />
-              <span>{remainingRequests} requests remaining</span>
+              <span>{!isLoggedIn ? 'Unlimited requests' : `${remainingRequests} requests remaining`}</span>
             </div>
           </div>
           
@@ -726,7 +734,7 @@ export function GlobalBlogGenerator({
           <div className="flex gap-3">
             <Button 
               onClick={handleGenerate}
-              disabled={isGenerating || remainingRequests <= 0}
+              disabled={isGenerating || (isLoggedIn && remainingRequests <= 0)}
               className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             >
               {isGenerating ? (
@@ -749,16 +757,29 @@ export function GlobalBlogGenerator({
             )}
           </div>
 
-          {/* Rate Limit Warning */}
-          {remainingRequests <= 2 && (
-            <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
-              <span className="text-sm text-amber-800">
-                {remainingRequests === 0 
-                  ? "You've reached the free tier limit. Sign up for unlimited access!"
-                  : `Only ${remainingRequests} request${remainingRequests === 1 ? '' : 's'} remaining. Sign up for unlimited access!`
-                }
-              </span>
+          {/* Rate Limit Warning - Only show for authenticated users */}
+          {isLoggedIn && remainingRequests <= 2 && (
+            <div className="flex items-center justify-between gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-amber-600" />
+                <span className="text-sm text-amber-800">
+                  {remainingRequests === 0
+                    ? "You've reached the free tier limit. Sign up for unlimited access!"
+                    : `Only ${remainingRequests} request${remainingRequests === 1 ? '' : 's'} remaining. Sign up for unlimited access!`
+                  }
+                </span>
+              </div>
+              {generatedPost && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => navigate(`/blog/${generatedPost.slug}`)}
+                  className="ml-2 bg-white hover:bg-amber-50 border-amber-300 text-amber-800"
+                >
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  View Post
+                </Button>
+              )}
             </div>
           )}
         </CardContent>

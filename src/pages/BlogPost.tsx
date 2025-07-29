@@ -8,6 +8,7 @@ import { publishedBlogService, type PublishedBlogPost } from '@/services/publish
 import { ClaimTrialPostDialog } from '@/components/ClaimTrialPostDialog';
 import { LoginModal } from '@/components/LoginModal';
 import { supabase } from '@/integrations/supabase/client';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatBlogTitle, formatBlogContent, getTrendingLabel, calculateWordCount, cleanHTMLContent } from '@/utils/textFormatting';
 import { runImmediateContentCleanup } from '@/utils/immediateContentCleanup';
 import { openAIContentGenerator } from '@/services/openAIContentGenerator';
@@ -28,7 +29,8 @@ import {
   RefreshCw,
   Zap,
   Gift,
-  Home
+  Home,
+  CheckCircle2
 } from 'lucide-react';
 
 export function BlogPost() {
@@ -456,12 +458,71 @@ export function BlogPost() {
             </Button>
 
             <div className="flex items-center gap-3">
-              {blogPost.is_trial_post && (
-                <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 shadow-md">
-                  <Sparkles className="mr-1 h-3 w-3" />
-                  Free Generated Content
-                </Badge>
-              )}
+              {/* Claim Status Badge */}
+              {(() => {
+                // Check if this post has been claimed by looking at various indicators
+                const isClaimedPost = !blogPost.is_trial_post ||
+                                    (blogPost as any).user_id ||
+                                    (blogPost as any).claimed_by_user_id;
+
+                const isTrialPost = blogPost.is_trial_post && !isClaimedPost;
+
+                // Check if claimed by looking at localStorage claims
+                let claimedByUser = null;
+                if (currentUser) {
+                  try {
+                    const userClaims = localStorage.getItem(`user_claimed_posts_${currentUser.id}`);
+                    if (userClaims) {
+                      const claims = JSON.parse(userClaims);
+                      claimedByUser = claims.find((claim: any) => claim.slug === blogPost.slug);
+                    }
+                  } catch (e) {
+                    console.warn('Failed to check user claims');
+                  }
+                }
+
+                if (isClaimedPost || claimedByUser) {
+                  return (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md cursor-help">
+                            <CheckCircle2 className="mr-1 h-3 w-3" />
+                            Claimed
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            {claimedByUser
+                              ? "This post has been permanently claimed by you and will never expire. It's now a permanent backlink!"
+                              : "This post has been permanently claimed by a user and will never expire. It's now a permanent backlink!"
+                            }
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  );
+                } else if (isTrialPost) {
+                  return (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-md cursor-help">
+                            <Clock className="mr-1 h-3 w-3" />
+                            Unclaimed
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            This is a trial post that will auto-delete in 24 hours. To make it permanent, {!currentUser ? 'sign up or sign in and then' : ''} click "Claim This Post Forever" below to save it permanently to your account.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  );
+                }
+                return null;
+              })()}
 
               {!currentUser ? (
                 <div className="flex items-center gap-2">
@@ -652,73 +713,7 @@ export function BlogPost() {
           </div>
         </div>
 
-        {/* Enhanced Call-to-Action Section */}
-        <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-700 rounded-2xl p-8 lg:p-12 text-white shadow-2xl mb-8">
-          <div className="text-center space-y-6">
-            <div className="flex justify-center">
-              <div className="p-4 bg-white/10 rounded-full">
-                <Sparkles className="h-8 w-8" />
-              </div>
-            </div>
 
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Love This Content Quality?
-              </h2>
-              <p className="text-xl text-purple-100 max-w-2xl mx-auto leading-relaxed">
-                This professional blog post was generated using our AI-powered content creation tool.
-                Create your own high-quality content in minutes!
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <div className="text-center">
-                <div className="p-3 bg-white/10 rounded-full w-fit mx-auto mb-3">
-                  <Zap className="h-6 w-6" />
-                </div>
-                <h3 className="font-semibold mb-2">AI-Powered</h3>
-                <p className="text-sm text-purple-100">Advanced algorithms create engaging content</p>
-              </div>
-
-              <div className="text-center">
-                <div className="p-3 bg-white/10 rounded-full w-fit mx-auto mb-3">
-                  <TrendingUp className="h-6 w-6" />
-                </div>
-                <h3 className="font-semibold mb-2">SEO Optimized</h3>
-                <p className="text-sm text-purple-100">Built for search engine visibility</p>
-              </div>
-
-              <div className="text-center">
-                <div className="p-3 bg-white/10 rounded-full w-fit mx-auto mb-3">
-                  <Clock className="h-6 w-6" />
-                </div>
-                <h3 className="font-semibold mb-2">Instant Results</h3>
-                <p className="text-sm text-purple-100">Get professional content in minutes</p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-4 pt-4">
-              <Button
-                onClick={() => navigate('/free-backlink')}
-                size="lg"
-                className="bg-white text-purple-700 hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 px-8 py-4 text-lg font-semibold"
-              >
-                <Gift className="mr-2 h-5 w-5" />
-                Generate Free Content
-              </Button>
-
-              <Button
-                onClick={() => navigate('/')}
-                variant="outline"
-                size="lg"
-                className="border-2 border-white text-white hover:bg-white/10 px-8 py-4 text-lg font-semibold"
-              >
-                <Home className="mr-2 h-5 w-5" />
-                Explore More
-              </Button>
-            </div>
-          </div>
-        </div>
 
         {/* Trial Post Notice with Claim Option */}
         {blogPost.is_trial_post && blogPost.expires_at && (

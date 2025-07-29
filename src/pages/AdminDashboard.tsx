@@ -14,6 +14,7 @@ import { TrialPostCleanupManager } from "@/components/admin/TrialPostCleanupMana
 import { ContentFilterManager } from "@/components/admin/ContentFilterManager";
 import { ContentModerationQueue } from "@/components/admin/ContentModerationQueue";
 import { AIPostsManager } from "@/components/admin/AIPostsManager";
+import { BlogPostClaimsManager } from "@/components/admin/BlogPostClaimsManager";
 import { AuthEmailTest } from "@/components/AuthEmailTest";
 
 import { EmailTest } from "@/components/EmailTest";
@@ -181,6 +182,7 @@ const AdminDashboard = () => {
           <TabsList>
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
             <TabsTrigger value="blog-posts">Blog Posts</TabsTrigger>
+            <TabsTrigger value="blog-claims">Blog Claims</TabsTrigger>
             <TabsTrigger value="ai-posts">AI Posts</TabsTrigger>
             <TabsTrigger value="free-backlinks">Free Backlinks</TabsTrigger>
             <TabsTrigger value="content-filter">Content Filter</TabsTrigger>
@@ -201,6 +203,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="blog-posts">
             <AdminBlogManager />
+          </TabsContent>
+
+          <TabsContent value="blog-claims">
+            <BlogPostClaimsManager />
           </TabsContent>
 
           <TabsContent value="ai-posts">

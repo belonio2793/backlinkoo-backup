@@ -53,19 +53,10 @@ export function QuickTrialUpgrade({
   };
 
   const validatePasswordStrength = (password: string): { isValid: boolean; message: string } => {
-    if (password.length < 8) {
-      return { isValid: false, message: "Password must be at least 8 characters long" };
+    if (password.length < 6) {
+      return { isValid: false, message: "Password must be at least 6 characters long" };
     }
-    if (!/(?=.*[a-z])/.test(password)) {
-      return { isValid: false, message: "Password must contain at least one lowercase letter" };
-    }
-    if (!/(?=.*[A-Z])/.test(password)) {
-      return { isValid: false, message: "Password must contain at least one uppercase letter" };
-    }
-    if (!/(?=.*\d)/.test(password)) {
-      return { isValid: false, message: "Password must contain at least one number" };
-    }
-    return { isValid: true, message: "Password strength is good" };
+    return { isValid: true, message: "Password is valid" };
   };
 
   const handleQuickUpgrade = async (e: React.FormEvent) => {
@@ -249,7 +240,7 @@ export function QuickTrialUpgrade({
                 <Input
                   id="quick-password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Create a strong password"
+                  placeholder="Create a password (min 6 characters)"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required

@@ -20,7 +20,7 @@ export const Footer = () => {
                 to="/no-hands-seo"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
               >
-                NO Hands SEO
+                Backlink ∞ Automation Link Building (beta)
               </Link>
               <Link
                 to="/dashboard"

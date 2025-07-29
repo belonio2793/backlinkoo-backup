@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS seo_subscriptions (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Create NO Hands SEO projects table
+-- Create Backlink ∞ Automation Link Building (beta) projects table
 CREATE TABLE IF NOT EXISTS no_hands_seo_projects (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,

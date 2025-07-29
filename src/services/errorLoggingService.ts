@@ -160,13 +160,19 @@ class ErrorLoggingService {
         throw error;
       }
     } catch (error) {
-      console.error('Failed to save error to database:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorName = error instanceof Error ? error.name : 'UnknownError';
+
+      console.error('Failed to save error to database:', {
+        message: errorMessage,
+        name: errorName,
+        stack: error instanceof Error ? error.stack : undefined
+      });
 
       // Always save to localStorage as fallback
       this.saveErrorToLocalStorage(entry);
 
       // Retry logic for temporary failures (but not for missing table/mock mode)
-      const errorMessage = error instanceof Error ? error.message : String(error);
       const isRetryableError = !errorMessage.includes('does not exist') &&
                               !errorMessage.includes('Mock mode') &&
                               !errorMessage.includes('Database not available');

@@ -54,19 +54,10 @@ export function InlineAuthForm({
   };
 
   const validatePasswordStrength = (password: string): { isValid: boolean; message: string } => {
-    if (password.length < 8) {
-      return { isValid: false, message: "Password must be at least 8 characters long" };
+    if (password.length < 6) {
+      return { isValid: false, message: "Password must be at least 6 characters long" };
     }
-    if (!/(?=.*[a-z])/.test(password)) {
-      return { isValid: false, message: "Password must contain at least one lowercase letter" };
-    }
-    if (!/(?=.*[A-Z])/.test(password)) {
-      return { isValid: false, message: "Password must contain at least one uppercase letter" };
-    }
-    if (!/(?=.*\d)/.test(password)) {
-      return { isValid: false, message: "Password must contain at least one number" };
-    }
-    return { isValid: true, message: "Password strength is good" };
+    return { isValid: true, message: "Password is valid" };
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -435,7 +426,7 @@ export function InlineAuthForm({
                   <Input
                     id="inline-signup-password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Create a strong password"
+                    placeholder="Create a password (min 6 characters)"
                     value={signupPassword}
                     onChange={(e) => setSignupPassword(e.target.value)}
                     className="h-9 pr-9"

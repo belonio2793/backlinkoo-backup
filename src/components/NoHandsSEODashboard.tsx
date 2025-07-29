@@ -87,9 +87,9 @@ const NoHandsSEODashboard = () => {
         return;
       }
 
-      // Filter for NO Hands SEO campaigns client-side
+      // Filter for Backlink ∞ Automation Link Building (beta) campaigns client-side
       const campaignsData = allCampaigns?.filter(campaign =>
-        campaign.name?.includes('NO Hands SEO') ||
+        campaign.name?.includes('Backlink ∞ Automation Link Building (beta)') ||
         campaign.campaign_type === 'no_hands_seo'
       ) || [];
 
@@ -347,7 +347,7 @@ const NoHandsSEODashboard = () => {
             <Zap className="h-6 w-6 text-blue-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">NO Hands SEO Dashboard</h2>
+            <h2 className="text-2xl font-bold">Backlink ∞ Automation Link Building (beta) Dashboard</h2>
             <p className="text-muted-foreground">Monitor your automated link building campaigns</p>
           </div>
         </div>
@@ -460,7 +460,7 @@ const NoHandsSEODashboard = () => {
             <Card>
               <CardContent className="text-center py-12">
                 <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">NO Hands SEO Campaigns</h3>
+                <h3 className="text-lg font-medium mb-2">Backlink ∞ Automation Link Building (beta) Campaigns</h3>
                 <p className="text-muted-foreground mb-4">
                   {statusFilter === 'all'
                     ? "You have no active campaigns running."
@@ -469,7 +469,7 @@ const NoHandsSEODashboard = () => {
                 </p>
                 <Button onClick={() => window.location.href = '/no-hands-seo'}>
                   <Zap className="h-4 w-4 mr-2" />
-                  Create NO Hands SEO Campaign
+                  Create Backlink ∞ Automation Link Building (beta) Campaign
                 </Button>
               </CardContent>
             </Card>

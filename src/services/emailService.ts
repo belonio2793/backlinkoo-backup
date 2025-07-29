@@ -79,7 +79,14 @@ export class EmailService {
 
       // Enhanced error handling for different HTTP status codes
       if (!response.ok) {
-        const errorText = await response.text();
+        let errorText = '';
+        try {
+          errorText = await response.text();
+        } catch (readError) {
+          console.warn('Failed to read response text:', readError);
+          errorText = 'Unable to read error response';
+        }
+
         console.error('Netlify function error response:', response.status, errorText);
 
         const errorMessage = this.getErrorMessage(response.status, errorText);
@@ -101,7 +108,8 @@ export class EmailService {
             to: emailData.to,
             subject: emailData.subject,
             attempt,
-            retryable: isRetryable
+            retryable: isRetryable,
+            errorText: errorText
           },
           'EmailService'
         );
@@ -168,20 +176,32 @@ export class EmailService {
         throw new Error(errorMessage);
       }
     } catch (error: any) {
-      console.error('sendViaNetlifyFunction error:', error);
+      const errorMessage = error?.message || String(error) || 'Unknown error';
+      const errorName = error?.name || 'UnknownError';
+
+      console.error('sendViaNetlifyFunction error:', {
+        message: errorMessage,
+        name: errorName,
+        stack: error?.stack
+      });
 
       // Log the failure with attempt number
-      this.logFailure(emailData.to, error.message, attempt);
+      this.logFailure(emailData.to, errorMessage, attempt);
 
       // Log to centralized error logging
       await errorLogger.logEmailError(
-        `Email sending failed: ${error.message}`,
+        `Email sending failed: ${errorMessage}`,
         {
           to: emailData.to,
           subject: emailData.subject,
           attempt,
-          errorType: error.name,
-          isTimeout: error.name === 'AbortError'
+          errorType: errorName,
+          isTimeout: errorName === 'AbortError',
+          fullError: {
+            message: errorMessage,
+            name: errorName,
+            stack: error?.stack
+          }
         },
         'EmailService'
       );
@@ -202,7 +222,7 @@ export class EmailService {
 
       return {
         success: false,
-        error: this.sanitizeErrorMessage(error.message) || 'Unknown error occurred',
+        error: this.sanitizeErrorMessage(errorMessage) || 'Unknown error occurred',
         provider: 'netlify_resend'
       };
     }
@@ -344,21 +364,32 @@ ${origin}`,
 
       return result;
     } catch (error: any) {
-      console.error('Error sending confirmation email:', error);
+      const errorMessage = error?.message || String(error) || 'Unknown error';
+
+      console.error('Error sending confirmation email:', {
+        message: errorMessage,
+        name: error?.name,
+        stack: error?.stack
+      });
 
       await errorLogger.logEmailError(
-        `Failed to send confirmation email: ${error.message}`,
+        `Failed to send confirmation email: ${errorMessage}`,
         {
           to: email,
           emailType: 'confirmation',
-          confirmationUrl
+          confirmationUrl,
+          fullError: {
+            message: errorMessage,
+            name: error?.name,
+            stack: error?.stack
+          }
         },
         'EmailService'
       );
 
       return {
         success: false,
-        error: `Failed to send confirmation email: ${error.message}`,
+        error: `Failed to send confirmation email: ${errorMessage}`,
         provider: 'netlify_resend'
       };
     }
@@ -407,16 +438,23 @@ https://backlinkoo.com`,
 
       return await this.sendViaNetlifyFunction(emailData);
     } catch (error: any) {
+      const errorMessage = error?.message || String(error) || 'Unknown error';
+
       await errorLogger.logEmailError(
-        `Failed to send password reset email: ${error.message}`,
+        `Failed to send password reset email: ${errorMessage}`,
         {
           to: email,
           emailType: 'password_reset',
-          resetUrl
+          resetUrl,
+          fullError: {
+            message: errorMessage,
+            name: error?.name,
+            stack: error?.stack
+          }
         },
         'EmailService'
       );
-      throw error;
+      throw new Error(errorMessage);
     }
   }
 
@@ -482,16 +520,23 @@ https://backlinkoo.com`,
 
       return await this.sendViaNetlifyFunction(emailData);
     } catch (error: any) {
+      const errorMessage = error?.message || String(error) || 'Unknown error';
+
       await errorLogger.logEmailError(
-        `Failed to send welcome email: ${error.message}`,
+        `Failed to send welcome email: ${errorMessage}`,
         {
           to: email,
           emailType: 'welcome',
-          firstName
+          firstName,
+          fullError: {
+            message: errorMessage,
+            name: error?.name,
+            stack: error?.stack
+          }
         },
         'EmailService'
       );
-      throw error;
+      throw new Error(errorMessage);
     }
   }
 
