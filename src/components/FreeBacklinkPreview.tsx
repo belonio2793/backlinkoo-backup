@@ -448,6 +448,14 @@ export function FreeBacklinkPreview({ content, onRegenerate, onDelete }: FreeBac
           </CardContent>
         </Card>
       )}
+
+      {/* Registration Modal */}
+      <RegistrationModal
+        open={registrationModalOpen}
+        onOpenChange={setRegistrationModalOpen}
+        postTitle={content?.title}
+        trigger="save_post"
+      />
     </div>
   );
 }
