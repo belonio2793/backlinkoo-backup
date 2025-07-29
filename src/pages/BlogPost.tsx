@@ -22,7 +22,8 @@ import {
   User,
   TrendingUp,
   Sparkles,
-  Trash2
+  Trash2,
+  RefreshCw
 } from 'lucide-react';
 
 export function BlogPost() {
