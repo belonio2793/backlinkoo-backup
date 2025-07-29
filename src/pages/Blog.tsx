@@ -322,15 +322,15 @@ export function Blog() {
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        <span>{post.reading_time}m</span>
+                        <span>{post.reading_time || 5}m</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Eye className="h-3 w-3" />
-                        <span>{post.view_count}</span>
+                        <span>{post.view_count || 0}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <TrendingUp className="h-3 w-3" />
-                        <span>{post.seo_score}/100</span>
+                        <span>{post.seo_score || 75}/100</span>
                       </div>
                     </div>
                     
