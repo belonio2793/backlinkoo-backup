@@ -81,6 +81,13 @@ export function GlobalBlogGenerator({
       setGlobalStats(stats);
     } catch (error) {
       console.warn('Could not load global stats:', error);
+      // Set safe fallback stats to prevent component errors
+      setGlobalStats({
+        totalPosts: 0,
+        postsToday: 0,
+        activeUsers: null,
+        averageQuality: null
+      });
     }
   };
 
