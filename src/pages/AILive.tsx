@@ -43,20 +43,11 @@ export default function AILive() {
   const [showPreview, setShowPreview] = useState(false);
   const [intermediateContent, setIntermediateContent] = useState<string>('');
 
-  // Check user limit on component mount
+  // No limits on AI Live - removed user limit check
   useEffect(() => {
-    const checkUserLimit = async () => {
-      if (user?.id) {
-        try {
-          const hasGenerated = await blogPublishingService.hasUserGeneratedContent(user.id);
-          setHasUsedLimit(hasGenerated);
-        } catch (error) {
-          console.error('Error checking user limit:', error);
-        }
-      }
-    };
-    checkUserLimit();
-  }, [user]);
+    // AI Live has no generation limits
+    setHasUsedLimit(false);
+  }, []);
 
   const handleGenerate = async () => {
     if (!keyword.trim() || !anchorText.trim() || !targetUrl.trim()) {
