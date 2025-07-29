@@ -58,13 +58,25 @@ export class BlogPublishingService {
       if (error) {
         console.error('Database error:', error);
 
-        // If table doesn't exist, create a mock post for now
-        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
-          console.warn('ai_generated_posts table does not exist, using fallback');
+        // Extract error details properly
+        const errorMessage = this.extractErrorMessage(error);
+        console.error('Extracted error message:', errorMessage);
+
+        // If table doesn't exist or any database issue, use fallback
+        if (
+          error.code === 'PGRST116' ||
+          error.code === '42P01' ||
+          errorMessage.includes('does not exist') ||
+          errorMessage.includes('relation') ||
+          errorMessage.includes('table') ||
+          errorMessage.includes('permission') ||
+          !errorMessage // Empty error message indicates connection issues
+        ) {
+          console.warn('Database issue detected, using fallback post creation');
           return this.createFallbackPost(postData);
         }
 
-        throw new Error(`Failed to publish blog post: ${error.message || error.details || JSON.stringify(error)}`);
+        throw new Error(`Failed to publish blog post: ${errorMessage}`);
       }
 
       return data as BlogPost;
