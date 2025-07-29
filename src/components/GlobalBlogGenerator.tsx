@@ -390,19 +390,39 @@ export function GlobalBlogGenerator({
       setGenerationStage('');
       setGeneratedPost(null);
 
-      // Check if this is an OpenAI or configuration error
-      const isConfigError = error.message && (
-        error.message.includes('not configured') ||
-        error.message.includes('API key') ||
-        error.message.includes('OpenAI')
-      );
+      // Provide specific error handling
+      const errorMessage = error.message || 'Unknown error';
+      let title = "Generation failed";
+      let description = "An unexpected error occurred. Please try again.";
+
+      const isConfigError = errorMessage.includes('not configured') ||
+                           errorMessage.includes('Invalid API key') ||
+                           errorMessage.includes('401');
+
+      if (errorMessage.includes('Invalid API key') || errorMessage.includes('401')) {
+        title = "🔑 OpenAI API Key Required";
+        description = "A valid OpenAI API key is required for content generation. Please configure your API key.";
+      } else if (errorMessage.includes('OpenAI API key is not configured')) {
+        title = "🔑 API Key Missing";
+        description = "OpenAI API key is not configured. Please set up your API key to generate content.";
+      } else if (errorMessage.includes('rate limit') || errorMessage.includes('429')) {
+        title = "⏱️ Rate Limit Exceeded";
+        description = "OpenAI rate limit reached. Please wait a few minutes before trying again.";
+      } else if (errorMessage.includes('quota') || errorMessage.includes('insufficient_quota')) {
+        title = "💳 Quota Exceeded";
+        description = "Your OpenAI account has exceeded its usage quota. Please check your billing settings.";
+      } else if (isConfigError) {
+        title = "🔧 API Configuration Issue";
+        description = "AI service configuration issue detected. Please check your OpenAI API key settings.";
+      } else {
+        description = errorMessage;
+      }
 
       toast({
-        title: "Generation failed",
-        description: isConfigError
-          ? "AI service temporarily unavailable. Try our dedicated Free Backlink feature for reliable generation!"
-          : error.message || "An unexpected error occurred. Please try again.",
+        title,
+        description,
         variant: "destructive",
+        duration: 8000,
       });
 
       // If it's a config error, suggest the free backlink feature
