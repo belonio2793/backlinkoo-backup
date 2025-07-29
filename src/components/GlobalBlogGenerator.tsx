@@ -175,7 +175,7 @@ export function GlobalBlogGenerator({
 
       // Check OpenAI specifically since it's our primary provider
       const openAIConfigured = openAIContentGenerator.isConfigured();
-      const hasApiKey = import.meta.env.VITE_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+      const hasApiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
       if (!hasApiKey) {
         setApiStatus({
