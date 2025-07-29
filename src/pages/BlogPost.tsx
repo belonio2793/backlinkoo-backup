@@ -266,6 +266,7 @@ export function BlogPost() {
       });
 
       // Generate new content using the enhanced AI engine
+      console.log('🔄 Starting content regeneration for:', primaryKeyword);
       const result = await enhancedAIContentEngine.generateContent({
         keyword: primaryKeyword,
         targetUrl: blogPost.target_url,
@@ -279,15 +280,24 @@ export function BlogPost() {
         throw new Error('Failed to generate content');
       }
 
-      // Update the blog post with new content
+      console.log('✅ Content generated successfully, updating post...');
+
+      // Extract title from generated content (look for h1 tag)
+      const titleMatch = result.finalContent.match(/<h1[^>]*>([^<]+)<\/h1>/);
+      const newTitle = titleMatch ? titleMatch[1] : `${primaryKeyword}: Complete Guide`;
+
+      // Update the blog post with new content and title
       const updatedBlogPost = {
         ...blogPost,
+        title: newTitle,
         content: result.finalContent,
-        word_count: result.metadata.wordCount,
-        reading_time: result.metadata.readingTime,
-        seo_score: result.metadata.seoScore,
+        word_count: result.metadata?.wordCount || calculateWordCount(result.finalContent),
+        reading_time: result.metadata?.readingTime || Math.ceil(calculateWordCount(result.finalContent) / 200),
+        seo_score: result.metadata?.seoScore || 85,
         updated_at: new Date().toISOString()
       };
+
+      console.log('📝 Updated blog post:', { title: newTitle, wordCount: updatedBlogPost.word_count });
 
       // Update in localStorage
       const blogStorageKey = `blog_post_${blogPost.slug}`;
@@ -321,12 +331,17 @@ export function BlogPost() {
       }
 
       // Update the component state
+      console.log('🔄 Updating component state with new content...');
       setBlogPost(updatedBlogPost);
 
-      toast({
-        title: "Content regenerated!",
-        description: "The blog post has been updated with fresh AI-generated content.",
-      });
+      // Force a small delay to ensure state update completes
+      setTimeout(() => {
+        console.log('✅ Content regeneration complete!');
+        toast({
+          title: "Content regenerated!",
+          description: `The blog post has been updated with fresh AI-generated content. New title: "${newTitle}".`,
+        });
+      }, 100);
 
     } catch (error) {
       console.error('Failed to regenerate content:', error);
