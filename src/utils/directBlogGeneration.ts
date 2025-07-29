@@ -106,7 +106,7 @@ Format the response as clean HTML with proper semantic structure.`;
     console.log('⚠️ Content issues detected:', formatted.issues);
   }
 
-  console.log(`📊 Generated content: ${wordCount} words, ${readingTime} min read, SEO: ${seoScore}/100`);
+  console.log(`��� Generated content: ${wordCount} words, ${readingTime} min read, SEO: ${seoScore}/100`);
 
   // Set expiration to 24 hours from now
   const expiresAt = new Date();
@@ -159,6 +159,17 @@ Format the response as clean HTML with proper semantic structure.`;
 }
 
 function createFallbackContent(keyword: string, anchorText: string, targetUrl: string): string {
+  // Use ContentFormatter template for consistent structure
+  return ContentFormatter.generateContentTemplate({
+    keyword,
+    anchorText,
+    targetUrl,
+    enforceStructure: true
+  });
+}
+
+// Legacy fallback content (kept for reference)
+function createLegacyFallbackContent(keyword: string, anchorText: string, targetUrl: string): string {
   return `
 <h1>The Complete Guide to ${keyword}</h1>
 
