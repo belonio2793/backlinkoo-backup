@@ -429,7 +429,7 @@ const checkRateLimit = (ip) => {
 
 // Main handler
 exports.handler = async (event, context) => {
-  console.log('��� Global blog generator called:', {
+  console.log('🌍 Global blog generator called:', {
     method: event.httpMethod,
     path: event.path,
     userAgent: event.headers['user-agent'],
@@ -555,8 +555,8 @@ exports.handler = async (event, context) => {
       anchor_text: anchorText || primaryKeyword,
       published_url: `https://backlinkoo.com/blog/${primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
       published_at: new Date().toISOString(),
-      author_name: aiProvider ? 'Backlink ∞ AI' : 'Backlink ∞',
-      category: aiProvider ? 'AI-Generated SEO Guide' : 'SEO Guide',
+      author_name: 'Backlink ∞',
+      category: 'SEO Guide',
       ai_provider: aiProvider,
       view_count: 0,
       word_count: Math.floor(content.length / 6),
