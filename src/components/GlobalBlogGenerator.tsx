@@ -71,8 +71,20 @@ export function GlobalBlogGenerator({
   const { isLoggedIn } = useAuthStatus();
 
   useEffect(() => {
-    loadGlobalStats();
-    updateRemainingRequests();
+    try {
+      loadGlobalStats();
+      updateRemainingRequests();
+    } catch (error) {
+      console.error('Error initializing GlobalBlogGenerator:', error);
+      // Set safe defaults
+      setGlobalStats({
+        totalPosts: 0,
+        postsToday: 0,
+        activeUsers: null,
+        averageQuality: null
+      });
+      setRemainingRequests(5);
+    }
   }, []);
 
   const loadGlobalStats = async () => {
