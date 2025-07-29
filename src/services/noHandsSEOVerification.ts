@@ -138,9 +138,9 @@ export class NoHandsSEOVerificationService {
         return [];
       }
 
-      // Filter for NO Hands SEO campaigns client-side
+      // Filter for ∞ Backlinks Automation (Beta) campaigns client-side
       const noHandsSEOCampaigns = data?.filter(campaign =>
-        campaign.name?.includes('NO Hands SEO') ||
+        campaign.name?.includes('∞ Backlinks Automation (Beta)') || campaign.name?.includes('NO Hands SEO') ||
         campaign.campaign_type === 'no_hands_seo'
       ) || [];
 
@@ -217,9 +217,9 @@ export class NoHandsSEOVerificationService {
         return { pending: 0, approved: 0, rejected: 0, avgVerificationTime: 0 };
       }
 
-      // Filter for NO Hands SEO campaigns client-side
+      // Filter for ∞ Backlinks Automation (Beta) campaigns client-side
       const noHandsSEOData = data.filter(campaign =>
-        campaign.name?.includes('NO Hands SEO') ||
+        campaign.name?.includes('∞ Backlinks Automation (Beta)') || campaign.name?.includes('NO Hands SEO') ||
         campaign.campaign_type === 'no_hands_seo'
       );
 
