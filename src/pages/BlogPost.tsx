@@ -10,7 +10,8 @@ import { LoginModal } from '@/components/LoginModal';
 import { supabase } from '@/integrations/supabase/client';
 import { formatBlogTitle, formatBlogContent, getTrendingLabel, calculateWordCount, cleanHTMLContent } from '@/utils/textFormatting';
 import { runImmediateContentCleanup } from '@/utils/immediateContentCleanup';
-import { globalBlogGenerator } from '@/services/globalBlogGenerator';
+import { openAIContentGenerator } from '@/services/openAIContentGenerator';
+import { freeBacklinkService } from '@/services/freeBacklinkService';
 import { Footer } from '@/components/Footer';
 import {
   Calendar,
