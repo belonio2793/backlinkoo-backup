@@ -291,13 +291,15 @@ const Index = () => {
                 <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
               ) : user ? (
                 <>
-                  <Button onClick={() => navigate("/dashboard")} className="font-medium">
+                  <Button
+                    onClick={() => navigate("/dashboard")}
+                    className="bg-transparent hover:bg-blue-50/50 border border-blue-200/60 text-blue-700 hover:text-blue-800 hover:border-blue-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+                  >
                     Dashboard
                   </Button>
                   <Button
-                    variant="ghost"
                     onClick={handleSignOut}
-                    className="font-medium"
+                    className="bg-transparent hover:bg-red-50/50 border border-red-200/60 text-red-600 hover:text-red-700 hover:border-red-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
                   >
                     Sign Out
                   </Button>
