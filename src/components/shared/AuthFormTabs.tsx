@@ -86,6 +86,12 @@ export function AuthFormTabs({
 
     setIsLoading(true);
 
+    // Show loading notification
+    toast({
+      title: "Signing you in...",
+      description: "Please wait while we verify your credentials.",
+    });
+
     try {
       const result = await AuthService.signIn({
         email: loginEmail,
@@ -95,11 +101,11 @@ export function AuthFormTabs({
       if (result.success && result.user) {
         toast({
           title: "Welcome back!",
-          description: "You have been successfully signed in.",
+          description: `Successfully signed in as ${result.user.email}`,
         });
-        
+
         onAuthSuccess?.(result.user);
-        
+
         // Reset form
         setLoginEmail("");
         setLoginPassword("");
@@ -112,7 +118,7 @@ export function AuthFormTabs({
       } else {
         toast({
           title: "Sign in failed",
-          description: result.error || 'An error occurred during sign in.',
+          description: result.error || 'Invalid email or password. Please check your credentials and try again.',
           variant: "destructive",
         });
       }
@@ -120,7 +126,7 @@ export function AuthFormTabs({
       console.error('Login error:', error);
       toast({
         title: "Sign in failed",
-        description: "An unexpected error occurred. Please try again.",
+        description: "Network error or server unavailable. Please check your connection and try again.",
         variant: "destructive",
       });
     } finally {
@@ -388,7 +394,7 @@ export function AuthFormTabs({
               <Input
                 id="signup-password"
                 type={showPassword ? "text" : "password"}
-                placeholder="•��••••••"
+                placeholder="••••••••"
                 value={signupPassword}
                 onChange={(e) => setSignupPassword(e.target.value)}
                 className={inputHeight}
