@@ -485,9 +485,22 @@ export function MinimalAITest() {
     }
   };
 
+  const isSystemWorking = apiStatuses.length > 0 && apiStatuses.some(api => api.status === 'online');
+
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-6xl mx-auto">
+
+        {/* Working Status Banner */}
+        {isSystemWorking && (
+          <div className="mb-6 bg-gradient-to-r from-green-500 to-blue-600 text-white p-4 rounded-lg text-center">
+            <div className="flex items-center justify-center gap-2">
+              <CheckCircle2 className="h-6 w-6" />
+              <h2 className="text-xl font-bold">Backlink ∞ is Working..</h2>
+            </div>
+            <p className="text-sm opacity-90 mt-1">AI content generation system is operational</p>
+          </div>
+        )}
 
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
