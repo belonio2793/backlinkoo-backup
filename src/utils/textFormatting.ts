@@ -262,6 +262,23 @@ export function cleanHTMLContent(content: string): string {
   cleaned = cleaned.replace(/- <div[^>]*>/g, '-');
   cleaned = cleaned.replace(/<\/div>\s*(?=\n|$)/g, '');
 
+  // Remove unnecessary symbols and characters that don't align with content
+  cleaned = cleaned.replace(/[\u2018\u2019]/g, "'"); // Smart quotes to straight quotes
+  cleaned = cleaned.replace(/[\u201C\u201D]/g, '"'); // Smart double quotes
+  cleaned = cleaned.replace(/\u2026/g, '...'); // Ellipsis character
+  cleaned = cleaned.replace(/[\u2013\u2014]/g, '-'); // En/em dashes to hyphens
+
+  // Remove excessive punctuation
+  cleaned = cleaned.replace(/[!]{2,}/g, '!'); // Multiple exclamation marks
+  cleaned = cleaned.replace(/[?]{2,}/g, '?'); // Multiple question marks
+  cleaned = cleaned.replace(/[.]{4,}/g, '...'); // Multiple periods
+
+  // Replace AI mentions with Backlink ∞ Algorithm
+  cleaned = cleaned.replace(/\bAI\b/g, 'Backlink ∞ Algorithm');
+  cleaned = cleaned.replace(/\bai\b/g, 'Backlink ∞ Algorithm');
+  cleaned = cleaned.replace(/\bartificial intelligence\b/gi, 'Backlink ∞ Algorithm');
+  cleaned = cleaned.replace(/\bmachine learning\b/gi, 'Backlink ∞ Algorithm');
+
   // Ensure proper paragraph structure around bullet points
   cleaned = cleaned.replace(/(\n- [^\n]+(?:\n- [^\n]+)*)/g, '\n<div class="bullet-list">$1\n</div>\n');
 
@@ -270,10 +287,16 @@ export function cleanHTMLContent(content: string): string {
 
   // Remove any remaining malformed HTML patterns
   cleaned = cleaned.replace(/class=["'][^"']*bullet["'][^>]*>/g, '');
+  cleaned = cleaned.replace(/data-loc=["'][^"']*["']/g, '');
+  cleaned = cleaned.replace(/<div[^>]*bullet[^>]*>/g, '');
 
   // Clean up any text that looks like comment markers
   cleaned = cleaned.replace(/^\s*-->\s*/gm, '');
   cleaned = cleaned.replace(/\s*<!--\s*$/gm, '');
+
+  // Remove unnecessary HTML attributes that don't belong in content
+  cleaned = cleaned.replace(/\s+data-[^=]*=["'][^"']*["']/g, '');
+  cleaned = cleaned.replace(/\s+class=["'][^"']*bullet[^"']*["']/g, '');
 
   // Ensure content starts cleanly (no leading whitespace/comments)
   cleaned = cleaned.trim();
