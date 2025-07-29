@@ -162,15 +162,71 @@ export class MultiProviderContentGenerator {
           requestId
         });
 
-        // If this is the last attempt, fail completely
-        if (isLastAttempt) {
-          console.error('💀 All providers failed');
-          
+        // If this is the last client-side provider, try Netlify functions as ultra-fallback
+        if (i === providerOrder.length - 1) {
+          console.log('🌐 All client-side providers failed, trying Netlify functions ultra-fallback...');
+
+          try {
+            if (netlifyContentGenerator.isAvailable()) {
+              const netlifyRequest = {
+                keyword: request.primaryKeyword,
+                url: request.targetUrl,
+                anchorText: request.anchorText,
+                wordCount: request.wordCount,
+                contentType: request.contentType,
+                tone: request.tone
+              };
+
+              const netlifyResult = await netlifyContentGenerator.generateContent(netlifyRequest);
+
+              if (netlifyResult.success && netlifyResult.content) {
+                console.log('✅ Netlify functions ultra-fallback succeeded!');
+
+                // Log successful attempt
+                attemptLog.push({
+                  provider: 'netlify-fallback',
+                  success: true,
+                  timestamp: new Date().toISOString()
+                });
+
+                return {
+                  success: true,
+                  result: {
+                    content: netlifyResult.content,
+                    usage: netlifyResult.usage || { tokens: 0, cost: 0 },
+                    success: true,
+                    provider: netlifyResult.provider || 'netlify-fallback',
+                    attemptNumber: providerOrder.length + 1,
+                    timestamp: new Date().toISOString()
+                  },
+                  attemptLog,
+                  fallbacksUsed: [...providerOrder, ...(netlifyResult.fallbacksUsed || [])],
+                  totalAttempts: providerOrder.length + (netlifyResult.totalAttempts || 1)
+                };
+              } else {
+                throw new Error(netlifyResult.error || 'Netlify functions failed');
+              }
+            } else {
+              console.log('🚫 Netlify functions not available in this environment');
+            }
+          } catch (netlifyError) {
+            console.warn('❌ Netlify functions ultra-fallback failed:', netlifyError);
+
+            attemptLog.push({
+              provider: 'netlify-fallback',
+              success: false,
+              error: netlifyError instanceof Error ? netlifyError.message : 'Unknown error',
+              timestamp: new Date().toISOString()
+            });
+          }
+
+          console.error('💀 All providers (including Netlify functions) failed');
+
           return {
             success: false,
             attemptLog,
-            fallbacksUsed: providerOrder.slice(0, -1),
-            totalAttempts: providerOrder.length
+            fallbacksUsed: [...providerOrder, 'netlify-fallback'],
+            totalAttempts: providerOrder.length + 1
           };
         }
 
