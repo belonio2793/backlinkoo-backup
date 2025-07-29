@@ -471,9 +471,15 @@ export function GlobalBlogGenerator({
               <Label htmlFor="targetUrl">Target URL *</Label>
               <Input
                 id="targetUrl"
-                placeholder="https://example.com/your-page"
+                placeholder="example.com (https:// will be added automatically)"
                 value={targetUrl}
                 onChange={(e) => setTargetUrl(e.target.value)}
+                onBlur={(e) => {
+                  const formatted = formatUrl(e.target.value);
+                  if (formatted !== e.target.value && formatted.trim()) {
+                    setTargetUrl(formatted);
+                  }
+                }}
                 disabled={isGenerating}
               />
             </div>
