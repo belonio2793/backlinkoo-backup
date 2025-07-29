@@ -87,7 +87,17 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
         anchorText: anchorText || primaryKeyword,
         wordCount,
         tone,
-        contentType
+        contentType,
+        retryConfig: {
+          maxRetries: 12,
+          baseDelay: 1500,
+          maxDelay: 60000,
+          exponentialBackoff: true,
+          retryOnRateLimit: true,
+          retryOnServerError: true,
+          retryOnNetworkError: true,
+          retryOnTimeout: true
+        }
       };
 
       const result = await openAIContentGenerator.generateContent(request);
