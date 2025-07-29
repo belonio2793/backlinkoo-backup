@@ -545,6 +545,7 @@ export function AILive() {
                   <label className="text-sm font-medium text-gray-700 mb-2 block">
                     AI Provider Status
                   </label>
+                  <p className="text-xs text-gray-500 mb-3">Priority order: System will use the first available provider</p>
                   <div className="space-y-2">
                     {providers.map((provider, index) => (
                       <div key={provider.name} className="flex items-center justify-between">
