@@ -7,6 +7,7 @@
 import { openAIService } from './api/openai';
 import { grokService } from './api/grok';
 import { cohereService } from './api/cohere';
+import { huggingFaceService } from './api/huggingface';
 
 export interface ContentGenerationRequest {
   keyword: string;
@@ -44,9 +45,10 @@ export interface EnhancedContentResult {
 
 export class EnhancedAIContentEngine {
   private providers = [
-    { name: 'openai', service: openAIService, weight: 0.4 },
-    { name: 'grok', service: grokService, weight: 0.35 },
-    { name: 'cohere', service: cohereService, weight: 0.25 }
+    { name: 'openai', service: openAIService, weight: 0.35 },
+    { name: 'grok', service: grokService, weight: 0.30 },
+    { name: 'cohere', service: cohereService, weight: 0.20 },
+    { name: 'huggingface', service: huggingFaceService, weight: 0.15 }
   ];
 
   /**
@@ -185,6 +187,13 @@ The goal is to create content so valuable and engaging that other sites want to 
             maxTokens: this.getMaxTokens(request.contentLength),
             temperature: 0.7
           });
+        } else if (provider.name === 'huggingface') {
+          const fullPrompt = `${systemPrompt}\n\n${selectedPrompt}`;
+          result = await provider.service.generateText(fullPrompt, {
+            model: 'microsoft/DialoGPT-large',
+            maxLength: this.getMaxTokens(request.contentLength),
+            temperature: 0.7
+          });
         }
 
         const generationTime = Date.now() - startTime;
@@ -251,6 +260,8 @@ The goal is to create content so valuable and engaging that other sites want to 
         return `${basePrompt} Bring wit and engaging personality while maintaining professionalism. Use current trends and real-world examples.`;
       case 'cohere':
         return `${basePrompt} Emphasize clarity, coherence, and logical flow. Create well-structured, easy-to-read content.`;
+      case 'huggingface':
+        return `${basePrompt} Focus on natural language generation with conversational flow. Create engaging, human-like content that connects with readers.`;
       default:
         return basePrompt;
     }
