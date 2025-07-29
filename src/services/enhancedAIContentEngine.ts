@@ -334,16 +334,33 @@ Create content that readers would want to bookmark, share, or reference later be
    * Select the best content based on quality metrics
    */
   private selectBestContent(results: AIProviderResult[], request: ContentGenerationRequest): AIProviderResult {
+    console.log('🔍 Selecting best content from results:', {
+      totalResults: results.length,
+      successfulResults: results.filter(r => r.success).length,
+      resultsWithContent: results.filter(r => r.content.length > 100).length,
+      providers: results.map(r => ({ provider: r.provider, success: r.success, contentLength: r.content.length }))
+    });
+
     const successfulResults = results.filter(r => r.success && r.content.length > 100);
-    
+
     if (successfulResults.length === 0) {
+      console.warn('⚠️ No successful AI results, using fallback content generation');
+
+      const fallbackContent = SmartFallbackContent.generateContent(
+        request.keyword,
+        request.targetUrl,
+        request.anchorText
+      );
+
+      console.log('📝 Fallback content generated:', {
+        contentLength: fallbackContent.length,
+        hasH1: fallbackContent.includes('<h1>'),
+        keyword: request.keyword
+      });
+
       // Return the first result as fallback
       return results[0] || {
-        content: SmartFallbackContent.generateContent(
-          request.keyword,
-          request.targetUrl,
-          request.anchorText
-        ),
+        content: fallbackContent,
         provider: 'fallback',
         success: true,
         usage: { tokens: 0, cost: 0 },
@@ -534,7 +551,7 @@ Create content that readers would want to bookmark, share, or reference later be
 
     if (wordCount < 1000) {
       // If content is too short, log a warning but don't add template content
-      console.warn(`⚠️ Generated content for "${request.keyword}" is only ${wordCount} words. Consider using better prompts or different AI providers.`);
+      console.warn(`⚠�� Generated content for "${request.keyword}" is only ${wordCount} words. Consider using better prompts or different AI providers.`);
       // Don't add template content - let the AI generate unique content only
     }
 
