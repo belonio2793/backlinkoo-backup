@@ -285,12 +285,10 @@ export default function AILive() {
                   )}
                 </Button>
 
-                {hasUsedLimit && (
-                  <p className="text-center text-sm text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
-                    <Shield className="inline h-4 w-4 mr-1" />
-                    You've used your free generation. Each account gets one free blog post.
-                  </p>
-                )}
+                <p className="text-center text-sm text-green-600 bg-green-50 p-3 rounded-lg border border-green-200">
+                  <Sparkles className="inline h-4 w-4 mr-1" />
+                  Unlimited AI content generation available on AI Live!
+                </p>
               </CardContent>
             </Card>
           </div>
