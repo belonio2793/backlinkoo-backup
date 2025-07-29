@@ -9,6 +9,7 @@
 
 import { huggingFaceService } from './api/huggingface';
 import { cohereService } from './api/cohere';
+import { ContentFormatter } from '@/utils/contentFormatter';
 
 export interface BuilderAIRequest {
   keyword: string;
@@ -255,13 +256,34 @@ FORMAT AS CLEAN HTML WITH PROPER SEMANTIC STRUCTURE.`;
       }
     }
 
-    this.updateStatus('publishing', 'Processing and publishing content...', 80);
+    this.updateStatus('publishing', 'Processing and formatting content...', 70);
 
-    // Extract title from content
-    const title = this.extractTitle(content, request.keyword);
+    // Format and fix content using ContentFormatter
+    const formatted = ContentFormatter.formatContent(content, {
+      keyword: request.keyword,
+      anchorText: request.anchorText,
+      targetUrl: request.targetUrl,
+      enforceStructure: true,
+      maxH1Count: 1
+    });
+
+    // Use formatted content
+    content = formatted.content;
+    const title = formatted.title;
+    const wordCount = formatted.wordCount;
+
+    this.updateStatus('publishing', 'Publishing optimized content...', 80);
+
     const slug = this.generateSlug(title);
-    const wordCount = this.countWords(content);
     const generationTime = Date.now() - startTime;
+
+    // Log formatting improvements
+    if (formatted.fixes.length > 0) {
+      console.log('✅ Content formatting fixes applied:', formatted.fixes);
+    }
+    if (formatted.issues.length > 0) {
+      console.log('⚠️ Content issues found:', formatted.issues);
+    }
 
     // Set expiration to 24 hours from now
     const expiresAt = new Date();
@@ -284,9 +306,11 @@ FORMAT AS CLEAN HTML WITH PROPER SEMANTIC STRUCTURE.`;
       generationTime,
       expiresAt,
       metadata: {
-        seoScore: this.calculateSEOScore(content, request.keyword),
+        seoScore: formatted.seoScore,
         readingTime: Math.ceil(wordCount / 200),
-        keywordDensity: this.calculateKeywordDensity(content, request.keyword)
+        keywordDensity: this.calculateKeywordDensity(content, request.keyword),
+        formattingIssues: formatted.issues,
+        appliedFixes: formatted.fixes
       }
     };
 
