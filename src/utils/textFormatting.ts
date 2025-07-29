@@ -183,29 +183,64 @@ export function formatBlogTitle(title: string): string {
 function formatInlineBulletPoints(content: string): string {
   let formatted = content;
 
-  // Handle patterns like "- item1 - item2 - item3" and separate them with line breaks
-  formatted = formatted.replace(/\s*-\s*([^-\n]+?)\s*-\s*([^-\n]+)/g, (match, ...items) => {
-    // Split on hyphens and clean up each item
-    const allItems = match.split(/\s*-\s*/).filter(item => item.trim());
-    const formattedItems = allItems.map(item => {
-      const cleanItem = item.trim();
-      if (cleanItem) {
-        // Capitalize first letter and ensure proper punctuation
-        const capitalized = cleanItem.charAt(0).toUpperCase() + cleanItem.slice(1);
+  // Handle long bullet point strings that are all concatenated together
+  // Pattern: "- Item1: Description - Item2: Description - Item3: Description"
+  formatted = formatted.replace(/(-\s*[^-]+?)(?=\s*-\s*[A-Z])/g, (match, item) => {
+    const cleanItem = item.trim();
+    if (cleanItem.startsWith('-')) {
+      // Ensure proper formatting and capitalization
+      const content = cleanItem.substring(1).trim();
+      const capitalized = content.charAt(0).toUpperCase() + content.slice(1);
+      return `- ${capitalized}\n`;
+    }
+    return match;
+  });
+
+  // Handle the last item in a sequence that doesn't have another bullet after it
+  formatted = formatted.replace(/(-\s*[^-\n]+)(?!\s*-)/g, (match, item) => {
+    const cleanItem = item.trim();
+    if (cleanItem.startsWith('-')) {
+      const content = cleanItem.substring(1).trim();
+      const capitalized = content.charAt(0).toUpperCase() + content.slice(1);
+      return `- ${capitalized}`;
+    }
+    return match;
+  });
+
+  // Convert HTML-style lists to proper bullet points with line breaks
+  formatted = formatted.replace(/<ul[^>]*>(.*?)<\/ul>/gis, (match, listContent) => {
+    const items = listContent.match(/<li[^>]*>(.*?)<\/li>/gis) || [];
+    const bulletItems = items.map(item => {
+      const content = item.replace(/<\/?li[^>]*>/gi, '').trim();
+      if (content) {
+        const capitalized = content.charAt(0).toUpperCase() + content.slice(1);
         return `- ${capitalized}`;
       }
       return '';
     }).filter(item => item);
 
-    return '\n' + formattedItems.join('\n') + '\n';
+    return bulletItems.length > 0 ? '\n' + bulletItems.join('\n') + '\n' : '';
   });
 
-  // Handle bullet points that are run together without proper spacing
-  formatted = formatted.replace(/([a-z])\s*-\s*([A-Z][^-]*)/g, (match, prevChar, nextItem) => {
-    return `${prevChar}\n- ${nextItem}`;
+  // Convert ordered lists to bullet points as well
+  formatted = formatted.replace(/<ol[^>]*>(.*?)<\/ol>/gis, (match, listContent) => {
+    const items = listContent.match(/<li[^>]*>(.*?)<\/li>/gis) || [];
+    const bulletItems = items.map(item => {
+      const content = item.replace(/<\/?li[^>]*>/gi, '').trim();
+      if (content) {
+        const capitalized = content.charAt(0).toUpperCase() + content.slice(1);
+        return `- ${capitalized}`;
+      }
+      return '';
+    }).filter(item => item);
+
+    return bulletItems.length > 0 ? '\n' + bulletItems.join('\n') + '\n' : '';
   });
 
-  // Clean up any double line breaks that might have been created
+  // Clean up any remaining li tags
+  formatted = formatted.replace(/<\/?li[^>]*>/gi, '');
+
+  // Clean up any multiple consecutive line breaks
   formatted = formatted.replace(/\n{3,}/g, '\n\n');
 
   return formatted;
