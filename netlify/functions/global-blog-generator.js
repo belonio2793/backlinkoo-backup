@@ -7,6 +7,7 @@ class SimpleAIGenerator {
     this.openaiKey = process.env.OPENAI_API_KEY;
     this.grokKey = process.env.GROK_API_KEY;
     this.cohereKey = process.env.COHERE_API_KEY;
+    this.huggingfaceKey = process.env.HUGGINGFACE_TOKEN;
   }
 
   async generateWithOpenAI(prompt, systemPrompt) {
@@ -114,6 +115,51 @@ class SimpleAIGenerator {
     return null;
   }
 
+  async generateWithHuggingFace(prompt) {
+    if (!this.huggingfaceKey) return null;
+
+    try {
+      const response = await fetch('https://api-inference.huggingface.co/models/microsoft/DialoGPT-large', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.huggingfaceKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          inputs: prompt,
+          parameters: {
+            max_length: 3000,
+            temperature: 0.7,
+            do_sample: true,
+            top_p: 0.95,
+            num_return_sequences: 1
+          },
+          options: {
+            wait_for_model: true,
+            use_cache: false
+          }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const content = data[0]?.generated_text || '';
+        // Remove the original prompt from the response if it's included
+        const cleanContent = content.replace(prompt, '').trim();
+
+        return {
+          content: cleanContent,
+          provider: 'huggingface',
+          tokens: Math.ceil(cleanContent.length / 4),
+          success: true
+        };
+      }
+    } catch (error) {
+      console.warn('HuggingFace generation failed:', error);
+    }
+    return null;
+  }
+
   async generateEnhancedContent(request) {
     const { primaryKeyword, targetUrl, anchorText, userLocation } = request;
     const wordCount = 2000;
@@ -145,7 +191,8 @@ Focus on user intent satisfaction while maintaining search engine optimization b
     const providers = [
       () => this.generateWithOpenAI(prompt, systemPrompt),
       () => this.generateWithGrok(prompt, systemPrompt),
-      () => this.generateWithCohere(`${systemPrompt}\n\n${prompt}`)
+      () => this.generateWithCohere(`${systemPrompt}\n\n${prompt}`),
+      () => this.generateWithHuggingFace(`${systemPrompt}\n\n${prompt}`)
     ];
 
     for (const provider of providers) {
