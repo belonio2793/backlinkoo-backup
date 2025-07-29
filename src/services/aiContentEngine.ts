@@ -493,7 +493,7 @@ Focus on ranking factors while maintaining user value and engagement.`;
     ];
 
     // Generate meta description
-    const metaDescription = `Comprehensive ${request.keyword} guide with expert insights and proven strategies. ${request.userLocation ? `Optimized for ${request.userLocation}.` : ''} Get started today.`.substring(0, 160);
+    const metaDescription = `Comprehensive ${request.keyword} guide with expert insights and proven strategies. Get started today.`.substring(0, 160);
 
     // Calculate SEO score
     let seoScore = 70;

@@ -9,6 +9,7 @@ import { ClaimTrialPostDialog } from '@/components/ClaimTrialPostDialog';
 import { LoginModal } from '@/components/LoginModal';
 import { supabase } from '@/integrations/supabase/client';
 import { formatBlogTitle, formatBlogContent, getTrendingLabel, calculateWordCount, cleanHTMLContent } from '@/utils/textFormatting';
+import { runImmediateContentCleanup } from '@/utils/immediateContentCleanup';
 import { enhancedAIContentEngine } from '@/services/enhancedAIContentEngine';
 import { Footer } from '@/components/Footer';
 import {
@@ -99,7 +100,12 @@ export function BlogPost() {
         }
 
         if (post) {
-          setBlogPost(post);
+          // Ensure content is properly cleaned before displaying
+          const cleanedPost = {
+            ...post,
+            content: cleanHTMLContent(post.content || '')
+          };
+          setBlogPost(cleanedPost);
         } else {
           // Show debug information if in development
           if (allKeys.length > 0) {

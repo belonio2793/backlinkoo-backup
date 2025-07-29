@@ -230,22 +230,79 @@ export function cleanHTMLContent(content: string): string {
 
   let cleaned = content;
 
-  // Remove HTML comments completely
+  // Remove all HTML comments completely (including malformed ones)
   cleaned = cleaned.replace(/<!--[\s\S]*?-->/g, '');
+
+  // Remove orphaned comment markers that might appear as text
+  cleaned = cleaned.replace(/-->/g, '');
+  cleaned = cleaned.replace(/<!--/g, '');
 
   // Remove meta tags hints that shouldn't be visible
   cleaned = cleaned.replace(/<!-- SEO Meta Tags[\s\S]*?-->/g, '');
   cleaned = cleaned.replace(/<!-- Structured Data[\s\S]*?-->/g, '');
 
+  // Remove JSON-LD structured data that appears as text
+  cleaned = cleaned.replace(/\{\s*"@context"[\s\S]*?\}/g, '');
+
+  // Clean up malformed bullet points with HTML entities
+  cleaned = cleaned.replace(/- &lt;div class=["']bullet["'][^&]*?&gt;/g, '-');
+  cleaned = cleaned.replace(/&lt;\/div&gt;/g, '');
+
+  // Fix HTML entities that shouldn't be visible
+  cleaned = cleaned.replace(/&lt;/g, '<');
+  cleaned = cleaned.replace(/&gt;/g, '>');
+  cleaned = cleaned.replace(/&quot;/g, '"');
+  cleaned = cleaned.replace(/&amp;/g, '&');
+
   // Fix malformed bullet points that are inline
   cleaned = cleaned.replace(/- <(strong|b)>/g, '\n- <$1>');
   cleaned = cleaned.replace(/<\/(strong|b)> - /g, '</$1>\n- ');
+
+  // Fix broken bullet point structures
+  cleaned = cleaned.replace(/- <div[^>]*>/g, '-');
+  cleaned = cleaned.replace(/<\/div>\s*(?=\n|$)/g, '');
+
+  // Remove unnecessary symbols and characters that don't align with content
+  cleaned = cleaned.replace(/[\u2018\u2019]/g, "'"); // Smart quotes to straight quotes
+  cleaned = cleaned.replace(/[\u201C\u201D]/g, '"'); // Smart double quotes
+  cleaned = cleaned.replace(/\u2026/g, '...'); // Ellipsis character
+  cleaned = cleaned.replace(/[\u2013\u2014]/g, '-'); // En/em dashes to hyphens
+
+  // Remove excessive punctuation
+  cleaned = cleaned.replace(/[!]{2,}/g, '!'); // Multiple exclamation marks
+  cleaned = cleaned.replace(/[?]{2,}/g, '?'); // Multiple question marks
+  cleaned = cleaned.replace(/[.]{4,}/g, '...'); // Multiple periods
+
+  // Replace AI mentions with Backlink ∞ Algorithm
+  cleaned = cleaned.replace(/\bAI\b/g, 'Backlink ∞ Algorithm');
+  cleaned = cleaned.replace(/\bai\b/g, 'Backlink ∞ Algorithm');
+  cleaned = cleaned.replace(/\bartificial intelligence\b/gi, 'Backlink ∞ Algorithm');
+  cleaned = cleaned.replace(/\bmachine learning\b/gi, 'Backlink ∞ Algorithm');
+
+  // Remove geolocation specifics from content
+  cleaned = cleaned.replace(/Optimized for [A-Za-z\s]+\./g, '');
+  cleaned = cleaned.replace(/Tailored for [A-Za-z\s]+\./g, '');
+  cleaned = cleaned.replace(/Designed for [A-Za-z\s]+ market\./g, '');
+  cleaned = cleaned.replace(/Localized for [A-Za-z\s]+\./g, '');
 
   // Ensure proper paragraph structure around bullet points
   cleaned = cleaned.replace(/(\n- [^\n]+(?:\n- [^\n]+)*)/g, '\n<div class="bullet-list">$1\n</div>\n');
 
   // Clean up excessive line breaks
   cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+
+  // Remove any remaining malformed HTML patterns
+  cleaned = cleaned.replace(/class=["'][^"']*bullet["'][^>]*>/g, '');
+  cleaned = cleaned.replace(/data-loc=["'][^"']*["']/g, '');
+  cleaned = cleaned.replace(/<div[^>]*bullet[^>]*>/g, '');
+
+  // Clean up any text that looks like comment markers
+  cleaned = cleaned.replace(/^\s*-->\s*/gm, '');
+  cleaned = cleaned.replace(/\s*<!--\s*$/gm, '');
+
+  // Remove unnecessary HTML attributes that don't belong in content
+  cleaned = cleaned.replace(/\s+data-[^=]*=["'][^"']*["']/g, '');
+  cleaned = cleaned.replace(/\s+class=["'][^"']*bullet[^"']*["']/g, '');
 
   // Ensure content starts cleanly (no leading whitespace/comments)
   cleaned = cleaned.trim();
