@@ -45,7 +45,7 @@ export interface MultiProviderResponse {
 
 export class MultiProviderContentGenerator {
   private providers = {
-    openai: openAIService,
+    openai: enhancedOpenAIService,
     cohere: cohereService,
     deepai: deepAIService
   };
