@@ -220,6 +220,26 @@ export function capitalizeSentences(text: string): string {
 }
 
 /**
+ * Calculates accurate word count from HTML content
+ * Strips HTML tags and counts actual words
+ */
+export function calculateWordCount(content: string): number {
+  if (!content) return 0;
+
+  // Strip HTML tags
+  const textContent = content.replace(/<[^>]*>/g, ' ');
+
+  // Remove extra whitespace and split into words
+  const words = textContent
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ')
+    .filter(word => word.length > 0);
+
+  return words.length;
+}
+
+/**
  * Gets a rotating trending adjective for blog posts
  */
 export function getTrendingLabel(): string {
