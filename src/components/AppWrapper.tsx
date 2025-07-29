@@ -30,7 +30,7 @@ import PromotionMaterials from '@/pages/PromotionMaterials';
 // Import components (not pages)
 import AdminAuthGuard from '@/components/AdminAuthGuard';
 import { EmailVerificationGuard } from '@/components/EmailVerificationGuard';
-import TrialNotificationBanner from '@/components/TrialNotificationBanner';
+import { TrialNotificationBanner } from '@/components/TrialNotificationBanner';
 import { GuestDashboard } from '@/components/GuestDashboard';
 import { AILive } from '@/components/AILive';
 import { TestFreeBacklink } from '@/components/TestFreeBacklink';
