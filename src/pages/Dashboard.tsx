@@ -731,17 +731,11 @@ const Dashboard = () => {
           <>
             {activeSection === "dashboard" ? (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 h-auto">
+            <TabsList className="grid w-full grid-cols-2 h-auto">
               <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Overview</span>
                 <span className="sm:hidden">Home</span>
               </TabsTrigger>
-              <TabsTrigger value="trial" className="text-xs sm:text-sm py-2 px-1 sm:px-3 relative">
-                <span className="hidden sm:inline">Trial</span>
-                <span className="sm:hidden">Trial</span>
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
-              </TabsTrigger>
-
               <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Campaigns</span>
                 <span className="sm:hidden">Camps</span>
