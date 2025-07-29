@@ -65,7 +65,7 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
         });
       }
     } catch (error) {
-      console.error('Password reset error:', error);
+      console.error("Password reset error:", error);
       toast({
         title: "Reset failed",
         description: "An unexpected error occurred. Please try again.",
@@ -91,7 +91,12 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
             <div className="flex items-center justify-center gap-2 mb-4">
               <Infinity className="h-8 w-8 text-primary" />
             </div>
-            <DialogTitle className="text-2xl font-bold text-foreground">Welcome Back</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-foreground" role="banner">
+              Welcome Back
+            </DialogTitle>
+            <div className="mt-3">
+              <LiveUserActivity />
+            </div>
           </div>
         </DialogHeader>
 
@@ -142,6 +147,7 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
           <AuthFormTabs
             onAuthSuccess={handleAuthSuccess}
             onForgotPassword={() => setShowForgotPassword(true)}
+            defaultTab={defaultTab}
           />
         )}
       </DialogContent>

@@ -1,6 +1,6 @@
 /**
  * AI Live Blog Generator
- * Real-time AI content generation with OpenAI and Grok APIs
+ * Real-time AI content generation with OpenAI API
  */
 
 import { useState, useEffect, useRef } from 'react';
@@ -24,11 +24,6 @@ import {
   Brain
 } from 'lucide-react';
 import { openAIService } from '@/services/api/openai';
-import { grokService } from '@/services/api/grok';
-import { deepAIService } from '@/services/api/deepai';
-import { huggingFaceService } from '@/services/api/huggingface';
-import { cohereService } from '@/services/api/cohere';
-import { rytrService } from '@/services/api/rytr';
 
 interface AIProvider {
   name: string;
@@ -68,12 +63,7 @@ export function AILive() {
   const [url, setUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [providers, setProviders] = useState<AIProvider[]>([
-    { name: 'HuggingFace', status: 'checking' },
-    { name: 'Cohere', status: 'checking' },
-    { name: 'Rytr', status: 'checking' },
-    { name: 'DeepAI', status: 'checking' },
-    { name: 'OpenAI', status: 'checking' },
-    { name: 'Grok', status: 'checking' }
+    { name: 'OpenAI', status: 'checking' }
   ]);
   const [apiCheckComplete, setApiCheckComplete] = useState(false);
   const [steps, setSteps] = useState<GenerationStep[]>([]);
@@ -113,22 +103,11 @@ export function AILive() {
     try {
       console.log(`Checking ${provider} health...`);
 
-      switch (provider) {
-        case 'OpenAI':
-          return openAIService.isConfigured() && await openAIService.testConnection();
-        case 'Grok':
-          return grokService.isConfigured() && await grokService.testConnection();
-        case 'DeepAI':
-          return deepAIService.isConfigured() && await deepAIService.testConnection();
-        case 'HuggingFace':
-          return huggingFaceService.isConfigured() && await huggingFaceService.testConnection();
-        case 'Cohere':
-          return cohereService.isConfigured() && await cohereService.testConnection();
-        case 'Rytr':
-          return rytrService.isConfigured() && await rytrService.testConnection();
-        default:
-          return false;
+      if (provider === 'OpenAI') {
+        return openAIService.isConfigured() && await openAIService.testConnection();
       }
+
+      return false;
     } catch (error) {
       console.log(`${provider} health check failed:`, error);
       return false;
@@ -202,20 +181,15 @@ export function AILive() {
   };
 
   const selectProviderByPriority = (): string => {
-    // Priority order: HuggingFace → Cohere → Rytr → DeepAI → OpenAI → Grok
-    const priorityOrder = ['HuggingFace', 'Cohere', 'Rytr', 'DeepAI', 'OpenAI', 'Grok'];
     const onlineProviders = providers.filter(p => p.status === 'online');
 
-    // Find the first available provider in priority order
-    for (const providerName of priorityOrder) {
-      const provider = onlineProviders.find(p => p.name === providerName);
-      if (provider) {
-        return provider.name;
-      }
+    // Always use OpenAI if available
+    const openAI = onlineProviders.find(p => p.name === 'OpenAI');
+    if (openAI) {
+      return 'OpenAI';
     }
 
-    // Fallback to first available if none match priority order
-    return onlineProviders[0]?.name || 'None';
+    return 'None';
   };
 
   const selectRandomPrompt = (): { prompt: string, index: number } => {
@@ -274,47 +248,14 @@ export function AILive() {
         console.log(`Generating content with ${selectedProvider}...`);
         let apiResult;
 
-        switch (selectedProvider) {
-          case 'OpenAI':
-            apiResult = await openAIService.generateContent(prompt, {
-              model: 'gpt-3.5-turbo',
-              maxTokens: 2000,
-              temperature: 0.7
-            });
-            break;
-          case 'Grok':
-            apiResult = await grokService.generateContent(prompt, {
-              model: 'grok-2-1212',
-              maxTokens: 2000,
-              temperature: 0.7
-            });
-            break;
-          case 'DeepAI':
-            apiResult = await deepAIService.generateText(prompt);
-            break;
-          case 'HuggingFace':
-            apiResult = await huggingFaceService.generateText(prompt, {
-              model: 'microsoft/DialoGPT-large',
-              maxLength: 2000,
-              temperature: 0.7
-            });
-            break;
-          case 'Cohere':
-            apiResult = await cohereService.generateText(prompt, {
-              model: 'command',
-              maxTokens: 2000,
-              temperature: 0.7
-            });
-            break;
-          case 'Rytr':
-            apiResult = await rytrService.generateContent(prompt, {
-              useCase: 'blog_idea_outline',
-              tone: 'convincing',
-              maxCharacters: 15000
-            });
-            break;
-          default:
-            throw new Error(`Unknown provider: ${selectedProvider}`);
+        if (selectedProvider === 'OpenAI') {
+          apiResult = await openAIService.generateContent(prompt, {
+            model: 'gpt-4',
+            maxTokens: 3000,
+            temperature: 0.7
+          });
+        } else {
+          throw new Error('OpenAI is the only available provider');
         }
 
         if (!apiResult.success || !apiResult.content) {

@@ -31,29 +31,22 @@ const Login = () => {
         }
       } catch (error) {
         console.error('Auth check error:', error);
-        // Continue to login page on error
       }
     };
 
     checkAuth();
 
-    // Listen for auth changes with better error handling
     const { data: { subscription } } = setupAuthStateListener((event, session) => {
       console.log('🔐 Auth state changed:', event, !!session);
 
       if (event === 'SIGNED_IN' && session && session.user) {
         console.log('🔐 Auth state change: redirecting to dashboard');
         setTimeout(() => navigate('/my-dashboard'), 100);
-      } else if (event === 'SIGNED_OUT') {
-        console.log('🔐 Auth state change: user signed out');
-        // Stay on login page
       }
     });
 
     return () => {
-      if (subscription?.unsubscribe) {
-        subscription.unsubscribe();
-      }
+      subscription?.unsubscribe?.();
     };
   }, [navigate]);
 
@@ -67,10 +60,7 @@ const Login = () => {
   };
 
   const handleForgotPassword = async () => {
-    if (isLoading) {
-      console.log('Password reset already in progress, ignoring click');
-      return;
-    }
+    if (isLoading) return;
 
     if (!forgotPasswordEmail.trim()) {
       toast({
@@ -98,7 +88,7 @@ const Login = () => {
       if (result.success) {
         toast({
           title: "Password reset email sent!",
-          description: "We've sent you a password reset link. Please check your email and spam folder.",
+          description: "We've sent you a password reset link. Please check your email.",
         });
 
         setShowForgotPassword(false);
@@ -106,15 +96,15 @@ const Login = () => {
       } else {
         toast({
           title: "Password reset failed",
-          description: result.error || "Failed to send password reset email. Please try again.",
+          description: result.error || "Failed to send email.",
           variant: "destructive",
         });
       }
     } catch (error: any) {
       console.error('Password reset exception:', error);
       toast({
-        title: "Password reset failed",
-        description: "An unexpected error occurred. Please try again.",
+        title: "Reset failed",
+        description: "Unexpected error. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -125,7 +115,6 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Back to Home Button */}
         <div className="mb-6 flex items-center justify-between">
           <Button
             variant="ghost"
@@ -143,7 +132,6 @@ const Login = () => {
           />
         </div>
 
-        {/* Logo and Welcome */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Infinity className="h-8 w-8 text-primary" />

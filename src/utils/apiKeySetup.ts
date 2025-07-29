@@ -15,31 +15,6 @@ export const API_KEY_CONFIG = {
     client: 'VITE_OPENAI_API_KEY',
     server: 'OPENAI_API_KEY',
     name: 'OpenAI'
-  },
-  grok: {
-    client: 'VITE_GROK_API_KEY',
-    server: 'GROK_API_KEY',
-    name: 'xAI Grok'
-  },
-  deepai: {
-    client: 'VITE_DEEPAI_API_KEY',
-    server: 'DEEPAI_API_KEY',
-    name: 'DeepAI'
-  },
-  huggingface: {
-    client: 'VITE_HF_ACCESS_TOKEN',
-    server: 'HF_ACCESS_TOKEN',
-    name: 'Hugging Face'
-  },
-  cohere: {
-    client: 'VITE_COHERE_API_KEY',
-    server: 'COHERE_API_KEY',
-    name: 'Cohere'
-  },
-  rytr: {
-    client: 'VITE_RYTR_API_KEY',
-    server: 'RYTR_API_KEY',
-    name: 'Rytr'
   }
 };
 
@@ -104,14 +79,9 @@ export function generateEnvSetup(): string {
 export function validateApiKey(provider: keyof typeof API_KEY_CONFIG, key: string): boolean {
   if (!key || key.length < 10) return false;
 
-  // Basic format validation for known providers
+  // Basic format validation for OpenAI
   const patterns = {
-    openai: /^sk-/,
-    grok: /^xai-/,
-    deepai: /^[a-f0-9-]{36}$/i,
-    huggingface: /^hf_/,
-    cohere: /^[a-zA-Z0-9]{40,}$/,
-    rytr: /^[A-Z0-9_]{15,}$/
+    openai: /^sk-/
   };
 
   const pattern = patterns[provider];
@@ -126,7 +96,7 @@ export function debugApiKeys(): void {
   
   const status = checkApiKeyStatus();
   status.forEach(s => {
-    console.log(`${s.provider}: ${s.configured ? '✅' : '❌'} (${s.environment}) ${s.keyPrefix || ''}`);
+    console.log(`${s.provider}: ${s.configured ? '✅' : '���'} (${s.environment}) ${s.keyPrefix || ''}`);
   });
 
   if (status.every(s => !s.configured)) {

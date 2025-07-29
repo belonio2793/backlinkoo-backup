@@ -6,14 +6,14 @@
   directory = "netlify/functions"
 
 # Note: Scheduled functions require Netlify Pro plan
-# For now, cleanup can be triggered manually via /.netlify/functions/cleanup-posts
+# For now, cleanup can be triggered manually via /.netlify/functions/unified-blog-cleanup
 # Uncomment below if you have Netlify Pro:
 # [[plugins]]
 #   package = "@netlify/plugin-scheduled-functions"
 # [scheduled]
-#   [scheduled.cleanup-posts]
-#     path = "/.netlify/functions/cleanup-posts"
-#     schedule = "*/30 * * * *"
+#   [scheduled.unified-blog-cleanup]
+#     path = "/.netlify/functions/unified-blog-cleanup"
+#     schedule = "0 */6 * * *"  # Every 6 hours
 
 # Redirects for blog posts
 [[redirects]]
