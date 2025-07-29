@@ -14,6 +14,7 @@ import { TrialPostCleanupManager } from "@/components/admin/TrialPostCleanupMana
 import { ContentFilterManager } from "@/components/admin/ContentFilterManager";
 import { ContentModerationQueue } from "@/components/admin/ContentModerationQueue";
 import { AIPostsManager } from "@/components/admin/AIPostsManager";
+import { BlogPostClaimsManager } from "@/components/admin/BlogPostClaimsManager";
 import { AuthEmailTest } from "@/components/AuthEmailTest";
 
 import { EmailTest } from "@/components/EmailTest";
