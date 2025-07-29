@@ -224,7 +224,7 @@ export default function BlogPostDetail() {
           <CardContent className="p-8">
             <header className="mb-8 pb-6 border-b border-gray-200">
               <div className="flex flex-wrap items-center gap-2 mb-4">
-                <Badge 
+                <Badge
                   variant={post.status === 'published' ? 'default' : 'secondary'}
                   className="capitalize"
                 >
@@ -233,6 +233,10 @@ export default function BlogPostDetail() {
                 <Badge variant="outline" className="flex items-center space-x-1">
                   <Zap className="h-3 w-3" />
                   <span>Backlink ∞</span>
+                </Badge>
+                <Badge variant="outline" className="flex items-center space-x-1">
+                  <ExternalLink className="h-3 w-3" />
+                  <span>Contains Backlink</span>
                 </Badge>
                 <Badge variant="outline" className="flex items-center space-x-1">
                   <BookOpen className="h-3 w-3" />
