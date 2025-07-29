@@ -299,7 +299,7 @@ export function Blog() {
                 
                 <CardContent className="pt-0">
                   <div className="flex flex-wrap gap-1 mb-4">
-                    {post.tags.slice(0, 3).map((tag, index) => (
+                    {(post.tags || post.keywords || []).slice(0, 3).map((tag, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         <Tag className="mr-1 h-2 w-2" />
                         {tag}
