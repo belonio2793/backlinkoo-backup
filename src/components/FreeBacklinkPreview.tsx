@@ -340,33 +340,162 @@ export function FreeBacklinkPreview({ content, onRegenerate, onDelete }: FreeBac
         </CardContent>
       </Card>
 
-      {/* Content Preview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            {viewMode === 'preview' ? <Eye className="h-5 w-5" /> : <Code className="h-5 w-5" />}
-            Content {viewMode === 'preview' ? 'Preview' : 'HTML Source'}
-          </CardTitle>
+      {/* Enhanced Content Preview */}
+      <Card className="shadow-lg border-purple-100">
+        <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-100">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              {viewMode === 'preview' ? <Eye className="h-5 w-5 text-purple-600" /> : <Code className="h-5 w-5 text-purple-600" />}
+              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                {viewMode === 'preview' ? 'Beautiful Content Preview' : 'HTML Source Code'}
+              </span>
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === 'preview' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('preview')}
+                className={viewMode === 'preview' ? 'bg-purple-600 hover:bg-purple-700 shadow-md' : 'border-purple-200 text-purple-700 hover:bg-purple-50'}
+              >
+                <Eye className="h-4 w-4 mr-1" />
+                Preview
+              </Button>
+              <Button
+                variant={viewMode === 'html' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('html')}
+                className={viewMode === 'html' ? 'bg-purple-600 hover:bg-purple-700 shadow-md' : 'border-purple-200 text-purple-700 hover:bg-purple-50'}
+              >
+                <Code className="h-4 w-4 mr-1" />
+                HTML
+              </Button>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {viewMode === 'preview' ? (
-            <div 
-              className="prose prose-purple max-w-none prose-headings:text-purple-900 prose-a:text-purple-600 prose-a:font-semibold prose-strong:text-purple-800"
-              dangerouslySetInnerHTML={{ __html: content.content }}
-            />
+            <div className="p-8 bg-white">
+              {/* Blog Header */}
+              <div className="mb-8 pb-6 border-b border-gray-100">
+                <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                  <Calendar className="h-4 w-4" />
+                  {new Date(content.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                  <span className="mx-2">•</span>
+                  <Clock className="h-4 w-4" />
+                  {content.readingTime} min read
+                  <span className="mx-2">•</span>
+                  <TrendingUp className="h-4 w-4" />
+                  SEO Score: {content.seoScore}/100
+                </div>
+                <h1 className="text-4xl font-bold text-gray-900 leading-tight mb-4">
+                  {content.title}
+                </h1>
+                <p className="text-xl text-gray-600 leading-relaxed">
+                  {content.metaDescription}
+                </p>
+              </div>
+
+              {/* Enhanced Content with Beautiful Typography */}
+              <div
+                className="prose prose-lg prose-purple max-w-none
+                  prose-headings:font-bold prose-headings:text-gray-900 prose-headings:tracking-tight
+                  prose-h1:text-4xl prose-h1:mb-6 prose-h1:leading-tight
+                  prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:text-purple-800 prose-h2:border-b prose-h2:border-purple-100 prose-h2:pb-3
+                  prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4 prose-h3:text-purple-700
+                  prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-p:text-lg
+                  prose-a:text-purple-600 prose-a:font-semibold prose-a:no-underline prose-a:bg-purple-50 prose-a:px-2 prose-a:py-1 prose-a:rounded-md prose-a:transition-all hover:prose-a:bg-purple-100 hover:prose-a:text-purple-700
+                  prose-strong:text-purple-800 prose-strong:font-bold
+                  prose-em:text-purple-600 prose-em:font-medium
+                  prose-ul:space-y-3 prose-ol:space-y-3
+                  prose-li:text-gray-700 prose-li:leading-relaxed prose-li:text-lg
+                  prose-blockquote:border-l-4 prose-blockquote:border-purple-200 prose-blockquote:bg-purple-50 prose-blockquote:pl-6 prose-blockquote:py-4 prose-blockquote:italic
+                  prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-purple-600
+                  prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:rounded-lg prose-pre:p-6
+                  prose-table:border-collapse prose-table:border prose-table:border-gray-200
+                  prose-th:bg-purple-50 prose-th:border prose-th:border-gray-200 prose-th:p-3 prose-th:font-semibold prose-th:text-purple-800
+                  prose-td:border prose-td:border-gray-200 prose-td:p-3"
+                dangerouslySetInnerHTML={{ __html: content.content }}
+              />
+
+              {/* Article Footer */}
+              <div className="mt-12 pt-8 border-t border-gray-100">
+                <div className="flex flex-wrap gap-2 mb-6">
+                  <span className="text-sm font-medium text-gray-600 mr-2">Tags:</span>
+                  {content.keywords.map((keyword, index) => (
+                    <Badge
+                      key={index}
+                      variant="outline"
+                      className="bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 transition-colors"
+                    >
+                      #{keyword}
+                    </Badge>
+                  ))}
+                </div>
+
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 border border-purple-100">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      <Sparkles className="h-8 w-8 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-purple-800 mb-2">Love this content?</h3>
+                      <p className="text-sm text-purple-700 mb-4">
+                        This high-quality blog post was generated using our AI-powered content creation tool.
+                        Create your own professional content in minutes!
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-purple-600 hover:bg-purple-700 text-white shadow-md"
+                          onClick={handleSaveAccount}
+                        >
+                          <Save className="h-4 w-4 mr-2" />
+                          Save Forever
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                          onClick={handleCopyContent}
+                        >
+                          <Copy className="h-4 w-4 mr-2" />
+                          Copy Content
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="relative">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleCopyContent}
-                className="absolute top-2 right-2 z-10"
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-              <pre className="bg-gray-50 p-4 rounded text-sm overflow-x-auto whitespace-pre-wrap border">
-                {content.content}
-              </pre>
+              <div className="absolute top-4 right-4 z-10 flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleCopyContent}
+                  className="bg-white/90 backdrop-blur-sm border-purple-200 text-purple-700 hover:bg-purple-50 shadow-md"
+                >
+                  <Copy className="h-4 w-4 mr-1" />
+                  Copy
+                </Button>
+              </div>
+              <div className="bg-gray-900 text-gray-100 p-6 rounded-none">
+                <div className="flex items-center gap-2 mb-4 text-gray-400">
+                  <Code className="h-4 w-4" />
+                  <span className="text-sm font-medium">HTML Source</span>
+                  <Badge variant="outline" className="bg-gray-800 border-gray-700 text-gray-300 text-xs">
+                    {content.wordCount} words
+                  </Badge>
+                </div>
+                <pre className="text-sm leading-relaxed overflow-x-auto whitespace-pre-wrap">
+                  <code className="language-html">{content.content}</code>
+                </pre>
+              </div>
             </div>
           )}
         </CardContent>
