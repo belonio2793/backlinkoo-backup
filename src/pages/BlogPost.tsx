@@ -483,17 +483,42 @@ export function BlogPost() {
 
                 if (isClaimedPost || claimedByUser) {
                   return (
-                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md">
-                      <CheckCircle2 className="mr-1 h-3 w-3" />
-                      {claimedByUser ? 'Claimed by You' : 'Claimed & Linked'}
-                    </Badge>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md cursor-help">
+                            <CheckCircle2 className="mr-1 h-3 w-3" />
+                            Claimed
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            {claimedByUser
+                              ? "This post has been permanently claimed by you and will never expire. It's now a permanent backlink!"
+                              : "This post has been permanently claimed by a user and will never expire. It's now a permanent backlink!"
+                            }
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   );
                 } else if (isTrialPost) {
                   return (
-                    <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-md">
-                      <Clock className="mr-1 h-3 w-3" />
-                      Unclaimed Trial
-                    </Badge>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-md cursor-help">
+                            <Clock className="mr-1 h-3 w-3" />
+                            Unclaimed
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            This is a trial post that will auto-delete in 24 hours. To make it permanent, {!currentUser ? 'sign up or sign in and then' : ''} click "Claim This Post Forever" below to save it permanently to your account.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   );
                 }
                 return null;
