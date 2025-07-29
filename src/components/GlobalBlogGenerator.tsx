@@ -220,13 +220,13 @@ export function GlobalBlogGenerator({
         setApiStatus({
           status: 'ready',
           message: 'API fully operational',
-          details: `Response time: ${connectivityTest.responseTime}ms`
+          details: `Connected in ${connectivityTest.attempt || 1} attempt${(connectivityTest.attempt || 1) > 1 ? 's' : ''} (${connectivityTest.responseTime}ms)`
         });
       } else {
         setApiStatus({
           status: 'error',
           message: 'API connectivity failed',
-          details: connectivityTest.error || 'Service unavailable'
+          details: `${connectivityTest.error || 'Service unavailable'} (${connectivityTest.attempt || 1} attempts)`
         });
       }
 
