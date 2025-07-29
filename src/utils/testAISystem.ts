@@ -73,7 +73,7 @@ export class AISystemTester {
     try {
       console.log('🤖 Testing Full AI Content Engine...');
       
-      const result = await aiContentEngine.generateContent({
+      const result = await aiContentEngine.generateContentWithFailover({
         keyword: 'machine learning',
         targetUrl: 'https://example-ml.com',
         anchorText: 'ML platform',
