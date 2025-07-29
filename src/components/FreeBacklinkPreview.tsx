@@ -138,11 +138,7 @@ export function FreeBacklinkPreview({ content, onRegenerate, onDelete }: FreeBac
   };
 
   const handleSaveAccount = () => {
-    // This would trigger account registration modal
-    toast({
-      title: "Account Registration",
-      description: "Register an account to save this post permanently and access advanced features.",
-    });
+    setRegistrationModalOpen(true);
   };
 
   const exportPost = () => {
