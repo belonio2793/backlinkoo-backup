@@ -109,33 +109,11 @@ const Login = () => {
 
     setIsLoading(true);
 
-    // Set up timeout notification
-    const timeoutId = setTimeout(() => {
-      if (isLoading) {
-        toast({
-          title: "Connection taking longer than expected",
-          description: "Please wait, we're still processing your login...",
-          variant: "default",
-        });
-      }
-    }, 3000);
-
     try {
-      // Create a promise that rejects after 10 seconds
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Login timeout - please try again')), 10000);
+      const result = await AuthService.signIn({
+        email: loginEmail,
+        password: loginPassword
       });
-
-      // Race between the actual login and timeout
-      const result = await Promise.race([
-        AuthService.signIn({
-          email: loginEmail,
-          password: loginPassword
-        }),
-        timeoutPromise
-      ]);
-
-      clearTimeout(timeoutId);
 
 
       if (result.success) {
