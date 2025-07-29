@@ -445,18 +445,22 @@ export function BlogPost() {
 
         // Last resort: create minimal viable content
         console.log('🆘 Creating emergency minimal content for keyword:', primaryKeyword);
-        const emergencyContent = `<h1>${primaryKeyword}: Essential Information</h1>
+        const safeKeyword = primaryKeyword || 'this topic';
+        const safeAnchorText = anchorText || 'learn more';
+        const safeTargetUrl = blogPost.target_url || '#';
 
-<p>This content is being regenerated. We're working to provide you with comprehensive information about <strong>${primaryKeyword}</strong>.</p>
+        const emergencyContent = `<h1>${safeKeyword}: Essential Information</h1>
 
-<h2>About ${primaryKeyword}</h2>
+<p>This content is being regenerated. We're working to provide you with comprehensive information about <strong>${safeKeyword}</strong>.</p>
 
-<p>Understanding ${primaryKeyword} is important for staying informed. This guide provides essential information to help you learn more about this topic.</p>
+<h2>About ${safeKeyword}</h2>
+
+<p>Understanding ${safeKeyword} is important for staying informed. This guide provides essential information to help you learn more about this topic.</p>
 
 <h3>Key Points</h3>
 
 <ul>
-<li>Essential information about ${primaryKeyword}</li>
+<li>Essential information about ${safeKeyword}</li>
 <li>Practical applications and benefits</li>
 <li>Current developments and trends</li>
 <li>Resources for further learning</li>
@@ -464,11 +468,11 @@ export function BlogPost() {
 
 <h2>Learn More</h2>
 
-<p>For additional resources and expert guidance on ${primaryKeyword}, <a href="${blogPost.target_url}" target="_blank" rel="noopener noreferrer">${anchorText}</a> provides comprehensive information and solutions.</p>
+<p>For additional resources and expert guidance on ${safeKeyword}, <a href="${safeTargetUrl}" target="_blank" rel="noopener noreferrer">${safeAnchorText}</a> provides comprehensive information and solutions.</p>
 
 <h2>Conclusion</h2>
 
-<p>This information about ${primaryKeyword} will help you understand the key concepts and applications. Continue exploring to deepen your knowledge in this area.</p>`;
+<p>This information about ${safeKeyword} will help you understand the key concepts and applications. Continue exploring to deepen your knowledge in this area.</p>`;
 
         const emergencyBlogPost = {
           ...blogPost,
