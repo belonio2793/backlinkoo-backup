@@ -210,10 +210,11 @@ export function GlobalBlogGenerator({
       return;
     }
 
-    if (remainingRequests <= 0) {
+    // Only apply rate limits to authenticated users
+    if (isLoggedIn && remainingRequests <= 0) {
       toast({
         title: "Rate limit reached",
-        description: "You've reached the free tier limit. Please try again later or sign up for unlimited access.",
+        description: "You've reached the account tier limit. Please try again later or upgrade your plan.",
         variant: "destructive",
       });
       return;
