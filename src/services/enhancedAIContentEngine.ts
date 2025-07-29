@@ -531,13 +531,13 @@ Create content that readers would want to bookmark, share, or reference later be
    */
   private async ensureContentLength(content: string, request: ContentGenerationRequest): Promise<string> {
     const wordCount = content.split(/\s+/).length;
-    
+
     if (wordCount < 1000) {
-      // Add additional sections to reach minimum length
-      const additionalSections = this.generateAdditionalSEOSections(request);
-      content += '\n\n' + additionalSections;
+      // If content is too short, log a warning but don't add template content
+      console.warn(`⚠️ Generated content for "${request.keyword}" is only ${wordCount} words. Consider using better prompts or different AI providers.`);
+      // Don't add template content - let the AI generate unique content only
     }
-    
+
     return content;
   }
   
