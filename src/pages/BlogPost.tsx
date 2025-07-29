@@ -418,7 +418,7 @@ export function BlogPost() {
                     This demo blog post will automatically delete on {formatDate(blogPost.expires_at)} unless claimed.
                     Claim it now to make this backlink permanent!
                   </p>
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-3">
                     {!currentUser ? (
                       <ClaimTrialPostDialog
                         trialPostSlug={blogPost.slug}
@@ -449,6 +449,15 @@ export function BlogPost() {
                       className="border-amber-600 text-amber-700 hover:bg-amber-100"
                     >
                       Create More Backlinks
+                    </Button>
+                    <Button
+                      onClick={handleDeletePost}
+                      disabled={isDeleting}
+                      variant="outline"
+                      className="border-red-400 text-red-600 hover:bg-red-50"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      {isDeleting ? 'Deleting...' : 'Delete Post'}
                     </Button>
                   </div>
                 </div>
