@@ -61,21 +61,21 @@ export class HuggingFaceService {
     }
 
     const {
-      model = 'microsoft/DialoGPT-large',
-      maxLength = 3000,
+      model = 'microsoft/DialoGPT-medium',
+      maxLength = 2000,
       temperature = 0.7
     } = options;
 
     try {
-      console.log('🤗 HuggingFace API Request:', { model, maxLength, temperature });
+      console.log('🤗 Primary AI engine request:', { maxLength, temperature });
 
       const requestBody: HuggingFaceRequest = {
         inputs: prompt,
         parameters: {
-          max_length: maxLength,
+          max_length: Math.min(maxLength, 2000), // Limit for free tier
           temperature,
           do_sample: true,
-          top_p: 0.95,
+          top_p: 0.9,
           num_return_sequences: 1
         },
         options: {
