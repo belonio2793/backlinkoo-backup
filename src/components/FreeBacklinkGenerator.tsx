@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { freeBacklinkService } from '@/services/freeBacklinkService';
 import { FreeBacklinkRequest, FreeBacklinkResult } from '@/services/simpleAIContentEngine';
+import { RegistrationModal } from './RegistrationModal';
 import { 
   Loader2, 
   Sparkles, 
