@@ -33,7 +33,10 @@ import {
   Zap,
   User,
   Settings,
-  ChevronDown
+  ChevronDown,
+  Eye,
+  Sparkles,
+  Crown
 } from "lucide-react";
 import { PaymentModal } from "@/components/PaymentModal";
 import { CampaignForm } from "@/components/CampaignForm";
