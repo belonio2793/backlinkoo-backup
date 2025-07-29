@@ -294,10 +294,7 @@ export function MinimalAITest() {
     addLog('info', 'SYSTEM', 'Testing API providers...');
     setCurrentProcess('Testing API connectivity...');
 
-    const providers = [
-      { name: 'HuggingFace API', service: huggingFaceService },
-      { name: 'Cohere API', service: cohereService }
-    ];
+    const providers: any[] = [];
     const statuses: ApiStatus[] = [];
 
     for (const provider of providers) {
