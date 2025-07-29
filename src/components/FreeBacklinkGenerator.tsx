@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 
 interface FreeBacklinkGeneratorProps {
-  onContentGenerated: (content: FreeBacklinkResult) => void;
+  onContentGenerated: (content: GeneratedContentResult) => void;
 }
 
 export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGeneratorProps) {
