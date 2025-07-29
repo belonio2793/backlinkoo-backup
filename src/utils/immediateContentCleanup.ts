@@ -25,11 +25,23 @@ export function runImmediateContentCleanup(): void {
         const blogPost = JSON.parse(storedData);
         if (!blogPost.content) continue;
         
-        // Always clean the content to ensure consistency
+        // Always clean the content and meta description to ensure consistency
         const originalContent = blogPost.content;
+        const originalMetaDesc = blogPost.meta_description;
         const cleanedContent = cleanHTMLContent(originalContent);
-        
-        if (originalContent !== cleanedContent) {
+
+        // Clean meta description of geolocation specifics
+        let cleanedMetaDesc = originalMetaDesc;
+        if (cleanedMetaDesc) {
+          cleanedMetaDesc = cleanedMetaDesc
+            .replace(/Optimized for [A-Za-z\s]+\./g, '')
+            .replace(/Tailored for [A-Za-z\s]+\./g, '')
+            .replace(/Designed for [A-Za-z\s]+ market\./g, '')
+            .replace(/Localized for [A-Za-z\s]+\./g, '')
+            .trim();
+        }
+
+        if (originalContent !== cleanedContent || originalMetaDesc !== cleanedMetaDesc) {
           console.log(`🔧 Cleaning: ${blogPost.title || key}`);
           
           // Update the blog post
