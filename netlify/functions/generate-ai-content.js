@@ -92,8 +92,17 @@ function generateFoodContent(keyword, anchorText, url) {
 }
 
 function generateBusinessContent(keyword, anchorText, url) {
-  const currentYear = new Date().getFullYear();
-  return `<h1>${keyword.charAt(0).toUpperCase() + keyword.slice(1)}: Complete Business Guide for ${currentYear}</h1>
+  // Generate more dynamic titles instead of template format
+  const titleVariations = [
+    `${keyword} for Business Success: Strategic Insights`,
+    `Understanding ${keyword}: A Business Perspective`,
+    `${keyword} in Practice: Real-World Applications`,
+    `The Business Guide to ${keyword}`
+  ];
+  const hash = keyword.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+  const dynamicTitle = titleVariations[hash % titleVariations.length];
+
+  return `<h1>${dynamicTitle}</h1>
 
 <h2>Introduction</h2>
 
