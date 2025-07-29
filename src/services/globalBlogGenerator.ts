@@ -241,12 +241,14 @@ class GlobalBlogGeneratorService {
         console.warn('Netlify function unavailable, using fallback:', netlifyError);
       }
 
-      // Use enhanced AI content engine as primary fallback
-      console.log('🚀 Using enhanced AI content engine for generation...');
-      const aiResult = await this.generateAIEnhancedBlogPost(enhancedRequest);
+      // No fallback content generation - return error immediately
+      console.log('❌ Netlify function unavailable, no fallback content generation');
       this.updateRateLimit();
-      
-      return aiResult;
+
+      return {
+        success: false,
+        error: "We're currently experiencing a large volume of requests. Please register or sign in to try one of our alternatives."
+      };
 
     } catch (error) {
       console.error('Global blog generation failed:', error);
