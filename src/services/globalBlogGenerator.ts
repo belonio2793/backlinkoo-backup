@@ -531,27 +531,56 @@ class GlobalBlogGeneratorService {
 
   async getGlobalBlogStats() {
     try {
-      const response = await fetch(`${this.API_BASE}/global-blog-generator`);
+      // Add timeout and better error handling for fetch
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+      const response = await fetch(`${this.API_BASE}/global-blog-generator`, {
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
+
+      clearTimeout(timeoutId);
+
       if (response.ok) {
-        return await response.json();
+        const data = await response.json();
+        return data;
       }
     } catch (error) {
-      console.warn('Could not fetch global stats:', error);
+      console.warn('Could not fetch global stats, using local fallback:', error);
+      // Don't re-throw the error, just continue to fallback
     }
 
     // Return actual usage stats or minimal fallback
-    const storedPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-    const today = new Date().toDateString();
-    const postsToday = storedPosts.filter((post: any) =>
-      new Date(post.created_at).toDateString() === today
-    ).length;
+    try {
+      const storedPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+      const today = new Date().toDateString();
+      const postsToday = storedPosts.filter((post: any) => {
+        try {
+          return new Date(post.created_at).toDateString() === today;
+        } catch {
+          return false;
+        }
+      }).length;
 
-    return {
-      totalPosts: storedPosts.length,
-      postsToday: postsToday,
-      activeUsers: null, // Remove inflated user count
-      averageQuality: null // Remove artificial quality score
-    };
+      return {
+        totalPosts: storedPosts.length,
+        postsToday: postsToday,
+        activeUsers: null, // Remove inflated user count
+        averageQuality: null // Remove artificial quality score
+      };
+    } catch (storageError) {
+      console.warn('Could not access localStorage, using minimal fallback:', storageError);
+      // Return minimal safe fallback
+      return {
+        totalPosts: 0,
+        postsToday: 0,
+        activeUsers: null,
+        averageQuality: null
+      };
+    }
   }
 
   getUserSessionData() {
