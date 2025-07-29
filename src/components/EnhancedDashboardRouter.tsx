@@ -17,12 +17,13 @@ export function EnhancedDashboardRouter() {
 
   useEffect(() => {
     let isMounted = true;
+    let subscription: any;
 
     const checkUserAndTrialPosts = async () => {
       try {
-        console.log('🔍 Checking user authentication...');
+        console.log('🔍 Checking user authentication for dashboard...');
         const { data: { session } } = await supabase.auth.getSession();
-        console.log('🔍 Session check result:', !!session?.user);
+        console.log('🔍 Session check result:', !!session?.user, session?.user?.email);
 
         if (!isMounted) return;
 
@@ -31,11 +32,9 @@ export function EnhancedDashboardRouter() {
         if (session?.user) {
           console.log('✅ User authenticated, showing dashboard');
           setIsLoading(false);
-          return;
         } else {
           console.log('❌ User not authenticated, redirecting to login');
           navigate('/login');
-          return;
         }
       } catch (error: any) {
         console.error('Dashboard router error:', error);
@@ -47,31 +46,31 @@ export function EnhancedDashboardRouter() {
     };
 
     checkUserAndTrialPosts();
+
+    // Listen for auth state changes
+    const authListener = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔐 Dashboard auth state changed:', event, !!session?.user);
+      if (isMounted) {
+        setUser(session?.user || null);
+        setIsLoading(false);
+      }
+    });
+
+    subscription = authListener.data?.subscription;
+
     return () => {
       isMounted = false;
+      subscription?.unsubscribe?.();
     };
   }, [navigate]);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔐 EnhancedDashboardRouter: Auth state changed:', event, !!session?.user);
-      if (event === 'SIGNED_IN' && session?.user) {
-        setUser(session.user);
-        setIsLoading(false);
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-      }
-    });
-
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
     if (!isLoading && !user) {
-      console.log('🚫 Fallback redirect to login');
-      navigate('/login');
+      console.log('🚫 No authenticated user, redirecting to login in 1 second...');
+      const timer = setTimeout(() => {
+        navigate('/login');
+      }, 1000);
+      return () => clearTimeout(timer);
     }
   }, [isLoading, user, navigate]);
 
@@ -94,6 +93,13 @@ export function EnhancedDashboardRouter() {
     return <Dashboard />;
   }
 
-  console.log('🚫 No authenticated user in fallback - redirecting');
-  return null;
+  // For non-authenticated users, show a redirect spinner
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex items-center gap-2">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span>Redirecting...</span>
+      </div>
+    </div>
+  );
 }

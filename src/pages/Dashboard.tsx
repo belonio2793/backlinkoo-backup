@@ -55,25 +55,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import type { User } from '@supabase/supabase-js';
 
-// FreeBlogPostGenerator component for the dashboard
-const FreeBlogPostGenerator = ({ onSuccess }: { onSuccess?: (blogPost: any) => void }) => {
-  try {
-    return (
-      <GlobalBlogGenerator
-        variant="embedded"
-        onSuccess={onSuccess}
-        showAdvancedOptions={false}
-      />
-    );
-  } catch (error) {
-    console.error('FreeBlogPostGenerator error:', error);
-    return (
-      <div className="p-4 text-center">
-        <p className="text-red-600">Error loading blog generator. Please refresh the page.</p>
-      </div>
-    );
-  }
-};
+
 
 // TrialBlogPostsDisplay component for the trial tab
 const TrialBlogPostsDisplay = () => {
@@ -444,7 +426,7 @@ const Dashboard = () => {
           console.log('🔍 Profile error (non-critical):', result.error);
         }
       } catch (profileError) {
-        console.warn('🔍 Profile fetch failed, using defaults:', profileError);
+        console.warn('��� Profile fetch failed, using defaults:', profileError);
       }
 
       // Set user type based on profile
@@ -750,10 +732,7 @@ const Dashboard = () => {
                 <span className="sm:hidden">Trial</span>
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
               </TabsTrigger>
-              <TabsTrigger value="free-blog" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
-                <span className="hidden sm:inline">Free Blog Post</span>
-                <span className="sm:hidden">Blog</span>
-              </TabsTrigger>
+
               <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Campaigns</span>
                 <span className="sm:hidden">Camps</span>
@@ -1242,23 +1221,7 @@ const Dashboard = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="free-blog" className="space-y-6">
-              <div className="max-w-4xl mx-auto">
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold mb-2">Create Your First Backlink For Free</h2>
-                  <p className="text-muted-foreground">
-                    Generate high-quality blog posts with natural contextual backlinks using our AI-powered system.
-                  </p>
-                </div>
 
-                <FreeBlogPostGenerator
-                  onSuccess={(blogPost) => {
-                    // Refresh stats after successful generation
-                    loadGlobalStats();
-                  }}
-                />
-              </div>
-            </TabsContent>
 
             <TabsContent value="campaigns" className="space-y-6">
               {showCampaignForm ? (
