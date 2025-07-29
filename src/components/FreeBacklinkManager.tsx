@@ -20,7 +20,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { freeBacklinkService } from '@/services/freeBacklinkService';
-import { FreeBacklinkResult } from '@/services/simpleAIContentEngine';
+import { GeneratedContentResult } from '@/services/openAIContentGenerator';
 import RegistrationModal from './RegistrationModal';
 import { 
   MoreHorizontal, 
