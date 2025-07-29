@@ -249,6 +249,12 @@ export function GlobalBlogGenerator({
 
     } catch (error: any) {
       console.error('Global blog generation error:', error);
+
+      // Reset all generation state
+      setProgress(0);
+      setGenerationStage('');
+      setGeneratedPost(null);
+
       toast({
         title: "Generation failed",
         description: error.message || "An unexpected error occurred. Please try again.",
@@ -256,6 +262,9 @@ export function GlobalBlogGenerator({
       });
     } finally {
       setIsGenerating(false);
+      // Ensure progress is reset in case of any hanging state
+      setProgress(0);
+      setGenerationStage('');
     }
   };
 
