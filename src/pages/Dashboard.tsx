@@ -874,6 +874,24 @@ const Dashboard = () => {
               )}
             </TabsContent>
 
+            <TabsContent value="free-blog" className="space-y-6">
+              <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold mb-2">Create Your First Backlink For Free</h2>
+                  <p className="text-muted-foreground">
+                    Generate high-quality blog posts with natural contextual backlinks using our AI-powered system.
+                  </p>
+                </div>
+
+                <FreeBlogPostGenerator
+                  onSuccess={(blogPost) => {
+                    // Refresh stats after successful generation
+                    loadGlobalStats();
+                  }}
+                />
+              </div>
+            </TabsContent>
+
             <TabsContent value="campaigns" className="space-y-6">
               {showCampaignForm ? (
                 <CampaignForm 
