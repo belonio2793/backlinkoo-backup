@@ -82,8 +82,12 @@ export function EnhancedDashboardRouter() {
   // Separate effect to handle navigation after loading is complete
   useEffect(() => {
     if (!isLoading && !user) {
-      console.log('🚫 No authenticated user, redirecting to home');
-      navigate('/');
+      console.log('🚫 No authenticated user, redirecting to home in 1 second...');
+      // Add a small delay to allow auth state to update
+      const timer = setTimeout(() => {
+        navigate('/');
+      }, 1000);
+      return () => clearTimeout(timer);
     }
   }, [isLoading, user, navigate]);
 
