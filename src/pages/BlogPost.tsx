@@ -476,7 +476,7 @@ export function BlogPost() {
 
         const emergencyBlogPost = {
           ...blogPost,
-          title: `${primaryKeyword}: Essential Information`,
+          title: `${safeKeyword}: Essential Information`,
           content: emergencyContent,
           word_count: calculateWordCount(emergencyContent),
           reading_time: Math.ceil(calculateWordCount(emergencyContent) / 200),
