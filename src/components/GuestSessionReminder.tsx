@@ -227,7 +227,7 @@ export function GuestSessionReminder({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => navigate('/login')}
+              onClick={onSignUp}
               className="border-white/30 text-white hover:bg-white/10"
             >
               Sign In
