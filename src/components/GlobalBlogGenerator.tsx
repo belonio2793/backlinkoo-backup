@@ -208,33 +208,54 @@ export function GlobalBlogGenerator({
         return;
       }
 
-      // Simplified connection test - just verify the key format and configuration
+      // Test actual OpenAI connection
       setApiStatus({
         status: 'checking',
-        message: 'Validating API configuration...',
-        details: 'Checking credentials'
+        message: 'Testing OpenAI connection...',
+        details: 'Validating API credentials'
       });
 
-      console.log('🔍 Validating OpenAI API key...');
+      console.log('🔍 Testing OpenAI API connection...');
 
-      // Simple validation - if key exists and looks valid, assume it's ready
-      // This avoids CORS issues with the models endpoint
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      const isValidKeyFormat = apiKey && apiKey.startsWith('sk-') && apiKey.length > 20;
+      // Get API key from multiple sources
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.OPENAI_API_KEY;
+      console.log('API key found:', apiKey ? `${apiKey.substring(0, 7)}...${apiKey.substring(apiKey.length - 4)}` : 'Not found');
 
-      if (isValidKeyFormat) {
-        console.log('✅ API key format is valid');
-        setApiStatus({
-          status: 'ready',
-          message: 'AI service ready',
-          details: 'Configuration validated'
-        });
-      } else {
+      if (!apiKey || !apiKey.startsWith('sk-') || apiKey.length < 20) {
         console.log('❌ Invalid API key format');
         setApiStatus({
           status: 'error',
-          message: 'Invalid API key',
-          details: 'Please check your OpenAI API key format'
+          message: 'Invalid API key format',
+          details: 'Please check your OpenAI API key'
+        });
+        return;
+      }
+
+      // Test actual connection with OpenAI
+      try {
+        const connectionTest = await openAIOnlyContentGenerator.testConnection();
+
+        if (connectionTest) {
+          console.log('✅ OpenAI connection successful');
+          setApiStatus({
+            status: 'ready',
+            message: 'AI service ready',
+            details: 'OpenAI connection verified'
+          });
+        } else {
+          console.log('❌ OpenAI connection failed');
+          setApiStatus({
+            status: 'error',
+            message: 'Connection failed',
+            details: 'OpenAI API key may be invalid or quota exceeded'
+          });
+        }
+      } catch (connectionError) {
+        console.error('OpenAI connection test failed:', connectionError);
+        setApiStatus({
+          status: 'error',
+          message: 'Connection error',
+          details: connectionError instanceof Error ? connectionError.message : 'Unknown connection error'
         });
       }
 
