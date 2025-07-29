@@ -107,15 +107,9 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
 
       onContentGenerated(result);
 
-      // Enhanced success message with provider info
-      const providerInfo = result.provider ? ` (Generated using ${result.provider.toUpperCase()})` : '';
-      const fallbackInfo = result.fallbacksUsed && result.fallbacksUsed.length > 0
-        ? ` Used ${result.fallbacksUsed.length} fallback provider(s).`
-        : '';
-
       toast({
         title: "Free Backlink Generated! 🎉",
-        description: `Your blog post is ready!${providerInfo} Remember, it will auto-delete in 24 hours unless you register an account.${fallbackInfo}`,
+        description: "Your blog post is ready! Remember, it will auto-delete in 24 hours unless you register an account.",
       });
 
       // Reset form
