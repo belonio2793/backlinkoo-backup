@@ -33,6 +33,7 @@ export function BlogPost() {
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const loadBlogPost = async () => {
