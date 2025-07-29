@@ -267,48 +267,7 @@ class GlobalBlogGeneratorService {
     };
   }
 
-  private generateFallbackContent(request: any): string {
-    const sections = [
-      `<h1>${request.primaryKeyword}: Your Complete Guide</h1><p>Welcome to the ultimate guide on ${request.primaryKeyword}. Whether you're a beginner or looking to enhance your knowledge, this comprehensive resource will provide you with valuable insights and practical strategies.</p>`,
-      
-      `<h2>What is ${request.primaryKeyword}?</h2><p>${request.primaryKeyword} is a crucial aspect of modern digital strategies. Understanding its fundamentals can significantly impact your success in today's competitive landscape.</p>`,
 
-      `<h2>Key Benefits of ${request.primaryKeyword}</h2><ul><li><strong>Enhanced Performance</strong>: Implementing ${request.primaryKeyword} strategies can dramatically improve your results</li><li><strong>Cost Efficiency</strong>: Smart ${request.primaryKeyword} approaches often reduce overhead while maximizing output</li><li><strong>Competitive Advantage</strong>: Stay ahead of competitors with advanced ${request.primaryKeyword} techniques</li><li><strong>Long-term Growth</strong>: Build sustainable success through proven ${request.primaryKeyword} methodologies</li></ul>`,
-      
-      `<h2>Best Practices for ${request.primaryKeyword}</h2><p>To get the most out of ${request.primaryKeyword}, consider these expert-recommended practices:</p><h3>Strategy Development</h3><p>Begin with a clear understanding of your goals. ${request.primaryKeyword} works best when aligned with your overall objectives.</p><h3>Implementation Tips</h3><ul><li>Start with small, manageable steps</li><li>Monitor progress regularly</li><li>Adjust strategies based on results</li><li>Stay updated with latest trends in ${request.primaryKeyword}</li></ul>`,
-      
-      `## Advanced ${request.primaryKeyword} Techniques\n\nFor those ready to take their ${request.primaryKeyword} efforts to the next level, these advanced techniques can provide significant advantages:\n\n### Professional Tools and Resources\nLeverage specialized tools and platforms designed for ${request.primaryKeyword}. For comprehensive solutions, consider exploring [advanced ${request.primaryKeyword} tools](${request.targetUrl}) that can streamline your workflow.\n\n`,
-      
-      `<h2>Common Mistakes to Avoid</h2><p>Even experienced practitioners can fall into these ${request.primaryKeyword} traps:</p><ul><li>Neglecting regular monitoring and optimization</li><li>Focusing on quantity over quality</li><li>Ignoring user experience considerations</li><li>Failing to adapt to industry changes</li></ul>`,
-      
-      `<h2>Future of ${request.primaryKeyword}</h2><p>As technology continues to evolve, ${request.primaryKeyword} is becoming increasingly sophisticated. Stay ahead by:</p><ul><li>Embracing new technologies and methodologies</li><li>Investing in continuous learning</li><li>Building adaptable strategies</li><li>Networking with industry experts</li></ul>`,
-      
-      `## Conclusion\n\n${request.primaryKeyword} represents a significant opportunity for growth and success. By implementing the strategies outlined in this guide, you'll be well-positioned to achieve your objectives.\n\nReady to get started? [Explore our ${request.primaryKeyword} solutions](${request.targetUrl}) and take your efforts to the next level.\n\n---\n\n* This comprehensive guide provides actionable insights for ${request.primaryKeyword} success. For more detailed strategies and tools, visit our resource center.`
-    ];
-
-    // Join sections and clean up any remaining markdown
-    let content = sections.join('');
-
-    // Fix any remaining markdown patterns
-    content = content
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-
-    return content;
-  }
-
-  private generateRelatedKeywords(primaryKeyword: string): string[] {
-    const commonSuffixes = ['guide', 'tips', 'strategies', 'best practices', 'tools', 'solutions'];
-    const commonPrefixes = ['best', 'top', 'advanced', 'professional', 'effective'];
-    
-    return [
-      `${primaryKeyword} guide`,
-      `best ${primaryKeyword}`,
-      `${primaryKeyword} tips`,
-      `${primaryKeyword} strategies`,
-      `professional ${primaryKeyword}`
-    ].slice(0, 4);
-  }
 
   private async storeGlobalBlogPost(blogPost: any) {
     try {
