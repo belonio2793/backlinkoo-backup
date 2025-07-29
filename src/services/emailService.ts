@@ -336,7 +336,7 @@ Why verify your email?
 ✅ Secure your account
 ✅ Access all platform features
 ✅ Receive important updates
-�� Start your first backlink campaign
+✅ Start your first backlink campaign
 
 This link will expire in 24 hours for security reasons.
 
@@ -364,21 +364,32 @@ ${origin}`,
 
       return result;
     } catch (error: any) {
-      console.error('Error sending confirmation email:', error);
+      const errorMessage = error?.message || String(error) || 'Unknown error';
+
+      console.error('Error sending confirmation email:', {
+        message: errorMessage,
+        name: error?.name,
+        stack: error?.stack
+      });
 
       await errorLogger.logEmailError(
-        `Failed to send confirmation email: ${error.message}`,
+        `Failed to send confirmation email: ${errorMessage}`,
         {
           to: email,
           emailType: 'confirmation',
-          confirmationUrl
+          confirmationUrl,
+          fullError: {
+            message: errorMessage,
+            name: error?.name,
+            stack: error?.stack
+          }
         },
         'EmailService'
       );
 
       return {
         success: false,
-        error: `Failed to send confirmation email: ${error.message}`,
+        error: `Failed to send confirmation email: ${errorMessage}`,
         provider: 'netlify_resend'
       };
     }
