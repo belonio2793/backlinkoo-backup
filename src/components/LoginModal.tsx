@@ -449,7 +449,7 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
                     <Input
                       id="signup-password"
                       type={showPassword ? "text" : "password"}
-                      placeholder="Create a strong password"
+                      placeholder="Create a password (min 6 characters)"
                       value={signupPassword}
                       onChange={(e) => setSignupPassword(e.target.value)}
                       required
