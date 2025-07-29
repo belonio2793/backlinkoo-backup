@@ -53,33 +53,9 @@ export class MultiApiContentGenerator {
       parseResponse: (data: any) => data.choices?.[0]?.message?.content || 'No content generated'
     },
 
-    grok: {
-      name: 'xAI Grok',
-      baseUrl: 'https://api.x.ai/v1',
-      endpoint: '/chat/completions',
-      model: 'grok-beta',
-      getHeaders: () => ({
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_GROK_API_KEY || process.env.GROK_API_KEY || ''}`
-      }),
-      getBody: (prompt: string) => ({
-        model: 'grok-beta',
-        messages: [{ role: 'user', content: prompt }]
-      }),
-      parseResponse: (data: any) => data.choices?.[0]?.message?.content || 'No content generated'
-    },
 
-    deepai: {
-      name: 'DeepAI',
-      baseUrl: 'https://api.deepai.org/api',
-      endpoint: '/text-generator',
-      getHeaders: () => ({
-        'api-key': import.meta.env.VITE_DEEPAI_API_KEY || process.env.DEEPAI_API_KEY || ''
-      }),
-      getBody: (prompt: string) => new URLSearchParams({ text: prompt }),
-      parseResponse: (data: any) => data.output || 'No content generated',
-      method: 'POST'
-    },
+
+
 
     huggingface: {
       name: 'Hugging Face',
