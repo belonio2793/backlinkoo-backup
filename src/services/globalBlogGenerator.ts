@@ -271,7 +271,7 @@ class GlobalBlogGeneratorService {
         industry: request.additionalContext?.industry
       });
 
-      if (aiResult.bestContent && aiResult.bestContent.length > 200) {
+      if (aiResult.finalContent && aiResult.finalContent.length > 200) {
         console.log('✅ AI content generation successful:', {
           provider: aiResult.selectedProvider,
           wordCount: aiResult.metadata.wordCount,
