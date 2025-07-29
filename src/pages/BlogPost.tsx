@@ -100,7 +100,12 @@ export function BlogPost() {
         }
 
         if (post) {
-          setBlogPost(post);
+          // Ensure content is properly cleaned before displaying
+          const cleanedPost = {
+            ...post,
+            content: cleanHTMLContent(post.content || '')
+          };
+          setBlogPost(cleanedPost);
         } else {
           // Show debug information if in development
           if (allKeys.length > 0) {
