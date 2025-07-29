@@ -90,14 +90,21 @@ export class HuggingFaceService {
         }
       };
 
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch(`${this.baseURL}/${model}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
