@@ -14,7 +14,7 @@ import StreamlinedBlog from '@/pages/StreamlinedBlog';
 import { BlogCreator } from '@/pages/BlogCreator';
 import { BlogPost } from '@/pages/BlogPost';
 import AIContentTest from '@/pages/AIContentTest';
-import FreeBacklink from '@/pages/FreeBacklink';
+import { FreeBacklink } from '@/pages/FreeBacklink';
 import NotFound from '@/pages/NotFound';
 import AdminDashboard from '@/pages/AdminDashboard';
 import PaymentSuccess from '@/pages/PaymentSuccess';
