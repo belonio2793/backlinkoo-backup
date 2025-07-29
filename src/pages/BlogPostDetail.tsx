@@ -233,7 +233,7 @@ export default function BlogPostDetail() {
                 </Badge>
                 <Badge variant="outline" className="flex items-center space-x-1">
                   <Zap className="h-3 w-3" />
-                  <span>{post.provider.toUpperCase()}</span>
+                  <span>Backlink ∞</span>
                 </Badge>
                 <Badge variant="outline" className="flex items-center space-x-1">
                   <BookOpen className="h-3 w-3" />
