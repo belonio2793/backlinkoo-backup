@@ -157,7 +157,7 @@ Format the response as clean HTML with proper semantic structure.`;
     try {
       if (useHuggingFace) {
         const result = await huggingFaceService.generateText(prompt, {
-          model: 'gpt2',
+          model: 'microsoft/DialoGPT-medium',
           maxLength: 2000,
           temperature: 0.7
         });
