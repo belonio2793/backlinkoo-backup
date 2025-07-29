@@ -78,21 +78,9 @@ export function EnhancedDashboardRouter() {
     );
   }
 
-  // If user is authenticated, show protected dashboard
-  if (user) {
-    console.log('👤 Rendering authenticated dashboard');
-    return <Dashboard />;
-  }
-
-  // For non-authenticated users, show loading while redirect happens
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="flex items-center gap-2">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        <span>Redirecting...</span>
-      </div>
-    </div>
-  );
+  // Show dashboard when not loading
+  console.log('👤 Rendering dashboard');
+  return <Dashboard />;
 }
 
 // Guest Onboarding Dashboard Component
