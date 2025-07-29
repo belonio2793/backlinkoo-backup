@@ -383,17 +383,31 @@ export function BlogPost() {
       console.error('Failed to regenerate content:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
+      let title = "Regeneration failed";
       let description = "An error occurred while generating new content. Please try again.";
-      if (errorMessage.includes('OpenAI API key not configured')) {
-        description = "OpenAI API key is not configured. Please set up your OpenAI API key to regenerate content.";
-      } else if (errorMessage.includes('rate limit') || errorMessage.includes('quota')) {
-        description = "OpenAI rate limit reached. Please try again in a few minutes.";
+
+      if (errorMessage.includes('Invalid API key') || errorMessage.includes('401')) {
+        title = "OpenAI API Key Required";
+        description = "A valid OpenAI API key is required to regenerate content. Please configure your API key in the environment settings.";
+      } else if (errorMessage.includes('OpenAI API key is not configured')) {
+        title = "OpenAI API Key Missing";
+        description = "OpenAI API key is not configured. Please set the VITE_OPENAI_API_KEY environment variable.";
+      } else if (errorMessage.includes('rate limit') || errorMessage.includes('429')) {
+        title = "Rate Limit Exceeded";
+        description = "OpenAI rate limit reached. Please wait a few minutes before trying again.";
+      } else if (errorMessage.includes('quota') || errorMessage.includes('insufficient_quota')) {
+        title = "OpenAI Quota Exceeded";
+        description = "Your OpenAI account has exceeded its usage quota. Please check your billing settings.";
+      } else if (errorMessage.includes('platform.openai.com')) {
+        // If the error message contains helpful links, use it as-is
+        description = errorMessage;
       }
 
       toast({
-        title: "Regeneration failed",
+        title,
         description,
         variant: "destructive",
+        duration: 8000, // Show longer for important API key messages
       });
     } finally {
       setIsRegenerating(false);
