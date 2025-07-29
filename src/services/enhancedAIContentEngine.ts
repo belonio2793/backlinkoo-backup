@@ -5,8 +5,6 @@
  */
 
 import { openAIService } from './api/openai';
-import { cohereService } from './api/cohere';
-import { huggingFaceService } from './api/huggingface';
 
 import { formatBlogContent } from '../utils/textFormatting';
 
