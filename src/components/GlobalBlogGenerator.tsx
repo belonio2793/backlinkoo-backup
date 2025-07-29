@@ -151,6 +151,62 @@ export function GlobalBlogGenerator({
     setRemainingRequests(remaining);
   };
 
+  const checkApiStatus = async () => {
+    try {
+      const multiApiGenerator = new MultiApiContentGenerator();
+      const availableProviders = await multiApiGenerator.getAvailableProviders();
+
+      // Check OpenAI specifically since it's our primary provider
+      const openAIConfigured = openAIContentGenerator.isConfigured();
+      const hasApiKey = import.meta.env.VITE_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+
+      if (!hasApiKey) {
+        setApiStatus({
+          status: 'error',
+          message: 'API not configured',
+          details: 'OpenAI API key is missing'
+        });
+        return;
+      }
+
+      if (!openAIConfigured) {
+        setApiStatus({
+          status: 'error',
+          message: 'Configuration error',
+          details: 'OpenAI service not properly configured'
+        });
+        return;
+      }
+
+      // Check if we have any available providers
+      const activeProviders = availableProviders.filter(p => p.available);
+
+      if (activeProviders.length === 0) {
+        setApiStatus({
+          status: 'error',
+          message: 'No APIs available',
+          details: 'No configured API providers found'
+        });
+        return;
+      }
+
+      // All checks passed
+      setApiStatus({
+        status: 'ready',
+        message: `${activeProviders.length} API${activeProviders.length > 1 ? 's' : ''} ready`,
+        details: `Available: ${activeProviders.map(p => p.name).join(', ')}`
+      });
+
+    } catch (error) {
+      console.error('API status check failed:', error);
+      setApiStatus({
+        status: 'error',
+        message: 'Status check failed',
+        details: 'Unable to verify API connectivity'
+      });
+    }
+  };
+
   const formatUrl = (url: string): string => {
     const trimmedUrl = url.trim();
     if (!trimmedUrl) return trimmedUrl;
