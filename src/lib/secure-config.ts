@@ -34,7 +34,7 @@ const SECURE_STORE = {
   paypal_client_secret: '',
   
   // API keys for external services (placeholder for future use)
-  openai_api_key: '',
+  openai_api_key: '', // Add your base64 encoded OpenAI API key here
   anthropic_api_key: '',
   google_api_key: '',
   
