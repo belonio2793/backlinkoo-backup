@@ -52,25 +52,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import type { User } from '@supabase/supabase-js';
 
-// FreeBlogPostGenerator component for the dashboard
-const FreeBlogPostGenerator = ({ onSuccess }: { onSuccess?: (blogPost: any) => void }) => {
-  try {
-    return (
-      <GlobalBlogGenerator
-        variant="embedded"
-        onSuccess={onSuccess}
-        showAdvancedOptions={false}
-      />
-    );
-  } catch (error) {
-    console.error('FreeBlogPostGenerator error:', error);
-    return (
-      <div className="p-4 text-center">
-        <p className="text-red-600">Error loading blog generator. Please refresh the page.</p>
-      </div>
-    );
-  }
-};
+
 
 // TrialBlogPostsDisplay component for the trial tab
 const TrialBlogPostsDisplay = () => {
@@ -443,7 +425,7 @@ const Dashboard = () => {
           console.log('🔍 Profile error (non-critical):', result.error);
         }
       } catch (profileError) {
-        console.warn('🔍 Profile fetch failed, using defaults:', profileError);
+        console.warn('��� Profile fetch failed, using defaults:', profileError);
       }
 
       // Set user type based on profile
