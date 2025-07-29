@@ -357,19 +357,19 @@ export default function AILive() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span className="text-sm font-medium text-green-800">Hugging Face</span>
-                  </div>
-                  <Badge variant="secondary" className="text-xs">Primary</Badge>
-                </div>
                 <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-center space-x-2">
                     <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm font-medium text-blue-800">Cohere</span>
+                    <span className="text-sm font-medium text-blue-800">Backlink ∞ AI</span>
                   </div>
-                  <Badge variant="outline" className="text-xs">Backup</Badge>
+                  <Badge variant="secondary" className="text-xs">Advanced</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-green-800">Multiple AI Models</span>
+                  </div>
+                  <Badge variant="outline" className="text-xs">Fallback</Badge>
                 </div>
               </CardContent>
             </Card>
