@@ -51,8 +51,8 @@ export function EnhancedDashboardRouter() {
           setIsLoading(false);
           return;
         } else {
-          console.log('❌ User not authenticated, redirecting to home');
-          navigate('/');
+          console.log('❌ User not authenticated, redirecting to login');
+          navigate('/login');
           return;
         }
       } catch (error) {
@@ -84,14 +84,6 @@ export function EnhancedDashboardRouter() {
       </div>
     );
   }
-
-  // Handle redirect for non-authenticated users
-  useEffect(() => {
-    if (!isLoading && !user) {
-      console.log('🚫 No authenticated user, redirecting to login');
-      navigate('/login');
-    }
-  }, [isLoading, user, navigate]);
 
   // If user is authenticated, show protected dashboard
   if (user) {
