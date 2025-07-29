@@ -3,7 +3,7 @@
  * Streamlined content generation using only OpenAI API
  */
 
-import { openAIService } from './api/openai';
+import { enhancedOpenAIService } from './api/enhancedOpenAI';
 
 export interface ContentGenerationRequest {
   targetUrl: string;
@@ -78,25 +78,26 @@ export class OpenAIContentGenerator {
         contentType
       };
 
-      // Use multi-provider system with intelligent fallback
-      const multiResult = await multiProviderContentGenerator.generateContent(multiProviderRequest);
+      // Use enhanced OpenAI service for maximum reliability
+      const prompt = this.createPrompt(request);
+      const systemPrompt = this.createSystemPrompt(contentType, tone);
 
-      if (!multiResult.success || !multiResult.result) {
-        // Log all failed attempts for debugging
-        console.error('🔥 All providers failed:');
-        console.error('📊 Attempt Log:', JSON.stringify(multiResult.attemptLog, null, 2));
-        console.error('🔄 Fallbacks Used:', multiResult.fallbacksUsed);
-        console.error('🔢 Total Attempts:', multiResult.totalAttempts);
+      const result = await enhancedOpenAIService.generateContent(prompt, {
+        model: 'gpt-3.5-turbo',
+        maxTokens: Math.max(wordCount * 1.5, 3000),
+        temperature: 0.7,
+        systemPrompt
+      });
 
-        const lastError = multiResult.attemptLog[multiResult.attemptLog.length - 1]?.error;
-        throw new Error(`All content providers failed. Last error: ${lastError || 'Unknown error'}. Tried ${multiResult.totalAttempts} providers with ${multiResult.fallbacksUsed.length} fallbacks.`);
+      if (!result.success || !result.content) {
+        throw new Error(`Enhanced OpenAI generation failed: ${result.error || 'Unknown error'}`);
       }
 
-      const result = multiResult.result;
-      console.log('✅ Multi-provider generation successful:', {
+      console.log('✅ Enhanced OpenAI generation successful:', {
         provider: result.provider,
-        attemptNumber: result.attemptNumber,
-        fallbacksUsed: multiResult.fallbacksUsed
+        apiKeyUsed: result.apiKeyUsed,
+        retryCount: result.retryCount,
+        responseTime: result.responseTime
       });
 
       // Process and format the content
@@ -125,8 +126,7 @@ export class OpenAIContentGenerator {
         claimed: false,
         usage: result.usage,
         // Add provider information for debugging
-        provider: result.provider,
-        fallbacksUsed: multiResult.fallbacksUsed
+        provider: result.provider
       };
 
       console.log('✅ Content generated successfully:', {
@@ -135,8 +135,8 @@ export class OpenAIContentGenerator {
         tokens: result.usage.tokens,
         cost: `$${result.usage.cost.toFixed(4)}`,
         processingTime: `${Date.now() - startTime}ms`,
-        fallbacksUsed: multiResult.fallbacksUsed,
-        totalAttempts: multiResult.totalAttempts
+        apiKeyUsed: result.apiKeyUsed,
+        retryCount: result.retryCount
       });
 
       return contentResult;
@@ -362,23 +362,31 @@ Focus on creating valuable, informative content that genuinely helps readers whi
    * Test all provider connections
    */
   async testConnection(): Promise<boolean> {
-    const results = await multiProviderContentGenerator.testAllProviders();
-    return Object.values(results).some(result => result); // Return true if any provider works
+    const result = await enhancedOpenAIService.testConnection();
+    return result.success;
   }
 
   /**
    * Get detailed provider status
    */
-  async getProviderStatus(): Promise<Record<string, boolean>> {
-    return await multiProviderContentGenerator.testAllProviders();
+  async getProviderStatus(): Promise<Record<string, any>> {
+    const health = enhancedOpenAIService.getServiceHealth();
+    const connectionTest = await enhancedOpenAIService.testConnection();
+    return {
+      'Enhanced OpenAI': {
+        configured: enhancedOpenAIService.isConfigured(),
+        healthy: health.status === 'healthy',
+        connectionWorking: connectionTest.success,
+        details: health.details
+      }
+    };
   }
 
   /**
    * Check if any provider is configured
    */
   isConfigured(): boolean {
-    const status = multiProviderContentGenerator.getProviderStatus();
-    return Object.values(status).some(configured => configured);
+    return enhancedOpenAIService.isConfigured();
   }
 }
 
