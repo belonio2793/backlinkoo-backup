@@ -297,13 +297,30 @@ export class OpenAIService {
     if (!this.apiKey) return false;
 
     try {
-      const response = await fetch(`${this.baseURL}/models`, {
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`
+      console.log('🔍 Testing OpenAI connection with retry logic...');
+
+      const result = await this.retryWithBackoff(async () => {
+        const response = await fetch(`${this.baseURL}/models`, {
+          headers: {
+            'Authorization': `Bearer ${this.apiKey}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Connection test failed: ${response.status} - ${response.statusText}`);
         }
+
+        return response.ok;
+      }, {
+        ...this.defaultRetryConfig,
+        maxRetries: 3, // Use fewer retries for connection test
+        baseDelay: 500
       });
-      return response.ok;
-    } catch {
+
+      console.log('✅ OpenAI connection test successful');
+      return result;
+    } catch (error) {
+      console.error('❌ OpenAI connection test failed:', error);
       return false;
     }
   }
