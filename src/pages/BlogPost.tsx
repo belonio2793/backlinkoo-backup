@@ -379,13 +379,24 @@ export function BlogPost() {
 
       // Try fallback content generation if main AI fails
       try {
-        console.log('🔄 Attempting fallback content generation...');
+        console.log('🔄 Attempting fallback content generation for:', { primaryKeyword, targetUrl: blogPost.target_url, anchorText });
         const { SmartFallbackContent } = await import('@/services/smartFallbackContent');
+
+        if (!SmartFallbackContent || typeof SmartFallbackContent.generateContent !== 'function') {
+          throw new Error('SmartFallbackContent service not available');
+        }
+
         const fallbackContent = SmartFallbackContent.generateContent(
           primaryKeyword,
           blogPost.target_url,
           anchorText
         );
+
+        console.log('📝 Fallback content result:', {
+          contentLength: fallbackContent?.length,
+          hasContent: !!fallbackContent,
+          contentPreview: fallbackContent?.substring(0, 100) + '...'
+        });
 
         if (fallbackContent && fallbackContent.length > 100) {
           console.log('✅ Fallback content generated successfully');
