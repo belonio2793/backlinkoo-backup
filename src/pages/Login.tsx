@@ -124,8 +124,9 @@ const Login = () => {
           description: "You have been successfully signed in.",
         });
 
-        // Don't navigate manually - let the auth state listener handle it
-        // The auth state change will trigger navigation automatically
+        // Reset loading state and let the auth state listener handle navigation
+        setIsLoading(false);
+        return;
       } else {
         if (result.requiresEmailVerification) {
           setShowResendConfirmation(true);
