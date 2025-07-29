@@ -64,7 +64,7 @@ export class OpenAIContentGenerator {
 
     // Check if OpenAI is configured
     if (!openAIService.isConfigured()) {
-      throw new Error('OpenAI API key is not configured. Please set the VITE_OPENAI_API_KEY environment variable with a valid OpenAI API key to enable content generation.');
+      throw new Error('OpenAI API key is not configured. Please set the VITE_OPENAI_API_KEY environment variable with a valid OpenAI API key from https://platform.openai.com/api-keys to enable content generation.');
     }
 
     try {
@@ -126,7 +126,7 @@ export class OpenAIContentGenerator {
     } catch (error) {
       console.error('❌ Content generation failed:', error);
 
-      // Provide more helpful error messages
+      // Provide helpful error messages but DO NOT generate fallback content
       if (error instanceof Error) {
         if (error.message.includes('401') || error.message.includes('Invalid API key')) {
           throw new Error('Invalid OpenAI API key. Please check that your API key is correct and has sufficient credits. Visit https://platform.openai.com/api-keys to manage your API keys.');

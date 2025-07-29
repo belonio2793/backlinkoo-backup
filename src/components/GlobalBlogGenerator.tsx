@@ -545,23 +545,19 @@ export function GlobalBlogGenerator({
                            errorMessage.includes('Invalid API key') ||
                            errorMessage.includes('401');
 
-      if (errorMessage.includes('Invalid API key') || errorMessage.includes('401')) {
-        title = "🔑 OpenAI API Key Required";
-        description = "A valid OpenAI API key is required for content generation. Please configure your API key.";
-      } else if (errorMessage.includes('OpenAI API key is not configured')) {
-        title = "🔑 API Key Missing";
-        description = "OpenAI API key is not configured. Please set up your API key to generate content.";
+      if (errorMessage.includes('Invalid API key') || errorMessage.includes('401') ||
+          errorMessage.includes('OpenAI API key is not configured') || isConfigError) {
+        title = "Service Unavailable";
+        description = "Sorry, something went wrong. Please try again.";
       } else if (errorMessage.includes('rate limit') || errorMessage.includes('429')) {
-        title = "⏱️ Rate Limit Exceeded";
-        description = "OpenAI rate limit reached. Please wait a few minutes before trying again.";
+        title = "Service Busy";
+        description = "Sorry, something went wrong. Please try again.";
       } else if (errorMessage.includes('quota') || errorMessage.includes('insufficient_quota')) {
-        title = "💳 Quota Exceeded";
-        description = "Your OpenAI account has exceeded its usage quota. Please check your billing settings.";
-      } else if (isConfigError) {
-        title = "🔧 API Configuration Issue";
-        description = "AI service configuration issue detected. Please check your OpenAI API key settings.";
+        title = "Service Unavailable";
+        description = "Sorry, something went wrong. Please try again.";
       } else {
-        description = errorMessage;
+        title = "Generation Failed";
+        description = "Sorry, something went wrong. Please try again.";
       }
 
       toast({
@@ -915,7 +911,7 @@ export function GlobalBlogGenerator({
               ) : apiStatus.status === 'ready' ? (
                 <>
                   <Zap className="h-4 w-4 mr-2" />
-                  ✨ Ready! Create Your First Backlink For Free! 🚀
+                  Create Permanent Link
                 </>
               ) : (
                 <>
