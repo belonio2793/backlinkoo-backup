@@ -511,6 +511,7 @@ export function BlogPost() {
         {/* Article Content */}
         <div className="prose prose-lg prose-gray max-w-none">
           <div
+            key={`content-${blogPost.updated_at || blogPost.created_at}`}
             dangerouslySetInnerHTML={{ __html: formatBlogContent(blogPost.content) }}
             className="blog-content"
           />
