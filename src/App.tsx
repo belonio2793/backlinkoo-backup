@@ -15,7 +15,7 @@ const queryClient = new QueryClient();
 // Run content cleanup once on app startup
 if (typeof window !== 'undefined') {
   // Check if cleanup has been run before
-  const cleanupVersion = '1.0.0';
+  const cleanupVersion = '1.2.0'; // Updated to trigger geolocation cleanup
   const lastCleanup = localStorage.getItem('content_cleanup_version');
 
   if (lastCleanup !== cleanupVersion) {
