@@ -45,16 +45,9 @@ export function EnhancedDashboardRouter() {
 
         setUser(session?.user || null);
 
-        // Simple logic: if user is authenticated, show dashboard; otherwise redirect to home
-        if (session?.user) {
-          console.log('✅ User authenticated, showing dashboard');
-          setIsLoading(false);
-          return;
-        } else {
-          console.log('❌ User not authenticated, redirecting to login');
-          navigate('/login');
-          return;
-        }
+        // Set loading to false regardless of auth state to show dashboard
+        console.log('✅ Setting loading to false, will show dashboard');
+        setIsLoading(false);
       } catch (error) {
         console.error('Dashboard router error:', error);
         if (isMounted) {
