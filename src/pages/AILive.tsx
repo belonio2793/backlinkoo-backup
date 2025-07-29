@@ -11,19 +11,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Sparkles, 
-  Zap, 
-  Clock, 
-  Globe, 
-  CheckCircle2, 
-  AlertCircle, 
+import {
+  Sparkles,
+  Zap,
+  Clock,
+  Globe,
+  CheckCircle2,
+  AlertCircle,
   Copy,
   ExternalLink,
   Loader2,
   BookOpen,
   Users,
-  Shield
+  Shield,
+  Eye
 } from 'lucide-react';
 import { BuilderAIGenerator, type GenerationStatus, type BuilderAIResult } from '@/services/builderAIGenerator';
 import { useAuth } from '@/hooks/useAuth';
