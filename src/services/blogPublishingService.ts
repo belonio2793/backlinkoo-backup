@@ -74,7 +74,9 @@ export class BlogPublishingService {
 
       // For now, use fallback for any database issues since table might not exist
       console.warn('Database connection issue, using fallback post creation');
-      return this.createFallbackPost(postData);
+      const fallbackPost = this.createFallbackPost(postData);
+      console.log('✅ Successfully created fallback post:', fallbackPost.id);
+      return fallbackPost;
     }
   }
 
