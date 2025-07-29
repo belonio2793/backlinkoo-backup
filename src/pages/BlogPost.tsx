@@ -453,7 +453,10 @@ export function BlogPost() {
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+            <h1
+              key={`title-${blogPost.updated_at || blogPost.created_at}`}
+              className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight"
+            >
               {formatBlogTitle(blogPost.title)}
             </h1>
 
