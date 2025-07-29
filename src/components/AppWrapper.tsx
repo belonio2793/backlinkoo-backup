@@ -1,4 +1,40 @@
+import { Routes, Route } from 'react-router-dom';
 import { useReferralTracking } from '@/hooks/useReferralTracking';
+
+// Import all page components
+import Index from '@/pages/Index';
+import Login from '@/pages/Login';
+import EmailConfirmation from '@/pages/EmailConfirmation';
+import AuthCallback from '@/pages/AuthCallback';
+import PasswordReset from '@/pages/PasswordReset';
+import TermsOfService from '@/pages/TermsOfService';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
+import BlogPreview from '@/pages/BlogPreview';
+import StreamlinedBlog from '@/pages/StreamlinedBlog';
+import BlogCreator from '@/pages/BlogCreator';
+import BlogPost from '@/pages/BlogPost';
+import GuestDashboard from '@/pages/GuestDashboard';
+import AIContentTest from '@/pages/AIContentTest';
+import AILive from '@/pages/AILive';
+import FreeBacklink from '@/pages/FreeBacklink';
+import TestFreeBacklink from '@/pages/TestFreeBacklink';
+import NotFound from '@/pages/NotFound';
+import EnhancedDashboardRouter from '@/pages/EnhancedDashboardRouter';
+import AdminDashboard from '@/pages/AdminDashboard';
+import PaymentSuccess from '@/pages/PaymentSuccess';
+import PaymentCancelled from '@/pages/PaymentCancelled';
+import CampaignDeliverables from '@/pages/CampaignDeliverables';
+import EmailMarketing from '@/pages/EmailMarketing';
+import BacklinkReport from '@/pages/BacklinkReport';
+import ReportViewer from '@/pages/ReportViewer';
+import NoHandsSEO from '@/pages/NoHandsSEO';
+import AffiliateProgram from '@/pages/AffiliateProgram';
+import PromotionMaterials from '@/pages/PromotionMaterials';
+
+// Import guard components
+import AdminAuthGuard from '@/components/AdminAuthGuard';
+import EmailVerificationGuard from '@/components/EmailVerificationGuard';
+import TrialNotificationBanner from '@/components/TrialNotificationBanner';
 
 export const AppWrapper = () => {
   useReferralTracking();
