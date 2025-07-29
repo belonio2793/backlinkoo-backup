@@ -78,19 +78,33 @@ Format the response as clean HTML with proper semantic structure.`;
     }
   }
 
-  // Enhance content for SEO
-  content = enhanceContentForSEO(content, keyword, anchorText, targetUrl);
+  // Format and enhance content using ContentFormatter
+  console.log('📝 Formatting content for optimal structure...');
+  const formatted = ContentFormatter.formatContent(content, {
+    keyword,
+    anchorText,
+    targetUrl,
+    enforceStructure: true,
+    maxH1Count: 1
+  });
 
-  // Extract title
-  const title = extractTitle(content, keyword);
+  // Use formatted content and metrics
+  content = formatted.content;
+  const title = formatted.title;
+  const wordCount = formatted.wordCount;
+  const seoScore = formatted.seoScore;
+  const readingTime = Math.ceil(wordCount / 200);
 
   // Generate slug
   const slug = generateSlug(title, keyword);
 
-  // Calculate metrics
-  const wordCount = countWords(content);
-  const readingTime = Math.ceil(wordCount / 200);
-  const seoScore = calculateBasicSEOScore(content, keyword);
+  // Log formatting improvements
+  if (formatted.fixes.length > 0) {
+    console.log('✅ Applied formatting fixes:', formatted.fixes);
+  }
+  if (formatted.issues.length > 0) {
+    console.log('⚠️ Content issues detected:', formatted.issues);
+  }
 
   console.log(`📊 Generated content: ${wordCount} words, ${readingTime} min read, SEO: ${seoScore}/100`);
 
