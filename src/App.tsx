@@ -12,6 +12,22 @@ import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 
 const queryClient = new QueryClient();
 
+// Run content cleanup once on app startup
+if (typeof window !== 'undefined') {
+  // Check if cleanup has been run before
+  const cleanupVersion = '1.0.0';
+  const lastCleanup = localStorage.getItem('content_cleanup_version');
+
+  if (lastCleanup !== cleanupVersion) {
+    console.log('🧹 Running one-time content cleanup...');
+    const cleanedCount = cleanupStoredBlogPosts();
+    if (cleanedCount > 0) {
+      console.log(`✅ Fixed ${cleanedCount} blog posts with malformed content`);
+    }
+    localStorage.setItem('content_cleanup_version', cleanupVersion);
+  }
+}
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
