@@ -54,50 +54,10 @@ export class AIContentEngine {
     {
       name: 'openai',
       service: openAIService,
-      weight: 0.95,  // Primary provider with highest weight
+      weight: 1.0,  // Only provider
       model: 'gpt-3.5-turbo',
       maxTokens: 3500,
-      priority: 1  // Highest priority for failover
-    },
-    {
-      name: 'huggingface',
-      service: huggingFaceService,
-      weight: 0.80,
-      model: 'microsoft/DialoGPT-large',
-      maxTokens: 2000,
-      priority: 2
-    },
-    {
-      name: 'cohere',
-      service: cohereService,
-      weight: 0.75,
-      model: 'command',
-      maxTokens: 3000,
-      priority: 3
-    },
-    {
-      name: 'grok',
-      service: grokService,
-      weight: 0.70,
-      model: 'grok-2-1212',
-      maxTokens: 3000,
-      priority: 4
-    },
-    {
-      name: 'deepai',
-      service: deepAIService,
-      weight: 0.65,
-      model: 'text-generator',
-      maxTokens: 0, // DeepAI doesn't use token limits in the same way
-      priority: 5
-    },
-    {
-      name: 'rytr',
-      service: rytrService,
-      weight: 0.60,
-      model: 'blog_idea_outline',
-      maxTokens: 15000, // Rytr uses characters
-      priority: 6
+      priority: 1
     }
   ];
 
