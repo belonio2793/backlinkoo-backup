@@ -218,13 +218,13 @@ export function BlogPost() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate('/login')}
+                    onClick={() => setShowLoginModal(true)}
                   >
                     Sign In
                   </Button>
                   <Button
                     size="sm"
-                    onClick={() => navigate('/login')}
+                    onClick={() => setShowLoginModal(true)}
                   >
                     Register
                   </Button>
