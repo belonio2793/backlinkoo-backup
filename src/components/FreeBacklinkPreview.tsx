@@ -40,6 +40,7 @@ interface FreeBacklinkPreviewProps {
 export function FreeBacklinkPreview({ content, onRegenerate, onDelete }: FreeBacklinkPreviewProps) {
   const [viewMode, setViewMode] = useState<'preview' | 'html'>('preview');
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<{
     hours: number;
     minutes: number;
