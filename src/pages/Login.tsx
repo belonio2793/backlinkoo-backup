@@ -129,65 +129,24 @@ const Login = () => {
         }, 100);
         return;
       } else {
-        clearTimeout(timeoutId);
-
         if (result.requiresEmailVerification) {
           setShowResendConfirmation(true);
           setResendEmail(loginEmail);
-          toast({
-            title: "Email verification required",
-            description: "Please check your email and verify your account before signing in.",
-            variant: "destructive",
-          });
-        } else {
-          // Provide specific error messages based on error type
-          let errorTitle = "Sign in failed";
-          let errorDescription = result.error || 'An error occurred during sign in.';
-
-          if (result.error?.includes('Invalid login credentials')) {
-            errorTitle = "Invalid credentials";
-            errorDescription = "The email or password you entered is incorrect. Please try again.";
-          } else if (result.error?.includes('rate limit') || result.error?.includes('too many')) {
-            errorTitle = "Too many attempts";
-            errorDescription = "You've made too many login attempts. Please wait a few minutes before trying again.";
-          } else if (result.error?.includes('network') || result.error?.includes('fetch')) {
-            errorTitle = "Connection error";
-            errorDescription = "Unable to connect to our servers. Please check your internet connection and try again.";
-          }
-
-          toast({
-            title: errorTitle,
-            description: errorDescription,
-            variant: "destructive",
-          });
         }
+
+        toast({
+          title: "Sign in failed",
+          description: result.error || 'An error occurred during sign in.',
+          variant: "destructive",
+        });
       }
 
     } catch (error: any) {
-      clearTimeout(timeoutId);
       console.error('🔐 Login exception:', error);
 
-      // Detect different types of errors
-      let errorTitle = "Sign in failed";
-      let errorDescription = "An unexpected error occurred. Please try again.";
-
-      if (error.message?.includes('timeout')) {
-        errorTitle = "Login timeout";
-        errorDescription = "The login request took too long. Please check your connection and try again.";
-      } else if (error.message?.includes('fetch') || error.message?.includes('network')) {
-        errorTitle = "Network error";
-        errorDescription = "Unable to connect to our servers. Please check your internet connection.";
-      } else if (error.message?.includes('Failed to fetch')) {
-        errorTitle = "Connection failed";
-        errorDescription = "Cannot reach the authentication server. Please try again in a moment.";
-      } else if (error.name === 'AbortError') {
-        errorTitle = "Request cancelled";
-        errorDescription = "The login request was cancelled. Please try again.";
-      }
-
       toast({
-        title: errorTitle,
-        description: errorDescription,
+        title: "Sign in failed",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
