@@ -124,8 +124,8 @@ const Login = () => {
           description: "You have been successfully signed in.",
         });
 
-
-        navigate('/dashboard');
+        // Don't navigate manually - let the auth state listener handle it
+        // The auth state change will trigger navigation automatically
       } else {
         if (result.requiresEmailVerification) {
           setShowResendConfirmation(true);
