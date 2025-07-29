@@ -77,17 +77,9 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
   };
 
   const resetAndClose = () => {
-    // Reset all form states
-    setLoginEmail("");
-    setLoginPassword("");
-    setSignupEmail("");
-    setSignupPassword("");
-    setConfirmPassword("");
-    setFirstName("");
     setForgotPasswordEmail("");
     setShowForgotPassword(false);
     setIsLoading(false);
-    setActiveTab(defaultTab);
     onClose();
   };
 
