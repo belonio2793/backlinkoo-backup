@@ -249,6 +249,11 @@ export function GlobalBlogGenerator({
         sessionId: request.sessionId
       });
 
+      // Check if the free backlink service is ready (OpenAI configured)
+      if (!freeBacklinkService.isReady()) {
+        throw new Error("Content generation service is not configured. Please try again later or contact support.");
+      }
+
       // Use the new free backlink service instead of the old globalBlogGenerator
       const freeBacklinkRequest = {
         targetUrl: request.targetUrl,
@@ -291,7 +296,7 @@ export function GlobalBlogGenerator({
         updateRemainingRequests();
 
         toast({
-          title: "Blog post generated successfully! ���",
+          title: "Blog post generated successfully! 🎉",
           description: "Your free backlink post is ready! It will auto-delete in 24 hours unless you register an account.",
         });
 
