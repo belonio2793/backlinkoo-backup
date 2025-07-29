@@ -85,7 +85,7 @@ export class OpenAIOnlyContentGenerator {
         wordCount: wordCount
       });
 
-      const result = await openAIService.generateContent(prompt, openAIOptions);
+      const result = await enhancedOpenAIService.generateContent(prompt, openAIOptions);
 
       if (!result.success || !result.content) {
         throw new Error(`OpenAI generation failed: ${result.error || 'Unknown error'}`);
