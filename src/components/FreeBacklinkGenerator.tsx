@@ -189,12 +189,12 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
         </AlertDescription>
       </Alert>
 
-      {/* Generation Form */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-purple-200">
-          <CardHeader>
+      {/* Enhanced Generation Form */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card className="border-purple-200 shadow-xl bg-gradient-to-br from-white to-purple-50/30 hover:shadow-2xl transition-shadow duration-300">
+          <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-2">
-              <Link className="h-5 w-5 text-purple-600" />
+              <Link className="h-5 w-5" />
               Target & Keywords
             </CardTitle>
           </CardHeader>
