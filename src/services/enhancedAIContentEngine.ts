@@ -9,6 +9,7 @@ import { grokService } from './api/grok';
 import { cohereService } from './api/cohere';
 import { huggingFaceService } from './api/huggingface';
 import { SmartFallbackContent } from './smartFallbackContent';
+import { formatBlogContent } from '../utils/textFormatting';
 
 export interface ContentGenerationRequest {
   keyword: string;
