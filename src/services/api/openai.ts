@@ -53,28 +53,13 @@ export class OpenAIService {
 
   constructor() {
     // Get API key from environment variables or secure config
-    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || this.getSecureApiKey();
+    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY;
 
-    if (!this.apiKey || this.apiKey === 'your-openai-api-key-here') {
+    if (!this.apiKey || this.apiKey === 'your-openai-api-key-here' || this.apiKey === 'sk-proj-YOUR_ACTUAL_OPENAI_API_KEY_HERE') {
       console.warn('❌ OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable.');
       console.warn('📋 Get your API key from: https://platform.openai.com/api-keys');
     } else {
-      console.log('✅ OpenAI API key configured successfully');
-    }
-  }
-
-  private getSecureApiKey(): string {
-    try {
-      // Dynamic import to avoid circular dependencies and ensure it works in both environments
-      if (typeof window !== 'undefined') {
-        // Browser environment - use dynamic import
-        return '';
-      } else {
-        // Server environment - we can't access secure config from client side
-        return '';
-      }
-    } catch {
-      return '';
+      console.log('✅ OpenAI API key configured successfully via secure config');
     }
   }
 
