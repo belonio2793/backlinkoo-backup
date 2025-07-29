@@ -308,5 +308,4 @@ export function RegistrationModal({
   );
 }
 
-export { RegistrationModal };
 export default RegistrationModal;
