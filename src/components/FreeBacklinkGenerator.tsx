@@ -235,8 +235,7 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
         </div>
       </div>
 
-      {/* Provider Status */}
-      <ProviderStatus showDetails={true} className="mb-4" />
+
 
       {/* Service Status Alert */}
       {!isReady && (
