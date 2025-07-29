@@ -30,7 +30,9 @@ export class HuggingFaceService {
   private baseURL = 'https://api-inference.huggingface.co/models';
 
   constructor() {
-    this.token = import.meta.env.VITE_HUGGINGFACE_TOKEN || 
+    this.token = import.meta.env.VITE_HF_ACCESS_TOKEN ||
+                 import.meta.env.VITE_HUGGINGFACE_TOKEN ||
+                 (typeof process !== 'undefined' ? process.env.HF_ACCESS_TOKEN : '') ||
                  (typeof process !== 'undefined' ? process.env.HUGGINGFACE_TOKEN : '') ||
                  '';
     
