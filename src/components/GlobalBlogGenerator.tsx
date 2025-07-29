@@ -949,6 +949,11 @@ export function GlobalBlogGenerator({
             </Card>
           )}
 
+          {/* API Status & Connection Test */}
+          <div className="border-t pt-4">
+            <ApiConnectionTest />
+          </div>
+
           {/* Action Buttons */}
           <div className="flex gap-3">
             <Button
