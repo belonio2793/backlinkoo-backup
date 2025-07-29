@@ -273,6 +273,67 @@ export function capitalizeSentences(text: string): string {
 }
 
 /**
+ * Reconstructs broken sentences and fixes word continuations
+ */
+function reconstructBrokenSentences(content: string): string {
+  let fixed = content;
+
+  // Fix common broken word patterns like "cost\n\nEffectively" -> "cost effectively"
+  fixed = fixed.replace(/([a-z])\s*\n+\s*([A-Z][a-z]+ly)\b/g, '$1 $2');
+
+  // Fix broken sentences where a word is split across lines
+  fixed = fixed.replace(/([a-z])\s*\n+\s*([a-z]{2,})/g, '$1 $2');
+
+  // Fix sentences that end with incomplete words followed by completion on next line
+  fixed = fixed.replace(/([a-z])\s*\n+\s*([a-z]+[.!?])/g, '$1$2');
+
+  // Fix broken sentences like "follow." followed by "- Up" -> "follow-up"
+  fixed = fixed.replace(/([a-z]+)\.\s*\n+\s*-\s*([A-Z][a-z]+)/g, '$1-$2');
+
+  // Fix sentences broken across paragraph tags
+  fixed = fixed.replace(/([a-z,])\s*<\/p>\s*<p>\s*([a-z])/gi, '$1 $2');
+
+  // Fix list items that contain sentence fragments
+  fixed = fixed.replace(/<li[^>]*>([^<]*?[a-z])\s*<\/li>\s*<li[^>]*>\s*([a-z][^<]*?)<\/li>/gi, '<li>$1 $2</li>');
+
+  // Remove orphaned punctuation at the beginning of sentences
+  fixed = fixed.replace(/^\s*[.!?:,-]\s*/gm, '');
+
+  // Fix sentences that start with lowercase after periods
+  fixed = fixed.replace(/([.!?])\s+([a-z])/g, '$1 ' + ((match, punct, letter) => letter.toUpperCase()));
+
+  return fixed;
+}
+
+/**
+ * Removes all indentations and normalizes spacing
+ */
+function removeIndentations(content: string): string {
+  let fixed = content;
+
+  // Remove all leading spaces and tabs from lines
+  fixed = fixed.replace(/^[ \t]+/gm, '');
+
+  // Remove indentation from list items
+  fixed = fixed.replace(/^\s*(<li[^>]*>)\s+/gm, '$1');
+
+  // Normalize multiple spaces to single spaces
+  fixed = fixed.replace(/[ \t]{2,}/g, ' ');
+
+  // Remove spaces at the end of lines
+  fixed = fixed.replace(/[ \t]+$/gm, '');
+
+  // Normalize line breaks - no more than 2 consecutive
+  fixed = fixed.replace(/\n{3,}/g, '\n\n');
+
+  // Remove spaces around HTML tags
+  fixed = fixed.replace(/\s+(<[^>]+>)\s+/g, '$1');
+  fixed = fixed.replace(/>\s+</g, '><');
+
+  return fixed;
+}
+
+/**
  * Fixes broken HTML structure and paragraph formatting
  */
 function fixBrokenHTMLStructure(content: string): string {
