@@ -35,8 +35,17 @@ function detectKeywordCategory(keyword) {
 }
 
 function generateFoodContent(keyword, anchorText, url) {
-  const currentYear = new Date().getFullYear();
-  return `<h1>${keyword.charAt(0).toUpperCase() + keyword.slice(1)}: Complete Guide for ${currentYear}</h1>
+  // Generate more dynamic titles instead of template format
+  const titleVariations = [
+    `The Ultimate ${keyword} Experience: What You Need to Know`,
+    `Discovering ${keyword}: A Food Lover's Guide`,
+    `${keyword} Unveiled: Your Complete Culinary Journey`,
+    `The Art of ${keyword}: From Basics to Mastery`
+  ];
+  const hash = keyword.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+  const dynamicTitle = titleVariations[hash % titleVariations.length];
+
+  return `<h1>${dynamicTitle}</h1>
 
 <h2>Introduction</h2>
 
