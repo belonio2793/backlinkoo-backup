@@ -186,7 +186,7 @@ export default function AILive() {
                       value={keyword}
                       onChange={(e) => setKeyword(e.target.value)}
                       className="mt-2 h-12 text-base"
-                      disabled={isGenerating || hasUsedLimit}
+                      disabled={isGenerating}
                     />
                     <p className="text-xs text-gray-500 mt-1">The main topic your article will focus on</p>
                   </div>
