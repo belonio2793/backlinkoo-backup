@@ -116,11 +116,13 @@ Please follow these SEO best practices:
 3. Write in a conversational, engaging tone
 4. Include relevant subheadings
 5. Add a compelling introduction and conclusion
-6. Ensure the anchor text "${request.anchorText}" is naturally integrated with the link to ${request.targetUrl}
+6. IMPORTANT: Include the anchor text "${request.anchorText}" as a link to ${request.targetUrl} at least 2-3 times throughout the content
 7. Make the content readable and valuable to users
 8. Use proper paragraph breaks and formatting
 9. Include relevant keywords and semantic variations
 10. Write exactly 1000 words
+
+CRITICAL REQUIREMENT: You MUST include at least 2 instances of the anchor text "${request.anchorText}" linked to ${request.targetUrl} in natural, contextual ways throughout the article. This is essential for backlink optimization.
 
 Format the response as clean HTML with proper semantic structure.`;
   }
