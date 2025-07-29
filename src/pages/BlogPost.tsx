@@ -284,12 +284,14 @@ export function BlogPost() {
       }
 
       // Update the blog post with new content
+      const newBlogPost = result.data.blogPost;
       const updatedBlogPost = {
         ...blogPost,
-        content: result.finalContent,
-        word_count: result.metadata.wordCount,
-        reading_time: result.metadata.readingTime,
-        seo_score: result.metadata.seoScore,
+        content: newBlogPost.content,
+        title: newBlogPost.title,
+        word_count: newBlogPost.word_count,
+        reading_time: newBlogPost.reading_time,
+        seo_score: newBlogPost.seo_score,
         updated_at: new Date().toISOString()
       };
 
