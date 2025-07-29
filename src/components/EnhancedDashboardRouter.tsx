@@ -43,8 +43,9 @@ export function EnhancedDashboardRouter() {
         setHasTrialPosts(validTrialPosts.length > 0);
 
         // Get guest analytics for dashboard display
+        let guestData = null;
         if (!session?.user) {
-          const guestData = getGuestData();
+          guestData = getGuestData();
           setGuestAnalytics({
             sessionDuration: getSessionDuration(),
             interactions: guestData.interactions
@@ -61,7 +62,7 @@ export function EnhancedDashboardRouter() {
           if (validTrialPosts.length > 0) {
             // Show trial dashboard with conversion prompts
             return;
-          } else if (guestData.interactions > 0 || getSessionDuration() > 0) {
+          } else if (guestData && (guestData.interactions > 0 || getSessionDuration() > 0)) {
             // Show guest onboarding dashboard for engaged visitors
             return;
           } else {
