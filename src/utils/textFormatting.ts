@@ -47,8 +47,10 @@ function capitalizeWord(word: string): string {
 /**
  * Formats blog content to fix common issues:
  * - Proper title case for headings
- * - Convert bullet points to hyphenated format
+ * - Convert bullet points to hyphenated format with line separation
  * - Proper spacing around asterisks
+ * - Capitalize first letter of every sentence
+ * - Format bullet points with proper line breaks
  */
 export function formatBlogContent(content: string): string {
   if (!content) return '';
@@ -66,17 +68,26 @@ export function formatBlogContent(content: string): string {
     }
   );
 
-  // Convert bullet points to hyphenated format
+  // Convert bullet points to hyphenated format with proper line breaks
   formattedContent = convertBulletPointsToHyphens(formattedContent);
 
   // Fix spacing around asterisks
   formattedContent = fixAsteriskSpacing(formattedContent);
 
+  // Format inline bullet points with proper line separation
+  formattedContent = formatInlineBulletPoints(formattedContent);
+
+  // Capitalize first letter of every sentence
+  formattedContent = capitalizeSentences(formattedContent);
+
+  // Clean up multiple consecutive line breaks
+  formattedContent = formattedContent.replace(/\n{3,}/g, '\n\n');
+
   return formattedContent;
 }
 
 /**
- * Converts bullet points from ul/ol/li structure to simple hyphenated format
+ * Converts bullet points from ul/ol/li structure to simple hyphenated format with proper line breaks
  */
 function convertBulletPointsToHyphens(content: string): string {
   let fixed = content;
@@ -87,9 +98,11 @@ function convertBulletPointsToHyphens(content: string): string {
     const items = listContent.match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || [];
     const hyphenItems = items.map((item: string) => {
       const content = item.replace(/<\/?li[^>]*>/gi, '').trim();
-      return `- ${content}`;
+      // Ensure first letter is capitalized
+      const capitalizedContent = content.charAt(0).toUpperCase() + content.slice(1);
+      return `- ${capitalizedContent}`;
     });
-    return hyphenItems.join('\n');
+    return '\n' + hyphenItems.join('\n') + '\n';
   });
 
   // Convert ol/li structures to hyphenated lists (instead of numbered)
@@ -97,9 +110,11 @@ function convertBulletPointsToHyphens(content: string): string {
     const items = listContent.match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || [];
     const hyphenItems = items.map((item: string) => {
       const content = item.replace(/<\/?li[^>]*>/gi, '').trim();
-      return `- ${content}`;
+      // Ensure first letter is capitalized
+      const capitalizedContent = content.charAt(0).toUpperCase() + content.slice(1);
+      return `- ${capitalizedContent}`;
     });
-    return hyphenItems.join('\n');
+    return '\n' + hyphenItems.join('\n') + '\n';
   });
 
   // Clean up any orphaned li tags
@@ -134,16 +149,7 @@ function fixAsteriskSpacing(content: string): string {
   return fixed;
 }
 
-/**
- * Capitalizes the first letter of each sentence
- */
-export function capitalizeSentences(text: string): string {
-  if (!text) return '';
-  
-  return text.replace(/(^|[.!?]\s+)([a-z])/g, (match, prefix, letter) => {
-    return prefix + letter.toUpperCase();
-  });
-}
+
 
 /**
  * Formats a blog title with proper capitalization
@@ -165,6 +171,52 @@ export function formatBlogTitle(title: string): string {
   formatted = formatted.replace(/\bCfo\b/gi, 'CFO');
 
   return formatted;
+}
+
+/**
+ * Formats inline bullet points that appear within paragraphs or text blocks
+ * Separates them with proper line breaks and capitalizes first letters
+ */
+function formatInlineBulletPoints(content: string): string {
+  let formatted = content;
+
+  // Handle patterns like "- item1 - item2 - item3" and separate them with line breaks
+  formatted = formatted.replace(/\s*-\s*([^-\n]+?)\s*-\s*([^-\n]+)/g, (match, ...items) => {
+    // Split on hyphens and clean up each item
+    const allItems = match.split(/\s*-\s*/).filter(item => item.trim());
+    const formattedItems = allItems.map(item => {
+      const cleanItem = item.trim();
+      if (cleanItem) {
+        // Capitalize first letter and ensure proper punctuation
+        const capitalized = cleanItem.charAt(0).toUpperCase() + cleanItem.slice(1);
+        return `- ${capitalized}`;
+      }
+      return '';
+    }).filter(item => item);
+
+    return '\n' + formattedItems.join('\n') + '\n';
+  });
+
+  // Handle bullet points that are run together without proper spacing
+  formatted = formatted.replace(/([a-z])\s*-\s*([A-Z][^-]*)/g, (match, prevChar, nextItem) => {
+    return `${prevChar}\n- ${nextItem}`;
+  });
+
+  // Clean up any double line breaks that might have been created
+  formatted = formatted.replace(/\n{3,}/g, '\n\n');
+
+  return formatted;
+}
+
+/**
+ * Enhanced sentence capitalization that handles various punctuation marks
+ */
+export function capitalizeSentences(text: string): string {
+  if (!text) return '';
+
+  return text.replace(/(^|[.!?:]\s+|\n\s*)([a-z])/g, (match, prefix, letter) => {
+    return prefix + letter.toUpperCase();
+  });
 }
 
 /**
