@@ -138,9 +138,9 @@ export class NoHandsSEOVerificationService {
         return [];
       }
 
-      // Filter for NO Hands SEO campaigns client-side
+      // Filter for Backlink ∞ Automation Link Building (beta) campaigns client-side
       const noHandsSEOCampaigns = data?.filter(campaign =>
-        campaign.name?.includes('NO Hands SEO') ||
+        campaign.name?.includes('Backlink ∞ Automation Link Building (beta)') ||
         campaign.campaign_type === 'no_hands_seo'
       ) || [];
 
