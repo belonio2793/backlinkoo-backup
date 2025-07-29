@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { publishedBlogService, type PublishedBlogPost } from '@/services/publishedBlogService';
 import { ClaimTrialPostDialog } from '@/components/ClaimTrialPostDialog';
+import { LoginModal } from '@/components/LoginModal';
 import { supabase } from '@/integrations/supabase/client';
 import { formatBlogTitle, formatBlogContent, getTrendingLabel } from '@/utils/textFormatting';
 import { Footer } from '@/components/Footer';
