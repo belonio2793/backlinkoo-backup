@@ -91,10 +91,22 @@ export function EnhancedDashboardRouter() {
     return <Dashboard />;
   }
 
-  // For non-authenticated users, redirect to /redirect
-  console.log('🚫 No authenticated user, redirecting to /redirect');
-  navigate('/redirect');
-  return null;
+  // For non-authenticated users, show a simple message or redirect
+  console.log('🚫 No authenticated user, showing fallback');
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center">
+        <h2 className="text-xl font-semibold mb-2">Access Required</h2>
+        <p className="text-muted-foreground mb-4">Please log in to access your dashboard.</p>
+        <button
+          onClick={() => navigate('/login')}
+          className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+        >
+          Go to Login
+        </button>
+      </div>
+    </div>
+  );
 }
 
 // Guest Onboarding Dashboard Component
