@@ -263,9 +263,18 @@ const Index = () => {
               {!authChecked ? (
                 <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
               ) : user ? (
-                <Button onClick={() => navigate("/dashboard")} className="font-medium">
-                  Dashboard
-                </Button>
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setShowLoginModal(true)}
+                    className="font-medium"
+                  >
+                    Sign Up
+                  </Button>
+                  <Button onClick={() => navigate("/dashboard")} className="font-medium">
+                    Dashboard
+                  </Button>
+                </>
               ) : (
                 <>
                   {/* Show trial upgrade button if user has trial posts */}
