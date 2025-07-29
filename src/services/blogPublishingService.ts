@@ -55,7 +55,8 @@ export class BlogPublishingService {
       .single();
 
     if (error) {
-      throw new Error(`Failed to publish blog post: ${error.message}`);
+      console.error('Database error:', error);
+      throw new Error(`Failed to publish blog post: ${error.message || error.details || JSON.stringify(error)}`);
     }
 
     return data as BlogPost;
