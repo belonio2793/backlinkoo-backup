@@ -23,45 +23,42 @@ class AILiveContentService {
     }
   }
 
-  async checkProviderHealth(providerName: string): Promise<boolean> {
-    const provider = this.providers[providerName];
-    if (!provider || !provider.apiKey) {
-      console.error(`No configuration found for provider: ${providerName}`);
+  async checkHealth(): Promise<boolean> {
+    if (!this.apiKey) {
+      console.error('OpenAI API key not configured');
       return false;
     }
 
     try {
-      const response = await fetch(provider.endpoint.replace('/chat/completions', '/models'), {
+      const response = await fetch('https://api.openai.com/v1/models', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${provider.apiKey}`,
+          'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json'
         }
       });
 
       return response.ok;
     } catch (error) {
-      console.error(`Health check failed for ${providerName}:`, error);
+      console.error('OpenAI health check failed:', error);
       return false;
     }
   }
 
   async generateContent(
-    providerName: string,
     prompt: string,
     keyword: string,
     anchorText: string,
-    url: string
+    url: string,
+    retryCount: number = 3
   ): Promise<GenerationResult> {
-    const provider = this.providers[providerName];
-    
-    if (!provider || !provider.apiKey) {
+    if (!this.apiKey) {
       return {
         content: '',
         wordCount: 0,
-        provider: providerName,
+        provider: 'OpenAI',
         success: false,
-        error: 'Provider not configured'
+        error: 'OpenAI API key not configured'
       };
     }
 
@@ -92,7 +89,7 @@ Additional requirements:
 Please create a comprehensive, well-structured blog post that naturally incorporates the anchor text "${anchorText}" as a clickable link to "${url}".`;
 
       const requestBody = {
-        model: provider.model,
+        model: this.model,
         messages: [
           {
             role: 'system',
@@ -109,12 +106,12 @@ Please create a comprehensive, well-structured blog post that naturally incorpor
         frequency_penalty: 0.1
       };
 
-      console.log(`Generating content with ${providerName}...`, { prompt: userPrompt.substring(0, 100) });
+      console.log('Generating content with OpenAI...', { prompt: userPrompt.substring(0, 100) });
 
-      const response = await fetch(provider.endpoint, {
+      const response = await fetch(this.endpoint, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${provider.apiKey}`,
+          'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(requestBody)
@@ -139,17 +136,25 @@ Please create a comprehensive, well-structured blog post that naturally incorpor
       return {
         content,
         wordCount,
-        provider: providerName,
+        provider: 'OpenAI',
         success: true
       };
 
     } catch (error) {
-      console.error(`Content generation failed for ${providerName}:`, error);
-      
+      console.error('OpenAI content generation failed:', error);
+
+      // Retry logic with exponential backoff
+      if (retryCount > 0 && (error instanceof Error &&
+          (error.message.includes('429') || error.message.includes('500') || error.message.includes('502')))) {
+        console.log(`Retrying in ${(4 - retryCount) * 1000}ms... (${retryCount} attempts left)`);
+        await new Promise(resolve => setTimeout(resolve, (4 - retryCount) * 1000));
+        return this.generateContent(prompt, keyword, anchorText, url, retryCount - 1);
+      }
+
       return {
         content: '',
         wordCount: 0,
-        provider: providerName,
+        provider: 'OpenAI',
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
       };
