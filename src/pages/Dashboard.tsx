@@ -228,7 +228,7 @@ const Dashboard = () => {
     try {
       const currentUser = authUser || user;
       if (!currentUser) {
-        console.log('���� No current user for fetchUserData');
+        console.log('🔍 No current user for fetchUserData');
         return;
       }
 
@@ -312,6 +312,11 @@ const Dashboard = () => {
       setIsFirstTimeUser(true);
       setUserType('user');
     }
+  };
+
+  const loadGlobalStats = async () => {
+    // Simple function to trigger stats reload - currently just used for callback consistency
+    console.log('Loading global stats after blog generation...');
   };
 
   const fetchCampaigns = async (authUser?: User) => {
