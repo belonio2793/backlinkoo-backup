@@ -440,32 +440,38 @@ Create content that readers would want to bookmark, share, or reference later be
       console.warn('⚠️ Generated content missing H1 tag - content may need manual review');
     }
 
-    // Convert markdown to proper HTML structure
-    console.log('📝 Converting markdown to HTML...');
-    enhanced = this.convertMarkdownToSEOHTML(enhanced);
-    console.log('📝 After markdown conversion:', { length: enhanced.length });
+    try {
+      // Convert markdown to proper HTML structure
+      console.log('📝 Converting markdown to HTML...');
+      enhanced = this.convertMarkdownToSEOHTML(enhanced);
+      console.log('📝 After markdown conversion:', { length: enhanced.length });
 
-    // Ensure proper paragraph structure (short paragraphs, 2-4 sentences)
-    enhanced = this.optimizeParagraphStructure(enhanced);
-    console.log('📝 After paragraph optimization:', { length: enhanced.length });
+      // Ensure proper paragraph structure (short paragraphs, 2-4 sentences)
+      enhanced = this.optimizeParagraphStructure(enhanced);
+      console.log('📝 After paragraph optimization:', { length: enhanced.length });
 
-    // Integrate backlink naturally with proper anchor text
-    enhanced = this.integrateBacklinkNaturally(enhanced, request);
-    console.log('📝 After backlink integration:', { length: enhanced.length });
+      // Integrate backlink naturally with proper anchor text
+      enhanced = this.integrateBacklinkNaturally(enhanced, request);
+      console.log('📝 After backlink integration:', { length: enhanced.length });
 
-    // Add proper keyword emphasis using strong and em tags
-    enhanced = this.addKeywordEmphasis(enhanced, request);
-    console.log('📝 After keyword emphasis:', { length: enhanced.length });
+      // Add proper keyword emphasis using strong and em tags
+      enhanced = this.addKeywordEmphasis(enhanced, request);
+      console.log('📝 After keyword emphasis:', { length: enhanced.length });
 
-    // Ensure proper content length (minimum 1000 words)
-    enhanced = await this.ensureContentLength(enhanced, request);
-    console.log('📝 After content length check:', { length: enhanced.length });
+      // Ensure proper content length (minimum 1000 words)
+      enhanced = await this.ensureContentLength(enhanced, request);
+      console.log('📝 After content length check:', { length: enhanced.length });
 
-    // Note: Meta tags and structured data should be handled by the page template, not inline content
+      // Note: Meta tags and structured data should be handled by the page template, not inline content
 
-    // Apply enhanced text formatting (bullet points, capitalization)
-    enhanced = formatBlogContent(enhanced);
-    console.log('📝 After text formatting:', { length: enhanced.length });
+      // Apply enhanced text formatting (bullet points, capitalization)
+      enhanced = formatBlogContent(enhanced);
+      console.log('📝 After text formatting:', { length: enhanced.length });
+    } catch (enhancementError) {
+      console.error('❌ Error during content enhancement:', enhancementError);
+      console.log('🔧 Falling back to original content due to enhancement error');
+      enhanced = content; // Fall back to original content if enhancement fails
+    }
 
     const finalContent = enhanced.trim();
     console.log('✅ Content enhancement complete:', {
