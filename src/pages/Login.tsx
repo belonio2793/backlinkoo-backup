@@ -55,7 +55,7 @@ const Login = () => {
 
       if (event === 'SIGNED_IN' && session && session.user) {
         console.log('🔐 Auth state change: redirecting to dashboard');
-        setTimeout(() => navigate('/my-dashboard'), 100);
+        setTimeout(() => navigate('/dashboard'), 100);
       } else if (event === 'SIGNED_OUT') {
         console.log('🔐 Auth state change: user signed out');
         // Stay on login page
