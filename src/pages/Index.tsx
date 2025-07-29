@@ -294,6 +294,13 @@ const Index = () => {
                       }} className="font-medium">
                         Sign In
                       </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => navigate("/free-backlink")}
+                        className="font-medium border-purple-200 text-purple-700 hover:bg-purple-50"
+                      >
+                        Free Backlink
+                      </Button>
                       <Button onClick={() => {
                         console.log('Get Started button clicked');
                         navigate("/login");
