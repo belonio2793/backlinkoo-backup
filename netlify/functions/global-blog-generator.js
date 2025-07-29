@@ -596,7 +596,7 @@ exports.handler = async (event, context) => {
           averageGenerationTime: aiProvider ? 45 : 12,
           successRate: aiProvider ? 98.5 : 96.8,
           userCountry: userLocation || 'Unknown',
-          contentSource: aiProvider ? `AI (${aiProvider})` : 'Template',
+          contentSource: 'Backlink ∞ Engine',
           enhancedGeneration: Boolean(aiProvider)
         }
       }
