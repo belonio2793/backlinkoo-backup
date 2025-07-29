@@ -371,8 +371,12 @@ class GlobalBlogGeneratorService {
   }
 
   private async generateFallbackBlogPost(request: any): Promise<GlobalBlogResponse> {
-    // Fallback to template-based generation when AI fails
-    const content = this.generateFallbackContent(request);
+    // Fallback to smart template-based generation when AI fails
+    const content = SmartFallbackContent.generateContent(
+      request.primaryKeyword,
+      request.targetUrl,
+      request.anchorText
+    );
 
     // Enhanced moderation of generated content
     const title = `${request.primaryKeyword}: A Comprehensive Guide for ${new Date().getFullYear()}`;
