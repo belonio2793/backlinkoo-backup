@@ -99,10 +99,15 @@ export function EnhancedDashboardRouter() {
     return <Dashboard />;
   }
 
-  // For non-authenticated users, redirect to home
-  console.log('🚫 No authenticated user, redirecting to home');
-  navigate('/');
-  return null;
+  // For non-authenticated users, show loading while navigation effect handles redirect
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex items-center gap-2">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span>Redirecting...</span>
+      </div>
+    </div>
+  );
 }
 
 // Guest Onboarding Dashboard Component
