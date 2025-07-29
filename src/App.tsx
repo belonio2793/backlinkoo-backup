@@ -9,6 +9,10 @@ import { AppWrapper } from "@/components/AppWrapper";
 import { AuthProfileChecker } from "@/components/AuthProfileChecker";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
+// Import admin utilities for global availability
+import "@/utils/adminUtilities";
+import "@/utils/testContentMigration";
+
 const queryClient = new QueryClient();
 
 const App = () => (
