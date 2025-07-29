@@ -91,61 +91,22 @@ export function EnhancedDashboardRouter() {
     return <Dashboard />;
   }
 
-  // If user has trial posts, show enhanced trial dashboard
-  if (hasTrialPosts) {
-    return (
-      <div className="min-h-screen bg-background">
-        <GuestDashboard />
-        
-        {/* Enhanced trial conversion overlay */}
-        <div className="fixed top-4 right-4 z-50 max-w-sm">
-          <QuickTrialUpgrade
-            onSuccess={(user) => {
-              setUser(user);
-              navigate('/my-dashboard');
-            }}
-            variant="default"
-            size="sm"
-          />
-        </div>
-        
-        {/* Guest session reminder if conversion criteria met */}
-        {shouldShowConversionPrompt() && (
-          <GuestSessionReminder
-            onSignUp={() => {
-              trackInteraction('dashboard_guest_reminder');
-              navigate('/login?from=dashboard');
-            }}
-            variant="floating"
-            position="bottom"
-          />
-        )}
+  // For non-authenticated users, show a simple message or redirect
+  console.log('🚫 No authenticated user, showing fallback');
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center">
+        <h2 className="text-xl font-semibold mb-2">Access Required</h2>
+        <p className="text-muted-foreground mb-4">Please log in to access your dashboard.</p>
+        <button
+          onClick={() => navigate('/login')}
+          className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+        >
+          Go to Login
+        </button>
       </div>
-    );
-  }
-
-  // Show guest onboarding dashboard for engaged visitors
-  if (guestAnalytics.interactions > 0 || guestAnalytics.sessionDuration > 0) {
-    return (
-      <div className="min-h-screen bg-background">
-        <GuestOnboardingDashboard
-          sessionDuration={guestAnalytics.sessionDuration}
-          interactions={guestAnalytics.interactions}
-          onSignUp={() => {
-            trackInteraction('onboarding_signup');
-            navigate('/login?from=onboarding');
-          }}
-          onCreateTrial={() => {
-            trackInteraction('onboarding_trial');
-            navigate('/?focus=generator');
-          }}
-        />
-      </div>
-    );
-  }
-
-  // Fallback - this shouldn't happen due to useEffect navigation
-  return null;
+    </div>
+  );
 }
 
 // Guest Onboarding Dashboard Component
