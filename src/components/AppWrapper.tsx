@@ -55,6 +55,8 @@ export const AppWrapper = () => {
       <Route path="/trial-dashboard" element={<GuestDashboard />} />
       <Route path="/ai-test" element={<AIContentTest />} />
       <Route path="/ai-live" element={<AILive />} />
+      <Route path="/free-backlink" element={<FreeBacklink />} />
+      <Route path="/free-backlink/:id" element={<FreeBacklink />} />
       <Route path="*" element={<NotFound />} />
 
       {/* Protected routes - require authentication and email verification */}
