@@ -300,7 +300,9 @@ function reconstructBrokenSentences(content: string): string {
   fixed = fixed.replace(/^\s*[.!?:,-]\s*/gm, '');
 
   // Fix sentences that start with lowercase after periods
-  fixed = fixed.replace(/([.!?])\s+([a-z])/g, '$1 ' + ((match, punct, letter) => letter.toUpperCase()));
+  fixed = fixed.replace(/([.!?])\s+([a-z])/g, (match, punct, letter) => {
+    return punct + ' ' + letter.toUpperCase();
+  });
 
   return fixed;
 }
