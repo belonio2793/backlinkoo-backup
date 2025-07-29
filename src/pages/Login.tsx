@@ -124,8 +124,11 @@ const Login = () => {
           description: "You have been successfully signed in.",
         });
 
-        // Reset loading state and let the auth state listener handle navigation
-        setIsLoading(false);
+        // Navigate immediately but also let auth state listener work
+        setTimeout(() => {
+          setIsLoading(false);
+          navigate('/dashboard');
+        }, 100);
         return;
       } else {
         if (result.requiresEmailVerification) {
