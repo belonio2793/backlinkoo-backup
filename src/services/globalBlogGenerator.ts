@@ -4,6 +4,7 @@ import { contentModerationService } from './contentModerationService';
 import { formatBlogTitle, formatBlogContent } from '@/utils/textFormatting';
 import { aiContentEngine } from './aiContentEngine';
 import { enhancedAIContentEngine } from './enhancedAIContentEngine';
+import { SmartFallbackContent } from './smartFallbackContent';
 
 export interface GlobalBlogRequest {
   targetUrl: string;
