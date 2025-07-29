@@ -267,30 +267,7 @@ class GlobalBlogGeneratorService {
   }
 
   async getGlobalBlogStats() {
-    try {
-      // Add timeout and better error handling for fetch
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-
-      const response = await fetch(`${this.API_BASE}/global-blog-generator`, {
-        signal: controller.signal,
-        headers: {
-          'Accept': 'application/json',
-        }
-      });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        return data;
-      }
-    } catch (error) {
-      console.warn('Could not fetch global stats, using local fallback:', error);
-      // Don't re-throw the error, just continue to fallback
-    }
-
-    // Return actual usage stats or minimal fallback
+    // Return actual usage stats from localStorage only
     try {
       const storedPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
       const today = new Date().toDateString();
