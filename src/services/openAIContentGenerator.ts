@@ -84,11 +84,10 @@ export class OpenAIContentGenerator {
 
       if (!multiResult.success || !multiResult.result) {
         // Log all failed attempts for debugging
-        console.error('🔥 All providers failed:', {
-          attemptLog: multiResult.attemptLog,
-          fallbacksUsed: multiResult.fallbacksUsed,
-          totalAttempts: multiResult.totalAttempts
-        });
+        console.error('🔥 All providers failed:');
+        console.error('📊 Attempt Log:', JSON.stringify(multiResult.attemptLog, null, 2));
+        console.error('🔄 Fallbacks Used:', multiResult.fallbacksUsed);
+        console.error('🔢 Total Attempts:', multiResult.totalAttempts);
 
         const lastError = multiResult.attemptLog[multiResult.attemptLog.length - 1]?.error;
         throw new Error(`All content providers failed. Last error: ${lastError || 'Unknown error'}. Tried ${multiResult.totalAttempts} providers with ${multiResult.fallbacksUsed.length} fallbacks.`);
