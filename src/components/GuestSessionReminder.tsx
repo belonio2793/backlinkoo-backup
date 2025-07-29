@@ -179,10 +179,10 @@ export function GuestSessionReminder({
                 <Zap className="h-3 w-3 mr-1" />
                 Sign Up Free
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => navigate('/login')}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onSignUp}
                 className="flex-shrink-0"
               >
                 Sign In
