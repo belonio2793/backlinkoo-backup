@@ -152,7 +152,11 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
         <AlertDescription className="text-purple-800">
           <strong>Free Service Notice:</strong> Your generated blog post will be available for 24 hours. 
           To save it permanently and access advanced features, 
-          <Button variant="link" className="p-0 h-auto text-purple-600 font-semibold">
+          <Button
+            variant="link"
+            className="p-0 h-auto text-purple-600 font-semibold"
+            onClick={() => setRegistrationModalOpen(true)}
+          >
             register a free account
           </Button> after generation.
         </AlertDescription>
