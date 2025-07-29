@@ -55,6 +55,7 @@ export function EnhancedDashboardRouter() {
         // Routing logic
         if (session?.user) {
           // User is logged in - redirect to protected dashboard
+          setIsLoading(false);
           navigate('/my-dashboard');
           return;
         } else {
