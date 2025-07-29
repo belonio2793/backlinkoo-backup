@@ -39,7 +39,7 @@ const Login = () => {
 
         if (session && session.user) {
           console.log('🔐 User already authenticated, redirecting...');
-          navigate('/my-dashboard');
+          navigate('/redirect');
         }
       } catch (error) {
         console.error('Auth check error:', error);
