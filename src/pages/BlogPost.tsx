@@ -311,11 +311,11 @@ export function BlogPost() {
         const { error } = await supabase
           .from('published_blog_posts')
           .update({
-            content: newBlogPost.content,
-            title: newBlogPost.title,
-            word_count: newBlogPost.word_count,
-            reading_time: newBlogPost.reading_time,
-            seo_score: newBlogPost.seo_score,
+            content: result.content,
+            title: result.title,
+            word_count: result.wordCount,
+            reading_time: result.readingTime,
+            seo_score: result.seoScore,
             updated_at: new Date().toISOString()
           })
           .eq('slug', blogPost.slug);
