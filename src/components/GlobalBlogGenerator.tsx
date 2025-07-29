@@ -531,12 +531,14 @@ export function GlobalBlogGenerator({
       }
 
     } catch (error: any) {
-      console.error('Global blog generation error:', {
-        error: error.message || 'Unknown error',
-        stack: error.stack,
-        context: error.context,
-        timestamp: new Date().toISOString()
-      });
+      console.error('Global blog generation error:', error.message || 'Unknown error');
+      if (error.stack) {
+        console.error('Stack trace:', error.stack);
+      }
+      if (error.context) {
+        console.error('Error context:', JSON.stringify(error.context, null, 2));
+      }
+      console.error('Timestamp:', new Date().toISOString());
 
       // Reset all generation state
       setProgress(0);
