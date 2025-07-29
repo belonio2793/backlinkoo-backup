@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useGuestTracking } from '@/hooks/useGuestTracking';
 import { supabase } from '@/integrations/supabase/client';
 import { GuestDashboard } from '@/components/GuestDashboard';
 import { UserBlogDashboard } from '@/components/UserBlogDashboard';
+import Dashboard from '@/pages/Dashboard';
 
 export function EnhancedDashboardRouter() {
   const [user, setUser] = useState<any>(null);
