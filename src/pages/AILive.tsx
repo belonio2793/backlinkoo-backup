@@ -151,6 +151,24 @@ export default function AILive() {
                 <Zap className="h-3 w-3" />
                 <span>AI Live</span>
               </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  toast.info('Generating demo blog post...');
+                  const result = await createBlogPost();
+                  if (result.success) {
+                    toast.success(`Blog post created! View at: ${result.fullUrl}`);
+                    window.open(result.url, '_blank');
+                  } else {
+                    toast.error(`Failed: ${result.error}`);
+                  }
+                }}
+                className="text-xs"
+              >
+                <BookOpen className="h-3 w-3 mr-1" />
+                Quick Demo
+              </Button>
             </div>
           </div>
         </div>
