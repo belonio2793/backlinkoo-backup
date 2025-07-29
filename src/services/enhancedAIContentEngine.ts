@@ -402,7 +402,8 @@ Create content that readers would want to bookmark, share, or reference later be
     
     // Ensure proper heading structure (only one H1 per page)
     if (!enhanced.includes('<h1>') && !enhanced.includes('# ')) {
-      enhanced = `<h1>How to Master ${request.keyword}: Complete Guide for ${new Date().getFullYear()}</h1>\n\n${enhanced}`;
+      // Let the AI-generated content provide its own title - don't force a template
+      console.warn('⚠️ Generated content missing H1 tag - content may need manual review');
     }
     
     // Convert markdown to proper HTML structure
