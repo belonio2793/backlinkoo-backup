@@ -112,28 +112,25 @@ export function AILive() {
   const checkApiHealth = async (provider: string): Promise<boolean> => {
     try {
       console.log(`Checking ${provider} health...`);
-      const response = await fetch('/.netlify/functions/check-ai-provider', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider })
-      });
 
-      console.log(`${provider} response status:`, response.status);
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log(`${provider} health check result:`, data);
-        return data.healthy === true;
+      switch (provider) {
+        case 'OpenAI':
+          return openAIService.isConfigured() && await openAIService.testConnection();
+        case 'Grok':
+          return grokService.isConfigured() && await grokService.testConnection();
+        case 'DeepAI':
+          return deepAIService.isConfigured() && await deepAIService.testConnection();
+        case 'HuggingFace':
+          return huggingFaceService.isConfigured() && await huggingFaceService.testConnection();
+        case 'Cohere':
+          return cohereService.isConfigured() && await cohereService.testConnection();
+        case 'Rytr':
+          return rytrService.isConfigured() && await rytrService.testConnection();
+        default:
+          return false;
       }
-
-      // If response is not ok, fall back to mock service
-      console.log(`${provider} Netlify function unavailable, using mock service`);
-      const mockResult = await MockAIService.checkProviderHealth(provider);
-      console.log(`Mock health check result for ${provider}:`, mockResult.healthy);
-      return mockResult.healthy;
     } catch (error) {
-      // Network error or other failure - no mock fallback
-      console.log(`${provider} health check failed: ${error.message}`);
+      console.log(`${provider} health check failed:`, error);
       return false;
     }
   };
