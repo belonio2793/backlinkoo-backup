@@ -330,9 +330,16 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
 
       {/* Disclaimer */}
       <p className="text-xs text-center text-muted-foreground">
-        By using this service, you agree that the generated content is for legitimate SEO purposes. 
+        By using this service, you agree that the generated content is for legitimate SEO purposes.
         The blog post will automatically delete after 24 hours unless you save it by registering an account.
       </p>
+
+      {/* Registration Modal */}
+      <RegistrationModal
+        open={registrationModalOpen}
+        onOpenChange={setRegistrationModalOpen}
+        trigger="general"
+      />
     </div>
   );
 }
