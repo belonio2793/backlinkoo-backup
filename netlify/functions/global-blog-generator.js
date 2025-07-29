@@ -215,12 +215,11 @@ Focus on creating content that ranks well while providing genuine value to users
 
     const systemPrompt = `You are a world-class SEO content writer and digital marketing expert. Create original, high-quality content that ranks well in search engines while providing genuine value to readers. Focus on expertise, authoritativeness, and trustworthiness.`;
 
-    // Try multiple AI providers
+    // Try multiple AI providers - HuggingFace primary, Cohere secondary
     const providers = [
-      () => this.generateWithOpenAI(prompt, systemPrompt),
-      () => this.generateWithGrok(prompt, systemPrompt),
-      () => this.generateWithCohere(`${systemPrompt}\n\n${prompt}`),
-      () => this.generateWithHuggingFace(`${systemPrompt}\n\n${prompt}`)
+      () => this.generateWithHuggingFace(`${systemPrompt}\n\n${prompt}`), // Primary
+      () => this.generateWithCohere(`${systemPrompt}\n\n${prompt}`) // Secondary
+      // OpenAI and Grok disabled as requested
     ];
 
     for (const provider of providers) {
@@ -430,7 +429,7 @@ const checkRateLimit = (ip) => {
 
 // Main handler
 exports.handler = async (event, context) => {
-  console.log('🌍 Global blog generator called:', {
+  console.log('��� Global blog generator called:', {
     method: event.httpMethod,
     path: event.path,
     userAgent: event.headers['user-agent'],
