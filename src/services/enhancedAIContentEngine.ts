@@ -47,9 +47,7 @@ export interface EnhancedContentResult {
 
 export class EnhancedAIContentEngine {
   private providers = [
-    { name: 'openai', service: openAIService, weight: 0.70 }, // Primary - as requested
-    { name: 'huggingface', service: huggingFaceService, weight: 0.20 },
-    { name: 'cohere', service: cohereService, weight: 0.10 } // Fallback
+    { name: 'openai', service: openAIService, weight: 1.0 } // Only OpenAI provider
   ];
 
   /**
