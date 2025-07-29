@@ -7,6 +7,7 @@
 import { openAIService } from './api/openai';
 import { cohereService } from './api/cohere';
 import { deepAIService } from './api/deepai';
+import { netlifyContentGenerator } from './netlifyContentGenerator';
 import { retryEventEmitter } from './retryEventEmitter';
 
 export interface MultiProviderRequest {
