@@ -28,6 +28,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
+import { AuthService } from "@/services/authService";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 import { LoginModal } from "@/components/LoginModal";
 import { InlineAuthForm } from "@/components/InlineAuthForm";
