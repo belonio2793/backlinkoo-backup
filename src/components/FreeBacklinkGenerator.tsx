@@ -168,11 +168,7 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
         description = errorMessage + detailedInfo;
       } else {
         // Show the actual error message for debugging
-        description = `Content generation error: ${errorMessage}` + detailedInfo;
-        // Add provider fallback info if available
-        if (errorMessage.includes('Tried') && errorMessage.includes('providers')) {
-          title = "🔄 Multi-Provider Attempt Failed";
-        }
+        description = `OpenAI content generation error: ${errorMessage}` + detailedInfo;
       }
 
       toast({
