@@ -387,6 +387,13 @@ export function FreeBacklinkManager({ onViewPost }: FreeBacklinkManagerProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Registration Modal */}
+      <RegistrationModal
+        open={registrationModalOpen}
+        onOpenChange={setRegistrationModalOpen}
+        trigger="general"
+      />
     </div>
   );
 }
