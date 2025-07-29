@@ -92,18 +92,14 @@ export function EnhancedDashboardRouter() {
   }
 
   // For non-authenticated users, show loading while redirect happens
-  if (!isLoading && !user) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span>Redirecting...</span>
-        </div>
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex items-center gap-2">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span>Redirecting...</span>
       </div>
-    );
-  }
-
-  return null;
+    </div>
+  );
 }
 
 // Guest Onboarding Dashboard Component
