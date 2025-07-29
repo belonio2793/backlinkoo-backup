@@ -33,7 +33,7 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
 
   const toolsDropdown = [
     {
-      name: "NO Hands SEO",
+      name: "∞ Backlinks Automation (Beta)",
       path: "/no-hands-seo",
       icon: Zap,
       description: "Automated link building",
