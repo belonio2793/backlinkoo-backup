@@ -537,8 +537,8 @@ export function GlobalBlogGenerator({
           </div>
           
           <p className="text-muted-foreground">
-            Generate high-quality blog posts with natural contextual backlinks. 
-            Our AI creates content based on global trends and user inputs from around the world.
+            Generate high-quality blog posts with natural contextual backlinks using advanced AI.
+            Powered by Hugging Face and Cohere AI models with intelligent fallback systems for 100% reliability.
           </p>
         </CardHeader>
 
