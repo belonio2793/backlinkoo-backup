@@ -269,19 +269,9 @@ Focus on ranking factors while maintaining user value and engagement.`;
       }
     }
 
-    // If all providers fail, return fallback content
-    console.log('⚠️ All providers failed, using fallback content');
-    const fallbackContent = this.generateFallbackContent(request);
-    const metadata = this.generateMetadata(fallbackContent, request);
-
-    return {
-      bestContent: fallbackContent,
-      allResults: [],
-      selectedProvider: 'fallback',
-      metadata,
-      totalCost: 0,
-      processingTime: Date.now() - startTime
-    };
+    // If all providers fail, throw error instead of using fallback content
+    console.error('❌ All AI providers failed');
+    throw new Error('Content generation failed: All AI providers are unavailable or misconfigured. Please check your API keys and try again.');
   }
 
   /**
