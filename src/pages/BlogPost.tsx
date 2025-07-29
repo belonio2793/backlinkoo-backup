@@ -166,6 +166,68 @@ export function BlogPost() {
     });
   };
 
+  const handleDeletePost = async () => {
+    if (!blogPost || !blogPost.is_trial_post) {
+      toast({
+        title: "Cannot delete",
+        description: "Only trial posts can be deleted.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete "${blogPost.title}"? This action cannot be undone.`
+    );
+
+    if (!confirmDelete) return;
+
+    setIsDeleting(true);
+
+    try {
+      // Remove from localStorage
+      const blogStorageKey = `blog_post_${blogPost.slug}`;
+      localStorage.removeItem(blogStorageKey);
+
+      // Remove from all posts list
+      const allPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+      const updatedPosts = allPosts.filter((post: any) => post.slug !== blogPost.slug);
+      localStorage.setItem('all_blog_posts', JSON.stringify(updatedPosts));
+
+      // Try to remove from database if it exists
+      try {
+        const { error } = await supabase
+          .from('published_blog_posts')
+          .delete()
+          .eq('slug', blogPost.slug);
+
+        if (error) {
+          console.warn('Could not delete from database:', error);
+        }
+      } catch (dbError) {
+        console.warn('Database deletion failed:', dbError);
+      }
+
+      toast({
+        title: "Post deleted",
+        description: "The trial blog post has been successfully deleted.",
+      });
+
+      // Navigate back to homepage
+      navigate('/');
+
+    } catch (error) {
+      console.error('Failed to delete post:', error);
+      toast({
+        title: "Delete failed",
+        description: "An error occurred while deleting the post. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
