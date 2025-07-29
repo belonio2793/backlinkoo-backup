@@ -37,7 +37,7 @@ export class HuggingFaceService {
     if (!this.token) {
       console.warn('HuggingFace token not configured');
     } else {
-      console.log('✅ HuggingFace token configured:', this.token.substring(0, 10) + '...');
+      console.log('✅ Primary AI engine configured and ready');
     }
   }
 
