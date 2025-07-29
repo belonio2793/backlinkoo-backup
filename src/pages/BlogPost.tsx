@@ -8,7 +8,7 @@ import { publishedBlogService, type PublishedBlogPost } from '@/services/publish
 import { ClaimTrialPostDialog } from '@/components/ClaimTrialPostDialog';
 import { LoginModal } from '@/components/LoginModal';
 import { supabase } from '@/integrations/supabase/client';
-import { formatBlogTitle, formatBlogContent, getTrendingLabel } from '@/utils/textFormatting';
+import { formatBlogTitle, formatBlogContent, getTrendingLabel, calculateWordCount } from '@/utils/textFormatting';
 import { Footer } from '@/components/Footer';
 import {
   Calendar,
