@@ -432,30 +432,92 @@ export default function AILive() {
                       variant="outline"
                       onClick={() => setShowPreview(!showPreview)}
                     >
-                      {showPreview ? 'Hide' : 'Show'} Preview
+                      {showPreview ? 'Hide' : 'Show'} Full Content
                     </Button>
-                    <Button onClick={() => window.open('/blog', '_blank')}>
+                    <Button
+                      onClick={() => window.open(result.publishedUrl, '_blank')}
+                      className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      View Published Post
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => window.open('/blog', '_blank')}
+                    >
                       <BookOpen className="h-4 w-4 mr-2" />
-                      View All Blog Posts
+                      All Posts
                     </Button>
                   </div>
 
-                  {showPreview && (
-                    <div className="mt-6 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                      <h4 className="font-semibold text-gray-800 mb-4">Content Preview:</h4>
-                      <div 
-                        className="prose max-w-none text-sm"
-                        dangerouslySetInnerHTML={{ __html: result.content.substring(0, 1000) + '...' }}
-                      />
+                  {/* Always show content preview */}
+                  <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="font-semibold text-gray-800 flex items-center">
+                        <Eye className="h-4 w-4 mr-2 text-blue-600" />
+                        Generated Content Preview
+                      </h4>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(result.content)}
+                        >
+                          <Copy className="h-4 w-4 mr-1" />
+                          Copy Content
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(`${window.location.origin}${result.publishedUrl}`)}
+                        >
+                          <Copy className="h-4 w-4 mr-1" />
+                          Copy URL
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div
+                      className="prose max-w-none text-sm bg-white p-4 rounded border"
+                      dangerouslySetInnerHTML={{
+                        __html: showPreview
+                          ? result.content
+                          : result.content.substring(0, 800) + (result.content.length > 800 ? '...' : '')
+                      }}
+                    />
+
+                    {!showPreview && result.content.length > 800 && (
                       <Button
                         variant="link"
-                        className="mt-2 p-0"
-                        onClick={() => window.open(result.publishedUrl, '_blank')}
+                        className="mt-2 p-0 text-blue-600"
+                        onClick={() => setShowPreview(true)}
                       >
-                        Read full article →
+                        Show full content ({result.wordCount} words) →
                       </Button>
+                    )}
+
+                    <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-green-800">Published Successfully!</p>
+                          <p className="text-xs text-green-700">
+                            Your content is live at:
+                            <code className="ml-1 px-2 py-1 bg-green-200 rounded text-xs">
+                              {window.location.origin}{result.publishedUrl}
+                            </code>
+                          </p>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => window.open(result.publishedUrl, '_blank')}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          <ExternalLink className="h-4 w-4 mr-1" />
+                          Visit
+                        </Button>
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
