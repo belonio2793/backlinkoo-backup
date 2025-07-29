@@ -243,14 +243,27 @@ export function Blog() {
               {searchTerm || selectedCategory ? 'No matching posts found' : 'No blog posts yet'}
             </h3>
             <p className="text-gray-600 mb-6">
-              {searchTerm || selectedCategory 
+              {searchTerm || selectedCategory
                 ? 'Try adjusting your search or filter criteria'
-                : 'Blog posts will appear here as they are generated'
+                : 'Blog posts will appear here when you generate content. Create backlinks using our AI tools to see posts displayed here.'
               }
             </p>
-            <Button onClick={() => navigate('/')}>
-              Create Your First Backlink
-            </Button>
+            <div className="space-y-3">
+              <Button
+                onClick={() => navigate('/')}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
+                Create Your First Backlink
+              </Button>
+              <br />
+              <Button
+                variant="outline"
+                onClick={() => navigate('/free-backlink')}
+                className="ml-2"
+              >
+                Try Free Backlink Generator
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
