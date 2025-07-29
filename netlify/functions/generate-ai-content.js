@@ -246,20 +246,16 @@ exports.handler = async (event, context) => {
       }
     }
 
-    // If all providers fail, generate demo content as fallback
-    console.log('⚠️ All AI providers failed, generating demo content...');
-    const demoContent = generateDemoContent(keyword, anchorText, url);
-
+    // If all providers fail, return error instead of fallback content
+    console.error('❌ All AI providers failed');
     return {
-      statusCode: 200,
+      statusCode: 500,
       headers,
       body: JSON.stringify({
-        content: demoContent,
-        wordCount: demoContent.split(/\s+/).length,
-        provider: 'Fallback (Demo)',
-        success: true,
-        demo: true,
-        error: lastError?.message || 'All AI providers unavailable'
+        error: 'Content generation failed',
+        details: lastError?.message || 'All AI providers are unavailable or misconfigured',
+        success: false,
+        providersAttempted: providers.filter(p => p.apiKey).map(p => p.name)
       })
     };
 
