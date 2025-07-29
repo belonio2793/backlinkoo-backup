@@ -34,14 +34,14 @@ export function TestFreeBacklink() {
       // Test 1: Check if OpenAI is configured
       results.push({
         name: 'OpenAI Configuration',
-        status: openAIContentGenerator.isConfigured() ? 'success' : 'error',
-        message: openAIContentGenerator.isConfigured() ? 
+        status: openAIOnlyContentGenerator.isConfigured() ? 'success' : 'error',
+        message: openAIOnlyContentGenerator.isConfigured() ? 
           'OpenAI is properly configured' : 
           'OpenAI API key is missing'
       });
 
       // Test 2: Test OpenAI connection (if configured)
-      if (openAIContentGenerator.isConfigured()) {
+      if (openAIOnlyContentGenerator.isConfigured()) {
         try {
           const connectionTest = await openAIContentGenerator.testConnection();
           results.push({
@@ -99,7 +99,7 @@ export function TestFreeBacklink() {
       }
 
       // Test 5: Test OpenAI content generation (if configured)
-      if (openAIContentGenerator.isConfigured()) {
+      if (openAIOnlyContentGenerator.isConfigured()) {
         try {
           const testResult = await openAIContentGenerator.generateContent({
             targetUrl: 'https://example.com',
