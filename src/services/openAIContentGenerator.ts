@@ -44,6 +44,9 @@ export interface GeneratedContentResult {
     cost: number;
   };
   error?: string;
+  // Multi-provider information
+  provider?: string;
+  fallbacksUsed?: string[];
 }
 
 export class OpenAIContentGenerator {
