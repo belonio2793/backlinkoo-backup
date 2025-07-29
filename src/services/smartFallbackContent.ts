@@ -22,6 +22,65 @@ export class SmartFallbackContent {
     return formatBlogContent(content);
   }
 
+  private static generateDynamicTitle(keyword: string, category: string): string {
+    const titleVariations = {
+      food: [
+        `The Ultimate ${keyword} Experience: What You Need to Know`,
+        `Discovering ${keyword}: A Food Lover's Guide`,
+        `${keyword} Unveiled: Your Complete Culinary Journey`,
+        `The Art of ${keyword}: From Basics to Mastery`,
+        `${keyword} Essentials: A Comprehensive Food Guide`
+      ],
+      technology: [
+        `Understanding ${keyword}: A Modern Perspective`,
+        `${keyword} Explained: Everything You Should Know`,
+        `The Complete ${keyword} Resource Guide`,
+        `Mastering ${keyword}: A Technical Overview`,
+        `${keyword} Deep Dive: Current Trends and Applications`
+      ],
+      health: [
+        `${keyword} and Your Health: A Complete Guide`,
+        `Understanding ${keyword}: Health Benefits and Considerations`,
+        `The Science Behind ${keyword}: What Research Shows`,
+        `${keyword} for Better Health: Evidence-Based Insights`,
+        `Your Guide to ${keyword}: Health-Focused Approach`
+      ],
+      travel: [
+        `${keyword}: Your Ultimate Travel Guide`,
+        `Exploring ${keyword}: A Traveler's Perspective`,
+        `The Complete ${keyword} Travel Experience`,
+        `${keyword} Adventure: Planning Your Perfect Trip`,
+        `Discovering ${keyword}: Insider Travel Tips`
+      ],
+      education: [
+        `Learning ${keyword}: A Student's Guide`,
+        `${keyword} Mastery: Educational Pathways and Resources`,
+        `Understanding ${keyword}: A Learning Journey`,
+        `The Complete ${keyword} Study Guide`,
+        `${keyword} Education: From Basics to Advanced`
+      ],
+      business: [
+        `${keyword} for Business Success: Strategic Insights`,
+        `Understanding ${keyword}: A Business Perspective`,
+        `${keyword} in Practice: Real-World Applications`,
+        `The Business Guide to ${keyword}`,
+        `${keyword} Strategy: Professional Insights and Tips`
+      ],
+      informational: [
+        `Everything About ${keyword}: An Informative Guide`,
+        `Understanding ${keyword}: Key Insights and Information`,
+        `The Complete ${keyword} Overview`,
+        `${keyword} Explained: What You Need to Know`,
+        `Comprehensive ${keyword} Information and Insights`
+      ]
+    };
+
+    const variations = titleVariations[category as keyof typeof titleVariations] || titleVariations.informational;
+    // Use a simple hash to consistently pick the same variation for the same keyword
+    const hash = keyword.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+    return variations[hash % variations.length];
+  }
+
   private static detectKeywordCategory(keyword: string): string {
     // Food and cuisine keywords
     if (['sushi', 'pizza', 'pasta', 'burger', 'tacos', 'ramen', 'curry', 'salad', 'sandwich', 'soup', 'steak', 'chicken', 'seafood', 'dessert', 'cake', 'coffee', 'tea', 'wine', 'beer', 'cocktail', 'recipe', 'cooking', 'cuisine', 'restaurant', 'food'].some(food => keyword.includes(food))) {
