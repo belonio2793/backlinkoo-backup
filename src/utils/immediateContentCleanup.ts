@@ -48,6 +48,7 @@ export function runImmediateContentCleanup(): void {
           const updatedBlogPost = {
             ...blogPost,
             content: cleanedContent,
+            meta_description: cleanedMetaDesc,
             updated_at: new Date().toISOString()
           };
           
