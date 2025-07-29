@@ -133,6 +133,31 @@ const Index = () => {
     };
   }, [authChecked]);
 
+  const handleSignOut = async () => {
+    try {
+      console.log('🚪 Signing out user...');
+      const result = await AuthService.signOut();
+
+      if (result.success) {
+        setUser(null);
+        toast({
+          title: "Signed out successfully",
+          description: "You have been signed out of your account.",
+        });
+      } else {
+        console.warn('Sign out had issues but continuing...');
+        setUser(null); // Clear user state anyway
+      }
+    } catch (error) {
+      console.error('Sign out error:', error);
+      setUser(null); // Clear user state anyway
+      toast({
+        title: "Signed out",
+        description: "You have been signed out.",
+      });
+    }
+  };
+
   const headlineVariations = [
     "Enterprise Backlinks",
     "Authority Links",
