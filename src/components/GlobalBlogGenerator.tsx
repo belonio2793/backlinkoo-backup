@@ -633,7 +633,7 @@ export function GlobalBlogGenerator({
             
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Users className="h-4 w-4" />
-              <span>{remainingRequests} requests remaining</span>
+              <span>{!isLoggedIn ? 'Unlimited requests' : `${remainingRequests} requests remaining`}</span>
             </div>
           </div>
           
