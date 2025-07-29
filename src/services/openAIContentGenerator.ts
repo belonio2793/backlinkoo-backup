@@ -4,7 +4,6 @@
  */
 
 import { openAIService } from './api/openai';
-import { multiProviderContentGenerator, MultiProviderRequest } from './multiProviderContentGenerator';
 
 export interface ContentGenerationRequest {
   targetUrl: string;
