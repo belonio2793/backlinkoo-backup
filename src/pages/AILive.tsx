@@ -116,6 +116,7 @@ export default function AILive() {
 
       setResult(generationResult);
       setHasUsedLimit(true);
+      setIntermediateContent(''); // Clear intermediate content
       toast.success('Content generated and published successfully!');
       
     } catch (error) {
