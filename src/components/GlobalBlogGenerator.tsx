@@ -63,6 +63,8 @@ export function GlobalBlogGenerator({
   const [generatedPost, setGeneratedPost] = useState<any>(null);
   const [globalStats, setGlobalStats] = useState<any>(null);
   const [remainingRequests, setRemainingRequests] = useState(0);
+  const [aiProvider, setAiProvider] = useState<string>('');
+  const [generationStatus, setGenerationStatus] = useState<GenerationStatus | null>(null);
 
   // UI state
   const [showPreview, setShowPreview] = useState(false);
