@@ -89,9 +89,9 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
         wordCount,
         tone,
         contentType,
-        // Multi-provider system handles retries automatically
+        // OpenAI retry configuration
         retryConfig: {
-          maxRetries: 5, // Reduced per-provider retries since we have multiple providers
+          maxRetries: 8, // Robust retry configuration for OpenAI
           baseDelay: 1000,
           maxDelay: 15000,
           exponentialBackoff: true,
