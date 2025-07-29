@@ -52,6 +52,17 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import type { User } from '@supabase/supabase-js';
 
+// FreeBlogPostGenerator component for the dashboard
+const FreeBlogPostGenerator = ({ onSuccess }: { onSuccess?: (blogPost: any) => void }) => {
+  return (
+    <GlobalBlogGenerator
+      variant="embedded"
+      onSuccess={onSuccess}
+      showAdvancedOptions={false}
+    />
+  );
+};
+
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [userType, setUserType] = useState<"user" | "admin">("user");
@@ -217,7 +228,7 @@ const Dashboard = () => {
     try {
       const currentUser = authUser || user;
       if (!currentUser) {
-        console.log('🔍 No current user for fetchUserData');
+        console.log('���� No current user for fetchUserData');
         return;
       }
 
