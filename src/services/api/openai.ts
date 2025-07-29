@@ -49,8 +49,9 @@ export class OpenAIService {
     // Get API key from environment variables or secure config
     this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || this.getSecureApiKey();
 
-    if (!this.apiKey) {
-      console.warn('❌ OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable or update secure-config.ts');
+    if (!this.apiKey || this.apiKey === 'your-openai-api-key-here') {
+      console.warn('❌ OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable.');
+      console.warn('📋 Get your API key from: https://platform.openai.com/api-keys');
     } else {
       console.log('✅ OpenAI API key configured successfully');
     }
