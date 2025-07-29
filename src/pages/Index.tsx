@@ -49,6 +49,7 @@ const Index = () => {
   const [customCredits, setCustomCredits] = useState<number>(0);
   const [isCustomPackage, setIsCustomPackage] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginModalTab, setLoginModalTab] = useState<"login" | "signup">("login");
   const [useProductionGenerator, setUseProductionGenerator] = useState(false);
   const [showTrialUpgrade, setShowTrialUpgrade] = useState(false);
   const [showInlineAuth, setShowInlineAuth] = useState(false);
