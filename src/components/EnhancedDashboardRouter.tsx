@@ -37,6 +37,9 @@ export function EnhancedDashboardRouter() {
       try {
         console.log('🔍 Checking user authentication...');
 
+        // Small delay to ensure auth session is established
+        await new Promise(resolve => setTimeout(resolve, 50));
+
         // Check authentication
         const { data: { session } } = await supabase.auth.getSession();
         console.log('🔍 Session check result:', !!session?.user);
