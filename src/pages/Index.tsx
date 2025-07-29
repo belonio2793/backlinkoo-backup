@@ -937,7 +937,7 @@ const Index = () => {
             description: "You have been successfully signed in.",
           });
         }}
-        defaultTab="login"
+        defaultTab={loginModalTab}
       />
     </div>
   );
