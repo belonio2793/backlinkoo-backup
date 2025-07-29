@@ -442,13 +442,13 @@ export function AuthFormTabs({
 
           <Button
             type="submit"
-            className={`w-full ${inputHeight}`}
+            className={`w-full ${inputHeight} ${isLoading ? 'bg-primary/80' : ''}`}
             disabled={isLoading || !signupEmail || !signupPassword || !confirmPassword || !firstName}
           >
             {isLoading ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Creating account...
+                {showTrialUpgrade ? "Upgrading trial..." : "Creating account..."}
               </>
             ) : (
               <>
