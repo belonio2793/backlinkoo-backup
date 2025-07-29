@@ -121,7 +121,8 @@ export class SmartFallbackContent {
     
     switch (template) {
       case 'food':
-        return `<h1>The Ultimate ${keyword} Experience: What You Need to Know</h1>
+        const foodTitle = this.generateDynamicTitle(keyword, 'food');
+        return `<h1>${foodTitle}</h1>
 
 <p>Welcome to your comprehensive guide to <strong>${keyword}</strong>. Whether you're a complete beginner or looking to expand your culinary knowledge, this guide covers everything you need to know about ${keyword}.</p>
 
