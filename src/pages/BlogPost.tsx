@@ -652,73 +652,7 @@ export function BlogPost() {
           </div>
         </div>
 
-        {/* Enhanced Call-to-Action Section */}
-        <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-700 rounded-2xl p-8 lg:p-12 text-white shadow-2xl mb-8">
-          <div className="text-center space-y-6">
-            <div className="flex justify-center">
-              <div className="p-4 bg-white/10 rounded-full">
-                <Sparkles className="h-8 w-8" />
-              </div>
-            </div>
 
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Love This Content Quality?
-              </h2>
-              <p className="text-xl text-purple-100 max-w-2xl mx-auto leading-relaxed">
-                This professional blog post was generated using our AI-powered content creation tool.
-                Create your own high-quality content in minutes!
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <div className="text-center">
-                <div className="p-3 bg-white/10 rounded-full w-fit mx-auto mb-3">
-                  <Zap className="h-6 w-6" />
-                </div>
-                <h3 className="font-semibold mb-2">AI-Powered</h3>
-                <p className="text-sm text-purple-100">Advanced algorithms create engaging content</p>
-              </div>
-
-              <div className="text-center">
-                <div className="p-3 bg-white/10 rounded-full w-fit mx-auto mb-3">
-                  <TrendingUp className="h-6 w-6" />
-                </div>
-                <h3 className="font-semibold mb-2">SEO Optimized</h3>
-                <p className="text-sm text-purple-100">Built for search engine visibility</p>
-              </div>
-
-              <div className="text-center">
-                <div className="p-3 bg-white/10 rounded-full w-fit mx-auto mb-3">
-                  <Clock className="h-6 w-6" />
-                </div>
-                <h3 className="font-semibold mb-2">Instant Results</h3>
-                <p className="text-sm text-purple-100">Get professional content in minutes</p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-4 pt-4">
-              <Button
-                onClick={() => navigate('/free-backlink')}
-                size="lg"
-                className="bg-white text-purple-700 hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 px-8 py-4 text-lg font-semibold"
-              >
-                <Gift className="mr-2 h-5 w-5" />
-                Generate Free Content
-              </Button>
-
-              <Button
-                onClick={() => navigate('/')}
-                variant="outline"
-                size="lg"
-                className="border-2 border-white text-white hover:bg-white/10 px-8 py-4 text-lg font-semibold"
-              >
-                <Home className="mr-2 h-5 w-5" />
-                Explore More
-              </Button>
-            </div>
-          </div>
-        </div>
 
         {/* Trial Post Notice with Claim Option */}
         {blogPost.is_trial_post && blogPost.expires_at && (
