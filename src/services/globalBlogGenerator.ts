@@ -371,83 +371,10 @@ class GlobalBlogGeneratorService {
   }
 
   private async generateFallbackBlogPost(request: any): Promise<GlobalBlogResponse> {
-    // Fallback to smart template-based generation when AI fails
-    const content = SmartFallbackContent.generateContent(
-      request.primaryKeyword,
-      request.targetUrl,
-      request.anchorText
-    );
-
-    // Enhanced moderation of generated content
-    const title = `${request.primaryKeyword}: A Comprehensive Guide for ${new Date().getFullYear()}`;
-    const keywords = [request.primaryKeyword, ...this.generateRelatedKeywords(request.primaryKeyword)];
-
-    const generatedContentModeration = await contentModerationService.moderateContent(
-      `${title} ${content}`,
-      request.targetUrl,
-      request.primaryKeyword,
-      request.anchorText,
-      undefined,
-      'generated_content'
-    );
-
-    if (!generatedContentModeration.allowed) {
-      throw new Error(`Generated content was flagged for moderation: The AI-generated content contains terms that require review before publication.`);
-    }
-
-    const rawTitle = `${request.primaryKeyword}: A Comprehensive Guide for ${new Date().getFullYear()}`;
-    const formattedTitle = formatBlogTitle(rawTitle);
-    const formattedContent = formatBlogContent(content);
-
-    const blogPost = {
-      id: crypto.randomUUID(),
-      title: formattedTitle,
-      content: formattedContent,
-      excerpt: `Discover everything you need to know about ${request.primaryKeyword}. Expert insights, practical tips, and actionable strategies.`,
-      slug: `${request.primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
-      keywords: [request.primaryKeyword, ...this.generateRelatedKeywords(request.primaryKeyword)],
-      tags: [request.primaryKeyword, ...this.generateRelatedKeywords(request.primaryKeyword)], // Add tags for compatibility
-      meta_description: `Complete guide to ${request.primaryKeyword}. Learn from experts and boost your results with proven strategies.`,
-      target_url: request.targetUrl,
-      anchor_text: request.anchorText || request.primaryKeyword,
-      seo_score: Math.floor(Math.random() * 20) + 80,
-      reading_time: Math.floor(Math.random() * 5) + 3,
-      word_count: Math.floor(content.length / 6), // Approximate word count
-      view_count: 0,
-      author_name: 'Backlink ∞',
-      category: 'SEO Guide',
-      published_url: `https://backlinkoo.com/blog/${request.primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
-      published_at: new Date().toISOString(),
-      is_trial_post: true,
-      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      contextual_links: []
-    };
-
-    await this.storeGlobalBlogPost(blogPost);
-
+    // Instead of generating fallback content, return an error asking users to register
     return {
-      success: true,
-      data: {
-        blogPost,
-        contextualLinks: {
-          primary: { 
-            url: request.targetUrl, 
-            anchor: request.anchorText || request.primaryKeyword, 
-            context: 'Main target link naturally integrated into content' 
-          },
-          secondary: [
-            { url: request.targetUrl, anchor: 'learn more', context: 'Additional reference in conclusion' }
-          ]
-        },
-        globalMetrics: {
-          totalRequestsToday: null, // Remove artificial metrics
-          averageGenerationTime: null,
-          successRate: null,
-          userCountry: request.userLocation || 'Unknown'
-        }
-      }
+      success: false,
+      error: "We're currently experiencing a large volume of requests. Please register or sign in to try one of our alternatives."
     };
   }
 
