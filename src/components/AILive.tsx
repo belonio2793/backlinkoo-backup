@@ -197,13 +197,11 @@ Please create a comprehensive, well-structured blog post that naturally incorpor
         return data.healthy === true;
       }
 
-      // If response is not ok, fall back to mock service
-      console.log(`${provider} Netlify function unavailable, using mock service`);
-      const mockResult = await MockAIService.checkProviderHealth(provider);
-      console.log(`Mock health check result for ${provider}:`, mockResult.healthy);
-      return mockResult.healthy;
+      // If response is not ok, provider is unavailable
+      console.log(`${provider} health check failed: ${response.status}`);
+      return false;
     } catch (error) {
-      // Network error or other failure - no mock fallback
+      // Network error or other failure
       console.log(`${provider} health check failed: ${error.message}`);
       return false;
     }
