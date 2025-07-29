@@ -58,7 +58,6 @@ export interface GlobalBlogResponse {
 }
 
 class GlobalBlogGeneratorService {
-  private readonly API_BASE = '/.netlify/functions';
   private readonly RATE_LIMIT_STORAGE_KEY = 'global_blog_rate_limit';
   private readonly USER_SESSION_KEY = 'global_user_session';
 
