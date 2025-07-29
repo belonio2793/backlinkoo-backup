@@ -806,27 +806,18 @@ export function GlobalBlogGenerator({
           <div className="flex gap-3">
             <Button
               onClick={handleGenerate}
-              disabled={isGenerating || remainingRequests <= 0 || apiStatus.status !== 'ready'}
-              className={`flex-1 transition-all duration-300 ${
-                apiStatus.status === 'ready'
-                  ? 'bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg'
-                  : 'bg-gradient-to-r from-gray-400 to-gray-500'
-              }`}
+              disabled={isGenerating || remainingRequests <= 0}
+              className="flex-1 transition-all duration-300 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg"
             >
               {isGenerating ? (
                 <>
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                   Generating...
                 </>
-              ) : apiStatus.status === 'ready' ? (
+              ) : (
                 <>
                   <Zap className="h-4 w-4 mr-2" />
                   Create Permanent Link
-                </>
-              ) : (
-                <>
-                  <Clock className="h-4 w-4 mr-2" />
-                  {apiStatus.status === 'retrying' ? 'Connecting...' : 'Preparing...'}
                 </>
               )}
             </Button>
