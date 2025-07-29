@@ -12,7 +12,7 @@ import { freeBacklinkService } from '@/services/freeBacklinkService';
 import { openAIOnlyContentGenerator, ContentGenerationRequest, GeneratedContentResult } from '@/services/openAIOnlyContentGenerator';
 import RegistrationModal from './RegistrationModal';
 import { WordCountProgress } from './WordCountProgress';
-import { ProviderStatus } from './ui/provider-status';
+
 import { 
   Loader2, 
   Sparkles, 
