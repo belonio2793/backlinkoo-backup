@@ -3,8 +3,32 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { SecureConfig } from '../../lib/secure-config';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || SecureConfig.SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || SecureConfig.SUPABASE_ANON_KEY;
+// Get Supabase configuration with proper fallback
+const getSupabaseConfig = () => {
+  const envUrl = import.meta.env.VITE_SUPABASE_URL;
+  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  console.log('🔧 Environment variables:', {
+    hasEnvUrl: !!envUrl,
+    hasEnvKey: !!envKey,
+    envUrlLength: envUrl?.length || 0,
+    envKeyLength: envKey?.length || 0
+  });
+
+  const url = envUrl || SecureConfig.SUPABASE_URL;
+  const key = envKey || SecureConfig.SUPABASE_ANON_KEY;
+
+  console.log('🔧 Final config:', {
+    url: url ? `${url.substring(0, 30)}...` : 'missing',
+    keyPrefix: key ? key.substring(0, 10) + '...' : 'missing',
+    urlFromEnv: !!envUrl,
+    keyFromEnv: !!envKey
+  });
+
+  return { url, key };
+};
+
+const { url: SUPABASE_URL, key: SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
