@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/services/authService";
-import { Eye, EyeOff, Mail, RefreshCw, Shield, CheckCircle, Infinity } from "lucide-react";
+import { AuthFormTabs } from "@/components/shared/AuthFormTabs";
+import { Mail, RefreshCw, Infinity } from "lucide-react";
 import { LiveUserActivity, SocialProofTestimonials, TrustBadges, MoneyBackGuarantee } from "./SocialProofElements";
 
 interface LoginModalProps {
