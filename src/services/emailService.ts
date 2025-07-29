@@ -520,16 +520,23 @@ https://backlinkoo.com`,
 
       return await this.sendViaNetlifyFunction(emailData);
     } catch (error: any) {
+      const errorMessage = error?.message || String(error) || 'Unknown error';
+
       await errorLogger.logEmailError(
-        `Failed to send welcome email: ${error.message}`,
+        `Failed to send welcome email: ${errorMessage}`,
         {
           to: email,
           emailType: 'welcome',
-          firstName
+          firstName,
+          fullError: {
+            message: errorMessage,
+            name: error?.name,
+            stack: error?.stack
+          }
         },
         'EmailService'
       );
-      throw error;
+      throw new Error(errorMessage);
     }
   }
 
