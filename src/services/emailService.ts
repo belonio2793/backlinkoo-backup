@@ -176,20 +176,32 @@ export class EmailService {
         throw new Error(errorMessage);
       }
     } catch (error: any) {
-      console.error('sendViaNetlifyFunction error:', error);
+      const errorMessage = error?.message || String(error) || 'Unknown error';
+      const errorName = error?.name || 'UnknownError';
+
+      console.error('sendViaNetlifyFunction error:', {
+        message: errorMessage,
+        name: errorName,
+        stack: error?.stack
+      });
 
       // Log the failure with attempt number
-      this.logFailure(emailData.to, error.message, attempt);
+      this.logFailure(emailData.to, errorMessage, attempt);
 
       // Log to centralized error logging
       await errorLogger.logEmailError(
-        `Email sending failed: ${error.message}`,
+        `Email sending failed: ${errorMessage}`,
         {
           to: emailData.to,
           subject: emailData.subject,
           attempt,
-          errorType: error.name,
-          isTimeout: error.name === 'AbortError'
+          errorType: errorName,
+          isTimeout: errorName === 'AbortError',
+          fullError: {
+            message: errorMessage,
+            name: errorName,
+            stack: error?.stack
+          }
         },
         'EmailService'
       );
