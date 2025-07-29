@@ -59,6 +59,10 @@ export function OpenAITestComponent() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
+      {/* Show API Key Guide if not configured */}
+      {!isConfigured && (
+        <OpenAIKeyGuide />
+      )}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
