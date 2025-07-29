@@ -76,6 +76,86 @@ export function AILive() {
   const stepsEndRef = useRef<HTMLDivElement>(null);
   const stepCounterRef = useRef(0);
 
+  // Direct OpenAI integration for development
+  const generateWithOpenAI = async (prompt: string, keyword: string, anchorText: string, url: string) => {
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error('OpenAI API key not configured');
+    }
+
+    const systemPrompt = `You are a professional content writer specializing in SEO-optimized blog posts. Create high-quality, engaging content that:
+
+1. Meets the minimum 1000-word requirement
+2. Uses proper SEO formatting with H1, H2, and H3 headers
+3. Includes short, readable paragraphs
+4. Incorporates bullet points or numbered lists where appropriate
+5. Uses natural keyword placement (avoid keyword stuffing)
+6. Creates valuable, informative content for readers
+7. Includes the specified anchor text as a natural hyperlink to the target URL
+
+Format the content in clean HTML with proper heading tags, paragraph tags, and list elements. Make the anchor text "${anchorText}" link to "${url}" naturally within the content flow.`;
+
+    const userPrompt = `${prompt}
+
+Additional requirements:
+- Target keyword: "${keyword}"
+- Anchor text to link: "${anchorText}"
+- Link destination: "${url}"
+- Minimum 1000 words
+- Professional, engaging tone
+- SEO-optimized structure with clear headings
+- Include practical tips, insights, or examples related to the topic
+
+Please create a comprehensive, well-structured blog post that naturally incorporates the anchor text "${anchorText}" as a clickable link to "${url}".`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        max_tokens: 4000,
+        temperature: 0.7,
+        presence_penalty: 0.1,
+        frequency_penalty: 0.1
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error('Invalid response format from OpenAI API');
+    }
+
+    const content = data.choices[0].message.content;
+    const wordCount = content.split(/\s+/).length;
+
+    // Ensure the content includes the anchor text as a link
+    let processedContent = content;
+    if (!content.includes(`<a href="${url}"`)) {
+      const anchorTextPattern = new RegExp(`\\b${anchorText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+      processedContent = content.replace(anchorTextPattern, `<a href="${url}" target="_blank" rel="noopener noreferrer">${anchorText}</a>`);
+    }
+
+    return {
+      content: processedContent,
+      wordCount,
+      provider: 'OpenAI (Direct)',
+      success: true
+    };
+  };
+
   const addStep = (step: string, status: GenerationStep['status'], message: string) => {
     stepCounterRef.current += 1;
     const newStep: GenerationStep = {
