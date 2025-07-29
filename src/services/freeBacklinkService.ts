@@ -22,32 +22,21 @@ export class FreeBacklinkService {
   }
 
   /**
-   * Generate a free backlink blog post
+   * Store a generated backlink for 24-hour management
    */
-  async generateFreeBacklink(request: FreeBacklinkRequest): Promise<FreeBacklinkResult> {
-    try {
-      // Generate content using OpenAI
-      const result = await simpleAIContentEngine.generateFreeBacklink(request);
-      
-      // Store the post with view tracking
-      const storedPost: StoredPost = {
-        ...result,
-        viewCount: 0
-      };
-      
-      this.savePost(storedPost);
-      
-      console.log('✅ Free backlink generated and stored:', {
-        id: result.id,
-        expiresAt: result.expiresAt,
-        wordCount: result.wordCount
-      });
+  storeFreeBacklink(result: GeneratedContentResult): void {
+    const storedPost: StoredPost = {
+      ...result,
+      viewCount: 0
+    };
 
-      return result;
-    } catch (error) {
-      console.error('❌ Failed to generate free backlink:', error);
-      throw error;
-    }
+    this.savePost(storedPost);
+
+    console.log('✅ Free backlink stored:', {
+      id: result.id,
+      expiresAt: result.expiresAt,
+      wordCount: result.wordCount
+    });
   }
 
   /**
