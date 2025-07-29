@@ -80,6 +80,21 @@ export function formatBlogContent(content: string): string {
   // Capitalize first letter of every sentence
   formattedContent = capitalizeSentences(formattedContent);
 
+  // Fix broken sentences and word continuations first
+  formattedContent = reconstructBrokenSentences(formattedContent);
+
+  // Remove all indentations and normalize spacing
+  formattedContent = removeIndentations(formattedContent);
+
+  // Fix broken HTML structure
+  formattedContent = fixBrokenHTMLStructure(formattedContent);
+
+  // Prevent double headlines
+  formattedContent = fixDoubleHeadlines(formattedContent);
+
+  // Convert text formatting to proper HTML tags
+  formattedContent = convertToProperHTML(formattedContent);
+
   // Clean up multiple consecutive line breaks
   formattedContent = formattedContent.replace(/\n{3,}/g, '\n\n');
 
@@ -183,29 +198,64 @@ export function formatBlogTitle(title: string): string {
 function formatInlineBulletPoints(content: string): string {
   let formatted = content;
 
-  // Handle patterns like "- item1 - item2 - item3" and separate them with line breaks
-  formatted = formatted.replace(/\s*-\s*([^-\n]+?)\s*-\s*([^-\n]+)/g, (match, ...items) => {
-    // Split on hyphens and clean up each item
-    const allItems = match.split(/\s*-\s*/).filter(item => item.trim());
-    const formattedItems = allItems.map(item => {
-      const cleanItem = item.trim();
-      if (cleanItem) {
-        // Capitalize first letter and ensure proper punctuation
-        const capitalized = cleanItem.charAt(0).toUpperCase() + cleanItem.slice(1);
+  // Handle long bullet point strings that are all concatenated together
+  // Pattern: "- Item1: Description - Item2: Description - Item3: Description"
+  formatted = formatted.replace(/(-\s*[^-]+?)(?=\s*-\s*[A-Z])/g, (match, item) => {
+    const cleanItem = item.trim();
+    if (cleanItem.startsWith('-')) {
+      // Ensure proper formatting and capitalization
+      const content = cleanItem.substring(1).trim();
+      const capitalized = content.charAt(0).toUpperCase() + content.slice(1);
+      return `- ${capitalized}\n`;
+    }
+    return match;
+  });
+
+  // Handle the last item in a sequence that doesn't have another bullet after it
+  formatted = formatted.replace(/(-\s*[^-\n]+)(?!\s*-)/g, (match, item) => {
+    const cleanItem = item.trim();
+    if (cleanItem.startsWith('-')) {
+      const content = cleanItem.substring(1).trim();
+      const capitalized = content.charAt(0).toUpperCase() + content.slice(1);
+      return `- ${capitalized}`;
+    }
+    return match;
+  });
+
+  // Convert HTML-style lists to proper bullet points with line breaks
+  formatted = formatted.replace(/<ul[^>]*>(.*?)<\/ul>/gis, (match, listContent) => {
+    const items = listContent.match(/<li[^>]*>(.*?)<\/li>/gis) || [];
+    const bulletItems = items.map(item => {
+      const content = item.replace(/<\/?li[^>]*>/gi, '').trim();
+      if (content) {
+        const capitalized = content.charAt(0).toUpperCase() + content.slice(1);
         return `- ${capitalized}`;
       }
       return '';
     }).filter(item => item);
 
-    return '\n' + formattedItems.join('\n') + '\n';
+    return bulletItems.length > 0 ? '\n' + bulletItems.join('\n') + '\n' : '';
   });
 
-  // Handle bullet points that are run together without proper spacing
-  formatted = formatted.replace(/([a-z])\s*-\s*([A-Z][^-]*)/g, (match, prevChar, nextItem) => {
-    return `${prevChar}\n- ${nextItem}`;
+  // Convert ordered lists to bullet points as well
+  formatted = formatted.replace(/<ol[^>]*>(.*?)<\/ol>/gis, (match, listContent) => {
+    const items = listContent.match(/<li[^>]*>(.*?)<\/li>/gis) || [];
+    const bulletItems = items.map(item => {
+      const content = item.replace(/<\/?li[^>]*>/gi, '').trim();
+      if (content) {
+        const capitalized = content.charAt(0).toUpperCase() + content.slice(1);
+        return `- ${capitalized}`;
+      }
+      return '';
+    }).filter(item => item);
+
+    return bulletItems.length > 0 ? '\n' + bulletItems.join('\n') + '\n' : '';
   });
 
-  // Clean up any double line breaks that might have been created
+  // Clean up any remaining li tags
+  formatted = formatted.replace(/<\/?li[^>]*>/gi, '');
+
+  // Clean up any multiple consecutive line breaks
   formatted = formatted.replace(/\n{3,}/g, '\n\n');
 
   return formatted;
@@ -220,6 +270,228 @@ export function capitalizeSentences(text: string): string {
   return text.replace(/(^|[.!?:]\s+|\n\s*)([a-z])/g, (match, prefix, letter) => {
     return prefix + letter.toUpperCase();
   });
+}
+
+/**
+ * Reconstructs broken sentences and fixes word continuations
+ */
+function reconstructBrokenSentences(content: string): string {
+  let fixed = content;
+
+  // Fix common broken word patterns like "cost\n\nEffectively" -> "cost effectively"
+  fixed = fixed.replace(/([a-z])\s*\n+\s*([A-Z][a-z]+ly)\b/g, '$1 $2');
+
+  // Fix broken sentences where a word is split across lines
+  fixed = fixed.replace(/([a-z])\s*\n+\s*([a-z]{2,})/g, '$1 $2');
+
+  // Fix sentences that end with incomplete words followed by completion on next line
+  fixed = fixed.replace(/([a-z])\s*\n+\s*([a-z]+[.!?])/g, '$1$2');
+
+  // Fix broken sentences like "follow." followed by "- Up" -> "follow-up"
+  fixed = fixed.replace(/([a-z]+)\.\s*\n+\s*-\s*([A-Z][a-z]+)/g, '$1-$2');
+
+  // Fix sentences broken across paragraph tags
+  fixed = fixed.replace(/([a-z,])\s*<\/p>\s*<p>\s*([a-z])/gi, '$1 $2');
+
+  // Fix list items that contain sentence fragments
+  fixed = fixed.replace(/<li[^>]*>([^<]*?[a-z])\s*<\/li>\s*<li[^>]*>\s*([a-z][^<]*?)<\/li>/gi, '<li>$1 $2</li>');
+
+  // Remove orphaned punctuation at the beginning of sentences
+  fixed = fixed.replace(/^\s*[.!?:,-]\s*/gm, '');
+
+  // Fix sentences that start with lowercase after periods
+  fixed = fixed.replace(/([.!?])\s+([a-z])/g, (match, punct, letter) => {
+    return punct + ' ' + letter.toUpperCase();
+  });
+
+  return fixed;
+}
+
+/**
+ * Removes all indentations and normalizes spacing
+ */
+function removeIndentations(content: string): string {
+  let fixed = content;
+
+  // Remove all leading spaces and tabs from lines
+  fixed = fixed.replace(/^[ \t]+/gm, '');
+
+  // Remove indentation from list items
+  fixed = fixed.replace(/^\s*(<li[^>]*>)\s+/gm, '$1');
+
+  // Normalize multiple spaces to single spaces
+  fixed = fixed.replace(/[ \t]{2,}/g, ' ');
+
+  // Remove spaces at the end of lines
+  fixed = fixed.replace(/[ \t]+$/gm, '');
+
+  // Normalize line breaks - no more than 2 consecutive
+  fixed = fixed.replace(/\n{3,}/g, '\n\n');
+
+  // Remove spaces around HTML tags
+  fixed = fixed.replace(/\s+(<[^>]+>)\s+/g, '$1');
+  fixed = fixed.replace(/>\s+</g, '><');
+
+  return fixed;
+}
+
+/**
+ * Fixes broken HTML structure and paragraph formatting
+ */
+function fixBrokenHTMLStructure(content: string): string {
+  let fixed = content;
+
+  // Fix list items that contain full paragraphs instead of being bullet points
+  fixed = fixed.replace(/<li[^>]*><p[^>]*>(.*?)<\/p><\/li>/gis, (match, innerContent) => {
+    const cleanContent = innerContent.trim();
+    // If it's a long paragraph, convert to regular paragraph
+    if (cleanContent.length > 100 && !cleanContent.match(/^[-•·]\s/)) {
+      return `<p>${cleanContent}</p>`;
+    }
+    // If it's a proper bullet point, keep as list item without nested paragraph
+    return `<li>${cleanContent}</li>`;
+  });
+
+  // Fix broken list items that contain paragraph content directly
+  fixed = fixed.replace(/<li[^>]*>(.*?)<\/li>/gis, (match, liContent) => {
+    const cleanContent = liContent.trim();
+    // Remove any nested paragraph tags within list items
+    const cleanedContent = cleanContent.replace(/<\/?p[^>]*>/gi, '');
+
+    // If the content looks like regular paragraph text (not a bullet point), convert to paragraph
+    if (cleanedContent && !cleanedContent.match(/^[-•·]\s/) && cleanedContent.length > 80) {
+      return `<p>${cleanedContent}</p>`;
+    }
+
+    // Keep as list item but ensure it's properly formatted
+    return `<li>${cleanedContent}</li>`;
+  });
+
+  // Fix broken paragraph tags and malformed content
+  fixed = fixed.replace(/<p[^>]*>\s*<\/p>/g, ''); // Remove empty paragraphs
+  fixed = fixed.replace(/<p[^>]*>\s*(<h[1-6])/gi, '$1'); // Don't wrap headings in paragraphs
+  fixed = fixed.replace(/(<\/h[1-6]>)\s*<\/p>/gi, '$1'); // Don't close paragraphs after headings
+
+  // Fix content that's not properly wrapped in paragraphs
+  fixed = fixed.replace(/^(?!<[hulo\/]|$)([^<\n][^<]*?)(?=\n\n|<h|<ul|<ol|$)/gm, '<p>$1</p>');
+
+  // Fix broken sentences (text that ends abruptly without punctuation)
+  fixed = fixed.replace(/([a-z])\s*<\/p>/gi, (match, lastChar) => {
+    if (!'.,!?;:'.includes(lastChar)) {
+      return `${lastChar}.</p>`;
+    }
+    return match;
+  });
+
+  // Remove any empty or malformed list structures
+  fixed = fixed.replace(/<[uo]l[^>]*>\s*<\/[uo]l>/gi, '');
+  fixed = fixed.replace(/<[uo]l[^>]*>\s*(<li[^>]*>\s*<\/li>\s*)*<\/[uo]l>/gi, '');
+
+  // Fix sentences that are broken across multiple paragraph tags
+  fixed = fixed.replace(/(<p[^>]*>[^<]*?)([a-z,])\s*<\/p>\s*<p[^>]*>\s*([a-z][^<]*?<\/p>)/gi, '$1$2 $3');
+
+  return fixed;
+}
+
+/**
+ * Prevents double headlines by merging consecutive heading tags
+ */
+function fixDoubleHeadlines(content: string): string {
+  let fixed = content;
+
+  // Remove consecutive H1 tags (keep only the first one)
+  fixed = fixed.replace(/(<h1[^>]*>.*?<\/h1>)\s*(<h1[^>]*>.*?<\/h1>)/gi, '$1');
+
+  // Convert H2 that immediately follows H1 to H2 with proper spacing
+  fixed = fixed.replace(/(<h1[^>]*>.*?<\/h1>)\s*(<h2[^>]*>.*?<\/h2>)/gi, '$1\n\n$2');
+
+  // Remove consecutive identical headings
+  fixed = fixed.replace(/(<h([1-6])[^>]*>)(.*?)(<\/h\2>)\s*(<h\2[^>]*>)\3(<\/h\2>)/gi, '$1$3$4');
+
+  // Ensure proper spacing between headings and content
+  fixed = fixed.replace(/(<\/h[1-6]>)\s*(<h[1-6])/gi, '$1\n\n$2');
+  fixed = fixed.replace(/(<\/h[1-6]>)\s*(<p)/gi, '$1\n\n$2');
+
+  return fixed;
+}
+
+/**
+ * Converts text formatting to proper HTML tags
+ */
+function convertToProperHTML(content: string): string {
+  let formatted = content;
+
+  // Convert **bold** to <strong>
+  formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+  // Convert *italic* to <em>
+  formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+  // Fix standalone bullet points and convert to proper lists
+  formatted = formatted.replace(/(?:^|\n)((?:\s*[-•·]\s[^\n]+(?:\n|$))+)/gm, (match, bulletGroup) => {
+    const items = bulletGroup.split('\n')
+      .map(line => line.trim())
+      .filter(line => line.match(/^[-•·]\s/))
+      .map(line => {
+        const content = line.replace(/^[-•·]\s/, '').trim();
+        return `  <li>${content}</li>`;
+      });
+
+    return items.length > 0 ? `\n<ul>\n${items.join('\n')}\n</ul>\n` : match;
+  });
+
+  // Convert numbered lists to ordered lists (1. 2. 3. etc.)
+  formatted = formatted.replace(/(?:^|\n)((?:\s*\d+\.\s[^\n]+(?:\n|$))+)/gm, (match, listGroup) => {
+    const items = listGroup.split('\n')
+      .map(line => line.trim())
+      .filter(line => /^\d+\.\s/.test(line))
+      .map(line => {
+        const content = line.replace(/^\d+\.\s/, '').trim();
+        return `  <li>${content}</li>`;
+      });
+
+    return items.length > 0 ? `\n<ol>\n${items.join('\n')}\n</ol>\n` : match;
+  });
+
+  // Wrap standalone text in paragraphs (avoiding headings and lists)
+  const lines = formatted.split('\n');
+  const processedLines = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+
+    // Skip empty lines, headings, lists, and already wrapped content
+    if (!line ||
+        line.startsWith('<h') ||
+        line.startsWith('</h') ||
+        line.startsWith('<ul') ||
+        line.startsWith('</ul') ||
+        line.startsWith('<ol') ||
+        line.startsWith('</ol') ||
+        line.startsWith('<li') ||
+        line.startsWith('</li') ||
+        line.startsWith('<p') ||
+        line.startsWith('</p')) {
+      processedLines.push(lines[i]);
+      continue;
+    }
+
+    // If it's regular text content, wrap in paragraph
+    if (line.length > 0 && !line.startsWith('<')) {
+      processedLines.push(`<p>${line}</p>`);
+    } else {
+      processedLines.push(lines[i]);
+    }
+  }
+
+  formatted = processedLines.join('\n');
+
+  // Clean up any malformed paragraph tags
+  formatted = formatted.replace(/<p>\s*<\/p>/g, '');
+  formatted = formatted.replace(/<p>\s*(<[huo])/g, '$1');
+  formatted = formatted.replace(/(<\/[huo]l>)\s*<\/p>/g, '$1');
+
+  return formatted;
 }
 
 /**
@@ -240,6 +512,13 @@ export function cleanHTMLContent(content: string): string {
   // Remove meta tags hints that shouldn't be visible
   cleaned = cleaned.replace(/<!-- SEO Meta Tags[\s\S]*?-->/g, '');
   cleaned = cleaned.replace(/<!-- Structured Data[\s\S]*?-->/g, '');
+
+  // Remove content structure comments and references
+  cleaned = cleaned.replace(/<!-- Rest of the sections[\s\S]*?-->/gi, '');
+  cleaned = cleaned.replace(/<!-- The complete implementation[\s\S]*?-->/gi, '');
+  cleaned = cleaned.replace(/\{\/\*[\s\S]*?\*\/\}/g, '');
+  cleaned = cleaned.replace(/\{\/\* Rest of the sections[\s\S]*?\*\/\}/gi, '');
+  cleaned = cleaned.replace(/\{\/\* The complete implementation[\s\S]*?\*\/\}/gi, '');
 
   // Remove JSON-LD structured data that appears as text
   cleaned = cleaned.replace(/\{\s*"@context"[\s\S]*?\}/g, '');
@@ -285,8 +564,29 @@ export function cleanHTMLContent(content: string): string {
   cleaned = cleaned.replace(/Designed for [A-Za-z\s]+ market\./g, '');
   cleaned = cleaned.replace(/Localized for [A-Za-z\s]+\./g, '');
 
-  // Ensure proper paragraph structure around bullet points
-  cleaned = cleaned.replace(/(\n- [^\n]+(?:\n- [^\n]+)*)/g, '\n<div class="bullet-list">$1\n</div>\n');
+  // Fix paragraph and list alignment issues
+  cleaned = cleaned.replace(/(<\/p>)\s*(<ul|<ol)/g, '$1\n\n$2');
+  cleaned = cleaned.replace(/(<\/ul>|<\/ol>)\s*(<p)/g, '$1\n\n$2');
+  cleaned = cleaned.replace(/(<\/h[1-6]>)\s*(<ul|<ol|<p)/g, '$1\n\n$2');
+
+  // Fix broken sentence continuations and word fragments
+  cleaned = cleaned.replace(/([a-z])\s*\n\s*([A-Z][a-z])/g, '$1 $2');
+  cleaned = cleaned.replace(/([a-z])\s+([A-Z][a-z]+ly)\b/g, '$1 $2');
+
+  // Fix incomplete sentences that end with fragments
+  cleaned = cleaned.replace(/([a-z])\s*\n+\s*([a-z]+[.!?])/g, '$1$2');
+
+  // Fix sentences broken by improper line breaks
+  cleaned = cleaned.replace(/([a-z,])\s*\n+\s*([a-z])/g, '$1 $2');
+
+  // Remove standalone punctuation that's separated from words
+  cleaned = cleaned.replace(/\s+([.!?,:;])/g, '$1');
+  cleaned = cleaned.replace(/([.!?])\s*\n+\s*([a-z])/g, (match, punct, letter) => {
+    return punct + ' ' + letter.toUpperCase();
+  });
+
+  // Fix hyphenated words that got broken across lines
+  cleaned = cleaned.replace(/([a-z])-\s*\n+\s*([a-z])/g, '$1-$2');
 
   // Clean up excessive line breaks
   cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
