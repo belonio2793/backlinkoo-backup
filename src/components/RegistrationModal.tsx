@@ -307,3 +307,6 @@ export function RegistrationModal({
     </Dialog>
   );
 }
+
+export { RegistrationModal };
+export default RegistrationModal;
