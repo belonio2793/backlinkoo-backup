@@ -517,6 +517,20 @@ export function BlogPost() {
         }
       `}</style>
 
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onAuthSuccess={(user) => {
+          setShowLoginModal(false);
+          setCurrentUser(user);
+          toast({
+            title: "Welcome! 🎉",
+            description: "You're now logged in and can claim backlinks.",
+          });
+        }}
+      />
+
       {/* Footer */}
       <Footer />
     </div>
