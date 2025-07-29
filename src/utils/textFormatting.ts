@@ -267,6 +267,67 @@ export function capitalizeSentences(text: string): string {
 }
 
 /**
+ * Fixes broken HTML structure and paragraph formatting
+ */
+function fixBrokenHTMLStructure(content: string): string {
+  let fixed = content;
+
+  // Fix broken list items that contain paragraph content
+  fixed = fixed.replace(/<li[^>]*>(.*?)<\/li>/gis, (match, liContent) => {
+    // If the li content looks like regular paragraph text (not a bullet point), convert to paragraph
+    const cleanContent = liContent.trim();
+    if (cleanContent && !cleanContent.match(/^[-•·]\s/) && cleanContent.length > 100) {
+      return `<p>${cleanContent}</p>`;
+    }
+    return match;
+  });
+
+  // Fix broken paragraph tags and malformed content
+  fixed = fixed.replace(/<p[^>]*>\s*<\/p>/g, ''); // Remove empty paragraphs
+  fixed = fixed.replace(/<p[^>]*>\s*(<h[1-6])/gi, '$1'); // Don't wrap headings in paragraphs
+  fixed = fixed.replace(/(<\/h[1-6]>)\s*<\/p>/gi, '$1'); // Don't close paragraphs after headings
+
+  // Fix content that's not properly wrapped in paragraphs
+  fixed = fixed.replace(/^(?!<[hulo\/]|$)([^<\n][^<]*?)(?=\n\n|<h|<ul|<ol|$)/gm, '<p>$1</p>');
+
+  // Fix broken sentences (text that ends abruptly without punctuation)
+  fixed = fixed.replace(/([a-z])\s*<\/p>/gi, (match, lastChar) => {
+    if (!'.,!?;:'.includes(lastChar)) {
+      return `${lastChar}.</p>`;
+    }
+    return match;
+  });
+
+  // Remove any empty or malformed list structures
+  fixed = fixed.replace(/<[uo]l[^>]*>\s*<\/[uo]l>/gi, '');
+  fixed = fixed.replace(/<[uo]l[^>]*>\s*(<li[^>]*>\s*<\/li>\s*)*<\/[uo]l>/gi, '');
+
+  return fixed;
+}
+
+/**
+ * Prevents double headlines by merging consecutive heading tags
+ */
+function fixDoubleHeadlines(content: string): string {
+  let fixed = content;
+
+  // Remove consecutive H1 tags (keep only the first one)
+  fixed = fixed.replace(/(<h1[^>]*>.*?<\/h1>)\s*(<h1[^>]*>.*?<\/h1>)/gi, '$1');
+
+  // Convert H2 that immediately follows H1 to H2 with proper spacing
+  fixed = fixed.replace(/(<h1[^>]*>.*?<\/h1>)\s*(<h2[^>]*>.*?<\/h2>)/gi, '$1\n\n$2');
+
+  // Remove consecutive identical headings
+  fixed = fixed.replace(/(<h([1-6])[^>]*>)(.*?)(<\/h\2>)\s*(<h\2[^>]*>)\3(<\/h\2>)/gi, '$1$3$4');
+
+  // Ensure proper spacing between headings and content
+  fixed = fixed.replace(/(<\/h[1-6]>)\s*(<h[1-6])/gi, '$1\n\n$2');
+  fixed = fixed.replace(/(<\/h[1-6]>)\s*(<p)/gi, '$1\n\n$2');
+
+  return fixed;
+}
+
+/**
  * Converts text formatting to proper HTML tags
  */
 function convertToProperHTML(content: string): string {
