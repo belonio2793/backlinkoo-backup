@@ -231,6 +231,109 @@ export function BlogPost() {
     }
   };
 
+  const handleRegenerateContent = async () => {
+    if (!blogPost || !blogPost.is_trial_post) {
+      toast({
+        title: "Cannot regenerate",
+        description: "Only trial posts can be regenerated.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const confirmRegenerate = window.confirm(
+      `Are you sure you want to regenerate the content for "${blogPost.title}"? This will replace the current content with fresh AI-generated content.`
+    );
+
+    if (!confirmRegenerate) return;
+
+    setIsRegenerating(true);
+
+    try {
+      // Extract the original keywords/anchor text from the blog post
+      const primaryKeyword = blogPost.keywords?.[0] || blogPost.title.split(':')[0].trim();
+      const anchorText = blogPost.anchor_text || primaryKeyword;
+
+      toast({
+        title: "Regenerating content...",
+        description: "Please wait while we generate fresh content with AI.",
+      });
+
+      // Generate new content using the enhanced AI engine
+      const result = await enhancedAIContentEngine.generateContent({
+        keyword: primaryKeyword,
+        targetUrl: blogPost.target_url,
+        anchorText: anchorText,
+        contentLength: 'medium',
+        contentTone: 'professional',
+        seoFocus: 'high'
+      });
+
+      if (!result.finalContent) {
+        throw new Error('Failed to generate content');
+      }
+
+      // Update the blog post with new content
+      const updatedBlogPost = {
+        ...blogPost,
+        content: result.finalContent,
+        word_count: result.metadata.wordCount,
+        reading_time: result.metadata.readingTime,
+        seo_score: result.metadata.seoScore,
+        updated_at: new Date().toISOString()
+      };
+
+      // Update in localStorage
+      const blogStorageKey = `blog_post_${blogPost.slug}`;
+      localStorage.setItem(blogStorageKey, JSON.stringify(updatedBlogPost));
+
+      // Update in all posts list
+      const allPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+      const updatedPosts = allPosts.map((post: any) =>
+        post.slug === blogPost.slug ? updatedBlogPost : post
+      );
+      localStorage.setItem('all_blog_posts', JSON.stringify(updatedPosts));
+
+      // Try to update in database if it exists
+      try {
+        const { error } = await supabase
+          .from('published_blog_posts')
+          .update({
+            content: result.finalContent,
+            word_count: result.metadata.wordCount,
+            reading_time: result.metadata.readingTime,
+            seo_score: result.metadata.seoScore,
+            updated_at: new Date().toISOString()
+          })
+          .eq('slug', blogPost.slug);
+
+        if (error) {
+          console.warn('Could not update database:', error);
+        }
+      } catch (dbError) {
+        console.warn('Database update failed:', dbError);
+      }
+
+      // Update the component state
+      setBlogPost(updatedBlogPost);
+
+      toast({
+        title: "Content regenerated!",
+        description: "The blog post has been updated with fresh AI-generated content.",
+      });
+
+    } catch (error) {
+      console.error('Failed to regenerate content:', error);
+      toast({
+        title: "Regeneration failed",
+        description: "An error occurred while generating new content. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
