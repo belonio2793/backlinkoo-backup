@@ -791,6 +791,13 @@ const Login = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Debug info - remove in production */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-8 max-w-2xl mx-auto">
+          <AuthDebugStatus />
+        </div>
+      )}
     </div>
   );
 };
