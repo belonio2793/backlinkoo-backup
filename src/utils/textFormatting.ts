@@ -80,6 +80,12 @@ export function formatBlogContent(content: string): string {
   // Capitalize first letter of every sentence
   formattedContent = capitalizeSentences(formattedContent);
 
+  // Fix broken HTML structure first
+  formattedContent = fixBrokenHTMLStructure(formattedContent);
+
+  // Prevent double headlines
+  formattedContent = fixDoubleHeadlines(formattedContent);
+
   // Convert text formatting to proper HTML tags
   formattedContent = convertToProperHTML(formattedContent);
 
