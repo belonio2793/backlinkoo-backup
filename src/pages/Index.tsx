@@ -267,7 +267,10 @@ const Index = () => {
                 <>
                   <Button
                     variant="ghost"
-                    onClick={() => setShowLoginModal(true)}
+                    onClick={() => {
+                      setLoginModalTab("signup");
+                      setShowLoginModal(true);
+                    }}
                     className="font-medium"
                   >
                     Sign Up
