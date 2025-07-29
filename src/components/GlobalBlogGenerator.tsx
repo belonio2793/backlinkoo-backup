@@ -89,12 +89,22 @@ export function GlobalBlogGenerator({
   }, []);
 
   const loadGlobalStats = async () => {
+    // Simple stats from localStorage for OpenAI-only system
     try {
-      const stats = await globalBlogGenerator.getGlobalBlogStats();
-      setGlobalStats(stats);
+      const allPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+      const today = new Date().toDateString();
+      const postsToday = allPosts.filter((post: any) =>
+        new Date(post.created_at).toDateString() === today
+      ).length;
+
+      setGlobalStats({
+        totalPosts: allPosts.length,
+        postsToday,
+        activeUsers: null,
+        averageQuality: null
+      });
     } catch (error) {
-      console.warn('Could not load global stats:', error);
-      // Set safe fallback stats to prevent component errors
+      console.warn('Could not load stats:', error);
       setGlobalStats({
         totalPosts: 0,
         postsToday: 0,
@@ -105,7 +115,8 @@ export function GlobalBlogGenerator({
   };
 
   const updateRemainingRequests = () => {
-    const remaining = globalBlogGenerator.getRemainingRequests();
+    // Simple rate limiting - just check if OpenAI is configured
+    const remaining = openAIContentGenerator.isConfigured() ? 10 : 0;
     setRemainingRequests(remaining);
   };
 
