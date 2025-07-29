@@ -116,6 +116,20 @@ export class OpenAIContentGenerator {
 
     } catch (error) {
       console.error('❌ Content generation failed:', error);
+
+      // Provide more helpful error messages
+      if (error instanceof Error) {
+        if (error.message.includes('401') || error.message.includes('Invalid API key')) {
+          throw new Error('Invalid OpenAI API key. Please check that your API key is correct and has sufficient credits. Visit https://platform.openai.com/api-keys to manage your API keys.');
+        } else if (error.message.includes('429') || error.message.includes('rate limit')) {
+          throw new Error('OpenAI rate limit exceeded. Please wait a moment before trying again. If this persists, check your OpenAI account usage limits.');
+        } else if (error.message.includes('insufficient_quota')) {
+          throw new Error('OpenAI quota exceeded. Please check your OpenAI account billing and usage limits at https://platform.openai.com/usage');
+        } else if (error.message.includes('model_not_found')) {
+          throw new Error('The requested OpenAI model is not available. Please try again or contact support if the issue persists.');
+        }
+      }
+
       throw error;
     }
   }
