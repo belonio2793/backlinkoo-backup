@@ -56,7 +56,7 @@ export class OpenAIContentGenerator {
 
     // Check if OpenAI is configured
     if (!openAIService.isConfigured()) {
-      throw new Error('OpenAI API key not configured. Please configure your OpenAI API key to generate content.');
+      throw new Error('OpenAI API key is not configured. Please set the VITE_OPENAI_API_KEY environment variable with a valid OpenAI API key to enable content generation.');
     }
 
     try {
