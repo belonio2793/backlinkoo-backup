@@ -28,7 +28,8 @@ import {
   RefreshCw,
   Zap,
   Gift,
-  Home
+  Home,
+  CheckCircle2
 } from 'lucide-react';
 
 export function BlogPost() {
