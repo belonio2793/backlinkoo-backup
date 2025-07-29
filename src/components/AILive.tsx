@@ -261,7 +261,7 @@ export function AILive() {
       }
 
       // Step 2: Select Provider and Prompt
-      const selectedProvider = selectRandomProvider();
+      const selectedProvider = selectProviderByPriority();
       const { prompt, index } = selectRandomPrompt();
       
       addStep('Selection', 'success', `Selected ${selectedProvider} with Prompt ${index + 1}`);
