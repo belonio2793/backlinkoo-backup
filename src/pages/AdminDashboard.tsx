@@ -205,6 +205,10 @@ const AdminDashboard = () => {
             <AdminBlogManager />
           </TabsContent>
 
+          <TabsContent value="blog-claims">
+            <BlogPostClaimsManager />
+          </TabsContent>
+
           <TabsContent value="ai-posts">
             <AIPostsManager />
           </TabsContent>
