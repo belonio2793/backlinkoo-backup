@@ -538,14 +538,7 @@ Focus on ranking factors while maintaining user value and engagement.`;
     const successfulResults = results.filter(r => r.success && r.content.length > 100);
 
     if (successfulResults.length === 0) {
-      return {
-        provider: 'fallback',
-        content: this.generateFallbackContent(request),
-        success: true,
-        usage: { tokens: 0, cost: 0 },
-        generationTime: 0,
-        quality: 70
-      };
+      throw new Error('No providers generated valid content. All attempts failed.');
     }
 
     // Calculate weighted scores
