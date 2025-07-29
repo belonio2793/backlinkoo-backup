@@ -80,8 +80,8 @@ export default function AILive() {
         keyword: keyword.trim(),
         anchorText: anchorText.trim(),
         targetUrl: targetUrl.trim(),
-        userId: user?.id,
-        accountId: user?.id
+        userId: user?.id
+        // No accountId to bypass one-per-account limit on AI Live
       });
 
       // Publish to blog
