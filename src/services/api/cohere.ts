@@ -47,7 +47,7 @@ export class CohereService {
     if (!this.apiKey) {
       console.warn('Cohere API key not configured');
     } else {
-      console.log('✅ Cohere API key configured:', this.apiKey.substring(0, 10) + '...');
+      console.log('✅ Secondary AI engine configured and ready');
     }
   }
 
