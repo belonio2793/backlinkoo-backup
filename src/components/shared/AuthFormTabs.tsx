@@ -179,6 +179,12 @@ export function AuthFormTabs({
 
     setIsLoading(true);
 
+    // Show loading notification
+    toast({
+      title: showTrialUpgrade ? "Upgrading your trial..." : "Creating your account...",
+      description: "Please wait while we set up your account.",
+    });
+
     try {
       // Use trial conversion service if we're upgrading a trial
       if (showTrialUpgrade && TrialConversionService.hasConvertibleTrialPosts()) {
