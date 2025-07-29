@@ -377,62 +377,13 @@ Focus on ranking factors while maintaining user value and engagement.`;
     const providerStartTime = Date.now();
     const systemPrompt = this.getSystemPrompt(provider.name, request);
 
-    let result;
-
-    switch (provider.name) {
-      case 'openai':
-        result = await provider.service.generateContent(prompt, {
-          model: provider.model,
-          maxTokens: provider.maxTokens,
-          temperature: 0.7,
-          systemPrompt
-        });
-        break;
-
-      case 'grok':
-        result = await provider.service.generateContent(prompt, {
-          model: provider.model,
-          maxTokens: provider.maxTokens,
-          temperature: 0.7,
-          systemPrompt
-        });
-        break;
-
-      case 'deepai':
-        const deepAIPrompt = `${systemPrompt}\n\n${prompt}`;
-        result = await provider.service.generateText(deepAIPrompt);
-        break;
-
-      case 'huggingface':
-        const hfPrompt = `${systemPrompt}\n\n${prompt}`;
-        result = await provider.service.generateText(hfPrompt, {
-          model: provider.model,
-          maxLength: provider.maxTokens,
-          temperature: 0.7
-        });
-        break;
-
-      case 'cohere':
-        const coherePrompt = `${systemPrompt}\n\n${prompt}`;
-        result = await provider.service.generateText(coherePrompt, {
-          model: provider.model,
-          maxTokens: provider.maxTokens,
-          temperature: 0.7
-        });
-        break;
-
-      case 'rytr':
-        result = await provider.service.generateContent(prompt, {
-          useCase: 'blog_idea_outline',
-          tone: request.tone || 'convincing',
-          maxCharacters: provider.maxTokens,
-          variations: 1
-        });
-        break;
-
-      default:
-        throw new Error(`Unknown provider: ${provider.name}`);
-    }
+    // Only OpenAI provider
+    const result = await provider.service.generateContent(prompt, {
+      model: provider.model,
+      maxTokens: provider.maxTokens,
+      temperature: 0.7,
+      systemPrompt
+    });
 
     const generationTime = Date.now() - providerStartTime;
     const quality = this.assessContentQuality(result?.content || '', request);
