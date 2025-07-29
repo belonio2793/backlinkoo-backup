@@ -636,48 +636,7 @@ Focus on ranking factors while maintaining user value and engagement.`;
     };
   }
 
-  /**
-   * Generate fallback content when all providers fail
-   */
-  private generateFallbackContent(request: ContentRequest): string {
-    const { keyword, targetUrl, anchorText } = request;
-    const anchor = anchorText || keyword;
-    
-    return `# ${keyword}: Your Ultimate Guide
 
-## Introduction
-
-Understanding ${keyword} is essential in today's digital landscape. This comprehensive guide will provide you with everything you need to know about ${keyword}, from basic concepts to advanced strategies.
-
-## What is ${keyword}?
-
-${keyword} represents a crucial element that can significantly impact your success. Whether you're a beginner or experienced professional, mastering ${keyword} will give you a competitive advantage.
-
-## Key Benefits
-
-- **Enhanced Performance**: Improve your results with proven ${keyword} strategies
-- **Expert Guidance**: Learn from industry professionals
-- **Practical Solutions**: Get actionable insights you can implement immediately
-- **Long-term Success**: Build sustainable growth through ${keyword}
-
-## Getting Started
-
-The best approach to ${keyword} combines theoretical knowledge with practical application. For comprehensive resources and expert tools, [${anchor}](${targetUrl}) provides everything you need to succeed.
-
-## Best Practices
-
-1. Start with a solid foundation in ${keyword} fundamentals
-2. Implement strategies systematically
-3. Monitor your progress regularly
-4. Stay updated with latest trends
-5. Seek professional guidance when needed
-
-## Conclusion
-
-Mastering ${keyword} requires dedication and the right resources. Take the first step toward success by exploring the comprehensive solutions available at [${anchor}](${targetUrl}).
-
-Ready to excel in ${keyword}? Start your journey today!`;
-  }
 
   /**
    * Test all provider connections
