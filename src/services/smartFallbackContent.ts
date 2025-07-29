@@ -3,6 +3,8 @@
  * Creates contextually relevant content based on keyword understanding
  */
 
+import { formatBlogContent } from '../utils/textFormatting';
+
 export class SmartFallbackContent {
   
   static generateContent(keyword: string, targetUrl: string, anchorText?: string): string {
