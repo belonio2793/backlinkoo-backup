@@ -249,12 +249,7 @@ export function GlobalBlogGenerator({
         sessionId: request.sessionId
       });
 
-      // Check if the free backlink service is ready (OpenAI configured)
-      if (!freeBacklinkService.isReady()) {
-        throw new Error("Content generation service is not configured. Please try again later or contact support.");
-      }
-
-      // Use the new free backlink service instead of the old globalBlogGenerator
+      // Use the new free backlink service (it has fallback content when OpenAI is not available)
       const freeBacklinkRequest = {
         targetUrl: request.targetUrl,
         primaryKeyword: request.primaryKeyword,
