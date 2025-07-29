@@ -116,9 +116,16 @@ export function GlobalBlogGenerator({
   };
 
   const updateRemainingRequests = () => {
-    // Simple rate limiting - just check if OpenAI is configured
-    const remaining = openAIContentGenerator.isConfigured() ? 10 : 0;
-    setRemainingRequests(remaining);
+    // Non-authenticated users get unlimited requests if OpenAI is configured
+    // Authenticated users have request limits
+    if (!isLoggedIn) {
+      const remaining = openAIContentGenerator.isConfigured() ? 999 : 0;
+      setRemainingRequests(remaining);
+    } else {
+      // Authenticated users have limited requests
+      const remaining = openAIContentGenerator.isConfigured() ? 10 : 0;
+      setRemainingRequests(remaining);
+    }
   };
 
   const formatUrl = (url: string): string => {
