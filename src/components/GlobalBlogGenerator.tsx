@@ -331,11 +331,38 @@ export function GlobalBlogGenerator({
       setGenerationStage('');
       setGeneratedPost(null);
 
+      // Check if this is an OpenAI configuration error
+      const isConfigError = error.message && (
+        error.message.includes('not configured') ||
+        error.message.includes('API key')
+      );
+
       toast({
         title: "Generation failed",
-        description: error.message || "An unexpected error occurred. Please try again.",
+        description: isConfigError
+          ? "Content generation is temporarily unavailable. Try our dedicated Free Backlink feature for reliable generation!"
+          : error.message || "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
+
+      // If it's a config error, suggest the free backlink feature
+      if (isConfigError) {
+        setTimeout(() => {
+          toast({
+            title: "💡 Try Free Backlink Feature",
+            description: "Generate high-quality blog posts with our dedicated free backlink tool - no configuration required!",
+            action: (
+              <Button
+                size="sm"
+                onClick={() => navigate('/free-backlink')}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                Try Free Backlink
+              </Button>
+            ),
+          });
+        }, 2000);
+      }
     } finally {
       setIsGenerating(false);
       // Ensure progress is reset in case of any hanging state
