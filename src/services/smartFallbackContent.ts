@@ -81,9 +81,19 @@ export class SmartFallbackContent {
     return 'informational';
   }
 
-  private static generateContextualContent(keyword: string, targetUrl: string, anchor: string, template: string): string {
+  private static generateContextualContent(
+    keyword: string,
+    targetUrl: string,
+    anchor: string,
+    template: string,
+    variant: number = 1,
+    uniqueSeed: string = '1'
+  ): string {
     const currentYear = new Date().getFullYear();
-    
+
+    // Generate unique content elements based on variant and seed
+    const uniqueElements = this.generateUniqueElements(keyword, variant, uniqueSeed);
+
     switch (template) {
       case 'food':
         return `<h1>${keyword}: Complete Guide for ${currentYear}</h1>
