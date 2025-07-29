@@ -938,61 +938,22 @@ export function GlobalBlogGenerator({
               </Badge>
             </div>
             
-            <div className={`flex items-center gap-2 text-sm ${
-              apiStatus.status === 'ready' ? 'text-green-600' :
-              apiStatus.status === 'error' ? 'text-red-600' :
-              apiStatus.status === 'retrying' ? 'text-orange-600' :
-              'text-yellow-600'
-            }`}>
+            <div className="flex items-center gap-2">
               {apiStatus.status === 'ready' ? (
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-              ) : apiStatus.status === 'error' ? (
-                <AlertCircle className="h-4 w-4 text-red-500" />
-              ) : (
-                <RefreshCw className="h-4 w-4 animate-spin text-blue-500" />
-              )}
-              <span className="font-medium">{apiStatus.message}</span>
-              {apiStatus.details && (
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className={`text-xs font-medium ${
-                      apiStatus.status === 'ready' ? 'border-green-300 bg-green-50 text-green-700' :
-                      apiStatus.status === 'error' ? 'border-red-300 bg-red-50 text-red-700' :
-                      apiStatus.status === 'retrying' ? 'border-orange-300 bg-orange-50 text-orange-700' :
-                      'border-yellow-300 bg-yellow-50 text-yellow-700'
-                    }`}
-                    title={apiStatus.details}
-                  >
-                    {apiStatus.status === 'ready' ? '✅ Ready' :
-                     apiStatus.status === 'error' ? '❌ Error' :
-                     apiStatus.status === 'retrying' ? `🔄 ${apiStatus.retryAttempt}/${apiStatus.maxRetries}` :
-                     '🔍 Checking'}
-                  </Badge>
-
-                  {/* Progress bar for retry attempts */}
-                  {(apiStatus.status === 'retrying' || apiStatus.status === 'checking') && apiStatus.retryAttempt && apiStatus.maxRetries && (
-                    <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-blue-500 transition-all duration-300 ease-out"
-                        style={{
-                          width: `${(apiStatus.retryAttempt / apiStatus.maxRetries) * 100}%`
-                        }}
-                      />
-                    </div>
-                  )}
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-green-600">Ready</span>
                 </div>
-              )}
-              {(apiStatus.status === 'error' || apiStatus.status === 'ready') && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0 hover:bg-gray-100"
-                  onClick={checkApiStatus}
-                  title="Test connection again"
-                >
-                  <RefreshCw className="h-3 w-3" />
-                </Button>
+              ) : apiStatus.status === 'error' ? (
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-red-600">Error</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-yellow-600">Connecting</span>
+                </div>
               )}
             </div>
           </div>
