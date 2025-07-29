@@ -37,7 +37,7 @@ import {
 } from 'lucide-react';
 
 interface FreeBacklinkPreviewProps {
-  content: FreeBacklinkResult | null;
+  content: GeneratedContentResult | null;
   onRegenerate?: (newContent: FreeBacklinkResult) => void;
   onDelete?: () => void;
 }
