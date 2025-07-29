@@ -265,18 +265,22 @@ export function BlogPost() {
         description: "Please wait while we generate fresh content with AI.",
       });
 
-      // Generate new content using the enhanced AI engine
-      const result = await enhancedAIContentEngine.generateContent({
-        keyword: primaryKeyword,
+      // Generate new content using the global blog generator
+      const sessionId = crypto.randomUUID();
+      const result = await globalBlogGenerator.generateGlobalBlogPost({
         targetUrl: blogPost.target_url,
+        primaryKeyword: primaryKeyword,
         anchorText: anchorText,
-        contentLength: 'medium',
-        contentTone: 'professional',
-        seoFocus: 'high'
+        sessionId,
+        additionalContext: {
+          contentLength: 'medium',
+          contentTone: 'professional',
+          seoFocus: 'high'
+        }
       });
 
-      if (!result.finalContent) {
-        throw new Error("We're currently experiencing a large volume of requests. Please register or sign in to try one of our alternatives.");
+      if (!result.success || !result.data?.blogPost) {
+        throw new Error(result.error || "We're currently experiencing a large volume of requests. Please register or sign in to try one of our alternatives.");
       }
 
       // Update the blog post with new content
