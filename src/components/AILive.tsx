@@ -546,9 +546,12 @@ export function AILive() {
                     AI Provider Status
                   </label>
                   <div className="space-y-2">
-                    {providers.map((provider) => (
+                    {providers.map((provider, index) => (
                       <div key={provider.name} className="flex items-center justify-between">
-                        <span className="text-sm">{provider.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-mono text-gray-400 w-6">#{index + 1}</span>
+                          <span className="text-sm">{provider.name}</span>
+                        </div>
                         <div className="flex items-center gap-2">
                           {provider.latency && (
                             <span className="text-xs text-gray-500">{provider.latency}ms</span>
