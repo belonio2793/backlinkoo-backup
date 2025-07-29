@@ -40,12 +40,14 @@ export class CohereService {
   private baseURL = 'https://api.cohere.ai/v1';
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_COHERE_API_KEY || 
+    this.apiKey = import.meta.env.VITE_COHERE_API_KEY ||
                   (typeof process !== 'undefined' ? process.env.COHERE_API_KEY : '') ||
                   '';
-    
+
     if (!this.apiKey) {
       console.warn('Cohere API key not configured');
+    } else {
+      console.log('✅ Cohere API key configured:', this.apiKey.substring(0, 10) + '...');
     }
   }
 
