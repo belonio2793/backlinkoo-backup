@@ -147,9 +147,27 @@ export function ClaimTrialPostDialog({
       claimedPosts.push({
         slug: trialPostSlug,
         title: trialPostTitle,
-        claimedAt: new Date().toISOString()
+        claimedAt: new Date().toISOString(),
+        userId: currentUser.id,
+        userEmail: profile?.email || currentUser.email
       });
       localStorage.setItem(`user_claimed_posts_${currentUser.id}`, JSON.stringify(claimedPosts));
+
+      // Update the blog post to mark it as claimed
+      try {
+        const blogStorageKey = `blog_post_${trialPostSlug}`;
+        const storedBlogData = localStorage.getItem(blogStorageKey);
+        if (storedBlogData) {
+          const blogPost = JSON.parse(storedBlogData);
+          blogPost.is_trial_post = false;
+          blogPost.claimed_by_user_id = currentUser.id;
+          blogPost.claimed_by_email = profile?.email || currentUser.email;
+          blogPost.claimed_at = new Date().toISOString();
+          localStorage.setItem(blogStorageKey, JSON.stringify(blogPost));
+        }
+      } catch (error) {
+        console.warn('Failed to update blog post claim status:', error);
+      }
 
       // Create campaign entry
       try {
