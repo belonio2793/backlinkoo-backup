@@ -352,7 +352,7 @@ export function GlobalBlogGenerator({
         const isFromFallback = result.error || result.usage.tokens === 0;
 
         toast({
-          title: "Blog post generated successfully! 🎉",
+          title: "Blog post generated successfully! ���",
           description: isFromFallback
             ? "Your free backlink post is ready! Generated using our reliable fallback system. It will auto-delete in 24 hours unless you register an account."
             : "Your free backlink post is ready! It will auto-delete in 24 hours unless you register an account.",
@@ -734,7 +734,7 @@ export function GlobalBlogGenerator({
           <div className="flex gap-3">
             <Button 
               onClick={handleGenerate}
-              disabled={isGenerating || remainingRequests <= 0}
+              disabled={isGenerating || (isLoggedIn && remainingRequests <= 0)}
               className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             >
               {isGenerating ? (
