@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { publishedBlogService, type PublishedBlogPost } from '@/services/publishedBlogService';
+import { freeBacklinkService } from '@/services/freeBacklinkService';
 import { 
   Calendar, 
   Clock, 
