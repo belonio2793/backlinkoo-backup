@@ -37,6 +37,7 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
   const [wordCount, setWordCount] = useState<number>(1500);
   const [tone, setTone] = useState<'professional' | 'casual' | 'technical' | 'friendly' | 'convincing'>('professional');
   const [isReady, setIsReady] = useState(false);
+  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
   const { toast } = useToast();
 
   useState(() => {
