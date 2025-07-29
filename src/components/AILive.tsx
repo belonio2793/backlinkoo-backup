@@ -270,6 +270,7 @@ export function AILive() {
 
       let result;
       try {
+        // Try Netlify function first
         const response = await fetch('/.netlify/functions/generate-ai-content', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -286,11 +287,22 @@ export function AILive() {
           result = await response.json();
           console.log('Content generated using Netlify function');
         } else {
-          throw new Error(`${selectedProvider} API not available. Please configure proper API keys.`);
+          throw new Error('Netlify function not available in dev mode');
         }
       } catch (error) {
-        // No mock fallback - require real API configuration
-        throw new Error(`Content generation failed: ${error.message}. Please configure OpenAI or Grok API keys.`);
+        // Fallback to direct OpenAI integration for development
+        console.log('Netlify function failed, trying direct OpenAI integration...');
+
+        if (selectedProvider === 'OpenAI') {
+          try {
+            result = await generateWithOpenAI(prompt, keyword, anchorText, url);
+            console.log('Content generated using direct OpenAI integration');
+          } catch (openaiError) {
+            throw new Error(`OpenAI generation failed: ${openaiError.message}`);
+          }
+        } else {
+          throw new Error(`${selectedProvider} API not available. Please configure proper API keys.`);
+        }
       }
       updateLastStep('success', `Generated ${result.wordCount} words`);
 
