@@ -63,11 +63,7 @@ export const AppWrapper = () => {
 
       {/* Protected routes - require authentication and email verification */}
       <Route path="/dashboard" element={<EnhancedDashboardRouter />} />
-      <Route path="/my-dashboard" element={
-        <EmailVerificationGuard>
-          <Dashboard />
-        </EmailVerificationGuard>
-      } />
+
       <Route path="/admin" element={
         <AdminAuthGuard>
           <AdminDashboard />
