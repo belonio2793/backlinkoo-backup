@@ -335,25 +335,42 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
         </CardContent>
       </Card>
 
-      {/* Generate Button */}
-      <Button
-        onClick={generateContent}
-        disabled={isGenerating || !isReady}
-        size="lg"
-        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-6 text-lg"
-      >
-        {isGenerating ? (
-          <>
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            Generating Your Free Backlink...
-          </>
-        ) : (
-          <>
-            <Sparkles className="mr-2 h-5 w-5" />
-            Generate Free Backlink Blog Post
-          </>
+      {/* Enhanced Generate Button */}
+      <div className="text-center space-y-4">
+        <Button
+          onClick={generateContent}
+          disabled={isGenerating || !isReady}
+          size="lg"
+          className="w-full max-w-md mx-auto bg-gradient-to-r from-purple-600 via-pink-600 to-purple-700 hover:from-purple-700 hover:via-pink-700 hover:to-purple-800 text-white font-bold py-8 text-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:hover:scale-100"
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+              <div className="flex flex-col">
+                <span>Generating Your Free Backlink...</span>
+                <span className="text-sm font-normal opacity-90">Please wait, AI is working its magic ✨</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <Sparkles className="mr-3 h-6 w-6" />
+              <div className="flex flex-col">
+                <span>Generate Free Backlink Blog Post</span>
+                <span className="text-sm font-normal opacity-90">🚀 Powered by Advanced AI</span>
+              </div>
+            </>
+          )}
+        </Button>
+
+        {!isReady && (
+          <div className="bg-orange-100 border border-orange-200 rounded-lg p-4 max-w-md mx-auto">
+            <div className="flex items-center gap-2 text-orange-700">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="text-sm font-medium">AI service initializing... Please wait a moment.</span>
+            </div>
+          </div>
         )}
-      </Button>
+      </div>
 
       {/* Disclaimer */}
       <p className="text-xs text-center text-muted-foreground">
