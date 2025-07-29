@@ -101,6 +101,16 @@ export function GlobalBlogGenerator({
       loadGlobalStats();
       updateRemainingRequests();
       checkApiStatus();
+
+      // Set up periodic API status refresh every 5 minutes
+      const statusInterval = setInterval(() => {
+        if (apiStatus.status === 'error') {
+          // Only auto-retry if there was an error
+          checkApiStatus();
+        }
+      }, 5 * 60 * 1000); // 5 minutes
+
+      return () => clearInterval(statusInterval);
     } catch (error) {
       console.error('Error initializing GlobalBlogGenerator:', error);
       // Set safe defaults
@@ -117,7 +127,7 @@ export function GlobalBlogGenerator({
         details: 'Failed to initialize the blog generator'
       });
     }
-  }, []);
+  }, [apiStatus.status]);
 
   const loadGlobalStats = async () => {
     // Simple stats from localStorage for OpenAI-only system
