@@ -305,11 +305,15 @@ export default function BlogPostDetail() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      <span>{post.word_count} words (minimum 1000 recommended)</span>
+                      <span>{post.word_count} words (optimized length)</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      <span>Short paragraphs for readability</span>
+                      <span>Proper paragraph structure and formatting</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <span>Consistent HTML structure throughout</span>
                     </div>
                   </div>
                 </div>
