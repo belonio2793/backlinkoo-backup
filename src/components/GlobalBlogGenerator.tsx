@@ -198,7 +198,7 @@ export function GlobalBlogGenerator({
       }
 
       // Check OpenAI service configuration
-      const openAIConfigured = openAIContentGenerator.isConfigured();
+      const openAIConfigured = openAIOnlyContentGenerator.isConfigured();
       if (!openAIConfigured) {
         setApiStatus({
           status: 'error',
