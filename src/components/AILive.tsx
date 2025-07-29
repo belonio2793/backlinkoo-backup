@@ -259,27 +259,65 @@ export function AILive() {
 
       let result;
       try {
-        const response = await fetch('/.netlify/functions/generate-ai-content', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            provider: selectedProvider,
-            prompt,
-            keyword,
-            anchorText,
-            url
-          })
-        });
+        console.log(`Generating content with ${selectedProvider}...`);
+        let apiResult;
 
-        if (response.ok) {
-          result = await response.json();
-          console.log('Content generated using Netlify function');
-        } else {
-          throw new Error(`${selectedProvider} API not available. Please configure proper API keys.`);
+        switch (selectedProvider) {
+          case 'OpenAI':
+            apiResult = await openAIService.generateContent(prompt, {
+              model: 'gpt-3.5-turbo',
+              maxTokens: 2000,
+              temperature: 0.7
+            });
+            break;
+          case 'Grok':
+            apiResult = await grokService.generateContent(prompt, {
+              model: 'grok-2-1212',
+              maxTokens: 2000,
+              temperature: 0.7
+            });
+            break;
+          case 'DeepAI':
+            apiResult = await deepAIService.generateText(prompt);
+            break;
+          case 'HuggingFace':
+            apiResult = await huggingFaceService.generateText(prompt, {
+              model: 'microsoft/DialoGPT-large',
+              maxLength: 2000,
+              temperature: 0.7
+            });
+            break;
+          case 'Cohere':
+            apiResult = await cohereService.generateText(prompt, {
+              model: 'command',
+              maxTokens: 2000,
+              temperature: 0.7
+            });
+            break;
+          case 'Rytr':
+            apiResult = await rytrService.generateContent(prompt, {
+              useCase: 'blog_idea_outline',
+              tone: 'convincing',
+              maxCharacters: 15000
+            });
+            break;
+          default:
+            throw new Error(`Unknown provider: ${selectedProvider}`);
         }
+
+        if (!apiResult.success || !apiResult.content) {
+          throw new Error(apiResult.error || 'Content generation failed');
+        }
+
+        result = {
+          content: apiResult.content,
+          wordCount: apiResult.content.split(' ').length,
+          provider: selectedProvider
+        };
+
+        console.log(`Content generated successfully with ${selectedProvider}`);
       } catch (error) {
-        // No mock fallback - require real API configuration
-        throw new Error(`Content generation failed: ${error.message}. Please configure OpenAI or Grok API keys.`);
+        throw new Error(`Content generation failed: ${error.message}. Please check your API configuration.`);
       }
       updateLastStep('success', `Generated ${result.wordCount} words`);
 
