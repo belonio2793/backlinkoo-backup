@@ -245,6 +245,20 @@ export default function AILive() {
                       )}
                     </div>
                     <Progress value={generationStatus.progress} className="h-2" />
+
+                    {/* Show intermediate content if available */}
+                    {intermediateContent && generationStatus.stage === 'generating' && (
+                      <div className="mt-4 p-3 bg-white border rounded-lg">
+                        <h5 className="text-xs font-medium text-gray-600 mb-2 flex items-center">
+                          <Zap className="h-3 w-3 mr-1" />
+                          Content Being Generated...
+                        </h5>
+                        <div
+                          className="text-xs text-gray-700 max-h-32 overflow-hidden"
+                          dangerouslySetInnerHTML={{ __html: intermediateContent.substring(0, 300) + '...' }}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
 
