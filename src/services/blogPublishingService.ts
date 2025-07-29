@@ -99,6 +99,41 @@ export class BlogPublishingService {
   }
 
   /**
+   * Extract meaningful error message from error object
+   */
+  private extractErrorMessage(error: any): string {
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    if (error && typeof error === 'object') {
+      // Try different error properties
+      if (error.message) return error.message;
+      if (error.details) return error.details;
+      if (error.hint) return error.hint;
+      if (error.code) return `Error code: ${error.code}`;
+
+      // Try to stringify, but handle circular references
+      try {
+        const stringified = JSON.stringify(error, null, 2);
+        if (stringified && stringified !== '{}') {
+          return stringified;
+        }
+      } catch (e) {
+        // Circular reference or other JSON error
+      }
+
+      // Last resort - extract own properties
+      const props = Object.getOwnPropertyNames(error);
+      if (props.length > 0) {
+        return props.map(prop => `${prop}: ${error[prop]}`).join(', ');
+      }
+    }
+
+    return 'Unknown database error';
+  }
+
+  /**
    * Create a fallback post when database is unavailable
    */
   private createFallbackPost(postData: Omit<BlogPost, 'id' | 'created_at' | 'status'>): BlogPost {
