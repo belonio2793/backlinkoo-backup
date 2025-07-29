@@ -652,7 +652,7 @@ Balance creativity with SEO requirements to create content that ranks well and e
     ];
 
     // Generate meta description
-    const metaDescription = `Comprehensive ${request.keyword} guide with expert insights, practical tips, and proven strategies. ${request.userLocation ? `Optimized for ${request.userLocation}.` : ''} Learn from industry experts.`.substring(0, 160);
+    const metaDescription = `Comprehensive ${request.keyword} guide with expert insights, practical tips, and proven strategies. Learn from industry experts.`.substring(0, 160);
 
     // Calculate SEO score based on various factors
     let seoScore = 70; // Base score
