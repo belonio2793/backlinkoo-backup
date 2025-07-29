@@ -201,9 +201,21 @@ export function AILive() {
     return true;
   };
 
-  const selectRandomProvider = (): string => {
+  const selectProviderByPriority = (): string => {
+    // Priority order: HuggingFace → Cohere → Rytr → DeepAI → OpenAI → Grok
+    const priorityOrder = ['HuggingFace', 'Cohere', 'Rytr', 'DeepAI', 'OpenAI', 'Grok'];
     const onlineProviders = providers.filter(p => p.status === 'online');
-    return onlineProviders[Math.floor(Math.random() * onlineProviders.length)].name;
+
+    // Find the first available provider in priority order
+    for (const providerName of priorityOrder) {
+      const provider = onlineProviders.find(p => p.name === providerName);
+      if (provider) {
+        return provider.name;
+      }
+    }
+
+    // Fallback to first available if none match priority order
+    return onlineProviders[0]?.name || 'None';
   };
 
   const selectRandomPrompt = (): { prompt: string, index: number } => {
