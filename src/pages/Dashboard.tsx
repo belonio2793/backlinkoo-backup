@@ -45,11 +45,210 @@ import SEOToolsSection from "@/components/SEOToolsSection";
 import { ProfileSettings } from "@/components/ProfileSettings";
 import { ApiConfigStatus } from "@/components/ApiConfigStatus";
 import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
+import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import type { User } from '@supabase/supabase-js';
+
+// FreeBlogPostGenerator component for the dashboard
+const FreeBlogPostGenerator = ({ onSuccess }: { onSuccess?: (blogPost: any) => void }) => {
+  try {
+    return (
+      <GlobalBlogGenerator
+        variant="embedded"
+        onSuccess={onSuccess}
+        showAdvancedOptions={false}
+      />
+    );
+  } catch (error) {
+    console.error('FreeBlogPostGenerator error:', error);
+    return (
+      <div className="p-4 text-center">
+        <p className="text-red-600">Error loading blog generator. Please refresh the page.</p>
+      </div>
+    );
+  }
+};
+
+// TrialBlogPostsDisplay component for the trial tab
+const TrialBlogPostsDisplay = () => {
+  const [trialPosts, setTrialPosts] = useState<any[]>([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Load trial posts from localStorage
+    const loadTrialPosts = () => {
+      try {
+        const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+        const validTrialPosts = allBlogs.filter((post: any) => {
+          if (!post.is_trial_post) return false;
+
+          // Check if expired
+          if (post.expires_at) {
+            const isExpired = new Date() > new Date(post.expires_at);
+            return !isExpired;
+          }
+          return true;
+        });
+
+        setTrialPosts(validTrialPosts.slice(0, 6)); // Show up to 6 posts
+      } catch (error) {
+        console.error('Error loading trial posts:', error);
+        setTrialPosts([]);
+      }
+    };
+
+    loadTrialPosts();
+
+    // Refresh every 30 seconds to check for new posts
+    const interval = setInterval(loadTrialPosts, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (trialPosts.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <BarChart3 className="h-10 w-10 text-purple-600" />
+        </div>
+        <h3 className="text-xl font-semibold text-gray-800 mb-3">No Trial Posts Yet</h3>
+        <p className="text-gray-600 mb-6 max-w-md mx-auto">
+          Start creating amazing blog posts with our free trial generator. Your content will appear here instantly.
+        </p>
+        <Button
+          onClick={() => navigate('/?focus=generator')}
+          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Create Your First Post
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Stats */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
+          <div className="text-2xl font-bold text-purple-700">{trialPosts.length}</div>
+          <div className="text-sm text-purple-600">Generated Posts</div>
+        </div>
+        <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+          <div className="text-2xl font-bold text-blue-700">
+            {Math.round(trialPosts.reduce((acc, post) => acc + (post.seo_score || 0), 0) / trialPosts.length) || 0}
+          </div>
+          <div className="text-sm text-blue-600">Avg SEO Score</div>
+        </div>
+        <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200">
+          <div className="text-2xl font-bold text-emerald-700">
+            {trialPosts.reduce((acc, post) => acc + (post.reading_time || 0), 0)}m
+          </div>
+          <div className="text-sm text-emerald-600">Total Reading</div>
+        </div>
+      </div>
+
+      {/* Blog Posts Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {trialPosts.map((post, index) => {
+          const timeRemaining = post.expires_at ?
+            Math.max(0, Math.floor((new Date(post.expires_at).getTime() - Date.now()) / (1000 * 60 * 60))) : 0;
+
+          return (
+            <Card
+              key={post.id || index}
+              className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50 overflow-hidden"
+            >
+              <CardContent className="p-6">
+                {/* Post Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-purple-700 transition-colors">
+                      {post.title || 'Untitled Post'}
+                    </h3>
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                      {post.excerpt || 'No description available'}
+                    </p>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="bg-purple-50 border-purple-200 text-purple-700 text-xs"
+                  >
+                    Trial
+                  </Badge>
+                </div>
+
+                {/* Post Stats */}
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="text-center p-2 bg-blue-50 rounded-lg">
+                    <div className="text-sm font-semibold text-blue-700">
+                      {post.seo_score || 0}
+                    </div>
+                    <div className="text-xs text-blue-600">SEO</div>
+                  </div>
+                  <div className="text-center p-2 bg-emerald-50 rounded-lg">
+                    <div className="text-sm font-semibold text-emerald-700">
+                      {post.reading_time || 0}m
+                    </div>
+                    <div className="text-xs text-emerald-600">Read</div>
+                  </div>
+                  <div className="text-center p-2 bg-amber-50 rounded-lg">
+                    <div className="text-sm font-semibold text-amber-700">
+                      {timeRemaining}h
+                    </div>
+                    <div className="text-xs text-amber-600">Left</div>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                    onClick={() => navigate(`/blog/${post.slug}`)}
+                  >
+                    <Eye className="h-3 w-3 mr-1" />
+                    View
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                  </Button>
+                </div>
+
+                {/* Expiry Warning */}
+                {timeRemaining < 6 && (
+                  <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-center gap-2 text-xs text-amber-700">
+                      <AlertCircle className="h-3 w-3" />
+                      <span>Expires in {timeRemaining} hours - Upgrade to keep forever!</span>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Call to Action */}
+      <div className="text-center pt-6 border-t border-gray-200">
+        <Button
+          onClick={() => navigate('/?focus=generator')}
+          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Generate Another Post
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -302,6 +501,11 @@ const Dashboard = () => {
     }
   };
 
+  const loadGlobalStats = async () => {
+    // Simple function to trigger stats reload - currently just used for callback consistency
+    console.log('Loading global stats after blog generation...');
+  };
+
   const fetchCampaigns = async (authUser?: User) => {
     try {
       const currentUser = authUser || user;
@@ -538,10 +742,19 @@ const Dashboard = () => {
           <>
             {activeSection === "dashboard" ? (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 h-auto">
+            <TabsList className="grid w-full grid-cols-4 h-auto">
               <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Overview</span>
                 <span className="sm:hidden">Home</span>
+              </TabsTrigger>
+              <TabsTrigger value="trial" className="text-xs sm:text-sm py-2 px-1 sm:px-3 relative">
+                <span className="hidden sm:inline">Trial</span>
+                <span className="sm:hidden">Trial</span>
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
+              </TabsTrigger>
+              <TabsTrigger value="free-blog" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
+                <span className="hidden sm:inline">Free Blog Post</span>
+                <span className="sm:hidden">Blog</span>
               </TabsTrigger>
               <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Campaigns</span>
@@ -868,6 +1081,185 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
               )}
+            </TabsContent>
+
+            <TabsContent value="trial" className="space-y-6">
+              <div className="relative overflow-hidden">
+                {/* Hero Section */}
+                <div className="relative bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 rounded-2xl p-8 mb-8 border border-purple-100">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-200/30 to-pink-200/30 rounded-full -translate-y-32 translate-x-32"></div>
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-200/30 to-cyan-200/30 rounded-full translate-y-24 -translate-x-24"></div>
+
+                  <div className="relative z-10 text-center max-w-4xl mx-auto">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-purple-200 mb-6">
+                      <Sparkles className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm font-medium text-purple-700">Free Trial Experience</span>
+                    </div>
+
+                    <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+                      Explore Premium Features
+                    </h1>
+
+                    <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+                      Experience the full power of our platform with free trial features. Generate high-quality content, build powerful backlinks, and watch your SEO soar.
+                    </p>
+
+                    <div className="flex flex-wrap justify-center gap-4">
+                      <div className="flex items-center gap-2 px-4 py-2 bg-white/70 backdrop-blur-sm rounded-full border border-blue-200">
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        <span className="text-sm font-medium text-gray-700">No Credit Card Required</span>
+                      </div>
+                      <div className="flex items-center gap-2 px-4 py-2 bg-white/70 backdrop-blur-sm rounded-full border border-blue-200">
+                        <Clock className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-medium text-gray-700">24-Hour Access</span>
+                      </div>
+                      <div className="flex items-center gap-2 px-4 py-2 bg-white/70 backdrop-blur-sm rounded-full border border-blue-200">
+                        <Zap className="h-4 w-4 text-yellow-600" />
+                        <span className="text-sm font-medium text-gray-700">Full Features Unlocked</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Main Content Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                  {/* Free Generated Blog Posts - Main Feature */}
+                  <div className="lg:col-span-2">
+                    <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white to-gray-50">
+                      <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                              <BarChart3 className="h-6 w-6" />
+                            </div>
+                            <div>
+                              <CardTitle className="text-xl font-bold">Free Generated Blog Posts</CardTitle>
+                              <p className="text-purple-100 text-sm">Your trial content library</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-white/20 text-white border-white/30">
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            Live
+                          </Badge>
+                        </div>
+                      </CardHeader>
+
+                      <CardContent className="p-6">
+                        <TrialBlogPostsDisplay />
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Side Panel - Trial Stats & Actions */}
+                  <div className="space-y-6">
+
+                    {/* Trial Progress */}
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-50 to-teal-50">
+                      <CardHeader className="pb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-emerald-100 rounded-lg">
+                            <TrendingUp className="h-5 w-5 text-emerald-600" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg text-emerald-800">Trial Progress</CardTitle>
+                            <p className="text-sm text-emerald-600">Track your exploration</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-gray-700">Blog Posts Generated</span>
+                            <span className="text-lg font-bold text-emerald-600">3/5</span>
+                          </div>
+                          <Progress value={60} className="h-2" />
+
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-gray-700">Features Explored</span>
+                            <span className="text-lg font-bold text-emerald-600">7/12</span>
+                          </div>
+                          <Progress value={58} className="h-2" />
+                        </div>
+
+                        <div className="p-3 bg-white/70 rounded-lg border border-emerald-200">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Clock className="h-4 w-4 text-emerald-600" />
+                            <span className="text-sm font-medium text-emerald-700">Trial Time Remaining</span>
+                          </div>
+                          <div className="text-2xl font-bold text-emerald-800">22h 47m</div>
+                          <div className="text-xs text-emerald-600">Expires tomorrow at 3:45 PM</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Quick Actions */}
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50">
+                      <CardHeader className="pb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <Zap className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <CardTitle className="text-lg text-blue-800">Quick Actions</CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0 shadow-lg">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create New Blog Post
+                        </Button>
+
+                        <Button variant="outline" className="w-full border-blue-200 text-blue-700 hover:bg-blue-50">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          View Analytics
+                        </Button>
+
+                        <Button variant="outline" className="w-full border-purple-200 text-purple-700 hover:bg-purple-50">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Customize Settings
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Upgrade Prompt */}
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-amber-50 to-orange-50 border-l-4 border-l-amber-400">
+                      <CardContent className="p-6">
+                        <div className="text-center">
+                          <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Crown className="h-6 w-6 text-amber-600" />
+                          </div>
+                          <h3 className="font-bold text-amber-800 mb-2">Love what you see?</h3>
+                          <p className="text-sm text-amber-700 mb-4">
+                            Upgrade to unlock unlimited access to all premium features.
+                          </p>
+                          <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0 shadow-lg">
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Upgrade Now
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="free-blog" className="space-y-6">
+              <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold mb-2">Create Your First Backlink For Free</h2>
+                  <p className="text-muted-foreground">
+                    Generate high-quality blog posts with natural contextual backlinks using our AI-powered system.
+                  </p>
+                </div>
+
+                <FreeBlogPostGenerator
+                  onSuccess={(blogPost) => {
+                    // Refresh stats after successful generation
+                    loadGlobalStats();
+                  }}
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="campaigns" className="space-y-6">

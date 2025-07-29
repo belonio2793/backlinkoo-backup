@@ -34,6 +34,19 @@ import {
   Eye
 } from 'lucide-react';
 
+interface GlobalBlogRequest {
+  targetUrl: string;
+  primaryKeyword: string;
+  anchorText?: string;
+  sessionId: string;
+  additionalContext?: {
+    industry?: string;
+    contentTone: 'professional' | 'casual' | 'technical' | 'friendly';
+    contentLength: 'short' | 'medium' | 'long';
+    seoFocus: 'high' | 'medium' | 'balanced';
+  };
+}
+
 interface GlobalBlogGeneratorProps {
   onSuccess?: (blogPost: any) => void;
   variant?: 'homepage' | 'blog' | 'embedded';
@@ -116,16 +129,9 @@ export function GlobalBlogGenerator({
   };
 
   const updateRemainingRequests = () => {
-    // Non-authenticated users get unlimited requests if OpenAI is configured
-    // Authenticated users have request limits
-    if (!isLoggedIn) {
-      const remaining = openAIContentGenerator.isConfigured() ? 999 : 0;
-      setRemainingRequests(remaining);
-    } else {
-      // Authenticated users have limited requests
-      const remaining = openAIContentGenerator.isConfigured() ? 10 : 0;
-      setRemainingRequests(remaining);
-    }
+    // All users get unlimited requests if OpenAI is configured
+    const remaining = openAIContentGenerator.isConfigured() ? 999 : 0;
+    setRemainingRequests(remaining);
   };
 
   const formatUrl = (url: string): string => {
@@ -210,11 +216,11 @@ export function GlobalBlogGenerator({
       return;
     }
 
-    // Only apply rate limits to authenticated users
-    if (isLoggedIn && remainingRequests <= 0) {
+    // Check if API is configured
+    if (remainingRequests <= 0) {
       toast({
-        title: "Rate limit reached",
-        description: "You've reached the account tier limit. Please try again later or upgrade your plan.",
+        title: "API not configured",
+        description: "OpenAI API is not properly configured. Please check the configuration.",
         variant: "destructive",
       });
       return;
@@ -633,7 +639,7 @@ export function GlobalBlogGenerator({
             
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Users className="h-4 w-4" />
-              <span>{!isLoggedIn ? 'Unlimited requests' : `${remainingRequests} requests remaining`}</span>
+              <span>Unlimited requests</span>
             </div>
           </div>
           
@@ -732,9 +738,9 @@ export function GlobalBlogGenerator({
 
           {/* Action Buttons */}
           <div className="flex gap-3">
-            <Button 
+            <Button
               onClick={handleGenerate}
-              disabled={isGenerating || (isLoggedIn && remainingRequests <= 0)}
+              disabled={isGenerating || remainingRequests <= 0}
               className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             >
               {isGenerating ? (
@@ -757,31 +763,7 @@ export function GlobalBlogGenerator({
             )}
           </div>
 
-          {/* Rate Limit Warning - Only show for authenticated users */}
-          {isLoggedIn && remainingRequests <= 2 && (
-            <div className="flex items-center justify-between gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-amber-600" />
-                <span className="text-sm text-amber-800">
-                  {remainingRequests === 0
-                    ? "You've reached the free tier limit. Sign up for unlimited access!"
-                    : `Only ${remainingRequests} request${remainingRequests === 1 ? '' : 's'} remaining. Sign up for unlimited access!`
-                  }
-                </span>
-              </div>
-              {generatedPost && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => navigate(`/blog/${generatedPost.slug}`)}
-                  className="ml-2 bg-white hover:bg-amber-50 border-amber-300 text-amber-800"
-                >
-                  <ExternalLink className="h-3 w-3 mr-1" />
-                  View Post
-                </Button>
-              )}
-            </div>
-          )}
+
         </CardContent>
       </Card>
 

@@ -20,69 +20,61 @@ export function EnhancedDashboardRouter() {
   const navigate = useNavigate();
   const { getGuestData, getSessionDuration, shouldShowConversionPrompt, trackInteraction } = useGuestTracking();
 
+  // Failsafe timeout to prevent infinite loading
   useEffect(() => {
+    const timeout = setTimeout(() => {
+      console.warn('⏰ Dashboard loading timeout reached, forcing load completion');
+      setIsLoading(false);
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
     const checkUserAndTrialPosts = async () => {
       try {
+        console.log('🔍 Checking user authentication...');
+
         // Check authentication
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('🔍 Session check result:', !!session?.user);
+
+        if (!isMounted) return;
+
         setUser(session?.user || null);
 
-        // Check for trial posts in localStorage
-        const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-        const validTrialPosts = allBlogs.filter((post: any) => {
-          if (!post.is_trial_post) return false;
-          
-          // Check if expired
-          if (post.expires_at) {
-            const isExpired = new Date() > new Date(post.expires_at);
-            return !isExpired;
-          }
-          return true;
-        });
-        
-        setHasTrialPosts(validTrialPosts.length > 0);
-
-        // Get guest analytics for dashboard display
-        if (!session?.user) {
-          const guestData = getGuestData();
-          setGuestAnalytics({
-            sessionDuration: getSessionDuration(),
-            interactions: guestData.interactions
-          });
-        }
-
-        // Routing logic
+        // Simple logic: if user is authenticated, show dashboard; otherwise redirect to home
         if (session?.user) {
-          // User is logged in - redirect to protected dashboard
-          navigate('/my-dashboard');
+          console.log('✅ User authenticated, showing dashboard');
+          setIsLoading(false);
           return;
         } else {
-          // User not logged in - show appropriate dashboard or redirect
-          if (validTrialPosts.length > 0) {
-            // Show trial dashboard with conversion prompts
-            return;
-          } else if (guestData.interactions > 0 || getSessionDuration() > 0) {
-            // Show guest onboarding dashboard for engaged visitors
-            return;
-          } else {
-            // No engagement, redirect to homepage
-            navigate('/');
-            return;
-          }
+          console.log('❌ User not authenticated, redirecting to home');
+          navigate('/');
+          return;
         }
       } catch (error) {
         console.error('Dashboard router error:', error);
-        // Default to homepage on error
-        navigate('/');
-      } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          // Default to showing guest dashboard on error
+          setIsLoading(false);
+        }
       }
     };
 
     checkUserAndTrialPosts();
-  }, [navigate, getGuestData, getSessionDuration]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate]);
+
+  console.log('📊 Dashboard Router State:', { isLoading, user: !!user, hasTrialPosts, guestAnalytics });
 
   if (isLoading) {
+    console.log('⏳ Showing loading screen');
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex items-center gap-2">
@@ -95,64 +87,26 @@ export function EnhancedDashboardRouter() {
 
   // If user is authenticated, show protected dashboard
   if (user) {
+    console.log('👤 Rendering authenticated dashboard');
     return <Dashboard />;
   }
 
-  // If user has trial posts, show enhanced trial dashboard
-  if (hasTrialPosts) {
-    return (
-      <div className="min-h-screen bg-background">
-        <GuestDashboard />
-        
-        {/* Enhanced trial conversion overlay */}
-        <div className="fixed top-4 right-4 z-50 max-w-sm">
-          <QuickTrialUpgrade
-            onSuccess={(user) => {
-              setUser(user);
-              navigate('/my-dashboard');
-            }}
-            variant="default"
-            size="sm"
-          />
-        </div>
-        
-        {/* Guest session reminder if conversion criteria met */}
-        {shouldShowConversionPrompt() && (
-          <GuestSessionReminder
-            onSignUp={() => {
-              trackInteraction('dashboard_guest_reminder');
-              navigate('/login?from=dashboard');
-            }}
-            variant="floating"
-            position="bottom"
-          />
-        )}
+  // For non-authenticated users, show a simple message or redirect
+  console.log('🚫 No authenticated user, showing fallback');
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center">
+        <h2 className="text-xl font-semibold mb-2">Access Required</h2>
+        <p className="text-muted-foreground mb-4">Please log in to access your dashboard.</p>
+        <button
+          onClick={() => navigate('/login')}
+          className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+        >
+          Go to Login
+        </button>
       </div>
-    );
-  }
-
-  // Show guest onboarding dashboard for engaged visitors
-  if (guestAnalytics.interactions > 0 || guestAnalytics.sessionDuration > 0) {
-    return (
-      <div className="min-h-screen bg-background">
-        <GuestOnboardingDashboard
-          sessionDuration={guestAnalytics.sessionDuration}
-          interactions={guestAnalytics.interactions}
-          onSignUp={() => {
-            trackInteraction('onboarding_signup');
-            navigate('/login?from=onboarding');
-          }}
-          onCreateTrial={() => {
-            trackInteraction('onboarding_trial');
-            navigate('/?focus=generator');
-          }}
-        />
-      </div>
-    );
-  }
-
-  // Fallback - this shouldn't happen due to useEffect navigation
-  return null;
+    </div>
+  );
 }
 
 // Guest Onboarding Dashboard Component

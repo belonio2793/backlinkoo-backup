@@ -12,6 +12,14 @@ export interface ContentGenerationRequest {
   wordCount?: number;
   tone?: 'professional' | 'casual' | 'technical' | 'friendly' | 'convincing';
   contentType?: 'how-to' | 'listicle' | 'review' | 'comparison' | 'news' | 'opinion';
+  retryConfig?: {
+    maxRetries?: number;
+    baseDelay?: number;
+    maxDelay?: number;
+    exponentialBackoff?: boolean;
+    retryOnRateLimit?: boolean;
+    retryOnServerError?: boolean;
+  };
 }
 
 export interface GeneratedContentResult {
@@ -66,12 +74,13 @@ export class OpenAIContentGenerator {
 
       console.log('🤖 Generating content with OpenAI...');
 
-      // Use OpenAI to generate content
+      // Use OpenAI to generate content with retry configuration
       const result = await openAIService.generateContent(prompt, {
         model: 'gpt-3.5-turbo',
         maxTokens: Math.min(4000, Math.floor(wordCount * 2.5)),
         temperature: 0.7,
-        systemPrompt
+        systemPrompt,
+        retryConfig: request.retryConfig
       });
 
       if (!result.success || !result.content) {

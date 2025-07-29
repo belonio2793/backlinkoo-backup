@@ -39,7 +39,7 @@ const Login = () => {
 
         if (session && session.user) {
           console.log('🔐 User already authenticated, redirecting...');
-          navigate('/dashboard');
+          navigate('/my-dashboard');
         }
       } catch (error) {
         console.error('Auth check error:', error);
@@ -55,7 +55,7 @@ const Login = () => {
 
       if (event === 'SIGNED_IN' && session && session.user) {
         console.log('🔐 Auth state change: redirecting to dashboard');
-        setTimeout(() => navigate('/dashboard'), 100);
+        setTimeout(() => navigate('/my-dashboard'), 100);
       } else if (event === 'SIGNED_OUT') {
         console.log('🔐 Auth state change: user signed out');
         // Stay on login page
@@ -125,7 +125,7 @@ const Login = () => {
         });
 
 
-        navigate('/dashboard');
+        navigate('/my-dashboard');
       } else {
         if (result.requiresEmailVerification) {
           setShowResendConfirmation(true);
