@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FreeBacklinkGenerator } from '@/components/FreeBacklinkGenerator';
 import { FreeBacklinkPreview } from '@/components/FreeBacklinkPreview';
 import { FreeBacklinkManager } from '@/components/FreeBacklinkManager';
-import { GeneratedContentResult } from '@/services/openAIContentGenerator';
+import { GeneratedContentResult } from '@/services/openAIOnlyContentGenerator';
 import { APIKeyStatus } from '@/components/APIKeyStatus';
 import { Sparkles, FileText, Settings, Gift, Zap, CheckCircle2 } from 'lucide-react';
 
