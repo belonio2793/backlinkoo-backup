@@ -367,12 +367,10 @@ export function GlobalBlogGenerator({
                   <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
                   <span className="font-medium">Generating your AI-powered backlink post...</span>
                 </div>
-                {aiProvider && (
-                  <Badge variant="secondary" className="flex items-center space-x-1">
-                    <Zap className="h-3 w-3" />
-                    <span>{aiProvider}</span>
-                  </Badge>
-                )}
+                <Badge variant="secondary" className="flex items-center space-x-1">
+                  <Zap className="h-3 w-3" />
+                  <span>Backlink ∞</span>
+                </Badge>
               </div>
               <Progress value={progress} className="w-full" />
               <p className="text-sm text-muted-foreground">{generationStage}</p>
