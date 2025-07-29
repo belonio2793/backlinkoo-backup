@@ -12,20 +12,9 @@ import { useNavigate } from "react-router-dom";
 import { Infinity, Mail, RefreshCw, ArrowLeft } from "lucide-react";
 
 const Login = () => {
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [showResendConfirmation, setShowResendConfirmation] = useState(false);
-  const [resendEmail, setResendEmail] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
-  const [activeTab, setActiveTab] = useState("login");
   const { toast } = useToast();
   const { broadcastNewUser } = useGlobalNotifications();
   const navigate = useNavigate();
