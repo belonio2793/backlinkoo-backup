@@ -381,18 +381,15 @@ export class MultiApiContentGenerator {
 
     switch (category) {
       case 'food':
-        return `Write a comprehensive, engaging article about "${keyword}" that food enthusiasts will love. This should be a culinary guide covering:
+        return `Create an engaging article about "${keyword}" that goes beyond basic information. Write from the perspective of someone who genuinely enjoys and understands food culture.
 
-        - The origins and cultural significance of ${keyword}
-        - Different varieties and styles
-        - How to properly enjoy and appreciate ${keyword}
-        - Where to find the best ${keyword}
-        - Tips for making ${keyword} at home
-        - Nutritional aspects and benefits
+        Think about what makes "${keyword}" special and interesting. Maybe it's the technique, the cultural stories, the regional variations, or personal experiences people have with it. Don't just list facts - share insights that would genuinely interest someone curious about "${keyword}".
 
-        The article should be at least 1000 words, written in an enthusiastic food lover's tone, and naturally incorporate a helpful link to ${targetUrl} using the anchor text "${anchorText}" where it makes sense for readers seeking more information or resources.
+        Include practical information that readers can actually use, whether that's how to select quality ingredients, cooking techniques, pairing suggestions, or where to experience authentic versions.
 
-        Format with proper HTML headers (h1, h2, h3) and ensure the content is genuinely useful for people interested in ${keyword}. Avoid business jargon - this is about food, not corporate strategies.`;
+        The article should be at least 1000 words and naturally include a helpful link to ${targetUrl} using the anchor text "${anchorText}" where it adds value for readers.
+
+        Write in a warm, knowledgeable tone like you're sharing your passion with a friend. Use HTML headers naturally to organize your thoughts, not to follow a rigid template.`;
 
       case 'technology':
         return `Write a comprehensive, technical guide about "${keyword}" for ${currentYear}. Cover:
@@ -451,18 +448,15 @@ export class MultiApiContentGenerator {
         Format with proper HTML headers and focus on genuine educational value.`;
 
       case 'business':
-        return `Write a comprehensive business guide about "${keyword}" for ${currentYear}. Cover:
+        return `Write a practical business article about "${keyword}" that provides genuine value to professionals. Focus on real-world applications and insights rather than generic business advice.
 
-        - Understanding ${keyword} in business context
-        - Strategic implementation approaches
-        - Benefits and ROI considerations
-        - Best practices and methodologies
-        - Common challenges and solutions
-        - Future trends and opportunities
+        Consider current challenges businesses face with "${keyword}", emerging trends that matter, or practical strategies that actually work. Share specific examples or case studies that illustrate key points.
 
-        The article should be at least 1000 words, professional and actionable, and naturally incorporate a link to ${targetUrl} using the anchor text "${anchorText}" for business solutions.
+        Address the topic from different perspectives - what matters for small businesses vs. larger organizations, or how different industries approach "${keyword}".
 
-        Format with proper HTML headers and focus on practical business value.`;
+        The article should be at least 1000 words, written in a professional but accessible tone, and include a helpful link to ${targetUrl} using the anchor text "${anchorText}" for business solutions.
+
+        Focus on actionable insights that readers can actually implement rather than theoretical business concepts.`;
 
       default: // informational
         return `Write a comprehensive, informative guide about "${keyword}" for ${currentYear}. Cover:
