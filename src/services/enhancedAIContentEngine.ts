@@ -541,44 +541,7 @@ Create content that readers would want to bookmark, share, or reference later be
     return content;
   }
   
-  /**
-   * Generate additional SEO-optimized sections
-   */
-  private generateAdditionalSEOSections(request: ContentGenerationRequest): string {
-    const keyword = request.keyword;
-    const currentYear = new Date().getFullYear();
-    
-    return `
-<h2>Advanced ${keyword} Strategies for ${currentYear}</h2>
 
-<p>As we move through ${currentYear}, <strong>${keyword}</strong> continues to evolve. The most successful approaches now emphasize user experience and quality over quantity.</p>
-
-<p>Industry experts recommend focusing on these key areas:</p>
-
-<h3>Best Practices for ${keyword} Implementation</h3>
-
-<p><em>${keyword}</em> success requires a strategic approach. Consider these proven methodologies:</p>
-
-- <strong>Data-driven decision making</strong>: Use analytics to guide your ${keyword} strategy
-- <strong>User-centric approach</strong>: Prioritize user experience in all ${keyword} initiatives
-- <strong>Continuous optimization</strong>: Regularly review and improve your ${keyword} performance
-- <strong>Industry best practices</strong>: Stay updated with the latest ${keyword} trends
-
-<h3>Common ${keyword} Mistakes to Avoid</h3>
-
-<p>Even experienced professionals can fall into these <em>${keyword}</em> traps:</p>
-
-<p><strong>Overlooking user intent</strong> is one of the biggest mistakes in ${keyword}. Always prioritize what your audience actually needs.</p>
-
-<p>Another critical error is <em>neglecting mobile optimization</em>. With mobile-first indexing, your ${keyword} strategy must work perfectly on all devices.</p>
-
-<h2>Future of ${keyword}</h2>
-
-<p>Looking ahead, <strong>${keyword}</strong> will continue to be shaped by technological advances and changing user behaviors. Success will depend on adaptability and continuous learning.</p>
-
-<p>The key to long-term ${keyword} success lies in building sustainable strategies that evolve with the industry while maintaining focus on delivering genuine value to users.</p>
-    `;
-  }
   
   /**
    * Add meta tags and structured data hints
