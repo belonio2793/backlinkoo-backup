@@ -52,7 +52,7 @@ export function EnhancedDashboardRouter() {
           return;
         } else {
           console.log('❌ User not authenticated, redirecting to home');
-          navigate('/');
+          setIsLoading(false);
           return;
         }
       } catch (error) {
@@ -70,6 +70,14 @@ export function EnhancedDashboardRouter() {
       isMounted = false;
     };
   }, [navigate]);
+
+  // Separate effect to handle navigation after loading is complete
+  useEffect(() => {
+    if (!isLoading && !user) {
+      console.log('🚫 No authenticated user, redirecting to home');
+      navigate('/');
+    }
+  }, [isLoading, user, navigate]);
 
   console.log('📊 Dashboard Router State:', { isLoading, user: !!user, hasTrialPosts, guestAnalytics });
 
