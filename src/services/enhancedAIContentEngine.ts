@@ -225,8 +225,8 @@ Balance creativity with SEO requirements to create content that ranks well and e
         if (provider.name === 'huggingface') {
           const fullPrompt = `${systemPrompt}\n\n${selectedPrompt}`;
           result = await provider.service.generateText(fullPrompt, {
-            model: 'microsoft/DialoGPT-large',
-            maxLength: this.getMaxTokens(request.contentLength),
+            model: 'gpt2',
+            maxLength: Math.min(this.getMaxTokens(request.contentLength), 1500),
             temperature: 0.7
           });
         } else if (provider.name === 'cohere') {
