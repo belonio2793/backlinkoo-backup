@@ -417,8 +417,7 @@ Balance creativity with SEO requirements to create content that ranks well and e
     // Ensure proper content length (minimum 1000 words)
     enhanced = await this.ensureContentLength(enhanced, request);
     
-    // Add meta tags and structured data hints
-    enhanced = this.addMetaTagsHints(enhanced, request);
+    // Note: Meta tags and structured data should be handled by the page template, not inline content
 
     // Apply enhanced text formatting (bullet points, capitalization)
     enhanced = formatBlogContent(enhanced);
