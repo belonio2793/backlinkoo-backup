@@ -237,6 +237,16 @@ export function GlobalBlogGenerator({
           message: 'API fully operational',
           details: `Connected in ${connectivityTest.attempt || 1} attempt${(connectivityTest.attempt || 1) > 1 ? 's' : ''} (${connectivityTest.responseTime}ms)`
         });
+
+        // Show success toast if it took multiple attempts
+        if ((connectivityTest.attempt || 1) > 1) {
+          toast({
+            title: "🎉 Successfully Connected!",
+            description: `AI service is now ready after ${connectivityTest.attempt} attempts. You can now create your free backlink!`,
+            variant: "default",
+            className: "border-green-200 bg-green-50"
+          });
+        }
       } else {
         setApiStatus({
           status: 'error',
