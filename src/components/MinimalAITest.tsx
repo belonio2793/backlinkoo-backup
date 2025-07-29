@@ -6,8 +6,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { huggingFaceService } from '@/services/api/huggingface';
-import { cohereService } from '@/services/api/cohere';
+
 import { globalBlogGenerator } from '@/services/globalBlogGenerator';
 import { Activity, CheckCircle2, AlertCircle, Loader2, Terminal, Zap } from 'lucide-react';
 
@@ -295,10 +294,7 @@ export function MinimalAITest() {
     addLog('info', 'SYSTEM', 'Testing API providers...');
     setCurrentProcess('Testing API connectivity...');
 
-    const providers = [
-      { name: 'HuggingFace API', service: huggingFaceService },
-      { name: 'Cohere API', service: cohereService }
-    ];
+    const providers: any[] = [];
     const statuses: ApiStatus[] = [];
 
     for (const provider of providers) {

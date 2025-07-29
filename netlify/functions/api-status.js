@@ -18,19 +18,14 @@ exports.handler = async (event, context) => {
 
   try {
     const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
-    const hasGrokKey = !!process.env.GROK_API_KEY;
-    
-    // For demo purposes, consider system online if we have at least one API key
-    const isOnline = hasOpenAIKey || hasGrokKey;
+
+    // System is online if OpenAI API key is configured
+    const isOnline = hasOpenAIKey;
     
     const providerStatus = {
       OpenAI: {
         configured: hasOpenAIKey,
         status: hasOpenAIKey ? 'online' : 'not_configured'
-      },
-      Grok: {
-        configured: hasGrokKey,
-        status: hasGrokKey ? 'online' : 'not_configured'
       }
     };
 
