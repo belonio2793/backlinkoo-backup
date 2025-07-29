@@ -77,6 +77,15 @@ export default function AILive() {
       // Set up status updates
       const generator = new BuilderAIGenerator((status) => {
         setGenerationStatus(status);
+
+        // Simulate intermediate content during generation
+        if (status.stage === 'generating' && status.progress > 50) {
+          setIntermediateContent(`
+            <h1>Generating content about ${keyword}</h1>
+            <p>Creating comprehensive article with ${anchorText} linking to your target URL...</p>
+            <p>Content generation in progress using ${status.provider?.toUpperCase()} AI...</p>
+          `);
+        }
       });
 
       const generationResult = await generator.generateContent({
