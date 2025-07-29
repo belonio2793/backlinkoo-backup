@@ -133,10 +133,7 @@ Format the response as clean HTML with proper semantic structure.`;
 
     this.updateStatus('initializing', 'Starting content generation...', 0);
 
-    // Check user limit
-    if (request.accountId && !await this.checkUserLimit(request.accountId)) {
-      throw new Error('Account has already used their one-time content generation limit');
-    }
+    // No user limits on AI Live - unlimited generation allowed
 
     // Check API availability
     const apiStatus = await this.checkApiAvailability();
