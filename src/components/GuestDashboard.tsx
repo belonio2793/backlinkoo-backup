@@ -160,7 +160,7 @@ export function GuestDashboard() {
                     className="border-amber-600 text-amber-700 hover:bg-amber-100"
                   >
                     <ArrowRight className="mr-2 h-4 w-4" />
-                    Create More Backlinks
+                    Create More
                   </Button>
                 </div>
               </div>
@@ -261,7 +261,7 @@ export function GuestDashboard() {
                 className="border-white text-white hover:bg-white hover:text-blue-600"
               >
                 <Sparkles className="mr-2 h-5 w-5" />
-                Create More Backlinks
+                Create More
               </Button>
             </div>
           </CardContent>
