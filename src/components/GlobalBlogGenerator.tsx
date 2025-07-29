@@ -407,7 +407,7 @@ export function GlobalBlogGenerator({
         title = "🔑 API Key Missing";
         description = "OpenAI API key is not configured. Please set up your API key to generate content.";
       } else if (errorMessage.includes('rate limit') || errorMessage.includes('429')) {
-        title = "⏱️ Rate Limit Exceeded";
+        title = "⏱��� Rate Limit Exceeded";
         description = "OpenAI rate limit reached. Please wait a few minutes before trying again.";
       } else if (errorMessage.includes('quota') || errorMessage.includes('insufficient_quota')) {
         title = "💳 Quota Exceeded";
@@ -626,7 +626,7 @@ export function GlobalBlogGenerator({
             
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Users className="h-4 w-4" />
-              <span>{!isLoggedIn ? 'Unlimited requests' : `${remainingRequests} requests remaining`}</span>
+              <span>Unlimited requests</span>
             </div>
           </div>
           
