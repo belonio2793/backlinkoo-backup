@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { freeBacklinkService } from '@/services/freeBacklinkService';
-import { openAIContentGenerator, ContentGenerationRequest, GeneratedContentResult } from '@/services/openAIContentGenerator';
+import { openAIOnlyContentGenerator, ContentGenerationRequest, GeneratedContentResult } from '@/services/openAIOnlyContentGenerator';
 import RegistrationModal from './RegistrationModal';
 import { WordCountProgress } from './WordCountProgress';
 import { ProviderStatus } from './ui/provider-status';
