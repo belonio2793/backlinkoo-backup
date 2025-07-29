@@ -39,9 +39,9 @@ interface GeneratedContent {
 }
 
 export function MinimalAITest() {
-  const [keyword, setKeyword] = useState('');
-  const [url, setUrl] = useState('');
-  const [anchorText, setAnchorText] = useState('');
+  const [keyword, setKeyword] = useState('artificial intelligence');
+  const [url, setUrl] = useState('https://example.com');
+  const [anchorText, setAnchorText] = useState('learn more about AI');
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<SystemLog[]>([]);
   const [apiStatuses, setApiStatuses] = useState<ApiStatus[]>([]);
