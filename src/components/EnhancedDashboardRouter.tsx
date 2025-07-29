@@ -74,6 +74,23 @@ export function EnhancedDashboardRouter() {
     };
   }, [navigate]);
 
+  // Listen for auth state changes to update user state immediately
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔐 EnhancedDashboardRouter: Auth state changed:', event, !!session?.user);
+      if (event === 'SIGNED_IN' && session?.user) {
+        setUser(session.user);
+        setIsLoading(false);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, []);
+
   // Additional useEffect to handle fallback redirect if somehow we reach an unauthenticated state
   useEffect(() => {
     if (!isLoading && !user) {
