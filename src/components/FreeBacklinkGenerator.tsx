@@ -243,10 +243,10 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
           </CardContent>
         </Card>
 
-        <Card className="border-purple-200">
-          <CardHeader>
+        <Card className="border-purple-200 shadow-xl bg-gradient-to-br from-white to-purple-50/30 hover:shadow-2xl transition-shadow duration-300">
+          <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-purple-600" />
+              <Target className="h-5 w-5" />
               Content Settings
             </CardTitle>
           </CardHeader>
