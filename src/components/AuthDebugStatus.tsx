@@ -91,7 +91,7 @@ export function AuthDebugStatus() {
             onClick={checkAuthStatus}
             disabled={isLoading}
           >
-            <Refresh className="h-4 w-4 mr-1" />
+            <RefreshCw className="h-4 w-4 mr-1" />
             Refresh
           </Button>
         </div>
