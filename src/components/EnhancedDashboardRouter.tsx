@@ -35,30 +35,28 @@ export function EnhancedDashboardRouter() {
 
     const checkUserAndTrialPosts = async () => {
       try {
-        console.log('🔍 Checking user authentication...');
+        console.log('🔍 Checking user authentication for dashboard...');
 
         // Check authentication
         const { data: { session } } = await supabase.auth.getSession();
-        console.log('🔍 Session check result:', !!session?.user);
+        console.log('🔍 Session check result:', !!session?.user, session?.user?.email);
 
         if (!isMounted) return;
 
         setUser(session?.user || null);
 
-        // Simple logic: if user is authenticated, show dashboard; otherwise redirect to home
         if (session?.user) {
           console.log('✅ User authenticated, showing dashboard');
           setIsLoading(false);
           return;
         } else {
-          console.log('❌ User not authenticated, redirecting to home');
+          console.log('❌ User not authenticated, will redirect to home');
           setIsLoading(false);
           return;
         }
       } catch (error) {
         console.error('Dashboard router error:', error);
         if (isMounted) {
-          // Default to showing guest dashboard on error
           setIsLoading(false);
         }
       }
@@ -66,8 +64,18 @@ export function EnhancedDashboardRouter() {
 
     checkUserAndTrialPosts();
 
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔐 Dashboard auth state changed:', event, !!session?.user);
+      if (isMounted) {
+        setUser(session?.user || null);
+        setIsLoading(false);
+      }
+    });
+
     return () => {
       isMounted = false;
+      subscription?.unsubscribe();
     };
   }, [navigate]);
 
