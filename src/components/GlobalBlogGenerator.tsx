@@ -457,6 +457,17 @@ export function GlobalBlogGenerator({
               </div>
               <Progress value={progress} className="w-full" />
               <p className="text-sm text-muted-foreground">{generationStage}</p>
+
+              {/* Word Count Progress */}
+              <div className="mt-4">
+                <WordCountProgress
+                  targetWords={1500}
+                  isGenerating={isGenerating}
+                  onComplete={(finalCount) => {
+                    console.log('Global blog generation completed with', finalCount, 'words');
+                  }}
+                />
+              </div>
             </div>
           ) : generatedPost ? (
             <div className="space-y-4">
