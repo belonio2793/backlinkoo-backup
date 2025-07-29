@@ -80,7 +80,13 @@ export function formatBlogContent(content: string): string {
   // Capitalize first letter of every sentence
   formattedContent = capitalizeSentences(formattedContent);
 
-  // Fix broken HTML structure first
+  // Fix broken sentences and word continuations first
+  formattedContent = reconstructBrokenSentences(formattedContent);
+
+  // Remove all indentations and normalize spacing
+  formattedContent = removeIndentations(formattedContent);
+
+  // Fix broken HTML structure
   formattedContent = fixBrokenHTMLStructure(formattedContent);
 
   // Prevent double headlines
