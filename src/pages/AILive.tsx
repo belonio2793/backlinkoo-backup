@@ -169,7 +169,7 @@ export default function AILive() {
                   Generate Your Blog Post
                 </CardTitle>
                 <CardDescription className="text-base text-gray-600 max-w-md mx-auto">
-                  Create high-quality, SEO-optimized content with AI in seconds. One free generation per account.
+                  Create unlimited high-quality, SEO-optimized content with AI in seconds.
                 </CardDescription>
               </CardHeader>
               
