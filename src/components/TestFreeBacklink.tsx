@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { freeBacklinkService } from '@/services/freeBacklinkService';
-import { openAIContentGenerator } from '@/services/openAIContentGenerator';
+import { openAIOnlyContentGenerator } from '@/services/openAIOnlyContentGenerator';
 import { 
   TestTube, 
   CheckCircle2, 
