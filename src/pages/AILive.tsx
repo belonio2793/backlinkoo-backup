@@ -55,10 +55,7 @@ export default function AILive() {
       return;
     }
 
-    if (hasUsedLimit) {
-      toast.error('You have already used your one-time content generation');
-      return;
-    }
+    // No limits on AI Live - unlimited generations allowed
 
     setIsGenerating(true);
     setResult(null);
