@@ -30,12 +30,14 @@ export class HuggingFaceService {
   private baseURL = 'https://api-inference.huggingface.co/models';
 
   constructor() {
-    this.token = import.meta.env.VITE_HUGGINGFACE_TOKEN || 
+    this.token = import.meta.env.VITE_HUGGINGFACE_TOKEN ||
                  (typeof process !== 'undefined' ? process.env.HUGGINGFACE_TOKEN : '') ||
                  '';
-    
+
     if (!this.token) {
       console.warn('HuggingFace token not configured');
+    } else {
+      console.log('✅ Primary AI engine configured and ready');
     }
   }
 
@@ -59,21 +61,27 @@ export class HuggingFaceService {
     }
 
     const {
-      model = 'microsoft/DialoGPT-large',
-      maxLength = 3000,
+      model = 'gpt2',
+      maxLength = 1500,
       temperature = 0.7
     } = options;
 
     try {
-      console.log('🤗 HuggingFace API Request:', { model, maxLength, temperature });
+      // Limit prompt length for HuggingFace free tier
+      const truncatedPrompt = prompt.length > 2000 ? prompt.substring(0, 2000) + '...' : prompt;
+      console.log('🤗 Primary AI engine request:', {
+        promptLength: truncatedPrompt.length,
+        maxLength,
+        temperature
+      });
 
       const requestBody: HuggingFaceRequest = {
-        inputs: prompt,
+        inputs: truncatedPrompt,
         parameters: {
-          max_length: maxLength,
+          max_length: Math.min(maxLength, 1500), // Conservative limit for free tier
           temperature,
           do_sample: true,
-          top_p: 0.95,
+          top_p: 0.9,
           num_return_sequences: 1
         },
         options: {
@@ -82,18 +90,27 @@ export class HuggingFaceService {
         }
       };
 
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch(`${this.baseURL}/${model}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HuggingFace API error: ${response.status} - ${errorData.error || response.statusText}`);
+        const errorMessage = errorData.error || response.statusText || 'Unknown error';
+        console.warn('Primary AI engine error:', { status: response.status, error: errorMessage });
+        throw new Error(`Primary AI engine error: ${response.status} - ${errorMessage}`);
       }
 
       const data: HuggingFaceResponse[] = await response.json();
@@ -123,12 +140,20 @@ export class HuggingFaceService {
       };
 
     } catch (error) {
-      console.error('❌ HuggingFace API error:', error);
+      let errorMessage = 'Unknown error';
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          errorMessage = 'Request timeout - switching to secondary provider';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      console.warn('❌ Primary AI engine error:', errorMessage);
       return {
         content: '',
         usage: { tokens: 0, cost: 0 },
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: errorMessage
       };
     }
   }

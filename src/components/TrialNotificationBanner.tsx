@@ -23,7 +23,11 @@ interface TrialPost {
   created_at: string;
 }
 
-export function TrialNotificationBanner() {
+interface TrialNotificationBannerProps {
+  onSignUp?: () => void;
+}
+
+export function TrialNotificationBanner({ onSignUp }: TrialNotificationBannerProps = {}) {
   const [trialPosts, setTrialPosts] = useState<TrialPost[]>([]);
   const [isVisible, setIsVisible] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -95,7 +99,11 @@ export function TrialNotificationBanner() {
   };
 
   const handleSignUp = () => {
-    navigate('/login');
+    if (onSignUp) {
+      onSignUp();
+    } else {
+      navigate('/login');
+    }
   };
 
   const handleQuickUpgrade = () => {

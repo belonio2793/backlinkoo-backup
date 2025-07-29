@@ -4,6 +4,7 @@ import { contentModerationService } from './contentModerationService';
 import { formatBlogTitle, formatBlogContent } from '@/utils/textFormatting';
 import { aiContentEngine } from './aiContentEngine';
 import { enhancedAIContentEngine } from './enhancedAIContentEngine';
+import { SmartFallbackContent } from './smartFallbackContent';
 
 export interface GlobalBlogRequest {
   targetUrl: string;
@@ -271,7 +272,7 @@ class GlobalBlogGeneratorService {
         industry: request.additionalContext?.industry
       });
 
-      if (aiResult.bestContent && aiResult.bestContent.length > 200) {
+      if (aiResult.finalContent && aiResult.finalContent.length > 200) {
         console.log('✅ AI content generation successful:', {
           provider: aiResult.selectedProvider,
           wordCount: aiResult.metadata.wordCount,
@@ -319,8 +320,8 @@ class GlobalBlogGeneratorService {
           reading_time: readingTime,
           word_count: wordCount,
           view_count: 0,
-          author_name: 'Backlink ∞ AI',
-          category: 'AI-Generated SEO Guide',
+          author_name: 'Backlink ∞',
+          category: 'SEO Guide',
           ai_provider: aiResult.selectedProvider,
           ai_generation_cost: aiResult.totalCost,
           ai_processing_time: aiResult.processingTime,
@@ -370,8 +371,12 @@ class GlobalBlogGeneratorService {
   }
 
   private async generateFallbackBlogPost(request: any): Promise<GlobalBlogResponse> {
-    // Fallback to template-based generation when AI fails
-    const content = this.generateFallbackContent(request);
+    // Fallback to smart template-based generation when AI fails
+    const content = SmartFallbackContent.generateContent(
+      request.primaryKeyword,
+      request.targetUrl,
+      request.anchorText
+    );
 
     // Enhanced moderation of generated content
     const title = `${request.primaryKeyword}: A Comprehensive Guide for ${new Date().getFullYear()}`;

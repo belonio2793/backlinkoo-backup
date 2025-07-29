@@ -6,20 +6,24 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { publishedBlogService, type PublishedBlogPost } from '@/services/publishedBlogService';
 import { ClaimTrialPostDialog } from '@/components/ClaimTrialPostDialog';
+import { LoginModal } from '@/components/LoginModal';
 import { supabase } from '@/integrations/supabase/client';
-import { formatBlogTitle, formatBlogContent, getTrendingLabel } from '@/utils/textFormatting';
+import { formatBlogTitle, formatBlogContent, getTrendingLabel, calculateWordCount, cleanHTMLContent } from '@/utils/textFormatting';
+import { enhancedAIContentEngine } from '@/services/enhancedAIContentEngine';
 import { Footer } from '@/components/Footer';
-import { 
-  Calendar, 
-  Clock, 
-  Eye, 
-  ArrowLeft, 
-  ExternalLink, 
+import {
+  Calendar,
+  Clock,
+  Eye,
+  ArrowLeft,
+  ExternalLink,
   Share2,
   Tag,
   User,
   TrendingUp,
-  Sparkles
+  Sparkles,
+  Trash2,
+  RefreshCw
 } from 'lucide-react';
 
 export function BlogPost() {
@@ -30,6 +34,9 @@ export function BlogPost() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   useEffect(() => {
     const loadBlogPost = async () => {
@@ -162,6 +169,171 @@ export function BlogPost() {
     });
   };
 
+  const handleDeletePost = async () => {
+    if (!blogPost || !blogPost.is_trial_post) {
+      toast({
+        title: "Cannot delete",
+        description: "Only trial posts can be deleted.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete "${blogPost.title}"? This action cannot be undone.`
+    );
+
+    if (!confirmDelete) return;
+
+    setIsDeleting(true);
+
+    try {
+      // Remove from localStorage
+      const blogStorageKey = `blog_post_${blogPost.slug}`;
+      localStorage.removeItem(blogStorageKey);
+
+      // Remove from all posts list
+      const allPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+      const updatedPosts = allPosts.filter((post: any) => post.slug !== blogPost.slug);
+      localStorage.setItem('all_blog_posts', JSON.stringify(updatedPosts));
+
+      // Try to remove from database if it exists
+      try {
+        const { error } = await supabase
+          .from('published_blog_posts')
+          .delete()
+          .eq('slug', blogPost.slug);
+
+        if (error) {
+          console.warn('Could not delete from database:', error);
+        }
+      } catch (dbError) {
+        console.warn('Database deletion failed:', dbError);
+      }
+
+      toast({
+        title: "Post deleted",
+        description: "The trial blog post has been successfully deleted.",
+      });
+
+      // Navigate back to homepage
+      navigate('/');
+
+    } catch (error) {
+      console.error('Failed to delete post:', error);
+      toast({
+        title: "Delete failed",
+        description: "An error occurred while deleting the post. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleRegenerateContent = async () => {
+    if (!blogPost || !blogPost.is_trial_post) {
+      toast({
+        title: "Cannot regenerate",
+        description: "Only trial posts can be regenerated.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const confirmRegenerate = window.confirm(
+      `Are you sure you want to regenerate the content for "${blogPost.title}"? This will replace the current content with fresh AI-generated content.`
+    );
+
+    if (!confirmRegenerate) return;
+
+    setIsRegenerating(true);
+
+    try {
+      // Extract the original keywords/anchor text from the blog post
+      const primaryKeyword = blogPost.keywords?.[0] || blogPost.title.split(':')[0].trim();
+      const anchorText = blogPost.anchor_text || primaryKeyword;
+
+      toast({
+        title: "Regenerating content...",
+        description: "Please wait while we generate fresh content with AI.",
+      });
+
+      // Generate new content using the enhanced AI engine
+      const result = await enhancedAIContentEngine.generateContent({
+        keyword: primaryKeyword,
+        targetUrl: blogPost.target_url,
+        anchorText: anchorText,
+        contentLength: 'medium',
+        contentTone: 'professional',
+        seoFocus: 'high'
+      });
+
+      if (!result.finalContent) {
+        throw new Error('Failed to generate content');
+      }
+
+      // Update the blog post with new content
+      const updatedBlogPost = {
+        ...blogPost,
+        content: result.finalContent,
+        word_count: result.metadata.wordCount,
+        reading_time: result.metadata.readingTime,
+        seo_score: result.metadata.seoScore,
+        updated_at: new Date().toISOString()
+      };
+
+      // Update in localStorage
+      const blogStorageKey = `blog_post_${blogPost.slug}`;
+      localStorage.setItem(blogStorageKey, JSON.stringify(updatedBlogPost));
+
+      // Update in all posts list
+      const allPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+      const updatedPosts = allPosts.map((post: any) =>
+        post.slug === blogPost.slug ? updatedBlogPost : post
+      );
+      localStorage.setItem('all_blog_posts', JSON.stringify(updatedPosts));
+
+      // Try to update in database if it exists
+      try {
+        const { error } = await supabase
+          .from('published_blog_posts')
+          .update({
+            content: result.finalContent,
+            word_count: result.metadata.wordCount,
+            reading_time: result.metadata.readingTime,
+            seo_score: result.metadata.seoScore,
+            updated_at: new Date().toISOString()
+          })
+          .eq('slug', blogPost.slug);
+
+        if (error) {
+          console.warn('Could not update database:', error);
+        }
+      } catch (dbError) {
+        console.warn('Database update failed:', dbError);
+      }
+
+      // Update the component state
+      setBlogPost(updatedBlogPost);
+
+      toast({
+        title: "Content regenerated!",
+        description: "The blog post has been updated with fresh AI-generated content.",
+      });
+
+    } catch (error) {
+      console.error('Failed to regenerate content:', error);
+      toast({
+        title: "Regeneration failed",
+        description: "An error occurred while generating new content. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
@@ -216,13 +388,13 @@ export function BlogPost() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate('/login')}
+                    onClick={() => setShowLoginModal(true)}
                   >
                     Sign In
                   </Button>
                   <Button
                     size="sm"
-                    onClick={() => navigate('/login')}
+                    onClick={() => setShowLoginModal(true)}
                   >
                     Register
                   </Button>
@@ -352,7 +524,7 @@ export function BlogPost() {
                     This demo blog post will automatically delete on {formatDate(blogPost.expires_at)} unless claimed.
                     Claim it now to make this backlink permanent!
                   </p>
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-3">
                     {!currentUser ? (
                       <ClaimTrialPostDialog
                         trialPostSlug={blogPost.slug}
@@ -382,7 +554,25 @@ export function BlogPost() {
                       variant="outline"
                       className="border-amber-600 text-amber-700 hover:bg-amber-100"
                     >
-                      Create More Backlinks
+                      Create More
+                    </Button>
+                    <Button
+                      onClick={handleRegenerateContent}
+                      disabled={isRegenerating}
+                      variant="outline"
+                      className="border-blue-400 text-blue-600 hover:bg-blue-50"
+                    >
+                      <RefreshCw className={`mr-2 h-4 w-4 ${isRegenerating ? 'animate-spin' : ''}`} />
+                      {isRegenerating ? 'Regenerating...' : 'Regenerate Content'}
+                    </Button>
+                    <Button
+                      onClick={handleDeletePost}
+                      disabled={isDeleting}
+                      variant="outline"
+                      className="border-red-400 text-red-600 hover:bg-red-50"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      {isDeleting ? 'Deleting...' : 'Delete Post'}
                     </Button>
                   </div>
                 </div>
@@ -404,9 +594,9 @@ export function BlogPost() {
                     <strong>Target Keywords:</strong> {(blogPost.keywords || blogPost.tags || []).join(', ')}
                   </p>
                 )}
-                {blogPost.word_count && (
+                {blogPost.content && (
                   <p className="text-sm text-gray-600">
-                    <strong>Word Count:</strong> {blogPost.word_count} words
+                    <strong>Word Count:</strong> {calculateWordCount(blogPost.content)} words
                   </p>
                 )}
                 {blogPost.contextual_links && blogPost.contextual_links.length > 0 && (
@@ -514,6 +704,20 @@ export function BlogPost() {
           color: inherit;
         }
       `}</style>
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onAuthSuccess={(user) => {
+          setShowLoginModal(false);
+          setCurrentUser(user);
+          toast({
+            title: "Welcome! 🎉",
+            description: "You're now logged in and can claim backlinks.",
+          });
+        }}
+      />
 
       {/* Footer */}
       <Footer />

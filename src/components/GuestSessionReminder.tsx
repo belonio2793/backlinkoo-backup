@@ -179,10 +179,10 @@ export function GuestSessionReminder({
                 <Zap className="h-3 w-3 mr-1" />
                 Sign Up Free
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => navigate('/login')}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onSignUp}
                 className="flex-shrink-0"
               >
                 Sign In
@@ -227,7 +227,7 @@ export function GuestSessionReminder({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => navigate('/login')}
+              onClick={onSignUp}
               className="border-white/30 text-white hover:bg-white/10"
             >
               Sign In
@@ -287,9 +287,9 @@ export function GuestSessionReminder({
             Create Free Account
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/login')}
+          <Button
+            variant="outline"
+            onClick={onSignUp}
             className="flex-shrink-0"
           >
             Sign In

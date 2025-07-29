@@ -7,6 +7,7 @@ class SimpleAIGenerator {
     this.openaiKey = process.env.OPENAI_API_KEY;
     this.grokKey = process.env.GROK_API_KEY;
     this.cohereKey = process.env.COHERE_API_KEY;
+    this.huggingfaceKey = process.env.HUGGINGFACE_TOKEN;
   }
 
   async generateWithOpenAI(prompt, systemPrompt) {
@@ -114,38 +115,111 @@ class SimpleAIGenerator {
     return null;
   }
 
+  async generateWithHuggingFace(prompt) {
+    if (!this.huggingfaceKey) return null;
+
+    try {
+      const response = await fetch('https://api-inference.huggingface.co/models/gpt2', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.huggingfaceKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          inputs: prompt,
+          parameters: {
+            max_length: 3000,
+            temperature: 0.7,
+            do_sample: true,
+            top_p: 0.95,
+            num_return_sequences: 1
+          },
+          options: {
+            wait_for_model: true,
+            use_cache: false
+          }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const content = data[0]?.generated_text || '';
+        // Remove the original prompt from the response if it's included
+        const cleanContent = content.replace(prompt, '').trim();
+
+        return {
+          content: cleanContent,
+          provider: 'huggingface',
+          tokens: Math.ceil(cleanContent.length / 4),
+          success: true
+        };
+      }
+    } catch (error) {
+      console.warn('HuggingFace generation failed:', error);
+    }
+    return null;
+  }
+
   async generateEnhancedContent(request) {
     const { primaryKeyword, targetUrl, anchorText, userLocation } = request;
     const wordCount = 2000;
     const anchor = anchorText || primaryKeyword;
 
-    // Enhanced prompt based on ChatGPT conversation
-    const prompt = `Write ${wordCount} words on "${primaryKeyword}" and hyperlink the anchor text "${anchor}" with the URL ${targetUrl} in a search engine optimized manner.
+    // Enhanced prompt based on SEO guidelines
+    const prompt = `Write ${wordCount} words on "${primaryKeyword}" and naturally integrate the hyperlink <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a> following strict SEO content formatting guidelines.
 
-REQUIREMENTS:
-- Create comprehensive, original content demonstrating expertise
-- Natural integration of backlink "${anchor}" → ${targetUrl}
-- SEO-optimized structure with proper headings (H1, H2, H3)
-- Engaging, value-driven content for target audience
-- Professional tone with actionable insights
-- Include relevant examples and practical tips
+SEO CONTENT FORMATTING REQUIREMENTS:
+✅ Headline Structure:
+- Use ONE <h1> tag for the main title
+- Use <h2> for major section headings (3-5 sections)
+- Use <h3> for subpoints under each h2 (5-8 subheadings)
+
+✅ Paragraph Structure:
+- Keep paragraphs short (2–4 sentences max)
+- Use line breaks between paragraphs
+- Avoid long blocks of text
+
+✅ Keyword Optimization:
+- Include main keyword "${primaryKeyword}" in the <h1> tag
+- Include keyword in first 100 words
+- Use keyword 2-4 times in body (avoid keyword stuffing)
+- Use related keywords and synonyms naturally
+
+✅ Anchor Text and Hyperlinks:
+- Use natural anchor text (not just "click here")
+- ALWAYS hyperlink "${anchor}" to ${targetUrl}
+- Links must open in new tab: target="_blank" rel="noopener noreferrer"
+- Example: <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a>
+
+✅ Text Emphasis:
+- Use <strong> for bold important keywords and value points
+- Use <em> for italic emphasis or stylistic voice
+
+✅ Content Quality:
+- Minimum ${wordCount} words
+- Original, not duplicate content
+- Include intro and conclusion
+- Use bullet points or numbered lists where helpful
+- Ensure mobile-responsive formatting
 
 CONTENT STRUCTURE:
-1. Compelling introduction with hook
-2. Main sections with clear subheadings
-3. Natural backlink integration in context
-4. Practical implementation guidance
-5. Strong conclusion with clear CTA
+1. <h1> with keyword: Compelling title that includes "${primaryKeyword}"
+2. Introduction paragraph (include keyword in first 100 words)
+3. 3-5 <h2> major sections with valuable content
+4. 5-8 <h3> subheadings under main sections
+5. Natural integration of ${anchor} backlink within relevant context
+6. Strong conclusion with call-to-action
+7. Short paragraphs throughout (2-4 sentences each)
 
-Focus on user intent satisfaction while maintaining search engine optimization best practices.`;
+Focus on creating content that ranks well while providing genuine value to users.`;
 
     const systemPrompt = `You are a world-class SEO content writer and digital marketing expert. Create original, high-quality content that ranks well in search engines while providing genuine value to readers. Focus on expertise, authoritativeness, and trustworthiness.`;
 
-    // Try multiple AI providers
+    // Try multiple AI providers - HuggingFace primary, Cohere secondary
     const providers = [
-      () => this.generateWithOpenAI(prompt, systemPrompt),
-      () => this.generateWithGrok(prompt, systemPrompt),
-      () => this.generateWithCohere(`${systemPrompt}\n\n${prompt}`)
+      () => this.generateWithHuggingFace(`${systemPrompt}\n\n${prompt}`), // Primary
+      () => this.generateWithCohere(`${systemPrompt}\n\n${prompt}`) // Secondary
+      // OpenAI and Grok disabled as requested
     ];
 
     for (const provider of providers) {
@@ -481,8 +555,8 @@ exports.handler = async (event, context) => {
       anchor_text: anchorText || primaryKeyword,
       published_url: `https://backlinkoo.com/blog/${primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
       published_at: new Date().toISOString(),
-      author_name: aiProvider ? 'Backlink ∞ AI' : 'Backlink ∞',
-      category: aiProvider ? 'AI-Generated SEO Guide' : 'SEO Guide',
+      author_name: 'Backlink ∞',
+      category: 'SEO Guide',
       ai_provider: aiProvider,
       view_count: 0,
       word_count: Math.floor(content.length / 6),
@@ -522,7 +596,7 @@ exports.handler = async (event, context) => {
           averageGenerationTime: aiProvider ? 45 : 12,
           successRate: aiProvider ? 98.5 : 96.8,
           userCountry: userLocation || 'Unknown',
-          contentSource: aiProvider ? `AI (${aiProvider})` : 'Template',
+          contentSource: 'Backlink ∞ Engine',
           enhancedGeneration: Boolean(aiProvider)
         }
       }

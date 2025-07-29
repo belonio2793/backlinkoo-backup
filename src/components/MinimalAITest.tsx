@@ -331,7 +331,7 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
     addLog('info', 'SYSTEM', 'Testing API providers...');
     setCurrentProcess('Testing API connectivity...');
 
-    const providers = ['OpenAI', 'xAI Grok', 'DeepAI', 'Hugging Face', 'Cohere', 'Rytr'];
+    const providers = ['Backlink ∞ AI Engine'];
     const statuses: ApiStatus[] = [];
 
     for (const provider of providers) {
