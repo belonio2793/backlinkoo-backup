@@ -113,18 +113,50 @@ export class BlogPublishingService {
    * Get blog post by slug (for public viewing)
    */
   async getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
-    const { data, error } = await supabase
-      .from('ai_generated_posts')
-      .select('*')
-      .eq('slug', slug)
-      .eq('status', 'published')
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('ai_generated_posts')
+        .select('*')
+        .eq('slug', slug)
+        .eq('status', 'published')
+        .single();
 
-    if (error || !data) {
-      return null;
+      if (error) {
+        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
+          // Try localStorage fallback
+          return this.getPostFromLocalStorage(slug);
+        }
+        return null;
+      }
+
+      return data as BlogPost;
+    } catch (error) {
+      console.warn('Database error, trying localStorage fallback:', error);
+      return this.getPostFromLocalStorage(slug);
     }
+  }
 
-    return data as BlogPost;
+  /**
+   * Get post from localStorage fallback
+   */
+  private getPostFromLocalStorage(slug: string): BlogPost | null {
+    try {
+      const stored = localStorage.getItem(`ai_post_${slug}`);
+      if (stored) {
+        const post = JSON.parse(stored);
+
+        // Check if expired
+        if (new Date(post.expires_at) <= new Date() && post.status === 'published') {
+          localStorage.removeItem(`ai_post_${slug}`);
+          return null;
+        }
+
+        return post;
+      }
+    } catch (error) {
+      console.warn('Error reading from localStorage:', error);
+    }
+    return null;
   }
 
   /**
