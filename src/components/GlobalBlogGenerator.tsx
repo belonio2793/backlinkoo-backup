@@ -261,7 +261,8 @@ export function GlobalBlogGenerator({
 
       const result = await freeBacklinkService.generateFreeBacklink(freeBacklinkRequest);
 
-      if (!result.error) {
+      // Accept the result even if it has an error (fallback content)
+      if (result && result.content) {
         setProgress(100);
         setGenerationStage('Generation complete!');
 
