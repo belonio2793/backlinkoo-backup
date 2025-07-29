@@ -751,14 +751,27 @@ export function GlobalBlogGenerator({
 
           {/* Rate Limit Warning */}
           {remainingRequests <= 2 && (
-            <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
-              <span className="text-sm text-amber-800">
-                {remainingRequests === 0 
-                  ? "You've reached the free tier limit. Sign up for unlimited access!"
-                  : `Only ${remainingRequests} request${remainingRequests === 1 ? '' : 's'} remaining. Sign up for unlimited access!`
-                }
-              </span>
+            <div className="flex items-center justify-between gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-amber-600" />
+                <span className="text-sm text-amber-800">
+                  {remainingRequests === 0
+                    ? "You've reached the free tier limit. Sign up for unlimited access!"
+                    : `Only ${remainingRequests} request${remainingRequests === 1 ? '' : 's'} remaining. Sign up for unlimited access!`
+                  }
+                </span>
+              </div>
+              {generatedPost && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => navigate(`/blog/${generatedPost.slug}`)}
+                  className="ml-2 bg-white hover:bg-amber-50 border-amber-300 text-amber-800"
+                >
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  View Post
+                </Button>
+              )}
             </div>
           )}
         </CardContent>
