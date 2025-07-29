@@ -31,6 +31,7 @@ import PromotionMaterials from "../pages/PromotionMaterials";
 import AIContentTest from "../pages/AIContentTest";
 import { AILive } from "../components/AILive";
 import { FreeBacklink } from "../pages/FreeBacklink";
+import { TestFreeBacklink } from "./TestFreeBacklink";
 
 export const AppWrapper = () => {
   // Initialize referral tracking
