@@ -328,19 +328,43 @@ function calculateBasicSEOScore(content: string, keyword: string): number {
   const lowerContent = content.toLowerCase();
   const lowerKeyword = keyword.toLowerCase();
 
-  if (content.includes('<h1')) score += 20;
-  
-  const headingCount = (content.match(/<h[1-6]/g) || []).length;
-  if (headingCount >= 3) score += 15;
+  // 1. Single H1 tag (15 points)
+  const h1Count = (content.match(/<h1/g) || []).length;
+  if (h1Count === 1) score += 15;
+  else if (h1Count > 1) score -= 10;
 
+  // 2. Proper heading hierarchy (15 points)
+  const h2Count = (content.match(/<h2/g) || []).length;
+  const h3Count = (content.match(/<h3/g) || []).length;
+  if (h2Count >= 2 && h3Count >= 1) score += 15;
+  else if (h2Count >= 1) score += 10;
+
+  // 3. Keyword optimization (20 points)
   const keywordCount = (lowerContent.match(new RegExp(lowerKeyword, 'g')) || []).length;
-  if (keywordCount >= 3 && keywordCount <= 8) score += 25;
+  if (keywordCount >= 3 && keywordCount <= 8) score += 20;
+  else if (keywordCount >= 2) score += 15;
 
+  // 4. Content length (15 points)
   const wordCount = countWords(content);
-  if (wordCount >= 800) score += 20;
+  if (wordCount >= 1000) score += 15;
+  else if (wordCount >= 800) score += 10;
 
-  if (content.includes('<p>') && content.includes('</p>')) score += 10;
-  if (content.includes('<a href=')) score += 10;
+  // 5. HTML structure (10 points)
+  if (content.includes('<p>') && content.includes('</p>')) score += 5;
+  if (content.includes('<strong>')) score += 3;
+  if (content.includes('<ul>') || content.includes('<ol>')) score += 2;
+
+  // 6. Link optimization (10 points)
+  const linkCount = (content.match(/<a href=/g) || []).length;
+  if (linkCount >= 2) score += 10;
+  else if (linkCount >= 1) score += 5;
+
+  // 7. Text emphasis (5 points)
+  const strongCount = (content.match(/<strong>/g) || []).length;
+  if (strongCount >= 3) score += 5;
+
+  // 8. Link attributes (5 points)
+  if (content.includes('target="_blank"') && content.includes('rel="noopener')) score += 5;
 
   return Math.min(score, 100);
 }
