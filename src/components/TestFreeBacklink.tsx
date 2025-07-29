@@ -101,7 +101,7 @@ export function TestFreeBacklink() {
       // Test 5: Test OpenAI content generation (if configured)
       if (openAIOnlyContentGenerator.isConfigured()) {
         try {
-          const testResult = await openAIContentGenerator.generateContent({
+          const testResult = await openAIOnlyContentGenerator.generateContent({
             targetUrl: 'https://example.com',
             primaryKeyword: 'test keyword',
             wordCount: 500
