@@ -61,9 +61,6 @@ export function EnhancedDashboardRouter() {
       try {
         console.log('🔍 Checking user authentication...');
 
-        // Small delay to ensure auth session is established
-        await new Promise(resolve => setTimeout(resolve, 50));
-
         // Check authentication
         const { data: { session } } = await supabase.auth.getSession();
         console.log('🔍 Session check result:', !!session?.user);
@@ -85,26 +82,7 @@ export function EnhancedDashboardRouter() {
       } catch (error: any) {
         console.error('Dashboard router error:', error);
         if (isMounted) {
-          // Show specific error message based on error type
-          let errorTitle = "Dashboard access error";
-          let errorDescription = "Unable to verify authentication status.";
-
-          if (error.message?.includes('fetch') || error.message?.includes('network')) {
-            errorTitle = "Connection error";
-            errorDescription = "Cannot connect to authentication servers. Please check your internet connection.";
-          } else if (error.message?.includes('timeout')) {
-            errorTitle = "Authentication timeout";
-            errorDescription = "Authentication check timed out. Please try refreshing the page.";
-          }
-
-          toast({
-            title: errorTitle,
-            description: errorDescription,
-            variant: "destructive",
-          });
-
           setIsLoading(false);
-          // Redirect to login on auth errors
           navigate('/login');
         }
       }
