@@ -95,7 +95,9 @@ export class HuggingFaceService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HuggingFace API error: ${response.status} - ${errorData.error || response.statusText}`);
+        const errorMessage = errorData.error || response.statusText || 'Unknown error';
+        console.warn('Primary AI engine error:', { status: response.status, error: errorMessage });
+        throw new Error(`Primary AI engine error: ${response.status} - ${errorMessage}`);
       }
 
       const data: HuggingFaceResponse[] = await response.json();
