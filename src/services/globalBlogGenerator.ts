@@ -2,8 +2,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { contentFilterService } from './contentFilterService';
 import { contentModerationService } from './contentModerationService';
 import { formatBlogTitle, formatBlogContent } from '@/utils/textFormatting';
-import { aiContentEngine } from './aiContentEngine';
-import { enhancedAIContentEngine } from './enhancedAIContentEngine';
 
 export interface GlobalBlogRequest {
   targetUrl: string;
