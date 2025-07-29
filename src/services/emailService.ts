@@ -438,16 +438,23 @@ https://backlinkoo.com`,
 
       return await this.sendViaNetlifyFunction(emailData);
     } catch (error: any) {
+      const errorMessage = error?.message || String(error) || 'Unknown error';
+
       await errorLogger.logEmailError(
-        `Failed to send password reset email: ${error.message}`,
+        `Failed to send password reset email: ${errorMessage}`,
         {
           to: email,
           emailType: 'password_reset',
-          resetUrl
+          resetUrl,
+          fullError: {
+            message: errorMessage,
+            name: error?.name,
+            stack: error?.stack
+          }
         },
         'EmailService'
       );
-      throw error;
+      throw new Error(errorMessage);
     }
   }
 
