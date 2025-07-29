@@ -8,19 +8,19 @@ import { Sparkles, FileText, Settings, Gift, Zap, CheckCircle2 } from 'lucide-re
 
 export function FreeBacklink() {
   const [activeTab, setActiveTab] = useState('generate');
-  const [generatedContent, setGeneratedContent] = useState<FreeBacklinkResult | null>(null);
+  const [generatedContent, setGeneratedContent] = useState<GeneratedContentResult | null>(null);
 
-  const handleContentGenerated = (content: FreeBacklinkResult) => {
+  const handleContentGenerated = (content: GeneratedContentResult) => {
     setGeneratedContent(content);
     setActiveTab('preview');
   };
 
-  const handleViewPost = (post: FreeBacklinkResult) => {
+  const handleViewPost = (post: GeneratedContentResult) => {
     setGeneratedContent(post);
     setActiveTab('preview');
   };
 
-  const handleRegenerate = (newContent: FreeBacklinkResult) => {
+  const handleRegenerate = (newContent: GeneratedContentResult) => {
     setGeneratedContent(newContent);
   };
 
