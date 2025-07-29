@@ -262,10 +262,11 @@ export function BlogPost() {
 
     setIsRegenerating(true);
 
+    // Extract the original keywords/anchor text from the blog post (outside try block for scope)
+    const primaryKeyword = blogPost.keywords?.[0] || blogPost.title.split(':')[0].trim();
+    const anchorText = blogPost.anchor_text || primaryKeyword;
+
     try {
-      // Extract the original keywords/anchor text from the blog post
-      const primaryKeyword = blogPost.keywords?.[0] || blogPost.title.split(':')[0].trim();
-      const anchorText = blogPost.anchor_text || primaryKeyword;
 
       toast({
         title: "Regenerating content...",
