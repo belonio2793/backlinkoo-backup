@@ -140,24 +140,18 @@ export class FreeBacklinkService {
   /**
    * Regenerate a post with the same parameters
    */
-  async regeneratePost(id: string): Promise<FreeBacklinkResult | null> {
+  regeneratePost(id: string): StoredPost | null {
     const existingPost = this.getPost(id);
     if (!existingPost) return null;
 
     // Delete the existing post
     this.deletePost(id);
 
-    // Generate new post with same parameters
-    const request: FreeBacklinkRequest = {
-      targetUrl: existingPost.targetUrl,
-      primaryKeyword: existingPost.keywords[0] || 'SEO',
-      anchorText: existingPost.anchorText,
-      wordCount: existingPost.wordCount,
-      tone: 'professional',
-      contentType: 'how-to'
-    };
+    // Note: This method now only handles the deletion.
+    // The regeneration should be done through the FreeBacklinkGenerator component
+    // which will call openAIContentGenerator.generateContent() and then storeFreeBacklink()
 
-    return await this.generateFreeBacklink(request);
+    return null;
   }
 
   /**
