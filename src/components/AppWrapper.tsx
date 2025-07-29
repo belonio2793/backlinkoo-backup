@@ -32,6 +32,7 @@ import AIContentTest from "../pages/AIContentTest";
 import { AILive } from "../components/AILive";
 import { FreeBacklink } from "../pages/FreeBacklink";
 import { TestFreeBacklink } from "./TestFreeBacklink";
+import StreamlinedBlog from "../pages/StreamlinedBlog";
 
 export const AppWrapper = () => {
   // Initialize referral tracking
@@ -50,7 +51,7 @@ export const AppWrapper = () => {
       <Route path="/terms-of-service" element={<TermsOfService />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/preview/:slug" element={<BlogPreview />} />
-      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog" element={<StreamlinedBlog />} />
       <Route path="/blog/create" element={<BlogCreator />} />
       <Route path="/blog/:slug" element={<BlogPost />} />
       <Route path="/trial-dashboard" element={<GuestDashboard />} />
