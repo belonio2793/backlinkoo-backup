@@ -22,7 +22,7 @@ export function LiveUserActivity({ className = "" }: { className?: string }) {
         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
       </div>
       <span className="font-medium">
-        Active community
+        {/* Active community removed */}
       </span>
     </div>
   );
