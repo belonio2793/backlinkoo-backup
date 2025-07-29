@@ -234,10 +234,7 @@ export default function BlogPostDetail() {
                   <Zap className="h-3 w-3" />
                   <span>Backlink ∞</span>
                 </Badge>
-                <Badge variant="outline" className="flex items-center space-x-1">
-                  <ExternalLink className="h-3 w-3" />
-                  <span>Contains Backlink</span>
-                </Badge>
+
                 <Badge variant="outline" className="flex items-center space-x-1">
                   <BookOpen className="h-3 w-3" />
                   <span>{post.word_count} words</span>
@@ -277,10 +274,21 @@ export default function BlogPostDetail() {
             </header>
 
             {/* Article Content */}
-            <article className="prose prose-lg max-w-none">
-              <div 
+            <article className="prose prose-lg prose-gray max-w-none">
+              <div
                 dangerouslySetInnerHTML={{ __html: post.content }}
-                className="leading-relaxed text-gray-800"
+                className="
+                  [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:text-gray-900 [&>h1]:mb-6 [&>h1]:mt-8
+                  [&>h2]:text-2xl [&>h2]:font-semibold [&>h2]:text-gray-800 [&>h2]:mb-4 [&>h2]:mt-8
+                  [&>h3]:text-xl [&>h3]:font-medium [&>h3]:text-gray-800 [&>h3]:mb-3 [&>h3]:mt-6
+                  [&>p]:text-gray-700 [&>p]:mb-4 [&>p]:leading-relaxed [&>p]:text-base
+                  [&>ul]:mb-4 [&>ul]:ml-6 [&>ul>li]:mb-2 [&>ul>li]:text-gray-700
+                  [&>ol]:mb-4 [&>ol]:ml-6 [&>ol>li]:mb-2 [&>ol>li]:text-gray-700
+                  [&>strong]:font-semibold [&>strong]:text-gray-900
+                  [&>em]:italic [&>em]:text-gray-700
+                  [&>a]:text-blue-600 [&>a]:underline [&>a:hover]:text-blue-800
+                  space-y-4
+                "
               />
             </article>
 
