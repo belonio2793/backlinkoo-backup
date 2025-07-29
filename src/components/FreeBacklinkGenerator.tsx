@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { freeBacklinkService } from '@/services/freeBacklinkService';
-import { FreeBacklinkRequest, FreeBacklinkResult } from '@/services/simpleAIContentEngine';
+import { openAIContentGenerator, ContentGenerationRequest, GeneratedContentResult } from '@/services/openAIContentGenerator';
 import RegistrationModal from './RegistrationModal';
 import { 
   Loader2, 
