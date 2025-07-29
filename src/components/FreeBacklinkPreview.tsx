@@ -294,53 +294,80 @@ export function FreeBacklinkPreview({ content, onRegenerate, onDelete }: FreeBac
             </div>
           </div>
 
-          <Separator />
-
-          {/* Meta Description */}
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Meta Description</p>
-            <p className="text-sm text-muted-foreground bg-gray-50 p-3 rounded">
-              {content.metaDescription}
+          {/* Enhanced Meta Description */}
+          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <FileText className="h-4 w-4 text-purple-600" />
+              </div>
+              <h3 className="font-semibold text-gray-900">Meta Description</h3>
+            </div>
+            <p className="text-gray-700 leading-relaxed bg-purple-50 p-4 rounded-lg border-l-4 border-purple-200">
+              "{content.metaDescription}"
             </p>
           </div>
 
-          {/* Keywords */}
-          <div className="space-y-2">
-            <p className="text-sm font-medium flex items-center gap-1">
-              <Hash className="h-4 w-4" />
-              Keywords
-            </p>
+          {/* Enhanced Keywords */}
+          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Hash className="h-4 w-4 text-blue-600" />
+              </div>
+              <h3 className="font-semibold text-gray-900">SEO Keywords</h3>
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                {content.keywords.length} keywords
+              </Badge>
+            </div>
             <div className="flex flex-wrap gap-2">
               {content.keywords.map((keyword, index) => (
-                <Badge key={index} variant="outline" className="bg-blue-50 text-blue-800">
-                  {keyword}
+                <Badge
+                  key={index}
+                  variant="outline"
+                  className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 text-blue-700 hover:from-blue-100 hover:to-purple-100 transition-all px-3 py-1 font-medium"
+                >
+                  #{keyword}
                 </Badge>
               ))}
             </div>
           </div>
 
-          {/* Target URL */}
-          <div className="space-y-2">
-            <p className="text-sm font-medium flex items-center gap-1">
-              <Link className="h-4 w-4" />
-              Backlink Target
-            </p>
-            <div className="flex items-center justify-between bg-gray-50 p-3 rounded">
-              <div>
-                <p className="text-sm font-medium">Target URL:</p>
-                <a 
-                  href={content.targetUrl} 
-                  target="_blank" 
+          {/* Enhanced Backlink Information */}
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Link className="h-4 w-4 text-green-600" />
+              </div>
+              <h3 className="font-semibold text-green-800">Backlink Information</h3>
+              <Badge className="bg-green-600 text-white">
+                SEO Optimized
+              </Badge>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-white rounded-lg p-4 border border-green-100">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-green-800">Target URL</p>
+                  <ExternalLink className="h-4 w-4 text-green-600" />
+                </div>
+                <a
+                  href={content.targetUrl}
+                  target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                  className="text-sm text-green-600 hover:text-green-700 hover:underline font-medium break-all"
                 >
                   {content.targetUrl}
-                  <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
-              <Badge variant="secondary">
-                Anchor: {content.anchorText}
-              </Badge>
+
+              <div className="bg-white rounded-lg p-4 border border-green-100">
+                <p className="text-sm font-medium text-green-800 mb-2">Anchor Text</p>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-green-50 border-green-200 text-green-700 font-medium">
+                    "{content.anchorText}"
+                  </Badge>
+                  <span className="text-xs text-green-600">• Natural integration</span>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
