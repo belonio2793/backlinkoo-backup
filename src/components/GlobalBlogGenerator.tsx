@@ -153,6 +153,13 @@ export function GlobalBlogGenerator({
 
   const checkApiStatus = async () => {
     try {
+      // Set initial checking state
+      setApiStatus({
+        status: 'checking',
+        message: 'Testing API connectivity...',
+        details: 'Verifying service availability'
+      });
+
       const multiApiGenerator = new MultiApiContentGenerator();
       const availableProviders = await multiApiGenerator.getAvailableProviders();
 
@@ -190,12 +197,28 @@ export function GlobalBlogGenerator({
         return;
       }
 
-      // All checks passed
+      // Now perform actual API connectivity test
       setApiStatus({
-        status: 'ready',
-        message: `${activeProviders.length} API${activeProviders.length > 1 ? 's' : ''} ready`,
-        details: `Available: ${activeProviders.map(p => p.name).join(', ')}`
+        status: 'checking',
+        message: 'Testing API response...',
+        details: 'Sending test request'
       });
+
+      const connectivityTest = await testApiConnectivity();
+
+      if (connectivityTest.success) {
+        setApiStatus({
+          status: 'ready',
+          message: 'API fully operational',
+          details: `Response time: ${connectivityTest.responseTime}ms`
+        });
+      } else {
+        setApiStatus({
+          status: 'error',
+          message: 'API connectivity failed',
+          details: connectivityTest.error || 'Service unavailable'
+        });
+      }
 
     } catch (error) {
       console.error('API status check failed:', error);
@@ -204,6 +227,71 @@ export function GlobalBlogGenerator({
         message: 'Status check failed',
         details: 'Unable to verify API connectivity'
       });
+    }
+  };
+
+  const testApiConnectivity = async (): Promise<{
+    success: boolean;
+    responseTime?: number;
+    error?: string;
+  }> => {
+    const startTime = Date.now();
+
+    try {
+      // Test with a minimal OpenAI API request
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+
+      const response = await fetch('https://api.openai.com/v1/models', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        signal: AbortSignal.timeout(10000) // 10 second timeout
+      });
+
+      const responseTime = Date.now() - startTime;
+
+      if (response.ok) {
+        return {
+          success: true,
+          responseTime
+        };
+      } else if (response.status === 401) {
+        return {
+          success: false,
+          error: 'Invalid API key or insufficient permissions'
+        };
+      } else if (response.status === 429) {
+        return {
+          success: false,
+          error: 'Rate limit exceeded - API temporarily unavailable'
+        };
+      } else {
+        return {
+          success: false,
+          error: `API returned status ${response.status}`
+        };
+      }
+    } catch (error: any) {
+      const responseTime = Date.now() - startTime;
+
+      if (error.name === 'TimeoutError') {
+        return {
+          success: false,
+          error: 'Request timeout - API not responding'
+        };
+      } else if (error.message?.includes('Failed to fetch')) {
+        return {
+          success: false,
+          error: 'Network error - check internet connection'
+        };
+      } else {
+        return {
+          success: false,
+          error: `Connection failed: ${error.message}`
+        };
+      }
     }
   };
 
