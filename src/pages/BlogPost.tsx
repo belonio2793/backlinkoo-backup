@@ -266,6 +266,7 @@ export function BlogPost() {
       });
 
       // Generate new content using the enhanced AI engine
+      console.log('🔄 Starting content regeneration for:', primaryKeyword);
       const result = await enhancedAIContentEngine.generateContent({
         keyword: primaryKeyword,
         targetUrl: blogPost.target_url,
@@ -275,8 +276,14 @@ export function BlogPost() {
         seoFocus: 'high'
       });
 
+      console.log('✅ Content generation result:', {
+        hasContent: !!result.finalContent,
+        wordCount: result.metadata?.wordCount,
+        selectedProvider: result.selectedProvider
+      });
+
       if (!result.finalContent) {
-        throw new Error('Failed to generate content');
+        throw new Error('Failed to generate content - empty response from AI engine');
       }
 
       // Update the blog post with new content
