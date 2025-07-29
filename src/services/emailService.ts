@@ -79,7 +79,14 @@ export class EmailService {
 
       // Enhanced error handling for different HTTP status codes
       if (!response.ok) {
-        const errorText = await response.text();
+        let errorText = '';
+        try {
+          errorText = await response.text();
+        } catch (readError) {
+          console.warn('Failed to read response text:', readError);
+          errorText = 'Unable to read error response';
+        }
+
         console.error('Netlify function error response:', response.status, errorText);
 
         const errorMessage = this.getErrorMessage(response.status, errorText);
@@ -101,7 +108,8 @@ export class EmailService {
             to: emailData.to,
             subject: emailData.subject,
             attempt,
-            retryable: isRetryable
+            retryable: isRetryable,
+            errorText: errorText
           },
           'EmailService'
         );
