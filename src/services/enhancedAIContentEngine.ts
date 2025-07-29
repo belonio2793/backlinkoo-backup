@@ -104,85 +104,88 @@ SEO CONTENT FORMATTING REQUIREMENTS:
 - Ensure mobile-responsive formatting
 `;
 
-    const primaryPrompt = `Write a comprehensive ${wordCount} word article about "${keyword}" and naturally integrate the hyperlink <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a> within the content.
+    const primaryPrompt = `Create a comprehensive ${wordCount} word article about "${keyword}" that provides genuine value to readers. Naturally integrate the hyperlink <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a> where it makes contextual sense.
 
 ${seoGuidelines}
 
-CONTENT REQUIREMENTS:
-- Create original, expert-level content that demonstrates authority
-- Follow the exact SEO formatting guidelines above
-- Write engaging, user-focused content that provides genuine value
-- Use professional tone with clear, actionable insights
-${industry ? `- Focus on ${industry} industry context` : ''}
-${targetAudience ? `- Target audience: ${targetAudience}` : ''}
+IMPORTANT: Avoid generic templates and formulaic structures. Create unique content that specifically addresses "${keyword}" rather than following a standard "How to Master [keyword]" or "Best Practices for [keyword]" format.
 
-CONTENT STRUCTURE:
-1. <h1> with keyword: Compelling title that includes "${keyword}"
-2. Introduction paragraph (include keyword in first 100 words)
-3. 3-5 <h2> major sections with valuable content
-4. 5-8 <h3> subheadings under main sections
-5. Natural integration of ${anchor} backlink within relevant context
-6. Strong conclusion with call-to-action
-7. Short paragraphs throughout (2-4 sentences each)
+CONTENT APPROACH:
+- Research what people actually want to know about "${keyword}"
+- Provide specific, actionable information unique to this topic
+- Use natural, conversational language that demonstrates expertise
+- Share insights, tips, or perspectives that aren't commonly found elsewhere
+- Make the content genuinely helpful for someone interested in "${keyword}"
+${industry ? `- Consider ${industry} industry context naturally` : ''}
+${targetAudience ? `- Write for: ${targetAudience}` : ''}
 
-SEO FOCUS: ${seoFocus || 'high'} - ensure optimal keyword density and semantic relevance following the guidelines exactly.`;
+STRUCTURE GUIDELINES (not rigid rules):
+- Create an engaging title that includes "${keyword}" naturally
+- Start with context that hooks the reader
+- Organize content logically with clear headers
+- Include specific examples, data, or real-world applications
+- End with practical takeaways
+- Keep paragraphs readable (2-4 sentences)
 
-    const secondaryPrompt = `Create a ${wordCount} word SEO-optimized blog post about "${keyword}" that perfectly integrates the hyperlink <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a> following strict SEO formatting guidelines.
+Focus on being genuinely helpful rather than following SEO templates. The best SEO content is content that serves users well.`;
 
-${seoGuidelines}
-
-E-A-T OPTIMIZATION REQUIREMENTS:
-- Demonstrate Expertise through detailed, accurate information
-- Show Authoritativeness with confident, well-researched content
-- Build Trustworthiness through transparent, helpful guidance
-- Use data and examples to support claims
-- Include practical, actionable advice
-
-CONTENT STRUCTURE REQUIREMENTS:
-- ONE <h1> tag only: "${keyword}: [Compelling Title]"
-- 3-5 <h2> tags for major sections
-- 5-8 <h3> tags for detailed subsections
-- Short paragraphs (2-4 sentences maximum)
-- Natural keyword integration without stuffing
-- Strategic placement of <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a>
-
-VOICE & TONE:
-- Professional yet accessible
-- Expert knowledge without jargon
-- Helpful and actionable
-- Engaging and readable
-
-The content must serve both users and search engines while following the exact formatting requirements provided.`;
-
-    const creativePrompt = `Write an engaging ${wordCount} word article about "${keyword}" that follows strict SEO formatting while naturally incorporating <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a>.
+    const secondaryPrompt = `Write a ${wordCount} word in-depth article about "${keyword}" that demonstrates real expertise and authority. Include the hyperlink <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a> naturally within the content.
 
 ${seoGuidelines}
 
-CREATIVE CONTENT APPROACH:
-- Start with a compelling hook in the introduction
-- Use storytelling elements and real-world examples
-- Present unique insights and fresh perspectives on ${keyword}
-- Include case studies or practical applications
-- Create engaging, shareable content while maintaining SEO structure
-- Use varied sentence structures within short paragraphs
-- Incorporate ${currentYear} trends and current insights
+EXPERTISE-FOCUSED APPROACH:
+- Show deep understanding of "${keyword}" beyond surface-level information
+- Include specific examples, case studies, or real-world applications
+- Address common questions or misconceptions about "${keyword}"
+- Provide actionable advice that readers can actually implement
+- Use data, research, or expert insights to back up claims
+- Share practical tips that demonstrate hands-on experience
 
-STRUCTURAL CREATIVITY:
-- Creative yet SEO-compliant headline structure
-- Engaging subheadings that include target keywords
-- Natural integration of the ${anchor} backlink
-- Compelling calls-to-action throughout
-- Interactive elements like lists and actionable tips
+CONTENT DEPTH REQUIREMENTS:
+- Go beyond basic definitions - assume readers want substantial information
+- Include nuanced perspectives or lesser-known aspects of "${keyword}"
+- Address potential challenges or considerations
+- Provide context about why "${keyword}" matters
+- Include relevant current information or trends for ${currentYear}
+- Natural keyword usage that flows with the content
+- Strategic but contextual placement of <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a>
 
-FORMATTING COMPLIANCE:
-- Exactly ONE <h1> tag for main title
-- 3-5 <h2> tags for major sections  
-- 5-8 <h3> tags for subsections
-- Short paragraphs (2-4 sentences)
-- Proper use of <strong> and <em> tags
-- Strategic keyword placement
+WRITING STYLE:
+- Authoritative but approachable tone
+- Use clear explanations without unnecessary jargon
+- Focus on being genuinely helpful
+- Engage readers with interesting insights
 
-Balance creativity with SEO requirements to create content that ranks well and engages readers naturally.`;
+Prioritize creating content that truly serves readers while maintaining technical SEO requirements.`;
+
+    const creativePrompt = `Create a compelling ${wordCount} word article about "${keyword}" that breaks away from typical blog templates. Include the hyperlink <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a> where it adds value for readers.
+
+${seoGuidelines}
+
+CREATIVE CONTENT PHILOSOPHY:
+- Tell a story or share a unique perspective about "${keyword}"
+- Use engaging examples, analogies, or scenarios
+- Address "${keyword}" from an angle that readers haven't seen before
+- Include surprising facts, insights, or contrarian viewpoints
+- Make complex aspects of "${keyword}" easy to understand
+- Connect "${keyword}" to broader trends or implications
+- Use conversational tone that feels like expert guidance from a friend
+
+ENGAGEMENT TECHNIQUES:
+- Start with a question, scenario, or interesting observation
+- Use specific examples rather than abstract concepts
+- Include actionable steps or practical advice
+- Address common misconceptions or surprises about "${keyword}"
+- End with thought-provoking conclusions or next steps
+- Vary paragraph length and sentence structure for readability
+
+AVOID GENERIC APPROACHES:
+- Don't use "Complete Guide" or "Best Practices" formulas
+- Avoid starting every section with "Understanding" or "What is"
+- Skip predictable structures like "Benefits of [keyword]"
+- Don't list obvious points that any basic article would cover
+
+Create content that readers would want to bookmark, share, or reference later because it offers genuine value and fresh insights about "${keyword}".`
 
     return {
       primary: primaryPrompt,
