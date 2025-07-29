@@ -292,12 +292,12 @@ export function GlobalBlogGenerator({
         updateRemainingRequests();
 
         // Check if this was generated with fallback content (when OpenAI is not available)
-        const isFromFallback = result.error && result.error.includes('OpenAI');
+        const isFromFallback = result.error || result.usage.tokens === 0;
 
         toast({
           title: "Blog post generated successfully! 🎉",
           description: isFromFallback
-            ? "Your free backlink post is ready using our fallback generator! It will auto-delete in 24 hours unless you register an account."
+            ? "Your free backlink post is ready! Generated using our reliable fallback system. It will auto-delete in 24 hours unless you register an account."
             : "Your free backlink post is ready! It will auto-delete in 24 hours unless you register an account.",
         });
 
