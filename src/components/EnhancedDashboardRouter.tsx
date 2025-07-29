@@ -110,7 +110,10 @@ export function EnhancedDashboardRouter() {
     checkUserAndTrialPosts();
   }, [navigate]);
 
+  console.log('📊 Dashboard Router State:', { isLoading, user: !!user, hasTrialPosts, guestAnalytics });
+
   if (isLoading) {
+    console.log('⏳ Showing loading screen');
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex items-center gap-2">
@@ -123,6 +126,7 @@ export function EnhancedDashboardRouter() {
 
   // If user is authenticated, show protected dashboard
   if (user) {
+    console.log('👤 Rendering authenticated dashboard');
     return <Dashboard />;
   }
 
