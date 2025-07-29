@@ -182,6 +182,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="ai-posts">AI Generated Posts</TabsTrigger>
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
             <TabsTrigger value="blog-posts">Blog Posts</TabsTrigger>
+            <TabsTrigger value="content-migration">Content Migration</TabsTrigger>
             <TabsTrigger value="free-backlinks">Free Backlinks</TabsTrigger>
             <TabsTrigger value="content-filter">Content Filter</TabsTrigger>
             <TabsTrigger value="moderation-queue">Moderation Queue</TabsTrigger>
