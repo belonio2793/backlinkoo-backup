@@ -31,6 +31,41 @@ const NoHandsSEO = () => {
   const [user, setUser] = useState<User | null>(null);
   const [targetUrl, setTargetUrl] = useState("");
   const [keyword, setKeyword] = useState("");
+
+  // Auto-correct URL to ensure proper protocol
+  const formatUrl = (url: string): string => {
+    if (!url.trim()) return url;
+
+    const trimmedUrl = url.trim();
+
+    // If URL already has protocol, return as is
+    if (/^https?:\/\//i.test(trimmedUrl)) {
+      return trimmedUrl;
+    }
+
+    // If URL starts with //, add https:
+    if (trimmedUrl.startsWith('//')) {
+      return `https:${trimmedUrl}`;
+    }
+
+    // If URL looks like a domain (contains .) but no protocol, add https://
+    if (trimmedUrl.includes('.') && !trimmedUrl.includes(' ')) {
+      return `https://${trimmedUrl}`;
+    }
+
+    return trimmedUrl;
+  };
+
+  const handleUrlChange = (value: string) => {
+    setTargetUrl(value);
+  };
+
+  const handleUrlBlur = () => {
+    const formattedUrl = formatUrl(targetUrl);
+    if (formattedUrl !== targetUrl) {
+      setTargetUrl(formattedUrl);
+    }
+  };
   const [isCreating, setIsCreating] = useState(false);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const [campaignNotes, setCampaignNotes] = useState("");
