@@ -61,8 +61,8 @@ export class HuggingFaceService {
     }
 
     const {
-      model = 'microsoft/DialoGPT-medium',
-      maxLength = 2000,
+      model = 'gpt2',
+      maxLength = 1500,
       temperature = 0.7
     } = options;
 
