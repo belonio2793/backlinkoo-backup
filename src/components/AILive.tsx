@@ -195,9 +195,26 @@ export function AILive() {
     return true;
   };
 
-  const selectRandomProvider = (): string => {
+  const selectPrimaryProvider = (): string => {
     const onlineProviders = providers.filter(p => p.status === 'online');
-    return onlineProviders[Math.floor(Math.random() * onlineProviders.length)].name;
+
+    // Always try OpenAI first if available
+    const openaiProvider = onlineProviders.find(p => p.name === 'OpenAI');
+    if (openaiProvider) {
+      return 'OpenAI';
+    }
+
+    // Fallback order: Grok, then others
+    const fallbackOrder = ['Grok'];
+    for (const providerName of fallbackOrder) {
+      const provider = onlineProviders.find(p => p.name === providerName);
+      if (provider) {
+        return provider.name;
+      }
+    }
+
+    // If none of the preferred providers are available, use any online provider
+    return onlineProviders.length > 0 ? onlineProviders[0].name : 'OpenAI';
   };
 
   const selectRandomPrompt = (): { prompt: string, index: number } => {
