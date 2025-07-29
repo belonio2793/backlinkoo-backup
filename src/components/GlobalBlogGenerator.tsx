@@ -415,7 +415,7 @@ export function GlobalBlogGenerator({
       setGenerationStage('Generating high-quality content with AI (up to 12 automatic retries if needed)...');
       setProgress(60);
 
-      const result = await openAIContentGenerator.generateContent(contentRequest);
+      const result = await openAIOnlyContentGenerator.generateContent(contentRequest);
 
       // Update progress after successful generation
       setProgress(80);
