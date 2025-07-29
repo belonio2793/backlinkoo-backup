@@ -273,14 +273,35 @@ export class OpenAIService {
           presence_penalty: 0
         };
 
-        const response = await fetch(`${this.baseURL}/chat/completions`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${this.apiKey}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(requestBody)
-        });
+        // Enhanced fetch with timeout and abort controller
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), finalRetryConfig.timeoutMs || 30000);
+
+        try {
+          const response = await fetch(`${this.baseURL}/chat/completions`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${this.apiKey}`,
+              'Content-Type': 'application/json',
+              'User-Agent': 'BacklinkooBot/1.0',
+              'X-Request-ID': crypto.randomUUID()
+            },
+            body: JSON.stringify(requestBody),
+            signal: controller.signal
+          });
+
+          clearTimeout(timeoutId);
+
+          return response;
+        } catch (fetchError) {
+          clearTimeout(timeoutId);
+
+          if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+            throw new Error(`Request timeout after ${finalRetryConfig.timeoutMs}ms`);
+          }
+
+          throw fetchError;
+        }
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
