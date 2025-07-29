@@ -54,13 +54,22 @@ import type { User } from '@supabase/supabase-js';
 
 // FreeBlogPostGenerator component for the dashboard
 const FreeBlogPostGenerator = ({ onSuccess }: { onSuccess?: (blogPost: any) => void }) => {
-  return (
-    <GlobalBlogGenerator
-      variant="embedded"
-      onSuccess={onSuccess}
-      showAdvancedOptions={false}
-    />
-  );
+  try {
+    return (
+      <GlobalBlogGenerator
+        variant="embedded"
+        onSuccess={onSuccess}
+        showAdvancedOptions={false}
+      />
+    );
+  } catch (error) {
+    console.error('FreeBlogPostGenerator error:', error);
+    return (
+      <div className="p-4 text-center">
+        <p className="text-red-600">Error loading blog generator. Please refresh the page.</p>
+      </div>
+    );
+  }
 };
 
 const Dashboard = () => {
