@@ -67,12 +67,18 @@ export class HuggingFaceService {
     } = options;
 
     try {
-      console.log('🤗 Primary AI engine request:', { maxLength, temperature });
+      // Limit prompt length for HuggingFace free tier
+      const truncatedPrompt = prompt.length > 2000 ? prompt.substring(0, 2000) + '...' : prompt;
+      console.log('🤗 Primary AI engine request:', {
+        promptLength: truncatedPrompt.length,
+        maxLength,
+        temperature
+      });
 
       const requestBody: HuggingFaceRequest = {
-        inputs: prompt,
+        inputs: truncatedPrompt,
         parameters: {
-          max_length: Math.min(maxLength, 2000), // Limit for free tier
+          max_length: Math.min(maxLength, 1500), // Conservative limit for free tier
           temperature,
           do_sample: true,
           top_p: 0.9,
