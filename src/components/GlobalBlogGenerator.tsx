@@ -331,6 +331,15 @@ export function GlobalBlogGenerator({
           description: isFromFallback
             ? "Your free backlink post is ready! Generated using our reliable fallback system. It will auto-delete in 24 hours unless you register an account."
             : "Your free backlink post is ready! It will auto-delete in 24 hours unless you register an account.",
+          action: (
+            <Button
+              size="sm"
+              onClick={() => navigate(`/blog/${uniqueSlug}`)}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              View Blog Post
+            </Button>
+          ),
         });
 
         // Track successful blog generation for admin monitoring
