@@ -4,7 +4,6 @@
  */
 
 import { openAIService } from './api/openai';
-import { fallbackContentGenerator } from './fallbackContentGenerator';
 
 export interface ContentGenerationRequest {
   targetUrl: string;
