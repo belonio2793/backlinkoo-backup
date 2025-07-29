@@ -41,6 +41,7 @@ export default function AILive() {
   const [result, setResult] = useState<BuilderAIResult | null>(null);
   const [hasUsedLimit, setHasUsedLimit] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [intermediateContent, setIntermediateContent] = useState<string>('');
 
   // Check user limit on component mount
   useEffect(() => {
