@@ -72,6 +72,184 @@ const FreeBlogPostGenerator = ({ onSuccess }: { onSuccess?: (blogPost: any) => v
   }
 };
 
+// TrialBlogPostsDisplay component for the trial tab
+const TrialBlogPostsDisplay = () => {
+  const [trialPosts, setTrialPosts] = useState<any[]>([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Load trial posts from localStorage
+    const loadTrialPosts = () => {
+      try {
+        const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+        const validTrialPosts = allBlogs.filter((post: any) => {
+          if (!post.is_trial_post) return false;
+
+          // Check if expired
+          if (post.expires_at) {
+            const isExpired = new Date() > new Date(post.expires_at);
+            return !isExpired;
+          }
+          return true;
+        });
+
+        setTrialPosts(validTrialPosts.slice(0, 6)); // Show up to 6 posts
+      } catch (error) {
+        console.error('Error loading trial posts:', error);
+        setTrialPosts([]);
+      }
+    };
+
+    loadTrialPosts();
+
+    // Refresh every 30 seconds to check for new posts
+    const interval = setInterval(loadTrialPosts, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (trialPosts.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <BarChart3 className="h-10 w-10 text-purple-600" />
+        </div>
+        <h3 className="text-xl font-semibold text-gray-800 mb-3">No Trial Posts Yet</h3>
+        <p className="text-gray-600 mb-6 max-w-md mx-auto">
+          Start creating amazing blog posts with our free trial generator. Your content will appear here instantly.
+        </p>
+        <Button
+          onClick={() => navigate('/?focus=generator')}
+          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Create Your First Post
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Stats */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
+          <div className="text-2xl font-bold text-purple-700">{trialPosts.length}</div>
+          <div className="text-sm text-purple-600">Generated Posts</div>
+        </div>
+        <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+          <div className="text-2xl font-bold text-blue-700">
+            {Math.round(trialPosts.reduce((acc, post) => acc + (post.seo_score || 0), 0) / trialPosts.length) || 0}
+          </div>
+          <div className="text-sm text-blue-600">Avg SEO Score</div>
+        </div>
+        <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200">
+          <div className="text-2xl font-bold text-emerald-700">
+            {trialPosts.reduce((acc, post) => acc + (post.reading_time || 0), 0)}m
+          </div>
+          <div className="text-sm text-emerald-600">Total Reading</div>
+        </div>
+      </div>
+
+      {/* Blog Posts Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {trialPosts.map((post, index) => {
+          const timeRemaining = post.expires_at ?
+            Math.max(0, Math.floor((new Date(post.expires_at).getTime() - Date.now()) / (1000 * 60 * 60))) : 0;
+
+          return (
+            <Card
+              key={post.id || index}
+              className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50 overflow-hidden"
+            >
+              <CardContent className="p-6">
+                {/* Post Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-purple-700 transition-colors">
+                      {post.title || 'Untitled Post'}
+                    </h3>
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                      {post.excerpt || 'No description available'}
+                    </p>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="bg-purple-50 border-purple-200 text-purple-700 text-xs"
+                  >
+                    Trial
+                  </Badge>
+                </div>
+
+                {/* Post Stats */}
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="text-center p-2 bg-blue-50 rounded-lg">
+                    <div className="text-sm font-semibold text-blue-700">
+                      {post.seo_score || 0}
+                    </div>
+                    <div className="text-xs text-blue-600">SEO</div>
+                  </div>
+                  <div className="text-center p-2 bg-emerald-50 rounded-lg">
+                    <div className="text-sm font-semibold text-emerald-700">
+                      {post.reading_time || 0}m
+                    </div>
+                    <div className="text-xs text-emerald-600">Read</div>
+                  </div>
+                  <div className="text-center p-2 bg-amber-50 rounded-lg">
+                    <div className="text-sm font-semibold text-amber-700">
+                      {timeRemaining}h
+                    </div>
+                    <div className="text-xs text-amber-600">Left</div>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                    onClick={() => navigate(`/blog/${post.slug}`)}
+                  >
+                    <Eye className="h-3 w-3 mr-1" />
+                    View
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                  </Button>
+                </div>
+
+                {/* Expiry Warning */}
+                {timeRemaining < 6 && (
+                  <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-center gap-2 text-xs text-amber-700">
+                      <AlertCircle className="h-3 w-3" />
+                      <span>Expires in {timeRemaining} hours - Upgrade to keep forever!</span>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Call to Action */}
+      <div className="text-center pt-6 border-t border-gray-200">
+        <Button
+          onClick={() => navigate('/?focus=generator')}
+          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Generate Another Post
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [userType, setUserType] = useState<"user" | "admin">("user");
