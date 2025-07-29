@@ -459,15 +459,32 @@ export function BlogPost() {
             <div className="flex items-center gap-3">
               {/* Claim Status Badge */}
               {(() => {
-                // Check if this post has been claimed
-                const isClaimedPost = !blogPost.is_trial_post;
-                const isTrialPost = blogPost.is_trial_post;
+                // Check if this post has been claimed by looking at various indicators
+                const isClaimedPost = !blogPost.is_trial_post ||
+                                    (blogPost as any).user_id ||
+                                    (blogPost as any).claimed_by_user_id;
 
-                if (isClaimedPost) {
+                const isTrialPost = blogPost.is_trial_post && !isClaimedPost;
+
+                // Check if claimed by looking at localStorage claims
+                let claimedByUser = null;
+                if (currentUser) {
+                  try {
+                    const userClaims = localStorage.getItem(`user_claimed_posts_${currentUser.id}`);
+                    if (userClaims) {
+                      const claims = JSON.parse(userClaims);
+                      claimedByUser = claims.find((claim: any) => claim.slug === blogPost.slug);
+                    }
+                  } catch (e) {
+                    console.warn('Failed to check user claims');
+                  }
+                }
+
+                if (isClaimedPost || claimedByUser) {
                   return (
                     <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md">
                       <CheckCircle2 className="mr-1 h-3 w-3" />
-                      Claimed & Linked
+                      {claimedByUser ? 'Claimed by You' : 'Claimed & Linked'}
                     </Badge>
                   );
                 } else if (isTrialPost) {
