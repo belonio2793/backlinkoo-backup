@@ -436,10 +436,15 @@ export function BlogPost() {
           return; // Exit successfully
         }
       } catch (fallbackError) {
-        console.error('❌ Fallback content generation also failed:', fallbackError);
+        console.error('❌ Fallback content generation also failed:', {
+          error: fallbackError.message,
+          primaryKeyword: primaryKeyword,
+          targetUrl: blogPost.target_url,
+          anchorText: anchorText
+        });
 
         // Last resort: create minimal viable content
-        console.log('🆘 Creating emergency minimal content...');
+        console.log('🆘 Creating emergency minimal content for keyword:', primaryKeyword);
         const emergencyContent = `<h1>${primaryKeyword}: Essential Information</h1>
 
 <p>This content is being regenerated. We're working to provide you with comprehensive information about <strong>${primaryKeyword}</strong>.</p>
