@@ -68,14 +68,25 @@ export class TrialConversionService {
         });
 
         if (error) {
-          console.error('Error converting trial post:', error);
-          errors.push(`Failed to convert "${post.title}": ${error.message}`);
+          const errorMessage = error?.message || String(error) || 'Unknown database error';
+          console.error('Error converting trial post:', {
+            message: errorMessage,
+            name: error?.name,
+            code: error?.code,
+            details: error?.details
+          });
+          errors.push(`Failed to convert "${post.title}": ${errorMessage}`);
         } else {
           convertedCount++;
         }
       } catch (error: any) {
-        console.error('Exception converting trial post:', error);
-        errors.push(`Failed to convert "${post.title}": ${error.message || 'Unknown error'}`);
+        const errorMessage = error?.message || String(error) || 'Unknown error';
+        console.error('Exception converting trial post:', {
+          message: errorMessage,
+          name: error?.name,
+          stack: error?.stack
+        });
+        errors.push(`Failed to convert "${post.title}": ${errorMessage}`);
       }
     }
 
