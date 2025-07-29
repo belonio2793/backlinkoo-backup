@@ -140,12 +140,20 @@ export class HuggingFaceService {
       };
 
     } catch (error) {
-      console.error('❌ HuggingFace API error:', error);
+      let errorMessage = 'Unknown error';
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          errorMessage = 'Request timeout - switching to secondary provider';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      console.warn('❌ Primary AI engine error:', errorMessage);
       return {
         content: '',
         usage: { tokens: 0, cost: 0 },
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: errorMessage
       };
     }
   }
