@@ -53,6 +53,13 @@ export function BlogPost() {
         return;
       }
 
+      // Add timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.warn('Blog post loading timed out');
+        setError('Blog post could not be loaded');
+        setLoading(false);
+      }, 5000);
+
       try {
         // Check user authentication
         const { data: { user } } = await supabase.auth.getUser();
