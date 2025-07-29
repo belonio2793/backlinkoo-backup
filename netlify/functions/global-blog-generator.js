@@ -119,7 +119,7 @@ class SimpleAIGenerator {
     if (!this.huggingfaceKey) return null;
 
     try {
-      const response = await fetch('https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium', {
+      const response = await fetch('https://api-inference.huggingface.co/models/gpt2', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.huggingfaceKey}`,
