@@ -36,7 +36,7 @@ export function DashboardRouter() {
         // Routing logic
         if (session?.user) {
           // User is logged in - redirect to protected dashboard
-          navigate('/my-dashboard');
+          navigate('/redirect');
           return;
         } else {
           // User not logged in
