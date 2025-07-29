@@ -208,6 +208,10 @@ const AdminDashboard = () => {
             <AdminBlogManager />
           </TabsContent>
 
+          <TabsContent value="content-migration">
+            <BlogContentMigrator />
+          </TabsContent>
+
           <TabsContent value="free-backlinks">
             <FreeBacklinkMonitor />
           </TabsContent>
