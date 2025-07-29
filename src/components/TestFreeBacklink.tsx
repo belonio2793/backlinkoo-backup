@@ -98,28 +98,33 @@ export function TestFreeBacklink() {
         });
       }
 
-      // Test 5: Test mock content generation (if OpenAI fails)
-      if (!simpleAIContentEngine.isConfigured() || results.some(r => r.name === 'OpenAI Connection' && r.status === 'error')) {
+      // Test 5: Test OpenAI content generation (if configured)
+      if (openAIContentGenerator.isConfigured()) {
         try {
-          const mockResult = await simpleAIContentEngine.generateFreeBacklink({
+          const testResult = await openAIContentGenerator.generateContent({
             targetUrl: 'https://example.com',
-            primaryKeyword: 'test keyword'
+            primaryKeyword: 'test keyword',
+            wordCount: 500
           });
-          
+
           results.push({
-            name: 'Fallback Content Generation',
-            status: mockResult.error ? 'warning' : 'success',
-            message: mockResult.error ? 
-              `Fallback generated with error: ${mockResult.error}` :
-              'Fallback content generation working'
+            name: 'OpenAI Content Generation',
+            status: 'success',
+            message: `Successfully generated ${testResult.wordCount} words using OpenAI`
           });
         } catch (error) {
           results.push({
-            name: 'Fallback Content Generation',
+            name: 'OpenAI Content Generation',
             status: 'error',
-            message: `Fallback generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+            message: `Content generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
           });
         }
+      } else {
+        results.push({
+          name: 'OpenAI Content Generation',
+          status: 'error',
+          message: 'Cannot test content generation - OpenAI API key not configured'
+        });
       }
 
       setTestResults(results);
