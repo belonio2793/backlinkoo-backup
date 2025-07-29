@@ -30,6 +30,7 @@ import { BuilderAIGenerator, type GenerationStatus, type BuilderAIResult } from 
 import { useAuth } from '@/hooks/useAuth';
 import { blogPublishingService } from '@/services/blogPublishingService';
 import { toast } from 'sonner';
+import { createBlogPost } from '@/utils/directBlogGeneration';
 
 export default function AILive() {
   const { user } = useAuth();
