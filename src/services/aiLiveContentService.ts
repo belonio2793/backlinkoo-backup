@@ -1,14 +1,7 @@
 /**
  * AI Live Content Generation Service
- * Handles OpenAI and Grok API integration for real-time blog generation
+ * Handles OpenAI API integration for real-time blog generation
  */
-
-interface AIProvider {
-  name: string;
-  apiKey: string;
-  endpoint: string;
-  model?: string;
-}
 
 interface GenerationResult {
   content: string;
@@ -19,20 +12,16 @@ interface GenerationResult {
 }
 
 class AILiveContentService {
-  private providers: Record<string, AIProvider> = {
-    'OpenAI': {
-      name: 'OpenAI',
-      apiKey: import.meta.env.VITE_OPENAI_API_KEY || '',
-      endpoint: 'https://api.openai.com/v1/chat/completions',
-      model: 'gpt-4'
-    },
-    'Grok': {
-      name: 'Grok',
-      apiKey: import.meta.env.VITE_GROK_API_KEY || '',
-      endpoint: 'https://api.x.ai/v1/chat/completions',
-      model: 'grok-beta'
+  private apiKey: string;
+  private endpoint = 'https://api.openai.com/v1/chat/completions';
+  private model = 'gpt-4';
+
+  constructor() {
+    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
+    if (!this.apiKey) {
+      console.warn('OpenAI API key not configured');
     }
-  };
+  }
 
   async checkProviderHealth(providerName: string): Promise<boolean> {
     const provider = this.providers[providerName];
