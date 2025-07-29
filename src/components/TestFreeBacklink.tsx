@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { freeBacklinkService } from '@/services/freeBacklinkService';
-import { openAIContentGenerator } from '@/services/openAIContentGenerator';
+import { openAIOnlyContentGenerator } from '@/services/openAIOnlyContentGenerator';
 import { 
   TestTube, 
   CheckCircle2, 
@@ -34,16 +34,16 @@ export function TestFreeBacklink() {
       // Test 1: Check if OpenAI is configured
       results.push({
         name: 'OpenAI Configuration',
-        status: openAIContentGenerator.isConfigured() ? 'success' : 'error',
-        message: openAIContentGenerator.isConfigured() ? 
+        status: openAIOnlyContentGenerator.isConfigured() ? 'success' : 'error',
+        message: openAIOnlyContentGenerator.isConfigured() ? 
           'OpenAI is properly configured' : 
           'OpenAI API key is missing'
       });
 
       // Test 2: Test OpenAI connection (if configured)
-      if (openAIContentGenerator.isConfigured()) {
+      if (openAIOnlyContentGenerator.isConfigured()) {
         try {
-          const connectionTest = await openAIContentGenerator.testConnection();
+          const connectionTest = await openAIOnlyContentGenerator.testConnection();
           results.push({
             name: 'OpenAI Connection',
             status: connectionTest ? 'success' : 'error',
@@ -99,9 +99,9 @@ export function TestFreeBacklink() {
       }
 
       // Test 5: Test OpenAI content generation (if configured)
-      if (openAIContentGenerator.isConfigured()) {
+      if (openAIOnlyContentGenerator.isConfigured()) {
         try {
-          const testResult = await openAIContentGenerator.generateContent({
+          const testResult = await openAIOnlyContentGenerator.generateContent({
             targetUrl: 'https://example.com',
             primaryKeyword: 'test keyword',
             wordCount: 500

@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { openAIContentGenerator } from '@/services/openAIContentGenerator';
+import { openAIOnlyContentGenerator } from '@/services/openAIOnlyContentGenerator';
 import { OpenAIKeyGuide } from './OpenAIKeyGuide';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -31,7 +31,7 @@ export function OpenAITestComponent() {
     setResult(null);
 
     try {
-      const content = await openAIContentGenerator.generateContent({
+      const content = await openAIOnlyContentGenerator.generateContent({
         targetUrl,
         primaryKeyword: keyword,
         wordCount: 500 // Short test content
@@ -55,7 +55,7 @@ export function OpenAITestComponent() {
     }
   };
 
-  const isConfigured = openAIContentGenerator.isConfigured();
+  const isConfigured = openAIOnlyContentGenerator.isConfigured();
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">

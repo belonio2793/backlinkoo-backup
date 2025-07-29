@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatBlogTitle, formatBlogContent, getTrendingLabel, calculateWordCount, cleanHTMLContent } from '@/utils/textFormatting';
 import { runImmediateContentCleanup } from '@/utils/immediateContentCleanup';
-import { openAIContentGenerator } from '@/services/openAIContentGenerator';
+import { openAIOnlyContentGenerator } from '@/services/openAIOnlyContentGenerator';
 import { freeBacklinkService } from '@/services/freeBacklinkService';
 import { Footer } from '@/components/Footer';
 import {
@@ -326,7 +326,7 @@ export function BlogPost() {
       });
 
       // Generate new content using the OpenAI-only service
-      const result = await openAIContentGenerator.generateContent({
+      const result = await openAIOnlyContentGenerator.generateContent({
         targetUrl: blogPost.target_url,
         primaryKeyword: primaryKeyword,
         anchorText: anchorText,

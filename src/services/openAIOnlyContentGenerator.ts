@@ -1,6 +1,6 @@
 /**
- * OpenAI Content Generator - Single Provider Only
- * Streamlined content generation using only OpenAI API
+ * OpenAI-Only Content Generator
+ * Simplified content generation using only OpenAI API
  */
 
 import { openAIService } from './api/openai';
@@ -43,12 +43,11 @@ export interface GeneratedContentResult {
     cost: number;
   };
   error?: string;
-  // Multi-provider information
-  provider?: string;
-  fallbacksUsed?: string[];
+  provider: string;
+  fallbacksUsed: string[];
 }
 
-export class OpenAIContentGenerator {
+export class OpenAIOnlyContentGenerator {
   /**
    * Generate content using only OpenAI
    */
@@ -66,37 +65,36 @@ export class OpenAIContentGenerator {
     } = request;
 
     try {
-      console.log('🚀 Starting multi-provider content generation with intelligent fallback...');
+      console.log('🚀 Starting OpenAI-only content generation...');
 
-      // Create multi-provider request
-      const multiProviderRequest: MultiProviderRequest = {
-        targetUrl,
-        primaryKeyword,
-        anchorText,
-        wordCount,
-        tone,
-        contentType
+      // Create OpenAI request with optimized parameters
+      const prompt = this.createPrompt(request);
+      const systemPrompt = this.createSystemPrompt(contentType, tone);
+
+      const openAIOptions = {
+        model: 'gpt-3.5-turbo',
+        maxTokens: Math.min(4000, Math.floor(wordCount * 2.5)),
+        temperature: 0.7,
+        systemPrompt,
+        retryConfig: request.retryConfig
       };
 
-      // Use multi-provider system with intelligent fallback
-      const multiResult = await multiProviderContentGenerator.generateContent(multiProviderRequest);
+      console.log('🤖 Generating content with OpenAI...', {
+        model: openAIOptions.model,
+        maxTokens: openAIOptions.maxTokens,
+        wordCount: wordCount
+      });
 
-      if (!multiResult.success || !multiResult.result) {
-        // Log all failed attempts for debugging
-        console.error('🔥 All providers failed:');
-        console.error('📊 Attempt Log:', JSON.stringify(multiResult.attemptLog, null, 2));
-        console.error('🔄 Fallbacks Used:', multiResult.fallbacksUsed);
-        console.error('🔢 Total Attempts:', multiResult.totalAttempts);
+      const result = await openAIService.generateContent(prompt, openAIOptions);
 
-        const lastError = multiResult.attemptLog[multiResult.attemptLog.length - 1]?.error;
-        throw new Error(`All content providers failed. Last error: ${lastError || 'Unknown error'}. Tried ${multiResult.totalAttempts} providers with ${multiResult.fallbacksUsed.length} fallbacks.`);
+      if (!result.success || !result.content) {
+        throw new Error(`OpenAI generation failed: ${result.error || 'Unknown error'}`);
       }
 
-      const result = multiResult.result;
-      console.log('✅ Multi-provider generation successful:', {
-        provider: result.provider,
-        attemptNumber: result.attemptNumber,
-        fallbacksUsed: multiResult.fallbacksUsed
+      console.log('✅ OpenAI generation successful:', {
+        contentLength: result.content.length,
+        tokens: result.usage.tokens,
+        cost: `$${result.usage.cost.toFixed(4)}`
       });
 
       // Process and format the content
@@ -124,41 +122,35 @@ export class OpenAIContentGenerator {
         expiresAt,
         claimed: false,
         usage: result.usage,
-        // Add provider information for debugging
-        provider: result.provider,
-        fallbacksUsed: multiResult.fallbacksUsed
+        provider: 'openai',
+        fallbacksUsed: []
       };
 
       console.log('✅ Content generated successfully:', {
-        provider: result.provider,
+        provider: 'openai',
         wordCount: metadata.wordCount,
         tokens: result.usage.tokens,
         cost: `$${result.usage.cost.toFixed(4)}`,
-        processingTime: `${Date.now() - startTime}ms`,
-        fallbacksUsed: multiResult.fallbacksUsed,
-        totalAttempts: multiResult.totalAttempts
+        processingTime: `${Date.now() - startTime}ms`
       });
 
       return contentResult;
 
     } catch (error) {
-      console.error('❌ Content generation failed:', error);
+      console.error('❌ OpenAI content generation failed:', error);
 
-      // Enhanced error handling with multi-provider context
+      // Enhanced error handling
       if (error instanceof Error) {
         const errorMessage = error.message;
 
-        if (errorMessage.includes('All content providers failed')) {
-          // This is already a comprehensive error from the multi-provider system
-          throw error;
-        } else if (errorMessage.includes('401') || errorMessage.includes('Invalid API key')) {
-          throw new Error('Authentication failed with available content providers. Please check your API keys configuration.');
+        if (errorMessage.includes('401') || errorMessage.includes('Invalid API key')) {
+          throw new Error('OpenAI authentication failed. Please check your API key configuration.');
         } else if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
-          throw new Error('Rate limits exceeded across multiple content providers. Please wait a moment before trying again.');
+          throw new Error('OpenAI rate limit exceeded. Please wait a moment before trying again.');
         } else if (errorMessage.includes('insufficient_quota')) {
-          throw new Error('Quota exceeded across available content providers. Please check your billing settings.');
+          throw new Error('OpenAI quota exceeded. Please check your OpenAI billing settings.');
         } else {
-          throw new Error(`Content generation failed: ${errorMessage}`);
+          throw new Error(`OpenAI content generation failed: ${errorMessage}`);
         }
       }
 
@@ -359,27 +351,27 @@ Focus on creating valuable, informative content that genuinely helps readers whi
   }
 
   /**
-   * Test all provider connections
+   * Test OpenAI connection
    */
   async testConnection(): Promise<boolean> {
-    const results = await multiProviderContentGenerator.testAllProviders();
-    return Object.values(results).some(result => result); // Return true if any provider works
+    return await openAIService.testConnection();
   }
 
   /**
-   * Get detailed provider status
+   * Get OpenAI status
    */
-  async getProviderStatus(): Promise<Record<string, boolean>> {
-    return await multiProviderContentGenerator.testAllProviders();
+  async getProviderStatus(): Promise<{ openai: boolean }> {
+    const isConfigured = openAIService.isConfigured();
+    const isConnected = isConfigured ? await this.testConnection() : false;
+    return { openai: isConnected };
   }
 
   /**
-   * Check if any provider is configured
+   * Check if OpenAI is configured
    */
   isConfigured(): boolean {
-    const status = multiProviderContentGenerator.getProviderStatus();
-    return Object.values(status).some(configured => configured);
+    return openAIService.isConfigured();
   }
 }
 
-export const openAIContentGenerator = new OpenAIContentGenerator();
+export const openAIOnlyContentGenerator = new OpenAIOnlyContentGenerator();

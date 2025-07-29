@@ -221,6 +221,7 @@ export class MultiProviderContentGenerator {
           }
 
           console.error('💀 All providers (including Netlify functions) failed');
+          console.error('📊 Final Attempt Log:', JSON.stringify(attemptLog, null, 2));
 
           return {
             success: false,

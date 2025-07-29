@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { openAIContentGenerator, ContentGenerationRequest } from '@/services/openAIContentGenerator';
+import { openAIOnlyContentGenerator, ContentGenerationRequest } from '@/services/openAIOnlyContentGenerator';
 import { freeBacklinkService } from '@/services/freeBacklinkService';
 import { WordCountProgress } from './WordCountProgress';
 import { contentModerationService } from '@/services/contentModerationService';
@@ -170,7 +170,7 @@ export function GlobalBlogGenerator({
 
   const updateRemainingRequests = () => {
     // All users get unlimited requests if OpenAI is configured
-    const remaining = openAIContentGenerator.isConfigured() ? 999 : 0;
+    const remaining = openAIOnlyContentGenerator.isConfigured() ? 999 : 0;
     setRemainingRequests(remaining);
   };
 
@@ -198,7 +198,7 @@ export function GlobalBlogGenerator({
       }
 
       // Check OpenAI service configuration
-      const openAIConfigured = openAIContentGenerator.isConfigured();
+      const openAIConfigured = openAIOnlyContentGenerator.isConfigured();
       if (!openAIConfigured) {
         setApiStatus({
           status: 'error',
@@ -415,7 +415,7 @@ export function GlobalBlogGenerator({
       setGenerationStage('Generating high-quality content with AI (up to 12 automatic retries if needed)...');
       setProgress(60);
 
-      const result = await openAIContentGenerator.generateContent(contentRequest);
+      const result = await openAIOnlyContentGenerator.generateContent(contentRequest);
 
       // Update progress after successful generation
       setProgress(80);
@@ -531,12 +531,14 @@ export function GlobalBlogGenerator({
       }
 
     } catch (error: any) {
-      console.error('Global blog generation error:', {
-        error: error.message || 'Unknown error',
-        stack: error.stack,
-        context: error.context,
-        timestamp: new Date().toISOString()
-      });
+      console.error('Global blog generation error:', error.message || 'Unknown error');
+      if (error.stack) {
+        console.error('Stack trace:', error.stack);
+      }
+      if (error.context) {
+        console.error('Error context:', JSON.stringify(error.context, null, 2));
+      }
+      console.error('Timestamp:', new Date().toISOString());
 
       // Reset all generation state
       setProgress(0);

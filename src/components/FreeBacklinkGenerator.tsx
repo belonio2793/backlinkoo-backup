@@ -9,10 +9,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { freeBacklinkService } from '@/services/freeBacklinkService';
-import { openAIContentGenerator, ContentGenerationRequest, GeneratedContentResult } from '@/services/openAIContentGenerator';
+import { openAIOnlyContentGenerator, ContentGenerationRequest, GeneratedContentResult } from '@/services/openAIOnlyContentGenerator';
 import RegistrationModal from './RegistrationModal';
 import { WordCountProgress } from './WordCountProgress';
-import { ProviderStatus } from './ui/provider-status';
+
 import { 
   Loader2, 
   Sparkles, 
@@ -89,9 +89,9 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
         wordCount,
         tone,
         contentType,
-        // Multi-provider system handles retries automatically
+        // OpenAI retry configuration
         retryConfig: {
-          maxRetries: 5, // Reduced per-provider retries since we have multiple providers
+          maxRetries: 8, // Robust retry configuration for OpenAI
           baseDelay: 1000,
           maxDelay: 15000,
           exponentialBackoff: true,
@@ -100,22 +100,16 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
         }
       };
 
-      const result = await openAIContentGenerator.generateContent(request);
+      const result = await openAIOnlyContentGenerator.generateContent(request);
 
       // Store the result for 24-hour management
       freeBacklinkService.storeFreeBacklink(result);
 
       onContentGenerated(result);
 
-      // Enhanced success message with provider info
-      const providerInfo = result.provider ? ` (Generated using ${result.provider.toUpperCase()})` : '';
-      const fallbackInfo = result.fallbacksUsed && result.fallbacksUsed.length > 0
-        ? ` Used ${result.fallbacksUsed.length} fallback provider(s).`
-        : '';
-
       toast({
         title: "Free Backlink Generated! 🎉",
-        description: `Your blog post is ready!${providerInfo} Remember, it will auto-delete in 24 hours unless you register an account.${fallbackInfo}`,
+        description: "Your blog post is ready! Remember, it will auto-delete in 24 hours unless you register an account.",
       });
 
       // Reset form
@@ -167,18 +161,14 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
       } else if (errorMessage.includes('failed after') && errorMessage.includes('attempts')) {
         title = "🔄 Multiple Retry Attempts Failed";
         description = "Despite multiple automatic retry attempts, the generation failed. Please try again in a few moments." + detailedInfo;
-      } else if (errorMessage.includes('All content providers failed')) {
-        title = "🔥 All AI Providers Failed";
-        description = "All available AI providers failed to generate content. This is rare - please try again in a moment." + detailedInfo;
+      } else if (errorMessage.includes('OpenAI generation failed')) {
+        title = "🔥 OpenAI Generation Failed";
+        description = "OpenAI failed to generate content. Please try again in a moment." + detailedInfo;
       } else if (errorMessage.includes('platform.openai.com')) {
         description = errorMessage + detailedInfo;
       } else {
         // Show the actual error message for debugging
-        description = `Content generation error: ${errorMessage}` + detailedInfo;
-        // Add provider fallback info if available
-        if (errorMessage.includes('Tried') && errorMessage.includes('providers')) {
-          title = "🔄 Multi-Provider Attempt Failed";
-        }
+        description = `OpenAI content generation error: ${errorMessage}` + detailedInfo;
       }
 
       toast({
@@ -245,8 +235,7 @@ export function FreeBacklinkGenerator({ onContentGenerated }: FreeBacklinkGenera
         </div>
       </div>
 
-      {/* Provider Status */}
-      <ProviderStatus showDetails={true} className="mb-4" />
+
 
       {/* Service Status Alert */}
       {!isReady && (
