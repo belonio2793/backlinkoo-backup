@@ -21,6 +21,9 @@ const SECURE_STORE = {
 
   // Email service credentials
   resend_api_key: 'cmVfZjJpeHlSQXdfRUExZHRRQ285S25BTmZKZ3JncWZYRkVx', // re_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq
+
+  // API keys for external services
+  openai_api_key: 'c2stcHJvai15eEMyd09xQVhwN2ozZVZVRUhuMkR5a05TeFRFZnoyTDdtM001c2JBbDRXMUprRGEtaC1WaVNDTEkxcGZ2WXdfLWZ6NVlWNVVhalQzQmxia0ZKeDFIYVJjeHpVVGVXbFZlTnZsSC1uUkxkMkpOQTlpSHZsWjVrRDhybGdOWG9ZVUNFekdoT1VCdjAzNW12SElWWEV5aXhjdDRLTUE=', // Encoded OpenAI API key
 };
 
 /**
@@ -77,7 +80,12 @@ export class SecureConfig {
   static get SUPABASE_ACCESS_TOKEN() {
     return decode(SECURE_STORE.supabase_access_token);
   }
-  
+
+  // API keys
+  static get OPENAI_API_KEY() {
+    return decode(SECURE_STORE.openai_api_key);
+  }
+
   /**
    * Helper method to add new credentials (for development use)
    */
