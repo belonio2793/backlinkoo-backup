@@ -233,83 +233,46 @@ export function MinimalAITest() {
   const generateContentFromProvider = async (provider: string, promptIndex: number = 0): Promise<GeneratedContent> => {
     const startTime = Date.now();
 
-    // 3-prompt rotation system
-    const prompts = [
-      `Generate a 1000 word article on ${keyword} including the ${anchorText} hyperlinked to ${url}`,
-      `Write a 1000 word blog post about ${keyword} with a hyperlinked ${anchorText} linked to ${url}`,
-      `Produce a 1000-word reader friendly post on ${keyword} that links ${anchorText}`
-    ];
-
-    const currentPrompt = prompts[promptIndex % 3];
-    const promptLabel = `Prompt ${(promptIndex % 3) + 1}`;
-
-    addLog('info', provider.toUpperCase(), `Using ${promptLabel}: "${currentPrompt}"`);
+    const promptLabel = `Real AI Generation`;
+    addLog('info', provider.toUpperCase(), `Testing real content generation...`);
 
     try {
-      const prompt = currentPrompt;
-
-      // Simulate content generation (replace with actual API calls)
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 3000 + 1000));
-
-      // Generate mock content for testing
-      const mockContent = `# ${keyword.charAt(0).toUpperCase() + keyword.slice(1)}: Complete Guide
-
-## Introduction
-
-Understanding ${keyword} is essential in today's digital landscape. This comprehensive guide explores the key aspects and practical applications of ${keyword}.
-
-## What is ${keyword.charAt(0).toUpperCase() + keyword.slice(1)}?
-
-${keyword.charAt(0).toUpperCase() + keyword.slice(1)} encompasses various strategies and techniques that are crucial for success. From basic concepts to advanced implementations, ${keyword} offers numerous opportunities for growth and improvement.
-
-## Key Benefits of ${keyword}
-
-- Enhanced visibility and reach
-- Improved user engagement
-- Better conversion rates
-- Long-term sustainable growth
-
-## Best Practices
-
-When implementing ${keyword} strategies, it's important to focus on quality and consistency. For professional guidance and expert solutions, consider consulting [${anchorText}](${url}) for comprehensive support.
-
-## Implementation Strategies
-
-1. **Research and Planning**: Understand your target audience and objectives
-2. **Content Creation**: Develop high-quality, valuable content
-3. **Optimization**: Fine-tune your approach based on performance data
-4. **Monitoring**: Track results and adjust strategies accordingly
-
-## Common Challenges
-
-Many businesses face challenges when implementing ${keyword} strategies. These can include resource constraints, technical limitations, and changing market conditions.
-
-## Future Trends
-
-The landscape of ${keyword} continues to evolve with new technologies and methodologies. Staying informed about emerging trends is crucial for maintaining competitive advantage.
-
-## Conclusion
-
-Mastering ${keyword} requires dedication, proper planning, and expert guidance. For those looking to excel in this area, [${anchorText}](${url}) provides valuable resources and professional support to achieve your goals.
-
-Start your journey with ${keyword} today and unlock new possibilities for success.`;
+      // Use the actual global blog generator
+      const sessionId = crypto.randomUUID();
+      const result = await globalBlogGenerator.generateGlobalBlogPost({
+        targetUrl: url,
+        primaryKeyword: keyword,
+        anchorText: anchorText,
+        sessionId,
+        additionalContext: {
+          contentLength: 'medium',
+          contentTone: 'professional',
+          seoFocus: 'high'
+        }
+      });
 
       const generateTime = Date.now() - startTime;
       const slug = generateSlug(keyword, provider);
-      const validation = validateContent(mockContent, keyword, url, anchorText);
 
-      return {
-        provider,
-        content: mockContent,
-        slug,
-        wordCount: mockContent.split(' ').length,
-        quality: validation.score,
-        isValid: validation.isValid,
-        error: validation.issues.length > 0 ? validation.issues.join(', ') : undefined,
-        generateTime,
-        promptUsed: currentPrompt,
-        promptIndex: promptIndex % 3
-      };
+      if (result.success && result.data?.blogPost) {
+        const blogPost = result.data.blogPost;
+        const validation = validateContent(blogPost.content, keyword, url, anchorText);
+
+        return {
+          provider,
+          content: blogPost.content,
+          slug: blogPost.slug || slug,
+          wordCount: blogPost.word_count || blogPost.content.split(' ').length,
+          quality: validation.score,
+          isValid: validation.isValid,
+          error: validation.issues.length > 0 ? validation.issues.join(', ') : undefined,
+          generateTime,
+          promptUsed: `Real AI generation using ${keyword}`,
+          promptIndex: 0
+        };
+      } else {
+        throw new Error(result.error || 'Generation failed');
+      }
 
     } catch (error) {
       addLog('error', provider.toUpperCase(), `Generation failed: ${error}`);
@@ -322,8 +285,8 @@ Start your journey with ${keyword} today and unlock new possibilities for succes
         isValid: false,
         error: error instanceof Error ? error.message : 'Generation failed',
         generateTime: Date.now() - startTime,
-        promptUsed: currentPrompt,
-        promptIndex: promptIndex % 3
+        promptUsed: `Failed generation attempt`,
+        promptIndex: 0
       };
     }
   };
