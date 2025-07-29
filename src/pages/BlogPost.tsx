@@ -337,9 +337,18 @@ export function BlogPost() {
 
     } catch (error) {
       console.error('Failed to regenerate content:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+      let description = "An error occurred while generating new content. Please try again.";
+      if (errorMessage.includes('OpenAI API key not configured')) {
+        description = "OpenAI API key is not configured. Please set up your OpenAI API key to regenerate content.";
+      } else if (errorMessage.includes('rate limit') || errorMessage.includes('quota')) {
+        description = "OpenAI rate limit reached. Please try again in a few minutes.";
+      }
+
       toast({
         title: "Regeneration failed",
-        description: "An error occurred while generating new content. Please try again.",
+        description,
         variant: "destructive",
       });
     } finally {
