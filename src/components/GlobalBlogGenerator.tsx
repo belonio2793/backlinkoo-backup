@@ -17,7 +17,6 @@ import { adminSyncService } from '@/services/adminSyncService';
 import { useAuthStatus } from '@/hooks/useAuth';
 import { trackBlogGeneration } from '@/hooks/useGuestTracking';
 import { MultiApiContentGenerator } from '@/services/multiApiContentGenerator';
-import { ApiConnectionTest } from '@/components/ApiConnectionTest';
 import {
   Globe,
   Zap,
