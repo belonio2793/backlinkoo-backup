@@ -579,7 +579,9 @@ export function cleanHTMLContent(content: string): string {
 
   // Remove standalone punctuation that's separated from words
   cleaned = cleaned.replace(/\s+([.!?,:;])/g, '$1');
-  cleaned = cleaned.replace(/([.!?])\s*\n+\s*([a-z])/g, '$1 ' + ((match, punct, letter) => punct + ' ' + letter.toUpperCase()));
+  cleaned = cleaned.replace(/([.!?])\s*\n+\s*([a-z])/g, (match, punct, letter) => {
+    return punct + ' ' + letter.toUpperCase();
+  });
 
   // Fix hyphenated words that got broken across lines
   cleaned = cleaned.replace(/([a-z])-\s*\n+\s*([a-z])/g, '$1-$2');
