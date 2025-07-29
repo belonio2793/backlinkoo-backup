@@ -288,8 +288,19 @@ Create content that readers would want to bookmark, share, or reference later be
       wordCount: metadata.wordCount,
       seoScore: metadata.seoScore,
       totalCost: `$${totalCost.toFixed(4)}`,
-      processingTime: `${processingTime}ms`
+      processingTime: `${processingTime}ms`,
+      finalContentLength: enhancedContent.length,
+      hasFinalContent: !!enhancedContent && enhancedContent.length > 0
     });
+
+    if (!enhancedContent || enhancedContent.length < 50) {
+      console.error('❌ Enhanced content is empty or too short:', {
+        enhancedContent: enhancedContent,
+        enhancedContentLength: enhancedContent?.length,
+        bestResultContent: bestResult.content,
+        bestResultContentLength: bestResult.content?.length
+      });
+    }
 
     return {
       finalContent: enhancedContent,
@@ -551,7 +562,7 @@ Create content that readers would want to bookmark, share, or reference later be
 
     if (wordCount < 1000) {
       // If content is too short, log a warning but don't add template content
-      console.warn(`⚠�� Generated content for "${request.keyword}" is only ${wordCount} words. Consider using better prompts or different AI providers.`);
+      console.warn(`⚠️ Generated content for "${request.keyword}" is only ${wordCount} words. Consider using better prompts or different AI providers.`);
       // Don't add template content - let the AI generate unique content only
     }
 
