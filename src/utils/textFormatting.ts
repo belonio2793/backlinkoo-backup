@@ -567,8 +567,22 @@ export function cleanHTMLContent(content: string): string {
   cleaned = cleaned.replace(/(<\/ul>|<\/ol>)\s*(<p)/g, '$1\n\n$2');
   cleaned = cleaned.replace(/(<\/h[1-6]>)\s*(<ul|<ol|<p)/g, '$1\n\n$2');
 
-  // Fix broken sentence continuations
+  // Fix broken sentence continuations and word fragments
   cleaned = cleaned.replace(/([a-z])\s*\n\s*([A-Z][a-z])/g, '$1 $2');
+  cleaned = cleaned.replace(/([a-z])\s+([A-Z][a-z]+ly)\b/g, '$1 $2');
+
+  // Fix incomplete sentences that end with fragments
+  cleaned = cleaned.replace(/([a-z])\s*\n+\s*([a-z]+[.!?])/g, '$1$2');
+
+  // Fix sentences broken by improper line breaks
+  cleaned = cleaned.replace(/([a-z,])\s*\n+\s*([a-z])/g, '$1 $2');
+
+  // Remove standalone punctuation that's separated from words
+  cleaned = cleaned.replace(/\s+([.!?,:;])/g, '$1');
+  cleaned = cleaned.replace(/([.!?])\s*\n+\s*([a-z])/g, '$1 ' + ((match, punct, letter) => punct + ' ' + letter.toUpperCase()));
+
+  // Fix hyphenated words that got broken across lines
+  cleaned = cleaned.replace(/([a-z])-\s*\n+\s*([a-z])/g, '$1-$2');
 
   // Clean up excessive line breaks
   cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
