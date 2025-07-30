@@ -47,6 +47,13 @@ export function Blog() {
   useEffect(() => {
     const loadBlogPosts = async () => {
       console.log('🔄 Loading blog posts...');
+
+      // Set a timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.warn('⚠️ Loading timeout reached, stopping loading state');
+        setLoading(false);
+      }, 10000); // 10 second timeout
+
       try {
         // Try to load from database first
         let posts: BlogPost[] = [];
@@ -113,6 +120,7 @@ export function Blog() {
         // Even if there's an error, still try to show any local posts that were loaded
         setBlogPosts([]);
       } finally {
+        clearTimeout(timeoutId);
         console.log('📊 Setting loading to false');
         setLoading(false);
       }
