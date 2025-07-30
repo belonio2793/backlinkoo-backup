@@ -351,17 +351,6 @@ const Index = () => {
         </div>
       </header>
 
-      {/* API Connection Test - Debug Section */}
-      <section className="py-12 px-6 bg-gradient-to-br from-red-50 to-pink-50">
-        <div className="container mx-auto">
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">API Connection Status</h2>
-            <p className="text-gray-600">Testing OpenAI API configuration from Netlify</p>
-          </div>
-          <APIConnectionTest />
-        </div>
-      </section>
-
       {/* Free Blog Generator - Top Feature */}
       <section className="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
         <div className="container mx-auto">
