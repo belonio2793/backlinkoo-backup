@@ -247,7 +247,7 @@ export class MultiKeyOpenAIService {
       }
 
       const tokens = data.usage.total_tokens;
-      const costPerToken = model.includes('gpt-4') ? 0.00003 : 0.000002;
+      const costPerToken = model.includes('gpt-4') ? 0.00003 : 0.0000015;
       const cost = tokens * costPerToken;
 
       const currentKey = this.apiKeys[this.currentKeyIndex];
