@@ -37,9 +37,7 @@ interface OpenAIResponse {
 
 export class MultiKeyOpenAIService {
   private apiKeys: string[] = [
-    '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',
-    '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',
-    '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'
+    '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'
   ];
   
   private baseURL = 'https://api.openai.com/v1';
