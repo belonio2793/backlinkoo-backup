@@ -45,12 +45,15 @@ exports.handler = async (event, context) => {
 
     let apiKey, endpoint;
 
-    switch (provider) {
-      case 'OpenAI':
+    // Normalize provider name for case insensitive comparison
+    const normalizedProvider = provider.toLowerCase();
+
+    switch (normalizedProvider) {
+      case 'openai':
         apiKey = process.env.OPENAI_API_KEY;
         endpoint = 'https://api.openai.com/v1/models';
         break;
-      case 'Grok':
+      case 'grok':
         apiKey = process.env.GROK_API_KEY;
         endpoint = 'https://api.x.ai/v1/models';
         break;
