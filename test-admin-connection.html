@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Admin OpenAI Connection</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Admin Panel OpenAI Connection Test</h1>
+    
+    <div id="results"></div>
+    
+    <button onclick="testOpenAIConnection()">Test OpenAI Connection</button>
+    <button onclick="testGenerateContent()">Test Content Generation</button>
+    <button onclick="clearResults()">Clear Results</button>
+
+    <script>
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            document.getElementById('results').appendChild(div);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testOpenAIConnection() {
+            addResult('Testing OpenAI connection via Netlify function...', 'info');
+            
+            try {
+                const response = await fetch('/.netlify/functions/check-ai-provider', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ provider: 'OpenAI' })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    addResult(`Response: ${JSON.stringify(result, null, 2)}`, 'success');
+                    
+                    if (result.configured) {
+                        addResult('✅ OpenAI is configured and working!', 'success');
+                    } else {
+                        addResult('⚠️ OpenAI is not configured', 'error');
+                    }
+                } else {
+                    addResult(`❌ HTTP Error: ${response.status}`, 'error');
+                    const text = await response.text();
+                    addResult(`Error details: ${text}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Network Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGenerateContent() {
+            addResult('Testing content generation...', 'info');
+            
+            try {
+                const response = await fetch('/.netlify/functions/generate-content', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: 'Say hello from the test',
+                        type: 'general',
+                        maxTokens: 50
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        addResult(`✅ Content generated: "${result.content}"`, 'success');
+                    } else {
+                        addResult(`❌ Content generation failed: ${result.error}`, 'error');
+                    }
+                } else {
+                    addResult(`❌ HTTP Error: ${response.status}`, 'error');
+                    const text = await response.text();
+                    addResult(`Error details: ${text}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Network Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run test on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            addResult('Page loaded. Click buttons to test OpenAI connection.', 'info');
+        });
+    </script>
+</body>
+</html>
