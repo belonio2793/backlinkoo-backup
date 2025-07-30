@@ -68,7 +68,7 @@ export function GlobalBlogGenerator({
 
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuthStatus();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     loadGlobalStats();
