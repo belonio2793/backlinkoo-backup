@@ -378,8 +378,28 @@ export function EnvironmentVariablesManager() {
     return value.substring(0, 4) + '•'.repeat(Math.max(value.length - 8, 4)) + value.slice(-4);
   };
 
+  if (isLoading && envVars.length === 0) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <RefreshCw className="h-6 w-6 animate-spin mr-2" />
+        Loading environment variables...
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* Status Alert */}
+      {envVars.length === 0 && !isLoading && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            No environment variables found. They will be stored locally until database connection is established.
+            If you're seeing connection errors, the "admin_environment_variables" table might not exist in your Supabase database.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Quick Access for API Keys */}
       <Card className="bg-blue-50 border-blue-200">
         <CardHeader>
