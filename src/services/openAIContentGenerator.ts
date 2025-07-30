@@ -303,16 +303,18 @@ export class OpenAIContentGenerator {
       }
 
       if (!response.ok) {
-        const errorText = await response.text().catch(() => 'Unknown error');
-        console.error(`❌ Netlify function error (${response.status}):`, errorText);
-
-        // If all Netlify functions fail, try direct fallback approach
-        if (response.status === 404) {
-          console.log('🔄 All Netlify functions failed, using direct fallback...');
-          return await this.generateDirectOpenAIContent(request, prompt);
+        // Only treat non-404 errors as actual errors since 404s are expected in fallback chain
+        if (response.status !== 404) {
+          const errorText = await response.text().catch(() => 'Function response parsing failed');
+          console.error(`❌ Netlify function error (${response.status}):`, errorText);
+          throw new Error(`Netlify function error: ${response.status} - ${errorText}`);
         }
 
-        throw new Error(`Netlify function error: ${response.status} - ${errorText}`);
+        // If we get a 404 on the final fallback, use direct fallback approach
+        if (response.status === 404) {
+          console.log('🔄 All Netlify functions unavailable, using direct fallback...');
+          return await this.generateDirectOpenAIContent(request, prompt);
+        }
       }
 
       const data = await response.json();
