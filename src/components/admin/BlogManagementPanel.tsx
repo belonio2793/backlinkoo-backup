@@ -63,8 +63,23 @@ export function BlogManagementPanel() {
   const { toast } = useToast();
 
   useEffect(() => {
-    loadBlogPosts();
-    loadStats();
+    const initializePanel = async () => {
+      try {
+        setLoading(true);
+        await Promise.all([loadBlogPosts(), loadStats()]);
+      } catch (error) {
+        console.error('Failed to initialize blog management panel:', error);
+        toast({
+          title: "Initialization Error",
+          description: "Failed to load blog management panel. Click 'Run Diagnostic' to check for issues.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializePanel();
   }, []);
 
   const loadBlogPosts = async () => {
