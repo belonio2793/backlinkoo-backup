@@ -110,10 +110,10 @@ export function ClaimTrialPostDialog({
         return;
       }
 
-      if (!canClaim || hasExistingClaim) {
+      if (!canClaim) {
         toast({
-          title: "Free Claim Limit Reached",
-          description: "You already have a free blog post saved. Each account can only claim one free trial post since they auto-delete after 24 hours unless claimed.",
+          title: "Claim Limit Reached",
+          description: reason || `You have reached the maximum limit of ${maxClaims} claimed posts. Please unclaim a post to claim a new one.`,
           variant: "destructive"
         });
         return;
