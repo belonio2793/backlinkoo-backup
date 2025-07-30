@@ -386,15 +386,25 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
             </div>
           )}
         </div>
-        <Button
-          onClick={() => loadAllPosts()}
-          variant="outline"
-          size="sm"
-          className="border-blue-200 text-blue-700 hover:bg-blue-50"
-        >
-          <RefreshCw className="h-3 w-3 mr-1" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setShowDebug(!showDebug)}
+            variant="ghost"
+            size="sm"
+            className="text-gray-500 hover:text-gray-700"
+          >
+            🔧 Debug
+          </Button>
+          <Button
+            onClick={() => loadAllPosts()}
+            variant="outline"
+            size="sm"
+            className="border-blue-200 text-blue-700 hover:bg-blue-50"
+          >
+            <RefreshCw className="h-3 w-3 mr-1" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Summary Stats */}
