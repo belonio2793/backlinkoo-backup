@@ -6,13 +6,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/services/authService";
 import { TrialConversionService } from "@/services/trialConversionService";
-import { 
-  Eye, 
-  EyeOff, 
-  RefreshCw, 
-  Shield, 
+import {
+  Eye,
+  EyeOff,
+  RefreshCw,
+  Shield,
   CheckCircle,
-  Mail
+  Mail,
+  Wifi
 } from "lucide-react";
 
 interface AuthFormTabsProps {
@@ -47,6 +48,7 @@ export function AuthFormTabs({
   const [firstName, setFirstName] = useState("");
   const [retryAttempts, setRetryAttempts] = useState(0);
   const [timeoutCountdown, setTimeoutCountdown] = useState(0);
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
 
   const { toast } = useToast();
 
@@ -65,6 +67,45 @@ export function AuthFormTabs({
       return { isValid: false, message: "Password must be at least 6 characters long" };
     }
     return { isValid: true, message: "Password is valid" };
+  };
+
+  const testConnection = async () => {
+    if (isTestingConnection) return;
+
+    setIsTestingConnection(true);
+    toast({
+      title: "Testing Connection",
+      description: "Checking authentication service connectivity...",
+    });
+
+    try {
+      const { runAuthHealthCheck } = await import('@/utils/authHealthCheck');
+      const healthResult = await runAuthHealthCheck();
+
+      if (healthResult.overallHealth === 'good') {
+        toast({
+          title: "Connection Test Passed",
+          description: "All authentication services are working properly.",
+        });
+      } else {
+        toast({
+          title: "Connection Issues Detected",
+          description: healthResult.recommendations[0] || "Some authentication services may be slow or unavailable.",
+          variant: "destructive"
+        });
+      }
+
+      console.log('🔧 Connection test results:', healthResult);
+    } catch (error) {
+      console.error('Connection test failed:', error);
+      toast({
+        title: "Connection Test Failed",
+        description: "Unable to run connectivity diagnostics.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsTestingConnection(false);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -99,8 +140,8 @@ export function AuthFormTabs({
       description: "Please wait while we verify your credentials.",
     });
 
-    // Start countdown timer
-    setTimeoutCountdown(30);
+    // Start countdown timer (reduced for better UX)
+    setTimeoutCountdown(35); // Increased to account for longer timeouts
     const countdownInterval = setInterval(() => {
       setTimeoutCountdown(prev => {
         if (prev <= 1) {
@@ -112,20 +153,138 @@ export function AuthFormTabs({
     }, 1000);
 
     try {
-      // Add timeout to prevent infinite loading (increased to 30 seconds)
-      const signInPromise = AuthService.signIn({
-        email: loginEmail,
-        password: loginPassword,
-      });
+      // Test connection first
+      try {
+        console.log('🔗 Testing connection...');
+        const { supabase } = await import('@/integrations/supabase/client');
+        const connectionTest = await Promise.race([
+          supabase.auth.getSession(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Connection test timeout')), 5000))
+        ]);
+        console.log('✅ Connection test successful');
+      } catch (connectionError: any) {
+        console.warn('⚠️ Connection test failed:', connectionError.message);
+        if (connectionError.message.includes('timeout')) {
+          throw new Error('Unable to connect. Please check your internet connection and try again.');
+        }
+      }
 
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => {
-          clearInterval(countdownInterval);
-          reject(new Error('Sign in is taking longer than expected. Please check your internet connection and try again.'));
-        }, 30000)
-      );
+      // Try multiple authentication methods with shorter timeouts
+      let result;
+      let authError;
 
-      const result = await Promise.race([signInPromise, timeoutPromise]) as any;
+      // Method 1: Quick AuthService attempt (15 seconds)
+      try {
+        console.log('🔐 Attempting quick AuthService login...');
+        const quickSignInPromise = AuthService.signIn({
+          email: loginEmail,
+          password: loginPassword,
+        });
+
+        const quickTimeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Quick auth timeout')), 15000)
+        );
+
+        result = await Promise.race([quickSignInPromise, quickTimeoutPromise]) as any;
+        console.log('✅ Quick auth successful');
+      } catch (quickError: any) {
+        console.warn('⚠️ Quick auth failed, trying direct Supabase...', {
+          message: quickError.message,
+          code: quickError.code,
+          name: quickError.name
+        });
+        authError = quickError;
+
+        // Method 2: Direct Supabase authentication (fallback)
+        try {
+          console.log('🔐 Attempting direct Supabase login...');
+          const { supabase } = await import('@/integrations/supabase/client');
+
+          const directAuthPromise = supabase.auth.signInWithPassword({
+            email: loginEmail.trim(),
+            password: loginPassword
+          });
+
+          const directTimeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Direct auth timeout')), 20000) // Increased to 20 seconds
+          );
+
+          const directResult = await Promise.race([directAuthPromise, directTimeoutPromise]) as any;
+
+          if (directResult.error) {
+            throw new Error(directResult.error.message);
+          }
+
+          if (directResult.data?.user) {
+            // Check email verification
+            if (!directResult.data.user.email_confirmed_at) {
+              throw new Error('Email verification required. Please check your email for a verification link.');
+            }
+
+            result = {
+              success: true,
+              user: directResult.data.user,
+              session: directResult.data.session
+            };
+            console.log('✅ Direct Supabase auth successful');
+          } else {
+            throw new Error('No user data received');
+          }
+        } catch (directError: any) {
+          console.error('❌ Direct Supabase auth failed:', {
+            message: directError.message,
+            code: directError.code,
+            status: directError.status,
+            name: directError.name,
+            authError: authError?.message
+          });
+
+          // Provide specific error messages based on the error type
+          if (directError.message.includes('timeout') && authError?.message?.includes('timeout')) {
+            throw new Error('Connection timeout. Please check your internet connection and try again later.');
+          } else if (directError.message.includes('Invalid login credentials')) {
+            throw new Error('Invalid email or password. Please check your credentials.');
+          } else if (directError.message.includes('Email verification required')) {
+            throw new Error('Email verification required. Please check your email for a verification link.');
+          } else if (directError.message.includes('timeout')) {
+            // Method 3: Last resort - simple auth without timeout racing
+            try {
+              console.log('🔐 Attempting final auth without timeout racing...');
+              const { supabase } = await import('@/integrations/supabase/client');
+
+              const finalResult = await supabase.auth.signInWithPassword({
+                email: loginEmail.trim(),
+                password: loginPassword
+              });
+
+              if (finalResult.error) {
+                throw new Error(finalResult.error.message);
+              }
+
+              if (finalResult.data?.user) {
+                if (!finalResult.data.user.email_confirmed_at) {
+                  throw new Error('Email verification required. Please check your email for a verification link.');
+                }
+
+                result = {
+                  success: true,
+                  user: finalResult.data.user,
+                  session: finalResult.data.session
+                };
+                console.log('✅ Final auth successful');
+              } else {
+                throw new Error('No user data received');
+              }
+            } catch (finalError: any) {
+              console.error('❌ Final auth also failed:', finalError.message);
+              throw new Error('Authentication is taking longer than expected. Please try again.');
+            }
+          } else {
+            // Use the more specific error message
+            throw new Error(directError.message || 'Authentication failed. Please try again.');
+          }
+        }
+      }
 
       // Clear countdown on success
       clearInterval(countdownInterval);
@@ -160,41 +319,54 @@ export function AuthFormTabs({
       console.error('Login error:', error);
       setTimeoutCountdown(0); // Clear countdown on error
 
-      let errorMessage = "Network error or server unavailable. Please check your connection and try again.";
-      const isTimeoutError = error.message.includes('Sign in is taking longer than expected') || error.message === 'Sign in timeout';
+      let errorMessage = "Authentication failed. Please try again.";
+      let shouldRetry = false;
 
-      if (isTimeoutError) {
+      // Categorize error types for better user feedback
+      if (error.message?.includes('timeout') || error.message?.includes('taking longer than expected')) {
+        // Timeout errors - offer retry
         setRetryAttempts(prev => prev + 1);
 
         if (retryAttempts < 2) {
+          shouldRetry = true;
           errorMessage = `Connection timeout (attempt ${retryAttempts + 1}/3). Retrying automatically...`;
           toast({
             title: "Retrying sign in...",
             description: errorMessage,
           });
 
-          // Auto-retry after a short delay
+          // Auto-retry with longer delay
           setTimeout(() => {
             if (loginEmail && loginPassword) {
               handleLogin(e);
             }
-          }, 2000);
+          }, 3000);
           return;
         } else {
-          errorMessage = error.message + " Maximum retry attempts reached. Please check your connection or try refreshing the page.";
+          errorMessage = "Connection keeps timing out. Please check your internet connection or try refreshing the page.";
         }
-      } else if (error.message?.includes('NetworkError') || error.message?.includes('fetch')) {
-        errorMessage = "Network connection failed. Please check your internet connection.";
-      } else if (error.message?.includes('Invalid login credentials')) {
+      } else if (error.message?.includes('Invalid login credentials') || error.message?.includes('Invalid email or password')) {
         errorMessage = "Invalid email or password. Please check your credentials.";
         setRetryAttempts(0); // Reset retry attempts for credential errors
+      } else if (error.message?.includes('Email verification required') || error.message?.includes('Email not confirmed')) {
+        errorMessage = "Please verify your email address before signing in. Check your email for a verification link.";
+        setRetryAttempts(0);
+      } else if (error.message?.includes('NetworkError') || error.message?.includes('fetch') || error.message?.includes('network')) {
+        errorMessage = "Network connection failed. Please check your internet connection and try again.";
+      } else if (error.message?.includes('rate limit') || error.message?.includes('too many')) {
+        errorMessage = "Too many login attempts. Please wait a few minutes before trying again.";
+      } else {
+        // Generic error with the actual error message
+        errorMessage = error.message || "An unexpected error occurred. Please try again.";
       }
 
-      toast({
-        title: "Sign in failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      if (!shouldRetry) {
+        toast({
+          title: "Sign in failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     } finally {
       console.log('🔐 Login attempt completed, setting loading to false');
       setIsLoading(false);
@@ -408,7 +580,11 @@ export function AuthFormTabs({
             {isLoading ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                {timeoutCountdown > 0 ? `Signing in... (${timeoutCountdown}s)` : 'Signing in...'}
+                {timeoutCountdown > 15 ?
+                  `Signing in... (${timeoutCountdown}s)` :
+                  timeoutCountdown > 5 ?
+                    `Trying backup method... (${timeoutCountdown}s)` :
+                    'Almost there...'}
               </>
             ) : (
               <>
@@ -418,18 +594,45 @@ export function AuthFormTabs({
             )}
           </Button>
 
-          {onForgotPassword && (
-            <div className="text-center">
-              <Button
-                type="button"
-                variant="link"
-                className="text-sm text-muted-foreground"
-                onClick={onForgotPassword}
-              >
-                Forgot your password?
-              </Button>
-            </div>
-          )}
+          <div className="space-y-2">
+            {onForgotPassword && (
+              <div className="text-center">
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-sm text-muted-foreground"
+                  onClick={onForgotPassword}
+                >
+                  Forgot your password?
+                </Button>
+              </div>
+            )}
+
+            {retryAttempts > 0 && (
+              <div className="text-center">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={testConnection}
+                  disabled={isTestingConnection}
+                >
+                  {isTestingConnection ? (
+                    <>
+                      <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <Wifi className="h-3 w-3 mr-1" />
+                      Test Connection
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
         </form>
       </TabsContent>
 
@@ -499,7 +702,7 @@ export function AuthFormTabs({
             <Input
               id="confirm-password"
               type="password"
-              placeholder="••••••••"
+              placeholder="•••���••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className={inputHeight}

@@ -12,6 +12,14 @@ import { AuthRedirectHandler } from "@/components/AuthRedirectHandler";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 
+// Import test utilities for debugging
+import '@/utils/testBlogClaiming';
+import '@/utils/netlifyFunctionDiagnostic';
+import '@/utils/dashboardAccessDiagnostic';
+import '@/utils/quickDashboardAccess';
+import '@/utils/blogClaimDiagnostic';
+import '@/utils/testBlogClaimFixes';
+
 const queryClient = new QueryClient();
 
 // Run content cleanup once on app startup

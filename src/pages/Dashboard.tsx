@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { BlogClaimDebugPanel } from "@/components/BlogClaimDebugPanel";
 import {
   CreditCard,
   Link,
@@ -23,6 +24,7 @@ import {
   Plus,
   Activity,
   LogOut,
+  Bug,
   Calendar,
   Target,
   BarChart3,
@@ -49,6 +51,7 @@ import SEOToolsSection from "@/components/SEOToolsSection";
 import { ProfileSettings } from "@/components/ProfileSettings";
 import { ApiConfigStatus } from "@/components/ApiConfigStatus";
 import { TrialBlogShowcase } from "@/components/TrialBlogShowcase";
+import { TrialBlogPostsDisplay as NewTrialBlogPostsDisplay } from "@/components/TrialBlogPostsDisplay";
 
 import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
@@ -433,7 +436,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
               <div>• Displayed: {debugInfo.displayedPosts}</div>
-              <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '��'}</div>
+              <div>��� Has Errors: {debugInfo.hasError ? '⚠️' : '��'}</div>
             </div>
           </div>
           {debugInfo.errorMessage && (
@@ -629,6 +632,7 @@ const Dashboard = () => {
     return () => clearTimeout(maxLoadingTime);
   }, []);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -1051,6 +1055,10 @@ const Dashboard = () => {
                     <Settings className="mr-2 h-4 w-4" />
                     Profile Settings
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowDebugPanel(true)}>
+                    <Bug className="mr-2 h-4 w-4" />
+                    Debug Claiming
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleSignOut}
@@ -1105,10 +1113,14 @@ const Dashboard = () => {
           <>
             {activeSection === "dashboard" ? (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto">
               <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Overview</span>
                 <span className="sm:hidden">Home</span>
+              </TabsTrigger>
+              <TabsTrigger value="trial" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
+                <span className="hidden sm:inline">Trial Posts</span>
+                <span className="sm:hidden">Trial</span>
               </TabsTrigger>
               <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Campaigns</span>
@@ -1445,7 +1457,9 @@ const Dashboard = () => {
               )}
             </TabsContent>
 
-
+            <TabsContent value="trial" className="space-y-6">
+              <NewTrialBlogPostsDisplay user={user} />
+            </TabsContent>
 
             <TabsContent value="campaigns" className="space-y-6">
               {showCampaignForm ? (
@@ -1782,6 +1796,19 @@ const Dashboard = () => {
           setUser(user);
         }}
       />
+
+      {/* Debug Panel Dialog */}
+      <Dialog open={showDebugPanel} onOpenChange={setShowDebugPanel}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Blog Claiming Debug Panel</DialogTitle>
+          </DialogHeader>
+          <BlogClaimDebugPanel
+            isOpen={true}
+            onClose={() => setShowDebugPanel(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">

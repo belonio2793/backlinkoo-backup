@@ -36,6 +36,27 @@ export class BlogClaimService {
     try {
       console.log(`🔍 BlogClaimService: Fetching up to ${limit} claimable posts...`);
 
+      // Test database connection first
+      try {
+        const { error: connectionError } = await supabase
+          .from('published_blog_posts')
+          .select('id')
+          .limit(1);
+
+        if (connectionError) {
+          console.warn('⚠️ BlogClaimService: Database connection test failed:', connectionError.message);
+          if (connectionError.message?.includes('relation') || connectionError.message?.includes('does not exist')) {
+            console.warn('🔧 BlogClaimService: Table does not exist, returning empty array');
+            return [];
+          }
+        } else {
+          console.log('✅ BlogClaimService: Database connection test passed');
+        }
+      } catch (testError: any) {
+        console.warn('⚠️ BlogClaimService: Database test failed:', testError.message);
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('published_blog_posts')
         .select(`
@@ -53,9 +74,14 @@ export class BlogClaimService {
           details: error.details,
           hint: error.hint,
           code: error.code,
-          fullError: error
+          errorString: JSON.stringify(error, null, 2)
         });
-        console.error('❌ BlogClaimService: Raw error object:', error);
+        console.error('❌ BlogClaimService: Raw error details:', JSON.stringify(error, null, 2));
+
+        // Check if it's a table/schema issue
+        if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
+          console.warn('🔧 BlogClaimService: Database table may not exist, falling back to empty array');
+        }
         return [];
       }
 
@@ -70,7 +96,17 @@ export class BlogClaimService {
         });
       }
 
-      return data || [];
+      // Validate data structure
+      const validatedData = (data || []).filter(post => {
+        if (!post.id || !post.slug || !post.title) {
+          console.warn('⚠️ BlogClaimService: Skipping invalid post data:', post);
+          return false;
+        }
+        return true;
+      });
+
+      console.log(`✅ BlogClaimService: Validated ${validatedData.length}/${data?.length || 0} posts`);
+      return validatedData;
     } catch (error: any) {
       console.error('💥 BlogClaimService: Exception fetching claimable posts:', {
         message: error.message,
@@ -115,15 +151,22 @@ export class BlogClaimService {
    */
   static async claimPost(postId: string, user: User): Promise<ClaimResult> {
     try {
+      console.log(`🔍 BlogClaimService: Attempting to claim post with ID: ${postId}`);
+
       // First check if the post exists and is claimable
       const { data: existingPost, error: fetchError } = await supabase
         .from('published_blog_posts')
-        .select('id, title, user_id, is_trial_post, expires_at')
+        .select('id, title, user_id, is_trial_post, expires_at, slug')
         .eq('id', postId)
         .eq('status', 'published')
         .single();
 
       if (fetchError || !existingPost) {
+        console.error('❌ BlogClaimService: Post not found in database:', {
+          postId,
+          error: fetchError?.message,
+          hint: 'This might be a localStorage-only post'
+        });
         return {
           success: false,
           message: 'Blog post not found or unavailable for claiming',
@@ -167,6 +210,12 @@ export class BlogClaimService {
           error: updateError.message
         };
       }
+
+      console.log('✅ BlogClaimService: Post claimed successfully:', {
+        postId: updatedPost.id,
+        slug: updatedPost.slug,
+        title: updatedPost.title
+      });
 
       return {
         success: true,
@@ -283,6 +332,69 @@ export class BlogClaimService {
     } catch (error) {
       console.error('Exception checking claim limits:', error);
       return { canClaim: false, reason: 'Unable to check claim limits', claimedCount: 0, maxClaims: 5 };
+    }
+  }
+
+  /**
+   * Create a database entry from a localStorage blog post and claim it
+   * This is used for claiming posts that only exist in localStorage
+   */
+  static async claimLocalStoragePost(localPost: any, user: User): Promise<ClaimResult> {
+    try {
+      console.log('🔄 BlogClaimService: Creating database entry for localStorage post:', localPost.slug);
+
+      // Check if post already exists by slug
+      const { data: existingPost } = await supabase
+        .from('published_blog_posts')
+        .select('id, user_id, is_trial_post')
+        .eq('slug', localPost.slug)
+        .eq('status', 'published')
+        .single();
+
+      if (existingPost) {
+        // Post already exists, use regular claim flow
+        return await this.claimPost(existingPost.id, user);
+      }
+
+      // Create new database entry with user as owner
+      const postToInsert = {
+        ...localPost,
+        user_id: user.id,
+        is_trial_post: false,
+        expires_at: null,
+        status: 'published',
+        updated_at: new Date().toISOString()
+      };
+
+      const { data: insertedPost, error: insertError } = await supabase
+        .from('published_blog_posts')
+        .insert([postToInsert])
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('❌ BlogClaimService: Failed to create database entry:', insertError);
+        return {
+          success: false,
+          message: 'Failed to save post to database',
+          error: insertError.message
+        };
+      }
+
+      console.log('✅ BlogClaimService: Successfully created and claimed post:', insertedPost.id);
+
+      return {
+        success: true,
+        message: 'Blog post claimed successfully! It has been saved to your account.',
+        post: insertedPost
+      };
+    } catch (error: any) {
+      console.error('💥 BlogClaimService: Exception creating localStorage post:', error);
+      return {
+        success: false,
+        message: 'An unexpected error occurred while claiming the post',
+        error: error.message
+      };
     }
   }
 

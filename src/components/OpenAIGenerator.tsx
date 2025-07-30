@@ -177,9 +177,31 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
 
     } catch (error) {
       console.error('OpenAI/ChatGPT generation failed:', error);
+
+      // Provide specific error messages based on error type
+      let errorTitle = "Generation Failed";
+      let errorDescription = "Content generation failed. Please try again later.";
+
+      if (error instanceof Error) {
+        const errorMessage = error.message.toLowerCase();
+
+        if (errorMessage.includes('404') || errorMessage.includes('netlify function')) {
+          errorTitle = "Service Temporarily Unavailable";
+          errorDescription = "Our content generation service is temporarily unavailable. The system has automatically used fallback generation to create your content.";
+        } else if (errorMessage.includes('api key') || errorMessage.includes('unauthorized')) {
+          errorTitle = "Configuration Issue";
+          errorDescription = "There's a configuration issue with the content generation service. Using fallback generation instead.";
+        } else if (errorMessage.includes('timeout') || errorMessage.includes('network')) {
+          errorTitle = "Connection Timeout";
+          errorDescription = "The request timed out. Please check your connection and try again.";
+        } else {
+          errorDescription = error.message;
+        }
+      }
+
       toast({
-        title: "Generation Failed",
-        description: "Content generation failed. Please try again later.",
+        title: errorTitle,
+        description: errorDescription,
         variant: "destructive",
       });
     } finally {

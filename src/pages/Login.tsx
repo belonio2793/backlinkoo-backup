@@ -10,6 +10,7 @@ import { AuthFormTabs } from "@/components/shared/AuthFormTabs";
 
 import { useNavigate } from "react-router-dom";
 import { Infinity, Mail, RefreshCw, ArrowLeft } from "lucide-react";
+import { testAuthFlow } from "@/utils/testAuth";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -25,9 +26,14 @@ const Login = () => {
       try {
         const { session } = await AuthService.getCurrentSession();
 
-        if (session && session.user) {
-          console.log('🔐 User already authenticated, redirecting...');
+        // Only redirect if user is truly authenticated AND email is verified
+        if (session && session.user && session.user.email_confirmed_at) {
+          console.log('🔐 User already authenticated and verified, redirecting to dashboard...');
           navigate('/dashboard');
+        } else if (session && session.user && !session.user.email_confirmed_at) {
+          console.log('📬 User authenticated but email not verified, staying on login page');
+        } else {
+          console.log('🚪 No valid session found, staying on login page');
         }
       } catch (error) {
         console.error('Auth check error:', error);
@@ -36,12 +42,24 @@ const Login = () => {
 
     checkAuth();
 
-    const { data: { subscription } } = setupAuthStateListener((event, session) => {
-      console.log('🔐 Auth state changed:', event, !!session);
+    // Add debug test to window for console access
+    if (typeof window !== 'undefined') {
+      (window as any).debugAuth = testAuthFlow;
+    }
 
-      if (event === 'SIGNED_IN' && session && session.user) {
-        console.log('🔐 Auth state change: redirecting to dashboard');
+    const { data: { subscription } } = setupAuthStateListener((event, session) => {
+      console.log('🔐 Auth state changed:', event, {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        emailConfirmed: session?.user?.email_confirmed_at
+      });
+
+      // Only redirect if user is signed in AND email is verified
+      if (event === 'SIGNED_IN' && session && session.user && session.user.email_confirmed_at) {
+        console.log('🔐 Auth state change: user verified, redirecting to dashboard');
         setTimeout(() => navigate('/dashboard'), 100);
+      } else if (event === 'SIGNED_IN' && session && session.user && !session.user.email_confirmed_at) {
+        console.log('📬 Auth state change: user signed in but email not verified');
       }
     });
 
