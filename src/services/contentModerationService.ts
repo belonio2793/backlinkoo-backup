@@ -402,7 +402,10 @@ export class ContentModerationService {
         .update({ status, reviewed_at: new Date().toISOString() })
         .eq('id', requestId);
     } catch (error) {
-      console.error('Failed to update request status:', error);
+      console.error('Failed to update request status:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: String(error)
+      });
     }
   }
 
