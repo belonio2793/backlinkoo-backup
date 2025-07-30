@@ -16,6 +16,7 @@ export interface BlogPostGenerationData {
   seoScore: number;
   metaDescription?: string;
   contextualLinks?: any[];
+  customSlug?: string; // Allow custom slug override
 }
 
 export class BlogService {
