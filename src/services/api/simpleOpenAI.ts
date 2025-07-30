@@ -76,7 +76,7 @@ export class SimpleOpenAIService {
       const data: OpenAIResponse = await response.json();
       const content = data.choices[0]?.message?.content || '';
       const tokens = data.usage?.total_tokens || 0;
-      const cost = tokens * (model.includes('gpt-4') ? 0.00003 : 0.000002);
+      const cost = tokens * (model.includes('gpt-4') ? 0.00003 : 0.0000015);
 
       return {
         content,

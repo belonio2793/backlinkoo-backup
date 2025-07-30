@@ -8,12 +8,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { openAIContentGenerator } from '@/services/openAIContentGenerator';
+import { testAllKeys } from '@/utils/testOpenAI';
 import {
   Zap,
   CheckCircle2,
   Globe,
   Clock,
-  AlertCircle
+  AlertCircle,
+  TestTube
 } from 'lucide-react';
 
 interface ProgressUpdate {
@@ -42,6 +44,7 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
   const [userCanGenerate, setUserCanGenerate] = useState<UserGenerationStatus>({ canGenerate: true });
   const [apiStatus, setApiStatus] = useState<{ accessible: boolean; error?: string } | null>(null);
   const [isCheckingAPI, setIsCheckingAPI] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -64,6 +67,40 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
       });
     } finally {
       setIsCheckingAPI(false);
+    }
+  };
+
+  const handleTestKeys = async () => {
+    setIsTesting(true);
+    toast({
+      title: "Testing API Keys",
+      description: "Running diagnostic tests on all OpenAI API keys...",
+    });
+
+    try {
+      const workingKey = await testAllKeys();
+
+      if (workingKey) {
+        toast({
+          title: "✅ API Keys Working!",
+          description: "Found at least one working OpenAI API key. Content generation should work.",
+        });
+      } else {
+        toast({
+          title: "❌ All API Keys Failed",
+          description: "All OpenAI API keys are invalid. Please check your keys in the OpenAI dashboard.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('API key testing failed:', error);
+      toast({
+        title: "Test Failed",
+        description: "Unable to test API keys due to network error.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -293,6 +330,26 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
             </div>
           </div>
         )}
+
+        {/* Test API Keys Button */}
+        <Button
+          onClick={handleTestKeys}
+          disabled={isTesting || isGenerating}
+          variant="outline"
+          className="w-full h-10 border-2 border-orange-200 text-orange-700 hover:bg-orange-50 mb-4"
+        >
+          {isTesting ? (
+            <>
+              <TestTube className="mr-2 h-4 w-4 animate-spin" />
+              Testing API Keys...
+            </>
+          ) : (
+            <>
+              <TestTube className="mr-2 h-4 w-4" />
+              🔧 Debug: Test API Keys
+            </>
+          )}
+        </Button>
 
         {/* Generation Button */}
         <Button

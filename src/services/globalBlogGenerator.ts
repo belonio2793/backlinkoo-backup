@@ -114,45 +114,13 @@ class GlobalBlogGeneratorService {
   }
 
   private checkRateLimit(): { allowed: boolean; retryAfter?: number } {
-    const rateLimitData = localStorage.getItem(this.RATE_LIMIT_STORAGE_KEY);
-    if (!rateLimitData) return { allowed: true };
-
-    const { lastRequest, requestCount, windowStart } = JSON.parse(rateLimitData);
-    const now = new Date().getTime();
-    const windowDuration = 60 * 60 * 1000; // 1 hour
-    const maxRequests = 5; // 5 requests per hour for free users
-
-    // Reset window if expired
-    if (now - windowStart > windowDuration) {
-      localStorage.removeItem(this.RATE_LIMIT_STORAGE_KEY);
-      return { allowed: true };
-    }
-
-    if (requestCount >= maxRequests) {
-      const retryAfter = Math.ceil((windowStart + windowDuration - now) / 1000);
-      return { allowed: false, retryAfter };
-    }
-
+    // Rate limiting disabled - unlimited usage
     return { allowed: true };
   }
 
   private updateRateLimit() {
-    const now = new Date().getTime();
-    const rateLimitData = localStorage.getItem(this.RATE_LIMIT_STORAGE_KEY);
-    
-    if (rateLimitData) {
-      const data = JSON.parse(rateLimitData);
-      data.requestCount += 1;
-      data.lastRequest = now;
-      localStorage.setItem(this.RATE_LIMIT_STORAGE_KEY, JSON.stringify(data));
-    } else {
-      const newData = {
-        windowStart: now,
-        lastRequest: now,
-        requestCount: 1
-      };
-      localStorage.setItem(this.RATE_LIMIT_STORAGE_KEY, JSON.stringify(newData));
-    }
+    // Rate limiting disabled - unlimited usage
+    console.log('✅ Rate limiting disabled - unlimited OpenAI API usage allowed');
   }
 
   async generateGlobalBlogPost(request: GlobalBlogRequest): Promise<GlobalBlogResponse> {

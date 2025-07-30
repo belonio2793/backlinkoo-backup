@@ -14,12 +14,12 @@ interface GenerationResult {
 class AILiveContentService {
   private apiKey: string;
   private endpoint = 'https://api.openai.com/v1/chat/completions';
-  private model = 'gpt-4';
+  private model = 'gpt-3.5-turbo';
 
   constructor() {
     this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
     if (!this.apiKey) {
-      console.warn('OpenAI API key not configured');
+      console.warn('OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable.');
     }
   }
 
