@@ -938,7 +938,7 @@ Begin your journey with ${keyword} today!`;
               <div className="space-y-1">
                 <p className="text-sm font-medium">Status</p>
                 <Badge variant={generatedBlog.saveMode === 'trial' ? 'outline' : 'default'}>
-                  {generatedBlog.saveMode === 'trial' ? '24h Trial' : 'Permanent'}
+                  {generatedBlog.saveMode === 'trial' ? 'Unclaimed (24h)' : 'Permanent'}
                 </Badge>
               </div>
               <div className="space-y-1">
