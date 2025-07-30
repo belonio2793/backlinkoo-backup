@@ -199,6 +199,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="security">Security & Roles</TabsTrigger>
           </TabsList>
 
+          <TabsContent value="connections">
+            <ServiceConnectionStatus />
+          </TabsContent>
+
           <TabsContent value="campaigns">
             <CampaignManager />
           </TabsContent>
