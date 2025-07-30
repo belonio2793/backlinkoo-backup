@@ -28,7 +28,12 @@ interface UserGenerationStatus {
   reason?: string;
 }
 
-export const OpenAIGenerator = () => {
+interface OpenAIGeneratorProps {
+  variant?: 'homepage' | 'standalone';
+  onSuccess?: (blogPost: any) => void;
+}
+
+export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGeneratorProps) => {
   const [keyword, setKeyword] = useState('');
   const [anchorText, setAnchorText] = useState('');
   const [targetUrl, setTargetUrl] = useState('');
