@@ -329,6 +329,8 @@ export function BlogPost() {
         description: error instanceof Error ? error.message : "Failed to claim the post. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsClaiming(false);
     }
   };
 
