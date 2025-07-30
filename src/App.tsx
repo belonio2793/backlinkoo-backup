@@ -13,7 +13,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 
 // Import test utilities for debugging
-import '@/utils/testBlogClaiming';
+import '@/utils/testBlogClaiming\';\nimport \'@/utils/netlifyFunctionDiagnostic';
 
 const queryClient = new QueryClient();
 
