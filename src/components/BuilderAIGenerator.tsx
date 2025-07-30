@@ -37,6 +37,7 @@ export const BuilderAIGenerator = () => {
   const [progress, setProgress] = useState<ProgressUpdate | null>(null);
   const [userCanGenerate, setUserCanGenerate] = useState<UserGenerationStatus>({ canGenerate: true });
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check if user can generate content (simplified version)
