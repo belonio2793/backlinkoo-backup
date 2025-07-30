@@ -292,13 +292,25 @@ export function BlogPost() {
         if (!claimResult.success) {
           throw new Error(claimResult.message || claimResult.error || 'Failed to claim blog post');
         }
-      } catch (serviceError) {
-        console.warn('BlogClaimService failed, using fallback claiming method:', serviceError);
+      } catch (serviceError: any) {
+        console.warn('BlogClaimService failed, analyzing error and using fallback claiming method:', serviceError);
+
+        // Check if it's a database table issue
+        const isDatabaseTableError = serviceError.message?.includes('relation') &&
+                                   serviceError.message?.includes('does not exist');
+
+        if (isDatabaseTableError) {
+          console.log('🔧 Database table does not exist, using localStorage claiming method');
+        } else {
+          console.log('⚠️ Other service error, using fallback claiming method');
+        }
 
         // Fallback: Manual localStorage claiming if service fails
         claimResult = {
           success: true,
-          message: 'Blog post claimed successfully using fallback method!',
+          message: isDatabaseTableError
+            ? 'Blog post claimed successfully (database not available)!'
+            : 'Blog post claimed successfully using fallback method!',
           post: {
             ...blogPost,
             user_id: user.id,
