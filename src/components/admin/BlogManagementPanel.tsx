@@ -73,13 +73,22 @@ export function BlogManagementPanel() {
         .eq('is_trial_post', true)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error loading blog posts:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
       setPosts(data || []);
     } catch (error) {
-      console.error('Error loading blog posts:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error loading blog posts:', errorMessage);
       toast({
         title: "Error",
-        description: "Failed to load blog posts",
+        description: `Failed to load blog posts: ${errorMessage}`,
         variant: "destructive",
       });
     }
