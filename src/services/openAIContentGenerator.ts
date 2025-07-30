@@ -675,7 +675,7 @@ export class OpenAIContentGenerator {
         console.log('✅ Blog post saved to Supabase database');
       }
     } catch (error) {
-      console.warn('��️ Database save failed (non-blocking):', error);
+      console.warn('⚠️ Database save failed (non-blocking):', error);
       // Continue without database save
     }
 
