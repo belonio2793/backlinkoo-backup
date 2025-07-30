@@ -114,12 +114,30 @@ export function APIManagementDashboard() {
         const response = await fetch('https://api.openai.com/v1/models', {
           headers: { 'Authorization': `Bearer ${apiKey}` }
         });
-        
-        updateServiceStatus('OpenAI', {
-          status: response.ok ? 'connected' : 'error',
-          message: response.ok ? 'API connection successful' : `API error: ${response.status}`,
-          responseTime: 200
-        });
+
+        if (response.ok) {
+          updateServiceStatus('OpenAI', {
+            status: 'connected',
+            message: 'API connection successful',
+            responseTime: 200
+          });
+        } else {
+          // Read response body properly
+          let errorMessage = `API error: ${response.status}`;
+          try {
+            const errorText = await response.text();
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.error?.message || errorMessage;
+          } catch (e) {
+            // Use default error message
+          }
+
+          updateServiceStatus('OpenAI', {
+            status: 'error',
+            message: errorMessage,
+            responseTime: 200
+          });
+        }
       } else {
         updateServiceStatus('OpenAI', {
           status: 'not_configured',
@@ -160,19 +178,35 @@ export function APIManagementDashboard() {
         const response = await fetch('https://api.openai.com/v1/models', {
           headers: { 'Authorization': `Bearer ${key.key}` }
         });
-        
-        setApiKeys(prev => prev.map(k => 
-          k.id === keyId ? { 
-            ...k, 
-            status: response.ok ? 'valid' : 'invalid',
+
+        let isValid = response.ok;
+        let toastMessage = '';
+
+        if (response.ok) {
+          toastMessage = 'OpenAI API key is working correctly';
+        } else {
+          // Read response body properly for error details
+          try {
+            const errorText = await response.text();
+            const errorData = JSON.parse(errorText);
+            toastMessage = errorData.error?.message || `API key is not valid (${response.status})`;
+          } catch (e) {
+            toastMessage = `API key is not valid (${response.status})`;
+          }
+        }
+
+        setApiKeys(prev => prev.map(k =>
+          k.id === keyId ? {
+            ...k,
+            status: isValid ? 'valid' : 'invalid',
             lastTested: new Date()
           } : k
         ));
         
         toast({
-          title: response.ok ? 'API Key Valid' : 'API Key Invalid',
-          description: response.ok ? 'OpenAI API key is working correctly' : 'The API key is not valid',
-          variant: response.ok ? 'default' : 'destructive'
+          title: isValid ? 'API Key Valid' : 'API Key Invalid',
+          description: toastMessage,
+          variant: isValid ? 'default' : 'destructive'
         });
       }
     } catch (error) {
