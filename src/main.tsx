@@ -73,4 +73,4 @@ Object.defineProperty = function(obj: any, prop: string | symbol, descriptor: Pr
 createRoot(document.getElementById("root")!).render(<App />);
 
 // Initialize trial post cleanup service
-// trialPostCleanupService.scheduleCleanup().catch(console.error);
+trialPostCleanupService.scheduleCleanup().catch(console.error);
