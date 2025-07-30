@@ -1,6 +1,6 @@
 /**
- * AI Live Content Generation Service
- * Handles OpenAI API integration for real-time blog generation
+ * AI Live Content Generation Service - Server-Side via Netlify Functions
+ * Handles content generation using secure server-side API calls
  */
 
 interface GenerationResult {
@@ -24,7 +24,7 @@ class AILiveContentService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ provider: 'OpenAI' })
       });
-
+      
       if (response.ok) {
         const result = await response.json();
         return result.configured || false;
@@ -32,21 +32,6 @@ class AILiveContentService {
       return false;
     } catch (error) {
       console.error('Health check failed:', error);
-      return false;
-    }
-
-    try {
-      const response = await fetch('https://api.openai.com/v1/models', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      return response.ok;
-    } catch (error) {
-      console.error('OpenAI health check failed:', error);
       return false;
     }
   }
@@ -58,96 +43,46 @@ class AILiveContentService {
     url: string,
     retryCount: number = 3
   ): Promise<GenerationResult> {
-    if (!this.apiKey) {
-      return {
-        content: '',
-        wordCount: 0,
-        provider: 'OpenAI',
-        success: false,
-        error: 'OpenAI API key not configured'
-      };
-    }
-
     try {
-      const systemPrompt = `You are a professional content writer specializing in SEO-optimized blog posts. Create high-quality, engaging content that:
+      console.log('Generating content via Netlify function...');
 
-1. Meets the minimum 1000-word requirement
-2. Uses proper SEO formatting with H1, H2, and H3 headers
-3. Includes short, readable paragraphs
-4. Incorporates bullet points or numbered lists where appropriate
-5. Uses natural keyword placement (avoid keyword stuffing)
-6. Creates valuable, informative content for readers
-7. Includes the specified anchor text as a natural hyperlink to the target URL
-
-Format the content in clean HTML with proper heading tags, paragraph tags, and list elements.`;
-
-      const userPrompt = `${prompt}
-
-Additional requirements:
-- Target keyword: "${keyword}"
-- Anchor text to link: "${anchorText}"
-- Link destination: "${url}"
-- Minimum 1000 words
-- Professional, engaging tone
-- SEO-optimized structure with clear headings
-- Include practical tips, insights, or examples related to the topic
-
-Please create a comprehensive, well-structured blog post that naturally incorporates the anchor text "${anchorText}" as a clickable link to "${url}".`;
-
-      const requestBody = {
-        model: this.model,
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: userPrompt
-          }
-        ],
-        max_tokens: 4000,
-        temperature: 0.7,
-        presence_penalty: 0.1,
-        frequency_penalty: 0.1
-      };
-
-      console.log('Generating content with OpenAI...', { prompt: userPrompt.substring(0, 100) });
-
-      const response = await fetch(this.endpoint, {
+      const response = await fetch('/.netlify/functions/generate-openai', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify({
+          keyword,
+          url,
+          anchorText,
+          wordCount: 1200,
+          contentType: 'article',
+          tone: 'professional'
+        })
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`API request failed: ${response.status} - ${errorText}`);
+        throw new Error(`Netlify function error: ${response.status}`);
       }
 
-      const data = await response.json();
-      
-      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-        throw new Error('Invalid response format from API');
+      const result = await response.json();
+
+      if (result.success) {
+        const wordCount = result.content.split(/\s+/).length;
+        console.log(`Content generated successfully: ${wordCount} words`);
+
+        return {
+          content: result.content,
+          wordCount,
+          provider: 'OpenAI',
+          success: true
+        };
+      } else {
+        throw new Error(result.error || 'Content generation failed');
       }
-
-      const content = data.choices[0].message.content;
-      const wordCount = content.split(/\s+/).length;
-
-      console.log(`Content generated successfully: ${wordCount} words`);
-
-      return {
-        content,
-        wordCount,
-        provider: 'OpenAI',
-        success: true
-      };
 
     } catch (error) {
-      console.error('OpenAI content generation failed:', error);
+      console.error('Content generation failed:', error);
 
       // Retry logic with exponential backoff
       if (retryCount > 0 && (error instanceof Error &&
