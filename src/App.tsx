@@ -40,9 +40,9 @@ const App = () => (
           {/*<GlobalNotifications />*/}
           {/*<BetaNotification />*/}
           <BrowserRouter>
-            {/*<AuthRedirectHandler>*/}
+            <AuthRedirectHandler>
               <AppWrapper />
-            {/*</AuthRedirectHandler>*/}
+            </AuthRedirectHandler>
           </BrowserRouter>
         {/*</AuthProfileChecker>*/}
       </TooltipProvider>
