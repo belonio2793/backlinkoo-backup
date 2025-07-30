@@ -272,9 +272,21 @@ export function BlogPost() {
         userEmail: user.email
       };
 
-      // Use BlogClaimService directly since Netlify functions are not available
+      // Use BlogClaimService with proper method based on post type
       const { BlogClaimService } = await import('@/services/blogClaimService');
-      const claimResult = await BlogClaimService.claimPost(blogPost.id, user);
+
+      let claimResult;
+
+      // Check if this is a localStorage post (no database ID) or database post
+      if (!blogPost.id || typeof blogPost.id === 'string' && blogPost.id.startsWith('local_')) {
+        console.log('🔄 Claiming localStorage post:', blogPost.slug);
+        // Use claimLocalStoragePost for posts that exist only in localStorage
+        claimResult = await BlogClaimService.claimLocalStoragePost(blogPost, user);
+      } else {
+        console.log('🔄 Claiming database post:', blogPost.id);
+        // Use regular claimPost for posts that exist in database
+        claimResult = await BlogClaimService.claimPost(blogPost.id, user);
+      }
 
       if (!claimResult.success) {
         throw new Error(claimResult.message || claimResult.error || 'Failed to claim blog post');
