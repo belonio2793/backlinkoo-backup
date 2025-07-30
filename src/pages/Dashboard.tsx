@@ -255,20 +255,65 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           <BarChart3 className="h-10 w-10 text-purple-600" />
         </div>
         <h3 className="text-xl font-semibold text-gray-800 mb-3">Loading Posts...</h3>
-        <p className="text-gray-600">Fetching the latest blog posts for you.</p>
+        <p className="text-gray-600 mb-4">{loadingStatus}</p>
+        <div className="max-w-sm mx-auto bg-gray-200 rounded-full h-2 mb-4">
+          <div className="bg-purple-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+        </div>
+        <p className="text-xs text-gray-500">
+          🔍 Checking database and local storage for blog posts...
+        </p>
       </div>
     );
   }
 
-  if (allPosts.length === 0) {
+  if (error && allPosts.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <BarChart3 className="h-10 w-10 text-purple-600" />
+        <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <AlertCircle className="h-10 w-10 text-red-600" />
+        </div>
+        <h3 className="text-xl font-semibold text-gray-800 mb-3">No Posts Found</h3>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md mx-auto mb-6">
+          <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
+        </div>
+        <div className="flex flex-col gap-4 items-center">
+          <Button
+            onClick={() => loadAllPosts()}
+            variant="outline"
+            className="border-red-200 text-red-700 hover:bg-red-50"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry Loading Posts
+          </Button>
+          <Button
+            onClick={() => navigate('/?focus=generator')}
+            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Generate Your First Post
+          </Button>
+        </div>
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg max-w-lg mx-auto">
+          <h4 className="font-medium text-blue-800 mb-2">System Status</h4>
+          <div className="text-xs text-blue-700 space-y-1">
+            <div>🔧 Status: {loadingStatus}</div>
+            <div>⏰ Last attempted: {new Date().toLocaleTimeString()}</div>
+            <div>📡 Connection: {navigator.onLine ? 'Online' : 'Offline'}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (allPosts.length === 0 && !error) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <BarChart3 className="h-10 w-10 text-amber-600" />
         </div>
         <h3 className="text-xl font-semibold text-gray-800 mb-3">No Posts Available</h3>
         <p className="text-gray-600 mb-6 max-w-md mx-auto">
-          No blog posts are currently available for claiming. Start creating amazing blog posts with our generator.
+          No blog posts are currently available for claiming. This is expected if no posts have been generated yet.
         </p>
         <Button
           onClick={() => navigate('/?focus=generator')}
@@ -277,6 +322,15 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           <Plus className="h-4 w-4 mr-2" />
           Create Your First Post
         </Button>
+        <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg max-w-lg mx-auto">
+          <h4 className="font-medium text-gray-800 mb-2">System Status ✅</h4>
+          <div className="text-xs text-gray-600 space-y-1">
+            <div>🔧 Status: {loadingStatus}</div>
+            <div>⏰ Last check: {lastRefresh?.toLocaleTimeString() || 'Never'}</div>
+            <div>🔄 Auto-refresh: Every 30 seconds</div>
+            <div>📡 Connection: {navigator.onLine ? 'Online' : 'Offline'}</div>
+          </div>
+        </div>
       </div>
     );
   }
