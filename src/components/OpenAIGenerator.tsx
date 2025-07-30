@@ -54,7 +54,7 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
   const checkAPIStatus = async () => {
     setIsCheckingAPI(true);
     try {
-      // OpenAI/ChatGPT is always available as it's our primary service
+      // API handled server-side via Netlify functions - always available
       setApiStatus({ accessible: true });
       setUserCanGenerate({ canGenerate: true });
     } catch (error) {
