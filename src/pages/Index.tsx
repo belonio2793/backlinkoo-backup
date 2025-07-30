@@ -45,7 +45,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { trackInteraction, trackPageView, shouldShowConversionPrompt } = useGuestTracking();
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [pricingModalOpen, setPricingModalOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'starter_100' | 'starter_200' | 'starter_300'>('starter_200');
