@@ -227,6 +227,103 @@ export function BlogPost() {
     });
   };
 
+  const handleClaimPost = async () => {
+    if (!blogPost) return;
+
+    try {
+      // Call the existing claim functionality through ClaimTrialPostDialog logic
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        setShowLoginModal(true);
+        return;
+      }
+
+      // Check if user can claim (using same logic as ClaimTrialPostDialog)
+      const { data: userPosts } = await supabase
+        .from('published_blog_posts')
+        .select('id, is_trial_post, user_id')
+        .eq('user_id', user.id)
+        .eq('is_trial_post', false);
+
+      const hasExistingClaim = (userPosts?.length || 0) > 0;
+      const localClaims = localStorage.getItem(`user_claimed_posts_${user.id}`);
+      const hasLocalClaims = localClaims ? JSON.parse(localClaims).length > 0 : false;
+
+      if (hasExistingClaim || hasLocalClaims) {
+        toast({
+          title: "Claim Limit Reached",
+          description: "You already have a free blog post saved. Each account can only claim one free trial post.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Proceed with claim via Netlify function (same as ClaimTrialPostDialog)
+      const response = await fetch('/.netlify/functions/claim-post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          slug: blogPost.slug,
+          userId: user.id,
+          userEmail: user.email
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to claim blog post');
+      }
+
+      // Update localStorage to mark as claimed
+      const blogStorageKey = `blog_post_${blogPost.slug}`;
+      const storedBlogData = localStorage.getItem(blogStorageKey);
+      if (storedBlogData) {
+        const updatedPost = JSON.parse(storedBlogData);
+        updatedPost.is_trial_post = false;
+        updatedPost.claimed_by_user_id = user.id;
+        updatedPost.claimed_by_email = user.email;
+        updatedPost.claimed_at = new Date().toISOString();
+        localStorage.setItem(blogStorageKey, JSON.stringify(updatedPost));
+        setBlogPost(updatedPost);
+      }
+
+      // Track claimed post
+      const userClaimedPosts = localStorage.getItem(`user_claimed_posts_${user.id}`);
+      const claimedPosts = userClaimedPosts ? JSON.parse(userClaimedPosts) : [];
+      claimedPosts.push({
+        slug: blogPost.slug,
+        title: blogPost.title,
+        claimedAt: new Date().toISOString(),
+        userId: user.id,
+        userEmail: user.email
+      });
+      localStorage.setItem(`user_claimed_posts_${user.id}`, JSON.stringify(claimedPosts));
+
+      toast({
+        title: "🎉 Post Claimed Successfully!",
+        description: "Your backlink is now permanent and saved to your dashboard!",
+      });
+
+      setShowClaimExplanation(false);
+
+    } catch (error) {
+      console.error('Failed to claim post:', error);
+      toast({
+        title: "Claim Failed",
+        description: error instanceof Error ? error.message : "Failed to claim the post. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleShowClaimExplanation = () => {
+    setShowClaimExplanation(true);
+  };
+
   const handleDeletePost = async () => {
     if (!blogPost || !blogPost.is_trial_post) {
       toast({
