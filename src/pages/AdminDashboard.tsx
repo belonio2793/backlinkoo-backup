@@ -36,6 +36,7 @@ import { OpenAIConnectionTest } from "@/components/OpenAIConnectionTest";
 import { APIKeyDebug } from "@/components/APIKeyDebug";
 import { APIKeyDebugAdvanced } from "@/components/APIKeyDebugAdvanced";
 import { APIManagementDashboard } from "@/components/admin/APIManagementDashboard";
+import { OrganizedAdminDashboard } from "@/components/admin/OrganizedAdminDashboard";
 import {
   Users,
   Activity,
