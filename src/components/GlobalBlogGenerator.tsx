@@ -16,7 +16,7 @@ import { contentModerationService } from '@/services/contentModerationService';
 import { adminSyncService } from '@/services/adminSyncService';
 import { useAuthStatus } from '@/hooks/useAuth';
 import { trackBlogGeneration } from '@/hooks/useGuestTracking';
-import { MultiApiContentGenerator } from '@/services/multiApiContentGenerator';
+
 import {
   Globe,
   Zap,
