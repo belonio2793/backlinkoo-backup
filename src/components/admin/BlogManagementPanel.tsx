@@ -120,12 +120,25 @@ export function BlogManagementPanel() {
       setStats(stats);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('Error loading stats:', errorMessage);
-      toast({
-        title: "Warning",
-        description: `Could not load statistics: ${errorMessage}`,
-        variant: "destructive",
+      console.warn('Stats loading failed (non-blocking):', errorMessage);
+
+      // Set default stats instead of showing error
+      setStats({
+        totalPosts: 0,
+        unclaimedPosts: 0,
+        claimedPosts: 0,
+        expiredPosts: 0,
+        expiringSoon: 0
       });
+
+      // Only show toast if it's not a table missing error
+      if (!errorMessage.includes('does not exist') && !errorMessage.includes('PGRST116')) {
+        toast({
+          title: "Stats Warning",
+          description: "Could not load statistics. Database may need setup.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
