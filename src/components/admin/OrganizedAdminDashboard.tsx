@@ -72,37 +72,37 @@ export function OrganizedAdminDashboard() {
       id: "overview",
       name: "Overview",
       icon: BarChart3,
-      description: "Dashboard overview and system status"
+      description: "System status & health"
     },
     {
       id: "content",
       name: "Content",
       icon: FileText,
-      description: "Blog management, AI posts, and content moderation"
+      description: "Posts, AI content & moderation"
     },
     {
       id: "system",
       name: "System",
       icon: Server,
-      description: "API configuration, deployment, and infrastructure"
+      description: "APIs, deployment & infrastructure"
     },
     {
       id: "communications",
       name: "Communications",
       icon: Mail,
-      description: "Email systems, campaigns, and notifications"
+      description: "Email systems & campaigns"
     },
     {
       id: "business",
       name: "Business",
       icon: Users,
-      description: "Affiliates, campaigns, and user management"
+      description: "Affiliates & user management"
     },
     {
       id: "security",
       name: "Security",
       icon: Shield,
-      description: "Security settings, roles, and monitoring"
+      description: "Security settings & monitoring"
     }
   ];
 
