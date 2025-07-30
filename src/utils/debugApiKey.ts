@@ -1,4 +1,5 @@
 import { environmentVariablesService } from '@/services/environmentVariablesService';
+import { APIKeyTester } from './apiKeyTester';
 
 export async function debugApiKey() {
   console.log('🔍 Starting comprehensive API key debug...');
