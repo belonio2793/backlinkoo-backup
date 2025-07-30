@@ -47,8 +47,7 @@ class AdminSyncService {
     this.addEvent(event);
     this.notifyListeners('blog_generated', event);
     
-    // Update rate limiting
-    this.updateRateLimit(data.sessionId);
+    // Rate limiting disabled - unlimited usage
   }
 
   trackPostClaimed(data: {
@@ -185,55 +184,28 @@ class AdminSyncService {
   }
 
   getConfiguration() {
-    const defaultConfig = {
-      rateLimit: 5,
-      expirationHours: 24,
-      autoCleanup: true,
+    // Always return unlimited configuration
+    const unlimitedConfig = {
+      rateLimit: Infinity,
+      expirationHours: Infinity,
+      autoCleanup: false,
       enableRealTimeSync: true
     };
-
-    try {
-      const stored = localStorage.getItem('admin_blog_config');
-      return stored ? { ...defaultConfig, ...JSON.parse(stored) } : defaultConfig;
-    } catch {
-      return defaultConfig;
-    }
+    return unlimitedConfig;
   }
 
-  // Rate limiting methods
+  // Rate limiting disabled - unlimited usage
   updateRateLimit(sessionId: string) {
-    const rateLimitKey = `rate_limit_${sessionId}`;
-    const now = Date.now();
-    const windowStart = now - (60 * 60 * 1000); // 1 hour window
-    
-    let requests = JSON.parse(localStorage.getItem(rateLimitKey) || '[]');
-    requests = requests.filter((timestamp: number) => timestamp > windowStart);
-    requests.push(now);
-    
-    localStorage.setItem(rateLimitKey, JSON.stringify(requests));
-    
-    const config = this.getConfiguration();
-    if (requests.length >= config.rateLimit) {
-      this.notifyListeners('rate_limit_exceeded', { sessionId, requests: requests.length });
-    }
+    // No rate limiting - unlimited usage
+    console.log('✅ Rate limiting disabled - unlimited OpenAI API usage allowed');
   }
 
   checkRateLimit(sessionId: string): { allowed: boolean; remaining: number; resetTime: number } {
-    const rateLimitKey = `rate_limit_${sessionId}`;
-    const now = Date.now();
-    const windowStart = now - (60 * 60 * 1000); // 1 hour window
-    
-    let requests = JSON.parse(localStorage.getItem(rateLimitKey) || '[]');
-    requests = requests.filter((timestamp: number) => timestamp > windowStart);
-    
-    const config = this.getConfiguration();
-    const remaining = Math.max(0, config.rateLimit - requests.length);
-    const resetTime = requests.length > 0 ? requests[0] + (60 * 60 * 1000) : now;
-    
+    // Always allow unlimited usage
     return {
-      allowed: remaining > 0,
-      remaining,
-      resetTime
+      allowed: true,
+      remaining: Infinity,
+      resetTime: 0
     };
   }
 
