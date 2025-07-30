@@ -227,7 +227,13 @@ export function AuthFormTabs({
             throw new Error('No user data received');
           }
         } catch (directError: any) {
-          console.error('❌ Direct Supabase auth failed:', directError.message);
+          console.error('❌ Direct Supabase auth failed:', {
+            message: directError.message,
+            code: directError.code,
+            status: directError.status,
+            name: directError.name,
+            authError: authError?.message
+          });
 
           // Provide specific error messages based on the error type
           if (directError.message.includes('timeout') && authError?.message?.includes('timeout')) {
@@ -661,7 +667,7 @@ export function AuthFormTabs({
             <Input
               id="confirm-password"
               type="password"
-              placeholder="••••••••"
+              placeholder="•••���••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className={inputHeight}
