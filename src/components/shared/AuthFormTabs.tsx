@@ -523,18 +523,45 @@ export function AuthFormTabs({
             )}
           </Button>
 
-          {onForgotPassword && (
-            <div className="text-center">
-              <Button
-                type="button"
-                variant="link"
-                className="text-sm text-muted-foreground"
-                onClick={onForgotPassword}
-              >
-                Forgot your password?
-              </Button>
-            </div>
-          )}
+          <div className="space-y-2">
+            {onForgotPassword && (
+              <div className="text-center">
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-sm text-muted-foreground"
+                  onClick={onForgotPassword}
+                >
+                  Forgot your password?
+                </Button>
+              </div>
+            )}
+
+            {retryAttempts > 0 && (
+              <div className="text-center">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={testConnection}
+                  disabled={isTestingConnection}
+                >
+                  {isTestingConnection ? (
+                    <>
+                      <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <Wifi className="h-3 w-3 mr-1" />
+                      Test Connection
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
         </form>
       </TabsContent>
 
