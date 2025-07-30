@@ -390,6 +390,11 @@ export class ReliableContentGenerator {
   private async ensureHealthCheck(): Promise<void> {
     const now = Date.now();
     if (now - this.lastHealthCheck > this.config.healthCheckInterval) {
+      // Skip health check if no providers are configured to avoid errors
+      if (!openAIService.isConfigured() && !cohereService.isConfigured()) {
+        this.lastHealthCheck = now;
+        return;
+      }
       await this.performHealthCheck();
     }
   }
