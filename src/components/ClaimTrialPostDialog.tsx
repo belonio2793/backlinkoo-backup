@@ -67,28 +67,22 @@ export function ClaimTrialPostDialog({
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
 
-      if (!user) return { canClaim: true, hasExistingClaim: false };
+      if (!user) return { canClaim: true, hasExistingClaim: false, claimedCount: 0, maxClaims: 3 };
 
-      // Check if user already has a claimed free blog post
-      const { data: userPosts } = await supabase
-        .from('published_blog_posts')
-        .select('id, is_trial_post, user_id')
-        .eq('user_id', user.id)
-        .eq('is_trial_post', false); // Claimed posts are no longer trial posts
-
-      const hasExistingClaim = (userPosts?.length || 0) > 0;
-
-      // Also check localStorage for any claimed posts
-      const localClaims = localStorage.getItem(`user_claimed_posts_${user.id}`);
-      const hasLocalClaims = localClaims ? JSON.parse(localClaims).length > 0 : false;
+      // Use BlogClaimService for consistent claim limit checking
+      const { BlogClaimService } = await import('@/services/blogClaimService');
+      const claimStatus = await BlogClaimService.canUserClaimMore(user);
 
       return {
-        canClaim: !hasExistingClaim && !hasLocalClaims,
-        hasExistingClaim: hasExistingClaim || hasLocalClaims
+        canClaim: claimStatus.canClaim,
+        hasExistingClaim: claimStatus.claimedCount > 0,
+        claimedCount: claimStatus.claimedCount,
+        maxClaims: claimStatus.maxClaims,
+        reason: claimStatus.reason
       };
     } catch (error) {
       console.warn('Failed to check user claims:', error);
-      return { canClaim: true, hasExistingClaim: false };
+      return { canClaim: true, hasExistingClaim: false, claimedCount: 0, maxClaims: 3 };
     }
   };
 
