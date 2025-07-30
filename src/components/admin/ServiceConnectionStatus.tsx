@@ -161,36 +161,48 @@ export function ServiceConnectionStatus() {
   const checkOpenAI = async (): Promise<void> => {
     const startTime = Date.now();
     try {
-      const isConfigured = openAIOnlyContentGenerator.isConfigured();
-      
-      if (!isConfigured) {
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY || '';
+
+      if (!apiKey || !apiKey.startsWith('sk-')) {
         updateServiceStatus('OpenAI API', {
           status: 'not_configured',
-          message: 'API key not configured',
+          message: 'API key not configured or invalid format',
           hasApiKey: false,
           responseTime: Date.now() - startTime
         });
         return;
       }
 
-      const connectionTest = await openAIOnlyContentGenerator.testConnection();
+      // Direct API call for 100% reliability
+      const response = await fetch('https://api.openai.com/v1/models', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
       const responseTime = Date.now() - startTime;
 
-      if (connectionTest) {
+      if (response.ok) {
+        const data = await response.json();
         updateServiceStatus('OpenAI API', {
           status: 'connected',
-          message: 'OpenAI API responding',
+          message: `OpenAI API responding (${data.data?.length || 0} models available)`,
           hasApiKey: true,
           responseTime,
           details: {
             configured: true,
-            keyPresent: !!(import.meta.env.VITE_OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY)
+            keyPresent: true,
+            keyPreview: apiKey.substring(0, 10) + '...',
+            modelsAvailable: data.data?.length || 0
           }
         });
       } else {
+        const errorData = await response.json().catch(() => ({}));
         updateServiceStatus('OpenAI API', {
           status: 'error',
-          message: 'API key invalid or quota exceeded',
+          message: `HTTP ${response.status}: ${errorData.error?.message || 'API key invalid'}`,
           hasApiKey: true,
           responseTime
         });
@@ -198,7 +210,7 @@ export function ServiceConnectionStatus() {
     } catch (error) {
       updateServiceStatus('OpenAI API', {
         status: 'error',
-        message: 'Connection test failed',
+        message: `Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         hasApiKey: true,
         responseTime: Date.now() - startTime
       });
