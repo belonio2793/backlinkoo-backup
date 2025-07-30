@@ -4,6 +4,7 @@
  */
 
 import { enhancedOpenAIService } from './api/enhancedOpenAI';
+import { multiKeyOpenAIService } from './api/multiKeyOpenAI';
 
 export interface ContentGenerationRequest {
   targetUrl: string;
