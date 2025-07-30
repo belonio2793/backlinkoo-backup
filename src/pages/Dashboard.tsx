@@ -51,6 +51,7 @@ import { ApiConfigStatus } from "@/components/ApiConfigStatus";
 import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 import { OpenAIDebugTest } from "@/components/OpenAIDebugTest";
+import { SupabaseConnectionTest } from "@/components/SupabaseConnectionTest";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -1543,6 +1544,7 @@ const Dashboard = () => {
               </Tabs>
             ) : activeSection === "seo-tools" ? (
               <div className="space-y-6">
+                <SupabaseConnectionTest />
                 <OpenAIDebugTest />
                 <SEOToolsSection user={user} />
               </div>
