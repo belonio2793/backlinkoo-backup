@@ -35,31 +35,47 @@ export function OpenAIConnectionTester() {
         return;
       }
 
-      // Test 2: Test connection
-      const connectionTest = await openAIOnlyContentGenerator.testConnection();
+      // Test 2: Test multi-key connection
+      const connectionTest = await multiKeyOpenAIService.testConnection();
       if (!connectionTest) {
         setResult({
           success: false,
-          message: 'OpenAI connection test failed'
+          message: 'All OpenAI API keys failed connection test',
+          details: multiKeyOpenAIService.getKeyStatuses()
         });
         setTesting(false);
         return;
       }
 
       // Test 3: Try simple generation
-      const simpleTest = await openAIOnlyContentGenerator.generateContent({
-        targetUrl: 'https://example.com',
-        primaryKeyword: 'test',
-        anchorText: 'test link',
-        wordCount: 100
+      const simpleTest = await multiKeyOpenAIService.generateContent('Write exactly 3 words: "Test successful message"', {
+        maxTokens: 20,
+        temperature: 0
       });
+
+      if (!simpleTest.success) {
+        setResult({
+          success: false,
+          message: 'Content generation failed',
+          details: {
+            error: simpleTest.error,
+            keyStatuses: multiKeyOpenAIService.getKeyStatuses()
+          }
+        });
+        setTesting(false);
+        return;
+      }
 
       setResult({
         success: true,
-        message: 'OpenAI connection and generation working!',
+        message: 'Multi-key OpenAI system working perfectly!',
         details: {
-          wordCount: simpleTest.wordCount,
-          title: simpleTest.title
+          content: simpleTest.content,
+          provider: simpleTest.provider,
+          keyUsed: simpleTest.apiKeyUsed,
+          tokens: simpleTest.usage.tokens,
+          keyStatuses: multiKeyOpenAIService.getKeyStatuses(),
+          serviceHealth: multiKeyOpenAIService.getServiceHealth()
         }
       });
 
