@@ -295,7 +295,7 @@ export const KeywordResearchTool = () => {
     { code: "HK", name: "Hong Kong", flag: "🇭🇰" },
     { code: "HM", name: "Heard Island and McDonald Islands", flag: "🇭🇲" },
     { code: "HN", name: "Honduras", flag: "🇭🇳" },
-    { code: "HR", name: "Croatia", flag: "🇭🇷" },
+    { code: "HR", name: "Croatia", flag: "���🇷" },
     { code: "HT", name: "Haiti", flag: "🇭🇹" },
     { code: "HU", name: "Hungary", flag: "🇭🇺" },
     { code: "ID", name: "Indonesia", flag: "🇮🇩" },
@@ -444,7 +444,7 @@ export const KeywordResearchTool = () => {
     { code: "WS", name: "Samoa", flag: "🇼🇸" },
     { code: "YE", name: "Yemen", flag: "🇾🇪" },
     { code: "YT", name: "Mayotte", flag: "🇾🇹" },
-    { code: "ZA", name: "South Africa", flag: "����🇦" },
+    { code: "ZA", name: "South Africa", flag: "🇿🇦" },
     { code: "ZM", name: "Zambia", flag: "🇿🇲" },
     { code: "ZW", name: "Zimbabwe", flag: "🇿🇼" }
   ];
