@@ -50,8 +50,7 @@ import { ProfileSettings } from "@/components/ProfileSettings";
 import { ApiConfigStatus } from "@/components/ApiConfigStatus";
 import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
-import { OpenAIDebugTest } from "@/components/OpenAIDebugTest";
-import { SupabaseConnectionTest } from "@/components/SupabaseConnectionTest";
+
 import { AIPostsManager } from "@/components/admin/AIPostsManager";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -155,7 +154,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
 
       // Show status in console for transparency
       if (finalPosts.length === 0) {
-        console.warn('⚠️ No blog posts found in database or local storage');
+        console.warn('���️ No blog posts found in database or local storage');
         if (!silentRefresh) {
           setError('NOT_FOUND');
         }
@@ -407,7 +406,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
       {showDebug && (
         <div className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-xs border border-gray-700">
           <div className="flex justify-between items-center mb-3">
-            <h4 className="text-green-300 font-semibold">🔧 Debug Information</h4>
+            <h4 className="text-green-300 font-semibold">���� Debug Information</h4>
             <Button
               onClick={() => setShowDebug(false)}
               variant="ghost"
