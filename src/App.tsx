@@ -16,7 +16,7 @@ import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 import '@/utils/testBlogClaiming';
 import '@/utils/netlifyFunctionDiagnostic';
 import '@/utils/dashboardAccessDiagnostic';
-import '@/utils/quickDashboardAccess\';\nimport \'@/utils/blogClaimDiagnostic';
+import '@/utils/quickDashboardAccess\';\nimport \'@/utils/blogClaimDiagnostic\';\nimport \'@/utils/testBlogClaimFixes';
 
 const queryClient = new QueryClient();
 
