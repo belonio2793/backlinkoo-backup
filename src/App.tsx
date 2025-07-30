@@ -37,8 +37,8 @@ const App = () => (
         {/*<AuthProfileChecker>*/}
           <Toaster />
           <Sonner />
-          {/*<GlobalNotifications />*/}
-          {/*<BetaNotification />*/}
+          <GlobalNotifications />
+          <BetaNotification />
           <BrowserRouter>
             <AuthRedirectHandler>
               <AppWrapper />
