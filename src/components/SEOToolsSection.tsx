@@ -360,11 +360,11 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold">SEO Tools</h2>
           <Badge variant="secondary" className="text-xs">
             <Crown className="h-3 w-3 mr-1" />
             Premium Active
           </Badge>
-          <span className="text-sm text-muted-foreground">$29/month</span>
         </div>
         <Button variant="outline" onClick={() => setIsSubscriptionModalOpen(true)}>
           <Settings className="h-4 w-4 mr-2" />
