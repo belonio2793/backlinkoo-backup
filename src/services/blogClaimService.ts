@@ -467,10 +467,16 @@ export class BlogClaimService {
         .single();
 
       if (insertError) {
-        console.error('❌ BlogClaimService: Failed to create database entry:', insertError);
+        console.error('❌ BlogClaimService: Failed to create database entry:', {
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+          code: insertError.code,
+          postData: JSON.stringify(postToInsert, null, 2)
+        });
         return {
           success: false,
-          message: 'Failed to save post to database',
+          message: `Failed to save post to database: ${insertError.message}`,
           error: insertError.message
         };
       }
