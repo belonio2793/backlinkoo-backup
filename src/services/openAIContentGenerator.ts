@@ -144,6 +144,12 @@ export class OpenAIContentGenerator {
 
     console.log(`🤖 Calling OpenAI API with ${apiKeys.length} available keys`);
 
+    // Debug environment
+    console.log('🌍 Environment check:');
+    console.log('- NODE_ENV:', process.env.NODE_ENV);
+    console.log('- Current URL:', window.location.origin);
+    console.log('- User Agent:', navigator.userAgent.substring(0, 50));
+
     // Validate all keys first (for debugging)
     if (process.env.NODE_ENV === 'development') {
       console.log('🔍 Running API key validation...');
