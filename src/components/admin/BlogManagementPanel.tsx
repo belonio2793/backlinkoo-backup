@@ -62,6 +62,7 @@ export function BlogManagementPanel() {
   const [runningCleanup, setRunningCleanup] = useState(false);
   const [runningDiagnostic, setRunningDiagnostic] = useState(false);
   const [runningDebug, setRunningDebug] = useState(false);
+  const [runningErrorTest, setRunningErrorTest] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -242,6 +243,28 @@ export function BlogManagementPanel() {
     }
   };
 
+  const runErrorReproductionTest = async () => {
+    setRunningErrorTest(true);
+    try {
+      console.log('🧪 Running error reproduction test...');
+      await ErrorReproductionTest.reproduceError();
+
+      toast({
+        title: "Error Test Complete",
+        description: "Check the browser console for detailed error analysis",
+      });
+    } catch (error) {
+      console.error('Error reproduction test failed:', error);
+      toast({
+        title: "Error Test Failed",
+        description: "Could not run error reproduction test",
+        variant: "destructive",
+      });
+    } finally {
+      setRunningErrorTest(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'claimed':
@@ -398,6 +421,19 @@ export function BlogManagementPanel() {
                   <AlertCircle className="h-4 w-4 mr-2" />
                 )}
                 Debug Error
+              </Button>
+              <Button
+                onClick={runErrorReproductionTest}
+                variant="secondary"
+                size="sm"
+                disabled={runningErrorTest}
+              >
+                {runningErrorTest ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                )}
+                Reproduce Error
               </Button>
             </div>
           </CardTitle>
