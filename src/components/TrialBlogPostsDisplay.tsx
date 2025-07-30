@@ -270,9 +270,9 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Trial Posts</h2>
+          <h2 className="text-2xl font-bold text-gray-900">All Blog Posts</h2>
           <p className="text-gray-600 mt-1">
-            {trialPosts.length} trial post{trialPosts.length !== 1 ? 's' : ''} • Expires in 24 hours unless claimed
+            {trialPosts.length} blog post{trialPosts.length !== 1 ? 's' : ''} • Claimed and unclaimed posts from /blog
           </p>
         </div>
         <Button
