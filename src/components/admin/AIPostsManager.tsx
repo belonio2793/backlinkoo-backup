@@ -104,9 +104,20 @@ export function AIPostsManager() {
 
       if (error) {
         console.error('Error loading AI posts:', error);
+
+        // Properly extract error message
+        let errorMessage = 'Failed to load AI-generated posts';
+        if (error.code === 'PGRST116') {
+          errorMessage = 'AI posts table does not exist in your Supabase database. Please create the "ai_generated_posts" table.';
+        } else if (error.message) {
+          errorMessage = `Database error: ${error.message}`;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        }
+
         toast({
           title: "Loading Error",
-          description: "Failed to load AI-generated posts",
+          description: errorMessage,
           variant: "destructive",
         });
         return;
@@ -116,6 +127,14 @@ export function AIPostsManager() {
       calculateStats(data || []);
     } catch (error) {
       console.error('Error loading posts:', error);
+
+      // Handle unexpected errors properly
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred while loading posts';
+      toast({
+        title: "Unexpected Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
