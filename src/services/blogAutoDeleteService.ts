@@ -81,7 +81,7 @@ export class BlogAutoDeleteService {
         expiresAt: post.expires_at
       }));
     } catch (error) {
-      console.error('Error getting expired posts:', error);
+      console.error('Error getting expired posts:', error instanceof Error ? error.message : String(error));
       return [];
     }
   }
