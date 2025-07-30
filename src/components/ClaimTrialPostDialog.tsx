@@ -97,6 +97,9 @@ export function ClaimTrialPostDialog({
 
     setIsClaiming(true);
 
+    // Track claim operation for dashboard router
+    localStorage.setItem('recent_claim_operation', Date.now().toString());
+
     try {
       const { canClaim, hasExistingClaim } = await checkUserFreeClaims();
 
