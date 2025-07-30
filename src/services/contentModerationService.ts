@@ -387,7 +387,10 @@ export class ContentModerationService {
 
       return true;
     } catch (error) {
-      console.error('Failed to review moderation request:', error);
+      console.error('Failed to review moderation request:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: String(error)
+      });
       return false;
     }
   }
