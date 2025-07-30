@@ -280,56 +280,16 @@ export function GlobalBlogGenerator({
         sessionId: request.sessionId
       });
 
-      // Update progress to show content generation with reliable multi-provider system
-      setGenerationStage('Generating high-quality content with reliable AI system (automatic failover enabled)...');
+      // Generate content with direct OpenAI
+      setGenerationStage('Generating high-quality content with OpenAI...');
       setProgress(60);
 
-      // Use reliable content generator for guaranteed success
-      const prompt = `Create a comprehensive ${1500}-word blog post about "${request.primaryKeyword}" that naturally incorporates a backlink to ${request.targetUrl}.
-
-CONTENT REQUIREMENTS:
-- Write exactly 1500 words of high-quality, original content
-- Focus on "${request.primaryKeyword}" as the main topic
-- Use professional tone throughout the article
-- Include practical, actionable advice
-- Structure with proper headings (H1, H2, H3)
-- Natural integration of anchor text "${request.anchorText}" linking to ${request.targetUrl}
-
-OUTPUT FORMAT:
-Return the content as HTML with proper tags including the backlink.`;
-
-      const systemPrompt = 'You are an expert SEO content writer specializing in creating high-quality, engaging blog posts that rank well in search engines.';
-
-      const reliableResult = await reliableContentGenerator.generateContent(prompt, {
-        maxTokens: 3000,
-        temperature: 0.7,
-        systemPrompt,
+      const result = await directOpenAI.generateBlogPost({
         targetUrl: request.targetUrl,
         primaryKeyword: request.primaryKeyword,
-        anchorText: request.anchorText
+        anchorText: request.anchorText,
+        wordCount: 1500
       });
-
-      // Convert reliable result to expected format
-      const result = {
-        id: crypto.randomUUID(),
-        title: `Complete Guide to ${request.primaryKeyword}`,
-        slug: request.primaryKeyword.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-'),
-        content: reliableResult.content,
-        metaDescription: `Comprehensive ${request.primaryKeyword} guide with expert insights and practical tips.`,
-        keywords: [request.primaryKeyword, `${request.primaryKeyword} guide`, `best ${request.primaryKeyword}`],
-        targetUrl: request.targetUrl,
-        anchorText: request.anchorText || request.primaryKeyword,
-        wordCount: reliableResult.content.replace(/<[^>]+>/g, ' ').split(' ').filter(w => w.length > 0).length,
-        readingTime: Math.ceil(reliableResult.content.replace(/<[^>]+>/g, ' ').split(' ').filter(w => w.length > 0).length / 200),
-        seoScore: 85,
-        status: 'unclaimed' as const,
-        createdAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        claimed: false,
-        usage: reliableResult.usage,
-        provider: reliableResult.provider,
-        fallbacksUsed: reliableResult.fallbacksUsed
-      };
 
       // Update progress after successful generation
       setProgress(80);
