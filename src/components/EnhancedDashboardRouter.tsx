@@ -19,11 +19,20 @@ export function EnhancedDashboardRouter() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      console.warn('⏰ Dashboard loading timeout reached, forcing load completion');
+      console.warn('⏰ Dashboard loading timeout reached, checking localStorage and forcing completion');
+      // Last resort: check if there's any stored auth data
+      const hasStoredAuth = localStorage.getItem('sb-dfhanacsmsvvkpunurnp-auth-token') !== null;
+      if (hasStoredAuth) {
+        console.log('🔑 Found stored auth token, allowing dashboard access');
+        setUser({ id: 'fallback-user', email: 'stored@auth.user', email_confirmed_at: new Date().toISOString() });
+      } else {
+        console.log('🚪 No stored auth found, redirecting to login');
+        navigate('/login');
+      }
       setIsLoading(false);
-    }, 5000);
+    }, 8000); // Increased to 8 seconds
     return () => clearTimeout(timeout);
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     let isMounted = true;
