@@ -70,6 +70,7 @@ export class ReliableContentGenerator {
         if (provider === 'openai' && !openAIService.isConfigured()) {
           console.log(`⚠️ Skipping ${provider} - not properly configured`);
           fallbacksUsed.push(provider);
+          this.providerHealth.set(provider, false);
           continue;
         }
         if (provider === 'cohere' && !cohereService.isConfigured()) {
