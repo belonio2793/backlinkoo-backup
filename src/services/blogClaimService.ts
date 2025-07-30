@@ -468,11 +468,15 @@ export class BlogClaimService {
         content: localPost.content || '',
         excerpt: localPost.excerpt || localPost.meta_description || '',
         meta_description: localPost.meta_description || localPost.excerpt || '',
-        keywords: Array.isArray(localPost.keywords) ? localPost.keywords : (localPost.keywords ? [localPost.keywords] : []),
+        keywords: Array.isArray(localPost.keywords)
+          ? localPost.keywords.filter(k => k && typeof k === 'string')
+          : (localPost.keywords && typeof localPost.keywords === 'string' ? [localPost.keywords] : []),
         target_url: localPost.target_url || localPost.targetUrl || '',
         published_url: localPost.published_url || localPost.publishedUrl || '',
         author_name: localPost.author_name || 'User',
-        tags: Array.isArray(localPost.tags) ? localPost.tags : (localPost.tags ? [localPost.tags] : []),
+        tags: Array.isArray(localPost.tags)
+          ? localPost.tags.filter(t => t && typeof t === 'string')
+          : (localPost.tags && typeof localPost.tags === 'string' ? [localPost.tags] : []),
         category: localPost.category || 'General',
         seo_score: Number(localPost.seo_score || localPost.seoScore || 85),
         reading_time: Number(localPost.reading_time || localPost.readingTime || 5),
