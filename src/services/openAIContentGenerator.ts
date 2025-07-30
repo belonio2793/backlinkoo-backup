@@ -133,14 +133,19 @@ export class OpenAIContentGenerator {
    */
   private async generateOpenAIContent(request: OpenAIContentRequest, prompt: string): Promise<string> {
     // Try to get API key from admin environment variables first
+    console.log('🔍 Attempting to get OpenAI API key from admin environment variables...');
     let apiKey = await environmentVariablesService.getVariable('VITE_OPENAI_API_KEY');
+    console.log('🔑 Admin env API key result:', apiKey ? 'Found (' + apiKey.substring(0, 10) + '...)' : 'Not found');
 
     // Fallback to environment variable
     if (!apiKey) {
+      console.log('🔍 Falling back to environment variable...');
       apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      console.log('🔑 Environment variable result:', apiKey ? 'Found (' + apiKey.substring(0, 10) + '...)' : 'Not found');
     }
 
     if (!apiKey) {
+      console.error('❌ No OpenAI API key found in any source');
       throw new Error('OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable.');
     }
 
