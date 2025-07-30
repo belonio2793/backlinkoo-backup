@@ -115,15 +115,22 @@ export class BlogClaimService {
    */
   static async claimPost(postId: string, user: User): Promise<ClaimResult> {
     try {
+      console.log(`🔍 BlogClaimService: Attempting to claim post with ID: ${postId}`);
+
       // First check if the post exists and is claimable
       const { data: existingPost, error: fetchError } = await supabase
         .from('published_blog_posts')
-        .select('id, title, user_id, is_trial_post, expires_at')
+        .select('id, title, user_id, is_trial_post, expires_at, slug')
         .eq('id', postId)
         .eq('status', 'published')
         .single();
 
       if (fetchError || !existingPost) {
+        console.error('❌ BlogClaimService: Post not found in database:', {
+          postId,
+          error: fetchError?.message,
+          hint: 'This might be a localStorage-only post'
+        });
         return {
           success: false,
           message: 'Blog post not found or unavailable for claiming',
@@ -167,6 +174,12 @@ export class BlogClaimService {
           error: updateError.message
         };
       }
+
+      console.log('✅ BlogClaimService: Post claimed successfully:', {
+        postId: updatedPost.id,
+        slug: updatedPost.slug,
+        title: updatedPost.title
+      });
 
       return {
         success: true,
