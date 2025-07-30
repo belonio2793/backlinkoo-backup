@@ -131,7 +131,11 @@ export class OpenAIService {
       }
     }
 
-    throw lastError!;
+    // Ensure we always throw a proper Error with a string message
+    const finalErrorMessage = lastError?.message || String(lastError);
+    const finalError = new Error(`OpenAI API failed: ${finalErrorMessage}`);
+    finalError.cause = lastError;
+    throw finalError;
   }
 
   /**
