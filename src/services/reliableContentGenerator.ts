@@ -59,8 +59,18 @@ export class ReliableContentGenerator {
   } = {}): Promise<GenerationResult> {
     const startTime = Date.now();
     const fallbacksUsed: string[] = [];
-    
-    // Ensure health check is recent
+
+    // Check if any API providers are configured
+    const hasOpenAI = openAIService.isConfigured();
+    const hasCohere = cohereService.isConfigured();
+
+    // If no APIs are configured, go directly to local fallback
+    if (!hasOpenAI && !hasCohere) {
+      console.log('🏠 No API providers configured - using local template immediately');
+      return this.generateEmergencyFallback(prompt, options, ['openai', 'cohere'], Date.now() - startTime);
+    }
+
+    // Ensure health check is recent (only if we have configured providers)
     await this.ensureHealthCheck();
     
     // Try each provider in order
