@@ -949,6 +949,12 @@ export function BlogPost() {
         }}
       />
 
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+      />
+
       {/* Footer */}
       <Footer />
     </div>
