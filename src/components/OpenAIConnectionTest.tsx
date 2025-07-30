@@ -18,16 +18,8 @@ export function OpenAIConnectionTest() {
     setTestResult({ status: 'testing', message: 'Testing OpenAI API connection...' });
 
     try {
-      // Get API key from admin environment variables
-      console.log('🔍 Getting API key from environment variables service...');
-      let apiKey = await environmentVariablesService.getVariable('VITE_OPENAI_API_KEY');
-      
-      // Fallback to environment variable
-      if (!apiKey) {
-        console.log('🔍 Falling back to import.meta.env...');
-        apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      }
-
+      // Simple and direct API key access
+      const apiKey = SecureConfig.OPENAI_API_KEY;
       console.log('🔑 API Key found:', apiKey ? `${apiKey.substring(0, 15)}...` : 'No key found');
 
       if (!apiKey) {
