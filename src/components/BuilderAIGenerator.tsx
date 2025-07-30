@@ -217,13 +217,7 @@ export function BuilderAIGenerator({ onSuccess, variant = 'homepage' }: BuilderA
     <div className="w-full max-w-4xl mx-auto space-y-6">
       {/* Main Generation Card */}
       <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-blue-50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3">
-            <div>
-              <div className="text-xl font-bold text-gray-800">AI Content Generator</div>
-              <div className="text-sm text-gray-600">Generate 1000+ word SEO-optimized blog posts instantly</div>
-            </div>
-          </CardTitle>
+        <CardHeader className="pb-4">
         </CardHeader>
         
         <CardContent className="space-y-6">
