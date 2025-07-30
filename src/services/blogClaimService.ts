@@ -616,7 +616,7 @@ export class BlogClaimService {
           console.error('❌ BlogClaimService: Fallback claim also failed:', fallbackError);
           return {
             success: false,
-            message: `Failed to save post: ${insertError.message || String(insertError)}`,
+            message: userMessage + ': ' + (insertError.message || String(insertError)),
             error: insertError.message || String(insertError)
           };
         }
