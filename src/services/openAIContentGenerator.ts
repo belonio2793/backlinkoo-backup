@@ -68,16 +68,15 @@ export class OpenAIContentGenerator {
     try {
       this.sendProgress('OpenAI Generation', 'Generating content with OpenAI/ChatGPT...', 10);
 
-      // Step 1: Create the OpenAI prompt
+      // Step 1: Create the OpenAI prompt using rotation
       this.sendProgress('Prompt Creation', 'Creating OpenAI prompt...', 20);
-      const openAIPrompt = `Write a 1000 word blog post about ${request.keyword} with a hyperlinked ${request.anchorText} linked to ${request.targetUrl}`;
+      const openAIPrompt = this.getRotatingPrompt(request);
 
       // Step 2: Generate content with OpenAI/ChatGPT
       this.sendProgress('Content Generation', 'Generating content with OpenAI/ChatGPT...', 40);
-      
-      // In a real implementation, this would call ChatGPT API
-      // For now, we'll generate a structured blog post based on the prompt
-      const generatedContent = await this.simulateOpenAIGeneration(request, openAIPrompt);
+
+      // Generate a structured blog post based on the prompt
+      const generatedContent = await this.generateOpenAIContent(request, openAIPrompt);
 
       // Step 3: Process and format the content
       this.sendProgress('Processing', 'Processing and formatting content...', 60);
