@@ -248,7 +248,10 @@ export class ContentModerationService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Failed to store moderation request:', error);
+      console.error('Failed to store moderation request:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: String(error)
+      });
       // Fallback to localStorage for critical requests
       const stored = JSON.parse(localStorage.getItem('moderation_queue') || '[]');
       stored.push(request);
