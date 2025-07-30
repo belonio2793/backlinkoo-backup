@@ -296,37 +296,30 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
   if (error && allPosts.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <AlertCircle className="h-10 w-10 text-red-600" />
+        <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+          <AlertCircle className="h-10 w-10 text-gray-600" />
         </div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-3">No Posts Found</h3>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md mx-auto mb-6">
-          <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
-        </div>
+        <h3 className="text-4xl font-bold text-gray-800 mb-3">404</h3>
+        <h4 className="text-xl font-semibold text-gray-600 mb-6">Not Found</h4>
+        <p className="text-gray-500 mb-8 max-w-md mx-auto">
+          No blog posts could be retrieved from the database or local storage.
+        </p>
         <div className="flex flex-col gap-4 items-center">
           <Button
             onClick={() => loadAllPosts()}
             variant="outline"
-            className="border-red-200 text-red-700 hover:bg-red-50"
+            className="border-gray-300 text-gray-700 hover:bg-gray-50"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
-            Retry Loading Posts
+            Try Again
           </Button>
           <Button
             onClick={() => navigate('/?focus=generator')}
             className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Generate Your First Post
+            Generate New Post
           </Button>
-        </div>
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg max-w-lg mx-auto">
-          <h4 className="font-medium text-blue-800 mb-2">System Status</h4>
-          <div className="text-xs text-blue-700 space-y-1">
-            <div>🔧 Status: {loadingStatus}</div>
-            <div>⏰ Last attempted: {new Date().toLocaleTimeString()}</div>
-            <div>📡 Connection: {navigator.onLine ? 'Online' : 'Offline'}</div>
-          </div>
         </div>
       </div>
     );
