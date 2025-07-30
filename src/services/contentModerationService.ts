@@ -437,7 +437,10 @@ export class ContentModerationService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Failed to get removal list:', error);
+      console.error('Failed to get removal list:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: String(error)
+      });
       return [];
     }
   }
