@@ -437,6 +437,18 @@ export function Blog() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Pricing Modal */}
+      <PricingModal
+        isOpen={pricingModalOpen}
+        onClose={() => setPricingModalOpen(false)}
+        onAuthSuccess={(user) => {
+          toast({
+            title: "Welcome!",
+            description: "You have been successfully signed in. Continue with your purchase.",
+          });
+        }}
+      />
     </div>
   );
 }
