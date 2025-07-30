@@ -804,7 +804,7 @@ const Dashboard = () => {
           console.log('🔍 Profile error (non-critical):', result.error);
         }
       } catch (profileError) {
-        console.warn('��� Profile fetch failed, using defaults:', profileError);
+        console.warn('⚠️ Profile fetch failed, using defaults:', profileError);
       }
 
       // Set user type based on profile
