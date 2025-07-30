@@ -255,7 +255,12 @@ export const TrialBlogShowcase = ({ limit = 6 }: TrialBlogShowcaseProps) => {
                     {post.category || 'Expert Content'}
                   </Badge>
                   <div className="flex items-center gap-1">
-                    {post.is_trial_post ? (
+                    {post.claimed_by_user_id ? (
+                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
+                        <CheckCircle2 className="mr-1 h-3 w-3" />
+                        Claimed
+                      </Badge>
+                    ) : post.is_trial_post ? (
                       <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs">
                         <Clock className="mr-1 h-3 w-3" />
                         Trial
