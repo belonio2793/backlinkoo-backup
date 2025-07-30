@@ -222,7 +222,25 @@ export class OpenAIContentGenerator {
 
     } catch (error) {
       console.error('❌ OpenAI Netlify function call failed:', error);
-      throw error;
+
+      // Provide more helpful error messages
+      if (error.message.includes('404')) {
+        console.log('🔍 Checking if any Netlify functions are available...');
+
+        // Try to call a basic test function to see if Netlify functions work at all
+        try {
+          const testResponse = await fetch('/.netlify/functions/test-connection');
+          if (testResponse.ok) {
+            throw new Error('Netlify functions are working, but OpenAI generation functions are not deployed. Please check function deployment.');
+          } else {
+            throw new Error('Netlify functions appear to be unavailable. This might be a deployment or configuration issue.');
+          }
+        } catch (testError) {
+          throw new Error(`Content generation service unavailable. Please try again later or contact support. (${error.message})`);
+        }
+      }
+
+      throw new Error(`Content generation failed: ${error.message}`);
     }
   }
 
