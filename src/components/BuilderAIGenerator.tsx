@@ -191,6 +191,9 @@ export const BuilderAIGenerator = () => {
     <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-blue-50">
       <CardHeader className="pb-4">
         <CardTitle>Create a Backlink</CardTitle>
+        <p className="text-sm text-gray-600 mt-2">
+          🤖 Uses Builder.io AI with ChatGPT fallback for maximum reliability
+        </p>
       </CardHeader>
 
       <CardContent className="space-y-6">
