@@ -291,7 +291,7 @@ export const PricingModal = ({
     setSelectedPlan("");
     setShowCustomPlan(false);
     setCustomCredits(initialCredits || 200);
-    setPaymentType("payment");
+    setPaymentType(defaultTab);
     setIsGuest(false);
     setGuestEmail("");
     setLoading(false);
