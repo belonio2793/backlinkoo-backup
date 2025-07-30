@@ -96,7 +96,7 @@ export function BlogPost() {
         if (!post) {
           try {
             const blogStorageKey = `blog_post_${slug}`;
-            console.log('�� Looking for blog post with key:', blogStorageKey);
+            console.log('🔍 Looking for blog post with key:', blogStorageKey);
 
             const allKeys = Object.keys(localStorage).filter(key => key.startsWith('blog_post_'));
             console.log('📋 Available blog post keys:', allKeys);
