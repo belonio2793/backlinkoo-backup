@@ -321,7 +321,6 @@ export function BuilderAIGenerator({ onSuccess, variant = 'homepage' }: BuilderA
               </>
             ) : (
               <>
-                <Sparkles className="mr-2 h-5 w-5" />
                 Create Your First Backlink For Free
               </>
             )}
