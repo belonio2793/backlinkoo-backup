@@ -3,6 +3,8 @@
  * Basic content generation without complex retry logic
  */
 
+import { SecureConfig } from '@/lib/secure-config';
+
 interface OpenAIResponse {
   choices: Array<{
     message: {
