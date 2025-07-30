@@ -242,7 +242,7 @@ export function Blog() {
                 className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold px-8 py-4 text-lg shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
               >
                 <Sparkles className="mr-2 h-5 w-5" />
-                Create AI Content
+                Login
               </Button>
               <Button
                 onClick={() => document.getElementById('blog-grid')?.scrollIntoView({ behavior: 'smooth' })}
