@@ -252,7 +252,6 @@ export function AILive() {
 
         if (selectedProvider === 'OpenAI') {
           apiResult = await openAIService.generateContent(prompt, {
-            model: 'gpt-3.5-turbo',
             maxTokens: 3000,
             temperature: 0.7
           });
