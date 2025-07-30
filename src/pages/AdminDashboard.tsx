@@ -104,41 +104,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Infinity className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-semibold">Admin Dashboard</h1>
-            </div>
-            <div className="flex items-center gap-3">
-              <PurgeStorageButton
-                variant="ghost"
-                size="sm"
-                showIcon={true}
-                className="text-muted-foreground hover:text-foreground"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  AdminAuthService.signOutAdmin();
-                  window.location.reload();
-                }}
-                className="text-muted-foreground hover:text-foreground"
-                title="Sign out admin"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-              <Badge variant="default" className="gap-1">
-                <Users className="h-3 w-3" />
-                Administrator
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </header>
 
       <div className="container mx-auto px-4 py-8">
         {/* Stats Overview */}
