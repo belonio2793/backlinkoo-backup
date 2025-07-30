@@ -34,6 +34,20 @@ Site URL is automatically provided by Netlify via:
 2. Navigate to **Site settings** → **Environment variables**
 3. Add each environment variable listed above with their respective values
 
+## GitHub Environment Variables
+
+The following environment variables have been configured in the GitHub repository:
+
+```bash
+OPENAI_API_KEY=sk-proj-...  # OpenAI API key for content generation
+RESEND_API_KEY=re_...       # Resend API key for email services
+SUPABASE_ANON_KEY=ey...     # Supabase anonymous key for client operations
+SUPABASE_URL=https://dfhanacsmsvvkpunurnp.supabase.co  # Supabase project URL
+VITE_OPENAI_API_KEY=sk-proj-...  # Client-side OpenAI API key (Vite env var)
+```
+
+These variables are available for GitHub Actions and can be referenced in workflows for deployment and CI/CD processes.
+
 ## Setting Up in Local Development
 
 1. Create a `.env` file in your project root
