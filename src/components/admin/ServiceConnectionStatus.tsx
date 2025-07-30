@@ -94,13 +94,22 @@ export function ServiceConnectionStatus() {
       const responseTime = Date.now() - startTime;
 
       if (response.ok) {
-        const data = await response.json();
-        updateServiceStatus('Netlify Functions', {
-          status: 'connected',
-          message: 'Netlify functions operational',
-          responseTime,
-          details: data.environment
-        });
+        try {
+          const data = await response.json();
+          updateServiceStatus('Netlify Functions', {
+            status: 'connected',
+            message: 'Netlify functions operational',
+            responseTime,
+            details: data.environment
+          });
+        } catch (jsonError) {
+          // If JSON parsing fails, still mark as connected
+          updateServiceStatus('Netlify Functions', {
+            status: 'connected',
+            message: 'Netlify functions operational (non-JSON response)',
+            responseTime
+          });
+        }
       } else {
         // Fallback: Assume functions are available in dev mode
         updateServiceStatus('Netlify Functions', {
@@ -190,23 +199,44 @@ export function ServiceConnectionStatus() {
       });
 
       const responseTime = Date.now() - startTime;
+      const responseClone = response.clone();
 
       if (response.ok) {
-        const data = await response.json();
-        updateServiceStatus('OpenAI API', {
-          status: 'connected',
-          message: `OpenAI API responding (${data.data?.length || 0} models available)`,
-          hasApiKey: true,
-          responseTime,
-          details: {
-            configured: true,
-            keyPresent: true,
-            keyPreview: apiKey.substring(0, 10) + '...',
-            modelsAvailable: data.data?.length || 0
-          }
-        });
+        try {
+          const data = await response.json();
+          updateServiceStatus('OpenAI API', {
+            status: 'connected',
+            message: `OpenAI API responding (${data.data?.length || 0} models available)`,
+            hasApiKey: true,
+            responseTime,
+            details: {
+              configured: true,
+              keyPresent: true,
+              keyPreview: apiKey.substring(0, 10) + '...',
+              modelsAvailable: data.data?.length || 0
+            }
+          });
+        } catch (jsonError) {
+          updateServiceStatus('OpenAI API', {
+            status: 'connected',
+            message: 'OpenAI API responding (unable to parse response)',
+            hasApiKey: true,
+            responseTime
+          });
+        }
       } else {
-        const errorData = await response.json().catch(() => ({}));
+        let errorData = {};
+        try {
+          errorData = await response.json();
+        } catch (jsonError) {
+          try {
+            const errorText = await responseClone.text();
+            errorData = { error: { message: errorText } };
+          } catch (textError) {
+            errorData = { error: { message: 'Failed to read error response' } };
+          }
+        }
+
         updateServiceStatus('OpenAI API', {
           status: 'error',
           message: `HTTP ${response.status}: ${errorData.error?.message || 'API key invalid'}`,
@@ -249,22 +279,43 @@ export function ServiceConnectionStatus() {
       });
 
       const responseTime = Date.now() - startTime;
+      const responseClone = response.clone();
 
       if (response.ok) {
-        const data = await response.json();
-        updateServiceStatus('Resend Email', {
-          status: 'connected',
-          message: `Resend API responding (${data.data?.length || 0} domains configured)`,
-          hasApiKey: true,
-          responseTime,
-          details: {
-            keyPresent: true,
-            keyPreview: resendKey.substring(0, 6) + '...',
-            domainsConfigured: data.data?.length || 0
-          }
-        });
+        try {
+          const data = await response.json();
+          updateServiceStatus('Resend Email', {
+            status: 'connected',
+            message: `Resend API responding (${data.data?.length || 0} domains configured)`,
+            hasApiKey: true,
+            responseTime,
+            details: {
+              keyPresent: true,
+              keyPreview: resendKey.substring(0, 6) + '...',
+              domainsConfigured: data.data?.length || 0
+            }
+          });
+        } catch (jsonError) {
+          updateServiceStatus('Resend Email', {
+            status: 'connected',
+            message: 'Resend API responding (unable to parse response)',
+            hasApiKey: true,
+            responseTime
+          });
+        }
       } else {
-        const errorData = await response.json().catch(() => ({}));
+        let errorData = {};
+        try {
+          errorData = await response.json();
+        } catch (jsonError) {
+          try {
+            const errorText = await responseClone.text();
+            errorData = { message: errorText };
+          } catch (textError) {
+            errorData = { message: 'Failed to read error response' };
+          }
+        }
+
         updateServiceStatus('Resend Email', {
           status: 'error',
           message: `HTTP ${response.status}: ${errorData.message || 'Invalid API key'}`,
