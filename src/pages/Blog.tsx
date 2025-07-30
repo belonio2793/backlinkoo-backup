@@ -590,7 +590,7 @@ function BlogPostListItem({ post, navigate, formatDate }: any) {
               <div className="flex items-center gap-6 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <User className="h-4 w-4" />
-                  <span>{post.author_name || 'Expert Writer'}</span>
+                  <span>{post.author_name || 'Backlink ∞'}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
