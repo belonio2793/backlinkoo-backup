@@ -95,7 +95,7 @@ export function ClaimTrialPostDialog({
     localStorage.setItem('recent_claim_operation', Date.now().toString());
 
     try {
-      const { canClaim, hasExistingClaim } = await checkUserFreeClaims();
+      const { canClaim, hasExistingClaim, claimedCount, maxClaims, reason } = await checkUserFreeClaims();
 
       if (!currentUser) {
         // Redirect to login/signup page with claim intent stored in localStorage
