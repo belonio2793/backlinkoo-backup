@@ -171,12 +171,22 @@ export const BlogClaimExplanationModal = ({
               <>
                 <Button
                   onClick={onClaim}
+                  disabled={isClaiming}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                   size="lg"
                 >
-                  <CheckCircle2 className="h-5 w-5 mr-2" />
-                  Claim This Blog Post
-                  <ArrowRight className="h-5 w-5 ml-2" />
+                  {isClaiming ? (
+                    <>
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      Claiming Post...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-5 w-5 mr-2" />
+                      Claim This Blog Post
+                      <ArrowRight className="h-5 w-5 ml-2" />
+                    </>
+                  )}
                 </Button>
                 <p className="text-xs text-center text-gray-500">
                   This will permanently save the post to your account
