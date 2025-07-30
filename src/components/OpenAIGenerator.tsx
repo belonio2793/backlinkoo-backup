@@ -272,7 +272,7 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
             <div className="text-sm text-gray-700 font-medium">{progress.details}</div>
             <div className="flex items-center gap-4 text-xs text-gray-500">
               <span>⏰ {progress.timestamp.toLocaleTimeString()}</span>
-              <span>🤖 OpenAI Engine</span>
+              <span>⚡ Content Engine</span>
               <span>📝 Real-time Generation</span>
             </div>
 
