@@ -188,7 +188,11 @@ export function AuthFormTabs({
         result = await Promise.race([quickSignInPromise, quickTimeoutPromise]) as any;
         console.log('✅ Quick auth successful');
       } catch (quickError: any) {
-        console.warn('⚠️ Quick auth failed, trying direct Supabase...', quickError.message);
+        console.warn('⚠️ Quick auth failed, trying direct Supabase...', {
+          message: quickError.message,
+          code: quickError.code,
+          name: quickError.name
+        });
         authError = quickError;
 
         // Method 2: Direct Supabase authentication (fallback)
