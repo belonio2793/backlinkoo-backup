@@ -92,12 +92,12 @@ export class OpenAIService {
 
         if (!shouldRetry || attempt >= config.maxRetries) {
           console.error(`❌ OpenAI API failed after ${attempt} attempts:`, {
-            error: lastError.message,
-            stack: lastError.stack,
-            attempt,
-            maxRetries: config.maxRetries,
-            shouldRetry
-          });
+          error: lastError?.message || String(lastError),
+          stack: lastError?.stack,
+          attempt,
+          maxRetries: config.maxRetries,
+          shouldRetry
+        });
           // Add more detailed error information for debugging
           const enhancedError = new Error(`OpenAI API failed after ${attempt} attempts: ${lastError.message}`);
           enhancedError.cause = lastError;
