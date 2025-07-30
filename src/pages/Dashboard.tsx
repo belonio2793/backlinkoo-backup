@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { BlogClaimDebugPanel } from "@/components/BlogClaimDebugPanel";
 import {
   CreditCard,
   Link,
