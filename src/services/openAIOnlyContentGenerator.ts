@@ -1,20 +1,21 @@
 /**
  * OpenAI-Only Content Generator
- * Simplified content generation using only OpenAI API
- * Created to restore missing service and fix homepage functionality
+ * Simplified content generation using only OpenAI API.
+ * Thin wrapper around the main OpenAI content generator.
+ * Used to restore homepage functionality with no external fallbacks.
  */
 
-import { openAIContentGenerator, ContentGenerationRequest, GeneratedContentResult } from './openAIContentGenerator';
+import {
+  openAIContentGenerator,
+  ContentGenerationRequest,
+  GeneratedContentResult
+} from './openAIContentGenerator';
 
 export type { ContentGenerationRequest, GeneratedContentResult };
 
-/**
- * OpenAI-Only Content Generator Service
- * This is a simplified wrapper around the main OpenAI content generator
- */
 export class OpenAIOnlyContentGenerator {
   /**
-   * Generate content using OpenAI
+   * Generate content using only OpenAI
    */
   async generateContent(request: ContentGenerationRequest): Promise<GeneratedContentResult> {
     return openAIContentGenerator.generateContent(request);
@@ -35,7 +36,7 @@ export class OpenAIOnlyContentGenerator {
   }
 
   /**
-   * Get detailed provider status
+   * Get provider status
    */
   async getProviderStatus(): Promise<Record<string, any>> {
     return openAIContentGenerator.getProviderStatus();

@@ -4,6 +4,7 @@
  */
 
 import { enhancedOpenAIService } from './api/enhancedOpenAI';
+import { multiKeyOpenAIService } from './api/multiKeyOpenAI';
 
 export interface ContentGenerationRequest {
   targetUrl: string;
@@ -70,11 +71,11 @@ export class OpenAIContentGenerator {
 
       // Prepare content generation
 
-      // Use enhanced OpenAI service for maximum reliability
+      // Use multi-key OpenAI service for maximum reliability
       const prompt = this.createPrompt(request);
       const systemPrompt = this.createSystemPrompt(contentType, tone);
 
-      const result = await enhancedOpenAIService.generateContent(prompt, {
+      const result = await multiKeyOpenAIService.generateContent(prompt, {
         model: 'gpt-3.5-turbo',
         maxTokens: Math.max(wordCount * 1.5, 3000),
         temperature: 0.7,
@@ -354,21 +355,20 @@ Focus on creating valuable, informative content that genuinely helps readers whi
    * Test all provider connections
    */
   async testConnection(): Promise<boolean> {
-    const result = await enhancedOpenAIService.testConnection();
-    return result.success;
+    return await multiKeyOpenAIService.testConnection();
   }
 
   /**
    * Get detailed provider status
    */
   async getProviderStatus(): Promise<Record<string, any>> {
-    const health = enhancedOpenAIService.getServiceHealth();
-    const connectionTest = await enhancedOpenAIService.testConnection();
+    const health = multiKeyOpenAIService.getServiceHealth();
+    const connectionTest = await multiKeyOpenAIService.testConnection();
     return {
-      'Enhanced OpenAI': {
-        configured: enhancedOpenAIService.isConfigured(),
+      'Multi-Key OpenAI': {
+        configured: multiKeyOpenAIService.isConfigured(),
         healthy: health.status === 'healthy',
-        connectionWorking: connectionTest.success,
+        connectionWorking: connectionTest,
         details: health.details
       }
     };
@@ -378,7 +378,7 @@ Focus on creating valuable, informative content that genuinely helps readers whi
    * Check if any provider is configured
    */
   isConfigured(): boolean {
-    return enhancedOpenAIService.isConfigured();
+    return multiKeyOpenAIService.isConfigured();
   }
 }
 

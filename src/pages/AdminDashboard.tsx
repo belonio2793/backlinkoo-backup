@@ -28,6 +28,9 @@ import { Footer } from "@/components/Footer";
 import { SystemStatusCheck } from "@/components/SystemStatusCheck";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 import { AdminAuthService } from "@/services/adminAuthService";
+import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
+import { APIConfigurationManager } from "@/components/admin/APIConfigurationManager";
+import { OpenAIConnectionTester } from "@/components/OpenAIConnectionTester";
 import {
   Users,
   Activity,
@@ -179,8 +182,10 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="campaigns" className="space-y-6">
+        <Tabs defaultValue="connections" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="connections">Service Status</TabsTrigger>
+            <TabsTrigger value="api-config">API Configuration</TabsTrigger>
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
             <TabsTrigger value="environment-vars">Environment Variables</TabsTrigger>
             <TabsTrigger value="blog-posts">Blog Posts</TabsTrigger>
@@ -198,6 +203,17 @@ const AdminDashboard = () => {
             <TabsTrigger value="email-test">Email System</TabsTrigger>
             <TabsTrigger value="security">Security & Roles</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="connections">
+            <ServiceConnectionStatus />
+          </TabsContent>
+
+          <TabsContent value="api-config">
+            <div className="space-y-6">
+              <OpenAIConnectionTester />
+              <APIConfigurationManager />
+            </div>
+          </TabsContent>
 
           <TabsContent value="campaigns">
             <CampaignManager />
