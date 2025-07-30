@@ -23,18 +23,9 @@ export function ApiKeyDebugger() {
   const [testResult, setTestResult] = useState<{ valid: boolean; error?: string } | null>(null);
 
   useEffect(() => {
-    // Load current key
-    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
-    const secureKey = SecureConfig.OPENAI_API_KEY;
-    
-    console.log('Environment key:', envKey ? `${envKey.substring(0, 8)}...` : 'Not set');
-    console.log('Secure config key:', secureKey ? `${secureKey.substring(0, 8)}...` : 'Not set');
-    
-    if (envKey) {
-      setCurrentKey(envKey);
-    } else if (secureKey) {
-      setCurrentKey(secureKey);
-    }
+    // API keys are now handled server-side only
+    console.log('API keys managed server-side via Netlify functions');
+    setCurrentKey('[Server-Side Configured]');
   }, []);
 
   const handleTest = async () => {
