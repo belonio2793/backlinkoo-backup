@@ -1,5 +1,5 @@
 /**
- * Simplified AI Content Test - Builder.io inspired design
+ * Simplified AI Content Test - OpenAI powered design
  * Clean, modern interface for instant backlink generation
  */
 
