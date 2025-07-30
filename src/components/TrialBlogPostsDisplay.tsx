@@ -46,6 +46,7 @@ interface TrialBlogPostsDisplayProps {
 
 export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
   const [trialPosts, setTrialPosts] = useState<TrialPost[]>([]);
+  const [claimedPosts, setClaimedPosts] = useState<TrialPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [claimingPostId, setClaimingPostId] = useState<string | null>(null);
   const { toast } = useToast();
