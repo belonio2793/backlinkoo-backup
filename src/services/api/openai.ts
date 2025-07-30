@@ -354,7 +354,7 @@ export class OpenAIService {
             errorMessage += ` - ${response.statusText}`;
           }
 
-          console.error('🔴 OpenAI API Error Details:', fullErrorContext);
+          console.error('🔴 OpenAI API Error Details:', JSON.stringify(fullErrorContext, null, 2));
           const apiError = new Error(errorMessage);
           (apiError as any).context = fullErrorContext;
           throw apiError;
