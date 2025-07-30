@@ -28,6 +28,7 @@ import { SystemStatusCheck } from "@/components/SystemStatusCheck";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 
 import { APIManagementDashboard } from "@/components/admin/APIManagementDashboard";
+import { AutoConfiguredStatus } from "@/components/AutoConfiguredStatus";
 
 import {
   Users,
