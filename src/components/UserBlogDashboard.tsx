@@ -170,7 +170,8 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
       {/* Content Tabs */}
       <Tabs defaultValue="blog-posts" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="blog-posts">Live Blog Posts</TabsTrigger>
+          <TabsTrigger value="blog-posts">My Blog Posts</TabsTrigger>
+          <TabsTrigger value="claimed-posts">Community Claimed Posts</TabsTrigger>
           <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
         </TabsList>
 
