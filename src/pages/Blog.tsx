@@ -189,7 +189,7 @@ export function Blog() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
-                onClick={() => navigate('/create-blog')}
+                onClick={() => navigate('/')}
                 size="lg"
                 className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold px-8 py-4 text-lg shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
               >
