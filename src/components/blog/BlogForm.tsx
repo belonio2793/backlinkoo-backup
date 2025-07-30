@@ -68,7 +68,17 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
         websiteUrl: targetUrl,
         keyword: primaryKeyword,
         anchorText: secondaryKeywords[0] || primaryKeyword,
-        sessionId: crypto.randomUUID()
+        sessionId: crypto.randomUUID(),
+        enhancedOptions: {
+          wordCount: parseInt(wordCount),
+          tone,
+          contentType,
+          targetAudience,
+          keywordDensity,
+          includeCallToAction,
+          optimizeForSnippets,
+          secondaryKeywords
+        }
       });
 
       const { testResult, blogResult } = workflowResult;
