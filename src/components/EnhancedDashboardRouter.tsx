@@ -45,7 +45,13 @@ export function EnhancedDashboardRouter() {
 
       // Quick check: if we're in development or have persistent auth issues, use simplified check
       const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1');
-      const hasRecentAuthError = localStorage.getItem('recent_auth_error');
+      const recentAuthError = localStorage.getItem('recent_auth_error');
+      const hasRecentAuthError = recentAuthError && (Date.now() - parseInt(recentAuthError)) < 60000; // Within last minute
+
+      // Clean up old error flags
+      if (recentAuthError && (Date.now() - parseInt(recentAuthError)) > 60000) {
+        localStorage.removeItem('recent_auth_error');
+      }
 
       if (isDevelopment && hasRecentAuthError) {
         console.log('🔧 Development mode with recent auth errors, using simplified check');
