@@ -229,10 +229,12 @@ export function BlogPost() {
   };
 
   const handleClaimPost = async () => {
-    if (!blogPost) return;
+    if (!blogPost || isClaiming) return;
+
+    setIsClaiming(true);
 
     try {
-      // Call the existing claim functionality through ClaimTrialPostDialog logic
+      // Get user authentication
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
@@ -260,22 +262,31 @@ export function BlogPost() {
         return;
       }
 
-      // Proceed with claim via Netlify function (same as ClaimTrialPostDialog)
+      // Create request body once
+      const requestBody = {
+        slug: blogPost.slug,
+        userId: user.id,
+        userEmail: user.email
+      };
+
+      // Proceed with claim via Netlify function
       const response = await fetch('/.netlify/functions/claim-post', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          slug: blogPost.slug,
-          userId: user.id,
-          userEmail: user.email
-        })
+        body: JSON.stringify(requestBody)
       });
+
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
 
       const data = await response.json();
 
-      if (!response.ok || !data.success) {
+      if (!data.success) {
         throw new Error(data.error || 'Failed to claim blog post');
       }
 
