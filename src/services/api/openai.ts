@@ -88,11 +88,17 @@ export class OpenAIService {
 
         return result;
       } catch (error) {
-        lastError = error as Error;
+        // Ensure we always have a proper Error object
+        if (error instanceof Error) {
+          lastError = error;
+        } else {
+          lastError = new Error(`API error: ${String(error)}`);
+          lastError.cause = error;
+        }
         attempt++;
 
         // Check if we should retry based on error type
-        const shouldRetry = this.shouldRetryError(error as Error, config);
+        const shouldRetry = this.shouldRetryError(lastError, config);
 
         if (!shouldRetry || attempt >= config.maxRetries) {
           console.error(`❌ OpenAI API failed after ${attempt} attempts:`, {
