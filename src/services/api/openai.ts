@@ -1,31 +1,18 @@
-import { environmentVariablesService } from '@/services/environmentVariablesService';
 import { SecureConfig } from '@/lib/secure-config';
 
 export class OpenAIService {
   private apiKey: string = '';
 
   constructor() {
-    // Load fallback API key from environment or secure config
+    // Simple and direct: Use environment variable with SecureConfig fallback
     this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY;
-    this.initializeApiKey(); // Attempt to override with admin value
+    this.validateApiKey();
   }
 
   /**
-   * Dynamically initialize API key from admin environment variable service
+   * Simple API key validation
    */
-  private async initializeApiKey() {
-    try {
-      const adminApiKey = await environmentVariablesService.getVariable('VITE_OPENAI_API_KEY');
-      if (adminApiKey && adminApiKey.startsWith('sk-')) {
-        this.apiKey = adminApiKey;
-        console.log('✅ OpenAI API key loaded from admin environment variables');
-        console.log('🔑 Key preview:', this.apiKey.substring(0, 10) + '...');
-        return;
-      }
-    } catch (error) {
-      console.warn('⚠️ Could not load API key from admin environment variables:', error);
-    }
-
+  private validateApiKey() {
     const invalidKeys = [
       'your-openai-api-key-here',
       'sk-proj-YOUR_ACTUAL_OPENAI_API_KEY_HERE',
@@ -38,7 +25,6 @@ export class OpenAIService {
     } else if (!this.apiKey.startsWith('sk-')) {
       console.warn('❌ OpenAI API key format is incorrect. It should start with "sk-".');
       console.warn('📋 Current key preview:', this.apiKey.substring(0, 10) + '...');
-      console.warn('🔁 Update your environment variable in Netlify or Admin Dashboard');
       this.apiKey = '';
     } else {
       console.log('✅ OpenAI API key configured successfully');
