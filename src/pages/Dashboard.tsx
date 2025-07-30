@@ -1456,7 +1456,9 @@ const Dashboard = () => {
               )}
             </TabsContent>
 
-
+            <TabsContent value="trial" className="space-y-6">
+              <TrialBlogPostsDisplay user={user} />
+            </TabsContent>
 
             <TabsContent value="campaigns" className="space-y-6">
               {showCampaignForm ? (
