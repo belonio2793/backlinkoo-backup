@@ -101,7 +101,7 @@ export function EnhancedBlogContent({ content, keyword, anchorText, targetUrl }:
     switch (type) {
       case 'h1':
         return (
-          <div key={id} className="text-center mb-12">
+          <div key={id} id={id} className="text-center mb-12 scroll-mt-20">
             <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent leading-tight">
               {content}
             </h1>
@@ -111,7 +111,7 @@ export function EnhancedBlogContent({ content, keyword, anchorText, targetUrl }:
 
       case 'h2':
         return (
-          <div key={id} className="mt-16 mb-8">
+          <div key={id} id={id} className="mt-16 mb-8 scroll-mt-20">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
                 <Lightbulb className="w-4 h-4 text-white" />
@@ -126,7 +126,7 @@ export function EnhancedBlogContent({ content, keyword, anchorText, targetUrl }:
 
       case 'h3':
         return (
-          <h3 key={id} className="text-2xl font-semibold text-gray-800 mt-12 mb-6 flex items-center gap-2">
+          <h3 key={id} id={id} className="text-2xl font-semibold text-gray-800 mt-12 mb-6 flex items-center gap-2 scroll-mt-20">
             <ArrowRight className="w-5 h-5 text-blue-500" />
             {content}
           </h3>
