@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, AlertCircle, Loader2, TestTube } from 'lucide-react';
-import { environmentVariablesService } from '@/services/environmentVariablesService';
+import { SecureConfig } from '@/lib/secure-config';
 
 interface TestResult {
   status: 'idle' | 'testing' | 'success' | 'error';
