@@ -139,6 +139,14 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
       } else {
         console.log(`✅ Successfully loaded ${finalPosts.length} blog posts`);
         setError(null);
+
+        // Show success notification on first load
+        if (!silentRefresh && !lastRefresh) {
+          toast({
+            title: "Posts Loaded Successfully",
+            description: `Found ${finalPosts.length} blog posts (${dbPosts.length} from database, ${localPosts.length} from local storage)`,
+          });
+        }
       }
 
     } catch (error: any) {
