@@ -163,6 +163,11 @@ export function BlogEditor({ postId, mode = 'edit', onSave, onCancel }: BlogEdit
           reading_time: Math.ceil(formData.content.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length / 200)
         };
 
+        // If slug changed, add it to updates
+        if (formData.slug.trim() && formData.slug !== blogPost.slug) {
+          updates.slug = formData.slug.trim();
+        }
+
         const updatedPost = await blogService.updateBlogPost(blogPost.id, updates);
 
         toast({
