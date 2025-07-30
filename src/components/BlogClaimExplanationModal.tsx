@@ -1,18 +1,19 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  CheckCircle2, 
-  Clock, 
-  Shield, 
-  Star, 
-  Users, 
-  Link as LinkIcon, 
+import {
+  CheckCircle2,
+  Clock,
+  Shield,
+  Star,
+  Users,
+  Link as LinkIcon,
   Infinity,
   ArrowRight,
   Heart,
   BookOpen,
-  Globe
+  Globe,
+  Loader2
 } from "lucide-react";
 
 interface BlogClaimExplanationModalProps {
