@@ -71,11 +71,11 @@ export class OpenAIContentGenerator {
 
       // Prepare content generation
 
-      // Use enhanced OpenAI service for maximum reliability
+      // Use multi-key OpenAI service for maximum reliability
       const prompt = this.createPrompt(request);
       const systemPrompt = this.createSystemPrompt(contentType, tone);
 
-      const result = await enhancedOpenAIService.generateContent(prompt, {
+      const result = await multiKeyOpenAIService.generateContent(prompt, {
         model: 'gpt-3.5-turbo',
         maxTokens: Math.max(wordCount * 1.5, 3000),
         temperature: 0.7,
