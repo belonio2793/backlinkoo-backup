@@ -123,8 +123,6 @@ export function BlogManagementPanel() {
         description: `Could not load statistics: ${errorMessage}`,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
