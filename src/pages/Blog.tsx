@@ -235,41 +235,7 @@ export function Blog() {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button
-                onClick={() => navigate('/')}
-                size="lg"
-                className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold px-8 py-4 text-lg shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
-              >
-                <Sparkles className="mr-2 h-5 w-5" />
-                Login
-              </Button>
-              <Button
-                onClick={() => document.getElementById('blog-grid')?.scrollIntoView({ behavior: 'smooth' })}
-                variant="outline"
-                size="lg"
-                className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-8 py-4 text-lg"
-              >
-                <BookOpen className="mr-2 h-5 w-5" />
-                Register
-              </Button>
-            </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto pt-12 border-t border-white/20">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-400">{blogPosts.length}</div>
-                <div className="text-sm text-blue-100">AI Articles</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-400">{Math.round(blogPosts.reduce((acc, post) => acc + (post.seo_score || 75), 0) / blogPosts.length) || 0}</div>
-                <div className="text-sm text-blue-100">Avg SEO Score</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-400">{blogPosts.reduce((acc, post) => acc + (post.view_count || 0), 0)}</div>
-                <div className="text-sm text-blue-100">Total Views</div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
