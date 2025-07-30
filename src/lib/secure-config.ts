@@ -141,9 +141,10 @@ export class SecureConfig {
     return decode(SECURE_STORE.paypal_client_secret);
   }
   
-  // API keys
+  // API keys - Environment variables take priority over stored values
   static get OPENAI_API_KEY(): string {
-    return decode(SECURE_STORE.openai_api_key);
+    // Always prefer environment variables (Netlify) over stored values
+    return import.meta.env.VITE_OPENAI_API_KEY || decode(SECURE_STORE.openai_api_key);
   }
   
   static get ANTHROPIC_API_KEY(): string {
