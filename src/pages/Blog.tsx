@@ -251,7 +251,7 @@ export function Blog() {
                 className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-8 py-4 text-lg"
               >
                 <BookOpen className="mr-2 h-5 w-5" />
-                Explore Posts
+                Register
               </Button>
             </div>
 
