@@ -729,30 +729,12 @@ export function BlogPost() {
 
         {/* Enhanced Article Content */}
         <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8 lg:p-12 mb-12">
-          <div className="prose prose-xl prose-blue max-w-none
-            prose-headings:font-bold prose-headings:text-gray-900 prose-headings:tracking-tight
-            prose-h1:text-4xl prose-h1:mb-8 prose-h1:leading-tight prose-h1:text-center
-            prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:text-blue-800 prose-h2:border-b prose-h2:border-blue-100 prose-h2:pb-4
-            prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4 prose-h3:text-blue-700
-            prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-p:text-lg
-            prose-a:text-blue-600 prose-a:font-semibold prose-a:no-underline prose-a:bg-blue-50 prose-a:px-3 prose-a:py-2 prose-a:rounded-lg prose-a:transition-all prose-a:shadow-sm hover:prose-a:bg-blue-100 hover:prose-a:text-blue-700 hover:prose-a:shadow-md
-            prose-strong:text-blue-800 prose-strong:font-bold
-            prose-em:text-blue-600 prose-em:font-medium
-            prose-ul:space-y-4 prose-ol:space-y-4
-            prose-li:text-gray-700 prose-li:leading-relaxed prose-li:text-lg prose-li:pl-2
-            prose-blockquote:border-l-4 prose-blockquote:border-blue-200 prose-blockquote:bg-blue-50 prose-blockquote:pl-8 prose-blockquote:py-6 prose-blockquote:italic prose-blockquote:rounded-r-lg
-            prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-blue-600 prose-code:font-mono
-            prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:rounded-xl prose-pre:p-6 prose-pre:shadow-lg
-            prose-table:border-collapse prose-table:border prose-table:border-gray-200 prose-table:rounded-lg prose-table:overflow-hidden
-            prose-th:bg-blue-50 prose-th:border prose-th:border-gray-200 prose-th:p-4 prose-th:font-semibold prose-th:text-blue-800
-            prose-td:border prose-td:border-gray-200 prose-td:p-4
-            prose-img:rounded-xl prose-img:shadow-lg prose-img:border prose-img:border-gray-200"
-          >
-            <div
-              dangerouslySetInnerHTML={{ __html: formatBlogContent(blogPost.content) }}
-              className="blog-content"
-            />
-          </div>
+          <EnhancedBlogContent
+            content={blogPost.content}
+            keyword={blogPost.keyword}
+            anchorText={blogPost.anchor_text}
+            targetUrl={blogPost.target_url}
+          />
         </div>
 
         {/* Trial Post Management */}
