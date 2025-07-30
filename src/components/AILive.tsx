@@ -23,7 +23,7 @@ import {
   FileText,
   Brain
 } from 'lucide-react';
-import { openAIService } from '@/services/api/openai';
+import { OpenAIService } from '@/services/api/openai';
 
 interface AIProvider {
   name: string;

@@ -1,4 +1,4 @@
-import { environmentVariablesService } from '@/lib/environmentVariablesService';
+import { environmentVariablesService } from '@/services/environmentVariablesService';
 import { SecureConfig } from '@/lib/secureConfig';
 
 export class OpenAIService {
