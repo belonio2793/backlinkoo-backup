@@ -376,6 +376,18 @@ export function BlogEditor({ postId, mode = 'edit', onSave, onCancel }: BlogEdit
                   />
                 </div>
 
+                {/* Inline Slug Editor */}
+                <div>
+                  <Label className="text-sm font-medium">URL Slug</Label>
+                  <InlineSlugEditor
+                    title={formData.title}
+                    keywords={formData.keywords}
+                    initialSlug={formData.slug}
+                    onSlugChange={(slug) => setFormData(prev => ({ ...prev, slug }))}
+                    className="mt-1"
+                  />
+                </div>
+
                 <div>
                   <Label htmlFor="excerpt">Excerpt</Label>
                   <Textarea
