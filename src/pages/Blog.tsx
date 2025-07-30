@@ -156,7 +156,7 @@ export function Blog() {
             <Sparkles className="absolute inset-0 m-auto h-6 w-6 text-blue-600 animate-pulse" />
           </div>
           <div className="space-y-2">
-            <p className="text-xl font-medium text-gray-900">Loading AI-Generated Content</p>
+            <p className="text-xl font-medium text-gray-900">Loading Expert Content</p>
             <p className="text-gray-600">Fetching the latest high-quality blog posts...</p>
           </div>
         </div>
@@ -183,7 +183,7 @@ export function Blog() {
                 </span>
               </h1>
               <p className="text-xl md:text-2xl font-medium text-blue-100 max-w-3xl mx-auto leading-relaxed">
-                Discover high-quality, AI-generated content designed to boost SEO rankings with contextual backlinks
+                Discover high-quality, expert content designed to boost SEO rankings with contextual backlinks
               </p>
             </div>
 
@@ -234,7 +234,7 @@ export function Blog() {
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <Input
-                placeholder="Search AI-generated posts..."
+                placeholder="Search expert posts..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 h-12 text-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -440,7 +440,7 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
       <CardHeader className="pb-4 space-y-4">
         <div className="flex items-start justify-between">
           <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-md">
-            {post.category || 'AI Generated'}
+            {post.category || 'Expert Content'}
           </Badge>
           <div className="flex items-center gap-2">
             {post.is_trial_post ? (
@@ -547,7 +547,7 @@ function BlogPostListItem({ post, navigate, formatDate }: any) {
           <div className="flex-1 space-y-3">
             <div className="flex items-center gap-3">
               <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0">
-                {post.category || 'AI Generated'}
+                {post.category || 'Expert Content'}
               </Badge>
               {post.is_trial_post ? (
                 <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
