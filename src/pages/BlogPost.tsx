@@ -62,6 +62,7 @@ export function BlogPost() {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showClaimExplanation, setShowClaimExplanation] = useState(false);
+  const [isClaiming, setIsClaiming] = useState(false);
 
   useEffect(() => {
     const loadBlogPost = async () => {
