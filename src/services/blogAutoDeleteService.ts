@@ -141,7 +141,26 @@ export class BlogAutoDeleteService {
   async getExpiredPosts(): Promise<ExpiredPost[]> {
     try {
       const now = new Date().toISOString();
-      
+
+      // First check if table exists by doing a simple count
+      console.log('🔍 Checking if blog_posts table exists...');
+      const { data: countData, error: countError } = await supabase
+        .from('blog_posts')
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) {
+        console.error('❌ Table existence check failed:', {
+          message: countError.message,
+          details: countError.details,
+          hint: countError.hint,
+          code: countError.code,
+          suggestion: countError.code === 'PGRST116' ? 'Table blog_posts does not exist' : 'Database access issue'
+        });
+        return [];
+      }
+
+      console.log('✅ Table exists, proceeding with query...');
+
       const { data, error } = await supabase
         .from('blog_posts')
         .select('id, slug, published_url, title, created_at, expires_at')
@@ -150,11 +169,12 @@ export class BlogAutoDeleteService {
         .lt('expires_at', now);
 
       if (error) {
-        console.error('Error fetching expired posts:', {
+        console.error('❌ Error fetching expired posts:', {
           message: error.message,
           details: error.details,
           hint: error.hint,
-          code: error.code
+          code: error.code,
+          query: 'Expired posts query failed'
         });
         return [];
       }
