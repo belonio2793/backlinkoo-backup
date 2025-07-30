@@ -315,7 +315,10 @@ export class ContentModerationService {
         topFlaggedTerms: this.getTopFlaggedTerms(data)
       };
     } catch (error) {
-      console.error('Failed to get moderation stats:', error);
+      console.error('Failed to get moderation stats:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.stack : String(error)
+      });
       return {
         total: 0,
         pending: 0,
