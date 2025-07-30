@@ -382,7 +382,7 @@ export const KeywordResearchTool = () => {
     { code: "PR", name: "Puerto Rico", flag: "🇵🇷" },
     { code: "PS", name: "Palestine", flag: "🇵🇸" },
     { code: "PT", name: "Portugal", flag: "🇵🇹" },
-    { code: "PW", name: "Palau", flag: "🇵�����" },
+    { code: "PW", name: "Palau", flag: "🇵🇼" },
     { code: "PY", name: "Paraguay", flag: "🇵🇾" },
     { code: "QA", name: "Qatar", flag: "🇶🇦" },
     { code: "RE", name: "Réunion", flag: "🇷🇪" },
