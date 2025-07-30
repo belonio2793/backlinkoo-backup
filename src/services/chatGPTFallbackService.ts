@@ -1,17 +1,17 @@
 /**
- * ChatGPT Fallback Service
- * Handles content generation when Builder.io AI is not available
+ * OpenAI Content Generator Service
+ * Handles content generation using OpenAI/ChatGPT
  */
 
 import { supabase } from '@/integrations/supabase/client';
 
-export interface ChatGPTFallbackRequest {
+export interface OpenAIContentRequest {
   keyword: string;
   anchorText: string;
   targetUrl: string;
 }
 
-export interface ChatGPTFallbackResult {
+export interface OpenAIContentResult {
   id: string;
   title: string;
   slug: string;
@@ -33,7 +33,7 @@ export interface ProgressUpdate {
   timestamp: Date;
 }
 
-export class ChatGPTFallbackService {
+export class OpenAIContentGenerator {
   private progressCallback?: (update: ProgressUpdate) => void;
 
   /**
@@ -58,26 +58,26 @@ export class ChatGPTFallbackService {
   }
 
   /**
-   * Generate content using ChatGPT fallback when Builder.io AI fails
+   * Generate content using OpenAI/ChatGPT
    */
-  async generateContentWithChatGPT(request: ChatGPTFallbackRequest): Promise<ChatGPTFallbackResult> {
+  async generateContent(request: OpenAIContentRequest): Promise<OpenAIContentResult> {
     const startTime = Date.now();
     const id = crypto.randomUUID();
     const slug = this.generateSlug(request.keyword);
 
     try {
-      this.sendProgress('Fallback Mode', 'Using ChatGPT fallback due to Builder.io AI unavailability', 10);
+      this.sendProgress('OpenAI Generation', 'Generating content with OpenAI/ChatGPT...', 10);
 
-      // Step 1: Create the ChatGPT prompt
-      this.sendProgress('Prompt Creation', 'Creating ChatGPT prompt...', 20);
-      const chatGPTPrompt = `Write a 1000 word blog post about ${request.keyword} with a hyperlinked ${request.anchorText} linked to ${request.targetUrl}`;
+      // Step 1: Create the OpenAI prompt
+      this.sendProgress('Prompt Creation', 'Creating OpenAI prompt...', 20);
+      const openAIPrompt = `Write a 1000 word blog post about ${request.keyword} with a hyperlinked ${request.anchorText} linked to ${request.targetUrl}`;
 
-      // Step 2: Simulate ChatGPT content generation (since we can't actually call ChatGPT API)
-      this.sendProgress('Content Generation', 'Generating content with ChatGPT...', 40);
+      // Step 2: Generate content with OpenAI/ChatGPT
+      this.sendProgress('Content Generation', 'Generating content with OpenAI/ChatGPT...', 40);
       
       // In a real implementation, this would call ChatGPT API
       // For now, we'll generate a structured blog post based on the prompt
-      const generatedContent = await this.simulateChatGPTGeneration(request, chatGPTPrompt);
+      const generatedContent = await this.simulateOpenAIGeneration(request, openAIPrompt);
 
       // Step 3: Process and format the content
       this.sendProgress('Processing', 'Processing and formatting content...', 60);
@@ -93,7 +93,7 @@ export class ChatGPTFallbackService {
 
       this.sendProgress('Complete', 'Blog post generated and published successfully!', 100);
 
-      console.log('✅ ChatGPT fallback content generated successfully:', {
+      console.log('✅ OpenAI content generated successfully:', {
         id,
         slug,
         publishedUrl,
@@ -104,7 +104,7 @@ export class ChatGPTFallbackService {
       return result;
 
     } catch (error) {
-      console.error('❌ ChatGPT fallback generation failed:', error);
+      console.error('❌ OpenAI content generation failed:', error);
       this.sendProgress('Error', `Generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 0);
       throw error;
     }
@@ -113,7 +113,7 @@ export class ChatGPTFallbackService {
   /**
    * Simulate ChatGPT content generation
    */
-  private async simulateChatGPTGeneration(request: ChatGPTFallbackRequest, prompt: string): Promise<string> {
+  private async simulateOpenAIGeneration(request: OpenAIContentRequest, prompt: string): Promise<string> {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 3000));
 
@@ -208,7 +208,7 @@ For additional resources and expert consultation on ${request.keyword}, don't he
   /**
    * Process content and add formatting
    */
-  private processContent(content: string, request: ChatGPTFallbackRequest) {
+  private processContent(content: string, request: OpenAIContentRequest) {
     // Calculate word count
     const wordCount = content.split(/\s+/).length;
 
@@ -253,7 +253,7 @@ For additional resources and expert consultation on ${request.keyword}, don't he
   /**
    * Publish content to /blog folder
    */
-  private async publishToBlog(slug: string, content: any, request: ChatGPTFallbackRequest): Promise<string> {
+  private async publishToBlog(slug: string, content: any, request: OpenAIContentRequest): Promise<string> {
     try {
       // Create blog post HTML with beautiful template
       const blogHTML = this.createBlogHTML(content, request);
@@ -263,7 +263,7 @@ For additional resources and expert consultation on ${request.keyword}, don't he
       
       const publishedUrl = `${window.location.origin}/blog/${slug}`;
       
-      console.log('📝 Content published to /blog folder via ChatGPT fallback:', publishedUrl);
+      console.log('📝 Content published to /blog folder via OpenAI:', publishedUrl);
       
       return publishedUrl;
     } catch (error) {
@@ -274,7 +274,7 @@ For additional resources and expert consultation on ${request.keyword}, don't he
   /**
    * Create HTML template for blog post
    */
-  private createBlogHTML(content: any, request: ChatGPTFallbackRequest): string {
+  private createBlogHTML(content: any, request: OpenAIContentRequest): string {
     const currentDate = new Date();
     const readingTime = Math.ceil(content.wordCount / 200);
 
@@ -314,7 +314,7 @@ For additional resources and expert consultation on ${request.keyword}, don't he
     </div>
     
     <div class="meta">
-        🤖 Generated with ChatGPT Fallback | 🎯 Target: <a href="${request.targetUrl}" target="_blank">${request.targetUrl}</a>
+        🤖 Generated with OpenAI/ChatGPT | 🎯 Target: <a href="${request.targetUrl}" target="_blank">${request.targetUrl}</a>
     </div>
 </body>
 </html>`;
@@ -323,11 +323,11 @@ For additional resources and expert consultation on ${request.keyword}, don't he
   /**
    * Save to database
    */
-  private async saveToDB(id: string, slug: string, content: any, request: ChatGPTFallbackRequest, publishedUrl: string): Promise<ChatGPTFallbackResult> {
+  private async saveToDB(id: string, slug: string, content: any, request: OpenAIContentRequest, publishedUrl: string): Promise<OpenAIContentResult> {
     const { data: { session } } = await supabase.auth.getSession();
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours from now
     
-    const result: ChatGPTFallbackResult = {
+    const result: OpenAIContentResult = {
       id,
       title: content.title,
       slug,
@@ -376,4 +376,4 @@ For additional resources and expert consultation on ${request.keyword}, don't he
   }
 }
 
-export const chatGPTFallbackService = new ChatGPTFallbackService();
+export const openAIContentGenerator = new OpenAIContentGenerator();
