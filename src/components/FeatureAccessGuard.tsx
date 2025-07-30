@@ -127,6 +127,7 @@ export const FeatureAccessGuard = ({
       <PricingModal
         isOpen={showPricingModal}
         onClose={() => setShowPricingModal(false)}
+        defaultTab="subscription"
         onAuthSuccess={() => {
           setShowPricingModal(false);
           // Refresh the page to check new subscription status
