@@ -212,11 +212,21 @@ export function BlogPostViewer() {
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Status Banner */}
         {blogPost.is_trial_post && (
-          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-            <div className="flex items-center gap-2 text-amber-800">
-              <Clock className="h-4 w-4" />
-              <span className="font-medium">Trial Post</span>
-              {blogPost.expires_at && (
+          <div className={`mb-6 p-4 rounded-lg ${
+            blogPost.user_id ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-amber-200'
+          }`}>
+            <div className={`flex items-center gap-2 ${
+              blogPost.user_id ? 'text-green-800' : 'text-amber-800'
+            }`}>
+              {blogPost.user_id ? (
+                <CheckCircle2 className="h-4 w-4" />
+              ) : (
+                <Clock className="h-4 w-4" />
+              )}
+              <span className="font-medium">
+                {blogPost.user_id ? 'Claimed' : 'Unclaimed'}
+              </span>
+              {blogPost.expires_at && !blogPost.user_id && (
                 <span className="text-sm">
                   • Expires {new Date(blogPost.expires_at).toLocaleDateString()}
                 </span>
