@@ -321,6 +321,10 @@ export function BlogPost() {
       });
     } finally {
       setIsClaiming(false);
+      // Clean up claim operation tracking after 5 seconds
+      setTimeout(() => {
+        localStorage.removeItem('recent_claim_operation');
+      }, 5000);
     }
   };
 
