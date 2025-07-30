@@ -33,6 +33,7 @@ interface PricingModalProps {
   onClose: () => void;
   initialCredits?: number;
   onAuthSuccess?: (user: any) => void;
+  defaultTab?: "payment" | "subscription";
 }
 
 interface PricingPlan {
