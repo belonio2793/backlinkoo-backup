@@ -359,16 +359,7 @@ export function Blog() {
                   : 'Be the first to create expert content! Generate high-quality blog posts with contextual backlinks.'
                 }
               </p>
-              <div className="pt-4">
-                <Button
-                  onClick={() => navigate('/')}
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3"
-                >
-                  <Sparkles className="mr-2 h-5 w-5" />
-                  Create Your First Post
-                </Button>
-              </div>
+
             </div>
           </div>
         ) : (
