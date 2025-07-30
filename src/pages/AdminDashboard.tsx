@@ -11,6 +11,7 @@ import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
 import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
 import { FreeBacklinkMonitor } from "@/components/admin/FreeBacklinkMonitor";
 import { TrialPostCleanupManager } from "@/components/admin/TrialPostCleanupManager";
+import { BlogManagementPanel } from "@/components/admin/BlogManagementPanel";
 import { ContentFilterManager } from "@/components/admin/ContentFilterManager";
 import { ContentModerationQueue } from "@/components/admin/ContentModerationQueue";
 import { AIPostsManager } from "@/components/admin/AIPostsManager";
