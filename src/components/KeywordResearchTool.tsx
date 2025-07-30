@@ -253,7 +253,7 @@ export const KeywordResearchTool = () => {
     { code: "CW", name: "Curaçao", flag: "🇨🇼" },
     { code: "CX", name: "Christmas Island", flag: "🇨🇽" },
     { code: "CY", name: "Cyprus", flag: "🇨🇾" },
-    { code: "CZ", name: "Czech Republic", flag: "🇨🇿" },
+    { code: "CZ", name: "Czech Republic", flag: "🇨���" },
     { code: "DE", name: "Germany", flag: "🇩🇪" },
     { code: "DJ", name: "Djibouti", flag: "🇩🇯" },
     { code: "DK", name: "Denmark", flag: "🇩🇰" },
@@ -443,7 +443,7 @@ export const KeywordResearchTool = () => {
     { code: "WF", name: "Wallis and Futuna", flag: "🇼🇫" },
     { code: "WS", name: "Samoa", flag: "🇼🇸" },
     { code: "YE", name: "Yemen", flag: "🇾����" },
-    { code: "YT", name: "Mayotte", flag: "����🇹" },
+    { code: "YT", name: "Mayotte", flag: "🇾🇹" },
     { code: "ZA", name: "South Africa", flag: "🇿🇦" },
     { code: "ZM", name: "Zambia", flag: "🇿🇲" },
     { code: "ZW", name: "Zimbabwe", flag: "🇿🇼" }
