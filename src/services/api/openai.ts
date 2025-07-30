@@ -58,8 +58,12 @@ export class OpenAIService {
     if (!this.apiKey || this.apiKey === 'your-openai-api-key-here' || this.apiKey === 'sk-proj-YOUR_ACTUAL_OPENAI_API_KEY_HERE') {
       console.warn('❌ OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable.');
       console.warn('📋 Get your API key from: https://platform.openai.com/api-keys');
+    } else if (!this.apiKey.startsWith('sk-')) {
+      console.warn('❌ OpenAI API key appears to be invalid format. Keys should start with "sk-"');
+      console.warn('📋 Current key preview:', this.apiKey.substring(0, 10) + '...');
     } else {
-      console.log('✅ OpenAI API key configured successfully via secure config');
+      console.log('✅ OpenAI API key configured successfully');
+      console.log('🔑 Key preview:', this.apiKey.substring(0, 10) + '...');
     }
   }
 
