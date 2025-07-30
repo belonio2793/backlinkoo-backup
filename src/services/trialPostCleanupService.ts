@@ -35,7 +35,7 @@ export class TrialPostCleanupService {
         .from('published_blog_posts')
         .select('id, slug, title, expires_at, user_id, target_url')
         .eq('is_trial_post', true)
-        .not('expires_at', 'is', null);
+        .neq('expires_at', null);
 
       if (!error && dbPosts) {
         dbPosts.forEach(post => {

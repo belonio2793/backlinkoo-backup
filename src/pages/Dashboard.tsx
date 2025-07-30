@@ -58,49 +58,281 @@ import type { User } from '@supabase/supabase-js';
 
 
 // TrialBlogPostsDisplay component for the trial tab
-const TrialBlogPostsDisplay = () => {
-  const [trialPosts, setTrialPosts] = useState<any[]>([]);
+const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
+  const [allPosts, setAllPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [loadingStatus, setLoadingStatus] = useState<string>('Initializing...');
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [claimingPostId, setClaimingPostId] = useState<string | null>(null);
+  const [showDebug, setShowDebug] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<any>({});
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Load trial posts from localStorage
-    const loadTrialPosts = () => {
+    loadAllPosts();
+
+    // Refresh every 30 seconds to check for new posts
+    const interval = setInterval(() => {
+      loadAllPosts(true); // Silent refresh
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadAllPosts = async (silentRefresh = false) => {
+    try {
+      if (!silentRefresh) {
+        setLoading(true);
+        setError(null);
+      }
+      setLoadingStatus('Connecting to database...');
+
+      // Load from database using the blog claim service
+      const { BlogClaimService } = await import('@/services/blogClaimService');
+
+      setLoadingStatus('Fetching published blog posts...');
+      const dbPosts = await BlogClaimService.getClaimablePosts(20);
+
+      setLoadingStatus('Checking local storage...');
+      // Also load from localStorage for backwards compatibility
+      const localPosts = [];
       try {
         const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-        const validTrialPosts = allBlogs.filter((post: any) => {
-          if (!post.is_trial_post) return false;
-
-          // Check if expired
+        const validLocalPosts = allBlogs.filter((post: any) => {
           if (post.expires_at) {
             const isExpired = new Date() > new Date(post.expires_at);
             return !isExpired;
           }
           return true;
         });
-
-        setTrialPosts(validTrialPosts.slice(0, 6)); // Show up to 6 posts
+        localPosts.push(...validLocalPosts);
+        console.log(`📦 Found ${validLocalPosts.length} valid local posts`);
       } catch (error) {
-        console.error('Error loading trial posts:', error);
-        setTrialPosts([]);
+        console.warn('Error loading local posts:', error);
       }
-    };
 
-    loadTrialPosts();
+      setLoadingStatus('Combining and deduplicating posts...');
+      // Combine and deduplicate posts (prioritize database posts)
+      const combinedPosts = [...dbPosts];
+      localPosts.forEach(localPost => {
+        if (!combinedPosts.find(dbPost => dbPost.slug === localPost.slug)) {
+          combinedPosts.push(localPost);
+        }
+      });
 
-    // Refresh every 30 seconds to check for new posts
-    const interval = setInterval(loadTrialPosts, 30000);
-    return () => clearInterval(interval);
-  }, []);
+      const finalPosts = combinedPosts.slice(0, 12);
 
-  if (trialPosts.length === 0) {
+      // Update debug information
+      const debugData = {
+        timestamp: new Date().toISOString(),
+        dbPosts: dbPosts.length,
+        localPosts: localPosts.length,
+        combinedPosts: combinedPosts.length,
+        displayedPosts: finalPosts.length,
+        userAuthenticated: !!user,
+        userId: user?.id || null,
+        loadingStatus,
+        hasError: !!error,
+        errorMessage: error || null,
+        connectionOnline: navigator.onLine
+      };
+
+      setDebugInfo(debugData);
+
+      console.log(`📊 Blog Posts Summary:
+        - Database posts: ${dbPosts.length}
+        - Local storage posts: ${localPosts.length}
+        - Combined unique posts: ${combinedPosts.length}
+        - Displaying: ${finalPosts.length}`);
+
+      setAllPosts(finalPosts);
+      setLastRefresh(new Date());
+
+      // Show status in console for transparency
+      if (finalPosts.length === 0) {
+        console.warn('⚠️ No blog posts found in database or local storage');
+        if (!silentRefresh) {
+          setError('NOT_FOUND');
+        }
+      } else {
+        console.log(`✅ Successfully loaded ${finalPosts.length} blog posts`);
+        setError(null);
+
+        // Show success notification on first load
+        if (!silentRefresh && !lastRefresh) {
+          toast({
+            title: "Posts Loaded Successfully",
+            description: `Found ${finalPosts.length} blog posts (${dbPosts.length} from database, ${localPosts.length} from local storage)`,
+          });
+        }
+      }
+
+    } catch (error: any) {
+      console.error('❌ Error loading posts:', error);
+      setError('NOT_FOUND');
+
+      // Don't clear posts on error, keep showing last known state
+      if (!silentRefresh) {
+        toast({
+          title: "Not Found",
+          description: "Unable to fetch blog posts from any source.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      if (!silentRefresh) {
+        setLoading(false);
+      }
+      setLoadingStatus('Ready');
+    }
+  };
+
+  const handleClaimPost = async (post: any) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to claim blog posts.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setClaimingPostId(post.id);
+      const { BlogClaimService } = await import('@/services/blogClaimService');
+
+      // Check if user can claim more posts
+      const { canClaim, reason } = await BlogClaimService.canUserClaimMore(user);
+      if (!canClaim) {
+        toast({
+          title: "Claim Limit Reached",
+          description: reason,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const result = await BlogClaimService.claimPost(post.id, user);
+
+      if (result.success) {
+        toast({
+          title: "Post Claimed Successfully",
+          description: result.message,
+        });
+        await loadAllPosts(); // Refresh the list
+      } else {
+        toast({
+          title: "Claim Failed",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error claiming post:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while claiming the post.",
+        variant: "destructive",
+      });
+    } finally {
+      setClaimingPostId(null);
+    }
+  };
+
+  const handleUnclaimPost = async (post: any) => {
+    if (!user) return;
+
+    try {
+      setClaimingPostId(post.id);
+      const { BlogClaimService } = await import('@/services/blogClaimService');
+
+      const result = await BlogClaimService.unclaimPost(post.id, user);
+
+      if (result.success) {
+        toast({
+          title: "Post Unclaimed",
+          description: result.message,
+        });
+        await loadAllPosts(); // Refresh the list
+      } else {
+        toast({
+          title: "Unclaim Failed",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error unclaiming post:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while unclaiming the post.",
+        variant: "destructive",
+      });
+    } finally {
+      setClaimingPostId(null);
+    }
+  };
+
+  if (loading) {
     return (
       <div className="text-center py-12">
-        <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
           <BarChart3 className="h-10 w-10 text-purple-600" />
         </div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-3">No Trial Posts Yet</h3>
+        <h3 className="text-xl font-semibold text-gray-800 mb-3">Loading Posts...</h3>
+        <p className="text-gray-600 mb-4">{loadingStatus}</p>
+        <div className="max-w-sm mx-auto bg-gray-200 rounded-full h-2 mb-4">
+          <div className="bg-purple-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+        </div>
+        <p className="text-xs text-gray-500">
+          🔍 Checking database and local storage for blog posts...
+        </p>
+      </div>
+    );
+  }
+
+  if (error && allPosts.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+          <AlertCircle className="h-10 w-10 text-gray-600" />
+        </div>
+        <h3 className="text-4xl font-bold text-gray-800 mb-3">404</h3>
+        <h4 className="text-xl font-semibold text-gray-600 mb-6">Not Found</h4>
+        <p className="text-gray-500 mb-8 max-w-md mx-auto">
+          No blog posts could be retrieved from the database or local storage.
+        </p>
+        <div className="flex flex-col gap-4 items-center">
+          <Button
+            onClick={() => loadAllPosts()}
+            variant="outline"
+            className="border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Try Again
+          </Button>
+          <Button
+            onClick={() => navigate('/?focus=generator')}
+            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Generate New Post
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (allPosts.length === 0 && !error) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <BarChart3 className="h-10 w-10 text-amber-600" />
+        </div>
+        <h3 className="text-xl font-semibold text-gray-800 mb-3">No Posts Available</h3>
         <p className="text-gray-600 mb-6 max-w-md mx-auto">
-          Start creating amazing blog posts with our free trial generator. Your content will appear here instantly.
+          No blog posts are currently available for claiming. This is expected if no posts have been generated yet.
         </p>
         <Button
           onClick={() => navigate('/?focus=generator')}
@@ -109,117 +341,254 @@ const TrialBlogPostsDisplay = () => {
           <Plus className="h-4 w-4 mr-2" />
           Create Your First Post
         </Button>
+        <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg max-w-lg mx-auto">
+          <h4 className="font-medium text-gray-800 mb-2">System Status ✅</h4>
+          <div className="text-xs text-gray-600 space-y-1">
+            <div>🔧 Status: {loadingStatus}</div>
+            <div>⏰ Last check: {lastRefresh?.toLocaleTimeString() || 'Never'}</div>
+            <div>🔄 Auto-refresh: Every 30 seconds</div>
+            <div>📡 Connection: {navigator.onLine ? 'Online' : 'Offline'}</div>
+          </div>
+        </div>
       </div>
     );
   }
 
+  // Separate posts into categories
+  const userClaimedPosts = allPosts.filter(post => post.user_id === user?.id && !post.is_trial_post);
+  const availablePosts = allPosts.filter(post => !post.user_id || post.is_trial_post);
+  const otherClaimedPosts = allPosts.filter(post => post.user_id && post.user_id !== user?.id && !post.is_trial_post);
+
   return (
     <div className="space-y-6">
+      {/* Real-time Status Header */}
+      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium text-gray-700">Live</span>
+          </div>
+          <div className="text-sm text-gray-600">
+            Last updated: {lastRefresh ? lastRefresh.toLocaleTimeString() : 'Loading...'}
+          </div>
+          {error && (
+            <div className="flex items-center gap-1 text-amber-600">
+              <AlertCircle className="h-4 w-4" />
+              <span className="text-xs">Partial load</span>
+            </div>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setShowDebug(!showDebug)}
+            variant="ghost"
+            size="sm"
+            className="text-gray-500 hover:text-gray-700"
+          >
+            🔧 Debug
+          </Button>
+          <Button
+            onClick={() => loadAllPosts()}
+            variant="outline"
+            size="sm"
+            className="border-blue-200 text-blue-700 hover:bg-blue-50"
+          >
+            <RefreshCw className="h-3 w-3 mr-1" />
+            Refresh
+          </Button>
+        </div>
+      </div>
+
+      {/* Debug Panel */}
+      {showDebug && (
+        <div className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-xs border border-gray-700">
+          <div className="flex justify-between items-center mb-3">
+            <h4 className="text-green-300 font-semibold">🔧 Debug Information</h4>
+            <Button
+              onClick={() => setShowDebug(false)}
+              variant="ghost"
+              size="sm"
+              className="text-gray-400 hover:text-white p-1 h-auto"
+            >
+              ✕
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <div className="text-yellow-400 mb-2">System Status:</div>
+              <div>• Status: {debugInfo.loadingStatus}</div>
+              <div>• Online: {debugInfo.connectionOnline ? '✅' : '❌'}</div>
+              <div>• Last Update: {debugInfo.timestamp}</div>
+              <div>• User Auth: {debugInfo.userAuthenticated ? '✅' : '❌'}</div>
+              <div>• User ID: {debugInfo.userId || 'None'}</div>
+            </div>
+            <div>
+              <div className="text-yellow-400 mb-2">Data Sources:</div>
+              <div>• Database Posts: {debugInfo.dbPosts}</div>
+              <div>• Local Storage: {debugInfo.localPosts}</div>
+              <div>• Combined Total: {debugInfo.combinedPosts}</div>
+              <div>• Displayed: {debugInfo.displayedPosts}</div>
+              <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '��'}</div>
+            </div>
+          </div>
+          {debugInfo.errorMessage && (
+            <div className="mt-3 p-2 bg-red-900 border border-red-700 rounded text-red-300">
+              <div className="text-red-200 font-semibold">Error Details:</div>
+              <div className="whitespace-pre-wrap">{debugInfo.errorMessage}</div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Summary Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
-          <div className="text-2xl font-bold text-purple-700">{trialPosts.length}</div>
-          <div className="text-sm text-purple-600">Generated Posts</div>
-        </div>
-        <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
-          <div className="text-2xl font-bold text-blue-700">
-            {Math.round(trialPosts.reduce((acc, post) => acc + (post.seo_score || 0), 0) / trialPosts.length) || 0}
-          </div>
-          <div className="text-sm text-blue-600">Avg SEO Score</div>
+          <div className="text-2xl font-bold text-purple-700">{allPosts.length}</div>
+          <div className="text-sm text-purple-600">Total Posts</div>
         </div>
         <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200">
-          <div className="text-2xl font-bold text-emerald-700">
-            {trialPosts.reduce((acc, post) => acc + (post.reading_time || 0), 0)}m
-          </div>
-          <div className="text-sm text-emerald-600">Total Reading</div>
+          <div className="text-2xl font-bold text-emerald-700">{userClaimedPosts.length}</div>
+          <div className="text-sm text-emerald-600">Your Posts</div>
+        </div>
+        <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+          <div className="text-2xl font-bold text-blue-700">{availablePosts.length}</div>
+          <div className="text-sm text-blue-600">Available</div>
         </div>
       </div>
 
-      {/* Blog Posts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {trialPosts.map((post, index) => {
-          const timeRemaining = post.expires_at ?
-            Math.max(0, Math.floor((new Date(post.expires_at).getTime() - Date.now()) / (1000 * 60 * 60))) : 0;
-
-          return (
-            <Card
-              key={post.id || index}
-              className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50 overflow-hidden"
-            >
-              <CardContent className="p-6">
-                {/* Post Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-purple-700 transition-colors">
-                      {post.title || 'Untitled Post'}
-                    </h3>
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                      {post.excerpt || 'No description available'}
-                    </p>
+      {/* Claimed Posts Section */}
+      {userClaimedPosts.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+            Your Claimed Posts ({userClaimedPosts.length})
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {userClaimedPosts.map((post, index) => (
+              <Card key={post.id || index} className="group hover:shadow-lg transition-all duration-300 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="font-medium text-gray-800 line-clamp-2 text-sm">{post.title}</h4>
+                    <Badge variant="outline" className="bg-emerald-50 border-emerald-200 text-emerald-700 text-xs">Owned</Badge>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="bg-purple-50 border-purple-200 text-purple-700 text-xs"
-                  >
-                    Trial
-                  </Badge>
-                </div>
+                  <div className="flex gap-2 mb-3">
+                    <Button size="sm" className="flex-1" onClick={() => navigate(`/blog/${post.slug}`)}>
+                      <Eye className="h-3 w-3 mr-1" />View
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleUnclaimPost(post)}
+                      disabled={claimingPostId === post.id}
+                      className="border-red-200 text-red-600 hover:bg-red-50"
+                    >
+                      Unclaim
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
-                {/* Post Stats */}
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                  <div className="text-center p-2 bg-blue-50 rounded-lg">
-                    <div className="text-sm font-semibold text-blue-700">
-                      {post.seo_score || 0}
+      {/* Available Posts Section */}
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <Target className="h-5 w-5 text-blue-600" />
+          Available Posts ({availablePosts.length})
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {availablePosts.map((post, index) => {
+            const timeRemaining = post.expires_at ?
+              Math.max(0, Math.floor((new Date(post.expires_at).getTime() - Date.now()) / (1000 * 60 * 60))) : null;
+
+            return (
+              <Card key={post.id || index} className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="font-medium text-gray-800 line-clamp-2 text-sm">{post.title}</h4>
+                    <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-700 text-xs">
+                      {post.is_trial_post ? 'Trial' : 'Available'}
+                    </Badge>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-3 gap-2 mb-3 text-xs">
+                    <div className="text-center p-2 bg-blue-50 rounded">
+                      <div className="font-semibold text-blue-700">{post.seo_score || 0}</div>
+                      <div className="text-blue-600">SEO</div>
                     </div>
-                    <div className="text-xs text-blue-600">SEO</div>
-                  </div>
-                  <div className="text-center p-2 bg-emerald-50 rounded-lg">
-                    <div className="text-sm font-semibold text-emerald-700">
-                      {post.reading_time || 0}m
+                    <div className="text-center p-2 bg-emerald-50 rounded">
+                      <div className="font-semibold text-emerald-700">{post.reading_time || 0}m</div>
+                      <div className="text-emerald-600">Read</div>
                     </div>
-                    <div className="text-xs text-emerald-600">Read</div>
-                  </div>
-                  <div className="text-center p-2 bg-amber-50 rounded-lg">
-                    <div className="text-sm font-semibold text-amber-700">
-                      {timeRemaining}h
-                    </div>
-                    <div className="text-xs text-amber-600">Left</div>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
-                    onClick={() => navigate(`/blog/${post.slug}`)}
-                  >
-                    <Eye className="h-3 w-3 mr-1" />
-                    View
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-purple-200 text-purple-700 hover:bg-purple-50"
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                  </Button>
-                </div>
-
-                {/* Expiry Warning */}
-                {timeRemaining < 6 && (
-                  <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
-                    <div className="flex items-center gap-2 text-xs text-amber-700">
-                      <AlertCircle className="h-3 w-3" />
-                      <span>Expires in {timeRemaining} hours - Upgrade to keep forever!</span>
+                    <div className="text-center p-2 bg-purple-50 rounded">
+                      <div className="font-semibold text-purple-700">{Math.floor((post.word_count || 0) / 100)}k</div>
+                      <div className="text-purple-600">Words</div>
                     </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
+
+                  <div className="flex gap-2 mb-3">
+                    <Button size="sm" variant="outline" className="flex-1" onClick={() => navigate(`/blog/${post.slug}`)}>
+                      <Eye className="h-3 w-3 mr-1" />View
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleClaimPost(post)}
+                      disabled={claimingPostId === post.id || !user}
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                    >
+                      {claimingPostId === post.id ? (
+                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <Plus className="h-3 w-3 mr-1" />
+                          Claim
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {/* Expiry Warning */}
+                  {timeRemaining !== null && timeRemaining < 6 && (
+                    <div className="p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700">
+                      <AlertCircle className="h-3 w-3 inline mr-1" />
+                      Expires in {timeRemaining}h
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
+
+      {/* Other Claimed Posts Section */}
+      {otherClaimedPosts.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Users className="h-5 w-5 text-gray-600" />
+            Claimed by Others ({otherClaimedPosts.length})
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {otherClaimedPosts.map((post, index) => (
+              <Card key={post.id || index} className="border-gray-200 bg-gradient-to-br from-gray-50 to-white opacity-75">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="font-medium text-gray-600 line-clamp-2 text-sm">{post.title}</h4>
+                    <Badge variant="outline" className="bg-gray-50 border-gray-300 text-gray-600 text-xs">Claimed</Badge>
+                  </div>
+                  <div className="text-xs text-gray-500 mb-3">claimed***@user.com</div>
+                  <Button size="sm" variant="outline" className="w-full" onClick={() => navigate(`/blog/${post.slug}`)}>
+                    <Eye className="h-3 w-3 mr-1" />View Only
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Call to Action */}
       <div className="text-center pt-6 border-t border-gray-200">
@@ -228,7 +597,7 @@ const TrialBlogPostsDisplay = () => {
           className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Generate Another Post
+          Generate New Post
         </Button>
       </div>
     </div>
@@ -1236,7 +1605,7 @@ const Dashboard = () => {
                         </CardHeader>
 
                         <CardContent className="p-6">
-                          <TrialBlogPostsDisplay />
+                          <TrialBlogPostsDisplay user={user} />
                         </CardContent>
                       </Card>
                     </div>
