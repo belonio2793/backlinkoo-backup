@@ -99,7 +99,8 @@ export class OpenAIService {
           shouldRetry
         });
           // Add more detailed error information for debugging
-          const enhancedError = new Error(`OpenAI API failed after ${attempt} attempts: ${lastError.message}`);
+          const errorMessage = lastError?.message || String(lastError);
+          const enhancedError = new Error(`OpenAI API failed after ${attempt} attempts: ${errorMessage}`);
           enhancedError.cause = lastError;
           throw enhancedError;
         }
