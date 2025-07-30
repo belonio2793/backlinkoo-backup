@@ -386,11 +386,18 @@ export class ContentModerationService {
 
   private getTopFlaggedTerms(requests: ModerationRequest[]): Array<{ term: string; count: number }> {
     const termCounts: { [key: string]: number } = {};
-    
-    requests.forEach(req => {
-      req.flagged_terms.forEach(term => {
-        termCounts[term] = (termCounts[term] || 0) + 1;
-      });
+
+    // Ensure requests is an array and handle null/undefined safely
+    const safeRequests = Array.isArray(requests) ? requests : [];
+
+    safeRequests.forEach(req => {
+      if (req?.flagged_terms && Array.isArray(req.flagged_terms)) {
+        req.flagged_terms.forEach(term => {
+          if (term && typeof term === 'string' && term.trim()) {
+            termCounts[term] = (termCounts[term] || 0) + 1;
+          }
+        });
+      }
     });
 
     return Object.entries(termCounts)
