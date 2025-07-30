@@ -18,6 +18,93 @@ export class BlogAutoDeleteService {
   private cleanupInterval?: number;
   private readonly CLEANUP_INTERVAL_MS = 60 * 60 * 1000; // Check every hour
 
+  /**
+   * Debug function to test the exact error
+   */
+  async debugDatabaseConnection(): Promise<void> {
+    console.log('🔍 DEBUG: Testing database connection...');
+
+    try {
+      // Test 1: Basic connection
+      console.log('🔍 Test 1: Basic Supabase connection');
+      const { data: basicTest, error: basicError } = await supabase.from('blog_posts').select('count', { count: 'exact', head: true });
+
+      if (basicError) {
+        console.error('❌ Basic connection failed:', {
+          message: basicError.message,
+          details: basicError.details,
+          hint: basicError.hint,
+          code: basicError.code,
+          fullError: basicError
+        });
+        return;
+      }
+
+      console.log('✅ Basic connection successful, count:', basicTest);
+
+      // Test 2: Table structure check
+      console.log('🔍 Test 2: Checking table structure');
+      const { data: structureTest, error: structureError } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .limit(1);
+
+      if (structureError) {
+        console.error('❌ Table structure check failed:', {
+          message: structureError.message,
+          details: structureError.details,
+          hint: structureError.hint,
+          code: structureError.code,
+          fullError: structureError
+        });
+        return;
+      }
+
+      console.log('✅ Table structure check passed, sample data:', structureTest);
+
+      // Test 3: Actual query that's failing
+      console.log('🔍 Test 3: Testing the actual failing query');
+      const now = new Date().toISOString();
+      const { data: queryTest, error: queryError } = await supabase
+        .from('blog_posts')
+        .select('id, slug, published_url, title, created_at, expires_at')
+        .eq('status', 'unclaimed')
+        .eq('is_trial_post', true)
+        .lt('expires_at', now);
+
+      if (queryError) {
+        console.error('❌ Query test failed:', {
+          message: queryError.message,
+          details: queryError.details,
+          hint: queryError.hint,
+          code: queryError.code,
+          fullError: queryError,
+          query: {
+            table: 'blog_posts',
+            select: 'id, slug, published_url, title, created_at, expires_at',
+            filters: {
+              status: 'unclaimed',
+              is_trial_post: true,
+              expires_at_lt: now
+            }
+          }
+        });
+        return;
+      }
+
+      console.log('✅ Query test passed, results:', queryTest);
+
+    } catch (error) {
+      console.error('❌ DEBUG: Caught exception:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        type: typeof error,
+        stringified: String(error)
+      });
+    }
+  }
+
   constructor() {
     this.startCleanupInterval();
   }
