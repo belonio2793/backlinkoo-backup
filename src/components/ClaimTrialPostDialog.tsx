@@ -248,7 +248,7 @@ export function ClaimTrialPostDialog({
             Claim Your Free Trial Post
           </DialogTitle>
           <DialogDescription>
-            Save this trial post permanently. Each account gets one free claim since posts auto-delete after 24 hours.
+            Save this trial post permanently. Each account can claim up to 3 posts since they auto-delete after 24 hours unless claimed.
           </DialogDescription>
         </DialogHeader>
 
