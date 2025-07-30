@@ -158,7 +158,7 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
       <CardHeader className="pb-4">
         <CardTitle>Create a Backlink</CardTitle>
         <p className="text-sm text-gray-600 mt-2">
-          🤖 Powered by OpenAI & ChatGPT for maximum reliability
+          🚀 Powered by advanced content generation for maximum reliability
         </p>
       </CardHeader>
 
