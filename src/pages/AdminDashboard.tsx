@@ -203,6 +203,10 @@ const AdminDashboard = () => {
             <CampaignManager />
           </TabsContent>
 
+          <TabsContent value="environment-vars">
+            <EnvironmentVariablesManager />
+          </TabsContent>
+
           <TabsContent value="blog-posts">
             <AdminBlogManager />
           </TabsContent>
