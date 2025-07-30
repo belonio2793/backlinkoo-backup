@@ -52,8 +52,10 @@ export class BlogClaimService {
           message: error.message,
           details: error.details,
           hint: error.hint,
-          code: error.code
+          code: error.code,
+          fullError: error
         });
+        console.error('❌ BlogClaimService: Raw error object:', error);
         return [];
       }
 

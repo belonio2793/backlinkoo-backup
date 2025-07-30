@@ -36,7 +36,8 @@ import {
   ChevronDown,
   Eye,
   Sparkles,
-  Crown
+  Crown,
+  RefreshCw
 } from "lucide-react";
 import { PaymentModal } from "@/components/PaymentModal";
 import { CampaignForm } from "@/components/CampaignForm";
@@ -49,6 +50,9 @@ import { ProfileSettings } from "@/components/ProfileSettings";
 import { ApiConfigStatus } from "@/components/ApiConfigStatus";
 import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
+import { OpenAIDebugTest } from "@/components/OpenAIDebugTest";
+import { SupabaseConnectionTest } from "@/components/SupabaseConnectionTest";
+import { AIPostsManager } from "@/components/admin/AIPostsManager";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -410,7 +414,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               size="sm"
               className="text-gray-400 hover:text-white p-1 h-auto"
             >
-              ✕
+              ��
             </Button>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -424,7 +428,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
             </div>
             <div>
               <div className="text-yellow-400 mb-2">Data Sources:</div>
-              <div>• Database Posts: {debugInfo.dbPosts}</div>
+              <div>�� Database Posts: {debugInfo.dbPosts}</div>
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
               <div>• Displayed: {debugInfo.displayedPosts}</div>
@@ -1540,7 +1544,11 @@ const Dashboard = () => {
             </TabsContent>
               </Tabs>
             ) : activeSection === "seo-tools" ? (
-              <SEOToolsSection user={user} />
+              <div className="space-y-6">
+                <SupabaseConnectionTest />
+                <OpenAIDebugTest />
+                <SEOToolsSection user={user} />
+              </div>
             ) : activeSection === "trial" ? (
               <div className="space-y-6">
                 <div className="relative overflow-hidden">
@@ -1718,14 +1726,19 @@ const Dashboard = () => {
               </Badge>
             </div>
 
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="verification">Verification Queue</TabsTrigger>
+              <TabsTrigger value="ai-posts">AI Posts</TabsTrigger>
               <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
 
             <TabsContent value="verification" className="space-y-6">
               <AdminVerificationQueue />
+            </TabsContent>
+
+            <TabsContent value="ai-posts" className="space-y-6">
+              <AIPostsManager />
             </TabsContent>
 
             <TabsContent value="campaigns" className="space-y-6">

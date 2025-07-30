@@ -14,7 +14,7 @@ const SECURE_STORE = {
   
   // Supabase configuration
   supabase_url: 'aHR0cHM6Ly9kZmhhbmFjc21zdnZrcHVudXJucC5zdXBhYmFzZS5jbw==', // https://dfhanacsmsvvkpunurnp.supabase.co
-  supabase_anon_key: 'ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnBjM01pT2lKemRYQmhZbUZ6WlNJc0luSmxaaUk2SW1SbWFHRnVZV056YlhOMmRtdHdkVzUxY201d0lpd2ljbTlzWlNJNkltRnViMjRpTENKcFlYUWlPakUzTlRJNU5UWTJORGNzSW1WNGNDSTZNakEyT0RVek1qWTBOMzAuTVpjQjRQX1RBT09Ua3RYU0c3Yk5LNUJzSU1BZjFiS1hWZ1Q4N1pxYTVSWQ==', // JWT token
+  supabase_anon_key: 'ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnBjM01pT2lKemRYQmhZbUZ6WlNJc0luSmxaaUk2SW1SbWFHRnVZV056YlhOMmRtdHdkVzUxY201d0lpd2ljbTlzWlNJNkltRnViMjRpTENKcFlYUWlPakUzTlRJNU5UWTJORGNzSW1WNGNDSTZNakEyT0RVek1qWTBOMzAuTVpjQjRQX1RBT09Ua3RYU0c3Yk5LNUJzSU1BZjFiS1hWZ1Q4N1pxYTVSWQ==', // Updated JWT token with new expiration
   
   // Access tokens
   supabase_access_token: 'c2JwXzY1ZjEzZDNlZjg0ZmFlMDkzZGJiMmIyZDUzNjg1NzRmNjliM2NlYTI=', // sbp_65f13d3ef84fae093dbb2b2d5368574f69b3cea2

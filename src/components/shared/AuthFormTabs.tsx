@@ -93,10 +93,17 @@ export function AuthFormTabs({
     });
 
     try {
-      const result = await AuthService.signIn({
+      // Add timeout to prevent infinite loading
+      const signInPromise = AuthService.signIn({
         email: loginEmail,
         password: loginPassword,
       });
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Sign in timeout')), 10000)
+      );
+
+      const result = await Promise.race([signInPromise, timeoutPromise]) as any;
 
       if (result.success && result.user) {
         toast({
@@ -122,14 +129,26 @@ export function AuthFormTabs({
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
+
+      let errorMessage = "Network error or server unavailable. Please check your connection and try again.";
+
+      if (error.message === 'Sign in timeout') {
+        errorMessage = "Sign in timed out. Please check your connection and try again.";
+      } else if (error.message?.includes('NetworkError') || error.message?.includes('fetch')) {
+        errorMessage = "Network connection failed. Please check your internet connection.";
+      } else if (error.message?.includes('Invalid login credentials')) {
+        errorMessage = "Invalid email or password. Please check your credentials.";
+      }
+
       toast({
         title: "Sign in failed",
-        description: "Network error or server unavailable. Please check your connection and try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
+      console.log('🔐 Login attempt completed, setting loading to false');
       setIsLoading(false);
     }
   };

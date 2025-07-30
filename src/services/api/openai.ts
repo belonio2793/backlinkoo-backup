@@ -68,6 +68,52 @@ export class OpenAIService {
   }
 
   /**
+   * Serialize error to prevent [object Object] logging
+   */
+  private serializeError(error: any): { message: string; details: any } {
+    if (!error) {
+      return { message: 'Unknown error', details: {} };
+    }
+
+    if (error instanceof Error) {
+      return {
+        message: error.message,
+        details: {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+          cause: error.cause ? this.serializeError(error.cause) : undefined
+        }
+      };
+    }
+
+    if (typeof error === 'object') {
+      try {
+        return {
+          message: error.message || error.error || 'API Error',
+          details: {
+            ...error,
+            message: error.message,
+            status: error.status,
+            statusText: error.statusText,
+            toString: () => JSON.stringify(error, null, 2)
+          }
+        };
+      } catch {
+        return {
+          message: 'Error serialization failed',
+          details: { original: String(error) }
+        };
+      }
+    }
+
+    return {
+      message: String(error),
+      details: { original: error }
+    };
+  }
+
+  /**
    * Retry function with exponential backoff
    */
   private async retryWithBackoff<T>(
@@ -101,15 +147,17 @@ export class OpenAIService {
         const shouldRetry = this.shouldRetryError(lastError, config);
 
         if (!shouldRetry || attempt >= config.maxRetries) {
+          const errorDetails = this.serializeError(lastError);
           console.error(`❌ OpenAI API failed after ${attempt} attempts:`, {
-          error: lastError?.message || String(lastError),
-          stack: lastError?.stack,
-          attempt,
-          maxRetries: config.maxRetries,
-          shouldRetry
-        });
+            error: errorDetails.message,
+            details: errorDetails,
+            stack: lastError?.stack,
+            attempt,
+            maxRetries: config.maxRetries,
+            shouldRetry
+          });
           // Add more detailed error information for debugging
-          const errorMessage = lastError?.message || String(lastError);
+          const errorMessage = errorDetails.message;
           const enhancedError = new Error(`OpenAI API failed after ${attempt} attempts: ${errorMessage}`);
           enhancedError.cause = lastError;
           throw enhancedError;
@@ -124,9 +172,10 @@ export class OpenAIService {
         const jitterRange = delay * config.jitterFactor;
         const jitteredDelay = delay + (Math.random() * 2 - 1) * jitterRange;
 
-        const errorMsg = lastError?.message || String(lastError);
-        console.warn(`⏳ OpenAI API attempt ${attempt} failed: ${errorMsg}. Retrying in ${Math.round(jitteredDelay)}ms...`, {
-          error: errorMsg,
+        const errorDetails = this.serializeError(lastError);
+        console.warn(`⏳ OpenAI API attempt ${attempt} failed: ${errorDetails.message}. Retrying in ${Math.round(jitteredDelay)}ms...`, {
+          error: errorDetails.message,
+          details: errorDetails,
           attempt,
           maxRetries: config.maxRetries,
           delay: Math.round(jitteredDelay),
@@ -138,8 +187,8 @@ export class OpenAIService {
     }
 
     // Ensure we always throw a proper Error with a string message
-    const finalErrorMessage = lastError?.message || String(lastError);
-    const finalError = new Error(`OpenAI API failed: ${finalErrorMessage}`);
+    const errorDetails = this.serializeError(lastError);
+    const finalError = new Error(`OpenAI API failed: ${errorDetails.message}`);
     finalError.cause = lastError;
     throw finalError;
   }
@@ -416,10 +465,11 @@ export class OpenAIService {
       return result;
 
     } catch (error) {
+      const errorDetails = this.serializeError(error);
       console.error('❌ OpenAI API failed after all retries:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorDetails.message,
+        details: errorDetails,
         stack: error instanceof Error ? error.stack : undefined,
-        context: (error as any)?.context,
         timestamp: new Date().toISOString()
       });
 
