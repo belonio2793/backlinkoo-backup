@@ -114,16 +114,16 @@ export class OpenAIContentGenerator {
    */
   private getRotatingPrompt(request: OpenAIContentRequest): string {
     const prompts = [
-      `Generate a 1000 word article on ${request.keyword} including the ${request.anchorText} hyperlinked to ${request.targetUrl}`,
-      `Write a 1000 word blog post about ${request.keyword} with a hyperlinked ${request.anchorText} linked to ${request.targetUrl}`,
-      `Produce a 1000-word reader friendly post on ${request.keyword} that links ${request.anchorText} to ${request.targetUrl}`
+      `Write a 1000 word easy-to-read article about ${request.keyword} for grade 8-10 readers. Use simple language, short sentences, and include the text "${request.anchorText}" as a hyperlink to ${request.targetUrl}. Format with proper HTML headings (h1, h2, h3) and paragraphs. Make it engaging and informative.`,
+      `Create a 1000 word beginner-friendly blog post explaining ${request.keyword} in simple terms. Write for teenagers and use clear, easy language. Include "${request.anchorText}" as a clickable link to ${request.targetUrl}. Use HTML formatting with headings and paragraphs. Focus on practical tips and examples.`,
+      `Generate a 1000-word reader-friendly guide about ${request.keyword} written in simple English suitable for high school students. Include the phrase "${request.anchorText}" linked to ${request.targetUrl}. Use proper HTML structure with h1, h2, h3 headings and well-organized paragraphs. Make it helpful and easy to understand.`
     ];
 
-    // Get current prompt index based on time (rotates every few minutes)
-    const promptIndex = Math.floor(Date.now() / (5 * 60 * 1000)) % prompts.length;
+    // Get current prompt index based on time and keyword to ensure uniqueness
+    const promptIndex = (Math.floor(Date.now() / (5 * 60 * 1000)) + request.keyword.length) % prompts.length;
     const selectedPrompt = prompts[promptIndex];
 
-    console.log(`🔄 Using prompt ${promptIndex + 1}/3: ${selectedPrompt}`);
+    console.log(`🔄 Using prompt ${promptIndex + 1}/3 for unique content generation`);
     return selectedPrompt;
   }
 
