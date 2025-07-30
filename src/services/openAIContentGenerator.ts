@@ -173,20 +173,24 @@ export class OpenAIContentGenerator {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          const errorMessage = `API key ${i + 1} failed: ${response.status} - ${errorData.error?.message || 'Unknown error'}`;
+          const keyPreview = `${apiKey.substring(0, 12)}...${apiKey.substring(apiKey.length - 4)}`;
+          const errorMessage = `API key ${i + 1} (${keyPreview}) failed: ${response.status} - ${errorData.error?.message || 'Unknown error'}`;
+
+          console.error(`❌ ${errorMessage}`);
+          console.error('Full error details:', errorData);
 
           if (response.status === 401) {
-            console.warn(`❌ ${errorMessage} (Invalid API key)`);
+            console.warn(`�� Key ${i + 1} is invalid or expired. Check OpenAI dashboard.`);
             continue; // Try next key
           } else if (response.status === 429) {
-            console.warn(`❌ ${errorMessage} (Rate limit exceeded)`);
+            console.warn(`⏰ Key ${i + 1} hit rate limit. Trying next key.`);
             continue; // Try next key
           } else if (response.status === 402) {
-            console.warn(`❌ ${errorMessage} (Quota exceeded)`);
+            console.warn(`💳 Key ${i + 1} quota exceeded. Check billing.`);
             continue; // Try next key
           }
 
-          console.warn(`❌ ${errorMessage}`);
+          console.warn(`❌ Key ${i + 1} failed with unknown error`);
           continue; // Try next key for any other error
         }
 
