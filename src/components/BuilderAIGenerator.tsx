@@ -91,14 +91,10 @@ export const BuilderAIGenerator = () => {
         contentType: 'how-to'
       });
 
-      if (!result.success || !result.data) {
-        throw new Error(result.error || 'Content generation failed');
-      }
-
       setProgress({ stage: "Optimization", progress: 80, details: "Optimizing for SEO...", timestamp: new Date() });
 
       // Store as free backlink
-      freeBacklinkService.storeFreeBacklink(result.data);
+      freeBacklinkService.storeFreeBacklink(result);
 
       setProgress({ stage: "Complete", progress: 100, details: "Blog post created successfully!", timestamp: new Date() });
 
@@ -114,7 +110,7 @@ export const BuilderAIGenerator = () => {
 
       // Redirect to the blog post after a short delay
       setTimeout(() => {
-        navigate(`/free-backlink/${result.data.id}`);
+        navigate(`/free-backlink/${result.id}`);
       }, 2000);
 
     } catch (error) {
