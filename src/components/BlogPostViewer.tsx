@@ -4,17 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Clock, 
-  User, 
-  ExternalLink, 
-  Share2, 
+import {
+  Clock,
+  User,
+  ExternalLink,
+  Share2,
   BookOpen,
   TrendingUp,
   Calendar,
   Tag,
   Globe,
-  ArrowLeft
+  ArrowLeft,
+  CheckCircle2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
