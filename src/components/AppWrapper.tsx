@@ -14,7 +14,7 @@ import StreamlinedBlog from '@/pages/StreamlinedBlog';
 import { BlogCreator } from '@/pages/BlogCreator';
 import { BlogPost } from '@/pages/BlogPost';
 import AIContentTest from '@/pages/AIContentTest';
-import { FreeBacklink } from '@/pages/FreeBacklink';
+
 import NotFound from '@/pages/NotFound';
 import AdminDashboard from '@/pages/AdminDashboard';
 import PaymentSuccess from '@/pages/PaymentSuccess';
@@ -33,7 +33,7 @@ import { EmailVerificationGuard } from '@/components/EmailVerificationGuard';
 import { TrialNotificationBanner } from '@/components/TrialNotificationBanner';
 import { GuestDashboard } from '@/components/GuestDashboard';
 import { AILive } from '@/components/AILive';
-import { TestFreeBacklink } from '@/components/TestFreeBacklink';
+
 import { EnhancedDashboardRouter } from '@/components/EnhancedDashboardRouter';
 
 export const AppWrapper = () => {
@@ -58,9 +58,7 @@ export const AppWrapper = () => {
         <Route path="/trial-dashboard" element={<GuestDashboard />} />
         <Route path="/ai-test" element={<AIContentTest />} />
         <Route path="/ai-live" element={<AILive />} />
-        <Route path="/free-backlink" element={<FreeBacklink />} />
-        <Route path="/free-backlink/:id" element={<FreeBacklink />} />
-        <Route path="/test-free-backlink" element={<TestFreeBacklink />} />
+
         <Route path="*" element={<NotFound />} />
 
         {/* Protected routes - require authentication and email verification */}
