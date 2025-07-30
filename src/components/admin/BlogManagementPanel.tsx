@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { blogAutoDeleteService } from '@/services/blogAutoDeleteService';
 import { supabase } from '@/integrations/supabase/client';
 import { databaseDiagnostic } from '@/utils/databaseDiagnostic';
+import ErrorReproductionTest from '@/utils/errorReproductionTest';
 import {
   FileText,
   Trash2,
