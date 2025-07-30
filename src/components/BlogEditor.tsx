@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { blogService, type BlogPost, type UpdateBlogPost } from '@/services/blogService';
 import { useAuth } from '@/hooks/useAuth';
+import { SlugCustomizer } from './SlugCustomizer';
 import {
   ArrowLeft,
   Save,
