@@ -176,22 +176,24 @@ export function OrganizedAdminDashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             {categories.map((category) => {
               const IconComponent = category.icon;
               return (
                 <Button
                   key={category.id}
                   variant={activeCategory === category.id ? "default" : "outline"}
-                  className="h-auto p-4 flex flex-col items-center gap-2"
+                  className="h-auto p-3 flex flex-col items-center gap-2 min-h-[80px] relative group"
                   onClick={() => setActiveCategory(category.id)}
                 >
-                  <IconComponent className="h-6 w-6" />
-                  <div className="text-center">
-                    <div className="font-medium">{category.name}</div>
-                    <div className="text-xs text-muted-foreground hidden md:block">
-                      {category.description}
-                    </div>
+                  <IconComponent className="h-5 w-5 shrink-0" />
+                  <div className="text-center w-full">
+                    <div className="font-medium text-sm leading-tight">{category.name}</div>
+                  </div>
+
+                  {/* Tooltip for description on hover */}
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10 whitespace-nowrap hidden lg:block">
+                    {category.description}
                   </div>
                 </Button>
               );
