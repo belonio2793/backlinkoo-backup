@@ -45,6 +45,7 @@ import {
   CheckCircle2,
   Calendar
 } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 
 interface AIGeneratedPost {
   id: string;
