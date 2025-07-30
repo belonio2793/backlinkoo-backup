@@ -92,6 +92,18 @@ export function EnhancedDashboardRouter() {
             localStorage.removeItem('recent_auth_error');
           } catch (authServiceError) {
             console.error('❌ All auth methods failed:', authServiceError);
+            // Run health check to diagnose the issue
+            runAuthHealthCheck().then(healthResult => {
+              console.log('🚑 Health check completed:', healthResult);
+              if (healthResult.overallHealth === 'critical') {
+                toast({
+                  title: "Connection Issues Detected",
+                  description: healthResult.recommendations[0] || "Please check your connection and try again.",
+                  variant: "destructive"
+                });
+              }
+            }).catch(err => console.warn('Health check failed:', err));
+
             setIsLoading(false);
             navigate('/login');
             return;
