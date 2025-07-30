@@ -451,14 +451,40 @@ export class BlogClaimService {
       }
 
       // Create new database entry with user as owner
+      // Only include fields that match the database schema
       const postToInsert = {
-        ...localPost,
+        id: localPost.id,
+        slug: localPost.slug,
+        title: localPost.title,
+        content: localPost.content || '',
+        excerpt: localPost.excerpt || localPost.meta_description || '',
+        meta_description: localPost.meta_description || localPost.excerpt || '',
+        keywords: Array.isArray(localPost.keywords) ? localPost.keywords : (localPost.keywords ? [localPost.keywords] : []),
+        target_url: localPost.target_url || localPost.targetUrl || '',
+        published_url: localPost.published_url || localPost.publishedUrl || '',
+        author_name: localPost.author_name || 'User',
+        tags: Array.isArray(localPost.tags) ? localPost.tags : (localPost.tags ? [localPost.tags] : []),
+        category: localPost.category || 'General',
+        seo_score: localPost.seo_score || localPost.seoScore || 85,
+        reading_time: localPost.reading_time || localPost.readingTime || 5,
+        word_count: localPost.word_count || localPost.wordCount || 1000,
+        view_count: localPost.view_count || localPost.viewCount || 0,
+        created_at: localPost.created_at || localPost.createdAt || new Date().toISOString(),
+        published_at: localPost.published_at || localPost.publishedAt || new Date().toISOString(),
+        anchor_text: localPost.anchor_text || localPost.anchorText || '',
         user_id: user.id,
         is_trial_post: false,
         expires_at: null,
         status: 'published',
         updated_at: new Date().toISOString()
       };
+
+      console.log('🔍 BlogClaimService: Attempting to insert post with data:', {
+        id: postToInsert.id,
+        slug: postToInsert.slug,
+        title: postToInsert.title,
+        user_id: postToInsert.user_id
+      });
 
       const { data: insertedPost, error: insertError } = await supabase
         .from('published_blog_posts')
