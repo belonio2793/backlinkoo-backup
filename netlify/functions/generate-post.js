@@ -600,7 +600,7 @@ Format as JSON:
   }
 }
 
-function generateChatGPTFallbackContent(destinationUrl, keyword, anchorText, domain) {
+function generateOpenAIContent(destinationUrl, keyword, anchorText, domain) {
   const title = `${keyword}: Complete Professional Guide for 2024`;
 
   const content = `
