@@ -102,12 +102,10 @@ class StreamlinedOpenAI {
 
   async improveContent(content: string, instructions: string = 'Improve this content'): Promise<string> {
     try {
-      // For content improvement, use a simple keyword approach
-      const result = await this.generateContent('', {
-        keyword: `Content Improvement: ${instructions}`,
-        url: 'https://example.com',
-        wordCount: Math.min(content.length * 1.2, 2000),
-        tone: 'professional'
+      const result = await this.generateContent(`${instructions}\n\nOriginal content:\n${content}\n\nProvide the improved version:`, {
+        type: 'content_improvement',
+        maxTokens: Math.min(content.length * 1.5, 2000),
+        temperature: 0.6
       });
 
       return result;
@@ -119,27 +117,23 @@ class StreamlinedOpenAI {
 
   async generateSEOKeywords(topic: string, count: number = 10): Promise<string[]> {
     try {
-      // Generate content focused on keywords
       const result = await this.generateContent('', {
-        keyword: `SEO Keywords for ${topic}`,
-        url: 'https://example.com',
-        wordCount: 300,
-        tone: 'technical'
+        type: 'seo_keywords',
+        topic: topic,
+        maxTokens: 200,
+        temperature: 0.5
       });
 
-      // Extract potential keywords from the generated content
-      const words = result
-        .replace(/<[^>]*>/g, ' ') // Remove HTML tags
-        .toLowerCase()
-        .match(/\b[a-z]{3,}\b/g) || [];
-
-      // Filter and deduplicate keywords
-      const uniqueKeywords = [...new Set(words)]
-        .filter(word => word.length > 3 && word !== topic.toLowerCase())
+      // Parse keywords from the response
+      const keywords = result
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0 && !line.match(/^\d+\./)) // Remove numbered lists
+        .map(line => line.replace(/^[-*•]\s*/, '')) // Remove bullet points
         .slice(0, count);
 
-      return uniqueKeywords.length > 0
-        ? uniqueKeywords
+      return keywords.length > 0
+        ? keywords
         : [topic, `${topic} guide`, `${topic} tips`, `${topic} 2024`]; // Fallback keywords
     } catch (error) {
       console.error('SEO keywords generation error:', error);
