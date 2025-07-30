@@ -22,8 +22,8 @@ const SECURE_STORE = {
   // Email service credentials
   resend_api_key: 'cmVfZjJpeHlSQXdfRUExZHRRQ285S25BTmZKZ3JncWZYRkVx', // re_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq
 
-  // API keys for external services
-  openai_api_key: 'c2stcHJvai1YT0pVZW94R3A3TlF0c0MyeklXRW5Yb3h3bHBsS0dwYXdvaURCOFRZdFVaYndoT3lVV1RRYUJYYzF1X2hRWjQ4R3BzMFBLRkx0RlQzQmxia0ZKY0YtQ3lGeEwwUW5NMm5ySTMySEVValUxYlVKZ2l1YWFMdUNtVEFkX014NjJIdnAzUUo4UWwtMG5OZzVRYTBYeF92dG1rUVN5b0E=', // Encoded OpenAI API key
+  // API keys removed for security - OpenAI calls now handled server-side only
+  openai_api_key: '', // Removed - use Netlify functions for OpenAI calls
 };
 
 /**
