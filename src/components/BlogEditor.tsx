@@ -77,6 +77,7 @@ export function BlogEditor({ postId, mode = 'edit', onSave, onCancel }: BlogEdit
         setBlogPost(post);
         setFormData({
           title: post.title,
+          slug: post.slug,
           content: post.content,
           excerpt: post.excerpt || '',
           meta_description: post.meta_description || '',
