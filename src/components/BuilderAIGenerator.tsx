@@ -41,9 +41,29 @@ export const BuilderAIGenerator = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user can generate content (simplified version)
-    setUserCanGenerate({ canGenerate: true });
+    checkAPIStatus();
   }, []);
+
+  const checkAPIStatus = async () => {
+    setIsCheckingAPI(true);
+    try {
+      const status = await builderAIContentGenerator.checkAPIAccessibility();
+      setApiStatus(status);
+      setUserCanGenerate({
+        canGenerate: status.accessible,
+        reason: status.error
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setApiStatus({ accessible: false, error: errorMessage });
+      setUserCanGenerate({
+        canGenerate: false,
+        reason: errorMessage
+      });
+    } finally {
+      setIsCheckingAPI(false);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!keyword.trim() || !anchorText.trim() || !targetUrl.trim()) {
