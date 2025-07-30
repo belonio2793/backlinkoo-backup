@@ -61,6 +61,9 @@ import type { User } from '@supabase/supabase-js';
 const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
   const [allPosts, setAllPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [loadingStatus, setLoadingStatus] = useState<string>('Initializing...');
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [claimingPostId, setClaimingPostId] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -69,18 +72,27 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
     loadAllPosts();
 
     // Refresh every 30 seconds to check for new posts
-    const interval = setInterval(loadAllPosts, 30000);
+    const interval = setInterval(() => {
+      loadAllPosts(true); // Silent refresh
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  const loadAllPosts = async () => {
+  const loadAllPosts = async (silentRefresh = false) => {
     try {
-      setLoading(true);
+      if (!silentRefresh) {
+        setLoading(true);
+        setError(null);
+      }
+      setLoadingStatus('Connecting to database...');
 
       // Load from database using the blog claim service
       const { BlogClaimService } = await import('@/services/blogClaimService');
+
+      setLoadingStatus('Fetching published blog posts...');
       const dbPosts = await BlogClaimService.getClaimablePosts(20);
 
+      setLoadingStatus('Checking local storage...');
       // Also load from localStorage for backwards compatibility
       const localPosts = [];
       try {
@@ -93,10 +105,12 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           return true;
         });
         localPosts.push(...validLocalPosts);
+        console.log(`📦 Found ${validLocalPosts.length} valid local posts`);
       } catch (error) {
         console.warn('Error loading local posts:', error);
       }
 
+      setLoadingStatus('Combining and deduplicating posts...');
       // Combine and deduplicate posts (prioritize database posts)
       const combinedPosts = [...dbPosts];
       localPosts.forEach(localPost => {
@@ -105,12 +119,46 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
         }
       });
 
-      setAllPosts(combinedPosts.slice(0, 12)); // Show up to 12 posts
-    } catch (error) {
-      console.error('Error loading posts:', error);
-      setAllPosts([]);
+      const finalPosts = combinedPosts.slice(0, 12);
+
+      console.log(`📊 Blog Posts Summary:
+        - Database posts: ${dbPosts.length}
+        - Local storage posts: ${localPosts.length}
+        - Combined unique posts: ${combinedPosts.length}
+        - Displaying: ${finalPosts.length}`);
+
+      setAllPosts(finalPosts);
+      setLastRefresh(new Date());
+
+      // Show status in console for transparency
+      if (finalPosts.length === 0) {
+        console.warn('⚠️ No blog posts found in database or local storage');
+        if (!silentRefresh) {
+          setError('No blog posts found. This could be because:\n• No posts have been generated yet\n• Database connection issues\n• All posts have expired');
+        }
+      } else {
+        console.log(`✅ Successfully loaded ${finalPosts.length} blog posts`);
+        setError(null);
+      }
+
+    } catch (error: any) {
+      console.error('❌ Error loading posts:', error);
+      const errorMessage = `Failed to load blog posts: ${error.message || 'Unknown error'}`;
+      setError(errorMessage);
+
+      // Don't clear posts on error, keep showing last known state
+      if (!silentRefresh) {
+        toast({
+          title: "Error Loading Posts",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     } finally {
-      setLoading(false);
+      if (!silentRefresh) {
+        setLoading(false);
+      }
+      setLoadingStatus('Ready');
     }
   };
 
