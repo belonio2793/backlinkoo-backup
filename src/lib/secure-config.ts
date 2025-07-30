@@ -33,10 +33,10 @@ const SECURE_STORE = {
   paypal_client_id: '',
   paypal_client_secret: '',
   
-  // API keys for external services
-  openai_api_key: '', // OpenAI API key (set via environment variable VITE_OPENAI_API_KEY instead)
-  anthropic_api_key: '',
-  google_api_key: '',
+  // API keys for external services (Configure via Netlify Environment Variables)
+  openai_api_key: '', // VITE_OPENAI_API_KEY - Set in Netlify Site Settings > Environment Variables
+  anthropic_api_key: '', // VITE_ANTHROPIC_API_KEY - Set in Netlify if needed
+  google_api_key: '', // VITE_GOOGLE_API_KEY - Set in Netlify if needed
   
   // Application secrets
   jwt_secret: '',
