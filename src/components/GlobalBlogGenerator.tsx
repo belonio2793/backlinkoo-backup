@@ -337,11 +337,11 @@ Return the content as clean HTML with proper tags including the hyperlink. Ensur
           if (reliableResult.success && reliableResult.content) {
             const wordCount = reliableResult.content.replace(/<[^>]+>/g, ' ').split(' ').filter(w => w.length > 0).length;
 
-            if (wordCount >= 500) {
+            if (wordCount >= 1000) {
               console.log(`✅ Content generated successfully with ${wordCount} words (attempt ${retryCount + 1})`);
               break; // Success - exit retry loop
             } else {
-              console.warn(`⚠️ Content too short: ${wordCount} words (minimum 500). Retrying...`);
+              console.warn(`⚠️ Content too short: ${wordCount} words (minimum 1000). Retrying...`);
               retryCount++;
               continue;
             }
@@ -371,8 +371,8 @@ Return the content as clean HTML with proper tags including the hyperlink. Ensur
       // Validate content meets requirements before proceeding
       const finalWordCount = reliableResult.content.replace(/<[^>]+>/g, ' ').split(' ').filter(w => w.length > 0).length;
 
-      if (finalWordCount < 500) {
-        throw new Error(`Generated content is too short (${finalWordCount} words). Minimum 500 words required.`);
+      if (finalWordCount < 1000) {
+        throw new Error(`Generated content is too short (${finalWordCount} words). Minimum 1000 words required.`);
       }
 
       // Convert reliable result to expected format
@@ -841,7 +841,7 @@ Return the content as clean HTML with proper tags including the hyperlink. Ensur
                 disabled={isGenerating}
               />
               <p className="text-xs text-gray-600">
-                Will generate minimum 500 words of high-quality content focused on this keyword
+                Will generate minimum 1000 words of high-quality content focused on this keyword
               </p>
             </div>
           </div>
