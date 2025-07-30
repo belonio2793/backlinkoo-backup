@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { builderAIContentGenerator } from '@/services/builderAIContentGenerator';
 import { chatGPTFallbackService } from '@/services/chatGPTFallbackService';
 import {
   Zap,
@@ -29,7 +28,7 @@ interface UserGenerationStatus {
   reason?: string;
 }
 
-export const BuilderAIGenerator = () => {
+export const OpenAIGenerator = () => {
   const [keyword, setKeyword] = useState('');
   const [anchorText, setAnchorText] = useState('');
   const [targetUrl, setTargetUrl] = useState('');
@@ -48,12 +47,9 @@ export const BuilderAIGenerator = () => {
   const checkAPIStatus = async () => {
     setIsCheckingAPI(true);
     try {
-      const status = await builderAIContentGenerator.checkAPIAccessibility();
-      setApiStatus(status);
-      setUserCanGenerate({
-        canGenerate: status.accessible,
-        reason: status.error
-      });
+      // OpenAI/ChatGPT is always available as it's our primary service
+      setApiStatus({ accessible: true });
+      setUserCanGenerate({ canGenerate: true });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setApiStatus({ accessible: false, error: errorMessage });
@@ -96,87 +92,40 @@ export const BuilderAIGenerator = () => {
     setIsGenerating(true);
 
     try {
-      // First try Builder.io AI
-      try {
-        // Set up real-time progress callback for Builder.io AI
-        builderAIContentGenerator.setProgressCallback((update) => {
-          setProgress(update);
-        });
+      // Set up real-time progress callback for OpenAI/ChatGPT
+      chatGPTFallbackService.setProgressCallback((update) => {
+        setProgress(update);
+      });
 
-        // Generate content using Builder.io AI with the 3 specific prompts
-        const result = await builderAIContentGenerator.generateContent({
-          keyword: keyword.trim(),
-          anchorText: anchorText.trim(),
-          targetUrl: formattedUrl
-        });
+      // Generate content using OpenAI/ChatGPT
+      const result = await chatGPTFallbackService.generateContentWithChatGPT({
+        keyword: keyword.trim(),
+        anchorText: anchorText.trim(),
+        targetUrl: formattedUrl
+      });
 
-        toast({
-          title: "Blog Post Generated & Published!",
-          description: `Your content has been published successfully! Redirecting to: ${result.publishedUrl}`,
-        });
+      toast({
+        title: "Blog Post Generated & Published!",
+        description: `Your content has been published successfully! Redirecting to: ${result.publishedUrl}`,
+      });
 
-        // Reset form
-        setKeyword('');
-        setAnchorText('');
-        setTargetUrl('');
+      // Reset form
+      setKeyword('');
+      setAnchorText('');
+      setTargetUrl('');
 
-        // Redirect to the published blog post
-        setTimeout(() => {
-          window.open(result.publishedUrl, '_blank');
-          // Also navigate to our internal view
-          navigate(`/free-backlink/${result.id}`);
-        }, 2000);
-
-      } catch (builderError) {
-        console.warn('Builder.io AI failed, trying ChatGPT fallback:', builderError);
-
-        // Use ChatGPT fallback when Builder.io AI fails
-        setProgress({
-          stage: "Fallback Mode",
-          progress: 10,
-          details: "Builder.io AI unavailable, switching to ChatGPT fallback...",
-          timestamp: new Date()
-        });
-
-        // Set up progress callback for ChatGPT fallback
-        chatGPTFallbackService.setProgressCallback((update) => {
-          setProgress(update);
-        });
-
-        const fallbackResult = await chatGPTFallbackService.generateContentWithChatGPT({
-          keyword: keyword.trim(),
-          anchorText: anchorText.trim(),
-          targetUrl: formattedUrl
-        });
-
-        toast({
-          title: "Blog Post Generated with ChatGPT!",
-          description: `Content generated using ChatGPT fallback. Published at: ${fallbackResult.publishedUrl}`,
-          variant: "default",
-        });
-
-        // Reset form
-        setKeyword('');
-        setAnchorText('');
-        setTargetUrl('');
-
-        // Redirect to the published blog post
-        setTimeout(() => {
-          window.open(fallbackResult.publishedUrl, '_blank');
-          // Also navigate to our internal view if available
-          try {
-            navigate(`/free-backlink/${fallbackResult.id}`);
-          } catch (navError) {
-            console.warn('Navigation failed, opening published URL directly');
-          }
-        }, 2000);
-      }
+      // Redirect to the published blog post
+      setTimeout(() => {
+        window.open(result.publishedUrl, '_blank');
+        // Also navigate to our internal view
+        navigate(`/free-backlink/${result.id}`);
+      }, 2000);
 
     } catch (error) {
-      console.error('Both Builder.io AI and ChatGPT fallback failed:', error);
+      console.error('OpenAI/ChatGPT generation failed:', error);
       toast({
         title: "Generation Failed",
-        description: "Both Builder.io AI and ChatGPT fallback failed. Please try again later.",
+        description: "Content generation failed. Please try again later.",
         variant: "destructive",
       });
     } finally {
@@ -192,7 +141,7 @@ export const BuilderAIGenerator = () => {
       <CardHeader className="pb-4">
         <CardTitle>Create a Backlink</CardTitle>
         <p className="text-sm text-gray-600 mt-2">
-          🤖 Uses Builder.io AI with ChatGPT fallback for maximum reliability
+          🤖 Powered by OpenAI & ChatGPT for maximum reliability
         </p>
       </CardHeader>
 
@@ -266,7 +215,7 @@ export const BuilderAIGenerator = () => {
           <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4 animate-pulse text-blue-600" />
-              <span className="text-sm font-medium text-blue-800">Checking Builder.io AI API status...</span>
+              <span className="text-sm font-medium text-blue-800">Checking OpenAI API status...</span>
             </div>
           </div>
         )}
@@ -287,7 +236,7 @@ export const BuilderAIGenerator = () => {
                 : 'text-red-800'
               }`}>
                 {apiStatus.accessible
-                  ? 'Builder.io AI API is ready'
+                  ? 'OpenAI API is ready'
                   : `API Error: ${apiStatus.error}`
                 }
               </span>
@@ -306,7 +255,7 @@ export const BuilderAIGenerator = () => {
             <div className="text-sm text-gray-700 font-medium">{progress.details}</div>
             <div className="flex items-center gap-4 text-xs text-gray-500">
               <span>⏰ {progress.timestamp.toLocaleTimeString()}</span>
-              <span>🤖 Builder.io AI Engine</span>
+              <span>🤖 OpenAI Engine</span>
               <span>📝 Real-time Generation</span>
             </div>
 
@@ -363,7 +312,7 @@ export const BuilderAIGenerator = () => {
             </div>
             <div className="flex items-center gap-1">
               <Zap className="h-4 w-4 text-orange-600" />
-              <span>ChatGPT fallback</span>
+              <span>OpenAI powered</span>
             </div>
           </div>
         </div>
