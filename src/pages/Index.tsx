@@ -237,11 +237,7 @@ const Index = () => {
       setSelectedPlan(planId as 'starter_100' | 'starter_200' | 'starter_300');
     }
 
-    if (user) {
-      setPaymentModalOpen(true);
-    } else {
-      navigate("/login");
-    }
+    setPricingModalOpen(true);
   };
 
   const stats = [
