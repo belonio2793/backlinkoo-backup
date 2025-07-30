@@ -99,6 +99,18 @@ export function AuthFormTabs({
       description: "Please wait while we verify your credentials.",
     });
 
+    // Start countdown timer
+    setTimeoutCountdown(30);
+    const countdownInterval = setInterval(() => {
+      setTimeoutCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownInterval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
     try {
       // Add timeout to prevent infinite loading (increased to 30 seconds)
       const signInPromise = AuthService.signIn({
@@ -107,10 +119,17 @@ export function AuthFormTabs({
       });
 
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Sign in is taking longer than expected. Please check your internet connection and try again.')), 30000)
+        setTimeout(() => {
+          clearInterval(countdownInterval);
+          reject(new Error('Sign in is taking longer than expected. Please check your internet connection and try again.'));
+        }, 30000)
       );
 
       const result = await Promise.race([signInPromise, timeoutPromise]) as any;
+
+      // Clear countdown on success
+      clearInterval(countdownInterval);
+      setTimeoutCountdown(0);
 
       if (result.success && result.user) {
         toast({
