@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { debugApiKey, testSpecificApiKey } from '@/utils/debugApiKey';
-import { validateAndTestApiKey } from '@/utils/isolatedApiTester';
+// API validation removed - auto-configured system
 import { CheckCircle, AlertCircle, Loader2, Key, TestTube, Bug } from 'lucide-react';
 
 export function APIKeyDebugAdvanced() {
