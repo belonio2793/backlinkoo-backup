@@ -175,10 +175,6 @@ export function APIManagementDashboard() {
       console.error('Error checking OpenAI status:', error);
       updateServiceStatus('OpenAI', {
         status: 'error',
-        message: 'Unable to connect to Netlify function'
-      });
-      updateServiceStatus('OpenAI', {
-        status: 'error',
         message: 'Connection failed'
       });
     }
