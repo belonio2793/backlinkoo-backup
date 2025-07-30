@@ -109,32 +109,25 @@ export function APIManagementDashboard() {
     
     // Test OpenAI
     try {
-      const apiKey = await environmentVariablesService.getVariable('VITE_OPENAI_API_KEY');
-      if (apiKey) {
-        const response = await fetch('https://api.openai.com/v1/models', {
-          headers: { 'Authorization': `Bearer ${apiKey}` }
-        });
+      // Test OpenAI via Netlify function instead of direct API call
+      const response = await fetch('/.netlify/functions/check-ai-provider', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: 'OpenAI' })
+      });
 
-        if (response.ok) {
+      if (response.ok) {
+        const result = await response.json();
+        if (result.configured) {
           updateServiceStatus('OpenAI', {
             status: 'connected',
-            message: 'API connection successful',
+            message: 'API configured via Netlify functions',
             responseTime: 200
           });
         } else {
-          // Read response body properly
-          let errorMessage = `API error: ${response.status}`;
-          try {
-            const errorText = await response.text();
-            const errorData = JSON.parse(errorText);
-            errorMessage = errorData.error?.message || errorMessage;
-          } catch (e) {
-            // Use default error message
-          }
-
           updateServiceStatus('OpenAI', {
             status: 'error',
-            message: errorMessage,
+            message: 'OpenAI not configured in Netlify environment',
             responseTime: 200
           });
         }
