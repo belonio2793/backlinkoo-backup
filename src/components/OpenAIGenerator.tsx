@@ -329,7 +329,7 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
             </div>
             <div className="flex items-center gap-1">
               <Zap className="h-4 w-4 text-orange-600" />
-              <span>OpenAI powered</span>
+              <span>Advanced content engine</span>
             </div>
           </div>
         </div>
