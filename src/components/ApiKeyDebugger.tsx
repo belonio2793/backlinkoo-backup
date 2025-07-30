@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { SecureConfig } from '@/lib/secure-config';
-import { decodeBase64, validateOpenAIKey, testOpenAIKey } from '@/utils/validateApiKey';
+import { validateProvidedApiKey, testProvidedApiKey, debugApiKeyIssue } from '@/utils/validateApiKey';
 import { 
   Key, 
   CheckCircle2, 
