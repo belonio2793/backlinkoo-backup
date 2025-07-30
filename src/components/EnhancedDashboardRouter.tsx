@@ -24,6 +24,8 @@ export function EnhancedDashboardRouter() {
       console.warn('⏰ Dashboard loading timeout reached, checking localStorage and forcing completion');
       // Last resort: check if there's any stored auth data
       const hasStoredAuth = localStorage.getItem('sb-dfhanacsmsvvkpunurnp-auth-token') !== null;
+      const recentClaimOperation = localStorage.getItem('recent_claim_operation');
+      const hasRecentClaim = recentClaimOperation && (Date.now() - parseInt(recentClaimOperation)) < 30000; // Within last 30 seconds
       if (hasStoredAuth) {
         console.log('🔑 Found stored auth token, allowing dashboard access');
         setUser({ id: 'fallback-user', email: 'stored@auth.user', email_confirmed_at: new Date().toISOString() });
