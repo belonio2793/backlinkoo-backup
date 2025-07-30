@@ -129,76 +129,42 @@ export class OpenAIContentGenerator {
   }
 
   /**
-   * Generate content using OpenAI/ChatGPT
+   * Generate content using OpenAI via Netlify function
    */
   private async generateOpenAIContent(request: OpenAIContentRequest, prompt: string): Promise<string> {
-    // Try to get API key from admin environment variables first
-    console.log('🔍 Attempting to get OpenAI API key from admin environment variables...');
-    let apiKey = await environmentVariablesService.getVariable('VITE_OPENAI_API_KEY');
-    console.log('🔑 Admin env API key result:', apiKey ? 'Found (' + apiKey.substring(0, 10) + '...)' : 'Not found');
-
-    // Fallback to environment variable
-    if (!apiKey) {
-      console.log('🔍 Falling back to environment variable...');
-      apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      console.log('🔑 Environment variable result:', apiKey ? 'Found (' + apiKey.substring(0, 10) + '...)' : 'Not found');
-    }
-
-    if (!apiKey) {
-      console.error('❌ No OpenAI API key found in any source');
-      throw new Error('OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable.');
-    }
-
-    console.log('🤖 Calling OpenAI API...');
+    console.log('🤖 Generating content via Netlify function...');
 
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch('/.netlify/functions/generate-openai', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a professional content writer. Create engaging, well-structured blog posts with proper HTML formatting. Always include the specified anchor text as a clickable link to the target URL. Make the content natural, informative, and reader-friendly.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          max_tokens: 4000,
-          temperature: 0.7
+          keyword: request.keyword,
+          url: request.targetUrl,
+          anchorText: request.anchorText,
+          wordCount: 1200,
+          contentType: 'article',
+          tone: 'professional'
         })
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        if (response.status === 401) {
-          throw new Error('Invalid OpenAI API key. Please check your VITE_OPENAI_API_KEY environment variable.');
-        } else if (response.status === 429) {
-          throw new Error('OpenAI temporary issue. Retrying automatically...');
-        } else if (response.status === 402) {
-          throw new Error('OpenAI quota exceeded. Please check your billing settings.');
-        }
-        throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+        throw new Error(`Netlify function error: ${response.status}`);
       }
 
-      const data = await response.json();
-      const content = data.choices?.[0]?.message?.content;
+      const result = await response.json();
 
-      if (!content) {
-        throw new Error('No content generated from OpenAI API');
+      if (result.success) {
+        console.log('✅ Content generated successfully via Netlify function');
+        return result.content;
+      } else {
+        throw new Error(result.error || 'Content generation failed');
       }
-
-      console.log('✅ OpenAI content generated successfully');
-      return content.trim();
 
     } catch (error) {
-      console.error('❌ OpenAI API call failed:', error);
+      console.error('❌ OpenAI generation via Netlify function failed:', error);
       throw error;
     }
   }
