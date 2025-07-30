@@ -418,7 +418,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               size="sm"
               className="text-gray-400 hover:text-white p-1 h-auto"
             >
-              ��
+              Debug
             </Button>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -432,11 +432,11 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
             </div>
             <div>
               <div className="text-yellow-400 mb-2">Data Sources:</div>
-              <div>�� Database Posts: {debugInfo.dbPosts}</div>
+              <div>• Database Posts: {debugInfo.dbPosts}</div>
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
               <div>• Displayed: {debugInfo.displayedPosts}</div>
-              <div>��� Has Errors: {debugInfo.hasError ? '⚠️' : '��'}</div>
+              <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '✅'}</div>
             </div>
           </div>
           {debugInfo.errorMessage && (
@@ -741,7 +741,7 @@ const Dashboard = () => {
       const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (!isMounted) return;
 
-        console.log('���� Dashboard - Auth state change:', { event, hasUser: !!session?.user });
+        console.log('🔄 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
 
         if (event === 'SIGNED_OUT' || !session) {
           console.log('🏠 Dashboard - User signed out, redirecting to login...');
@@ -804,7 +804,7 @@ const Dashboard = () => {
           console.log('🔍 Profile error (non-critical):', result.error);
         }
       } catch (profileError) {
-        console.warn('��� Profile fetch failed, using defaults:', profileError);
+        console.warn('⚠️ Profile fetch failed, using defaults:', profileError);
       }
 
       // Set user type based on profile
@@ -1113,7 +1113,7 @@ const Dashboard = () => {
           <>
             {activeSection === "dashboard" ? (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
               <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Overview</span>
                 <span className="sm:hidden">Home</span>

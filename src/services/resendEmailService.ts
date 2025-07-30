@@ -37,7 +37,12 @@ export class ResendEmailService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        if (response.status === 404) {
+          console.warn('Email Netlify function not available (404), email service unavailable');
+          throw new Error('Email service unavailable - function not found');
+        }
+
+        const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status} error` }));
         console.error('Netlify function error:', response.status, errorData);
         throw new Error(`Email service error: ${errorData.error || response.statusText}`);
       }

@@ -177,7 +177,7 @@ export function GuestDashboard() {
                   <CardTitle className="text-lg line-clamp-2">{post.title}</CardTitle>
                   <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">
                     <Clock className="mr-1 h-3 w-3" />
-                    Trial
+                    Unclaimed
                   </Badge>
                 </div>
               </CardHeader>

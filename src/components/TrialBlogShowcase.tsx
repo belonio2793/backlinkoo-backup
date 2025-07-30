@@ -263,7 +263,7 @@ export const TrialBlogShowcase = ({ limit = 6 }: TrialBlogShowcaseProps) => {
                     ) : post.is_trial_post ? (
                       <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs">
                         <Clock className="mr-1 h-3 w-3" />
-                        Trial
+                        Unclaimed
                       </Badge>
                     ) : (
                       <Badge className="bg-green-50 text-green-700 border-green-200 text-xs">

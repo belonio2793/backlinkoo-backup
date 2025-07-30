@@ -248,6 +248,14 @@ export class OpenAIContentGenerator {
   private async generateOpenAIContent(request: OpenAIContentRequest, prompt: string): Promise<string> {
     console.log('🔧 Using secure Netlify function for OpenAI content generation...');
 
+    // Check if we're in an environment where Netlify functions are likely available
+    const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
+
+    if (!isProduction) {
+      console.log('🔄 Development environment detected, skipping to direct fallback...');
+      return await this.generateDirectOpenAIContent(request, prompt);
+    }
+
     try {
       console.log('🤖 Making secure OpenAI request via Netlify function...');
 
@@ -303,16 +311,18 @@ export class OpenAIContentGenerator {
       }
 
       if (!response.ok) {
-        const errorText = await response.text().catch(() => 'Unknown error');
-        console.error(`❌ Netlify function error (${response.status}):`, errorText);
-
-        // If all Netlify functions fail, try direct fallback approach
-        if (response.status === 404) {
-          console.log('🔄 All Netlify functions failed, using direct fallback...');
-          return await this.generateDirectOpenAIContent(request, prompt);
+        // Only treat non-404 errors as actual errors since 404s are expected in fallback chain
+        if (response.status !== 404) {
+          const errorText = await response.text().catch(() => 'Function response parsing failed');
+          console.error(`❌ Netlify function error (${response.status}):`, errorText);
+          throw new Error(`Netlify function error: ${response.status} - ${errorText}`);
         }
 
-        throw new Error(`Netlify function error: ${response.status} - ${errorText}`);
+        // If we get a 404 on the final fallback, use direct fallback approach
+        if (response.status === 404) {
+          console.log('🔄 All Netlify functions unavailable, using direct fallback...');
+          return await this.generateDirectOpenAIContent(request, prompt);
+        }
       }
 
       const data = await response.json();
@@ -665,7 +675,7 @@ export class OpenAIContentGenerator {
         console.log('✅ Blog post saved to Supabase database');
       }
     } catch (error) {
-      console.warn('��️ Database save failed (non-blocking):', error);
+      console.warn('⚠️ Database save failed (non-blocking):', error);
       // Continue without database save
     }
 

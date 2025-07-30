@@ -125,8 +125,8 @@ export class BlogClaimService {
       const { data, error } = await supabase
         .from('published_blog_posts')
         .select(`
-          id, slug, title, excerpt, published_url, target_url, 
-          created_at, expires_at, seo_score, reading_time, word_count, 
+          id, slug, title, excerpt, published_url, target_url,
+          created_at, expires_at, seo_score, reading_time, word_count,
           view_count, is_trial_post, user_id, author_name, tags, category
         `)
         .eq('user_id', userId)
@@ -135,6 +135,40 @@ export class BlogClaimService {
 
       if (error) {
         console.error('Error fetching user claimed posts:', error);
+
+        // Check if it's a table/schema issue
+        if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
+          console.warn('🔧 BlogClaimService: Database table may not exist, checking localStorage for user claimed posts');
+
+          // Fallback to localStorage
+          try {
+            const userClaimedPosts = localStorage.getItem(`user_claimed_posts_${userId}`);
+            if (userClaimedPosts) {
+              const claimedPosts = JSON.parse(userClaimedPosts);
+              return claimedPosts.map((claim: any) => {
+                // Try to get full post data from localStorage
+                const blogData = localStorage.getItem(`blog_post_${claim.slug}`);
+                if (blogData) {
+                  return JSON.parse(blogData);
+                }
+                // Return minimal data if full post not found
+                return {
+                  id: claim.slug,
+                  slug: claim.slug,
+                  title: claim.title,
+                  user_id: userId,
+                  is_trial_post: false,
+                  created_at: claim.claimedAt || new Date().toISOString(),
+                  tags: [],
+                  category: 'Claimed',
+                  author_name: 'User'
+                };
+              });
+            }
+          } catch (localError) {
+            console.warn('Failed to get claimed posts from localStorage:', localError);
+          }
+        }
         return [];
       }
 
@@ -161,12 +195,42 @@ export class BlogClaimService {
         .eq('status', 'published')
         .single();
 
+      // Check for database table not existing
+      if (fetchError && fetchError.message?.includes('relation') && fetchError.message?.includes('does not exist')) {
+        console.warn('⚠️ BlogClaimService: Database table does not exist, trying localStorage fallback...');
+
+        // Try to find the post in localStorage and use claimLocalStoragePost
+        const blogStorageKey = `blog_post_${postId}`;
+        const storedBlogData = localStorage.getItem(blogStorageKey);
+
+        if (storedBlogData) {
+          const blogPost = JSON.parse(storedBlogData);
+          console.log('🔄 BlogClaimService: Found post in localStorage, using claimLocalStoragePost method');
+          return await this.claimLocalStoragePost(blogPost, user);
+        }
+
+        // Try to find by scanning all blog posts in localStorage
+        const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+        for (const blogMeta of allBlogPosts) {
+          const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
+          if (blogData) {
+            const blogPost = JSON.parse(blogData);
+            if (blogPost.id === postId) {
+              console.log('🔄 BlogClaimService: Found post by scanning localStorage, using claimLocalStoragePost method');
+              return await this.claimLocalStoragePost(blogPost, user);
+            }
+          }
+        }
+
+        return {
+          success: false,
+          message: 'Database table not available and post not found in localStorage',
+          error: 'Table does not exist and localStorage fallback failed'
+        };
+      }
+
       if (fetchError || !existingPost) {
-        console.error('❌ BlogClaimService: Post not found in database:', {
-          postId,
-          error: fetchError?.message,
-          hint: 'This might be a localStorage-only post'
-        });
+        console.error('❌ BlogClaimService: Post not found in database:', `ID: ${postId}, Error: ${fetchError?.message || 'Unknown error'}, Hint: This might be a localStorage-only post`);
         return {
           success: false,
           message: 'Blog post not found or unavailable for claiming',
@@ -309,11 +373,41 @@ export class BlogClaimService {
 
       if (error) {
         console.error('Error checking claim limits:', error);
-        return { canClaim: false, reason: 'Unable to check claim limits', claimedCount: 0, maxClaims: 5 };
+
+        // Check if it's a table/schema issue
+        if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
+          console.warn('🔧 BlogClaimService: Database table may not exist, checking localStorage for claim limits');
+
+          // Fallback to localStorage count
+          try {
+            const userClaimedPosts = localStorage.getItem(`user_claimed_posts_${user.id}`);
+            const claimedCount = userClaimedPosts ? JSON.parse(userClaimedPosts).length : 0;
+            const maxClaims = 3;
+
+            if (claimedCount >= maxClaims) {
+              return {
+                canClaim: false,
+                reason: `You have reached the maximum limit of ${maxClaims} claimed posts. Please unclaim a post to claim a new one.`,
+                claimedCount,
+                maxClaims
+              };
+            }
+
+            return {
+              canClaim: true,
+              claimedCount,
+              maxClaims
+            };
+          } catch (localError) {
+            console.warn('Failed to check claim limits from localStorage:', localError);
+          }
+        }
+
+        return { canClaim: false, reason: 'Unable to check claim limits', claimedCount: 0, maxClaims: 3 };
       }
 
       const claimedCount = claimedPosts?.length || 0;
-      const maxClaims = 5; // Default limit - could be made configurable per user tier
+      const maxClaims = 3; // Default limit - could be made configurable per user tier
 
       if (claimedCount >= maxClaims) {
         return {
@@ -331,7 +425,7 @@ export class BlogClaimService {
       };
     } catch (error) {
       console.error('Exception checking claim limits:', error);
-      return { canClaim: false, reason: 'Unable to check claim limits', claimedCount: 0, maxClaims: 5 };
+      return { canClaim: false, reason: 'Unable to check claim limits', claimedCount: 0, maxClaims: 3 };
     }
   }
 
@@ -356,9 +450,41 @@ export class BlogClaimService {
         return await this.claimPost(existingPost.id, user);
       }
 
+      // Validate required fields first
+      if (!localPost.id || !localPost.slug || !localPost.title) {
+        return {
+          success: false,
+          message: 'Invalid post data: missing required fields (id, slug, or title)',
+          error: 'Missing required fields'
+        };
+      }
+
       // Create new database entry with user as owner
+      // Only include fields that match the database schema
       const postToInsert = {
-        ...localPost,
+        id: localPost.id,
+        slug: localPost.slug,
+        title: localPost.title,
+        content: localPost.content || '',
+        excerpt: localPost.excerpt || localPost.meta_description || '',
+        meta_description: localPost.meta_description || localPost.excerpt || '',
+        keywords: Array.isArray(localPost.keywords)
+          ? localPost.keywords.filter(k => k && typeof k === 'string')
+          : (localPost.keywords && typeof localPost.keywords === 'string' ? [localPost.keywords] : []),
+        target_url: localPost.target_url || localPost.targetUrl || '',
+        published_url: localPost.published_url || localPost.publishedUrl || '',
+        author_name: localPost.author_name || 'User',
+        tags: Array.isArray(localPost.tags)
+          ? localPost.tags.filter(t => t && typeof t === 'string')
+          : (localPost.tags && typeof localPost.tags === 'string' ? [localPost.tags] : []),
+        category: localPost.category || 'General',
+        seo_score: Number(localPost.seo_score || localPost.seoScore || 85),
+        reading_time: Number(localPost.reading_time || localPost.readingTime || 5),
+        word_count: Number(localPost.word_count || localPost.wordCount || 1000),
+        view_count: Number(localPost.view_count || localPost.viewCount || 0),
+        created_at: localPost.created_at || localPost.createdAt || new Date().toISOString(),
+        published_at: localPost.published_at || localPost.publishedAt || new Date().toISOString(),
+        anchor_text: localPost.anchor_text || localPost.anchorText || '',
         user_id: user.id,
         is_trial_post: false,
         expires_at: null,
@@ -366,22 +492,163 @@ export class BlogClaimService {
         updated_at: new Date().toISOString()
       };
 
-      const { data: insertedPost, error: insertError } = await supabase
-        .from('published_blog_posts')
-        .insert([postToInsert])
-        .select()
-        .single();
+      console.log('🔍 BlogClaimService: Attempting to insert post with data:', {
+        id: postToInsert.id,
+        slug: postToInsert.slug,
+        title: postToInsert.title,
+        user_id: postToInsert.user_id,
+        contentLength: postToInsert.content?.length || 0,
+        keywordsLength: postToInsert.keywords?.length || 0,
+        tagsLength: postToInsert.tags?.length || 0
+      });
 
-      if (insertError) {
-        console.error('❌ BlogClaimService: Failed to create database entry:', insertError);
+      // Test database connection first
+      try {
+        const { error: connectionError } = await supabase
+          .from('published_blog_posts')
+          .select('id')
+          .limit(1);
+
+        if (connectionError) {
+          console.warn('⚠️ BlogClaimService: Database connection test failed before insertion:', connectionError.message);
+          if (connectionError.message?.includes('relation') || connectionError.message?.includes('does not exist')) {
+            return {
+              success: false,
+              message: 'Database table is not available. Please contact support.',
+              error: 'Database table does not exist'
+            };
+          }
+        }
+      } catch (testError: any) {
+        console.warn('⚠️ BlogClaimService: Database test failed:', testError.message);
         return {
           success: false,
-          message: 'Failed to save post to database',
-          error: insertError.message
+          message: 'Database is not available. Please try again later.',
+          error: testError.message
         };
       }
 
+      let insertedPost, insertError;
+      try {
+        const result = await supabase
+          .from('published_blog_posts')
+          .insert([postToInsert])
+          .select()
+          .single();
+        insertedPost = result.data;
+        insertError = result.error;
+      } catch (dbException: any) {
+        console.error('❌ BlogClaimService: Database insertion exception:', dbException);
+        insertError = dbException;
+      }
+
+      if (insertError) {
+        console.error('❌ BlogClaimService: Failed to create database entry:', {
+          message: insertError.message || String(insertError),
+          details: insertError.details,
+          hint: insertError.hint,
+          code: insertError.code,
+          postData: JSON.stringify(postToInsert, null, 2)
+        });
+
+        // Check if it's a duplicate key error
+        if (insertError.code === '23505' || insertError.message?.includes('duplicate')) {
+          console.log('🔄 BlogClaimService: Duplicate detected, trying to claim existing post');
+          try {
+            // Try to find and claim the existing post
+            const existingPost = await this.getClaimablePosts(100);
+            const foundPost = existingPost.find(p => p.slug === localPost.slug || p.id === localPost.id);
+            if (foundPost) {
+              return await this.claimPost(foundPost.id, user);
+            }
+          } catch (retryError) {
+            console.warn('Failed to claim existing duplicate post:', retryError);
+          }
+        }
+
+        // Provide specific error messages based on error type
+        let userMessage = 'Failed to save post to database';
+        if (insertError.code === '23505') {
+          userMessage = 'This post already exists in the database';
+        } else if (insertError.code === '23502') {
+          userMessage = 'Missing required information for database entry';
+        } else if (insertError.code === '23514') {
+          userMessage = 'Invalid data format for database entry';
+        } else if (insertError.message?.includes('relation') || insertError.message?.includes('does not exist')) {
+          userMessage = 'Database table is not available';
+        }
+
+        // Fallback: Store claim information locally even if database fails
+        try {
+          console.log('🔄 BlogClaimService: Database failed, using localStorage fallback for claim');
+
+          // Update the post in localStorage to mark as claimed
+          const blogStorageKey = `blog_post_${localPost.slug}`;
+          const updatedLocalPost = {
+            ...localPost,
+            user_id: user.id,
+            is_trial_post: false,
+            expires_at: null,
+            claimed_at: new Date().toISOString(),
+            claimed_locally: true // Flag to indicate this was claimed locally
+          };
+          localStorage.setItem(blogStorageKey, JSON.stringify(updatedLocalPost));
+
+          // Update the blog posts list
+          const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+          const updatedAllBlogPosts = allBlogPosts.map((post: any) =>
+            post.slug === localPost.slug ? { ...post, user_id: user.id, is_trial_post: false } : post
+          );
+          localStorage.setItem('all_blog_posts', JSON.stringify(updatedAllBlogPosts));
+
+          // Store in user's claimed posts list
+          const userClaimedPosts = JSON.parse(localStorage.getItem(`user_claimed_posts_${user.id}`) || '[]');
+          userClaimedPosts.push({
+            slug: localPost.slug,
+            title: localPost.title,
+            claimedAt: new Date().toISOString()
+          });
+          localStorage.setItem(`user_claimed_posts_${user.id}`, JSON.stringify(userClaimedPosts));
+
+          return {
+            success: true,
+            message: `Blog post claimed successfully! (${userMessage} - saved locally and will sync when database is available)`,
+            post: updatedLocalPost
+          };
+        } catch (fallbackError) {
+          console.error('❌ BlogClaimService: Fallback claim also failed:', fallbackError);
+          return {
+            success: false,
+            message: userMessage + ': ' + (insertError.message || String(insertError)),
+            error: insertError.message || String(insertError)
+          };
+        }
+      }
+
       console.log('✅ BlogClaimService: Successfully created and claimed post:', insertedPost.id);
+
+      // Also update the post in localStorage to mark as claimed
+      try {
+        const blogStorageKey = `blog_post_${localPost.slug}`;
+        const updatedLocalPost = {
+          ...localPost,
+          user_id: user.id,
+          is_trial_post: false,
+          expires_at: null,
+          claimed_at: new Date().toISOString()
+        };
+        localStorage.setItem(blogStorageKey, JSON.stringify(updatedLocalPost));
+
+        // Keep it visible on /blog by not removing it from all_blog_posts
+        const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+        const updatedAllBlogPosts = allBlogPosts.map((post: any) =>
+          post.slug === localPost.slug ? { ...post, user_id: user.id, is_trial_post: false } : post
+        );
+        localStorage.setItem('all_blog_posts', JSON.stringify(updatedAllBlogPosts));
+
+      } catch (localError) {
+        console.warn('Failed to update localStorage after claiming:', localError);
+      }
 
       return {
         success: true,

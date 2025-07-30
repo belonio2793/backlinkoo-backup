@@ -67,28 +67,22 @@ export function ClaimTrialPostDialog({
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
 
-      if (!user) return { canClaim: true, hasExistingClaim: false };
+      if (!user) return { canClaim: true, hasExistingClaim: false, claimedCount: 0, maxClaims: 3 };
 
-      // Check if user already has a claimed free blog post
-      const { data: userPosts } = await supabase
-        .from('published_blog_posts')
-        .select('id, is_trial_post, user_id')
-        .eq('user_id', user.id)
-        .eq('is_trial_post', false); // Claimed posts are no longer trial posts
-
-      const hasExistingClaim = (userPosts?.length || 0) > 0;
-
-      // Also check localStorage for any claimed posts
-      const localClaims = localStorage.getItem(`user_claimed_posts_${user.id}`);
-      const hasLocalClaims = localClaims ? JSON.parse(localClaims).length > 0 : false;
+      // Use BlogClaimService for consistent claim limit checking
+      const { BlogClaimService } = await import('@/services/blogClaimService');
+      const claimStatus = await BlogClaimService.canUserClaimMore(user);
 
       return {
-        canClaim: !hasExistingClaim && !hasLocalClaims,
-        hasExistingClaim: hasExistingClaim || hasLocalClaims
+        canClaim: claimStatus.canClaim,
+        hasExistingClaim: claimStatus.claimedCount > 0,
+        claimedCount: claimStatus.claimedCount,
+        maxClaims: claimStatus.maxClaims,
+        reason: claimStatus.reason
       };
     } catch (error) {
       console.warn('Failed to check user claims:', error);
-      return { canClaim: true, hasExistingClaim: false };
+      return { canClaim: true, hasExistingClaim: false, claimedCount: 0, maxClaims: 3 };
     }
   };
 
@@ -101,18 +95,25 @@ export function ClaimTrialPostDialog({
     localStorage.setItem('recent_claim_operation', Date.now().toString());
 
     try {
-      const { canClaim, hasExistingClaim } = await checkUserFreeClaims();
+      const { canClaim, hasExistingClaim, claimedCount, maxClaims, reason } = await checkUserFreeClaims();
 
       if (!currentUser) {
-        // Redirect to signup with claim intent
-        navigate(`/auth/callback?action=signup&redirect=/blog/${trialPostSlug}&claim=true`);
+        // Redirect to login/signup page with claim intent stored in localStorage
+        localStorage.setItem('claim_intent', JSON.stringify({
+          action: 'claim_trial_post',
+          postSlug: trialPostSlug,
+          postTitle: trialPostTitle,
+          targetUrl: targetUrl,
+          timestamp: Date.now()
+        }));
+        navigate('/login');
         return;
       }
 
-      if (!canClaim || hasExistingClaim) {
+      if (!canClaim) {
         toast({
-          title: "Free Claim Limit Reached",
-          description: "You already have a free blog post saved. Each account can only claim one free trial post since they auto-delete after 24 hours unless claimed.",
+          title: "Claim Limit Reached",
+          description: reason || `You have reached the maximum limit of ${maxClaims} claimed posts. Please unclaim a post to claim a new one.`,
           variant: "destructive"
         });
         return;
@@ -247,7 +248,7 @@ export function ClaimTrialPostDialog({
             Claim Your Free Trial Post
           </DialogTitle>
           <DialogDescription>
-            Save this trial post permanently. Each account gets one free claim since posts auto-delete after 24 hours.
+            Save this trial post permanently. Each account can claim up to 3 posts since they auto-delete after 24 hours unless claimed.
           </DialogDescription>
         </DialogHeader>
 
@@ -313,7 +314,7 @@ export function ClaimTrialPostDialog({
               <Badge className="bg-green-600 text-white">No Cost</Badge>
             </div>
             <p className="text-xs text-green-700 mt-1">
-              Each account can claim one free trial post to prevent it from auto-deletion
+              Each account can claim up to 3 trial posts to prevent them from auto-deletion
             </p>
           </div>
 
@@ -339,7 +340,16 @@ export function ClaimTrialPostDialog({
               </Button>
             ) : (
               <Button
-                onClick={() => navigate('/auth/callback?action=signup&claim=true')}
+                onClick={() => {
+                  localStorage.setItem('claim_intent', JSON.stringify({
+                    action: 'claim_trial_post',
+                    postSlug: trialPostSlug,
+                    postTitle: trialPostTitle,
+                    targetUrl: targetUrl,
+                    timestamp: Date.now()
+                  }));
+                  navigate('/login');
+                }}
                 className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               >
                 Sign Up to Claim
@@ -357,7 +367,7 @@ export function ClaimTrialPostDialog({
 
           {!currentUser && (
             <p className="text-xs text-gray-500 text-center">
-              Sign up to claim one free trial post permanently
+              Sign up to claim up to 3 trial posts permanently
             </p>
           )}
         </div>

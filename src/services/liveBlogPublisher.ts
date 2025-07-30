@@ -169,10 +169,50 @@ export class LiveBlogPublisher {
 
   async getUserBlogPosts(userId: string): Promise<LiveBlogPost[]> {
     try {
-      const userPosts = Array.from(this.inMemoryPosts.values())
+      // Get posts from in-memory storage
+      const inMemoryPosts = Array.from(this.inMemoryPosts.values())
         .filter(post => post.userId === userId)
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      return userPosts;
+
+      // Also get claimed posts from database
+      let claimedPosts: LiveBlogPost[] = [];
+      try {
+        const { BlogClaimService } = await import('./blogClaimService');
+        const dbPosts = await BlogClaimService.getUserClaimedPosts(userId);
+
+        // Convert claimed posts to LiveBlogPost format
+        claimedPosts = dbPosts.map(post => ({
+          id: post.id,
+          slug: post.slug,
+          title: post.title,
+          content: '', // Content not needed for dashboard display
+          metaDescription: post.excerpt || '',
+          keywords: post.tags,
+          targetUrl: post.target_url,
+          publishedUrl: post.published_url,
+          status: 'published' as const,
+          createdAt: post.created_at,
+          updatedAt: post.created_at,
+          userId: post.user_id,
+          isTrialPost: post.is_trial_post,
+          expiresAt: post.expires_at,
+          viewCount: post.view_count || 0,
+          seoScore: post.seo_score || 0,
+          contextualLinks: []
+        }));
+      } catch (error) {
+        console.warn('Failed to load claimed posts from database:', error);
+      }
+
+      // Combine and deduplicate posts (in-memory posts take priority)
+      const allPosts = [...inMemoryPosts];
+      claimedPosts.forEach(claimedPost => {
+        if (!allPosts.find(inMemoryPost => inMemoryPost.slug === claimedPost.slug)) {
+          allPosts.push(claimedPost);
+        }
+      });
+
+      return allPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     } catch (error) {
       console.error('Failed to get user blog posts:', error);
       return [];

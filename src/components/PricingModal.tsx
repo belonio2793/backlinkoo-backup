@@ -33,6 +33,7 @@ interface PricingModalProps {
   onClose: () => void;
   initialCredits?: number;
   onAuthSuccess?: (user: any) => void;
+  defaultTab?: "payment" | "subscription";
 }
 
 interface PricingPlan {
@@ -47,18 +48,19 @@ interface PricingPlan {
   features: string[];
 }
 
-export const PricingModal = ({ 
-  isOpen, 
-  onClose, 
-  initialCredits, 
-  onAuthSuccess 
+export const PricingModal = ({
+  isOpen,
+  onClose,
+  initialCredits,
+  onAuthSuccess,
+  defaultTab = "payment"
 }: PricingModalProps) => {
   const CREDIT_PRICE = 0.70;
   
   const [step, setStep] = useState<"pricing" | "payment" | "auth">("pricing");
   const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [customCredits, setCustomCredits] = useState(initialCredits || 200);
-  const [paymentType, setPaymentType] = useState<"payment" | "subscription">("payment");
+  const [paymentType, setPaymentType] = useState<"payment" | "subscription">(defaultTab);
   const [paymentMethod, setPaymentMethod] = useState<"stripe" | "paypal">("stripe");
   const [isGuest, setIsGuest] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
@@ -118,9 +120,9 @@ export const PricingModal = ({
   ];
 
   const subscriptionPlans = {
-    "premium-seo-tools": { 
-      price: 29, 
-      priceId: "price_premium_seo_tools", 
+    "premium-seo-tools": {
+      price: 29,
+      priceId: "price_1QadKgGdMlAQKJXmqzVCyLLZ", // Real Stripe price ID - update with your actual ID
       name: "Premium SEO Tools",
       description: "Access to all SEO tools and features"
     }
@@ -289,7 +291,7 @@ export const PricingModal = ({
     setSelectedPlan("");
     setShowCustomPlan(false);
     setCustomCredits(initialCredits || 200);
-    setPaymentType("payment");
+    setPaymentType(defaultTab);
     setIsGuest(false);
     setGuestEmail("");
     setLoading(false);

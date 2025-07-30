@@ -153,20 +153,19 @@ export function AuthFormTabs({
     }, 1000);
 
     try {
-      // Test connection first
+      // Test connection first (non-blocking)
       try {
         console.log('🔗 Testing connection...');
         const { supabase } = await import('@/integrations/supabase/client');
         const connectionTest = await Promise.race([
           supabase.auth.getSession(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Connection test timeout')), 5000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Connection test timeout')), 8000)) // Increased timeout
         ]);
         console.log('✅ Connection test successful');
       } catch (connectionError: any) {
-        console.warn('⚠️ Connection test failed:', connectionError.message);
-        if (connectionError.message.includes('timeout')) {
-          throw new Error('Unable to connect. Please check your internet connection and try again.');
-        }
+        console.warn('⚠️ Connection test failed, but continuing with login attempt:', connectionError.message);
+        // Don't throw error here - let the actual login attempt handle connection issues
+        // The connection test is just informative, not a hard requirement
       }
 
       // Try multiple authentication methods with shorter timeouts
@@ -296,6 +295,31 @@ export function AuthFormTabs({
           description: `Successfully signed in as ${result.user.email}`,
         });
 
+        // Check for claim intent and handle it
+        const claimIntent = localStorage.getItem('claim_intent');
+        if (claimIntent) {
+          try {
+            const intent = JSON.parse(claimIntent);
+            // Clear the intent to prevent repeated execution
+            localStorage.removeItem('claim_intent');
+
+            // Show notification about continuing with claim
+            toast({
+              title: "Continuing with your claim...",
+              description: `Processing your request to claim "${intent.postTitle}"`,
+            });
+
+            // Navigate to the blog post to complete the claim
+            setTimeout(() => {
+              window.location.href = `/blog/${intent.postSlug}`;
+            }, 1500);
+            return;
+          } catch (error) {
+            console.warn('Failed to parse claim intent:', error);
+            localStorage.removeItem('claim_intent');
+          }
+        }
+
         onAuthSuccess?.(result.user);
 
         // Reset form and retry attempts
@@ -351,7 +375,7 @@ export function AuthFormTabs({
       } else if (error.message?.includes('Email verification required') || error.message?.includes('Email not confirmed')) {
         errorMessage = "Please verify your email address before signing in. Check your email for a verification link.";
         setRetryAttempts(0);
-      } else if (error.message?.includes('NetworkError') || error.message?.includes('fetch') || error.message?.includes('network')) {
+      } else if (error.message?.includes('NetworkError') || error.message?.includes('fetch') || error.message?.includes('network') || error.message?.includes('Unable to connect')) {
         errorMessage = "Network connection failed. Please check your internet connection and try again.";
       } else if (error.message?.includes('rate limit') || error.message?.includes('too many')) {
         errorMessage = "Too many login attempts. Please wait a few minutes before trying again.";
@@ -441,6 +465,29 @@ export function AuthFormTabs({
               ? `Your account is ready and ${convertedCount} trial post${convertedCount > 1 ? 's have' : ' has'} been converted to permanent.`
               : "Your account is ready! You can now create permanent backlinks.",
           });
+
+          // Check for claim intent
+          const claimIntent = localStorage.getItem('claim_intent');
+          if (claimIntent) {
+            try {
+              const intent = JSON.parse(claimIntent);
+              localStorage.removeItem('claim_intent');
+
+              toast({
+                title: "Continuing with your claim...",
+                description: `Processing your request to claim "${intent.postTitle}"`,
+              });
+
+              setTimeout(() => {
+                window.location.href = `/blog/${intent.postSlug}`;
+              }, 2000);
+              return;
+            } catch (error) {
+              console.warn('Failed to parse claim intent:', error);
+              localStorage.removeItem('claim_intent');
+            }
+          }
+
           onAuthSuccess?.(conversionResult.user);
         } else {
           toast({
@@ -471,6 +518,28 @@ export function AuthFormTabs({
           }
 
           if (result.user?.email_confirmed_at) {
+            // Check for claim intent
+            const claimIntent = localStorage.getItem('claim_intent');
+            if (claimIntent) {
+              try {
+                const intent = JSON.parse(claimIntent);
+                localStorage.removeItem('claim_intent');
+
+                toast({
+                  title: "Continuing with your claim...",
+                  description: `Processing your request to claim "${intent.postTitle}"`,
+                });
+
+                setTimeout(() => {
+                  window.location.href = `/blog/${intent.postSlug}`;
+                }, 1500);
+                return;
+              } catch (error) {
+                console.warn('Failed to parse claim intent:', error);
+                localStorage.removeItem('claim_intent');
+              }
+            }
+
             onAuthSuccess?.(result.user);
           } else {
             // Auto-switch to login tab after successful signup
@@ -702,7 +771,7 @@ export function AuthFormTabs({
             <Input
               id="confirm-password"
               type="password"
-              placeholder="•••���••••"
+              placeholder="••••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className={inputHeight}

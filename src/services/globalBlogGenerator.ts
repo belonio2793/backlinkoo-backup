@@ -229,7 +229,7 @@ class GlobalBlogGeneratorService {
         if (error) {
           console.warn('Could not store in database:', error);
         } else {
-          console.log('��� Blog post stored globally in database');
+          console.log('✅ Blog post stored globally in database');
         }
       } catch (dbError) {
         console.warn('Database storage failed, using localStorage only:', dbError);

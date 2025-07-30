@@ -40,6 +40,8 @@ import type { User } from '@supabase/supabase-js';
 import { KeywordResearchTool } from "@/components/KeywordResearchTool";
 import { RankingTracker } from "@/components/RankingTracker";
 import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
+import SubscriptionService, { type SubscriptionStatus } from "@/services/subscriptionService";
+import FeatureAccessGuard from "@/components/FeatureAccessGuard";
 
 interface SEOToolsSectionProps {
   user: User | null;
@@ -70,7 +72,16 @@ interface BlogPost {
 }
 
 const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>({
+    isSubscribed: false,
+    subscriptionTier: null,
+    features: {
+      keywordResearch: false,
+      automatedCampaigns: false,
+      rankTracker: false,
+      unlimitedAccess: false,
+    }
+  });
   const [projects, setProjects] = useState<NoHandsSEOProject[]>([]);
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -79,6 +90,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
   const [isCancellingSubscription, setIsCancellingSubscription] = useState(false);
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const [billingEmailNotifications, setBillingEmailNotifications] = useState(true);
+  const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -92,23 +104,24 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
 
   const checkSubscriptionStatus = async () => {
     try {
-      // For development, set to false to show subscription UI
-      // When tables are created, uncomment below:
-      // const { data, error } = await supabase
-      //   .from('seo_subscriptions')
-      //   .select('*')
-      //   .eq('user_id', user?.id)
-      //   .eq('status', 'active')
-      //   .single();
-      //
-      // if (!error && data) {
-      //   setIsSubscribed(true);
-      // }
+      const status = await SubscriptionService.getSubscriptionStatus(user);
+      setSubscriptionStatus(status);
 
-      setIsSubscribed(true);
+      // Also get subscription info for the modal
+      const info = await SubscriptionService.getSubscriptionInfo(user);
+      setSubscriptionInfo(info);
     } catch (error) {
       console.error('Error checking subscription:', error);
-      setIsSubscribed(false);
+      setSubscriptionStatus({
+        isSubscribed: false,
+        subscriptionTier: null,
+        features: {
+          keywordResearch: false,
+          automatedCampaigns: false,
+          rankTracker: false,
+          unlimitedAccess: false,
+        }
+      });
     }
   };
 
@@ -159,29 +172,28 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
 
   const handleSubscribe = async () => {
     try {
-      // Create Stripe checkout session for $29/month subscription
-      const { data, error } = await supabase.functions.invoke('create-seo-subscription', {
-        body: { user_id: user?.id, plan: 'no_hands_seo' }
-      });
+      const result = await SubscriptionService.createSubscription(user);
 
-      if (error) throw error;
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
       // Redirect to Stripe checkout
-      if (data?.url) {
-        window.location.href = data.url;
+      if (result.url) {
+        window.location.href = result.url;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating subscription:', error);
       toast({
         title: "Error",
-        description: "Failed to start subscription process. Please try again.",
+        description: error.message || "Failed to start subscription process. Please try again.",
         variant: "destructive",
       });
     }
   };
 
-  // Mock subscription data - replace with real data from your billing system
-  const subscriptionData = {
+  // Use subscription info from service
+  const subscriptionData = subscriptionInfo || {
     plan: "Premium SEO Tools",
     price: "$29.00",
     billing: "Monthly",
@@ -193,7 +205,8 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
     features: [
       "Unlimited keyword research",
       "Advanced SERP analysis",
-      "Campaign monitoring",
+      "Automated campaign management",
+      "Real-time rank tracking",
       "Priority support",
       "Export capabilities"
     ]
@@ -202,21 +215,26 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
   const handleCancelSubscription = async () => {
     setIsCancellingSubscription(true);
     try {
-      // Simulate API call to cancel subscription
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const result = await SubscriptionService.cancelSubscription(user);
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
       toast({
         title: "Subscription Cancelled",
-        description: "Your subscription has been cancelled. You'll continue to have access until March 15, 2024.",
+        description: "Your subscription has been cancelled. You'll continue to have access until your current billing period ends.",
       });
 
       setIsSubscriptionModalOpen(false);
       setShowCancelConfirmation(false);
-      setIsSubscribed(false);
-    } catch (error) {
+
+      // Refresh subscription status
+      await checkSubscriptionStatus();
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to cancel subscription. Please try again.",
+        description: error.message || "Failed to cancel subscription. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -272,7 +290,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
     }
   };
 
-  if (!isSubscribed) {
+  if (!subscriptionStatus.isSubscribed) {
     return (
       <div className="space-y-6">
         {/* Subscription CTA */}
@@ -380,15 +398,33 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
         </TabsList>
 
         <TabsContent value="no-hands-seo" className="space-y-6">
-          <NoHandsSEODashboard />
+          <FeatureAccessGuard
+            feature="automatedCampaigns"
+            featureName="Automated Link Building"
+            fallbackMessage="Upgrade to Premium to access our automated link building system with unlimited campaigns and 24/7 automation."
+          >
+            <NoHandsSEODashboard />
+          </FeatureAccessGuard>
         </TabsContent>
 
         <TabsContent value="keyword-research" className="space-y-6">
-          <KeywordResearchTool />
+          <FeatureAccessGuard
+            feature="keywordResearch"
+            featureName="Advanced Keyword Research"
+            fallbackMessage="Upgrade to Premium for unlimited keyword research with geographic targeting, difficulty analysis, and SERP insights."
+          >
+            <KeywordResearchTool />
+          </FeatureAccessGuard>
         </TabsContent>
 
         <TabsContent value="rank-tracker" className="space-y-6">
-          <RankingTracker />
+          <FeatureAccessGuard
+            feature="rankTracker"
+            featureName="Real-time Rank Tracking"
+            fallbackMessage="Upgrade to Premium for unlimited rank tracking across multiple search engines with historical data and trend analysis."
+          >
+            <RankingTracker />
+          </FeatureAccessGuard>
         </TabsContent>
       </Tabs>
 

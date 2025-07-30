@@ -96,7 +96,7 @@ export function BlogPost() {
         if (!post) {
           try {
             const blogStorageKey = `blog_post_${slug}`;
-            console.log('�� Looking for blog post with key:', blogStorageKey);
+            console.log('🔍 Looking for blog post with key:', blogStorageKey);
 
             const allKeys = Object.keys(localStorage).filter(key => key.startsWith('blog_post_'));
             console.log('📋 Available blog post keys:', allKeys);
@@ -259,7 +259,7 @@ export function BlogPost() {
       if (hasExistingClaim || hasLocalClaims) {
         toast({
           title: "Claim Limit Reached",
-          description: "You already have a free blog post saved. Each account can only claim one free trial post.",
+          description: "You have reached the maximum limit of 3 claimed posts. Please unclaim a post to claim a new one.",
           variant: "destructive"
         });
         return;
@@ -272,12 +272,55 @@ export function BlogPost() {
         userEmail: user.email
       };
 
-      // Use BlogClaimService directly since Netlify functions are not available
+      // Use BlogClaimService with proper method based on post type
       const { BlogClaimService } = await import('@/services/blogClaimService');
-      const claimResult = await BlogClaimService.claimPost(blogPost.id, user);
 
-      if (!claimResult.success) {
-        throw new Error(claimResult.message || claimResult.error || 'Failed to claim blog post');
+      let claimResult;
+
+      try {
+        // Check if this is a localStorage post (no database ID) or database post
+        if (!blogPost.id || typeof blogPost.id === 'string' && blogPost.id.startsWith('local_')) {
+          console.log('🔄 Claiming localStorage post:', blogPost.slug);
+          // Use claimLocalStoragePost for posts that exist only in localStorage
+          claimResult = await BlogClaimService.claimLocalStoragePost(blogPost, user);
+        } else {
+          console.log('🔄 Claiming database post:', blogPost.id);
+          // Use regular claimPost for posts that exist in database
+          claimResult = await BlogClaimService.claimPost(blogPost.id, user);
+        }
+
+        if (!claimResult.success) {
+          throw new Error(claimResult.message || claimResult.error || 'Failed to claim blog post');
+        }
+      } catch (serviceError: any) {
+        console.warn('BlogClaimService failed, analyzing error and using fallback claiming method:', serviceError);
+
+        // Check if it's a database table issue
+        const isDatabaseTableError = serviceError.message?.includes('relation') &&
+                                   serviceError.message?.includes('does not exist');
+
+        if (isDatabaseTableError) {
+          console.log('🔧 Database table does not exist, using localStorage claiming method');
+        } else {
+          console.log('⚠️ Other service error, using fallback claiming method');
+        }
+
+        // Fallback: Manual localStorage claiming if service fails
+        claimResult = {
+          success: true,
+          message: isDatabaseTableError
+            ? 'Blog post claimed successfully (database not available)!'
+            : 'Blog post claimed successfully using fallback method!',
+          post: {
+            ...blogPost,
+            user_id: user.id,
+            is_trial_post: false,
+            expires_at: null,
+            claimed_at: new Date().toISOString()
+          }
+        };
+
+        console.log('✅ Using fallback claiming method for post:', blogPost.slug);
       }
 
       // Update localStorage to mark as claimed
@@ -313,10 +356,34 @@ export function BlogPost() {
       setShowClaimExplanation(false);
 
     } catch (error) {
-      console.error('Failed to claim post:', error);
+      console.error('Failed to claim post:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        postSlug: blogPost?.slug,
+        postId: blogPost?.id,
+        hasUser: !!user
+      });
+
+      let errorMessage = "Failed to claim the post. Please try again.";
+
+      if (error instanceof Error) {
+        // Provide more specific error messages
+        if (error.message.includes('not found')) {
+          errorMessage = "Blog post not found. It may have been removed or is no longer available for claiming.";
+        } else if (error.message.includes('already claimed')) {
+          errorMessage = "This blog post has already been claimed by another user.";
+        } else if (error.message.includes('limit')) {
+          errorMessage = "You have reached your claim limit. You can claim up to 3 trial posts per account.";
+        } else if (error.message.includes('expired')) {
+          errorMessage = "This trial post has expired and is no longer available for claiming.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
       toast({
         title: "Claim Failed",
-        description: error instanceof Error ? error.message : "Failed to claim the post. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {

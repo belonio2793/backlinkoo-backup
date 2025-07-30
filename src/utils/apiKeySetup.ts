@@ -96,7 +96,7 @@ export function debugApiKeys(): void {
   
   const status = checkApiKeyStatus();
   status.forEach(s => {
-    console.log(`${s.provider}: ${s.configured ? '✅' : '���'} (${s.environment}) ${s.keyPrefix || ''}`);
+    console.log(`${s.provider}: ${s.configured ? '✅' : '❌'} (${s.environment}) ${s.keyPrefix || ''}`);
   });
 
   if (status.every(s => !s.configured)) {
