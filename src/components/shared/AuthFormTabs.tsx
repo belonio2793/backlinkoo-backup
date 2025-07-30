@@ -158,6 +158,7 @@ export function AuthFormTabs({
       }
     } catch (error: any) {
       console.error('Login error:', error);
+      setTimeoutCountdown(0); // Clear countdown on error
 
       let errorMessage = "Network error or server unavailable. Please check your connection and try again.";
       const isTimeoutError = error.message.includes('Sign in is taking longer than expected') || error.message === 'Sign in timeout';
