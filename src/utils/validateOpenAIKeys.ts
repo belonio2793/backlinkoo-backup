@@ -64,28 +64,22 @@ export async function validateOpenAIKey(apiKey: string): Promise<KeyValidationRe
 }
 
 export async function validateAllOpenAIKeys(): Promise<KeyValidationResult[]> {
-  const apiKeys = [
-    import.meta.env.VITE_OPENAI_API_KEY,
-    import.meta.env.VITE_OPENAI_API_KEY_BACKUP_1,
-    import.meta.env.VITE_OPENAI_API_KEY_BACKUP_2
-  ].filter(key => key && key !== 'your-openai-api-key-here');
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
-  console.log(`🔍 Validating ${apiKeys.length} OpenAI API keys...`);
+  if (!apiKey || apiKey === 'your-openai-api-key-here') {
+    console.log('🚨 No OpenAI API key configured');
+    return [];
+  }
 
-  const results = await Promise.all(
-    apiKeys.map(key => validateOpenAIKey(key))
-  );
+  console.log('🔍 Validating OpenAI API key...');
 
-  results.forEach((result, index) => {
-    if (result.valid) {
-      console.log(`✅ Key ${index + 1} (${result.keyPreview}): Valid - ${result.models?.length} GPT models available`);
-    } else {
-      console.error(`❌ Key ${index + 1} (${result.keyPreview}): Invalid - ${result.error}`);
-    }
-  });
+  const result = await validateOpenAIKey(apiKey);
 
-  const validKeys = results.filter(r => r.valid);
-  console.log(`📊 Summary: ${validKeys.length}/${results.length} keys are valid`);
+  if (result.valid) {
+    console.log(`✅ API Key (${result.keyPreview}): Valid - ${result.models?.length} GPT models available`);
+  } else {
+    console.error(`❌ API Key (${result.keyPreview}): Invalid - ${result.error}`);
+  }
 
-  return results;
+  return [result];
 }
