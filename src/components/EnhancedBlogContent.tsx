@@ -14,6 +14,7 @@ interface EnhancedBlogContentProps {
 export function EnhancedBlogContent({ content, keyword, anchorText, targetUrl }: EnhancedBlogContentProps) {
   const [readingProgress, setReadingProgress] = useState(0);
   const [showTOC, setShowTOC] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   // Calculate reading progress
   useEffect(() => {
