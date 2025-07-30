@@ -785,7 +785,7 @@ export function BlogPost() {
                     )}
                     
                     <Button
-                      onClick={() => setIsPaymentModalOpen(true)}
+                      onClick={() => setIsPricingModalOpen(true)}
                       className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0 px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
                     >
                       <Zap className="mr-2 h-5 w-5" />
