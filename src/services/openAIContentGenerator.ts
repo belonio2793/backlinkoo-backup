@@ -132,7 +132,13 @@ export class OpenAIContentGenerator {
    * Generate content using OpenAI/ChatGPT
    */
   private async generateOpenAIContent(request: OpenAIContentRequest, prompt: string): Promise<string> {
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    // Try to get API key from admin environment variables first
+    let apiKey = await environmentVariablesService.getVariable('VITE_OPENAI_API_KEY');
+
+    // Fallback to environment variable
+    if (!apiKey) {
+      apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    }
 
     if (!apiKey) {
       throw new Error('OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable.');
