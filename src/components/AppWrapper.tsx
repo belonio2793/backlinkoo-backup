@@ -73,7 +73,7 @@ export const AppWrapper = () => {
         } />
         <Route path="/blog/:postId/edit" element={
           <EmailVerificationGuard>
-            <BlogEditor mode="edit" />
+            <BlogEditPage />
           </EmailVerificationGuard>
         } />
 
