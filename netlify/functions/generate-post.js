@@ -254,7 +254,7 @@ Format the response as JSON with:
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 3000,
         temperature: 0.7
@@ -549,7 +549,7 @@ Format as JSON:
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: chatGPTPrompt }],
         max_tokens: 3500,
         temperature: 0.7
