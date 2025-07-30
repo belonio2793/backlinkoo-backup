@@ -14,7 +14,7 @@ import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 
 // Import test utilities for debugging
 import '@/utils/testBlogClaiming';
-import '@/utils/netlifyFunctionDiagnostic';
+import '@/utils/netlifyFunctionDiagnostic\';\nimport \'@/utils/dashboardAccessDiagnostic';
 
 const queryClient = new QueryClient();
 
