@@ -58,39 +58,147 @@ import type { User } from '@supabase/supabase-js';
 
 
 // TrialBlogPostsDisplay component for the trial tab
-const TrialBlogPostsDisplay = () => {
-  const [trialPosts, setTrialPosts] = useState<any[]>([]);
+const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
+  const [allPosts, setAllPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [claimingPostId, setClaimingPostId] = useState<string | null>(null);
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Load trial posts from localStorage
-    const loadTrialPosts = () => {
+    loadAllPosts();
+
+    // Refresh every 30 seconds to check for new posts
+    const interval = setInterval(loadAllPosts, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadAllPosts = async () => {
+    try {
+      setLoading(true);
+
+      // Load from database using the blog claim service
+      const { BlogClaimService } = await import('@/services/blogClaimService');
+      const dbPosts = await BlogClaimService.getClaimablePosts(20);
+
+      // Also load from localStorage for backwards compatibility
+      const localPosts = [];
       try {
         const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-        const validTrialPosts = allBlogs.filter((post: any) => {
-          if (!post.is_trial_post) return false;
-
-          // Check if expired
+        const validLocalPosts = allBlogs.filter((post: any) => {
           if (post.expires_at) {
             const isExpired = new Date() > new Date(post.expires_at);
             return !isExpired;
           }
           return true;
         });
-
-        setTrialPosts(validTrialPosts.slice(0, 6)); // Show up to 6 posts
+        localPosts.push(...validLocalPosts);
       } catch (error) {
-        console.error('Error loading trial posts:', error);
-        setTrialPosts([]);
+        console.warn('Error loading local posts:', error);
       }
-    };
 
-    loadTrialPosts();
+      // Combine and deduplicate posts (prioritize database posts)
+      const combinedPosts = [...dbPosts];
+      localPosts.forEach(localPost => {
+        if (!combinedPosts.find(dbPost => dbPost.slug === localPost.slug)) {
+          combinedPosts.push(localPost);
+        }
+      });
 
-    // Refresh every 30 seconds to check for new posts
-    const interval = setInterval(loadTrialPosts, 30000);
-    return () => clearInterval(interval);
-  }, []);
+      setAllPosts(combinedPosts.slice(0, 12)); // Show up to 12 posts
+    } catch (error) {
+      console.error('Error loading posts:', error);
+      setAllPosts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClaimPost = async (post: any) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to claim blog posts.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setClaimingPostId(post.id);
+      const { BlogClaimService } = await import('@/services/blogClaimService');
+
+      // Check if user can claim more posts
+      const { canClaim, reason } = await BlogClaimService.canUserClaimMore(user);
+      if (!canClaim) {
+        toast({
+          title: "Claim Limit Reached",
+          description: reason,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const result = await BlogClaimService.claimPost(post.id, user);
+
+      if (result.success) {
+        toast({
+          title: "Post Claimed Successfully",
+          description: result.message,
+        });
+        await loadAllPosts(); // Refresh the list
+      } else {
+        toast({
+          title: "Claim Failed",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error claiming post:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while claiming the post.",
+        variant: "destructive",
+      });
+    } finally {
+      setClaimingPostId(null);
+    }
+  };
+
+  const handleUnclaimPost = async (post: any) => {
+    if (!user) return;
+
+    try {
+      setClaimingPostId(post.id);
+      const { BlogClaimService } = await import('@/services/blogClaimService');
+
+      const result = await BlogClaimService.unclaimPost(post.id, user);
+
+      if (result.success) {
+        toast({
+          title: "Post Unclaimed",
+          description: result.message,
+        });
+        await loadAllPosts(); // Refresh the list
+      } else {
+        toast({
+          title: "Unclaim Failed",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error unclaiming post:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while unclaiming the post.",
+        variant: "destructive",
+      });
+    } finally {
+      setClaimingPostId(null);
+    }
+  };
 
   if (trialPosts.length === 0) {
     return (
