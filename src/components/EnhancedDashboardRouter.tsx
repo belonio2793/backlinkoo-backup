@@ -60,10 +60,18 @@ export function EnhancedDashboardRouter() {
           const { data: { user }, error: userError } = await supabase.auth.getUser();
           sessionResult = { data: { session: user ? { user } : null }, error: userError };
         } catch (fallbackError) {
-          console.error('❌ Fallback auth check also failed:', fallbackError);
-          setIsLoading(false);
-          navigate('/login');
-          return;
+          console.error('❌ Fallback auth check also failed, trying AuthService...');
+          // Last resort: try AuthService
+          try {
+            const { session, user } = await AuthService.getCurrentSession();
+            sessionResult = { data: { session }, error: null };
+            console.log('✅ AuthService fallback successful');
+          } catch (authServiceError) {
+            console.error('❌ All auth methods failed:', authServiceError);
+            setIsLoading(false);
+            navigate('/login');
+            return;
+          }
         }
       }
 
