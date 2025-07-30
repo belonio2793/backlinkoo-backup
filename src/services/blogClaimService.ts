@@ -477,6 +477,29 @@ export class BlogClaimService {
 
       console.log('✅ BlogClaimService: Successfully created and claimed post:', insertedPost.id);
 
+      // Also update the post in localStorage to mark as claimed
+      try {
+        const blogStorageKey = `blog_post_${localPost.slug}`;
+        const updatedLocalPost = {
+          ...localPost,
+          user_id: user.id,
+          is_trial_post: false,
+          expires_at: null,
+          claimed_at: new Date().toISOString()
+        };
+        localStorage.setItem(blogStorageKey, JSON.stringify(updatedLocalPost));
+
+        // Keep it visible on /blog by not removing it from all_blog_posts
+        const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+        const updatedAllBlogPosts = allBlogPosts.map((post: any) =>
+          post.slug === localPost.slug ? { ...post, user_id: user.id, is_trial_post: false } : post
+        );
+        localStorage.setItem('all_blog_posts', JSON.stringify(updatedAllBlogPosts));
+
+      } catch (localError) {
+        console.warn('Failed to update localStorage after claiming:', localError);
+      }
+
       return {
         success: true,
         message: 'Blog post claimed successfully! It has been saved to your account.',
