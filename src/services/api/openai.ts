@@ -68,6 +68,52 @@ export class OpenAIService {
   }
 
   /**
+   * Serialize error to prevent [object Object] logging
+   */
+  private serializeError(error: any): { message: string; details: any } {
+    if (!error) {
+      return { message: 'Unknown error', details: {} };
+    }
+
+    if (error instanceof Error) {
+      return {
+        message: error.message,
+        details: {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+          cause: error.cause ? this.serializeError(error.cause) : undefined
+        }
+      };
+    }
+
+    if (typeof error === 'object') {
+      try {
+        return {
+          message: error.message || error.error || 'API Error',
+          details: {
+            ...error,
+            message: error.message,
+            status: error.status,
+            statusText: error.statusText,
+            toString: () => JSON.stringify(error, null, 2)
+          }
+        };
+      } catch {
+        return {
+          message: 'Error serialization failed',
+          details: { original: String(error) }
+        };
+      }
+    }
+
+    return {
+      message: String(error),
+      details: { original: error }
+    };
+  }
+
+  /**
    * Retry function with exponential backoff
    */
   private async retryWithBackoff<T>(
@@ -83,7 +129,7 @@ export class OpenAIService {
         const result = await fn();
 
         if (attempt > 0) {
-          console.log(`�� OpenAI API succeeded on attempt ${attempt + 1}`);
+          console.log(`✅ OpenAI API succeeded on attempt ${attempt + 1}`);
         }
 
         return result;
