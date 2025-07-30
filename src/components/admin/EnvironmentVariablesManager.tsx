@@ -353,6 +353,67 @@ export function EnvironmentVariablesManager() {
 
   return (
     <div className="space-y-6">
+      {/* Quick Access for API Keys */}
+      <Card className="bg-blue-50 border-blue-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-blue-800">
+            <Key className="h-5 w-5" />
+            Quick Access - API Keys
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {envVars.filter(v => v.key.includes('API_KEY')).map((apiKey) => (
+              <Card key={apiKey.id} className="p-3 bg-white">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-xs">{apiKey.key}</Badge>
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => startEditing(apiKey)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                      {apiKey.key.includes('API_KEY') && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => testApiKey(apiKey.key, apiKey.value)}
+                          disabled={testResults[apiKey.key]?.status === 'testing'}
+                          className="h-6 w-6 p-0"
+                        >
+                          {testResults[apiKey.key]?.status === 'testing' ? (
+                            <RefreshCw className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <TestTube className="h-3 w-3" />
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-xs font-mono bg-gray-100 p-1 rounded truncate">
+                    {maskValue(apiKey.value, false)}
+                  </div>
+                  {testResults[apiKey.key] && (
+                    <div className={`text-xs p-1 rounded ${testResults[apiKey.key].status === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {testResults[apiKey.key].message}
+                    </div>
+                  )}
+                </div>
+              </Card>
+            ))}
+            {envVars.filter(v => v.key.includes('API_KEY')).length === 0 && (
+              <div className="text-center text-muted-foreground py-4 md:col-span-2 lg:col-span-3">
+                No API keys configured yet. Add them using the form below.
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
