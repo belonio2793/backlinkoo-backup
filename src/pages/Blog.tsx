@@ -55,11 +55,27 @@ export function Blog() {
       }, 10000); // 10 second timeout
 
       try {
-        // Try to load from database first
+        // Try to load from published_blog_posts table first (correct table)
         let posts: BlogPost[] = [];
         try {
-          posts = await blogService.getRecentBlogPosts(50);
-          console.log('✅ Database posts loaded:', posts.length);
+          const { data, error } = await supabase
+            .from('published_blog_posts')
+            .select(`
+              id, slug, title, excerpt, published_url, target_url,
+              created_at, expires_at, seo_score, reading_time, word_count,
+              view_count, is_trial_post, user_id, author_name, tags, category,
+              meta_description, content, keywords, published_at, anchor_text
+            `)
+            .eq('status', 'published')
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+          if (error) {
+            console.warn('❌ Database error:', error);
+          } else {
+            posts = data || [];
+            console.log('✅ Database posts loaded:', posts.length);
+          }
         } catch (dbError) {
           console.warn('❌ Database unavailable, using localStorage:', dbError);
         }
