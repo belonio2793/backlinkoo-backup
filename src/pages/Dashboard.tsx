@@ -342,6 +342,34 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
 
   return (
     <div className="space-y-6">
+      {/* Real-time Status Header */}
+      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium text-gray-700">Live</span>
+          </div>
+          <div className="text-sm text-gray-600">
+            Last updated: {lastRefresh ? lastRefresh.toLocaleTimeString() : 'Loading...'}
+          </div>
+          {error && (
+            <div className="flex items-center gap-1 text-amber-600">
+              <AlertCircle className="h-4 w-4" />
+              <span className="text-xs">Partial load</span>
+            </div>
+          )}
+        </div>
+        <Button
+          onClick={() => loadAllPosts()}
+          variant="outline"
+          size="sm"
+          className="border-blue-200 text-blue-700 hover:bg-blue-50"
+        >
+          <RefreshCw className="h-3 w-3 mr-1" />
+          Refresh
+        </Button>
+      </div>
+
       {/* Summary Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
