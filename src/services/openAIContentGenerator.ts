@@ -129,123 +129,67 @@ export class OpenAIContentGenerator {
   }
 
   /**
-   * Generate content using OpenAI/ChatGPT with multi-key failover
+   * Generate content using OpenAI/ChatGPT
    */
   private async generateOpenAIContent(request: OpenAIContentRequest, prompt: string): Promise<string> {
-    const apiKeys = [
-      import.meta.env.VITE_OPENAI_API_KEY,
-      import.meta.env.VITE_OPENAI_API_KEY_BACKUP_1,
-      import.meta.env.VITE_OPENAI_API_KEY_BACKUP_2
-    ].filter(key => key && key !== 'your-openai-api-key-here');
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
-    if (apiKeys.length === 0) {
-      throw new Error('No valid OpenAI API keys configured. Please set VITE_OPENAI_API_KEY environment variable.');
+    if (!apiKey) {
+      throw new Error('OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable.');
     }
 
-    console.log(`🤖 Calling OpenAI API with ${apiKeys.length} available keys`);
+    console.log('🤖 Calling OpenAI API...');
 
-    // Debug environment
-    console.log('🌍 Environment check:');
-    console.log('- NODE_ENV:', process.env.NODE_ENV);
-    console.log('- Current URL:', window.location.origin);
-    console.log('- User Agent:', navigator.userAgent.substring(0, 50));
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a professional content writer. Create engaging, well-structured blog posts with proper HTML formatting. Always include the specified anchor text as a clickable link to the target URL. Make the content natural, informative, and reader-friendly.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          max_tokens: 3000,
+          temperature: 0.7
+        })
+      });
 
-    // Validate all keys first (for debugging)
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Running API key validation...');
-      await validateAllOpenAIKeys();
-    }
-
-    for (let i = 0; i < apiKeys.length; i++) {
-      const apiKey = apiKeys[i];
-      try {
-        console.log(`🔑 Trying API key ${i + 1}/${apiKeys.length}`);
-
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: 'gpt-3.5-turbo',
-            messages: [
-              {
-                role: 'system',
-                content: 'You are a professional content writer. Create engaging, well-structured blog posts with proper HTML formatting. Always include the specified anchor text as a clickable link to the target URL. Make the content natural, informative, and reader-friendly.'
-              },
-              {
-                role: 'user',
-                content: prompt
-              }
-            ],
-            max_tokens: 3000,
-            temperature: 0.7
-          })
-        });
-
-        if (!response.ok) {
-          const keyPreview = `${apiKey.substring(0, 12)}...${apiKey.substring(apiKey.length - 4)}`;
-
-          // Try to get error details
-          let errorData = {};
-          let errorText = '';
-          try {
-            errorText = await response.text();
-            errorData = JSON.parse(errorText);
-          } catch (parseError) {
-            console.warn('Could not parse error response:', parseError);
-            errorData = { error: { message: errorText || 'Failed to parse error response' } };
-          }
-
-          const errorMessage = `API key ${i + 1} (${keyPreview}) failed: ${response.status} - ${errorData.error?.message || errorText || 'Unknown error'}`;
-
-          console.error(`❌ ${errorMessage}`);
-          console.error('Full error details:', JSON.stringify(errorData, null, 2));
-          console.error('Raw error text:', errorText);
-          console.error('Response status:', response.status);
-          console.error('Response headers:', Object.fromEntries(response.headers.entries()));
-          console.error('Request URL:', 'https://api.openai.com/v1/chat/completions');
-          console.error('Request headers:', { 'Authorization': `Bearer ${keyPreview}`, 'Content-Type': 'application/json' });
-
-          if (response.status === 401) {
-            console.warn(`🔑 Key ${i + 1} is invalid or expired. Check OpenAI dashboard.`);
-            continue; // Try next key
-          } else if (response.status === 429) {
-            console.warn(`⏰ Key ${i + 1} hit rate limit. Trying next key.`);
-            continue; // Try next key
-          } else if (response.status === 402) {
-            console.warn(`💳 Key ${i + 1} quota exceeded. Check billing.`);
-            continue; // Try next key
-          }
-
-          console.warn(`❌ Key ${i + 1} failed with unknown error`);
-          continue; // Try next key for any other error
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          throw new Error('Invalid OpenAI API key. Please check your VITE_OPENAI_API_KEY environment variable.');
+        } else if (response.status === 429) {
+          throw new Error('OpenAI rate limit exceeded. Please wait a moment and try again.');
+        } else if (response.status === 402) {
+          throw new Error('OpenAI quota exceeded. Please check your billing settings.');
         }
-
-        const data = await response.json();
-        const content = data.choices?.[0]?.message?.content;
-
-        if (!content) {
-          console.warn(`❌ API key ${i + 1} returned no content`);
-          continue; // Try next key
-        }
-
-        console.log(`✅ OpenAI content generated successfully with API key ${i + 1}`);
-        return content.trim();
-
-      } catch (error) {
-        console.error(`❌ API key ${i + 1} failed with error:`, error);
-        if (i === apiKeys.length - 1) {
-          // This was the last key, throw the error
-          throw error;
-        }
-        // Continue to next key
-        continue;
+        throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
       }
-    }
 
-    throw new Error('All OpenAI API keys failed. Please check your API keys and try again.');
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
+
+      if (!content) {
+        throw new Error('No content generated from OpenAI API');
+      }
+
+      console.log('✅ OpenAI content generated successfully');
+      return content.trim();
+
+    } catch (error) {
+      console.error('❌ OpenAI API call failed:', error);
+      throw error;
+    }
   }
 
   /**
