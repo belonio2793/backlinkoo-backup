@@ -168,7 +168,7 @@ export class OpenAIContentGenerator {
         if (response.status === 401) {
           throw new Error('Invalid OpenAI API key. Please check your VITE_OPENAI_API_KEY environment variable.');
         } else if (response.status === 429) {
-          throw new Error('OpenAI rate limit exceeded. Please wait a moment and try again.');
+          throw new Error('OpenAI temporary issue. Retrying automatically...');
         } else if (response.status === 402) {
           throw new Error('OpenAI quota exceeded. Please check your billing settings.');
         }
