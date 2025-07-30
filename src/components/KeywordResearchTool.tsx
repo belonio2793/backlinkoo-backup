@@ -441,7 +441,7 @@ export const KeywordResearchTool = () => {
     { code: "VN", name: "Vietnam", flag: "🇻🇳" },
     { code: "VU", name: "Vanuatu", flag: "🇻🇺" },
     { code: "WF", name: "Wallis and Futuna", flag: "🇼🇫" },
-    { code: "WS", name: "Samoa", flag: "��🇸" },
+    { code: "WS", name: "Samoa", flag: "🇼🇸" },
     { code: "YE", name: "Yemen", flag: "🇾🇪" },
     { code: "YT", name: "Mayotte", flag: "🇾🇹" },
     { code: "ZA", name: "South Africa", flag: "🇿🇦" },
