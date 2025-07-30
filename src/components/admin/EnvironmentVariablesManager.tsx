@@ -96,8 +96,8 @@ export function EnvironmentVariablesManager() {
   }, []);
 
   const initializeWithAPIKeys = () => {
-    // Pre-populate with essential API keys if no variables exist and no database connection
-    const openAIKey = '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';
+    // Note: OpenAI API keys are now handled server-side only for security
+    const openAIKey = '';
     const supabaseToken = 'sbp_65f13d3ef84fae093dbb2b2d5368574f69b3cea2';
 
     setTimeout(() => {
