@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { directOpenAI } from '@/services/directOpenAI';
-import { freeBacklinkService } from '@/services/freeBacklinkService';
+
 import { WordCountProgress } from './WordCountProgress';
 import { contentModerationService } from '@/services/contentModerationService';
 import { adminSyncService } from '@/services/adminSyncService';
@@ -250,7 +250,7 @@ Return clean HTML content optimized for SEO.`;
     const existing = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
     localStorage.setItem('all_blog_posts', JSON.stringify([{ ...blogPost }, ...existing]));
 
-    freeBacklinkService.storeFreeBacklink(result);
+
 
     setGeneratedPost(blogPost);
     updateRemainingRequests();
