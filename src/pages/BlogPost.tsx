@@ -800,7 +800,7 @@ export function BlogPost() {
                     )}
                     
                     <Button
-                      onClick={() => navigate('/create-blog')}
+                      onClick={() => navigate('/')}
                       variant="outline"
                       className="border-amber-600 text-amber-700 hover:bg-amber-100 px-6 py-3"
                     >
