@@ -1542,7 +1542,10 @@ const Dashboard = () => {
             </TabsContent>
               </Tabs>
             ) : activeSection === "seo-tools" ? (
-              <SEOToolsSection user={user} />
+              <div className="space-y-6">
+                <OpenAIDebugTest />
+                <SEOToolsSection user={user} />
+              </div>
             ) : activeSection === "trial" ? (
               <div className="space-y-6">
                 <div className="relative overflow-hidden">
