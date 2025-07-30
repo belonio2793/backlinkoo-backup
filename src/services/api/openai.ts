@@ -345,7 +345,7 @@ export class OpenAIService {
           let errorMessage = `OpenAI API error: ${response.status}`;
           let fullErrorContext = {
             status: response.status,
-            statusText: response.statusText,
+            statusText: response.statusText || 'No status text',
             errorData,
             timestamp: new Date().toISOString()
           };
@@ -354,6 +354,12 @@ export class OpenAIService {
             errorMessage += ' - Model not found. Check if the model name is correct and available.';
           } else if (response.status === 401) {
             errorMessage += ' - Invalid API key. Check your OpenAI API key.';
+            // For 401 errors, we want to fail fast and not retry
+            console.error('🔴 OpenAI API Authentication Error:', JSON.stringify(fullErrorContext, null, 2));
+            const authError = new Error(errorMessage);
+            authError.name = 'AuthenticationError';
+            (authError as any).context = fullErrorContext;
+            throw authError;
           } else if (response.status === 429) {
             errorMessage += ' - Rate limit exceeded. Will retry automatically.';
             if (errorData.error?.message) {
