@@ -432,7 +432,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
               <div>• Displayed: {debugInfo.displayedPosts}</div>
-              <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '��'}</div>
+              <div>• Has Errors: {debugInfo.hasError ? '⚠���' : '��'}</div>
             </div>
           </div>
           {debugInfo.errorMessage && (
@@ -1126,7 +1126,7 @@ const Dashboard = () => {
                       Get started by purchasing credits to create your first backlink campaign. 
                       Our high-quality backlinks will help improve your website's search engine rankings.
                     </p>
-                    <Button onClick={() => setIsPaymentModalOpen(true)}>
+                    <Button onClick={() => setIsPricingModalOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
                       Buy Your First Credits
                     </Button>
