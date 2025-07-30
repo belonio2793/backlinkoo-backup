@@ -123,6 +123,23 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
 
       const finalPosts = combinedPosts.slice(0, 12);
 
+      // Update debug information
+      const debugData = {
+        timestamp: new Date().toISOString(),
+        dbPosts: dbPosts.length,
+        localPosts: localPosts.length,
+        combinedPosts: combinedPosts.length,
+        displayedPosts: finalPosts.length,
+        userAuthenticated: !!user,
+        userId: user?.id || null,
+        loadingStatus,
+        hasError: !!error,
+        errorMessage: error || null,
+        connectionOnline: navigator.onLine
+      };
+
+      setDebugInfo(debugData);
+
       console.log(`📊 Blog Posts Summary:
         - Database posts: ${dbPosts.length}
         - Local storage posts: ${localPosts.length}
