@@ -182,16 +182,20 @@ export function EnhancedBlogContent({ content, keyword, anchorText, targetUrl }:
 
       case 'orderedList':
         return (
-          <Card key={id} className="mb-8 border-blue-200 bg-blue-50">
+          <Card key={id} className="mb-8 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 hover:shadow-lg transition-all duration-300">
             <div className="p-6">
               <ol className="space-y-4">
-                {element.items.map((item: any) => (
-                  <li key={item.id} className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+                {element.items.map((item: any, index: number) => (
+                  <li
+                    key={item.id}
+                    className="flex items-start gap-4 group hover:transform hover:scale-[1.01] transition-all duration-200"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center group-hover:shadow-md transition-shadow">
                       <span className="text-white font-bold text-sm">{item.number}</span>
                     </div>
                     <div className="flex-1">
-                      <span className="text-gray-800 leading-relaxed font-medium">
+                      <span className="text-gray-800 leading-relaxed font-medium group-hover:text-gray-900 transition-colors">
                         {item.content}
                       </span>
                     </div>
