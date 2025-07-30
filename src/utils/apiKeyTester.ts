@@ -31,23 +31,63 @@ export class APIKeyTester {
 
       const responseTime = Date.now() - startTime;
 
+      // Read response body immediately to avoid "body stream already read" errors
+      let responseText = '';
+      let responseData = null;
+
+      try {
+        responseText = await response.text();
+        if (responseText) {
+          try {
+            responseData = JSON.parse(responseText);
+          } catch (parseError) {
+            // Response is not JSON, keep as text
+          }
+        }
+      } catch (readError) {
+        console.error('Error reading response:', readError);
+        responseText = 'Failed to read response';
+      }
+
       if (response.ok) {
-        // Read successful response
-        const data = await response.json();
         console.log('✅ OpenAI API key is valid!');
-        
+
         return {
           success: true,
-          message: `API key is valid! ${data.data?.length || 0} models available.`,
+          message: `API key is valid! ${responseData?.data?.length || 0} models available.`,
           responseTime,
           details: {
-            modelsCount: data.data?.length || 0,
+            modelsCount: responseData?.data?.length || 0,
             keyPreview: apiKey.substring(0, 15) + '...'
           }
         };
       } else {
-        // Read error response properly
-        return await this.handleErrorResponse(response, responseTime, 'OpenAI API key');
+        // Handle error with already-read response data
+        const errorMessage = responseData?.error?.message ||
+                            responseData?.message ||
+                            responseText ||
+                            'API request failed';
+
+        const errorCategories = {
+          401: 'Invalid API key or authentication failed',
+          403: 'Access forbidden - insufficient permissions',
+          429: 'Rate limit exceeded - too many requests',
+          500: 'Server error - try again later',
+          502: 'Bad gateway - service temporarily unavailable',
+          503: 'Service unavailable - try again later'
+        };
+
+        const categorizedError = errorCategories[response.status as keyof typeof errorCategories] || 'API request failed';
+
+        console.error('❌ OpenAI API test failed:', response.status, errorMessage);
+
+        return {
+          success: false,
+          message: `${categorizedError}: ${errorMessage}`,
+          status: response.status,
+          responseTime,
+          details: responseData
+        };
       }
     } catch (error) {
       console.error('❌ Network error testing OpenAI API:', error);
