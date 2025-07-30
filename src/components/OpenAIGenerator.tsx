@@ -69,39 +69,7 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
     }
   };
 
-  const handleTestKeys = async () => {
-    setIsTesting(true);
-    toast({
-      title: "Testing API Keys",
-      description: "Running diagnostic tests on all OpenAI API keys...",
-    });
-
-    try {
-      const workingKey = await testAllKeys();
-
-      if (workingKey) {
-        toast({
-          title: "✅ API Keys Working!",
-          description: "Found at least one working OpenAI API key. Content generation should work.",
-        });
-      } else {
-        toast({
-          title: "❌ All API Keys Failed",
-          description: "All OpenAI API keys are invalid. Please check your keys in the OpenAI dashboard.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('API key testing failed:', error);
-      toast({
-        title: "Test Failed",
-        description: "Unable to test API keys due to network error.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsTesting(false);
-    }
-  };
+  // API testing removed - handled server-side via Netlify functions
 
   const handleGenerate = async () => {
     if (!keyword.trim() || !anchorText.trim() || !targetUrl.trim()) {
