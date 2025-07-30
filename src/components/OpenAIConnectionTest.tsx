@@ -58,7 +58,7 @@ export function OpenAIConnectionTest() {
           status: 'error',
           message: `Netlify function error: ${response.status}`,
           details: {
-            error: 'Check Netlify function deployment',
+            deployment: 'Check Netlify function deployment',
             status: response.status,
             error: errorData.error?.message || 'Unknown error'
           }
