@@ -23,6 +23,7 @@ import {
 
 export function Blog() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
