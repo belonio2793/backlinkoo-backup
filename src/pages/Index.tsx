@@ -966,7 +966,10 @@ const Index = () => {
                   <Sparkles className="mr-2 h-4 w-4" />
                   Explore Blog
                 </Button>
-                <Button onClick={() => navigate("/create-blog")} variant="outline" className="font-medium">
+                <Button onClick={() => {
+                  // Scroll to blog creation form
+                  document.getElementById('blog-generator')?.scrollIntoView({ behavior: 'smooth' });
+                }} variant="outline" className="font-medium">
                   Create Content
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
