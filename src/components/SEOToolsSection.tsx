@@ -213,21 +213,26 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
   const handleCancelSubscription = async () => {
     setIsCancellingSubscription(true);
     try {
-      // Simulate API call to cancel subscription
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const result = await SubscriptionService.cancelSubscription(user);
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
       toast({
         title: "Subscription Cancelled",
-        description: "Your subscription has been cancelled. You'll continue to have access until March 15, 2024.",
+        description: "Your subscription has been cancelled. You'll continue to have access until your current billing period ends.",
       });
 
       setIsSubscriptionModalOpen(false);
       setShowCancelConfirmation(false);
-      setIsSubscribed(false);
-    } catch (error) {
+
+      // Refresh subscription status
+      await checkSubscriptionStatus();
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to cancel subscription. Please try again.",
+        description: error.message || "Failed to cancel subscription. Please try again.",
         variant: "destructive",
       });
     } finally {
