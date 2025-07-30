@@ -929,10 +929,11 @@ export function BlogPost() {
                   <div className="flex flex-wrap gap-3">
                     <Button
                       onClick={handleShowClaimExplanation}
-                      className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-bold px-6 py-3 animate-pulse shadow-lg"
+                      disabled={isClaiming}
+                      className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-bold px-6 py-3 animate-pulse shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Sparkles className="mr-2 h-5 w-5" />
-                      Claim This Post Forever
+                      {isClaiming ? 'Processing...' : 'Claim This Post Forever'}
                     </Button>
 
                     {currentUser && (
