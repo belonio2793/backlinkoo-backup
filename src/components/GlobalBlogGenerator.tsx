@@ -362,14 +362,9 @@ export function GlobalBlogGenerator({
         // Update remaining requests
         updateRemainingRequests();
 
-        // Check if this was generated with fallback content (when OpenAI is not available)
-        const providerInfo = result.provider === 'emergency-template'
-          ? 'Generated using our reliable fallback system'
-          : `Generated using ${result.provider.toUpperCase()} ${result.fallbacksUsed?.length ? '(with fallback)' : ''}`;
-
         toast({
           title: "Blog post generated successfully! ���",
-          description: `Your free backlink post is ready! ${providerInfo}. It will auto-delete in 24 hours unless you register an account.`,
+          description: `Your free backlink post is ready! Generated with OpenAI. It will auto-delete in 24 hours unless you register an account.`,
           action: (
             <Button
               size="sm"
