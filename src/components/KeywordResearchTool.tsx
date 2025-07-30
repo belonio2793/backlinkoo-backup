@@ -209,7 +209,7 @@ export const KeywordResearchTool = () => {
     { code: "AQ", name: "Antarctica", flag: "🇦🇶" },
     { code: "AR", name: "Argentina", flag: "🇦🇷" },
     { code: "AS", name: "American Samoa", flag: "🇦🇸" },
-    { code: "AT", name: "Austria", flag: "����🇹" },
+    { code: "AT", name: "Austria", flag: "🇦🇹" },
     { code: "AU", name: "Australia", flag: "🇦🇺" },
     { code: "AW", name: "Aruba", flag: "🇦🇼" },
     { code: "AX", name: "Åland Islands", flag: "🇦🇽" },
