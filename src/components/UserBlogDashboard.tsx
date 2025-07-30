@@ -51,6 +51,11 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
       const posts = await liveBlogPublisher.getUserBlogPosts(userId);
       setBlogPosts(posts);
 
+      // Load all claimed posts from the community (for public viewing)
+      const allClaimedPosts = await blogClaimService.getClaimablePosts(20);
+      const onlyClaimedPosts = allClaimedPosts.filter(post => !post.is_trial_post && post.user_id);
+      setClaimedPosts(onlyClaimedPosts);
+
       // Load user's campaigns
       const { data: campaignData, error } = await supabase
         .from('campaigns')
