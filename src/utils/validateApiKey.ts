@@ -46,7 +46,7 @@ export function validateProvidedApiKey() {
 
 export async function testProvidedApiKey() {
   console.log('🧪 Testing provided API key with OpenAI...');
-  
+
   try {
     const response = await fetch('https://api.openai.com/v1/models', {
       method: 'GET',
@@ -55,39 +55,48 @@ export async function testProvidedApiKey() {
         'Content-Type': 'application/json'
       }
     });
-    
+
     console.log('📡 Response status:', response.status);
     console.log('📡 Response ok:', response.ok);
-    
+
+    // Clone the response so we can read it multiple times if needed
+    const responseClone = response.clone();
+
     if (response.ok) {
       const data = await response.json();
       console.log('✅ API key is valid!');
       console.log('📊 Models available:', data.data?.length || 0);
       return { success: true, models: data.data?.length || 0 };
     } else {
-      const errorText = await response.text();
       let errorData;
       try {
-        errorData = JSON.parse(errorText);
+        // Try to parse as JSON first
+        errorData = await response.json();
       } catch (e) {
-        errorData = { message: errorText };
+        // If JSON parsing fails, get text from the cloned response
+        try {
+          const errorText = await responseClone.text();
+          errorData = { message: errorText };
+        } catch (textError) {
+          errorData = { message: 'Failed to read error response' };
+        }
       }
-      
+
       console.error('❌ API key test failed:');
       console.error('   Status:', response.status);
-      console.error('   Error:', errorData.error?.message || errorText);
-      
-      return { 
-        success: false, 
-        status: response.status, 
-        error: errorData.error?.message || errorText 
+      console.error('   Error:', errorData.error?.message || errorData.message || 'Unknown error');
+
+      return {
+        success: false,
+        status: response.status,
+        error: errorData.error?.message || errorData.message || 'Unknown error'
       };
     }
   } catch (error) {
     console.error('❌ Network error:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Network error' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Network error'
     };
   }
 }
