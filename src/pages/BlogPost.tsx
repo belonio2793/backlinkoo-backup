@@ -69,7 +69,7 @@ export function BlogPost() {
         // Try database first
         let post: BlogPostType | null = null;
         try {
-          post = await publishedBlogService.getBlogPostBySlug(slug);
+          post = await blogService.getBlogPostBySlug(slug);
         } catch (dbError) {
           console.warn('Database unavailable, trying localStorage:', dbError);
         }
