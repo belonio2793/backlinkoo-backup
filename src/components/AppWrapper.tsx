@@ -35,6 +35,8 @@ import { GuestDashboard } from '@/components/GuestDashboard';
 import { AILive } from '@/components/AILive';
 
 import { EnhancedDashboardRouter } from '@/components/EnhancedDashboardRouter';
+import { UserBlogManagement } from '@/components/UserBlogManagement';
+import { BlogEditor } from '@/components/BlogEditor';
 
 export const AppWrapper = () => {
   useReferralTracking();
