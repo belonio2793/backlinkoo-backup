@@ -104,8 +104,15 @@ export function ClaimTrialPostDialog({
       const { canClaim, hasExistingClaim } = await checkUserFreeClaims();
 
       if (!currentUser) {
-        // Redirect to signup with claim intent
-        navigate(`/auth/callback?action=signup&redirect=/blog/${trialPostSlug}&claim=true`);
+        // Redirect to login/signup page with claim intent stored in localStorage
+        localStorage.setItem('claim_intent', JSON.stringify({
+          action: 'claim_trial_post',
+          postSlug: trialPostSlug,
+          postTitle: trialPostTitle,
+          targetUrl: targetUrl,
+          timestamp: Date.now()
+        }));
+        navigate('/login');
         return;
       }
 
