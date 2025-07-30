@@ -233,7 +233,7 @@ export const KeywordResearchTool = () => {
     { code: "BT", name: "Bhutan", flag: "🇧🇹" },
     { code: "BV", name: "Bouvet Island", flag: "🇧🇻" },
     { code: "BW", name: "Botswana", flag: "🇧🇼" },
-    { code: "BY", name: "Belarus", flag: "��🇾" },
+    { code: "BY", name: "Belarus", flag: "🇧🇾" },
     { code: "BZ", name: "Belize", flag: "🇧🇿" },
     { code: "CA", name: "Canada", flag: "🇨🇦" },
     { code: "CC", name: "Cocos Islands", flag: "🇨🇨" },
@@ -425,7 +425,7 @@ export const KeywordResearchTool = () => {
     { code: "TR", name: "Turkey", flag: "🇹🇷" },
     { code: "TT", name: "Trinidad and Tobago", flag: "🇹🇹" },
     { code: "TV", name: "Tuvalu", flag: "🇹🇻" },
-    { code: "TW", name: "Taiwan", flag: "🇹🇼" },
+    { code: "TW", name: "Taiwan", flag: "��🇼" },
     { code: "TZ", name: "Tanzania", flag: "🇹🇿" },
     { code: "UA", name: "Ukraine", flag: "🇺🇦" },
     { code: "UG", name: "Uganda", flag: "🇺🇬" },
@@ -445,7 +445,7 @@ export const KeywordResearchTool = () => {
     { code: "YE", name: "Yemen", flag: "🇾🇪" },
     { code: "YT", name: "Mayotte", flag: "🇾🇹" },
     { code: "ZA", name: "South Africa", flag: "🇿🇦" },
-    { code: "ZM", name: "Zambia", flag: "🇿🇲" },
+    { code: "ZM", name: "Zambia", flag: "���🇲" },
     { code: "ZW", name: "Zimbabwe", flag: "🇿🇼" }
   ];
 
