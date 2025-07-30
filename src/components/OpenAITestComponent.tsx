@@ -1,53 +1,51 @@
 import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { openAIOnlyContentGenerator } from '@/services/openAIOnlyContentGenerator';
+import { directOpenAI } from '@/services/directOpenAI';
 import { OpenAIKeyGuide } from './OpenAIKeyGuide';
-import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
 export function OpenAITestComponent() {
   const [targetUrl, setTargetUrl] = useState('https://example.com');
-  const [keyword, setKeyword] = useState('SEO optimization');
+  const [keyword, setKeyword] = useState('artificial intelligence');
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const testGeneration = async () => {
+  const handleGenerate = async () => {
     if (!targetUrl || !keyword) {
       toast({
-        title: "Missing Information",
-        description: "Please provide both target URL and keyword",
+        title: "Missing fields",
+        description: "Please fill in both URL and keyword",
         variant: "destructive"
       });
       return;
     }
 
     setIsGenerating(true);
-    setError(null);
     setResult(null);
 
     try {
-      const content = await openAIOnlyContentGenerator.generateContent({
+      const content = await directOpenAI.generateBlogPost({
         targetUrl,
         primaryKeyword: keyword,
-        wordCount: 500 // Short test content
+        wordCount: 1000
       });
 
       setResult(content);
       toast({
-        title: "Content Generated Successfully! 🎉",
-        description: `Generated ${content.wordCount} words using OpenAI`,
+        title: "Content generated!",
+        description: "OpenAI successfully generated your content"
       });
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      setError(errorMessage);
+
+    } catch (error) {
+      console.error('Generation failed:', error);
       toast({
-        title: "Generation Failed",
-        description: errorMessage,
+        title: "Generation failed",
+        description: error instanceof Error ? error.message : "Unknown error",
         variant: "destructive"
       });
     } finally {
@@ -55,120 +53,79 @@ export function OpenAITestComponent() {
     }
   };
 
-  const isConfigured = openAIOnlyContentGenerator.isConfigured();
+  const isConfigured = directOpenAI.isConfigured();
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      {/* Show API Key Guide if not configured */}
-      {!isConfigured && (
-        <OpenAIKeyGuide />
-      )}
+    <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {isConfigured ? (
-              <CheckCircle2 className="h-5 w-5 text-green-500" />
+              <CheckCircle2 className="h-5 w-5 text-green-600" />
             ) : (
-              <AlertCircle className="h-5 w-5 text-red-500" />
+              <AlertCircle className="h-5 w-5 text-red-600" />
             )}
-            OpenAI Content Generator Test
+            OpenAI Direct Test
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!isConfigured && (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY environment variable to test content generation.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {!isConfigured && <OpenAIKeyGuide />}
+          
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium">Target URL</label>
+              <Label htmlFor="url">Target URL</Label>
               <Input
+                id="url"
                 value={targetUrl}
                 onChange={(e) => setTargetUrl(e.target.value)}
                 placeholder="https://example.com"
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Primary Keyword</label>
+              <Label htmlFor="keyword">Keyword</Label>
               <Input
+                id="keyword"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
-                placeholder="SEO optimization"
+                placeholder="artificial intelligence"
               />
             </div>
           </div>
 
           <Button 
-            onClick={testGeneration}
-            disabled={!isConfigured || isGenerating}
+            onClick={handleGenerate}
+            disabled={isGenerating || !isConfigured}
             className="w-full"
           >
             {isGenerating ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating Content...
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Generating...
               </>
             ) : (
-              'Test Content Generation'
+              'Generate Content'
             )}
           </Button>
+
+          {result && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Generated Content</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <p><strong>Title:</strong> {result.title}</p>
+                  <p><strong>Word Count:</strong> {result.wordCount}</p>
+                  <p><strong>SEO Score:</strong> {result.seoScore}/100</p>
+                  <div className="max-h-60 overflow-y-auto border p-3 rounded">
+                    <div dangerouslySetInnerHTML={{ __html: result.content }} />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </CardContent>
       </Card>
-
-      {error && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            <strong>Error:</strong> {error}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {result && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Generated Content</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <strong>Word Count:</strong> {result.wordCount}
-              </div>
-              <div>
-                <strong>SEO Score:</strong> {result.seoScore}/100
-              </div>
-              <div>
-                <strong>Tokens Used:</strong> {result.usage.tokens}
-              </div>
-              <div>
-                <strong>Cost:</strong> ${result.usage.cost.toFixed(4)}
-              </div>
-            </div>
-            
-            <div>
-              <strong>Title:</strong> {result.title}
-            </div>
-            
-            <div>
-              <strong>Meta Description:</strong>
-              <p className="text-sm text-gray-600 mt-1">{result.metaDescription}</p>
-            </div>
-
-            <div>
-              <strong>Content Preview:</strong>
-              <div 
-                className="mt-2 p-4 bg-gray-50 rounded-lg max-h-96 overflow-y-auto prose prose-sm"
-                dangerouslySetInnerHTML={{ __html: result.content.substring(0, 2000) + (result.content.length > 2000 ? '...' : '') }}
-              />
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
