@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 import { OpenAIService } from '@/services/api/openai';
 
+const openAIService = new OpenAIService();
+
 interface AIProvider {
   name: string;
   status: 'checking' | 'online' | 'offline' | 'error';
