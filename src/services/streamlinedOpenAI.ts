@@ -58,79 +58,86 @@ class StreamlinedOpenAI {
     content: string;
     excerpt: string;
   }> {
-    const keywordText = keywords.length > 0 ? `\nKeywords to include: ${keywords.join(', ')}` : '';
-    
-    const prompt = `Write a comprehensive blog post about "${topic}".${keywordText}
-
-Please structure the response as a JSON object with:
-- title: A compelling blog post title
-- content: Full blog post content (800-1200 words) with proper markdown formatting
-- excerpt: A brief summary (100-150 words)
-
-Make the content engaging, informative, and SEO-friendly.`;
-
     try {
-      const response = await this.generateContent(prompt, {
-        model: 'gpt-3.5-turbo',
-        maxTokens: 2000,
-        temperature: 0.8
+      // Generate main blog content using Netlify function
+      const contentResult = await this.generateContent('', {
+        keyword: topic,
+        url: 'https://example.com',
+        wordCount: 1200,
+        tone: 'professional'
       });
 
-      // Try to parse as JSON, fallback to structured text if needed
-      try {
-        return JSON.parse(response);
-      } catch {
-        // Fallback: create structured response from text
-        const lines = response.split('\n');
-        const title = lines.find(line => line.toLowerCase().includes('title'))?.replace(/.*title[:\-]\s*/i, '') || topic;
-        
-        return {
-          title,
-          content: response,
-          excerpt: response.substring(0, 150) + '...'
-        };
-      }
+      // Extract title from HTML content
+      const titleMatch = contentResult.match(/<h1[^>]*>(.*?)<\/h1>/i);
+      const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '') : topic;
+
+      // Create excerpt from first paragraph
+      const excerptMatch = contentResult.match(/<p[^>]*>(.*?)<\/p>/i);
+      const excerpt = excerptMatch
+        ? excerptMatch[1].replace(/<[^>]*>/g, '').substring(0, 150) + '...'
+        : `A comprehensive guide about ${topic}`;
+
+      return {
+        title,
+        content: contentResult,
+        excerpt
+      };
     } catch (error) {
       console.error('Blog post generation error:', error);
-      throw error;
+
+      // Fallback response
+      return {
+        title: topic,
+        content: `<h1>${topic}</h1><p>Content generation is temporarily unavailable. Please try again later.</p>`,
+        excerpt: 'Content generation temporarily unavailable.'
+      };
     }
   }
 
   async improveContent(content: string, instructions: string = 'Improve this content'): Promise<string> {
-    const prompt = `${instructions}
+    try {
+      // For content improvement, use a simple keyword approach
+      const result = await this.generateContent('', {
+        keyword: `Content Improvement: ${instructions}`,
+        url: 'https://example.com',
+        wordCount: Math.min(content.length * 1.2, 2000),
+        tone: 'professional'
+      });
 
-Original content:
-${content}
-
-Please provide the improved version:`;
-
-    return this.generateContent(prompt, {
-      model: 'gpt-3.5-turbo',
-      maxTokens: 1500,
-      temperature: 0.6
-    });
+      return result;
+    } catch (error) {
+      console.error('Content improvement error:', error);
+      return content; // Return original if improvement fails
+    }
   }
 
   async generateSEOKeywords(topic: string, count: number = 10): Promise<string[]> {
-    const prompt = `Generate ${count} SEO-friendly keywords for the topic: "${topic}"
-
-Return only the keywords, one per line, without numbering or bullets.`;
-
     try {
-      const response = await this.generateContent(prompt, {
-        model: 'gpt-3.5-turbo',
-        maxTokens: 200,
-        temperature: 0.5
+      // Generate content focused on keywords
+      const result = await this.generateContent('', {
+        keyword: `SEO Keywords for ${topic}`,
+        url: 'https://example.com',
+        wordCount: 300,
+        tone: 'technical'
       });
 
-      return response
-        .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0)
+      // Extract potential keywords from the generated content
+      const words = result
+        .replace(/<[^>]*>/g, ' ') // Remove HTML tags
+        .toLowerCase()
+        .match(/\b[a-z]{3,}\b/g) || [];
+
+      // Filter and deduplicate keywords
+      const uniqueKeywords = [...new Set(words)]
+        .filter(word => word.length > 3 && word !== topic.toLowerCase())
         .slice(0, count);
+
+      return uniqueKeywords.length > 0
+        ? uniqueKeywords
+        : [topic, `${topic} guide`, `${topic} tips`, `${topic} 2024`]; // Fallback keywords
     } catch (error) {
       console.error('SEO keywords generation error:', error);
-      return [];
+      return [topic, `${topic} guide`, `${topic} tips`]; // Simple fallback
     }
   }
 }
