@@ -33,7 +33,7 @@ export function Blog() {
         // Try to load from database first
         let posts: BlogPost[] = [];
         try {
-          posts = await publishedBlogService.getRecentBlogPosts(50);
+          posts = await blogService.getRecentBlogPosts(50);
         } catch (dbError) {
           console.warn('Database unavailable, using localStorage:', dbError);
         }
