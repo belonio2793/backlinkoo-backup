@@ -1620,7 +1620,7 @@ const Dashboard = () => {
                         </CardHeader>
 
                         <CardContent className="p-6">
-                          <TrialBlogPostsDisplay user={user} />
+                          <TrialBlogShowcase limit={6} />
                         </CardContent>
                       </Card>
                     </div>
