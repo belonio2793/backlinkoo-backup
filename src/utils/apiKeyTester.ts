@@ -187,62 +187,7 @@ export class APIKeyTester {
     }
   }
 
-  /**
-   * Handle error responses properly without reading body multiple times
-   */
-  private static async handleErrorResponse(
-    response: Response, 
-    responseTime: number, 
-    serviceName: string
-  ): Promise<APITestResult> {
-    let errorMessage = 'Unknown error';
-    let errorDetails = null;
 
-    try {
-      // Read response body only once
-      const responseText = await response.text();
-      console.log(`📝 ${serviceName} error response:`, responseText);
-
-      if (responseText) {
-        try {
-          // Try to parse as JSON
-          errorDetails = JSON.parse(responseText);
-          errorMessage = errorDetails.error?.message || 
-                        errorDetails.message || 
-                        errorDetails.detail || 
-                        'API request failed';
-        } catch (parseError) {
-          // If not JSON, use the raw text
-          errorMessage = responseText || 'API request failed';
-        }
-      }
-    } catch (readError) {
-      console.error('Error reading response:', readError);
-      errorMessage = `Failed to read error response: ${response.status}`;
-    }
-
-    // Categorize common errors
-    const errorCategories = {
-      401: 'Invalid API key or authentication failed',
-      403: 'Access forbidden - insufficient permissions',
-      429: 'Rate limit exceeded - too many requests',
-      500: 'Server error - try again later',
-      502: 'Bad gateway - service temporarily unavailable',
-      503: 'Service unavailable - try again later'
-    };
-
-    const categorizedError = errorCategories[response.status as keyof typeof errorCategories] || errorMessage;
-
-    console.error(`❌ ${serviceName} test failed:`, response.status, errorMessage);
-
-    return {
-      success: false,
-      message: `${categorizedError}: ${errorMessage}`,
-      status: response.status,
-      responseTime,
-      details: errorDetails
-    };
-  }
 
   /**
    * Validate API key format
