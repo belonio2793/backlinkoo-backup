@@ -73,11 +73,16 @@ export function EnhancedDashboardRouter() {
           sessionResult = { data: { session: user ? { user } : null }, error: userError };
         } catch (fallbackError) {
           console.error('❌ Fallback auth check also failed, trying AuthService...');
+          // Track this error for debugging
+          localStorage.setItem('recent_auth_error', Date.now().toString());
+
           // Last resort: try AuthService
           try {
             const { session, user } = await AuthService.getCurrentSession();
             sessionResult = { data: { session }, error: null };
             console.log('✅ AuthService fallback successful');
+            // Clear error flag on success
+            localStorage.removeItem('recent_auth_error');
           } catch (authServiceError) {
             console.error('❌ All auth methods failed:', authServiceError);
             setIsLoading(false);
