@@ -21,6 +21,21 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check for claim intent and show notification
+    const claimIntent = localStorage.getItem('claim_intent');
+    if (claimIntent) {
+      try {
+        const intent = JSON.parse(claimIntent);
+        toast({
+          title: "Complete Your Claim",
+          description: `Sign in to claim "${intent.postTitle}" and make it permanent.`,
+        });
+      } catch (error) {
+        console.warn('Failed to parse claim intent:', error);
+        localStorage.removeItem('claim_intent');
+      }
+    }
+
     // Check if user is already logged in
     const checkAuth = async () => {
       try {
@@ -28,7 +43,29 @@ const Login = () => {
 
         // Only redirect if user is truly authenticated AND email is verified
         if (session && session.user && session.user.email_confirmed_at) {
-          console.log('🔐 User already authenticated and verified, redirecting to dashboard...');
+          console.log('🔐 User already authenticated and verified, checking for claim intent...');
+
+          // Handle claim intent if user is already logged in
+          if (claimIntent) {
+            try {
+              const intent = JSON.parse(claimIntent);
+              localStorage.removeItem('claim_intent');
+
+              toast({
+                title: "Continuing with your claim...",
+                description: `Processing your request to claim "${intent.postTitle}"`,
+              });
+
+              setTimeout(() => {
+                window.location.href = `/blog/${intent.postSlug}`;
+              }, 1500);
+              return;
+            } catch (error) {
+              console.warn('Failed to parse claim intent:', error);
+              localStorage.removeItem('claim_intent');
+            }
+          }
+
           navigate('/dashboard');
         } else if (session && session.user && !session.user.email_confirmed_at) {
           console.log('📬 User authenticated but email not verified, staying on login page');
