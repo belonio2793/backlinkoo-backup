@@ -1545,8 +1545,6 @@ const Dashboard = () => {
               </Tabs>
             ) : activeSection === "seo-tools" ? (
               <div className="space-y-6">
-                <SupabaseConnectionTest />
-                <OpenAIDebugTest />
                 <SEOToolsSection user={user} />
               </div>
             ) : activeSection === "trial" ? (
