@@ -155,7 +155,10 @@ export class ContentModerationService {
     try {
       await this.storeModerationRequest(request);
     } catch (error) {
-      console.error('Failed to store moderation request:', error);
+      console.error('Failed to store moderation request:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: String(error)
+      });
     }
 
     // Log the event
