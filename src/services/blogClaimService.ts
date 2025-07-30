@@ -36,6 +36,27 @@ export class BlogClaimService {
     try {
       console.log(`🔍 BlogClaimService: Fetching up to ${limit} claimable posts...`);
 
+      // Test database connection first
+      try {
+        const { error: connectionError } = await supabase
+          .from('published_blog_posts')
+          .select('id')
+          .limit(1);
+
+        if (connectionError) {
+          console.warn('⚠️ BlogClaimService: Database connection test failed:', connectionError.message);
+          if (connectionError.message?.includes('relation') || connectionError.message?.includes('does not exist')) {
+            console.warn('🔧 BlogClaimService: Table does not exist, returning empty array');
+            return [];
+          }
+        } else {
+          console.log('✅ BlogClaimService: Database connection test passed');
+        }
+      } catch (testError: any) {
+        console.warn('⚠️ BlogClaimService: Database test failed:', testError.message);
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('published_blog_posts')
         .select(`
