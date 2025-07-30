@@ -35,12 +35,14 @@ import {
 export function Blog() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'trending'>('newest');
+  const [pricingModalOpen, setPricingModalOpen] = useState(false);
 
   useEffect(() => {
     const loadBlogPosts = async () => {
