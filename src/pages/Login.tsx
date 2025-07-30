@@ -27,7 +27,7 @@ const Login = () => {
 
         if (session && session.user) {
           console.log('🔐 User already authenticated, redirecting...');
-          navigate('/my-dashboard');
+          navigate('/dashboard');
         }
       } catch (error) {
         console.error('Auth check error:', error);
@@ -41,7 +41,7 @@ const Login = () => {
 
       if (event === 'SIGNED_IN' && session && session.user) {
         console.log('🔐 Auth state change: redirecting to dashboard');
-        setTimeout(() => navigate('/my-dashboard'), 100);
+        setTimeout(() => navigate('/dashboard'), 100);
       }
     });
 
@@ -56,7 +56,7 @@ const Login = () => {
   };
 
   const handleAuthSuccess = (user: any) => {
-    navigate('/my-dashboard');
+    navigate('/dashboard');
   };
 
   const handleForgotPassword = async () => {
