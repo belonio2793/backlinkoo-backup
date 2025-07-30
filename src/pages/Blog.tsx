@@ -46,13 +46,15 @@ export function Blog() {
 
   useEffect(() => {
     const loadBlogPosts = async () => {
+      console.log('🔄 Loading blog posts...');
       try {
         // Try to load from database first
         let posts: BlogPost[] = [];
         try {
           posts = await blogService.getRecentBlogPosts(50);
+          console.log('✅ Database posts loaded:', posts.length);
         } catch (dbError) {
-          console.warn('Database unavailable, using localStorage:', dbError);
+          console.warn('❌ Database unavailable, using localStorage:', dbError);
         }
 
         // Also load from localStorage (traditional blog posts)
@@ -101,14 +103,17 @@ export function Blog() {
         const sortedPosts = sortPosts(allPosts, sortBy);
         setBlogPosts(sortedPosts);
 
-        console.log('Blog posts loaded:', {
+        console.log('✅ Blog posts loaded:', {
           databasePosts: posts.length,
           localBlogPosts: localBlogPosts.length,
           totalPosts: allPosts.length,
         });
       } catch (error) {
-        console.error('Failed to load blog posts:', error);
+        console.error('❌ Failed to load blog posts:', error);
+        // Even if there's an error, still try to show any local posts that were loaded
+        setBlogPosts([]);
       } finally {
+        console.log('📊 Setting loading to false');
         setLoading(false);
       }
     };
