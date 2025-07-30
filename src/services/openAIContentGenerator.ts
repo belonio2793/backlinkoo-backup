@@ -305,6 +305,13 @@ export class OpenAIContentGenerator {
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'Unknown error');
         console.error(`❌ Netlify function error (${response.status}):`, errorText);
+
+        // If all Netlify functions fail, try direct fallback approach
+        if (response.status === 404) {
+          console.log('🔄 All Netlify functions failed, using direct fallback...');
+          return await this.generateDirectOpenAIContent(request, prompt);
+        }
+
         throw new Error(`Netlify function error: ${response.status} - ${errorText}`);
       }
 
