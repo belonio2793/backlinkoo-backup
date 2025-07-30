@@ -114,9 +114,10 @@ export function AuthFormTabs({
 
         onAuthSuccess?.(result.user);
 
-        // Reset form
+        // Reset form and retry attempts
         setLoginEmail("");
         setLoginPassword("");
+        setRetryAttempts(0);
       } else if (result.requiresEmailVerification) {
         toast({
           title: "Email verification required",
