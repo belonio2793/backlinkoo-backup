@@ -217,16 +217,7 @@ export function BuilderAIGenerator({ onSuccess, variant = 'homepage' }: BuilderA
     <div className="w-full max-w-4xl mx-auto space-y-6">
       {/* Main Generation Card */}
       <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-blue-50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg">
-              <Sparkles className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <div className="text-xl font-bold text-gray-800">Builder.io AI Content Generator</div>
-              <div className="text-sm text-gray-600">Generate 1000+ word SEO-optimized blog posts instantly</div>
-            </div>
-          </CardTitle>
+        <CardHeader className="pb-4">
         </CardHeader>
         
         <CardContent className="space-y-6">
@@ -324,7 +315,6 @@ export function BuilderAIGenerator({ onSuccess, variant = 'homepage' }: BuilderA
               </>
             ) : (
               <>
-                <Sparkles className="mr-2 h-5 w-5" />
                 Create Your First Backlink For Free
               </>
             )}
@@ -343,7 +333,7 @@ export function BuilderAIGenerator({ onSuccess, variant = 'homepage' }: BuilderA
               </div>
               <div className="flex items-center gap-1">
                 <Clock className="h-4 w-4 text-purple-600" />
-                <span>24h auto-delete</span>
+                <span>permanent link</span>
               </div>
             </div>
           </div>

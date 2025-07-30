@@ -15,6 +15,7 @@ import { ContentFilterManager } from "@/components/admin/ContentFilterManager";
 import { ContentModerationQueue } from "@/components/admin/ContentModerationQueue";
 import { AIPostsManager } from "@/components/admin/AIPostsManager";
 import { BlogPostClaimsManager } from "@/components/admin/BlogPostClaimsManager";
+import { EnvironmentVariablesManager } from "@/components/admin/EnvironmentVariablesManager";
 import { AuthEmailTest } from "@/components/AuthEmailTest";
 
 import { EmailTest } from "@/components/EmailTest";
@@ -181,6 +182,7 @@ const AdminDashboard = () => {
         <Tabs defaultValue="campaigns" className="space-y-6">
           <TabsList>
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
+            <TabsTrigger value="environment-vars">Environment Variables</TabsTrigger>
             <TabsTrigger value="blog-posts">Blog Posts</TabsTrigger>
             <TabsTrigger value="blog-claims">Blog Claims</TabsTrigger>
             <TabsTrigger value="ai-posts">AI Posts</TabsTrigger>
@@ -199,6 +201,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="campaigns">
             <CampaignManager />
+          </TabsContent>
+
+          <TabsContent value="environment-vars">
+            <EnvironmentVariablesManager />
           </TabsContent>
 
           <TabsContent value="blog-posts">
