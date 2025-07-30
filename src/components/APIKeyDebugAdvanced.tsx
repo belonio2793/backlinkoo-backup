@@ -34,17 +34,18 @@ export function APIKeyDebugAdvanced() {
 
   const testCustomKey = async () => {
     if (!testKey.trim()) return;
-    
+
     setTestLoading(true);
     setTestResults(null);
-    
+
     try {
-      const result = await testSpecificApiKey(testKey.trim());
+      // Use isolated tester to avoid response stream conflicts
+      const result = await validateAndTestApiKey(testKey.trim());
       setTestResults(result);
     } catch (error) {
-      setTestResults({ 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Test failed' 
+      setTestResults({
+        success: false,
+        error: error instanceof Error ? error.message : 'Test failed'
       });
     } finally {
       setTestLoading(false);
