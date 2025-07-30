@@ -47,6 +47,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <GlobalNotifications />
+          <DatabaseHealthLogger />
           <BetaNotification />
           <BrowserRouter>
             <AuthRedirectHandler>
