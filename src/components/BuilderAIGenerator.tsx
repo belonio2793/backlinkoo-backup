@@ -210,17 +210,69 @@ export const BuilderAIGenerator = () => {
           </p>
         </div>
 
-        {/* Progress Display */}
-        {isGenerating && progress && (
-          <div className="space-y-3 p-4 bg-white rounded-lg border">
-            <div className="flex items-center justify-between">
-              <div className="font-medium text-gray-800">{progress.stage}</div>
-              <div className="text-sm text-gray-600">{progress.progress}%</div>
+        {/* API Status Display */}
+        {isCheckingAPI && (
+          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 animate-pulse text-blue-600" />
+              <span className="text-sm font-medium text-blue-800">Checking Builder.io AI API status...</span>
             </div>
-            <Progress value={progress.progress} className="h-3" />
-            <div className="text-sm text-gray-600">{progress.details}</div>
-            <div className="text-xs text-gray-500">
-              {progress.timestamp.toLocaleTimeString()}
+          </div>
+        )}
+
+        {apiStatus && !isCheckingAPI && (
+          <div className={`p-4 rounded-lg border ${apiStatus.accessible
+            ? 'bg-green-50 border-green-200'
+            : 'bg-red-50 border-red-200'
+          }`}>
+            <div className="flex items-center gap-2">
+              {apiStatus.accessible ? (
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+              ) : (
+                <AlertCircle className="h-4 w-4 text-red-600" />
+              )}
+              <span className={`text-sm font-medium ${apiStatus.accessible
+                ? 'text-green-800'
+                : 'text-red-800'
+              }`}>
+                {apiStatus.accessible
+                  ? 'Builder.io AI API is ready'
+                  : `API Error: ${apiStatus.error}`
+                }
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Real-time Progress Display */}
+        {isGenerating && progress && (
+          <div className="space-y-4 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border">
+            <div className="flex items-center justify-between">
+              <div className="font-bold text-lg text-gray-800">{progress.stage}</div>
+              <div className="text-lg font-mono text-gray-600">{progress.progress}%</div>
+            </div>
+            <Progress value={progress.progress} className="h-4" />
+            <div className="text-sm text-gray-700 font-medium">{progress.details}</div>
+            <div className="flex items-center gap-4 text-xs text-gray-500">
+              <span>⏰ {progress.timestamp.toLocaleTimeString()}</span>
+              <span>🤖 Builder.io AI Engine</span>
+              <span>📝 Real-time Generation</span>
+            </div>
+
+            {/* Live Action Indicators */}
+            <div className="grid grid-cols-4 gap-2 text-xs">
+              <div className={`p-2 rounded text-center ${progress.progress >= 10 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'}`}>
+                ✓ API Check
+              </div>
+              <div className={`p-2 rounded text-center ${progress.progress >= 30 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'}`}>
+                ✓ AI Generation
+              </div>
+              <div className={`p-2 rounded text-center ${progress.progress >= 80 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'}`}>
+                ✓ Publishing
+              </div>
+              <div className={`p-2 rounded text-center ${progress.progress >= 100 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'}`}>
+                ✓ Complete
+              </div>
             </div>
           </div>
         )}
