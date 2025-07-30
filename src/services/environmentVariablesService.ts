@@ -80,6 +80,7 @@ class EnvironmentVariablesService {
    */
   async refreshCache(): Promise<void> {
     try {
+      console.log('🔄 Fetching environment variables from Supabase database...');
       const { data, error } = await supabase
         .from('admin_environment_variables')
         .select('key, value');
@@ -98,6 +99,15 @@ class EnvironmentVariablesService {
 
       this.lastFetch = Date.now();
       console.log('✅ Environment variables cache refreshed from database');
+      console.log('📊 Loaded variables:', data?.map((item: any) => item.key).join(', '));
+
+      // Log API key status specifically
+      const apiKey = this.cache.get('VITE_OPENAI_API_KEY');
+      if (apiKey) {
+        console.log('🔑 OpenAI API key loaded from database:', apiKey.substring(0, 15) + '...');
+      } else {
+        console.log('❌ No OpenAI API key found in database');
+      }
     } catch (error) {
       console.warn('Error refreshing environment variables cache, using localStorage fallback:', error);
       this.loadFromLocalStorage();
