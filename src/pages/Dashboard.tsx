@@ -1104,7 +1104,7 @@ const Dashboard = () => {
           <>
             {activeSection === "dashboard" ? (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 h-auto">
+            <TabsList className="grid w-full grid-cols-4 h-auto">
               <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Overview</span>
                 <span className="sm:hidden">Home</span>
@@ -1112,6 +1112,14 @@ const Dashboard = () => {
               <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Campaigns</span>
                 <span className="sm:hidden">Camps</span>
+              </TabsTrigger>
+              <TabsTrigger value="keyword-research" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
+                <span className="hidden sm:inline">Keyword Research</span>
+                <span className="sm:hidden">Keywords</span>
+              </TabsTrigger>
+              <TabsTrigger value="rank-tracker" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
+                <span className="hidden sm:inline">Rankings</span>
+                <span className="sm:hidden">Ranks</span>
               </TabsTrigger>
             </TabsList>
 
