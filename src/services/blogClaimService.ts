@@ -96,7 +96,17 @@ export class BlogClaimService {
         });
       }
 
-      return data || [];
+      // Validate data structure
+      const validatedData = (data || []).filter(post => {
+        if (!post.id || !post.slug || !post.title) {
+          console.warn('⚠️ BlogClaimService: Skipping invalid post data:', post);
+          return false;
+        }
+        return true;
+      });
+
+      console.log(`✅ BlogClaimService: Validated ${validatedData.length}/${data?.length || 0} posts`);
+      return validatedData;
     } catch (error: any) {
       console.error('💥 BlogClaimService: Exception fetching claimable posts:', {
         message: error.message,
