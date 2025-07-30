@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { validateAllOpenAIKeys } from '@/utils/validateOpenAIKeys';
 
 export interface OpenAIContentRequest {
   keyword: string;
@@ -143,6 +144,12 @@ export class OpenAIContentGenerator {
 
     console.log(`🤖 Calling OpenAI API with ${apiKeys.length} available keys`);
 
+    // Validate all keys first (for debugging)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 Running API key validation...');
+      await validateAllOpenAIKeys();
+    }
+
     for (let i = 0; i < apiKeys.length; i++) {
       const apiKey = apiKeys[i];
       try {
@@ -180,7 +187,7 @@ export class OpenAIContentGenerator {
           console.error('Full error details:', errorData);
 
           if (response.status === 401) {
-            console.warn(`�� Key ${i + 1} is invalid or expired. Check OpenAI dashboard.`);
+            console.warn(`🔑 Key ${i + 1} is invalid or expired. Check OpenAI dashboard.`);
             continue; // Try next key
           } else if (response.status === 429) {
             console.warn(`⏰ Key ${i + 1} hit rate limit. Trying next key.`);
