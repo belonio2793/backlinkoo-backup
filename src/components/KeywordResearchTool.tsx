@@ -404,7 +404,7 @@ export const KeywordResearchTool = () => {
     { code: "SM", name: "San Marino", flag: "🇸🇲" },
     { code: "SN", name: "Senegal", flag: "🇸🇳" },
     { code: "SO", name: "Somalia", flag: "🇸🇴" },
-    { code: "SR", name: "Suriname", flag: "🇸�����" },
+    { code: "SR", name: "Suriname", flag: "🇸🇷" },
     { code: "SS", name: "South Sudan", flag: "🇸🇸" },
     { code: "ST", name: "São Tomé and Príncipe", flag: "🇸🇹" },
     { code: "SV", name: "El Salvador", flag: "🇸🇻" },
