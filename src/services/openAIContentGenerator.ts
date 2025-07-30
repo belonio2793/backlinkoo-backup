@@ -135,7 +135,9 @@ export class OpenAIContentGenerator {
 
     try {
       console.log('🤖 Making secure OpenAI request via Netlify function...');
-      const response = await fetch('/.netlify/functions/generate-openai', {
+
+      // Try the dedicated generate-openai function first
+      let response = await fetch('/.netlify/functions/generate-openai', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -150,17 +152,43 @@ export class OpenAIContentGenerator {
         })
       });
 
+      // If generate-openai returns 404, fall back to generate-ai-content
+      if (response.status === 404) {
+        console.log('🔄 generate-openai not found, falling back to generate-ai-content...');
+        response = await fetch('/.netlify/functions/generate-ai-content', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            provider: 'OpenAI',
+            prompt: prompt,
+            keyword: request.keyword,
+            anchorText: request.anchorText,
+            url: request.targetUrl
+          })
+        });
+      }
+
       if (!response.ok) {
         throw new Error(`Netlify function error: ${response.status}`);
       }
 
       const data = await response.json();
 
-      if (!data.success) {
-        throw new Error(data.error || 'Content generation failed');
+      // Handle different response formats
+      let content;
+      if (data.success && data.content) {
+        // generate-openai format
+        content = data.content;
+      } else if (data.content && !data.error) {
+        // generate-ai-content format
+        content = data.content;
+      } else if (data.error) {
+        throw new Error(data.error);
+      } else {
+        throw new Error('No content generated from OpenAI');
       }
-
-      const content = data.content;
 
       if (!content) {
         throw new Error('No content generated from OpenAI');
