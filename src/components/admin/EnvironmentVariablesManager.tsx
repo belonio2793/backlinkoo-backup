@@ -144,12 +144,23 @@ export function EnvironmentVariablesManager() {
 
       if (error) {
         console.error('Error loading environment variables:', error);
+
+        // Properly extract error message
+        let errorMessage = 'Using local storage as fallback';
+        if (error.code === 'PGRST116') {
+          errorMessage = 'Environment variables table does not exist in your Supabase database.';
+        } else if (error.message) {
+          errorMessage = `Database error: ${error.message}`;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        }
+
         toast({
           title: 'Error loading environment variables',
-          description: 'Using local storage as fallback',
+          description: errorMessage,
           variant: 'destructive'
         });
-        
+
         // Fallback to localStorage
         const stored = localStorage.getItem('admin_env_vars');
         if (stored) {
@@ -159,7 +170,16 @@ export function EnvironmentVariablesManager() {
         setEnvVars(data || []);
       }
     } catch (err) {
-      console.error('Error:', err);
+      console.error('Error loading environment variables:', err);
+
+      // Handle unexpected errors properly
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred while loading environment variables';
+      toast({
+        title: 'Loading Error',
+        description: errorMessage,
+        variant: 'destructive'
+      });
+
       // Fallback to localStorage
       const stored = localStorage.getItem('admin_env_vars');
       if (stored) {
