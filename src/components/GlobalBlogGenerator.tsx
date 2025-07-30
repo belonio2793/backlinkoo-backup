@@ -407,7 +407,7 @@ Return the content as HTML with proper tags including the backlink.`;
           : `Generated using ${result.provider.toUpperCase()} ${result.fallbacksUsed?.length ? '(with fallback)' : ''}`;
 
         toast({
-          title: "Blog post generated successfully! �����",
+          title: "Blog post generated successfully! ���",
           description: `Your free backlink post is ready! ${providerInfo}. It will auto-delete in 24 hours unless you register an account.`,
           action: (
             <Button
@@ -475,9 +475,10 @@ Return the content as HTML with proper tags including the backlink.`;
                            errorMessage.includes('401');
 
       if (errorMessage.includes('Invalid API key') || errorMessage.includes('401') ||
-          errorMessage.includes('OpenAI API key is not configured') || isConfigError) {
-        title = "Service Configuration Issue";
-        description = "The AI service is not properly configured. Please try again or contact support." + detailedInfo;
+          errorMessage.includes('OpenAI API key is not configured') ||
+          errorMessage.includes('API key not configured') || isConfigError) {
+        title = "OpenAI API Key Required";
+        description = "A valid OpenAI API key is needed for content generation. The system will use the local fallback template instead." + detailedInfo;
       } else if (errorMessage.includes('rate limit') || errorMessage.includes('429')) {
         title = "Service Busy - Rate Limited";
         description = "Too many requests right now. Please wait a few minutes and try again." + detailedInfo;
