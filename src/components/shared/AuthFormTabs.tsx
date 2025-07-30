@@ -247,7 +247,38 @@ export function AuthFormTabs({
           } else if (directError.message.includes('Email verification required')) {
             throw new Error('Email verification required. Please check your email for a verification link.');
           } else if (directError.message.includes('timeout')) {
-            throw new Error('Authentication is taking longer than expected. Please try again.');
+            // Method 3: Last resort - simple auth without timeout racing
+            try {
+              console.log('🔐 Attempting final auth without timeout racing...');
+              const { supabase } = await import('@/integrations/supabase/client');
+
+              const finalResult = await supabase.auth.signInWithPassword({
+                email: loginEmail.trim(),
+                password: loginPassword
+              });
+
+              if (finalResult.error) {
+                throw new Error(finalResult.error.message);
+              }
+
+              if (finalResult.data?.user) {
+                if (!finalResult.data.user.email_confirmed_at) {
+                  throw new Error('Email verification required. Please check your email for a verification link.');
+                }
+
+                result = {
+                  success: true,
+                  user: finalResult.data.user,
+                  session: finalResult.data.session
+                };
+                console.log('✅ Final auth successful');
+              } else {
+                throw new Error('No user data received');
+              }
+            } catch (finalError: any) {
+              console.error('❌ Final auth also failed:', finalError.message);
+              throw new Error('Authentication is taking longer than expected. Please try again.');
+            }
           } else {
             // Use the more specific error message
             throw new Error(directError.message || 'Authentication failed. Please try again.');
