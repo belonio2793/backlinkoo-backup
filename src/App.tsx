@@ -10,6 +10,7 @@ import { AppWrapper } from "@/components/AppWrapper";
 import { AuthProfileChecker } from "@/components/AuthProfileChecker";
 import { AuthRedirectHandler } from "@/components/AuthRedirectHandler";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 
 // Import test utilities for debugging
