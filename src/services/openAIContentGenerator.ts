@@ -133,19 +133,28 @@ export class OpenAIContentGenerator {
   private async generateOpenAIContent(request: OpenAIContentRequest, prompt: string): Promise<string> {
     console.log('🤖 Generating content via Netlify function...');
 
+    // Check if we're in development mode
+    const isDevelopment = import.meta.env?.DEV;
+
+    if (isDevelopment) {
+      console.log('Development mode: generating mock content');
+      return this.generateMockContent(request);
+    }
+
     try {
-      const response = await fetch('/.netlify/functions/generate-openai', {
+      // Use the correct generate-content function
+      const response = await fetch('/.netlify/functions/generate-content', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          keyword: request.keyword,
-          url: request.targetUrl,
-          anchorText: request.anchorText,
-          wordCount: 1200,
-          contentType: 'article',
-          tone: 'professional'
+          prompt: `Write a comprehensive 1000-word article about "${request.keyword}". Include the phrase "${request.anchorText}" naturally in the content and make it link to ${request.targetUrl}. Make the content informative, engaging, and SEO-friendly.`,
+          type: 'blog_post',
+          topic: request.keyword,
+          keywords: [request.keyword, request.anchorText],
+          maxTokens: 2000,
+          temperature: 0.7
         })
       });
 
@@ -166,6 +175,72 @@ export class OpenAIContentGenerator {
       console.error('❌ OpenAI generation via Netlify function failed:', error);
       throw error;
     }
+  }
+
+  /**
+   * Generate mock content for development mode
+   */
+  private generateMockContent(request: OpenAIContentRequest): string {
+    return `# ${request.keyword}: Complete Guide
+
+Welcome to this comprehensive guide about ${request.keyword}. This article will provide you with expert insights and valuable information.
+
+## Introduction
+
+${request.keyword} is an important topic that deserves careful attention. In this guide, we'll explore various aspects and provide practical advice.
+
+## Key Benefits
+
+Here are some key benefits of understanding ${request.keyword}:
+
+- Improved knowledge and expertise
+- Better decision-making capabilities
+- Enhanced professional development
+- Practical applications in real-world scenarios
+
+## Best Practices
+
+When working with ${request.keyword}, consider these best practices:
+
+1. **Research thoroughly** - Always start with comprehensive research
+2. **Apply consistently** - Consistency is key to success
+3. **Monitor progress** - Track your results and adjust as needed
+4. **Stay updated** - Keep up with the latest developments
+
+## Expert Tips
+
+For those looking to master ${request.keyword}, here are some expert tips:
+
+- Focus on understanding the fundamentals first
+- Practice regularly to build proficiency
+- Learn from experienced practitioners
+- <a href="${request.targetUrl}" target="_blank" rel="noopener noreferrer">${request.anchorText}</a> for additional resources
+
+## Advanced Strategies
+
+Once you've mastered the basics, consider these advanced strategies:
+
+- Implement automation where possible
+- Develop systematic approaches
+- Create documentation and processes
+- Build networks with other professionals
+
+## Common Mistakes to Avoid
+
+Avoid these common pitfalls when working with ${request.keyword}:
+
+- Rushing through the learning process
+- Ignoring best practices and guidelines
+- Failing to adapt to new developments
+- Not seeking feedback from others
+
+## Conclusion
+
+Understanding ${request.keyword} is crucial for success in today's environment. By following the guidance in this article and leveraging resources like ${request.anchorText}, you'll be well-equipped to achieve your goals.
+
+Remember that mastery takes time and practice. Stay committed to learning and improving, and you'll see positive results.
+
+*This content was generated for development testing purposes.*`;
   }
 
   /**
