@@ -3,7 +3,7 @@
  * Simplified content generation using only OpenAI API
  */
 
-import { openAIService } from './api/openai';
+import { simpleOpenAIService } from './api/simpleOpenAI';
 
 export interface ContentGenerationRequest {
   targetUrl: string;
@@ -85,7 +85,7 @@ export class OpenAIOnlyContentGenerator {
         wordCount: wordCount
       });
 
-      const result = await openAIService.generateContent(prompt, openAIOptions);
+      const result = await simpleOpenAIService.generateContent(prompt, openAIOptions);
 
       if (!result.success || !result.content) {
         throw new Error(`OpenAI generation failed: ${result.error || 'Unknown error'}`);
@@ -354,23 +354,21 @@ Focus on creating valuable, informative content that genuinely helps readers whi
    * Test OpenAI connection
    */
   async testConnection(): Promise<boolean> {
-    return await openAIService.testConnection();
+    return simpleOpenAIService.isConfigured();
   }
 
   /**
    * Get OpenAI status
    */
   async getProviderStatus(): Promise<{ openai: boolean }> {
-    const isConfigured = openAIService.isConfigured();
-    const isConnected = isConfigured ? await this.testConnection() : false;
-    return { openai: isConnected };
+    return { openai: simpleOpenAIService.isConfigured() };
   }
 
   /**
    * Check if OpenAI is configured
    */
   isConfigured(): boolean {
-    return openAIService.isConfigured();
+    return simpleOpenAIService.isConfigured();
   }
 }
 

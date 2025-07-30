@@ -4,7 +4,7 @@
  * to ensure content generation "always works"
  */
 
-import { openAIService } from './api/openai';
+import { enhancedOpenAIService } from './api/enhancedOpenAI';
 import { cohereService } from './api/cohere';
 import { deepAIService } from './api/deepai';
 import { netlifyContentGenerator } from './netlifyContentGenerator';
@@ -45,7 +45,7 @@ export interface MultiProviderResponse {
 
 export class MultiProviderContentGenerator {
   private providers = {
-    openai: openAIService,
+    openai: enhancedOpenAIService,
     cohere: cohereService,
     deepai: deepAIService
   };

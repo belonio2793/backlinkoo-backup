@@ -453,3 +453,6 @@ export class OpenAIService {
 }
 
 export const openAIService = new OpenAIService();
+
+// Also export enhanced service for components that need maximum reliability
+export { enhancedOpenAIService } from './enhancedOpenAI';

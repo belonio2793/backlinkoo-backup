@@ -84,14 +84,11 @@ export function GlobalBlogGenerator({
 
   // API status state
   const [apiStatus, setApiStatus] = useState<{
-    status: 'checking' | 'ready' | 'error' | 'partial' | 'retrying';
+    status: 'ready' | 'error';
     message: string;
-    details?: string;
-    retryAttempt?: number;
-    maxRetries?: number;
   }>({
-    status: 'checking',
-    message: 'Checking API status...'
+    status: 'ready',
+    message: 'Ready'
   });
 
   const { toast } = useToast();
@@ -99,48 +96,10 @@ export function GlobalBlogGenerator({
   const { isLoggedIn } = useAuthStatus();
 
   useEffect(() => {
-    try {
-      loadGlobalStats();
-      updateRemainingRequests();
-      checkApiStatus();
-
-      // Set up aggressive retry mechanism - retry every 10 seconds until connected
-      const statusInterval = setInterval(() => {
-        if (apiStatus.status === 'error' || apiStatus.status === 'checking') {
-          console.log('🔄 Auto-retrying API connection...');
-          checkApiStatus();
-        }
-      }, 10 * 1000); // 10 seconds for aggressive retry
-
-      // Additional long-term monitoring every 2 minutes for maintenance
-      const maintenanceInterval = setInterval(() => {
-        if (apiStatus.status === 'ready') {
-          // Occasional health check when ready
-          checkApiStatus();
-        }
-      }, 2 * 60 * 1000); // 2 minutes
-
-      return () => {
-        clearInterval(statusInterval);
-        clearInterval(maintenanceInterval);
-      };
-    } catch (error) {
-      console.error('Error initializing GlobalBlogGenerator:', error);
-      // Set safe defaults
-      setGlobalStats({
-        totalPosts: 0,
-        postsToday: 0,
-        activeUsers: null,
-        averageQuality: null
-      });
-      setRemainingRequests(5);
-      setApiStatus({
-        status: 'error',
-        message: 'Initialization error',
-        details: 'Failed to initialize the blog generator'
-      });
-    }
-  }, [apiStatus.status]);
+    loadGlobalStats();
+    updateRemainingRequests();
+    trackBlogGeneration();
+  }, []);
 
   const loadGlobalStats = async () => {
     // Simple stats from localStorage for OpenAI-only system
@@ -174,79 +133,7 @@ export function GlobalBlogGenerator({
     setRemainingRequests(remaining);
   };
 
-  const checkApiStatus = async () => {
-    try {
-      // Set initial checking state with encouraging message
-      setApiStatus({
-        status: 'checking',
-        message: 'Connecting to AI service...',
-        details: 'Establishing secure connection',
-        retryAttempt: 1,
-        maxRetries: 8
-      });
 
-      // Check OpenAI API key first
-      const hasApiKey = import.meta.env.VITE_OPENAI_API_KEY;
-
-      if (!hasApiKey || hasApiKey === 'sk-proj-YOUR_ACTUAL_OPENAI_API_KEY_HERE') {
-        setApiStatus({
-          status: 'error',
-          message: 'API key required',
-          details: 'Please configure your OpenAI API key'
-        });
-        return;
-      }
-
-      // Check OpenAI service configuration
-      const openAIConfigured = openAIOnlyContentGenerator.isConfigured();
-      if (!openAIConfigured) {
-        setApiStatus({
-          status: 'error',
-          message: 'Configuration error',
-          details: 'OpenAI service not properly configured'
-        });
-        return;
-      }
-
-      // Simplified connection test - just verify the key format and configuration
-      setApiStatus({
-        status: 'checking',
-        message: 'Validating API configuration...',
-        details: 'Checking credentials'
-      });
-
-      console.log('🔍 Validating OpenAI API key...');
-
-      // Simple validation - if key exists and looks valid, assume it's ready
-      // This avoids CORS issues with the models endpoint
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      const isValidKeyFormat = apiKey && apiKey.startsWith('sk-') && apiKey.length > 20;
-
-      if (isValidKeyFormat) {
-        console.log('✅ API key format is valid');
-        setApiStatus({
-          status: 'ready',
-          message: 'AI service ready',
-          details: 'Configuration validated'
-        });
-      } else {
-        console.log('❌ Invalid API key format');
-        setApiStatus({
-          status: 'error',
-          message: 'Invalid API key',
-          details: 'Please check your OpenAI API key format'
-        });
-      }
-
-    } catch (error) {
-      console.error('API status check failed:', error);
-      setApiStatus({
-        status: 'error',
-        message: 'Connection error',
-        details: 'Failed to verify API status'
-      });
-    }
-  };
 
 
 
@@ -801,22 +688,10 @@ export function GlobalBlogGenerator({
             </div>
             
             <div className="flex items-center gap-2">
-              {apiStatus.status === 'ready' ? (
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-green-600">Ready</span>
-                </div>
-              ) : apiStatus.status === 'error' ? (
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-red-600">Error</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-yellow-600">Connecting</span>
-                </div>
-              )}
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm font-medium text-green-600">Ready</span>
+              </div>
             </div>
           </div>
           
@@ -931,27 +806,18 @@ export function GlobalBlogGenerator({
           <div className="flex gap-3">
             <Button
               onClick={handleGenerate}
-              disabled={isGenerating || remainingRequests <= 0 || apiStatus.status !== 'ready'}
-              className={`flex-1 transition-all duration-300 ${
-                apiStatus.status === 'ready'
-                  ? 'bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg'
-                  : 'bg-gradient-to-r from-gray-400 to-gray-500'
-              }`}
+              disabled={isGenerating || remainingRequests <= 0}
+              className="flex-1 transition-all duration-300 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg"
             >
               {isGenerating ? (
                 <>
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                   Generating...
                 </>
-              ) : apiStatus.status === 'ready' ? (
+              ) : (
                 <>
                   <Zap className="h-4 w-4 mr-2" />
                   Create Permanent Link
-                </>
-              ) : (
-                <>
-                  <Clock className="h-4 w-4 mr-2" />
-                  {apiStatus.status === 'retrying' ? 'Connecting...' : 'Preparing...'}
                 </>
               )}
             </Button>
