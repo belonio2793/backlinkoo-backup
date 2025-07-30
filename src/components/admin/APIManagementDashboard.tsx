@@ -133,11 +133,16 @@ export function APIManagementDashboard() {
         }
       } else {
         updateServiceStatus('OpenAI', {
-          status: 'not_configured',
-          message: 'API key not configured'
+          status: 'error',
+          message: 'Failed to check OpenAI configuration'
         });
       }
     } catch (error) {
+      console.error('Error checking OpenAI status:', error);
+      updateServiceStatus('OpenAI', {
+        status: 'error',
+        message: 'Unable to connect to Netlify function'
+      });
       updateServiceStatus('OpenAI', {
         status: 'error',
         message: 'Connection failed'
