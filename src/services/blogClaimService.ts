@@ -53,9 +53,14 @@ export class BlogClaimService {
           details: error.details,
           hint: error.hint,
           code: error.code,
-          fullError: error
+          errorString: JSON.stringify(error, null, 2)
         });
-        console.error('❌ BlogClaimService: Raw error object:', error);
+        console.error('❌ BlogClaimService: Raw error details:', JSON.stringify(error, null, 2));
+
+        // Check if it's a table/schema issue
+        if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
+          console.warn('🔧 BlogClaimService: Database table may not exist, falling back to empty array');
+        }
         return [];
       }
 
