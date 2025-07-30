@@ -174,7 +174,7 @@ export function Blog() {
             <div className="space-y-4">
               <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-4 py-2 text-sm">
                 <Zap className="mr-2 h-4 w-4" />
-                AI-Powered Content Hub
+                Expert Content Hub
               </Badge>
               <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight">
                 Backlinkoo
@@ -338,7 +338,7 @@ export function Blog() {
               <p className="text-gray-600 max-w-md mx-auto">
                 {searchTerm || selectedCategory
                   ? 'Try adjusting your search or filter criteria to find the content you\'re looking for.'
-                  : 'Be the first to create AI-powered content! Generate high-quality blog posts with contextual backlinks.'
+                  : 'Be the first to create expert content! Generate high-quality blog posts with contextual backlinks.'
                 }
               </p>
               <div className="pt-4">
@@ -380,7 +380,7 @@ export function Blog() {
               Ready to Boost Your SEO?
             </h2>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Join thousands of users creating high-quality backlinks with AI-powered content generation
+              Join thousands of users creating high-quality backlinks with expert content generation
             </p>
           </div>
           
@@ -410,8 +410,8 @@ export function Blog() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-12 border-t border-white/10">
             <div className="text-center space-y-2">
               <Sparkles className="h-8 w-8 text-yellow-400 mx-auto" />
-              <h3 className="font-semibold">AI-Powered</h3>
-              <p className="text-sm text-gray-400">Advanced GPT models create high-quality content</p>
+              <h3 className="font-semibold">Expert Quality</h3>
+              <p className="text-sm text-gray-400">Advanced language models create high-quality content</p>
             </div>
             <div className="text-center space-y-2">
               <TrendingUp className="h-8 w-8 text-green-400 mx-auto" />
