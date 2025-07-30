@@ -94,6 +94,12 @@ export function BlogManagementPanel() {
         .order('created_at', { ascending: false });
 
       if (error) {
+        if (error.code === 'PGRST116' || error.message.includes('does not exist')) {
+          console.warn('📝 blog_posts table does not exist - this is expected for new setups');
+          setPosts([]);
+          return;
+        }
+
         console.error('Supabase error loading blog posts:', {
           message: error.message,
           details: error.details,
@@ -106,11 +112,18 @@ export function BlogManagementPanel() {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Error loading blog posts:', errorMessage);
-      toast({
-        title: "Error",
-        description: `Failed to load blog posts: ${errorMessage}`,
-        variant: "destructive",
-      });
+
+      // Set empty posts instead of crashing
+      setPosts([]);
+
+      // Only show error toast for non-table-missing errors
+      if (!errorMessage.includes('does not exist') && !errorMessage.includes('PGRST116')) {
+        toast({
+          title: "Database Error",
+          description: "Could not load blog posts. Check if database is properly configured.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
