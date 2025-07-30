@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client'
-import TestApp from './TestApp.tsx'
+import App from './App.tsx'
 import './index.css'
 import { trialPostCleanupService } from './services/trialPostCleanupService'
 
@@ -70,7 +70,7 @@ Object.defineProperty = function(obj: any, prop: string | symbol, descriptor: Pr
   return originalDefineProperty.call(this, obj, prop, descriptor);
 };
 
-createRoot(document.getElementById("root")!).render(<TestApp />);
+createRoot(document.getElementById("root")!).render(<App />);
 
 // Initialize trial post cleanup service
 // trialPostCleanupService.scheduleCleanup().catch(console.error);
