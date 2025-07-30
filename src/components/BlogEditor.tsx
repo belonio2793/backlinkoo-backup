@@ -441,6 +441,16 @@ export function BlogEditor({ postId, mode = 'edit', onSave, onCancel }: BlogEdit
               </CardContent>
             </Card>
 
+            {/* Slug Customizer */}
+            <SlugCustomizer
+              title={formData.title}
+              keywords={formData.keywords}
+              content={formData.content}
+              category={formData.category}
+              initialSlug={formData.slug}
+              onSlugChange={(slug) => setFormData(prev => ({ ...prev, slug }))}
+            />
+
             <Card>
               <CardHeader>
                 <CardTitle>SEO & Links</CardTitle>
