@@ -524,9 +524,37 @@ export function EnvironmentVariablesManager() {
                       </div>
 
                       <div className="text-sm">
-                        <div className="font-mono bg-gray-100 p-2 rounded">
-                          {maskValue(envVar.value, showSecrets[envVar.id!] || !envVar.is_secret)}
-                        </div>
+                        {editingVar === envVar.id ? (
+                          <div className="space-y-2">
+                            <div className="flex gap-2">
+                              <Input
+                                type={envVar.is_secret ? 'password' : 'text'}
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                className="font-mono text-xs"
+                                placeholder="Enter new value..."
+                              />
+                              <Button
+                                size="sm"
+                                onClick={() => saveEdit(envVar)}
+                                disabled={!editValue.trim() || isLoading}
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={cancelEditing}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="font-mono bg-gray-100 p-2 rounded break-all overflow-hidden">
+                            {maskValue(envVar.value, showSecrets[envVar.id!] || !envVar.is_secret)}
+                          </div>
+                        )}
                       </div>
 
                       {envVar.description && (
