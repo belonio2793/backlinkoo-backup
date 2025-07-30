@@ -283,28 +283,35 @@ export function GlobalBlogGenerator({
       setGenerationStage('Generating high-quality content with reliable AI system (automatic failover enabled)...');
       setProgress(60);
 
-      // Use reliable content generator for guaranteed success
-      const targetWordCount = contentLength === 'short' ? 500 : contentLength === 'medium' ? 800 : 1200;
-      const prompt = `Create a comprehensive ${targetWordCount}-word blog post about "${request.primaryKeyword}" that naturally incorporates a backlink to ${request.targetUrl}.
+      // Use reliable content generator for guaranteed success with specified prompt templates
+      const targetWordCount = Math.max(1000, contentLength === 'short' ? 1000 : contentLength === 'medium' ? 1000 : 1000); // Always 1000+ words as requested
 
-CONTENT REQUIREMENTS:
-- Write MINIMUM ${Math.max(500, targetWordCount)} words of high-quality, original content
-- Focus on "${request.primaryKeyword}" as the main topic
+      // Randomly select from the three specified prompt templates
+      const promptTemplates = [
+        `Generate a 1000 word article on ${request.primaryKeyword} including the ${request.anchorText || request.primaryKeyword} hyperlinked to ${request.targetUrl}`,
+
+        `Write a 1000 word blog post about ${request.primaryKeyword} with a hyperlinked ${request.anchorText || request.primaryKeyword} linked to ${request.targetUrl}`,
+
+        `Produce a 1000-word reader friendly post on ${request.primaryKeyword} that links ${request.anchorText || request.primaryKeyword} to ${request.targetUrl}`
+      ];
+
+      // Randomly select one of the prompt templates
+      const selectedTemplate = promptTemplates[Math.floor(Math.random() * promptTemplates.length)];
+
+      const prompt = selectedTemplate + `
+
+IMPORTANT REQUIREMENTS:
+- Write exactly 1000 words or more of high-quality, original content
 - Use ${contentTone} tone throughout the article
 - Include practical, actionable advice with examples
 - Structure with proper headings (H1, H2, H3, H4)
-- Natural integration of anchor text "${request.anchorText || request.primaryKeyword}" linking to ${request.targetUrl}
+- Naturally integrate the hyperlink within relevant content context
 - Include relevant statistics, tips, and detailed explanations
 - Provide comprehensive coverage of the topic
 - End with a helpful conclusion
 
-BACKLINK INTEGRATION:
-- Integrate the backlink naturally within the content context
-- Use anchor text: "${request.anchorText || request.primaryKeyword}"
-- Make the link relevant to the surrounding content
-
 OUTPUT FORMAT:
-Return the content as clean HTML with proper tags including the backlink. Ensure the content is well-structured and SEO-optimized.`;
+Return the content as clean HTML with proper tags including the hyperlink. Ensure the content is well-structured and SEO-optimized.`;
 
       const systemPrompt = 'You are an expert SEO content writer specializing in creating high-quality, engaging blog posts that rank well in search engines.';
 
