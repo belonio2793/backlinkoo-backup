@@ -16,17 +16,22 @@ export function EnhancedBlogContent({ content, keyword, anchorText, targetUrl }:
   const [showTOC, setShowTOC] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  // Calculate reading progress
+  // Calculate reading progress and scroll position
   useEffect(() => {
     const handleScroll = () => {
       const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = (window.scrollY / totalHeight) * 100;
       setReadingProgress(Math.min(progress, 100));
+      setShowScrollTop(window.scrollY > 300);
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Calculate reading time
   const calculateReadingTime = (text: string) => {
