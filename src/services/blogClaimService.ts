@@ -125,8 +125,8 @@ export class BlogClaimService {
       const { data, error } = await supabase
         .from('published_blog_posts')
         .select(`
-          id, slug, title, excerpt, published_url, target_url, 
-          created_at, expires_at, seo_score, reading_time, word_count, 
+          id, slug, title, excerpt, published_url, target_url,
+          created_at, expires_at, seo_score, reading_time, word_count,
           view_count, is_trial_post, user_id, author_name, tags, category
         `)
         .eq('user_id', userId)
@@ -135,6 +135,40 @@ export class BlogClaimService {
 
       if (error) {
         console.error('Error fetching user claimed posts:', error);
+
+        // Check if it's a table/schema issue
+        if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
+          console.warn('🔧 BlogClaimService: Database table may not exist, checking localStorage for user claimed posts');
+
+          // Fallback to localStorage
+          try {
+            const userClaimedPosts = localStorage.getItem(`user_claimed_posts_${userId}`);
+            if (userClaimedPosts) {
+              const claimedPosts = JSON.parse(userClaimedPosts);
+              return claimedPosts.map((claim: any) => {
+                // Try to get full post data from localStorage
+                const blogData = localStorage.getItem(`blog_post_${claim.slug}`);
+                if (blogData) {
+                  return JSON.parse(blogData);
+                }
+                // Return minimal data if full post not found
+                return {
+                  id: claim.slug,
+                  slug: claim.slug,
+                  title: claim.title,
+                  user_id: userId,
+                  is_trial_post: false,
+                  created_at: claim.claimedAt || new Date().toISOString(),
+                  tags: [],
+                  category: 'Claimed',
+                  author_name: 'User'
+                };
+              });
+            }
+          } catch (localError) {
+            console.warn('Failed to get claimed posts from localStorage:', localError);
+          }
+        }
         return [];
       }
 
