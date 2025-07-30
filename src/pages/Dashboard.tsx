@@ -1405,7 +1405,7 @@ const Dashboard = () => {
                         </CardHeader>
 
                         <CardContent className="p-6">
-                          <TrialBlogPostsDisplay />
+                          <TrialBlogPostsDisplay user={user} />
                         </CardContent>
                       </Card>
                     </div>
