@@ -384,7 +384,7 @@ export const KeywordResearchTool = () => {
     { code: "PT", name: "Portugal", flag: "🇵🇹" },
     { code: "PW", name: "Palau", flag: "🇵🇼" },
     { code: "PY", name: "Paraguay", flag: "🇵🇾" },
-    { code: "QA", name: "Qatar", flag: "🇶🇦" },
+    { code: "QA", name: "Qatar", flag: "🇶��" },
     { code: "RE", name: "Réunion", flag: "🇷🇪" },
     { code: "RO", name: "Romania", flag: "🇷🇴" },
     { code: "RS", name: "Serbia", flag: "🇷🇸" },
@@ -405,7 +405,7 @@ export const KeywordResearchTool = () => {
     { code: "SN", name: "Senegal", flag: "🇸🇳" },
     { code: "SO", name: "Somalia", flag: "🇸🇴" },
     { code: "SR", name: "Suriname", flag: "🇸🇷" },
-    { code: "SS", name: "South Sudan", flag: "🇸🇸" },
+    { code: "SS", name: "South Sudan", flag: "��🇸" },
     { code: "ST", name: "São Tomé and Príncipe", flag: "🇸🇹" },
     { code: "SV", name: "El Salvador", flag: "🇸🇻" },
     { code: "SX", name: "Sint Maarten", flag: "🇸🇽" },
@@ -445,7 +445,7 @@ export const KeywordResearchTool = () => {
     { code: "YE", name: "Yemen", flag: "🇾🇪" },
     { code: "YT", name: "Mayotte", flag: "🇾🇹" },
     { code: "ZA", name: "South Africa", flag: "🇿🇦" },
-    { code: "ZM", name: "Zambia", flag: "���🇲" },
+    { code: "ZM", name: "Zambia", flag: "🇿🇲" },
     { code: "ZW", name: "Zimbabwe", flag: "🇿🇼" }
   ];
 
