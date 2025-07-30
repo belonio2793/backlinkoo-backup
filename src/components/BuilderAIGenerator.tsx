@@ -121,14 +121,6 @@ export function BuilderAIGenerator({ onSuccess, variant = 'homepage' }: BuilderA
 
   const handleGenerate = async () => {
     if (!validateForm()) return;
-    if (!apiStatus?.accessible) {
-      toast({
-        title: "API Not Available",
-        description: apiStatus?.error || "OpenAI API is not accessible",
-        variant: "destructive",
-      });
-      return;
-    }
     if (!userCanGenerate?.canGenerate) {
       toast({
         title: "Generation Limit Reached",
@@ -226,26 +218,7 @@ export function BuilderAIGenerator({ onSuccess, variant = 'homepage' }: BuilderA
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {/* API Status Indicator */}
-          <div className="flex items-center justify-between p-4 bg-white rounded-lg border">
-            <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full ${apiStatus?.accessible ? 'bg-green-500' : 'bg-red-500'} animate-pulse`}></div>
-              <span className="font-medium">
-                API Status: {apiStatus?.accessible ? 'Ready' : 'Unavailable'}
-              </span>
-              {apiStatus?.error && (
-                <span className="text-sm text-red-600">({apiStatus.error})</span>
-              )}
-            </div>
-            <Button
-              onClick={checkAPIStatus}
-              variant="ghost"
-              size="sm"
-              disabled={isGenerating}
-            >
-              <RefreshCw className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
+          {/* API Status - Hidden but still functional */}
 
           {/* User Limit Status */}
           {userCanGenerate && !userCanGenerate.canGenerate && (
@@ -329,7 +302,7 @@ export function BuilderAIGenerator({ onSuccess, variant = 'homepage' }: BuilderA
           {/* Generation Button */}
           <Button
             onClick={handleGenerate}
-            disabled={isGenerating || !apiStatus?.accessible || !userCanGenerate?.canGenerate}
+            disabled={isGenerating || !userCanGenerate?.canGenerate}
             className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium"
           >
             {isGenerating ? (
@@ -340,7 +313,7 @@ export function BuilderAIGenerator({ onSuccess, variant = 'homepage' }: BuilderA
             ) : (
               <>
                 <Sparkles className="mr-2 h-5 w-5" />
-                Generate 1000+ Word Blog Post
+                Create Your First Backlink For Free
               </>
             )}
           </Button>
