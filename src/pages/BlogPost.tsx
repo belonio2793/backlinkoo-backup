@@ -373,7 +373,7 @@ export function BlogPost() {
         } else if (error.message.includes('already claimed')) {
           errorMessage = "This blog post has already been claimed by another user.";
         } else if (error.message.includes('limit')) {
-          errorMessage = "You have reached your claim limit. You can only claim one free trial post per account.";
+          errorMessage = "You have reached your claim limit. You can claim up to 3 trial posts per account.";
         } else if (error.message.includes('expired')) {
           errorMessage = "This trial post has expired and is no longer available for claiming.";
         } else {
