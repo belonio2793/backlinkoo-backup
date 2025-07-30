@@ -71,7 +71,16 @@ interface BlogPost {
 }
 
 const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>({
+    isSubscribed: false,
+    subscriptionTier: null,
+    features: {
+      keywordResearch: false,
+      automatedCampaigns: false,
+      rankTracker: false,
+      unlimitedAccess: false,
+    }
+  });
   const [projects, setProjects] = useState<NoHandsSEOProject[]>([]);
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -80,6 +89,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
   const [isCancellingSubscription, setIsCancellingSubscription] = useState(false);
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const [billingEmailNotifications, setBillingEmailNotifications] = useState(true);
+  const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
