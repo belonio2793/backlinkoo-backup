@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { environmentVariablesService } from '@/services/environmentVariablesService';
 
 export interface OpenAIContentRequest {
   keyword: string;
