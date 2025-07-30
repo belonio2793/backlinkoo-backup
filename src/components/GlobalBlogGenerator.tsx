@@ -284,18 +284,27 @@ export function GlobalBlogGenerator({
       setProgress(60);
 
       // Use reliable content generator for guaranteed success
-      const prompt = `Create a comprehensive ${1500}-word blog post about "${request.primaryKeyword}" that naturally incorporates a backlink to ${request.targetUrl}.
+      const targetWordCount = contentLength === 'short' ? 500 : contentLength === 'medium' ? 800 : 1200;
+      const prompt = `Create a comprehensive ${targetWordCount}-word blog post about "${request.primaryKeyword}" that naturally incorporates a backlink to ${request.targetUrl}.
 
 CONTENT REQUIREMENTS:
-- Write exactly 1500 words of high-quality, original content
+- Write MINIMUM ${Math.max(500, targetWordCount)} words of high-quality, original content
 - Focus on "${request.primaryKeyword}" as the main topic
-- Use professional tone throughout the article
-- Include practical, actionable advice
-- Structure with proper headings (H1, H2, H3)
-- Natural integration of anchor text "${request.anchorText}" linking to ${request.targetUrl}
+- Use ${contentTone} tone throughout the article
+- Include practical, actionable advice with examples
+- Structure with proper headings (H1, H2, H3, H4)
+- Natural integration of anchor text "${request.anchorText || request.primaryKeyword}" linking to ${request.targetUrl}
+- Include relevant statistics, tips, and detailed explanations
+- Provide comprehensive coverage of the topic
+- End with a helpful conclusion
+
+BACKLINK INTEGRATION:
+- Integrate the backlink naturally within the content context
+- Use anchor text: "${request.anchorText || request.primaryKeyword}"
+- Make the link relevant to the surrounding content
 
 OUTPUT FORMAT:
-Return the content as HTML with proper tags including the backlink.`;
+Return the content as clean HTML with proper tags including the backlink. Ensure the content is well-structured and SEO-optimized.`;
 
       const systemPrompt = 'You are an expert SEO content writer specializing in creating high-quality, engaging blog posts that rank well in search engines.';
 
