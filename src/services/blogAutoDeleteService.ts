@@ -142,25 +142,6 @@ export class BlogAutoDeleteService {
     try {
       const now = new Date().toISOString();
 
-      // First check if table exists by doing a simple count
-      console.log('🔍 Checking if blog_posts table exists...');
-      const { data: countData, error: countError } = await supabase
-        .from('blog_posts')
-        .select('*', { count: 'exact', head: true });
-
-      if (countError) {
-        console.error('❌ Table existence check failed:', {
-          message: countError.message,
-          details: countError.details,
-          hint: countError.hint,
-          code: countError.code,
-          suggestion: countError.code === 'PGRST116' ? 'Table blog_posts does not exist' : 'Database access issue'
-        });
-        return [];
-      }
-
-      console.log('✅ Table exists, proceeding with query...');
-
       const { data, error } = await supabase
         .from('blog_posts')
         .select('id, slug, published_url, title, created_at, expires_at')
@@ -169,12 +150,53 @@ export class BlogAutoDeleteService {
         .lt('expires_at', now);
 
       if (error) {
-        console.error('❌ Error fetching expired posts:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
+        // Handle specific error cases with clear messages
+        if (error.code === 'PGRST116' || error.message.includes('does not exist')) {
+          console.error('❌ TABLE MISSING: blog_posts table does not exist in Supabase database');
+          console.error('🔧 SOLUTION: Create the blog_posts table in your Supabase SQL editor with this SQL:');
+          console.error(`
+            CREATE TABLE blog_posts (
+              id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+              title TEXT NOT NULL,
+              slug TEXT NOT NULL UNIQUE,
+              content TEXT NOT NULL,
+              target_url TEXT NOT NULL,
+              anchor_text TEXT NOT NULL,
+              keywords TEXT[],
+              meta_description TEXT,
+              published_url TEXT,
+              word_count INTEGER DEFAULT 0,
+              expires_at TIMESTAMP WITH TIME ZONE,
+              is_trial_post BOOLEAN DEFAULT false,
+              user_id UUID REFERENCES auth.users(id),
+              status TEXT DEFAULT 'unclaimed' CHECK (status IN ('unclaimed', 'claimed', 'expired')),
+              created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+              updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+              deleted_at TIMESTAMP WITH TIME ZONE,
+              claimed_by UUID REFERENCES auth.users(id),
+              claimed_at TIMESTAMP WITH TIME ZONE
+            );
+          `);
+          return [];
+        }
+
+        if (error.code === '42P01') {
+          console.error('❌ TABLE ERROR: blog_posts table relation does not exist');
+          return [];
+        }
+
+        if (error.message.includes('permission') || error.message.includes('RLS')) {
+          console.error('❌ PERMISSION ERROR: Row Level Security policy blocking access');
+          console.error('🔧 SOLUTION: Check RLS policies for blog_posts table in Supabase');
+          return [];
+        }
+
+        // Generic error with full details
+        console.error('❌ DATABASE ERROR:', error.message);
+        console.error('Error details:', {
           code: error.code,
-          query: 'Expired posts query failed'
+          details: error.details,
+          hint: error.hint
         });
         return [];
       }
