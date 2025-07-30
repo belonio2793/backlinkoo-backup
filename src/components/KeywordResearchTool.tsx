@@ -295,7 +295,7 @@ export const KeywordResearchTool = () => {
     { code: "HK", name: "Hong Kong", flag: "🇭🇰" },
     { code: "HM", name: "Heard Island and McDonald Islands", flag: "🇭🇲" },
     { code: "HN", name: "Honduras", flag: "🇭🇳" },
-    { code: "HR", name: "Croatia", flag: "���🇷" },
+    { code: "HR", name: "Croatia", flag: "🇭🇷" },
     { code: "HT", name: "Haiti", flag: "🇭🇹" },
     { code: "HU", name: "Hungary", flag: "🇭🇺" },
     { code: "ID", name: "Indonesia", flag: "🇮🇩" },
