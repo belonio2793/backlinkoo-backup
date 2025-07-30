@@ -425,7 +425,7 @@ export class BlogClaimService {
       };
     } catch (error) {
       console.error('Exception checking claim limits:', error);
-      return { canClaim: false, reason: 'Unable to check claim limits', claimedCount: 0, maxClaims: 5 };
+      return { canClaim: false, reason: 'Unable to check claim limits', claimedCount: 0, maxClaims: 3 };
     }
   }
 
