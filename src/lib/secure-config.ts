@@ -34,7 +34,7 @@ const SECURE_STORE = {
   paypal_client_secret: '',
   
   // API keys for external services
-  openai_api_key: 'c2stcHJvai15eEMyd09xQVhwN2ozZVZVRUhuMkR5a05TeFRFZnoyTDdtM001c2JBbDRXMUprRGEtaC1WaVNDTEkxcGZ2WXdfLWZ6NVlWNVVhalQzQmxia0ZKeDFIYVJjeHpVVGVXbFZlTnZsSC1uUkxkMkpOQTlpSHZsWjVrRDhybGdOWG9ZVUNFekdoT1VCdjAzNW12SElWWEV5aXhjdDRLTUE=', // Valid OpenAI API key (base64 encoded)
+  openai_api_key: '', // OpenAI API key (set via environment variable VITE_OPENAI_API_KEY instead)
   anthropic_api_key: '',
   google_api_key: '',
   

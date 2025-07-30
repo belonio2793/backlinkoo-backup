@@ -58,8 +58,12 @@ export class OpenAIService {
     if (!this.apiKey || this.apiKey === 'your-openai-api-key-here' || this.apiKey === 'sk-proj-YOUR_ACTUAL_OPENAI_API_KEY_HERE') {
       console.warn('❌ OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable.');
       console.warn('📋 Get your API key from: https://platform.openai.com/api-keys');
+    } else if (!this.apiKey.startsWith('sk-')) {
+      console.warn('❌ OpenAI API key appears to be invalid format. Keys should start with "sk-"');
+      console.warn('📋 Current key preview:', this.apiKey.substring(0, 10) + '...');
     } else {
-      console.log('✅ OpenAI API key configured successfully via secure config');
+      console.log('✅ OpenAI API key configured successfully');
+      console.log('🔑 Key preview:', this.apiKey.substring(0, 10) + '...');
     }
   }
 
@@ -84,22 +88,29 @@ export class OpenAIService {
 
         return result;
       } catch (error) {
-        lastError = error as Error;
+        // Ensure we always have a proper Error object
+        if (error instanceof Error) {
+          lastError = error;
+        } else {
+          lastError = new Error(`API error: ${String(error)}`);
+          lastError.cause = error;
+        }
         attempt++;
 
         // Check if we should retry based on error type
-        const shouldRetry = this.shouldRetryError(error as Error, config);
+        const shouldRetry = this.shouldRetryError(lastError, config);
 
         if (!shouldRetry || attempt >= config.maxRetries) {
           console.error(`❌ OpenAI API failed after ${attempt} attempts:`, {
-            error: lastError.message,
-            stack: lastError.stack,
-            attempt,
-            maxRetries: config.maxRetries,
-            shouldRetry
-          });
+          error: lastError?.message || String(lastError),
+          stack: lastError?.stack,
+          attempt,
+          maxRetries: config.maxRetries,
+          shouldRetry
+        });
           // Add more detailed error information for debugging
-          const enhancedError = new Error(`OpenAI API failed after ${attempt} attempts: ${lastError.message}`);
+          const errorMessage = lastError?.message || String(lastError);
+          const enhancedError = new Error(`OpenAI API failed after ${attempt} attempts: ${errorMessage}`);
           enhancedError.cause = lastError;
           throw enhancedError;
         }
@@ -113,8 +124,9 @@ export class OpenAIService {
         const jitterRange = delay * config.jitterFactor;
         const jitteredDelay = delay + (Math.random() * 2 - 1) * jitterRange;
 
-        console.warn(`⏳ OpenAI API attempt ${attempt} failed: ${lastError.message}. Retrying in ${Math.round(jitteredDelay)}ms...`, {
-          error: lastError.message,
+        const errorMsg = lastError?.message || String(lastError);
+        console.warn(`⏳ OpenAI API attempt ${attempt} failed: ${errorMsg}. Retrying in ${Math.round(jitteredDelay)}ms...`, {
+          error: errorMsg,
           attempt,
           maxRetries: config.maxRetries,
           delay: Math.round(jitteredDelay),
@@ -125,7 +137,11 @@ export class OpenAIService {
       }
     }
 
-    throw lastError!;
+    // Ensure we always throw a proper Error with a string message
+    const finalErrorMessage = lastError?.message || String(lastError);
+    const finalError = new Error(`OpenAI API failed: ${finalErrorMessage}`);
+    finalError.cause = lastError;
+    throw finalError;
   }
 
   /**
@@ -200,7 +216,7 @@ export class OpenAIService {
     }
 
     // Don't retry on authentication errors (but log them)
-    if (message.includes('401') || message.includes('unauthorized') || message.includes('invalid api key')) {
+    if (message.includes('401') || message.includes('unauthorized') || message.includes('invalid api key') || error.name === 'AuthenticationError') {
       console.error('🔑 Authentication error - check API key validity');
       return false;
     }
@@ -247,7 +263,7 @@ export class OpenAIService {
     success: boolean;
     error?: string;
   }> {
-    if (!this.apiKey) {
+    if (!this.isConfigured()) {
       return {
         content: '',
         usage: { tokens: 0, cost: 0 },
@@ -316,7 +332,12 @@ export class OpenAIService {
             throw new Error(`Request timeout after ${finalRetryConfig.timeoutMs}ms`);
           }
 
-          throw fetchError;
+          // Ensure we throw a proper Error object
+          if (fetchError instanceof Error) {
+            throw fetchError;
+          } else {
+            throw new Error(`Fetch error: ${String(fetchError)}`);
+          }
         }
 
         if (!response.ok) {
@@ -324,7 +345,7 @@ export class OpenAIService {
           let errorMessage = `OpenAI API error: ${response.status}`;
           let fullErrorContext = {
             status: response.status,
-            statusText: response.statusText,
+            statusText: response.statusText || 'No status text',
             errorData,
             timestamp: new Date().toISOString()
           };
@@ -333,6 +354,12 @@ export class OpenAIService {
             errorMessage += ' - Model not found. Check if the model name is correct and available.';
           } else if (response.status === 401) {
             errorMessage += ' - Invalid API key. Check your OpenAI API key.';
+            // For 401 errors, we want to fail fast and not retry
+            console.error('🔴 OpenAI API Authentication Error:', JSON.stringify(fullErrorContext, null, 2));
+            const authError = new Error(errorMessage);
+            authError.name = 'AuthenticationError';
+            (authError as any).context = fullErrorContext;
+            throw authError;
           } else if (response.status === 429) {
             errorMessage += ' - Rate limit exceeded. Will retry automatically.';
             if (errorData.error?.message) {
@@ -348,7 +375,7 @@ export class OpenAIService {
             errorMessage += ` - ${response.statusText}`;
           }
 
-          console.error('🔴 OpenAI API Error Details:', fullErrorContext);
+          console.error('🔴 OpenAI API Error Details:', JSON.stringify(fullErrorContext, null, 2));
           const apiError = new Error(errorMessage);
           (apiError as any).context = fullErrorContext;
           throw apiError;
@@ -416,7 +443,10 @@ export class OpenAIService {
   }
 
   async testConnection(): Promise<boolean> {
-    if (!this.apiKey) return false;
+    if (!this.apiKey || !this.apiKey.startsWith('sk-')) {
+      console.log('⚠️ Skipping OpenAI connection test - no valid API key configured');
+      return false;
+    }
 
     try {
       console.log('🔍 Testing OpenAI connection with retry logic...');
@@ -429,26 +459,28 @@ export class OpenAIService {
         });
 
         if (!response.ok) {
-          throw new Error(`Connection test failed: ${response.status} - ${response.statusText}`);
+          const errorText = await response.text().catch(() => response.statusText);
+          throw new Error(`Connection test failed: ${response.status} - ${errorText}`);
         }
 
         return response.ok;
       }, {
         ...this.defaultRetryConfig,
-        maxRetries: 3, // Use fewer retries for connection test
-        baseDelay: 500
+        maxRetries: 1, // Only try once for connection test to avoid spam
+        baseDelay: 1000
       });
 
       console.log('✅ OpenAI connection test successful');
       return result;
     } catch (error) {
-      console.error('❌ OpenAI connection test failed:', error);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.warn('⚠️ OpenAI connection test failed:', errorMsg);
       return false;
     }
   }
 
   isConfigured(): boolean {
-    return Boolean(this.apiKey);
+    return Boolean(this.apiKey && this.apiKey.startsWith('sk-') && this.apiKey.length > 20);
   }
 }
 
