@@ -102,39 +102,34 @@ export async function debugApiKey() {
 // Test a specific API key directly
 export async function testSpecificApiKey(testKey: string) {
   console.log('🧪 Testing specific API key:', testKey.substring(0, 20) + '...');
-  
-  try {
-    const response = await fetch('https://api.openai.com/v1/models', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${testKey}`,
-        'Content-Type': 'application/json'
-      }
-    });
 
-    if (response.ok) {
-      const data = await response.json();
-      console.log('✅ Specific API key test successful!');
-      return { success: true, modelsCount: data.data?.length || 0 };
-    } else {
-      let errorData = { message: 'Unknown error' };
-      try {
-        const responseText = await response.text();
-        if (responseText) {
-          try {
-            errorData = JSON.parse(responseText);
-          } catch (parseError) {
-            errorData = { message: responseText };
-          }
-        }
-      } catch (readError) {
-        errorData = { message: 'Failed to read error response' };
-      }
-      console.error('❌ Specific API key test failed:', response.status, errorData);
-      return { success: false, status: response.status, error: errorData };
-    }
-  } catch (error) {
-    console.error('❌ Network error testing specific key:', error);
-    return { success: false, error: 'Network error' };
+  // Validate format first
+  const formatValidation = APIKeyTester.validateAPIKeyFormat(testKey, 'openai');
+  if (!formatValidation.isValid) {
+    console.error('❌ API key format invalid:', formatValidation.message);
+    return {
+      success: false,
+      error: `Invalid format: ${formatValidation.message}`
+    };
+  }
+
+  // Test with robust error handling
+  const testResult = await APIKeyTester.testOpenAI(testKey);
+
+  if (testResult.success) {
+    console.log('✅ Specific API key test successful!');
+    return {
+      success: true,
+      modelsCount: testResult.details?.modelsCount || 0,
+      responseTime: testResult.responseTime
+    };
+  } else {
+    console.error('❌ Specific API key test failed:', testResult.message);
+    return {
+      success: false,
+      status: testResult.status,
+      error: testResult.message,
+      responseTime: testResult.responseTime
+    };
   }
 }
