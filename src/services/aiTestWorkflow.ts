@@ -8,6 +8,8 @@ import { aiContentEngine } from './aiContentEngine';
 import { enhancedAIContentEngine } from './enhancedAIContentEngine';
 import { globalBlogGenerator } from './globalBlogGenerator';
 import { multiApiContentGenerator } from './multiApiContentGenerator';
+import { enhancedContentGenerator } from './enhancedContentGenerator';
+import type { ContentGenerationRequest } from './enhancedContentGenerator';
 
 export interface TestWorkflowRequest {
   websiteUrl: string;
@@ -122,9 +124,18 @@ export class AITestWorkflow {
   }
 
   /**
-   * Generate blog content using validated providers
+   * Generate blog content using enhanced content generator with SEO optimization
    */
-  async generateBlogContent(request: TestWorkflowRequest, testResult: TestWorkflowResult): Promise<BlogGenerationResult> {
+  async generateBlogContent(request: TestWorkflowRequest, testResult: TestWorkflowResult, options?: {
+    wordCount?: number;
+    tone?: string;
+    contentType?: string;
+    targetAudience?: string;
+    keywordDensity?: string;
+    includeCallToAction?: boolean;
+    optimizeForSnippets?: boolean;
+    secondaryKeywords?: string[];
+  }): Promise<BlogGenerationResult> {
     if (!testResult.canProceedToBlogGeneration) {
       return {
         success: false,
@@ -132,129 +143,204 @@ export class AITestWorkflow {
       };
     }
 
-    console.log('📝 Starting blog generation...');
+    console.log('📝 Starting enhanced blog generation with SEO optimization...');
 
     try {
-      const sessionId = request.sessionId || crypto.randomUUID();
+      // Always try enhanced content generator first
+      console.log('🚀 Using enhanced ChatGPT content generator...');
 
-      // Check if we have working providers or need to use fallback
-      if (testResult.workingProviders.length === 0) {
-        console.log('🔄 Using fallback content generation (no working API providers)');
+      const contentRequest: ContentGenerationRequest = {
+        targetUrl: request.websiteUrl,
+        primaryKeyword: request.keyword,
+        anchorText: request.anchorText || request.keyword,
+        secondaryKeywords: options?.secondaryKeywords || [],
+        wordCount: options?.wordCount || 1500,
+        tone: (options?.tone as any) || 'professional',
+        contentType: (options?.contentType as any) || 'guide',
+        targetAudience: (options?.targetAudience as any) || 'general',
+        includeCallToAction: options?.includeCallToAction ?? true,
+        optimizeForFeaturedSnippets: options?.optimizeForSnippets ?? true,
+        keywordDensity: (options?.keywordDensity as any) || 'medium'
+      };
 
-        // Generate fallback content
-        const fallbackContent = this.generateFallbackContent(request);
-        const slug = request.keyword.toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '');
-
-        const baseUrl = request.currentDomain || 'https://backlinkoo.com';
-        return {
-          success: true,
-          blogUrl: `${baseUrl}/blog/${slug}`,
-          content: fallbackContent,
-          publishedAt: new Date().toISOString(),
-          metadata: {
-            title: `${request.keyword}: Complete Guide ${new Date().getFullYear()}`,
-            slug,
-            generatedBy: 'fallback',
-            wordCount: fallbackContent.split(' ').length
-          }
-        };
-      }
-
-      // Try multi-API content generation first, then fallback to global blog generator
       try {
-        console.log('🚀 Attempting multi-API content generation...');
+        const result = await enhancedContentGenerator.generateContent(contentRequest);
 
-        const multiApiResult = await multiApiContentGenerator.generateBlogContent(
-          request.keyword,
-          request.websiteUrl,
-          request.anchorText || request.keyword
-        );
+        // Save to localStorage for blog integration
+        const blogPost = {
+          id: crypto.randomUUID(),
+          title: result.title,
+          slug: result.slug,
+          content: result.content,
+          target_url: request.websiteUrl,
+          anchor_text: result.anchorText,
+          keywords: result.keywords,
+          tags: result.keywords,
+          category: 'Expert Content',
+          meta_description: result.metaDescription,
+          excerpt: result.metaDescription,
+          published_url: `${window.location.origin}/blog/${result.slug}`,
+          word_count: result.wordCount,
+          reading_time: result.readingTime,
+          seo_score: result.seoScore,
+          readability_score: result.readabilityScore,
+          view_count: 0,
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          is_trial_post: true,
+          author_name: 'Expert Writer',
+          status: 'published',
+          created_at: new Date().toISOString(),
+          published_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          structured_data: result.structuredData
+        };
 
-        if (multiApiResult.success && multiApiResult.bestResponse) {
-          console.log('✅ Multi-API generation successful:', multiApiResult.bestResponse.provider);
+        // Save to localStorage
+        localStorage.setItem(`blog_post_${result.slug}`, JSON.stringify(blogPost));
 
-          const baseUrl = request.currentDomain || 'https://backlinkoo.com';
-          const slug = request.keyword.toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-+|-+$/g, '');
+        // Update all blog posts list
+        const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+        allBlogPosts.unshift({
+          id: blogPost.id,
+          slug: result.slug,
+          title: result.title,
+          category: 'Expert Content',
+          created_at: blogPost.created_at
+        });
+        localStorage.setItem('all_blog_posts', JSON.stringify(allBlogPosts));
 
-          return {
-            success: true,
-            blogUrl: `${baseUrl}/blog/${slug}`,
-            content: multiApiResult.bestResponse.content,
-            publishedAt: new Date().toISOString(),
-            metadata: {
-              title: `${request.keyword}: Complete Guide ${new Date().getFullYear()}`,
-              slug,
-              generatedBy: `multi-api-${multiApiResult.bestResponse.provider}`,
-              wordCount: multiApiResult.bestResponse.content.split(' ').length,
-              providersUsed: multiApiResult.responses.map(r => r.provider),
-              processingTime: multiApiResult.processingTime
-            }
-          };
-        }
+        const publishedUrl = `${window.location.origin}/blog/${result.slug}`;
 
-        // Fallback to global blog generator if multi-API fails
-        console.log('⚠️ Multi-API generation failed, trying global blog generator...');
-        const blogResult = await globalBlogGenerator.generateGlobalBlogPost({
-          targetUrl: request.websiteUrl,
-          primaryKeyword: request.keyword,
-          anchorText: request.anchorText || request.keyword,
-          sessionId,
-          additionalContext: {
-            contentTone: 'professional',
-            contentLength: 'medium',
-            seoFocus: 'high',
-            preferredProvider: testResult.recommendedProvider
-          }
+        console.log('✅ Enhanced blog content generated successfully:', {
+          url: publishedUrl,
+          wordCount: result.wordCount,
+          seoScore: result.seoScore,
+          readabilityScore: result.readabilityScore
         });
 
-        if (blogResult.success && blogResult.blogUrl) {
-          console.log('✅ Blog generated successfully:', blogResult.blogUrl);
-
-          return {
-            success: true,
-            blogUrl: blogResult.blogUrl,
-            content: blogResult.content,
-            publishedAt: new Date().toISOString(),
-            metadata: blogResult.metadata
-          };
-        } else {
-          throw new Error(blogResult.error || 'Blog generation failed');
-        }
-      } catch (apiError) {
-        console.warn('⚠️ API blog generation failed, using fallback:', apiError);
-
-        // Fall back to local content generation
-        const fallbackContent = this.generateFallbackContent(request);
-        const slug = request.keyword.toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '');
-
-        const baseUrl = request.currentDomain || 'https://backlinkoo.com';
         return {
           success: true,
-          blogUrl: `${baseUrl}/blog/${slug}`,
-          content: fallbackContent,
-          publishedAt: new Date().toISOString(),
+          blogUrl: publishedUrl,
+          content: result,
+          publishedAt: blogPost.published_at,
           metadata: {
-            title: `${request.keyword}: Complete Guide ${new Date().getFullYear()}`,
-            slug,
-            generatedBy: 'fallback-after-api-failure',
-            wordCount: fallbackContent.split(' ').length,
-            apiErrors: apiError instanceof Error ? apiError.message : 'API generation failed'
+            provider: 'Enhanced ChatGPT',
+            keyword: request.keyword,
+            anchorText: result.anchorText,
+            websiteUrl: request.websiteUrl,
+            wordCount: result.wordCount,
+            seoScore: result.seoScore,
+            readabilityScore: result.readabilityScore,
+            suggestions: result.suggestions,
+            slug: result.slug,
+            title: result.title
           }
         };
+      } catch (enhancedError) {
+        console.warn('⚠️ Enhanced content generation failed, falling back to legacy methods:', enhancedError);
+
+        // Fallback to legacy generation methods
+        return this.generateLegacyContent(request, testResult);
       }
 
     } catch (error) {
       console.error('❌ Blog generation failed:', error);
-      
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown blog generation error'
+      };
+    }
+  }
+
+  /**
+   * Legacy content generation fallback
+   */
+  private async generateLegacyContent(request: TestWorkflowRequest, testResult: TestWorkflowResult): Promise<BlogGenerationResult> {
+    const sessionId = request.sessionId || crypto.randomUUID();
+
+    // Try multi-API content generation first, then fallback to global blog generator
+    try {
+      console.log('🚀 Attempting multi-API content generation...');
+
+      const multiApiResult = await multiApiContentGenerator.generateBlogContent(
+        request.keyword,
+        request.websiteUrl,
+        request.anchorText || request.keyword
+      );
+
+      if (multiApiResult.success && multiApiResult.bestResponse) {
+        console.log('✅ Multi-API generation successful:', multiApiResult.bestResponse.provider);
+
+        const slug = request.keyword.toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+
+        return {
+          success: true,
+          blogUrl: `${window.location.origin}/blog/${slug}`,
+          content: multiApiResult.bestResponse.content,
+          publishedAt: new Date().toISOString(),
+          metadata: {
+            title: `${request.keyword}: Complete Guide ${new Date().getFullYear()}`,
+            slug,
+            generatedBy: `multi-api-${multiApiResult.bestResponse.provider}`,
+            wordCount: multiApiResult.bestResponse.content.split(' ').length,
+            providersUsed: multiApiResult.responses.map(r => r.provider),
+            processingTime: multiApiResult.processingTime
+          }
+        };
+      }
+
+      // Fallback to global blog generator if multi-API fails
+      console.log('⚠️ Multi-API generation failed, trying global blog generator...');
+      const blogResult = await globalBlogGenerator.generateGlobalBlogPost({
+        targetUrl: request.websiteUrl,
+        primaryKeyword: request.keyword,
+        anchorText: request.anchorText || request.keyword,
+        sessionId,
+        additionalContext: {
+          contentTone: 'professional',
+          contentLength: 'medium',
+          seoFocus: 'high',
+          preferredProvider: testResult.recommendedProvider
+        }
+      });
+
+      if (blogResult.success && blogResult.blogUrl) {
+        console.log('✅ Blog generated successfully:', blogResult.blogUrl);
+
+        return {
+          success: true,
+          blogUrl: blogResult.blogUrl,
+          content: blogResult.content,
+          publishedAt: new Date().toISOString(),
+          metadata: blogResult.metadata
+        };
+      } else {
+        throw new Error(blogResult.error || 'Blog generation failed');
+      }
+    } catch (apiError) {
+      console.warn('⚠️ All API blog generation failed, using final fallback:', apiError);
+
+      // Final fallback to static content generation
+      const fallbackContent = this.generateFallbackContent(request);
+      const slug = request.keyword.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+      return {
+        success: true,
+        blogUrl: `${window.location.origin}/blog/${slug}`,
+        content: fallbackContent,
+        publishedAt: new Date().toISOString(),
+        metadata: {
+          title: `${request.keyword}: Complete Guide ${new Date().getFullYear()}`,
+          slug,
+          generatedBy: 'fallback-after-all-failures',
+          wordCount: fallbackContent.split(' ').length,
+          apiErrors: apiError instanceof Error ? apiError.message : 'All API generation failed'
+        }
       };
     }
   }
@@ -271,8 +357,9 @@ export class AITestWorkflow {
     // Step 1: Run AI test workflow
     const testResult = await this.runTestWorkflow(request);
 
-    // Step 2: Generate blog if tests pass
-    const blogResult = await this.generateBlogContent(request, testResult);
+    // Step 2: Generate blog if tests pass (with enhanced options if provided)
+    const enhancedOptions = (request as any).enhancedOptions || {};
+    const blogResult = await this.generateBlogContent(request, testResult, enhancedOptions);
 
     console.log('🏁 Complete workflow finished:', {
       testSuccess: testResult.success,
