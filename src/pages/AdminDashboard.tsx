@@ -179,7 +179,7 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="campaigns" className="space-y-6">
+        <Tabs defaultValue="connections" className="space-y-6">
           <TabsList>
             <TabsTrigger value="connections">Service Status</TabsTrigger>
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
