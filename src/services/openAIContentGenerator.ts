@@ -502,7 +502,7 @@ export class OpenAIContentGenerator {
       expires_at: expiresAt,
       is_trial_post: true,
       user_id: session?.user?.id,
-      author_name: 'AI Assistant',
+      author_name: 'Expert Writer',
       status: 'published',
       created_at: createdAt,
       published_at: createdAt,
