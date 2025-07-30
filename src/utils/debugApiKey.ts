@@ -61,78 +61,33 @@ export async function debugApiKey() {
       return { success: false, error: 'Invalid API key format' };
     }
 
-    // Test API key with detailed error handling
+    // Validate API key format first
+    const formatValidation = APIKeyTester.validateAPIKeyFormat(apiKey, 'openai');
+    if (!formatValidation.isValid) {
+      console.error('❌ API key format invalid:', formatValidation.message);
+      return {
+        success: false,
+        error: `Invalid API key format: ${formatValidation.message}`
+      };
+    }
+
+    // Test API key with robust error handling
     console.log('🧪 Testing API key with OpenAI...');
-    
-    try {
-      const response = await fetch('https://api.openai.com/v1/models', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          'User-Agent': 'BacklinkooApp/1.0'
-        }
-      });
+    const testResult = await APIKeyTester.testOpenAI(apiKey);
 
-      console.log('📡 Response Status:', response.status);
-      console.log('📡 Response Headers:', Object.fromEntries(response.headers.entries()));
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('✅ API key is valid!');
-        console.log('📊 Available models:', data.data?.length || 0);
-        return { 
-          success: true, 
-          apiKey: apiKey.substring(0, 20) + '...', 
-          modelsCount: data.data?.length || 0 
-        };
-      } else {
-        // Get detailed error information - read response only once
-        let errorText = 'Unknown error';
-        let errorData = null;
-
-        try {
-          // Try to read as JSON first
-          const responseText = await response.text();
-          console.log('📝 Raw response text:', responseText);
-
-          if (responseText) {
-            try {
-              errorData = JSON.parse(responseText);
-              errorText = errorData.error?.message || errorData.message || 'Unknown error';
-              console.log('❌ OpenAI Error Response:', errorData);
-            } catch (parseError) {
-              // If not JSON, use the text directly
-              errorText = responseText;
-              console.log('❌ OpenAI Error Text:', errorText);
-            }
-          }
-        } catch (readError) {
-          errorText = `Failed to read error response: ${readError}`;
-          console.log('❌ Error reading response:', readError);
-        }
-
-        const errors = {
-          401: 'Invalid API key or insufficient permissions',
-          403: 'Forbidden - API key may not have required permissions',  
-          429: 'Rate limit exceeded',
-          500: 'OpenAI server error'
-        };
-
-        const errorMessage = errors[response.status as keyof typeof errors] || `HTTP ${response.status}`;
-        console.error(`❌ ${errorMessage}: ${errorText}`);
-        
-        return { 
-          success: false, 
-          error: `${errorMessage}: ${errorText}`,
-          status: response.status
-        };
-      }
-    } catch (networkError) {
-      console.error('❌ Network error:', networkError);
-      return { 
-        success: false, 
-        error: `Network error: ${networkError instanceof Error ? networkError.message : 'Unknown error'}`
+    if (testResult.success) {
+      return {
+        success: true,
+        apiKey: apiKey.substring(0, 20) + '...',
+        modelsCount: testResult.details?.modelsCount || 0,
+        responseTime: testResult.responseTime
+      };
+    } else {
+      return {
+        success: false,
+        error: testResult.message,
+        status: testResult.status,
+        responseTime: testResult.responseTime
       };
     }
   } catch (error) {
