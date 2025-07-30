@@ -77,23 +77,62 @@ export function APIKeyDebugAdvanced() {
       <CardContent className="space-y-6">
         {/* Full Debug Section */}
         <div className="space-y-3">
-          <Button 
-            onClick={runFullDebug} 
-            disabled={loading}
-            className="w-full"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Running Full Debug...
-              </>
-            ) : (
-              <>
-                <Bug className="mr-2 h-4 w-4" />
-                Run Comprehensive Debug
-              </>
-            )}
-          </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <Button
+              onClick={runFullDebug}
+              disabled={loading}
+              className="w-full"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Running...
+                </>
+              ) : (
+                <>
+                  <Bug className="mr-2 h-4 w-4" />
+                  Full Debug
+                </>
+              )}
+            </Button>
+
+            <Button
+              onClick={async () => {
+                setLoading(true);
+                setResults(null);
+                try {
+                  const apiKey = await import('@/services/environmentVariablesService').then(m =>
+                    m.environmentVariablesService.getVariable('VITE_OPENAI_API_KEY')
+                  );
+                  if (apiKey) {
+                    const result = await validateAndTestApiKey(apiKey);
+                    setResults(result);
+                  } else {
+                    setResults({ success: false, error: 'No API key found' });
+                  }
+                } catch (error) {
+                  setResults({ success: false, error: error instanceof Error ? error.message : 'Test failed' });
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              disabled={loading}
+              variant="outline"
+              className="w-full"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Testing...
+                </>
+              ) : (
+                <>
+                  <TestTube className="mr-2 h-4 w-4" />
+                  Isolated Test
+                </>
+              )}
+            </Button>
+          </div>
 
           {results && (
             <div className="space-y-3 p-4 border rounded-lg">
