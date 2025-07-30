@@ -55,7 +55,7 @@ export const AppWrapper = () => {
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/preview/:slug" element={<BlogPreview />} />
-        <Route path="/blog" element={<StreamlinedBlog />} />
+        <Route path="/blog" element={<Blog />} />
         <Route path="/blog/create" element={<BlogCreator />} />
         <Route path="/create-blog" element={<EnhancedBlogCreation />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
