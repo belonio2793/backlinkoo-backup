@@ -51,7 +51,7 @@ export function StreamlinedBlogGenerator() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   
   // User posts state
-  const [userPosts, setUserPosts] = useState<BlogPost[]>([]);
+  const [userPosts, setUserPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
 
   // Load user posts when authenticated
@@ -63,10 +63,10 @@ export function StreamlinedBlogGenerator() {
 
   const loadUserPosts = async () => {
     if (!user?.id) return;
-    
+
     setLoadingPosts(true);
     try {
-      const posts = await BlogWorkflowManager.getUserPosts(user.id);
+      const posts = await EnhancedBlogWorkflow.getUserBlogPosts(user.id);
       setUserPosts(posts);
     } catch (error) {
       console.error('Failed to load user posts:', error);
