@@ -36,15 +36,19 @@ interface OpenAIResponse {
 }
 
 export class MultiKeyOpenAIService {
-  private apiKeys: string[] = [
-    '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'
-  ];
+  private apiKeys: string[] = [];
   
   private baseURL = 'https://api.openai.com/v1';
   private currentKeyIndex = 0;
   private keyStatus: Record<string, { working: boolean; lastTested: Date; errors: number }> = {};
 
   constructor() {
+    // Load API keys from environment
+    const primaryKey = import.meta.env.VITE_OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY;
+    if (primaryKey) {
+      this.apiKeys = [primaryKey];
+    }
+
     // Initialize key status tracking
     this.apiKeys.forEach(key => {
       this.keyStatus[key] = {
