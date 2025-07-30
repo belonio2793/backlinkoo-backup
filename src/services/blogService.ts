@@ -39,8 +39,9 @@ export class BlogService {
     userId?: string,
     isTrialPost: boolean = false
   ): Promise<BlogPost> {
-    const baseSlug = this.generateSlug(data.title);
-    
+    // Use custom slug if provided, otherwise generate from title
+    const baseSlug = data.customSlug || this.generateSlug(data.title);
+
     // Generate unique slug using database function
     const { data: uniqueSlugData, error: slugError } = await supabase
       .rpc('generate_unique_slug', { base_slug: baseSlug });
