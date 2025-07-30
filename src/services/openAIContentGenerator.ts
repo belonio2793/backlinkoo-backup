@@ -168,10 +168,29 @@ export class OpenAIContentGenerator {
             url: request.targetUrl
           })
         });
+
+        // If generate-ai-content also returns 404, try generate-post as ultimate fallback
+        if (response.status === 404) {
+          console.log('🔄 generate-ai-content not found, falling back to generate-post...');
+          response = await fetch('/.netlify/functions/generate-post', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              destinationUrl: request.targetUrl,
+              keyword: request.keyword,
+              anchorText: request.anchorText,
+              userId: 'anonymous'
+            })
+          });
+        }
       }
 
       if (!response.ok) {
-        throw new Error(`Netlify function error: ${response.status}`);
+        const errorText = await response.text().catch(() => 'Unknown error');
+        console.error(`❌ Netlify function error (${response.status}):`, errorText);
+        throw new Error(`Netlify function error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
