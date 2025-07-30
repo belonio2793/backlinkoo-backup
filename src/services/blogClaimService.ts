@@ -80,7 +80,7 @@ export class BlogClaimService {
 
         // Check if it's a table/schema issue
         if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
-          console.warn('🔧 BlogClaimService: Database table may not exist, falling back to empty array');
+          console.warn('��� BlogClaimService: Database table may not exist, falling back to empty array');
         }
         return [];
       }
@@ -547,6 +547,21 @@ export class BlogClaimService {
           code: insertError.code,
           postData: JSON.stringify(postToInsert, null, 2)
         });
+
+        // Check if it's a duplicate key error
+        if (insertError.code === '23505' || insertError.message?.includes('duplicate')) {
+          console.log('🔄 BlogClaimService: Duplicate detected, trying to claim existing post');
+          try {
+            // Try to find and claim the existing post
+            const existingPost = await this.getClaimablePosts(100);
+            const foundPost = existingPost.find(p => p.slug === localPost.slug || p.id === localPost.id);
+            if (foundPost) {
+              return await this.claimPost(foundPost.id, user);
+            }
+          } catch (retryError) {
+            console.warn('Failed to claim existing duplicate post:', retryError);
+          }
+        }
 
         // Fallback: Store claim information locally even if database fails
         try {
