@@ -334,18 +334,46 @@ export class OpenAIContentGenerator {
   }
 
   /**
-   * Generate SEO-friendly title
+   * Check for duplicate content to ensure uniqueness
+   */
+  private checkForDuplicateContent(keyword: string): boolean {
+    try {
+      const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+      return allBlogPosts.some((post: any) =>
+        post.title && post.title.toLowerCase().includes(keyword.toLowerCase())
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Generate unique SEO-friendly title
+   */
+  private generateUniqueTitle(keyword: string): string {
+    const titleTemplates = [
+      `Simple Guide to ${keyword}`,
+      `Everything About ${keyword}`,
+      `Learn ${keyword} Easy Steps`,
+      `${keyword} Explained Simply`,
+      `Understanding ${keyword} Made Easy`,
+      `${keyword}: A Beginner's Guide`,
+      `Getting Started with ${keyword}`,
+      `${keyword} Basics Everyone Should Know`,
+      `Easy ${keyword} Guide for Everyone`,
+      `${keyword}: What You Need to Know`
+    ];
+
+    // Use time and keyword length to ensure uniqueness
+    const index = (Math.floor(Date.now() / 1000) + keyword.length) % titleTemplates.length;
+    return titleTemplates[index];
+  }
+
+  /**
+   * Generate SEO-friendly title (legacy method)
    */
   private generateTitle(keyword: string): string {
-    const titleTemplates = [
-      `The Complete Guide to ${keyword}`,
-      `Everything You Need to Know About ${keyword}`,
-      `Master ${keyword}: Expert Tips and Strategies`,
-      `${keyword}: Best Practices and Implementation Guide`
-    ];
-    
-    const randomTemplate = titleTemplates[Math.floor(Math.random() * titleTemplates.length)];
-    return randomTemplate;
+    return this.generateUniqueTitle(keyword);
   }
 
   /**
