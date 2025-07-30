@@ -153,7 +153,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
       if (finalPosts.length === 0) {
         console.warn('⚠️ No blog posts found in database or local storage');
         if (!silentRefresh) {
-          setError('No blog posts found. This could be because:\n• No posts have been generated yet\n• Database connection issues\n• All posts have expired');
+          setError('NOT_FOUND');
         }
       } else {
         console.log(`✅ Successfully loaded ${finalPosts.length} blog posts`);
@@ -436,7 +436,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
               <div>• Displayed: {debugInfo.displayedPosts}</div>
-              <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '✅'}</div>
+              <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '��'}</div>
             </div>
           </div>
           {debugInfo.errorMessage && (
