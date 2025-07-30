@@ -14,7 +14,7 @@ import {
   Filter
 } from 'lucide-react';
 import { publishedBlogService } from '@/services/publishedBlogService';
-import { freeBacklinkService } from '@/services/freeBacklinkService';
+
 
 interface BlogPostStatus {
   id: string;
@@ -102,25 +102,7 @@ export function BlogPostClaimsManager() {
       }
 
       // Load from free backlink service
-      try {
-        const freePosts = freeBacklinkService.getAllPosts();
-        freePosts.forEach(freePost => {
-          if (blogPosts.find(p => p.slug === freePost.slug)) return; // Skip duplicates
 
-          blogPosts.push({
-            id: freePost.id,
-            slug: freePost.slug,
-            title: freePost.title,
-            url: `${window.location.origin}/blog/${freePost.slug}`,
-            status: 'unclaimed',
-            createdAt: freePost.createdAt,
-            expiresAt: freePost.expiresAt,
-            viewCount: (freePost as any).viewCount || 0
-          });
-        });
-      } catch (freeError) {
-        console.warn('Failed to load from free backlink service');
-      }
 
       // Sort by creation date, newest first
       blogPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
