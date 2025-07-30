@@ -238,8 +238,8 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
         <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
           <Timer className="h-8 w-8 text-amber-600" />
         </div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading Trial Posts...</h3>
-        <p className="text-gray-600 text-sm">Checking for posts that expire in 24 hours</p>
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading Blog Posts...</h3>
+        <p className="text-gray-600 text-sm">Fetching all available blog posts from database and local storage</p>
       </div>
     );
   }
