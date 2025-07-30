@@ -8,6 +8,8 @@ import { blogService, type BlogPost } from '@/services/blogService';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/Footer';
 import { PurgeStorageButton } from '@/components/PurgeStorageButton';
+import { PricingModal } from '@/components/PricingModal';
+import { useToast } from '@/hooks/use-toast';
 import {
   Calendar,
   Clock,
