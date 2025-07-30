@@ -62,16 +62,16 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
   const loadTrialPosts = async () => {
     try {
       setLoading(true);
-      const posts: TrialPost[] = [];
+      const allPosts: TrialPost[] = [];
 
-      // First load from database (all published posts - claimed and unclaimed)
+      // First load from database (all published posts)
       try {
         const { BlogClaimService } = await import('@/services/blogClaimService');
         const dbPosts = await BlogClaimService.getClaimablePosts(50);
 
-        // Add all database posts (claimed and unclaimed)
+        // Add all database posts
         dbPosts.forEach(dbPost => {
-          posts.push({
+          allPosts.push({
             id: dbPost.id,
             title: dbPost.title,
             slug: dbPost.slug,
@@ -93,7 +93,7 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
         console.warn('Error loading posts from database:', error);
       }
 
-      // Also load from localStorage (all posts - not just trial)
+      // Also load from localStorage
       try {
         const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
 
@@ -113,8 +113,8 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
             }
 
             // Only add if not already in database posts
-            if (!posts.find(dbPost => dbPost.slug === blogPost.slug)) {
-              posts.push({
+            if (!allPosts.find(dbPost => dbPost.slug === blogPost.slug)) {
+              allPosts.push({
                 id: blogPost.id,
                 title: blogPost.title,
                 slug: blogPost.slug,
@@ -136,7 +136,7 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
 
         // Update the all_blog_posts list to remove expired ones
         const validBlogMetas = allBlogs.filter((meta: any) => {
-          return posts.some(post => post.slug === meta.slug) ||
+          return allPosts.some(post => post.slug === meta.slug) ||
                  !JSON.parse(localStorage.getItem(`blog_post_${meta.slug}`) || '{}').expires_at;
         });
         localStorage.setItem('all_blog_posts', JSON.stringify(validBlogMetas));
@@ -144,6 +144,19 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
       } catch (error) {
         console.warn('Error loading posts from localStorage:', error);
       }
+
+      // Separate into trial posts and claimed posts
+      const unclaimedTrialPosts = allPosts.filter(post => post.is_trial_post && !post.user_id);
+      const userClaimedPosts = user ? allPosts.filter(post => post.user_id === user.id) : [];
+
+      // Sort by creation date (newest first)
+      unclaimedTrialPosts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      userClaimedPosts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setTrialPosts(unclaimedTrialPosts);
+      setClaimedPosts(userClaimedPosts);
+
+      console.log(`✅ Loaded ${unclaimedTrialPosts.length} trial posts and ${userClaimedPosts.length} claimed posts`);
 
       // Sort by creation date (newest first)
       posts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
