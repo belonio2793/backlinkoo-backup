@@ -47,13 +47,12 @@ export class OpenAIService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt,
-          options: {
-            model: options.model || 'gpt-3.5-turbo',
-            maxTokens: options.maxTokens || 3500,
-            temperature: options.temperature || 0.7,
-            systemPrompt: options.systemPrompt || 'You are a professional content writer.'
-          }
+          keyword: prompt, // Use prompt as keyword for this service
+          url: 'https://example.com', // Default URL since this service doesn't specify one
+          anchorText: 'learn more', // Default anchor text
+          wordCount: options.maxTokens ? Math.floor(options.maxTokens / 2.5) : 1500,
+          contentType: 'how-to',
+          tone: 'professional'
         })
       });
 
