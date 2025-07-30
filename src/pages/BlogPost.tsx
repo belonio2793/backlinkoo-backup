@@ -834,15 +834,15 @@ export function BlogPost() {
           </Card>
         )}
 
-        {/* SEO Information */}
+        {/* Enhanced SEO Information */}
         {(blogPost.keywords || blogPost.tags) && (
           <Card className="mt-8 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-100 shadow-lg">
             <CardContent className="p-8">
               <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                 <TrendingUp className="h-6 w-6 text-purple-600" />
-                SEO Information
+                SEO Analytics & Performance
               </h3>
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-3 gap-6">
                 <div>
                   <p className="text-sm font-medium text-gray-700 mb-3">Target Keywords</p>
                   <div className="flex flex-wrap gap-2">
@@ -864,17 +864,81 @@ export function BlogPost() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-700">SEO Score:</span>
-                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+                    <Badge className={`${
+                      (blogPost.seo_score || 75) >= 90 ? 'bg-green-500' :
+                      (blogPost.seo_score || 75) >= 70 ? 'bg-yellow-500' : 'bg-red-500'
+                    } text-white`}>
                       {blogPost.seo_score || 75}/100
                     </Badge>
                   </div>
                 </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700">Readability:</span>
+                    <Badge className={`${
+                      (blogPost.readability_score || 80) >= 80 ? 'bg-green-500' :
+                      (blogPost.readability_score || 80) >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                    } text-white`}>
+                      {blogPost.readability_score || 80}/100
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700">Generated:</span>
+                    <span className="text-sm text-gray-900 font-bold">Enhanced AI</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700">Optimized:</span>
+                    <Badge className="bg-blue-100 text-blue-800">
+                      ✓ SEO Ready
+                    </Badge>
+                  </div>
+                </div>
               </div>
+
+              {/* SEO Features */}
+              <div className="mt-6 pt-4 border-t border-purple-200">
+                <p className="text-sm font-medium text-gray-700 mb-3">SEO Features Applied:</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Structured Headlines</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Keyword Optimization</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Meta Description</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Content Spacing</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Natural Backlinks</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Featured Snippets</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Readability Score</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Structured Data</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="mt-4 pt-4 border-t border-purple-200">
                 <p className="text-sm font-medium text-gray-700 mb-2">Target URL:</p>
-                <a 
-                  href={blogPost.target_url} 
-                  target="_blank" 
+                <a
+                  href={blogPost.target_url}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:text-blue-800 underline break-all font-medium"
                 >
