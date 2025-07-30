@@ -327,4 +327,4 @@ class AdminSyncService {
 }
 
 export const adminSyncService = new AdminSyncService();
-export type { AdminSyncEvent, FreeBacklinkMetrics };
+export type { AdminSyncEvent, BlogMetrics };
