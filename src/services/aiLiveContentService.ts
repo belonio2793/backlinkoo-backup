@@ -12,20 +12,26 @@ interface GenerationResult {
 }
 
 class AILiveContentService {
-  private apiKey: string;
-  private endpoint = 'https://api.openai.com/v1/chat/completions';
-  private model = 'gpt-3.5-turbo';
-
   constructor() {
-    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
-    if (!this.apiKey) {
-      console.warn('OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable.');
-    }
+    console.log('✅ AI Live Content Service initialized - using server-side API calls');
   }
 
   async checkHealth(): Promise<boolean> {
-    if (!this.apiKey) {
-      console.error('OpenAI API key not configured');
+    // Health check via Netlify function
+    try {
+      const response = await fetch('/.netlify/functions/check-ai-provider', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: 'OpenAI' })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        return result.configured || false;
+      }
+      return false;
+    } catch (error) {
+      console.error('Health check failed:', error);
       return false;
     }
 
