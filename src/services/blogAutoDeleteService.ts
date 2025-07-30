@@ -106,7 +106,9 @@ export class BlogAutoDeleteService {
   }
 
   constructor() {
-    this.startCleanupInterval();
+    // Don't start automatic cleanup immediately to avoid startup errors
+    // this.startCleanupInterval();
+    console.log('📝 BlogAutoDeleteService initialized (manual cleanup only)');
   }
 
   /**
