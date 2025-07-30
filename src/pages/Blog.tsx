@@ -153,14 +153,30 @@ export function Blog() {
   }, [sortBy]);
 
   const sortPosts = (posts: BlogPost[], criteria: string) => {
+    let sorted: BlogPost[];
     switch (criteria) {
       case 'popular':
-        return [...posts].sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
+        sorted = [...posts].sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
+        break;
       case 'trending':
-        return [...posts].sort((a, b) => (b.seo_score || 0) - (a.seo_score || 0));
+        sorted = [...posts].sort((a, b) => (b.seo_score || 0) - (a.seo_score || 0));
+        break;
       default: // newest
-        return [...posts].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        sorted = [...posts].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
     }
+
+    // Prioritize claimed posts (better quality for public viewing) while maintaining sort order
+    return sorted.sort((a, b) => {
+      const aIsClaimed = !a.is_trial_post && a.user_id;
+      const bIsClaimed = !b.is_trial_post && b.user_id;
+
+      // If both are claimed or both are trial, maintain existing order
+      if (aIsClaimed === bIsClaimed) return 0;
+
+      // Claimed posts come first
+      return bIsClaimed ? 1 : -1;
+    });
   };
 
   const formatDate = (dateString: string) => {
