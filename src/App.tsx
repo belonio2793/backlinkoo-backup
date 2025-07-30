@@ -34,7 +34,7 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {/*<AuthProfileChecker>*/}
+        <AuthProfileChecker>
           <Toaster />
           <Sonner />
           <GlobalNotifications />
@@ -44,7 +44,7 @@ const App = () => (
               <AppWrapper />
             </AuthRedirectHandler>
           </BrowserRouter>
-        {/*</AuthProfileChecker>*/}
+        </AuthProfileChecker>
       </TooltipProvider>
     </QueryClientProvider>
   </ErrorBoundary>
