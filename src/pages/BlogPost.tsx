@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { blogService, type BlogPost as BlogPostType } from '@/services/blogService';
 import { ClaimTrialPostDialog } from '@/components/ClaimTrialPostDialog';
 import { LoginModal } from '@/components/LoginModal';
+import { BlogClaimExplanationModal } from '@/components/BlogClaimExplanationModal';
 import { supabase } from '@/integrations/supabase/client';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatBlogTitle, formatBlogContent, getTrendingLabel, calculateWordCount, cleanHTMLContent } from '@/utils/textFormatting';
