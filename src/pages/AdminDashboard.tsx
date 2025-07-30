@@ -32,6 +32,7 @@ import { AdminAuthService } from "@/services/adminAuthService";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 import { APIConfigurationManager } from "@/components/admin/APIConfigurationManager";
 import { OpenAIConnectionTester } from "@/components/OpenAIConnectionTester";
+import { OpenAIConnectionTest } from "@/components/OpenAIConnectionTest";
 import {
   Users,
   Activity,
