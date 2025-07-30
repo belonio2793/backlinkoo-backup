@@ -1,98 +1,108 @@
-import { environmentVariablesService } from '@/services/environmentVariablesService';
-import { SecureConfig } from '@/lib/secure-config';
+/**
+ * OpenAI Service - Server-Side via Netlify Functions
+ * All API calls routed through secure Netlify functions
+ */
 
 export class OpenAIService {
-  private apiKey: string = '';
-
   constructor() {
-    // Load fallback API key from environment or secure config
-    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY;
-    this.initializeApiKey(); // Attempt to override with admin value
+    console.log('✅ OpenAI service initialized - using server-side API calls');
   }
 
   /**
-   * Dynamically initialize API key from admin environment variable service
+   * Generate content using Netlify function
    */
-  private async initializeApiKey() {
+  public async generateContent(prompt: string, options: {
+    model?: string;
+    maxTokens?: number;
+    temperature?: number;
+  }): Promise<{ success: boolean; content?: string; error?: string }> {
     try {
-      const adminApiKey = await environmentVariablesService.getVariable('VITE_OPENAI_API_KEY');
-      if (adminApiKey && adminApiKey.startsWith('sk-')) {
-        this.apiKey = adminApiKey;
-        console.log('✅ OpenAI API key loaded from admin environment variables');
-        console.log('🔑 Key preview:', this.apiKey.substring(0, 10) + '...');
-        return;
-      }
-    } catch (error) {
-      console.warn('⚠️ Could not load API key from admin environment variables:', error);
-    }
-
-    const invalidKeys = [
-      'your-openai-api-key-here',
-      'sk-proj-YOUR_ACTUAL_OPENAI_API_KEY_HERE',
-      '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'
-    ];
-
-    if (!this.apiKey || invalidKeys.includes(this.apiKey)) {
-      console.warn('❌ OpenAI API key not configured or is invalid.');
-      this.apiKey = '';
-    } else if (!this.apiKey.startsWith('sk-')) {
-      console.warn('❌ OpenAI API key format is incorrect. It should start with "sk-".');
-      console.warn('📋 Current key preview:', this.apiKey.substring(0, 10) + '...');
-      console.warn('🔁 Update your environment variable in Netlify or Admin Dashboard');
-      this.apiKey = '';
-    } else {
-      console.log('✅ OpenAI API key configured successfully');
-      console.log('🔑 Key preview:', this.apiKey.substring(0, 10) + '...');
-    }
-  }
-
-  /**
-   * Example function to send a prompt to OpenAI (you can expand this)
-   */
-  public async sendPrompt(prompt: string, options: { temperature?: number; max_tokens?: number }) {
-    if (!this.apiKey) {
-      throw new Error('OpenAI API key is not configured');
-    }
-
-    try {
-      const response = await fetch('https://api.openai.com/v1/completions', {
+      const response = await fetch('/.netlify/functions/generate-content', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'text-davinci-003',
           prompt,
-          max_tokens: options.max_tokens || 100,
-          temperature: options.temperature || 0.7,
-        }),
+          type: 'general',
+          maxTokens: options.maxTokens || 1000,
+          temperature: options.temperature || 0.7
+        })
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`OpenAI API Error: ${response.status} - ${errorText}`);
+        throw new Error(`Netlify function error: ${response.status}`);
       }
 
-      const data = await response.json();
-      return data;
+      const result = await response.json();
+
+      if (result.success) {
+        return {
+          success: true,
+          content: result.content
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error || 'Content generation failed'
+        };
+      }
     } catch (error) {
-      console.error('❌ OpenAI API request failed:', error);
-      throw error;
+      console.error('❌ Content generation failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Network error'
+      };
     }
   }
 
   /**
-   * Utility: Check if the key is valid and ready
+   * Send a prompt to OpenAI via Netlify function
    */
-  public isConfigured(): boolean {
-    return !!this.apiKey && this.apiKey.startsWith('sk-');
+  public async sendPrompt(prompt: string, options: { temperature?: number; max_tokens?: number }) {
+    return this.generateContent(prompt, {
+      maxTokens: options.max_tokens,
+      temperature: options.temperature
+    });
   }
 
   /**
-   * Utility: Get masked preview of key
+   * Test connection via Netlify function
+   */
+  public async testConnection(): Promise<boolean> {
+    try {
+      const response = await fetch('/.netlify/functions/check-ai-provider', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ provider: 'OpenAI' })
+      });
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const result = await response.json();
+      return result.configured || false;
+    } catch (error) {
+      console.error('Connection test failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Check if service is configured (server-side)
+   */
+  public isConfigured(): boolean {
+    // Always return true since configuration is handled server-side
+    return true;
+  }
+
+  /**
+   * Get service status
    */
   public getMaskedKey(): string {
-    return this.apiKey ? this.apiKey.substring(0, 10) + '...' : '[Not Set]';
+    return '[Server-Side Configured]';
   }
 }
