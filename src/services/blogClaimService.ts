@@ -403,11 +403,11 @@ export class BlogClaimService {
           }
         }
 
-        return { canClaim: false, reason: 'Unable to check claim limits', claimedCount: 0, maxClaims: 5 };
+        return { canClaim: false, reason: 'Unable to check claim limits', claimedCount: 0, maxClaims: 3 };
       }
 
       const claimedCount = claimedPosts?.length || 0;
-      const maxClaims = 5; // Default limit - could be made configurable per user tier
+      const maxClaims = 3; // Default limit - could be made configurable per user tier
 
       if (claimedCount >= maxClaims) {
         return {
