@@ -24,12 +24,13 @@ interface BlogClaimExplanationModalProps {
   isClaiming?: boolean;
 }
 
-export const BlogClaimExplanationModal = ({ 
-  isOpen, 
-  onClose, 
-  onClaim, 
-  onLogin, 
-  isAuthenticated 
+export const BlogClaimExplanationModal = ({
+  isOpen,
+  onClose,
+  onClaim,
+  onLogin,
+  isAuthenticated,
+  isClaiming = false
 }: BlogClaimExplanationModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
