@@ -63,45 +63,31 @@ export async function testOpenAIKeyIsolated(apiKey: string): Promise<TestResult>
       headers: Object.fromEntries(response.headers.entries())
     });
 
-    // Create a new response reader to ensure clean read
-    const responseReader = response.body?.getReader();
+    // Read response using the standard approach to avoid stream locking issues
     let responseText = '';
-    
-    if (responseReader) {
-      const chunks: Uint8Array[] = [];
-      let done = false;
-      
-      while (!done) {
-        const { done: readerDone, value } = await responseReader.read();
-        done = readerDone;
-        if (value) {
-          chunks.push(value);
+    let responseData = null;
+
+    try {
+      // First try to read as JSON directly
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        responseData = await response.json();
+        responseText = JSON.stringify(responseData);
+      } else {
+        // Read as text for non-JSON responses
+        responseText = await response.text();
+        // Try to parse as JSON if possible
+        try {
+          responseData = JSON.parse(responseText);
+        } catch (parseError) {
+          // Not JSON, keep as text
         }
       }
-      
-      // Combine chunks into text
-      const decoder = new TextDecoder();
-      responseText = decoder.decode(new Uint8Array(chunks.reduce((acc, chunk) => [...acc, ...chunk], [] as number[])));
-    } else {
-      // Fallback: try to read as text (but this might cause the error)
-      try {
-        responseText = await response.text();
-      } catch (readError) {
-        console.error('Error reading response text:', readError);
-        responseText = 'Failed to read response body';
-      }
+    } catch (readError) {
+      console.error('Error reading response:', readError);
+      responseText = 'Failed to read response body';
     }
 
     console.log('📝 Response text:', responseText.substring(0, 200) + '...');
-
-    let responseData = null;
-    if (responseText) {
-      try {
-        responseData = JSON.parse(responseText);
-      } catch (parseError) {
-        console.log('Response is not JSON, using as text');
-      }
-    }
 
     if (response.ok) {
       console.log('✅ OpenAI API key test successful!');
