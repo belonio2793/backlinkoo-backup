@@ -55,54 +55,80 @@ export const BuilderAIGenerator = () => {
     }
 
     // Basic URL validation
+    let formattedUrl = targetUrl.trim();
     try {
-      new URL(targetUrl);
+      // Add https:// if no protocol specified
+      if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+        formattedUrl = 'https://' + formattedUrl;
+      }
+      new URL(formattedUrl);
     } catch {
       toast({
         title: "Invalid URL",
-        description: "Please enter a valid URL starting with http:// or https://",
+        description: "Please enter a valid URL (e.g., example.com or https://example.com)",
         variant: "destructive",
       });
       return;
     }
 
     setIsGenerating(true);
-    
-    try {
-      // Simulate progress updates
-      const stages = [
-        { stage: "Initializing", progress: 10, details: "Preparing AI content generation..." },
-        { stage: "Research", progress: 30, details: "Researching keyword and topic..." },
-        { stage: "Writing", progress: 60, details: "Generating high-quality content..." },
-        { stage: "Optimization", progress: 80, details: "Optimizing for SEO..." },
-        { stage: "Finalizing", progress: 100, details: "Blog post created successfully!" },
-      ];
 
-      for (const stage of stages) {
-        setProgress({ ...stage, timestamp: new Date() });
-        await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      // Progress updates
+      setProgress({ stage: "Initializing", progress: 10, details: "Preparing AI content generation...", timestamp: new Date() });
+
+      setProgress({ stage: "Research", progress: 30, details: "Researching keyword and topic...", timestamp: new Date() });
+
+      // Generate content using OpenAI service
+      setProgress({ stage: "Writing", progress: 60, details: "Generating high-quality content...", timestamp: new Date() });
+
+      const result = await openAIContentGenerator.generateContent({
+        targetUrl: formattedUrl,
+        primaryKeyword: keyword.trim(),
+        anchorText: anchorText.trim(),
+        wordCount: 1000,
+        tone: 'professional',
+        contentType: 'how-to'
+      });
+
+      if (!result.success || !result.data) {
+        throw new Error(result.error || 'Content generation failed');
       }
+
+      setProgress({ stage: "Optimization", progress: 80, details: "Optimizing for SEO...", timestamp: new Date() });
+
+      // Store as free backlink
+      freeBacklinkService.storeFreeBacklink(result.data);
+
+      setProgress({ stage: "Complete", progress: 100, details: "Blog post created successfully!", timestamp: new Date() });
 
       toast({
         title: "Blog Post Generated!",
-        description: "Your content has been created successfully.",
+        description: "Your backlink content has been created successfully. Redirecting to your post...",
       });
 
       // Reset form
       setKeyword('');
       setAnchorText('');
       setTargetUrl('');
-      
+
+      // Redirect to the blog post after a short delay
+      setTimeout(() => {
+        navigate(`/free-backlink/${result.data.id}`);
+      }, 2000);
+
     } catch (error) {
       console.error('Generation error:', error);
       toast({
         title: "Generation Failed",
-        description: "There was an error generating your content. Please try again.",
+        description: error instanceof Error ? error.message : "There was an error generating your content. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsGenerating(false);
-      setProgress(null);
+      setTimeout(() => {
+        setIsGenerating(false);
+        setProgress(null);
+      }, 2000);
     }
   };
 
