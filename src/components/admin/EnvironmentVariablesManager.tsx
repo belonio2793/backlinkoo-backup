@@ -490,6 +490,14 @@ export function EnvironmentVariablesManager() {
                           >
                             <Copy className="h-4 w-4" />
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => startEditing(envVar)}
+                            disabled={editingVar === envVar.id}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
                           {envVar.key.includes('API_KEY') && (
                             <Button
                               variant="ghost"
