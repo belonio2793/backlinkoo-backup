@@ -722,7 +722,43 @@ export function BlogPost() {
           </div>
         </div>
 
+        {/* Claimed Post Notice */}
+        {(() => {
+          const emailDisplay = getDisplayEmailForPost(
+            {
+              user_id: (blogPost as any).user_id,
+              is_trial_post: blogPost.is_trial_post
+            },
+            currentUser ? {
+              id: currentUser.id,
+              email: currentUser.email
+            } : null,
+            true // isPublicView
+          );
 
+          if (emailDisplay) {
+            return (
+              <Card className="mt-8 border-emerald-200 bg-emerald-50">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                    <div>
+                      <div className="font-medium text-emerald-800">{emailDisplay.label}</div>
+                      <div className="text-sm text-emerald-700">
+                        {emailDisplay.isOwner ? (
+                          `This post is permanently saved to your account (${emailDisplay.email})`
+                        ) : (
+                          `Contact: ${emailDisplay.email}`
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          }
+          return null;
+        })()}
 
         {/* Trial Post Notice with Claim Option */}
         {blogPost.is_trial_post && blogPost.expires_at && (
