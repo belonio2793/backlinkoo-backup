@@ -367,7 +367,7 @@ export function ClaimTrialPostDialog({
 
           {!currentUser && (
             <p className="text-xs text-gray-500 text-center">
-              Sign up to claim one free trial post permanently
+              Sign up to claim up to 3 trial posts permanently
             </p>
           )}
         </div>
