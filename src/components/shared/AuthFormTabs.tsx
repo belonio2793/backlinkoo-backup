@@ -375,7 +375,7 @@ export function AuthFormTabs({
       } else if (error.message?.includes('Email verification required') || error.message?.includes('Email not confirmed')) {
         errorMessage = "Please verify your email address before signing in. Check your email for a verification link.";
         setRetryAttempts(0);
-      } else if (error.message?.includes('NetworkError') || error.message?.includes('fetch') || error.message?.includes('network')) {
+      } else if (error.message?.includes('NetworkError') || error.message?.includes('fetch') || error.message?.includes('network') || error.message?.includes('Unable to connect')) {
         errorMessage = "Network connection failed. Please check your internet connection and try again.";
       } else if (error.message?.includes('rate limit') || error.message?.includes('too many')) {
         errorMessage = "Too many login attempts. Please wait a few minutes before trying again.";
