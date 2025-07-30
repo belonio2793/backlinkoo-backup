@@ -48,8 +48,7 @@ import AdminVerificationQueue from "@/components/AdminVerificationQueue";
 import SEOToolsSection from "@/components/SEOToolsSection";
 import { ProfileSettings } from "@/components/ProfileSettings";
 import { ApiConfigStatus } from "@/components/ApiConfigStatus";
-import { OpenAIDebugTest } from "@/components/OpenAIDebugTest";
-import { SupabaseConnectionTest } from "@/components/SupabaseConnectionTest";
+
 import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 
