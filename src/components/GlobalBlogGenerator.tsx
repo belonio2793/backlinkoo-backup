@@ -308,14 +308,58 @@ Return the content as clean HTML with proper tags including the backlink. Ensure
 
       const systemPrompt = 'You are an expert SEO content writer specializing in creating high-quality, engaging blog posts that rank well in search engines.';
 
-      const reliableResult = await reliableContentGenerator.generateContent(prompt, {
-        maxTokens: 3000,
-        temperature: 0.7,
-        systemPrompt,
-        targetUrl: request.targetUrl,
-        primaryKeyword: request.primaryKeyword,
-        anchorText: request.anchorText
-      });
+      // Enhanced retry logic with multiple attempts
+      let reliableResult;
+      let retryCount = 0;
+      const maxRetries = 5;
+
+      while (retryCount < maxRetries) {
+        try {
+          setGenerationStage(`Generating content... (Attempt ${retryCount + 1}/${maxRetries})`);
+
+          reliableResult = await reliableContentGenerator.generateContent(prompt, {
+            maxTokens: 3000,
+            temperature: 0.7,
+            systemPrompt,
+            targetUrl: request.targetUrl,
+            primaryKeyword: request.primaryKeyword,
+            anchorText: request.anchorText
+          });
+
+          // Validate content meets minimum requirements
+          if (reliableResult.success && reliableResult.content) {
+            const wordCount = reliableResult.content.replace(/<[^>]+>/g, ' ').split(' ').filter(w => w.length > 0).length;
+
+            if (wordCount >= 500) {
+              console.log(`✅ Content generated successfully with ${wordCount} words (attempt ${retryCount + 1})`);
+              break; // Success - exit retry loop
+            } else {
+              console.warn(`⚠️ Content too short: ${wordCount} words (minimum 500). Retrying...`);
+              retryCount++;
+              continue;
+            }
+          } else {
+            console.warn(`❌ Content generation failed: ${reliableResult.error || 'Unknown error'}. Retrying...`);
+            retryCount++;
+            continue;
+          }
+        } catch (error: any) {
+          retryCount++;
+          console.error(`❌ Retry attempt ${retryCount} failed:`, error.message);
+
+          if (retryCount >= maxRetries) {
+            throw new Error(`Content generation failed after ${maxRetries} attempts: ${error.message}`);
+          }
+
+          // Wait before retrying (exponential backoff)
+          const delay = Math.min(1000 * Math.pow(2, retryCount - 1), 10000);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+
+      if (!reliableResult || !reliableResult.success) {
+        throw new Error('Failed to generate content after all retry attempts');
+      }
 
       // Convert reliable result to expected format
       const result = {
