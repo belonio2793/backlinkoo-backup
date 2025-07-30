@@ -223,6 +223,9 @@ export function BuilderAIGenerator({ onSuccess, variant = 'homepage' }: BuilderA
         </CardHeader>
         
         <CardContent className="space-y-6">
+          {/* OpenAI Connection Test - Debug */}
+          <OpenAIConnectionTester />
+
           {/* API Status - Hidden but still functional */}
 
           {/* User Limit Status */}
