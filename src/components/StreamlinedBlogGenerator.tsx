@@ -35,9 +35,10 @@ export function StreamlinedBlogGenerator() {
   const [activeTab, setActiveTab] = useState('generate');
   
   // Generation state
-  const [request, setRequest] = useState<BlogGenerationRequest>({
+  const [request, setRequest] = useState<BlogCreationRequest>({
     targetUrl: '',
-    keywords: '',
+    keywords: [],
+    primaryKeyword: '',
     contentType: 'blog',
     tone: 'professional',
     wordCount: 800
