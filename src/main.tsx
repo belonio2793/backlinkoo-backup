@@ -3,19 +3,9 @@ import App from './App.tsx'
 import './index.css'
 import { trialPostCleanupService } from './services/trialPostCleanupService'
 import './utils/setupApiKey'
-// Auto-run debug on load
-import { debugApiKey } from './utils/debugApiKey';
-if (typeof window !== 'undefined') {
-  setTimeout(() => {
-    debugApiKey().then(result => {
-      if (result.success) {
-        console.log('🎉 API key validation passed!');
-      } else {
-        console.error('❌ API key validation failed:', result.error);
-      }
-    });
-  }, 2000);
-}
+// Auto-run debug disabled to prevent concurrent API calls
+// Use the admin interface to test API keys manually
+// import { debugApiKey } from './utils/debugApiKey';
 
 // Prevent ethereum property conflicts from browser extensions
 try {
