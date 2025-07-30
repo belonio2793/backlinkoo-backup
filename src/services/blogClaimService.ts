@@ -300,6 +300,69 @@ export class BlogClaimService {
   }
 
   /**
+   * Create a database entry from a localStorage blog post and claim it
+   * This is used for claiming posts that only exist in localStorage
+   */
+  static async claimLocalStoragePost(localPost: any, user: User): Promise<ClaimResult> {
+    try {
+      console.log('🔄 BlogClaimService: Creating database entry for localStorage post:', localPost.slug);
+
+      // Check if post already exists by slug
+      const { data: existingPost } = await supabase
+        .from('published_blog_posts')
+        .select('id, user_id, is_trial_post')
+        .eq('slug', localPost.slug)
+        .eq('status', 'published')
+        .single();
+
+      if (existingPost) {
+        // Post already exists, use regular claim flow
+        return await this.claimPost(existingPost.id, user);
+      }
+
+      // Create new database entry with user as owner
+      const postToInsert = {
+        ...localPost,
+        user_id: user.id,
+        is_trial_post: false,
+        expires_at: null,
+        status: 'published',
+        updated_at: new Date().toISOString()
+      };
+
+      const { data: insertedPost, error: insertError } = await supabase
+        .from('published_blog_posts')
+        .insert([postToInsert])
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('❌ BlogClaimService: Failed to create database entry:', insertError);
+        return {
+          success: false,
+          message: 'Failed to save post to database',
+          error: insertError.message
+        };
+      }
+
+      console.log('✅ BlogClaimService: Successfully created and claimed post:', insertedPost.id);
+
+      return {
+        success: true,
+        message: 'Blog post claimed successfully! It has been saved to your account.',
+        post: insertedPost
+      };
+    } catch (error: any) {
+      console.error('💥 BlogClaimService: Exception creating localStorage post:', error);
+      return {
+        success: false,
+        message: 'An unexpected error occurred while claiming the post',
+        error: error.message
+      };
+    }
+  }
+
+  /**
    * Get claim statistics for a user
    */
   static async getClaimStats(userId: string): Promise<{
