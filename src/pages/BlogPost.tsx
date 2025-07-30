@@ -278,13 +278,18 @@ export function BlogPost() {
         body: JSON.stringify(requestBody)
       });
 
-      // Check if response is ok before trying to parse JSON
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      // Parse response once and handle errors
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('Failed to parse response:', parseError);
+        throw new Error(`Invalid response from server (Status: ${response.status})`);
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP ${response.status}: Request failed`);
+      }
 
       if (!data.success) {
         throw new Error(data.error || 'Failed to claim blog post');
