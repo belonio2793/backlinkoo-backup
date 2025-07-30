@@ -52,6 +52,7 @@ import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 import { OpenAIDebugTest } from "@/components/OpenAIDebugTest";
 import { SupabaseConnectionTest } from "@/components/SupabaseConnectionTest";
+import { AIPostsManager } from "@/components/admin/AIPostsManager";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -413,7 +414,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               size="sm"
               className="text-gray-400 hover:text-white p-1 h-auto"
             >
-              ✕
+              ��
             </Button>
           </div>
           <div className="grid grid-cols-2 gap-4">
