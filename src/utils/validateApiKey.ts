@@ -138,7 +138,9 @@ export async function debugApiKeyIssue() {
   return { formatValid, testResult };
 }
 
-// Auto-run debug when imported
+// Auto-run debug disabled to prevent automatic API calls on page load
+// Use the admin interface to test API keys manually
+/*
 if (typeof window !== 'undefined') {
   setTimeout(() => {
     debugApiKeyIssue().then(({ formatValid, testResult }) => {
@@ -150,3 +152,4 @@ if (typeof window !== 'undefined') {
     });
   }, 1000);
 }
+*/
