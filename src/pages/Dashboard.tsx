@@ -50,6 +50,7 @@ import { ProfileSettings } from "@/components/ProfileSettings";
 import { ApiConfigStatus } from "@/components/ApiConfigStatus";
 import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
+import { OpenAIDebugTest } from "@/components/OpenAIDebugTest";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
