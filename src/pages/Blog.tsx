@@ -22,7 +22,7 @@ import {
 
 export function Blog() {
   const navigate = useNavigate();
-  const [blogPosts, setBlogPosts] = useState<PublishedBlogPost[]>([]);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -31,7 +31,7 @@ export function Blog() {
     const loadBlogPosts = async () => {
       try {
         // Try to load from database first
-        let posts: PublishedBlogPost[] = [];
+        let posts: BlogPost[] = [];
         try {
           posts = await publishedBlogService.getRecentBlogPosts(50);
         } catch (dbError) {
@@ -39,7 +39,7 @@ export function Blog() {
         }
 
         // Also load from localStorage (traditional blog posts)
-        const localBlogPosts: PublishedBlogPost[] = [];
+        const localBlogPosts: BlogPost[] = [];
         try {
           const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
 
