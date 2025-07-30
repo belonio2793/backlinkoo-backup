@@ -7,6 +7,22 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      '/.netlify/functions': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        rewrite: (path) => {
+          // Route function calls to our mock endpoints in development
+          if (path.includes('check-ai-provider')) {
+            return '/api/mock-check-ai-provider';
+          }
+          if (path.includes('generate-content')) {
+            return '/api/mock-generate-content';
+          }
+          return path;
+        }
+      }
+    }
   },
   plugins: [
     react(),
