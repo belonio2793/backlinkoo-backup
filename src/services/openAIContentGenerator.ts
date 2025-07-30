@@ -104,6 +104,32 @@ export class OpenAIContentGenerator {
 
     } catch (error) {
       console.error('❌ OpenAI content generation failed:', error);
+
+      // If all OpenAI functions fail, generate demo content as fallback
+      if (error.message.includes('404') || error.message.includes('unavailable')) {
+        console.log('🔄 All OpenAI functions failed, generating demo content as fallback...');
+        this.sendProgress('Fallback', 'Generating demo content...', 50);
+
+        try {
+          const demoContent = this.generateDemoContent(request);
+          const processedContent = this.processContent(demoContent, request);
+
+          this.sendProgress('Publishing', 'Publishing demo content...', 80);
+          const publishedUrl = await this.publishToBlog(slug, processedContent, request);
+
+          this.sendProgress('Database', 'Saving to database...', 90);
+          const result = await this.saveToDB(id, slug, processedContent, request, publishedUrl);
+
+          this.sendProgress('Complete', 'Demo content generated successfully! (AI service temporarily unavailable)', 100);
+
+          return result;
+        } catch (fallbackError) {
+          console.error('❌ Demo content fallback also failed:', fallbackError);
+          this.sendProgress('Error', 'Content generation completely failed', 0);
+          throw new Error('Content generation service is completely unavailable. Please try again later.');
+        }
+      }
+
       this.sendProgress('Error', `Generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 0);
       throw error;
     }
@@ -221,7 +247,7 @@ export class OpenAIContentGenerator {
       return content.trim();
 
     } catch (error) {
-      console.error('❌ OpenAI Netlify function call failed:', error);
+      console.error('�� OpenAI Netlify function call failed:', error);
 
       // Provide more helpful error messages
       if (error.message.includes('404')) {
