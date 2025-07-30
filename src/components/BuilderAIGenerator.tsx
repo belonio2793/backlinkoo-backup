@@ -333,7 +333,7 @@ export function BuilderAIGenerator({ onSuccess, variant = 'homepage' }: BuilderA
               </div>
               <div className="flex items-center gap-1">
                 <Clock className="h-4 w-4 text-purple-600" />
-                <span>24h auto-delete</span>
+                <span>permanent link</span>
               </div>
             </div>
           </div>
