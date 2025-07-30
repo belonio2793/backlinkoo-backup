@@ -59,23 +59,29 @@ class StreamlinedOpenAI {
     excerpt: string;
   }> {
     try {
-      // Generate main blog content using Netlify function
       const contentResult = await this.generateContent('', {
-        keyword: topic,
-        url: 'https://example.com',
-        wordCount: 1200,
-        tone: 'professional'
+        type: 'blog_post',
+        topic: topic,
+        keywords: keywords,
+        maxTokens: 2000,
+        temperature: 0.7
       });
 
-      // Extract title from HTML content
-      const titleMatch = contentResult.match(/<h1[^>]*>(.*?)<\/h1>/i);
-      const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '') : topic;
+      // Extract title from content or use topic
+      const titleMatch = contentResult.match(/^#\s+(.+)/m) || contentResult.match(/<h1[^>]*>(.*?)<\/h1>/i);
+      const title = titleMatch
+        ? titleMatch[1].replace(/<[^>]*>/g, '').trim()
+        : `${topic}: Complete Guide`;
 
       // Create excerpt from first paragraph
-      const excerptMatch = contentResult.match(/<p[^>]*>(.*?)<\/p>/i);
-      const excerpt = excerptMatch
-        ? excerptMatch[1].replace(/<[^>]*>/g, '').substring(0, 150) + '...'
-        : `A comprehensive guide about ${topic}`;
+      const sentences = contentResult
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/#+\s+[^\n]*\n/g, '')
+        .trim()
+        .split('.')
+        .slice(0, 2);
+
+      const excerpt = sentences.join('.').substring(0, 150) + '...';
 
       return {
         title,
@@ -88,7 +94,7 @@ class StreamlinedOpenAI {
       // Fallback response
       return {
         title: topic,
-        content: `<h1>${topic}</h1><p>Content generation is temporarily unavailable. Please try again later.</p>`,
+        content: `# ${topic}\n\nContent generation is temporarily unavailable. Please try again later.`,
         excerpt: 'Content generation temporarily unavailable.'
       };
     }
