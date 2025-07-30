@@ -466,6 +466,29 @@ export function AuthFormTabs({
               ? `Your account is ready and ${convertedCount} trial post${convertedCount > 1 ? 's have' : ' has'} been converted to permanent.`
               : "Your account is ready! You can now create permanent backlinks.",
           });
+
+          // Check for claim intent
+          const claimIntent = localStorage.getItem('claim_intent');
+          if (claimIntent) {
+            try {
+              const intent = JSON.parse(claimIntent);
+              localStorage.removeItem('claim_intent');
+
+              toast({
+                title: "Continuing with your claim...",
+                description: `Processing your request to claim "${intent.postTitle}"`,
+              });
+
+              setTimeout(() => {
+                window.location.href = `/blog/${intent.postSlug}`;
+              }, 2000);
+              return;
+            } catch (error) {
+              console.warn('Failed to parse claim intent:', error);
+              localStorage.removeItem('claim_intent');
+            }
+          }
+
           onAuthSuccess?.(conversionResult.user);
         } else {
           toast({
