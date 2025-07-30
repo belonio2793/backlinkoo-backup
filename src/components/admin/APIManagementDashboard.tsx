@@ -119,7 +119,7 @@ export function APIManagementDashboard() {
         console.log('Development mode: simulating OpenAI API check');
 
         // Simulate the check based on environment variable availability
-        result = {
+        const result = {
           provider: 'OpenAI',
           configured: true,
           healthy: true,
@@ -127,41 +127,49 @@ export function APIManagementDashboard() {
           message: 'OpenAI API configured via environment variables (dev mode)'
         };
 
-        // Create a mock response object
-        response = { ok: true };
+        // Handle the simulated result directly
+        if (result.configured) {
+          updateServiceStatus('OpenAI', {
+            status: 'connected',
+            message: 'API configured via environment variables (dev mode)',
+            responseTime: 50
+          });
+        } else {
+          updateServiceStatus('OpenAI', {
+            status: 'error',
+            message: 'OpenAI not configured in development environment',
+            responseTime: 50
+          });
+        }
       } else {
         // In production, use the actual Netlify function
-        response = await fetch('/.netlify/functions/check-ai-provider', {
+        const response = await fetch('/.netlify/functions/check-ai-provider', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ provider: 'OpenAI' })
         });
 
         if (response.ok) {
-          result = await response.json();
-        }
-      }
-
-      if (response.ok) {
-        const result = await response.json();
-        if (result.configured) {
-          updateServiceStatus('OpenAI', {
-            status: 'connected',
-            message: 'API configured via Netlify functions',
-            responseTime: 200
-          });
+          const result = await response.json();
+          if (result.configured) {
+            updateServiceStatus('OpenAI', {
+              status: 'connected',
+              message: 'API configured via Netlify functions',
+              responseTime: 200
+            });
+          } else {
+            updateServiceStatus('OpenAI', {
+              status: 'error',
+              message: 'OpenAI not configured in Netlify environment',
+              responseTime: 200
+            });
+          }
         } else {
           updateServiceStatus('OpenAI', {
             status: 'error',
-            message: 'OpenAI not configured in Netlify environment',
-            responseTime: 200
+            message: 'Failed to check OpenAI configuration'
           });
         }
-      } else {
-        updateServiceStatus('OpenAI', {
-          status: 'error',
-          message: 'Failed to check OpenAI configuration'
-        });
       }
     } catch (error) {
       console.error('Error checking OpenAI status:', error);
