@@ -132,7 +132,8 @@ export function BlogEditor({ postId, mode = 'edit', onSave, onCancel }: BlogEdit
           readingTime: Math.ceil(formData.content.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length / 200),
           seoScore: 75, // Default score
           metaDescription: formData.meta_description,
-          contextualLinks: []
+          contextualLinks: [],
+          customSlug: formData.slug.trim() || undefined
         }, user?.id, false);
 
         toast({
