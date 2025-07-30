@@ -73,26 +73,22 @@ export async function testOpenAIKey(apiKey: string) {
 }
 
 export async function testAllKeys() {
-  const apiKeys = [
-    import.meta.env.VITE_OPENAI_API_KEY,
-    import.meta.env.VITE_OPENAI_API_KEY_BACKUP_1,
-    import.meta.env.VITE_OPENAI_API_KEY_BACKUP_2
-  ].filter(key => key && key !== 'your-openai-api-key-here');
-  
-  console.log(`🔍 Testing ${apiKeys.length} OpenAI API keys...`);
-  
-  for (let i = 0; i < apiKeys.length; i++) {
-    console.log(`\n🔑 Testing Key ${i + 1}/${apiKeys.length}:`);
-    const success = await testOpenAIKey(apiKeys[i]);
-    
-    if (success) {
-      console.log(`✅ Key ${i + 1} is working perfectly!`);
-      return apiKeys[i]; // Return the first working key
-    } else {
-      console.log(`❌ Key ${i + 1} failed tests`);
-    }
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+  if (!apiKey || apiKey === 'your-openai-api-key-here') {
+    console.log('🚨 No OpenAI API key configured');
+    return null;
   }
-  
-  console.log(`\n🚨 All ${apiKeys.length} keys failed tests`);
-  return null;
+
+  console.log('🔍 Testing OpenAI API key...');
+
+  const success = await testOpenAIKey(apiKey);
+
+  if (success) {
+    console.log('✅ OpenAI API key is working perfectly!');
+    return apiKey;
+  } else {
+    console.log('❌ OpenAI API key failed tests');
+    return null;
+  }
 }
