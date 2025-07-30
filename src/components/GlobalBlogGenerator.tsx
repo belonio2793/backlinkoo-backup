@@ -795,9 +795,6 @@ export function GlobalBlogGenerator({
             <div className="flex items-center gap-2">
               <Globe className="h-6 w-6 text-blue-600" />
               <CardTitle>Create Your First Backlink For Free</CardTitle>
-              <Badge variant="outline" className="bg-green-50 text-green-700">
-                Live & Dynamic
-              </Badge>
             </div>
             
             <div className="flex items-center gap-2">
