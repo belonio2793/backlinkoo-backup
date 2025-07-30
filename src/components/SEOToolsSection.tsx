@@ -41,6 +41,7 @@ import { KeywordResearchTool } from "@/components/KeywordResearchTool";
 import { RankingTracker } from "@/components/RankingTracker";
 import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
 import SubscriptionService, { type SubscriptionStatus } from "@/services/subscriptionService";
+import FeatureAccessGuard from "@/components/FeatureAccessGuard";
 
 interface SEOToolsSectionProps {
   user: User | null;
