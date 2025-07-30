@@ -191,8 +191,8 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
     }
   };
 
-  // Mock subscription data - replace with real data from your billing system
-  const subscriptionData = {
+  // Use subscription info from service
+  const subscriptionData = subscriptionInfo || {
     plan: "Premium SEO Tools",
     price: "$29.00",
     billing: "Monthly",
@@ -204,7 +204,8 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
     features: [
       "Unlimited keyword research",
       "Advanced SERP analysis",
-      "Campaign monitoring",
+      "Automated campaign management",
+      "Real-time rank tracking",
       "Priority support",
       "Export capabilities"
     ]
