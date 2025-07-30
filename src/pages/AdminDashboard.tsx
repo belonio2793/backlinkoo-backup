@@ -205,6 +205,10 @@ const AdminDashboard = () => {
             <ServiceConnectionStatus />
           </TabsContent>
 
+          <TabsContent value="api-config">
+            <APIConfigurationManager />
+          </TabsContent>
+
           <TabsContent value="campaigns">
             <CampaignManager />
           </TabsContent>
