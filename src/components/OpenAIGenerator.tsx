@@ -13,8 +13,7 @@ import {
   CheckCircle2,
   Globe,
   Clock,
-  AlertCircle,
-  TestTube
+  AlertCircle
 } from 'lucide-react';
 
 interface ProgressUpdate {
