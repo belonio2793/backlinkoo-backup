@@ -63,7 +63,12 @@ export class BlogAutoDeleteService {
         .lt('expires_at', now);
 
       if (error) {
-        console.error('Error fetching expired posts:', error);
+        console.error('Error fetching expired posts:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         return [];
       }
 
