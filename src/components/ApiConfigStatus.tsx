@@ -20,7 +20,7 @@ export function ApiConfigStatus() {
       name: 'OpenAI',
       key: 'openai',
       configured: false,
-      description: 'GPT-4 for high-quality content generation',
+      description: 'GPT-3.5 Turbo for high-quality content generation',
       icon: '🤖'
     },
     {
