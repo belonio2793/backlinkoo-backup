@@ -948,10 +948,16 @@ export function BlogPost() {
         }}
       />
 
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={isPaymentModalOpen}
-        onClose={() => setIsPaymentModalOpen(false)}
+      {/* Pricing Modal */}
+      <PricingModal
+        isOpen={isPricingModalOpen}
+        onClose={() => setIsPricingModalOpen(false)}
+        onAuthSuccess={(user) => {
+          toast({
+            title: "Welcome!",
+            description: "You have been successfully signed in. Continue with your purchase.",
+          });
+        }}
       />
 
       {/* Footer */}
