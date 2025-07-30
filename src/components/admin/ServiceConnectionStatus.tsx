@@ -421,7 +421,7 @@ export function ServiceConnectionStatus() {
                   {getStatusIcon(service.status)}
                 </div>
                 
-                <p className="text-sm text-muted-foreground mb-3">{service.message}</p>
+                <p className="text-sm text-muted-foreground mb-3 break-words overflow-hidden">{service.message}</p>
                 
                 <div className="flex items-center justify-between">
                   {getStatusBadge(service)}
@@ -469,9 +469,9 @@ export function ServiceConnectionStatus() {
 
                       // Handle other details normally
                       return (
-                        <div key={key} className="flex justify-between">
-                          <span>{key}:</span>
-                          <span className={typeof value === 'boolean' ? (value ? 'text-green-600' : 'text-red-600') : ''}>
+                        <div key={key} className="flex justify-between items-start gap-2">
+                          <span className="font-medium min-w-0 shrink-0">{key}:</span>
+                          <span className={`break-all text-right max-w-[200px] truncate ${typeof value === 'boolean' ? (value ? 'text-green-600' : 'text-red-600') : ''}`} title={String(value)}>
                             {typeof value === 'boolean' ? (value ? '✓' : '✗') : String(value)}
                           </span>
                         </div>
