@@ -361,10 +361,11 @@ export class BlogAutoDeleteService {
 
       if (error) {
         console.error('Error fetching posts expiring soon:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
+          message: error.message || 'Unknown error',
+          details: error.details || 'No details available',
+          hint: error.hint || 'No hint available',
+          code: error.code || 'No error code',
+          fullError: String(error)
         });
         return [];
       }
