@@ -428,7 +428,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
             </div>
             <div>
               <div className="text-yellow-400 mb-2">Data Sources:</div>
-              <div>• Database Posts: {debugInfo.dbPosts}</div>
+              <div>�� Database Posts: {debugInfo.dbPosts}</div>
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
               <div>• Displayed: {debugInfo.displayedPosts}</div>
@@ -1726,8 +1726,9 @@ const Dashboard = () => {
               </Badge>
             </div>
 
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="verification">Verification Queue</TabsTrigger>
+              <TabsTrigger value="ai-posts">AI Posts</TabsTrigger>
               <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
