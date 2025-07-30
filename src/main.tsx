@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { trialPostCleanupService } from './services/trialPostCleanupService'
+import './utils/setupApiKey'
 
 // Prevent ethereum property conflicts from browser extensions
 try {
