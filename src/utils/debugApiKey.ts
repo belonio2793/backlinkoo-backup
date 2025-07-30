@@ -161,16 +161,18 @@ export async function testSpecificApiKey(testKey: string) {
       console.log('✅ Specific API key test successful!');
       return { success: true, modelsCount: data.data?.length || 0 };
     } else {
-      let errorData = {};
+      let errorData = { message: 'Unknown error' };
       try {
-        errorData = await response.json();
-      } catch (e) {
-        try {
-          const errorText = await response.clone().text();
-          errorData = { message: errorText };
-        } catch (textError) {
-          errorData = { message: 'Failed to read error response' };
+        const responseText = await response.text();
+        if (responseText) {
+          try {
+            errorData = JSON.parse(responseText);
+          } catch (parseError) {
+            errorData = { message: responseText };
+          }
         }
+      } catch (readError) {
+        errorData = { message: 'Failed to read error response' };
       }
       console.error('❌ Specific API key test failed:', response.status, errorData);
       return { success: false, status: response.status, error: errorData };
