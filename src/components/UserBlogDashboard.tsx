@@ -326,6 +326,98 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
           )}
         </TabsContent>
 
+        <TabsContent value="claimed-posts" className="space-y-4">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold">Claimed Posts from the Community</h3>
+            <p className="text-muted-foreground">High-quality posts that have been claimed by users and are available for public viewing</p>
+          </div>
+
+          {claimedPosts.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No claimed posts yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Community claimed posts will appear here as they become available
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {claimedPosts.map((post) => (
+                <Card key={post.id} className="hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-green-50/50 to-emerald-50/50 border-green-200/50">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between mb-2">
+                      <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+                        {post.category || 'Expert Content'}
+                      </Badge>
+                      <Badge className="bg-green-100 text-green-800 border-green-300">
+                        <Star className="mr-1 h-3 w-3" />
+                        Claimed
+                      </Badge>
+                    </div>
+                    <CardTitle className="text-lg line-clamp-2">{post.title}</CardTitle>
+                    {post.excerpt && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
+                    )}
+                  </CardHeader>
+
+                  <CardContent className="space-y-3">
+                    {/* Keywords */}
+                    <div className="flex flex-wrap gap-1">
+                      {post.tags.slice(0, 3).map((tag, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    {/* Stats */}
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="flex items-center gap-1">
+                        <Eye className="h-3 w-3 text-purple-500" />
+                        <span>{post.view_count || 0} views</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <TrendingUp className="h-3 w-3 text-orange-500" />
+                        <span>{post.seo_score}/100 SEO</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3 text-blue-500" />
+                        <span>{post.reading_time}m read</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <FileText className="h-3 w-3 text-gray-500" />
+                        <span>{post.word_count} words</span>
+                      </div>
+                    </div>
+
+                    {/* Action */}
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => window.open(post.published_url, '_blank')}
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View Post
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(post.target_url, '_blank')}
+                      >
+                        <Target className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
         <TabsContent value="campaigns" className="space-y-4">
           {campaigns.length === 0 ? (
             <Card>
