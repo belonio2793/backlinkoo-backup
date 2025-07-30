@@ -170,14 +170,13 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
 
     } catch (error: any) {
       console.error('❌ Error loading posts:', error);
-      const errorMessage = `Failed to load blog posts: ${error.message || 'Unknown error'}`;
-      setError(errorMessage);
+      setError('NOT_FOUND');
 
       // Don't clear posts on error, keep showing last known state
       if (!silentRefresh) {
         toast({
-          title: "Error Loading Posts",
-          description: errorMessage,
+          title: "Not Found",
+          description: "Unable to fetch blog posts from any source.",
           variant: "destructive",
         });
       }
