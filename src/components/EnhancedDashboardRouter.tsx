@@ -30,39 +30,75 @@ export function EnhancedDashboardRouter() {
     let subscription: any;
 
     const checkUserAndTrialPosts = async () => {
-      try {
-        console.log('🔍 Checking user authentication for dashboard...');
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('🔍 Session check result:', !!session?.user, session?.user?.email);
+    try {
+      console.log('🔍 Checking user authentication for dashboard...');
 
-        if (!isMounted) return;
+      // Add timeout to prevent hanging auth checks
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Auth check timeout')), 5000)
+      );
 
-        setUser(session?.user || null);
+      const sessionPromise = supabase.auth.getSession();
 
-        if (session?.user) {
-          console.log('✅ User authenticated, showing dashboard');
-          setIsLoading(false);
-        } else {
-          console.log('❌ User not authenticated, redirecting to login');
-          navigate('/login');
-        }
-      } catch (error: any) {
-        console.error('Dashboard router error:', error);
-        if (isMounted) {
-          setIsLoading(false);
-          navigate('/login');
-        }
+      const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+
+      if (!isMounted) return;
+
+      if (error) {
+        console.error('🔍 Session check error:', error);
+        setIsLoading(false);
+        navigate('/login');
+        return;
       }
-    };
+
+      console.log('🔍 Session check result:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        userEmail: session?.user?.email,
+        emailConfirmed: session?.user?.email_confirmed_at,
+        sessionValid: !!(session?.user && session.user.email_confirmed_at)
+      });
+
+      const validUser = session?.user && session.user.email_confirmed_at;
+      setUser(validUser || null);
+
+      if (validUser) {
+        console.log('✅ User authenticated and verified, showing dashboard');
+        setIsLoading(false);
+      } else {
+        console.log('❌ User not authenticated or email not verified, redirecting to login');
+        setIsLoading(false);
+        // Small delay to prevent redirect loop
+        setTimeout(() => navigate('/login'), 100);
+      }
+    } catch (error: any) {
+      console.error('Dashboard router error:', error);
+      if (isMounted) {
+        setIsLoading(false);
+        setTimeout(() => navigate('/login'), 100);
+      }
+    }
+  };
 
     checkUserAndTrialPosts();
 
     // Listen for auth state changes
     const authListener = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔐 Dashboard auth state changed:', event, !!session?.user);
+      console.log('🔐 Dashboard auth state changed:', event, {
+        hasUser: !!session?.user,
+        userEmail: session?.user?.email,
+        emailConfirmed: session?.user?.email_confirmed_at
+      });
       if (isMounted) {
-        setUser(session?.user || null);
+        const validUser = session?.user && session.user.email_confirmed_at;
+        setUser(validUser || null);
         setIsLoading(false);
+
+        // If user signed out or lost valid session, redirect to login
+        if ((event === 'SIGNED_OUT' || !validUser) && event !== 'INITIAL_SESSION') {
+          console.log('🚪 User signed out or invalid session, redirecting to login');
+          setTimeout(() => navigate('/login'), 100);
+        }
       }
     });
 
