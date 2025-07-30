@@ -289,29 +289,42 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
       {/* Trial Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {trialPosts.map((post) => {
-          const timeRemaining = getTimeRemaining(post.expires_at);
-          const isExpiringSoon = timeRemaining && timeRemaining.hours < 2;
+        const timeRemaining = getTimeRemaining(post.expires_at);
+        const isExpiringSoon = timeRemaining && timeRemaining.hours < 2;
+        const isClaimed = post.user_id && !post.is_trial_post;
+        const isUnclaimedTrial = post.is_trial_post && !post.user_id;
 
-          return (
-            <Card key={post.id} className={`group hover:shadow-lg transition-all duration-200 ${
-              isExpiringSoon ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'
-            }`}>
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
+        return (
+          <Card key={post.id} className={`group hover:shadow-lg transition-all duration-200 ${
+            isClaimed
+              ? 'border-green-200 bg-green-50'
+              : isExpiringSoon
+                ? 'border-red-200 bg-red-50'
+                : 'border-amber-200 bg-amber-50'
+          }`}>
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                {isClaimed ? (
+                  <Badge className="bg-green-100 text-green-700 border-green-200">
+                    <CheckCircle2 className="mr-1 h-3 w-3" />
+                    Claimed
+                  </Badge>
+                ) : (
                   <Badge variant="outline" className={`${
                     isExpiringSoon ? 'bg-red-100 text-red-700 border-red-200' : 'bg-amber-100 text-amber-700 border-amber-200'
                   }`}>
                     <Timer className="mr-1 h-3 w-3" />
                     Unclaimed
                   </Badge>
-                  {timeRemaining && (
-                    <div className={`text-xs font-medium ${
-                      isExpiringSoon ? 'text-red-600' : 'text-amber-600'
-                    }`}>
-                      {timeRemaining.hours}h {timeRemaining.minutes}m left
-                    </div>
-                  )}
-                </div>
+                )}
+                {timeRemaining && isUnclaimedTrial && (
+                  <div className={`text-xs font-medium ${
+                    isExpiringSoon ? 'text-red-600' : 'text-amber-600'
+                  }`}>
+                    {timeRemaining.hours}h {timeRemaining.minutes}m left
+                  </div>
+                )}
+              </div>
                 <CardTitle className="text-lg line-clamp-2 group-hover:text-blue-600 transition-colors">
                   {post.title}
                 </CardTitle>
