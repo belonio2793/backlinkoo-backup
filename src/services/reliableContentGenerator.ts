@@ -333,17 +333,19 @@ export class ReliableContentGenerator {
    * Perform health check on all providers
    */
   private async performHealthCheck(): Promise<void> {
-    console.log('🏥 Performing provider health check...');
-    
     const healthPromises = [
       this.checkOpenAIHealth(),
       this.checkCohereHealth()
     ];
-    
+
     await Promise.allSettled(healthPromises);
     this.lastHealthCheck = Date.now();
-    
-    console.log('🏥 Health check complete:', Object.fromEntries(this.providerHealth));
+
+    // Only log if we have healthy providers
+    const healthyCount = Array.from(this.providerHealth.values()).filter(Boolean).length;
+    if (healthyCount > 0) {
+      console.log('🏥 Provider health check complete - ' + healthyCount + ' provider(s) healthy');
+    }
   }
 
   /**
