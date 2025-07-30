@@ -1,54 +1,54 @@
 /**
- * Streamlined OpenAI Service
- * Auto-configured, no validation needed - just works
+ * Streamlined OpenAI Service - Server-Side via Netlify Functions
+ * All API calls handled securely on the server
  */
 
-import { SecureConfig } from '@/lib/secure-config';
-
 class StreamlinedOpenAI {
-  private getApiKey(): string {
-    // Try multiple sources for API key
-    const key = import.meta.env.VITE_OPENAI_API_KEY || 
-                SecureConfig.OPENAI_API_KEY || 
-                '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';
-    
-    return key;
-  }
-
-  async generateContent(prompt: string, options: {
-    model?: string;
-    maxTokens?: number;
-    temperature?: number;
-  } = {}): Promise<string> {
-    const {
-      model = 'gpt-3.5-turbo',
-      maxTokens = 1000,
-      temperature = 0.7
-    } = options;
-
+  private async callNetlifyFunction(endpoint: string, data: any): Promise<any> {
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch(`/.netlify/functions/${endpoint}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.getApiKey()}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: 'user', content: prompt }],
-          max_tokens: maxTokens,
-          temperature
-        })
+        body: JSON.stringify(data)
       });
 
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status}`);
+        throw new Error(`Netlify function error: ${response.status}`);
       }
 
-      const data = await response.json();
-      return data.choices[0]?.message?.content || '';
+      return await response.json();
     } catch (error) {
-      console.error('OpenAI generation error:', error);
+      console.error(`Error calling ${endpoint}:`, error);
+      throw error;
+    }
+  }
+
+  async generateContent(prompt: string, options: {
+    keyword?: string;
+    url?: string;
+    wordCount?: number;
+    tone?: string;
+  } = {}): Promise<string> {
+    try {
+      // Use the generate-openai Netlify function
+      const result = await this.callNetlifyFunction('generate-openai', {
+        keyword: options.keyword || 'Content Generation',
+        url: options.url || 'https://example.com',
+        anchorText: options.keyword || 'generated content',
+        wordCount: options.wordCount || 1000,
+        contentType: 'article',
+        tone: options.tone || 'professional'
+      });
+
+      if (result.success) {
+        return result.content;
+      } else {
+        throw new Error(result.error || 'Content generation failed');
+      }
+    } catch (error) {
+      console.error('Content generation error:', error);
       throw error;
     }
   }
