@@ -13,7 +13,7 @@ import { formatBlogTitle, formatBlogContent, getTrendingLabel, calculateWordCoun
 import { getDisplayEmailForPost } from '@/utils/emailMasking';
 import { runImmediateContentCleanup } from '@/utils/immediateContentCleanup';
 import { openAIOnlyContentGenerator } from '@/services/openAIOnlyContentGenerator';
-import { freeBacklinkService } from '@/services/freeBacklinkService';
+
 import { Footer } from '@/components/Footer';
 import {
   Calendar,
@@ -92,41 +92,7 @@ export function BlogPost() {
             // Also check free backlink service storage
             if (!storedBlogData) {
               console.log('🔍 Checking free backlink service...');
-              try {
-                const freeBacklinkPosts = freeBacklinkService.getAllPosts();
-                const freePost = freeBacklinkPosts.find(p => p.slug === slug);
-                if (freePost) {
-                  console.log('✅ Found in free backlink service:', freePost.id);
-                  // Convert to blog post format
-                  post = {
-                    id: freePost.id,
-                    title: freePost.title,
-                    slug: freePost.slug,
-                    content: freePost.content,
-                    excerpt: freePost.metaDescription,
-                    meta_description: freePost.metaDescription,
-                    keywords: freePost.keywords,
-                    tags: freePost.keywords,
-                    category: 'Free Backlink',
-                    author_name: 'AI Generator',
-                    target_url: freePost.targetUrl,
-                    anchor_text: freePost.anchorText,
-                    seo_score: freePost.seoScore,
-                    reading_time: freePost.readingTime,
-                    word_count: freePost.wordCount,
-                    view_count: (freePost as any).viewCount || 0,
-                    published_at: freePost.createdAt,
-                    created_at: freePost.createdAt,
-                    updated_at: freePost.createdAt,
-                    published_url: `${window.location.origin}/blog/${freePost.slug}`,
-                    is_trial_post: true,
-                    expires_at: freePost.expiresAt,
-                    status: 'published' as const
-                  };
-                }
-              } catch (freeBacklinkError) {
-                console.warn('Error checking free backlink service:', freeBacklinkError);
-              }
+
             }
 
             if (storedBlogData) {
@@ -168,7 +134,7 @@ export function BlogPost() {
             searchedSlug: slug,
             searchedKey: `blog_post_${slug}`,
             availableKeys: allKeys,
-            freeBacklinkPosts: freeBacklinkService.getAllPosts().map(p => ({ id: p.id, slug: p.slug, title: p.title })),
+
             allBlogPostsMeta: JSON.parse(localStorage.getItem('all_blog_posts') || '[]')
           });
 
@@ -337,9 +303,7 @@ export function BlogPost() {
       });
 
       // Store the new content for 24-hour management if it's a trial post
-      if (blogPost.is_trial_post) {
-        freeBacklinkService.storeFreeBacklink(result);
-      }
+
       const updatedBlogPost = {
         ...blogPost,
         content: result.content,
