@@ -355,6 +355,71 @@ export class OpenAIContentGenerator {
   }
 
   /**
+   * Direct OpenAI API call as fallback when Netlify functions fail
+   */
+  private async generateDirectOpenAIContent(request: OpenAIContentRequest, prompt: string): Promise<string> {
+    console.log('🚀 Using direct OpenAI API as fallback...');
+
+    try {
+      // Check if we have API key configured
+      const apiKey = localStorage.getItem('openai_api_key') ||
+                    localStorage.getItem('OPENAI_API_KEY');
+
+      if (!apiKey) {
+        console.warn('⚠️ No OpenAI API key found, using fallback content generation...');
+        return this.generateFallbackContent(request);
+      }
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          'User-Agent': 'BacklinkooBot/1.0'
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert SEO content writer specializing in creating high-quality, engaging blog posts that rank well in search engines.'
+            },
+            { role: 'user', content: prompt }
+          ],
+          max_tokens: 3000,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        console.warn('⚠️ Direct OpenAI API call failed, using fallback content...');
+        return this.generateFallbackContent(request);
+      }
+
+      const data = await response.json();
+
+      if (!data.choices || data.choices.length === 0) {
+        console.warn('⚠️ No content from OpenAI, using fallback...');
+        return this.generateFallbackContent(request);
+      }
+
+      const content = data.choices[0].message.content;
+
+      if (!content || content.trim().length < 100) {
+        console.warn('⚠️ Generated content too short, using fallback...');
+        return this.generateFallbackContent(request);
+      }
+
+      console.log('✅ Direct OpenAI generation successful');
+      return content;
+
+    } catch (error: any) {
+      console.warn('⚠️ Direct OpenAI failed:', error.message);
+      return this.generateFallbackContent(request);
+    }
+  }
+
+  /**
    * Process content and add formatting
    */
   private processContent(content: string, request: OpenAIContentRequest) {
