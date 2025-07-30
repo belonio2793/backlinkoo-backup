@@ -1113,15 +1113,12 @@ const Dashboard = () => {
           <>
             {activeSection === "dashboard" ? (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
               <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Overview</span>
                 <span className="sm:hidden">Home</span>
               </TabsTrigger>
-              <TabsTrigger value="trial" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
-                <span className="hidden sm:inline">Trial Posts</span>
-                <span className="sm:hidden">Trial</span>
-              </TabsTrigger>
+
               <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Campaigns</span>
                 <span className="sm:hidden">Camps</span>
@@ -1457,9 +1454,7 @@ const Dashboard = () => {
               )}
             </TabsContent>
 
-            <TabsContent value="trial" className="space-y-6">
-              <NewTrialBlogPostsDisplay user={user} />
-            </TabsContent>
+
 
             <TabsContent value="campaigns" className="space-y-6">
               {showCampaignForm ? (
