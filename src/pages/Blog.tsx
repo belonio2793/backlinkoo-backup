@@ -169,6 +169,51 @@ export function Blog() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      {/* Header */}
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+              <Infinity className="h-7 w-7 text-primary" />
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <PurgeStorageButton
+                variant="ghost"
+                size="sm"
+                showIcon={true}
+                className="text-muted-foreground hover:text-foreground"
+              />
+              {user ? (
+                <>
+                  <Button
+                    onClick={() => navigate("/dashboard")}
+                    className="bg-transparent hover:bg-blue-50/50 border border-blue-200/60 text-blue-700 hover:text-blue-800 hover:border-blue-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+                  >
+                    Dashboard
+                  </Button>
+                  <Button
+                    onClick={() => navigate("/auth")}
+                    className="bg-transparent hover:bg-red-50/50 border border-red-200/60 text-red-600 hover:text-red-700 hover:border-red-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+                  >
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" onClick={() => navigate("/auth")} className="font-medium">
+                    Sign In
+                  </Button>
+                  <Button onClick={() => navigate("/auth")} className="font-medium">
+                    Get Started
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Header */}
       <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600">
         <div className="absolute inset-0 bg-black/20"></div>
