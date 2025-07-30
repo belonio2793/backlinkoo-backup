@@ -269,30 +269,12 @@ export function BlogPost() {
         userEmail: user.email
       };
 
-      // Proceed with claim via Netlify function
-      const response = await fetch('/.netlify/functions/claim-post', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
-      });
+      // Use BlogClaimService directly since Netlify functions are not available
+      const { BlogClaimService } = await import('@/services/blogClaimService');
+      const claimResult = await BlogClaimService.claimPost(blogPost.id, user);
 
-      // Parse response once and handle errors
-      let data;
-      try {
-        data = await response.json();
-      } catch (parseError) {
-        console.error('Failed to parse response:', parseError);
-        throw new Error(`Invalid response from server (Status: ${response.status})`);
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error || `HTTP ${response.status}: Request failed`);
-      }
-
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to claim blog post');
+      if (!claimResult.success) {
+        throw new Error(claimResult.message || claimResult.error || 'Failed to claim blog post');
       }
 
       // Update localStorage to mark as claimed
