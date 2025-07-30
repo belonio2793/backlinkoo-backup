@@ -7,18 +7,21 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Key, 
-  Eye, 
-  EyeOff, 
-  Save, 
-  CheckCircle2, 
+import {
+  Key,
+  Eye,
+  EyeOff,
+  Save,
+  CheckCircle2,
   AlertTriangle,
   Settings,
   TestTube,
   RefreshCw,
   Copy,
-  Trash2
+  Trash2,
+  Edit,
+  X,
+  Check
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -49,6 +52,8 @@ export function EnvironmentVariablesManager() {
   const [showSecrets, setShowSecrets] = useState<{ [key: string]: boolean }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [testResults, setTestResults] = useState<{ [key: string]: ApiTestResult }>({});
+  const [editingVar, setEditingVar] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
   const { toast } = useToast();
 
   // Predefined environment variables with descriptions
