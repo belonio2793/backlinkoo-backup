@@ -86,26 +86,29 @@ export async function debugApiKey() {
           modelsCount: data.data?.length || 0 
         };
       } else {
-        // Get detailed error information
+        // Get detailed error information - read response only once
         let errorText = 'Unknown error';
         let errorData = null;
 
         try {
-          // Clone the response to read it multiple times if needed
-          const responseClone = response.clone();
-          errorData = await response.json();
-          errorText = errorData.error?.message || errorData.message || 'Unknown error';
-          console.log('❌ OpenAI Error Response:', errorData);
-        } catch (e) {
-          try {
-            // If JSON parsing failed, try reading as text
-            const responseClone = response.clone();
-            errorText = await responseClone.text() || 'Unknown error';
-            console.log('❌ OpenAI Error Text:', errorText);
-          } catch (textError) {
-            errorText = `Failed to read error response: ${e}`;
-            console.log('❌ Error reading response:', textError);
+          // Try to read as JSON first
+          const responseText = await response.text();
+          console.log('📝 Raw response text:', responseText);
+
+          if (responseText) {
+            try {
+              errorData = JSON.parse(responseText);
+              errorText = errorData.error?.message || errorData.message || 'Unknown error';
+              console.log('❌ OpenAI Error Response:', errorData);
+            } catch (parseError) {
+              // If not JSON, use the text directly
+              errorText = responseText;
+              console.log('❌ OpenAI Error Text:', errorText);
+            }
           }
+        } catch (readError) {
+          errorText = `Failed to read error response: ${readError}`;
+          console.log('❌ Error reading response:', readError);
         }
 
         const errors = {
