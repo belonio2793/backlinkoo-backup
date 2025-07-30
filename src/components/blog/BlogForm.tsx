@@ -25,6 +25,10 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
   const [contentType, setContentType] = useState('how-to');
   const [wordCount, setWordCount] = useState('1500');
   const [tone, setTone] = useState('professional');
+  const [targetAudience, setTargetAudience] = useState('general');
+  const [keywordDensity, setKeywordDensity] = useState('medium');
+  const [includeCallToAction, setIncludeCallToAction] = useState(true);
+  const [optimizeForSnippets, setOptimizeForSnippets] = useState(true);
   const [customInstructions, setCustomInstructions] = useState('');
   const [promptOverlayVisible, setPromptOverlayVisible] = useState(false);
   const [testingProviders, setTestingProviders] = useState(false);
@@ -64,7 +68,17 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
         websiteUrl: targetUrl,
         keyword: primaryKeyword,
         anchorText: secondaryKeywords[0] || primaryKeyword,
-        sessionId: crypto.randomUUID()
+        sessionId: crypto.randomUUID(),
+        enhancedOptions: {
+          wordCount: parseInt(wordCount),
+          tone,
+          contentType,
+          targetAudience,
+          keywordDensity,
+          includeCallToAction,
+          optimizeForSnippets,
+          secondaryKeywords
+        }
       });
 
       const { testResult, blogResult } = workflowResult;
@@ -88,6 +102,10 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             contentType,
             wordCount: parseInt(wordCount),
             tone,
+            targetAudience,
+            keywordDensity,
+            includeCallToAction,
+            optimizeForSnippets,
             customInstructions,
             testResult,
             workingProviders: testResult.workingProviders,
@@ -232,6 +250,21 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label>Target Audience</Label>
+              <Select value={targetAudience} onValueChange={setTargetAudience}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="beginners">Beginners</SelectItem>
+                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
+                  <SelectItem value="general">General Audience</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -261,6 +294,53 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             isVisible={promptOverlayVisible}
             onToggleVisibility={() => setPromptOverlayVisible(!promptOverlayVisible)}
           />
+        </CardContent>
+      </Card>
+
+      {/* SEO Optimization Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Target className="h-5 w-5" />
+            SEO Optimization
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Keyword Density</Label>
+            <Select value={keywordDensity} onValueChange={setKeywordDensity}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="low">Low (0.5-1%)</SelectItem>
+                <SelectItem value="medium">Medium (1-2%)</SelectItem>
+                <SelectItem value="high">High (2-3%)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="callToAction"
+              checked={includeCallToAction}
+              onChange={(e) => setIncludeCallToAction(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <Label htmlFor="callToAction">Include Call-to-Action</Label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="snippetOptimization"
+              checked={optimizeForSnippets}
+              onChange={(e) => setOptimizeForSnippets(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <Label htmlFor="snippetOptimization">Optimize for Featured Snippets</Label>
+          </div>
         </CardContent>
       </Card>
 
