@@ -318,6 +318,23 @@ export function EnvironmentVariablesManager() {
     setShowSecrets(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const startEditing = (envVar: EnvironmentVariable) => {
+    setEditingVar(envVar.id!);
+    setEditValue(envVar.value);
+  };
+
+  const cancelEditing = () => {
+    setEditingVar(null);
+    setEditValue('');
+  };
+
+  const saveEdit = async (envVar: EnvironmentVariable) => {
+    const updatedVar = { ...envVar, value: editValue.trim() };
+    await saveEnvironmentVariable(updatedVar);
+    setEditingVar(null);
+    setEditValue('');
+  };
+
   const maskValue = (value: string, show: boolean) => {
     if (show) return value;
     if (value.length <= 8) return '•'.repeat(value.length);
