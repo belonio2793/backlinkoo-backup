@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, XCircle, Loader2, TestTube } from 'lucide-react';
 import { openAIOnlyContentGenerator } from '@/services/openAIOnlyContentGenerator';
+import { multiKeyOpenAIService } from '@/services/api/multiKeyOpenAI';
 
 export function OpenAIConnectionTester() {
   const [testing, setTesting] = useState(false);
