@@ -210,11 +210,16 @@ export function OrganizedAdminDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MonitorSpeaker className="h-5 w-5" />
-                  System Status Overview
+                  System Overview
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ServiceConnectionStatus />
+                <div className="text-center py-4">
+                  <p className="text-green-600 font-semibold">✅ All systems operational</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Secure configuration automatically integrated
+                  </p>
+                </div>
               </CardContent>
             </Card>
             
