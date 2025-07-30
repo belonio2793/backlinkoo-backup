@@ -326,22 +326,31 @@ export class ContentModerationService {
         throw error;
       }
 
-      const total = data.length;
-      const pending = data.filter(req => req.status === 'pending').length;
-      const approved = data.filter(req => req.status === 'approved').length;
-      const rejected = data.filter(req => req.status === 'rejected').length;
-      const autoRejected = data.filter(req => req.auto_decision && req.status === 'rejected').length;
+      // Ensure data is an array
+      const safeData = Array.isArray(data) ? data : [];
 
-      const bySeverity = data.reduce((acc, req) => {
-        acc[req.severity] = (acc[req.severity] || 0) + 1;
+      const total = safeData.length;
+      const pending = safeData.filter(req => req?.status === 'pending').length;
+      const approved = safeData.filter(req => req?.status === 'approved').length;
+      const rejected = safeData.filter(req => req?.status === 'rejected').length;
+      const autoRejected = safeData.filter(req => req?.auto_decision && req?.status === 'rejected').length;
+
+      const bySeverity = safeData.reduce((acc, req) => {
+        if (req?.severity) {
+          acc[req.severity] = (acc[req.severity] || 0) + 1;
+        }
         return acc;
       }, {});
 
-      const byCategory = data.reduce((acc, req) => {
-        const categories = req.category.split(', ');
-        categories.forEach(cat => {
-          acc[cat] = (acc[cat] || 0) + 1;
-        });
+      const byCategory = safeData.reduce((acc, req) => {
+        if (req?.category && typeof req.category === 'string') {
+          const categories = req.category.split(', ');
+          categories.forEach(cat => {
+            if (cat && cat.trim()) {
+              acc[cat] = (acc[cat] || 0) + 1;
+            }
+          });
+        }
         return acc;
       }, {});
 
