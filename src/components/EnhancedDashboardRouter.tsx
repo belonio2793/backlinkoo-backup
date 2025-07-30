@@ -58,7 +58,7 @@ export function EnhancedDashboardRouter() {
       }
 
       if (isDevelopment && hasRecentAuthError) {
-        console.log('�� Development mode with recent auth errors, using simplified check');
+        console.log('🔧 Development mode with recent auth errors, using simplified check');
         const mockUser = { id: 'dev-user', email: 'dev@example.com', email_confirmed_at: new Date().toISOString() };
         setUser(mockUser);
         setIsLoading(false);
