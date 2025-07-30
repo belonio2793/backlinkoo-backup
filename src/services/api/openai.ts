@@ -53,20 +53,42 @@ export class OpenAIService {
   };
 
   constructor() {
-    // Get API key from environment variables or secure config
+    // Initialize with environment variables or secure config (will be updated async)
     this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY;
 
+    // Try to load from admin environment variables asynchronously
+    this.initializeApiKey();
+  }
+
+  /**
+   * Initialize API key from admin environment variables
+   */
+  private async initializeApiKey() {
+    try {
+      const adminApiKey = await environmentVariablesService.getVariable('VITE_OPENAI_API_KEY');
+      if (adminApiKey && adminApiKey.startsWith('sk-')) {
+        this.apiKey = adminApiKey;
+        console.log('✅ OpenAI API key loaded from admin environment variables');
+        console.log('🔑 Key preview:', this.apiKey.substring(0, 10) + '...');
+        return;
+      }
+    } catch (error) {
+      console.warn('Could not load API key from admin environment variables:', error);
+    }
+
+    // Fallback to original logic
     if (!this.apiKey || this.apiKey === 'your-openai-api-key-here' || this.apiKey === 'sk-proj-YOUR_ACTUAL_OPENAI_API_KEY_HERE') {
       console.warn('❌ OpenAI API key not configured.');
+      console.warn('🌐 Admin: Set VITE_OPENAI_API_KEY in /admin dashboard > Environment Variables');
       console.warn('🌐 Production: Set VITE_OPENAI_API_KEY in Netlify Site Settings > Environment Variables');
       console.warn('🛠️ Development: Use DevServerControl tool to set environment variable');
       console.warn('📋 Get your API key from: https://platform.openai.com/api-keys');
     } else if (!this.apiKey.startsWith('sk-')) {
       console.warn('❌ OpenAI API key appears to be invalid format. Keys should start with "sk-"');
       console.warn('📋 Current key preview:', this.apiKey.substring(0, 10) + '...');
-      console.warn('🌐 Update the key in Netlify Environment Variables');
+      console.warn('🌐 Update the key in Admin Dashboard or Netlify Environment Variables');
     } else {
-      console.log('✅ OpenAI API key configured successfully from environment variables');
+      console.log('✅ OpenAI API key configured successfully');
       console.log('🔑 Key preview:', this.apiKey.substring(0, 10) + '...');
     }
   }
