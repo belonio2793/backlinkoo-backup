@@ -42,6 +42,11 @@ const Login = () => {
 
     checkAuth();
 
+    // Add debug test to window for console access
+    if (typeof window !== 'undefined') {
+      (window as any).debugAuth = testAuthFlow;
+    }
+
     const { data: { subscription } } = setupAuthStateListener((event, session) => {
       console.log('🔐 Auth state changed:', event, {
         hasSession: !!session,
