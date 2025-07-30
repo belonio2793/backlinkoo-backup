@@ -129,7 +129,7 @@ export function GlobalBlogGenerator({
 
   const updateRemainingRequests = () => {
     // All users get unlimited requests if OpenAI is configured
-    const remaining = openAIOnlyContentGenerator.isConfigured() ? 999 : 0;
+    const remaining = directOpenAI.isConfigured() ? 999 : 0;
     setRemainingRequests(remaining);
   };
 
