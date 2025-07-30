@@ -519,6 +519,28 @@ export function AuthFormTabs({
           }
 
           if (result.user?.email_confirmed_at) {
+            // Check for claim intent
+            const claimIntent = localStorage.getItem('claim_intent');
+            if (claimIntent) {
+              try {
+                const intent = JSON.parse(claimIntent);
+                localStorage.removeItem('claim_intent');
+
+                toast({
+                  title: "Continuing with your claim...",
+                  description: `Processing your request to claim "${intent.postTitle}"`,
+                });
+
+                setTimeout(() => {
+                  window.location.href = `/blog/${intent.postSlug}`;
+                }, 1500);
+                return;
+              } catch (error) {
+                console.warn('Failed to parse claim intent:', error);
+                localStorage.removeItem('claim_intent');
+              }
+            }
+
             onAuthSuccess?.(result.user);
           } else {
             // Auto-switch to login tab after successful signup
