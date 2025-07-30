@@ -359,23 +359,34 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
 
                 {/* Actions */}
                 <div className="flex gap-2">
-                  <Button
-                    onClick={() => handleClaimPost(post)}
-                    disabled={claimingPostId === post.id}
-                    className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                  >
-                    {claimingPostId === post.id ? (
-                      <>
-                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                        Claiming...
-                      </>
-                    ) : (
-                      <>
-                        <Crown className="mr-2 h-4 w-4" />
-                        Claim
-                      </>
-                    )}
-                  </Button>
+                  {isClaimed ? (
+                    <Button
+                      disabled
+                      className="flex-1 bg-green-100 text-green-700 cursor-default"
+                      variant="outline"
+                    >
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      Already Claimed
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => handleClaimPost(post)}
+                      disabled={claimingPostId === post.id}
+                      className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                    >
+                      {claimingPostId === post.id ? (
+                        <>
+                          <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                          Claiming...
+                        </>
+                      ) : (
+                        <>
+                          <Crown className="mr-2 h-4 w-4" />
+                          Claim Post
+                        </>
+                      )}
+                    </Button>
+                  )}
                   <Button
                     onClick={() => navigate(`/blog/${post.slug}`)}
                     variant="outline"
