@@ -373,6 +373,36 @@ export class BlogClaimService {
 
       if (error) {
         console.error('Error checking claim limits:', error);
+
+        // Check if it's a table/schema issue
+        if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
+          console.warn('🔧 BlogClaimService: Database table may not exist, checking localStorage for claim limits');
+
+          // Fallback to localStorage count
+          try {
+            const userClaimedPosts = localStorage.getItem(`user_claimed_posts_${user.id}`);
+            const claimedCount = userClaimedPosts ? JSON.parse(userClaimedPosts).length : 0;
+            const maxClaims = 5;
+
+            if (claimedCount >= maxClaims) {
+              return {
+                canClaim: false,
+                reason: `You have reached the maximum limit of ${maxClaims} claimed posts. Please unclaim a post to claim a new one.`,
+                claimedCount,
+                maxClaims
+              };
+            }
+
+            return {
+              canClaim: true,
+              claimedCount,
+              maxClaims
+            };
+          } catch (localError) {
+            console.warn('Failed to check claim limits from localStorage:', localError);
+          }
+        }
+
         return { canClaim: false, reason: 'Unable to check claim limits', claimedCount: 0, maxClaims: 5 };
       }
 
