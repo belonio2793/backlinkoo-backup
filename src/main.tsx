@@ -2,6 +2,13 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { trialPostCleanupService } from './services/trialPostCleanupService'
+import './utils/setupApiKey'
+import './utils/setApiKey'
+import './utils/testNewApiKey'
+import './utils/validateApiKey'
+// Auto-run debug disabled to prevent concurrent API calls
+// Use the admin interface to test API keys manually
+// import { debugApiKey } from './utils/debugApiKey';
 
 // Prevent ethereum property conflicts from browser extensions
 try {

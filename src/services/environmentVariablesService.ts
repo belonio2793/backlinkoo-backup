@@ -24,20 +24,42 @@ class EnvironmentVariablesService {
    * Get environment variable value by key
    */
   async getVariable(key: string): Promise<string | null> {
+    // Force refresh from database for API keys to get latest from Supabase
+    if (key.includes('API_KEY')) {
+      console.log('🔄 Force refreshing API key from Supabase database...');
+      await this.refreshCache();
+      const dbValue = this.cache.get(key);
+      if (dbValue) {
+        console.log('✅ API key found in Supabase database:', dbValue.substring(0, 15) + '...');
+        return dbValue;
+      }
+    }
+
     // First check runtime environment variables
     const envValue = import.meta.env[key];
     if (envValue) {
+      console.log('✅ API key found in environment variables:', envValue.substring(0, 15) + '...');
       return envValue;
     }
 
     // Then check cache
     if (this.cache.has(key) && Date.now() - this.lastFetch < this.CACHE_DURATION) {
-      return this.cache.get(key) || null;
+      const cached = this.cache.get(key);
+      if (cached) {
+        console.log('✅ API key found in cache:', cached.substring(0, 15) + '...');
+        return cached;
+      }
     }
 
     // Fetch from database
     await this.refreshCache();
-    return this.cache.get(key) || null;
+    const dbValue = this.cache.get(key);
+    if (dbValue) {
+      console.log('✅ API key found after refresh:', dbValue.substring(0, 15) + '...');
+    } else {
+      console.log('❌ No API key found in any source');
+    }
+    return dbValue || null;
   }
 
   /**
@@ -58,6 +80,7 @@ class EnvironmentVariablesService {
    */
   async refreshCache(): Promise<void> {
     try {
+      console.log('🔄 Fetching environment variables from Supabase database...');
       const { data, error } = await supabase
         .from('admin_environment_variables')
         .select('key, value');
@@ -76,6 +99,15 @@ class EnvironmentVariablesService {
 
       this.lastFetch = Date.now();
       console.log('✅ Environment variables cache refreshed from database');
+      console.log('📊 Loaded variables:', data?.map((item: any) => item.key).join(', '));
+
+      // Log API key status specifically
+      const apiKey = this.cache.get('VITE_OPENAI_API_KEY');
+      if (apiKey) {
+        console.log('🔑 OpenAI API key loaded from database:', apiKey.substring(0, 15) + '...');
+      } else {
+        console.log('❌ No OpenAI API key found in database');
+      }
     } catch (error) {
       console.warn('Error refreshing environment variables cache, using localStorage fallback:', error);
       this.loadFromLocalStorage();

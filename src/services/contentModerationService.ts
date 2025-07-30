@@ -155,7 +155,10 @@ export class ContentModerationService {
     try {
       await this.storeModerationRequest(request);
     } catch (error) {
-      console.error('Failed to store moderation request:', error);
+      console.error('Failed to store moderation request:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: String(error)
+      });
     }
 
     // Log the event
@@ -245,7 +248,10 @@ export class ContentModerationService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Failed to store moderation request:', error);
+      console.error('Failed to store moderation request:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: String(error)
+      });
       // Fallback to localStorage for critical requests
       const stored = JSON.parse(localStorage.getItem('moderation_queue') || '[]');
       stored.push(request);
@@ -264,7 +270,10 @@ export class ContentModerationService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Failed to fetch moderation requests:', error);
+      console.error('Failed to fetch moderation requests:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: String(error)
+      });
       // Fallback to localStorage
       const stored = JSON.parse(localStorage.getItem('moderation_queue') || '[]');
       return stored.filter((req: ModerationRequest) => 
@@ -282,24 +291,66 @@ export class ContentModerationService {
         .select('*')
         .gte('created_at', since);
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific error types gracefully
+        if (error.code === '42P01') {
+          console.warn('📋 content_moderation_queue table does not exist yet - this is normal for new installations');
+          return {
+            total: 0,
+            pending: 0,
+            approved: 0,
+            rejected: 0,
+            autoRejected: 0,
+            approvalRate: '0',
+            bySeverity: {},
+            byCategory: {},
+            topFlaggedTerms: []
+          };
+        }
 
-      const total = data.length;
-      const pending = data.filter(req => req.status === 'pending').length;
-      const approved = data.filter(req => req.status === 'approved').length;
-      const rejected = data.filter(req => req.status === 'rejected').length;
-      const autoRejected = data.filter(req => req.auto_decision && req.status === 'rejected').length;
+        if (error.message?.includes('permission') || error.message?.includes('RLS')) {
+          console.warn('🔒 Database permission issue - check RLS policies for content_moderation_queue table');
+          return {
+            total: 0,
+            pending: 0,
+            approved: 0,
+            rejected: 0,
+            autoRejected: 0,
+            approvalRate: '0',
+            bySeverity: {},
+            byCategory: {},
+            topFlaggedTerms: []
+          };
+        }
 
-      const bySeverity = data.reduce((acc, req) => {
-        acc[req.severity] = (acc[req.severity] || 0) + 1;
+        throw error;
+      }
+
+      // Ensure data is an array
+      const safeData = Array.isArray(data) ? data : [];
+
+      const total = safeData.length;
+      const pending = safeData.filter(req => req?.status === 'pending').length;
+      const approved = safeData.filter(req => req?.status === 'approved').length;
+      const rejected = safeData.filter(req => req?.status === 'rejected').length;
+      const autoRejected = safeData.filter(req => req?.auto_decision && req?.status === 'rejected').length;
+
+      const bySeverity = safeData.reduce((acc, req) => {
+        if (req?.severity) {
+          acc[req.severity] = (acc[req.severity] || 0) + 1;
+        }
         return acc;
       }, {});
 
-      const byCategory = data.reduce((acc, req) => {
-        const categories = req.category.split(', ');
-        categories.forEach(cat => {
-          acc[cat] = (acc[cat] || 0) + 1;
-        });
+      const byCategory = safeData.reduce((acc, req) => {
+        if (req?.category && typeof req.category === 'string') {
+          const categories = req.category.split(', ');
+          categories.forEach(cat => {
+            if (cat && cat.trim()) {
+              acc[cat] = (acc[cat] || 0) + 1;
+            }
+          });
+        }
         return acc;
       }, {});
 
@@ -312,10 +363,13 @@ export class ContentModerationService {
         approvalRate: total > 0 ? ((approved / total) * 100).toFixed(1) : '0',
         bySeverity,
         byCategory,
-        topFlaggedTerms: this.getTopFlaggedTerms(data)
+        topFlaggedTerms: this.getTopFlaggedTerms(safeData)
       };
     } catch (error) {
-      console.error('Failed to get moderation stats:', error);
+      console.error('Failed to get moderation stats:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.stack : String(error)
+      });
       return {
         total: 0,
         pending: 0,
@@ -332,11 +386,18 @@ export class ContentModerationService {
 
   private getTopFlaggedTerms(requests: ModerationRequest[]): Array<{ term: string; count: number }> {
     const termCounts: { [key: string]: number } = {};
-    
-    requests.forEach(req => {
-      req.flagged_terms.forEach(term => {
-        termCounts[term] = (termCounts[term] || 0) + 1;
-      });
+
+    // Ensure requests is an array and handle null/undefined safely
+    const safeRequests = Array.isArray(requests) ? requests : [];
+
+    safeRequests.forEach(req => {
+      if (req?.flagged_terms && Array.isArray(req.flagged_terms)) {
+        req.flagged_terms.forEach(term => {
+          if (term && typeof term === 'string' && term.trim()) {
+            termCounts[term] = (termCounts[term] || 0) + 1;
+          }
+        });
+      }
     });
 
     return Object.entries(termCounts)
@@ -375,7 +436,10 @@ export class ContentModerationService {
 
       return true;
     } catch (error) {
-      console.error('Failed to review moderation request:', error);
+      console.error('Failed to review moderation request:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: String(error)
+      });
       return false;
     }
   }
@@ -387,7 +451,10 @@ export class ContentModerationService {
         .update({ status, reviewed_at: new Date().toISOString() })
         .eq('id', requestId);
     } catch (error) {
-      console.error('Failed to update request status:', error);
+      console.error('Failed to update request status:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: String(error)
+      });
     }
   }
 
@@ -402,7 +469,10 @@ export class ContentModerationService {
 
       await supabase.from('content_removal_list').insert(entries);
     } catch (error) {
-      console.error('Failed to add terms to removal list:', error);
+      console.error('Failed to add terms to removal list:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: String(error)
+      });
     }
   }
 
@@ -416,7 +486,10 @@ export class ContentModerationService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Failed to get removal list:', error);
+      console.error('Failed to get removal list:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: String(error)
+      });
       return [];
     }
   }

@@ -360,11 +360,23 @@ export class BlogAutoDeleteService {
         .lt('expires_at', twoHoursFromNow);
 
       if (error) {
+        // Handle specific error types gracefully
+        if (error.code === '42P01') {
+          console.warn('📋 blog_posts table does not exist yet - this is normal for new installations');
+          return [];
+        }
+
+        if (error.message?.includes('permission') || error.message?.includes('RLS')) {
+          console.warn('🔒 Database permission issue - check RLS policies for blog_posts table');
+          return [];
+        }
+
         console.error('Error fetching posts expiring soon:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
+          message: error.message || 'Unknown error',
+          details: error.details || 'No details available',
+          hint: error.hint || 'No hint available',
+          code: error.code || 'No error code',
+          fullError: String(error)
         });
         return [];
       }

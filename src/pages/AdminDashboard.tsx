@@ -32,6 +32,11 @@ import { AdminAuthService } from "@/services/adminAuthService";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 import { APIConfigurationManager } from "@/components/admin/APIConfigurationManager";
 import { OpenAIConnectionTester } from "@/components/OpenAIConnectionTester";
+import { OpenAIConnectionTest } from "@/components/OpenAIConnectionTest";
+import { APIKeyDebug } from "@/components/APIKeyDebug";
+import { APIKeyDebugAdvanced } from "@/components/APIKeyDebugAdvanced";
+import { APIManagementDashboard } from "@/components/admin/APIManagementDashboard";
+import { OrganizedAdminDashboard } from "@/components/admin/OrganizedAdminDashboard";
 import {
   Users,
   Activity,
@@ -99,206 +104,9 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Infinity className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-semibold">Admin Dashboard</h1>
-            </div>
-            <div className="flex items-center gap-3">
-              <PurgeStorageButton
-                variant="ghost"
-                size="sm"
-                showIcon={true}
-                className="text-muted-foreground hover:text-foreground"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  AdminAuthService.signOutAdmin();
-                  window.location.reload();
-                }}
-                className="text-muted-foreground hover:text-foreground"
-                title="Sign out admin"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-              <Badge variant="default" className="gap-1">
-                <Users className="h-3 w-3" />
-                Administrator
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
-              <Clock className="h-4 w-4 text-warning" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-warning">{stats.pendingOrders}</div>
-              <p className="text-xs text-muted-foreground">Awaiting completion</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-              <Activity className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">{stats.inProgress}</div>
-              <p className="text-xs text-muted-foreground">Being worked on</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalUsers}</div>
-              <p className="text-xs text-muted-foreground">Registered accounts</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
-              <CreditCard className="h-4 w-4 text-success" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-success">${stats.monthlyRevenue}</div>
-              <p className="text-xs text-muted-foreground">This month</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Tabs defaultValue="connections" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="connections">Service Status</TabsTrigger>
-            <TabsTrigger value="api-config">API Configuration</TabsTrigger>
-            <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
-            <TabsTrigger value="environment-vars">Environment Variables</TabsTrigger>
-            <TabsTrigger value="blog-posts">Blog Posts</TabsTrigger>
-            <TabsTrigger value="blog-claims">Blog Claims</TabsTrigger>
-            <TabsTrigger value="ai-posts">AI Posts</TabsTrigger>
-
-            <TabsTrigger value="content-filter">Content Filter</TabsTrigger>
-            <TabsTrigger value="moderation-queue">Moderation Queue</TabsTrigger>
-            <TabsTrigger value="trial-cleanup">Trial Cleanup</TabsTrigger>
-            <TabsTrigger value="blog-management">Blog Management</TabsTrigger>
-            <TabsTrigger value="affiliates">Affiliate Program</TabsTrigger>
-            <TabsTrigger value="auth-test">Auth & Email Test</TabsTrigger>
-            <TabsTrigger value="deployment">Deployment</TabsTrigger>
-            <TabsTrigger value="database">Database</TabsTrigger>
-            <TabsTrigger value="smtp-test">SMTP Test</TabsTrigger>
-            <TabsTrigger value="email-test">Email System</TabsTrigger>
-            <TabsTrigger value="security">Security & Roles</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="connections">
-            <ServiceConnectionStatus />
-          </TabsContent>
-
-          <TabsContent value="api-config">
-            <div className="space-y-6">
-              <OpenAIConnectionTester />
-              <APIConfigurationManager />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="campaigns">
-            <CampaignManager />
-          </TabsContent>
-
-          <TabsContent value="environment-vars">
-            <EnvironmentVariablesManager />
-          </TabsContent>
-
-          <TabsContent value="blog-posts">
-            <AdminBlogManager />
-          </TabsContent>
-
-          <TabsContent value="blog-claims">
-            <BlogPostClaimsManager />
-          </TabsContent>
-
-          <TabsContent value="ai-posts">
-            <AIPostsManager />
-          </TabsContent>
-
-
-
-          <TabsContent value="content-filter">
-            <ContentFilterManager />
-          </TabsContent>
-
-          <TabsContent value="moderation-queue">
-            <ContentModerationQueue />
-          </TabsContent>
-
-          <TabsContent value="trial-cleanup">
-            <TrialPostCleanupManager />
-          </TabsContent>
-
-          <TabsContent value="blog-management">
-            <BlogManagementPanel />
-          </TabsContent>
-
-          <TabsContent value="affiliates">
-            <AdminAffiliateManager />
-          </TabsContent>
-
-          <TabsContent value="auth-test">
-            <AuthEmailTest />
-          </TabsContent>
-
-
-
-          <TabsContent value="deployment">
-            <DeploymentStatus />
-          </TabsContent>
-
-          <TabsContent value="database">
-            <SystemStatusCheck />
-          </TabsContent>
-
-          <TabsContent value="smtp-test">
-            <SMTPConfigTest />
-          </TabsContent>
-
-          <TabsContent value="email-test">
-            <div className="space-y-6">
-              <SupabaseEmailGuide />
-              <SupabaseEmailTest />
-              <Card>
-                <CardHeader>
-                  <CardTitle>Manual Email Test</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <EmailTest />
-                </CardContent>
-              </Card>
-              <EmailSystemManager />
-            </div>
-          </TabsContent>
-
-
-
-          <TabsContent value="security">
-            <SecurityDashboard />
-          </TabsContent>
-        </Tabs>
+        <OrganizedAdminDashboard />
       </div>
 
       {/* Footer */}

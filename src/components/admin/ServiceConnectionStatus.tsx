@@ -7,6 +7,13 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   CheckCircle, 
   AlertCircle, 
@@ -407,14 +414,16 @@ export function ServiceConnectionStatus() {
             <Card key={service.name} className={`border-2 ${getStatusColor(service.status)}`}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <IconComponent className="h-5 w-5" />
-                    <h3 className="font-semibold">{service.name}</h3>
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <IconComponent className="h-5 w-5 shrink-0" />
+                    <h3 className="font-semibold truncate">{service.name}</h3>
                   </div>
-                  {getStatusIcon(service.status)}
+                  <div className="shrink-0">
+                    {getStatusIcon(service.status)}
+                  </div>
                 </div>
                 
-                <p className="text-sm text-muted-foreground mb-3">{service.message}</p>
+                <p className="text-sm text-muted-foreground mb-3 break-words overflow-hidden">{service.message}</p>
                 
                 <div className="flex items-center justify-between">
                   {getStatusBadge(service)}
@@ -438,14 +447,38 @@ export function ServiceConnectionStatus() {
                 {/* Additional Details */}
                 {service.details && (
                   <div className="mt-2 text-xs text-muted-foreground space-y-1">
-                    {Object.entries(service.details).map(([key, value]) => (
-                      <div key={key} className="flex justify-between">
-                        <span>{key}:</span>
-                        <span className={typeof value === 'boolean' ? (value ? 'text-green-600' : 'text-red-600') : ''}>
-                          {typeof value === 'boolean' ? (value ? '✓' : '✗') : String(value)}
-                        </span>
-                      </div>
-                    ))}
+                    {Object.entries(service.details).map(([key, value]) => {
+                      // Handle availableEnvVars as a dropdown
+                      if (key === 'availableEnvVars' && Array.isArray(value)) {
+                        return (
+                          <div key={key} className="space-y-1">
+                            <span className="text-xs font-medium">Available Environment Variables ({value.length}):</span>
+                            <Select>
+                              <SelectTrigger className="w-full h-8 text-xs">
+                                <SelectValue placeholder="Select environment variable..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {value.map((envVar) => (
+                                  <SelectItem key={envVar} value={envVar} className="text-xs">
+                                    {envVar}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        );
+                      }
+
+                      // Handle other details normally
+                      return (
+                        <div key={key} className="flex justify-between items-start gap-2">
+                          <span className="font-medium min-w-0 shrink-0">{key}:</span>
+                          <span className={`break-all text-right max-w-[200px] truncate ${typeof value === 'boolean' ? (value ? 'text-green-600' : 'text-red-600') : ''}`} title={String(value)}>
+                            {typeof value === 'boolean' ? (value ? '✓' : '✗') : String(value)}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>

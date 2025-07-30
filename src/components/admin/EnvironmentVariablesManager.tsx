@@ -7,18 +7,21 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Key, 
-  Eye, 
-  EyeOff, 
-  Save, 
-  CheckCircle2, 
+import {
+  Key,
+  Eye,
+  EyeOff,
+  Save,
+  CheckCircle2,
   AlertTriangle,
   Settings,
   TestTube,
   RefreshCw,
   Copy,
-  Trash2
+  Trash2,
+  Edit,
+  X,
+  Check
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -49,6 +52,8 @@ export function EnvironmentVariablesManager() {
   const [showSecrets, setShowSecrets] = useState<{ [key: string]: boolean }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [testResults, setTestResults] = useState<{ [key: string]: ApiTestResult }>({});
+  const [editingVar, setEditingVar] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
   const { toast } = useToast();
 
   // Predefined environment variables with descriptions
@@ -92,7 +97,7 @@ export function EnvironmentVariablesManager() {
 
   const initializeWithAPIKeys = () => {
     // Pre-populate with essential API keys if no variables exist and no database connection
-    const openAIKey = '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';
+    const openAIKey = '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';
     const supabaseToken = 'sbp_65f13d3ef84fae093dbb2b2d5368574f69b3cea2';
 
     setTimeout(() => {
@@ -313,6 +318,33 @@ export function EnvironmentVariablesManager() {
     setShowSecrets(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const startEditing = (envVar: EnvironmentVariable) => {
+    setEditingVar(envVar.id!);
+    setEditValue(envVar.value);
+  };
+
+  const cancelEditing = () => {
+    setEditingVar(null);
+    setEditValue('');
+  };
+
+  const saveEdit = async (envVar: EnvironmentVariable) => {
+    const updatedVar = { ...envVar, value: editValue.trim() };
+    await saveEnvironmentVariable(updatedVar);
+
+    // Also update localStorage for immediate persistence
+    const currentVars = envVars.map(v => v.id === envVar.id ? updatedVar : v);
+    localStorage.setItem('admin_env_vars', JSON.stringify(currentVars));
+
+    setEditingVar(null);
+    setEditValue('');
+
+    toast({
+      title: 'Environment variable updated',
+      description: `${envVar.key} has been updated successfully`
+    });
+  };
+
   const maskValue = (value: string, show: boolean) => {
     if (show) return value;
     if (value.length <= 8) return '•'.repeat(value.length);
@@ -321,6 +353,67 @@ export function EnvironmentVariablesManager() {
 
   return (
     <div className="space-y-6">
+      {/* Quick Access for API Keys */}
+      <Card className="bg-blue-50 border-blue-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-blue-800">
+            <Key className="h-5 w-5" />
+            Quick Access - API Keys
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {envVars.filter(v => v.key.includes('API_KEY')).map((apiKey) => (
+              <Card key={apiKey.id} className="p-3 bg-white">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-xs">{apiKey.key}</Badge>
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => startEditing(apiKey)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                      {apiKey.key.includes('API_KEY') && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => testApiKey(apiKey.key, apiKey.value)}
+                          disabled={testResults[apiKey.key]?.status === 'testing'}
+                          className="h-6 w-6 p-0"
+                        >
+                          {testResults[apiKey.key]?.status === 'testing' ? (
+                            <RefreshCw className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <TestTube className="h-3 w-3" />
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-xs font-mono bg-gray-100 p-1 rounded truncate">
+                    {maskValue(apiKey.value, false)}
+                  </div>
+                  {testResults[apiKey.key] && (
+                    <div className={`text-xs p-1 rounded ${testResults[apiKey.key].status === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {testResults[apiKey.key].message}
+                    </div>
+                  )}
+                </div>
+              </Card>
+            ))}
+            {envVars.filter(v => v.key.includes('API_KEY')).length === 0 && (
+              <div className="text-center text-muted-foreground py-4 md:col-span-2 lg:col-span-3">
+                No API keys configured yet. Add them using the form below.
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -468,6 +561,14 @@ export function EnvironmentVariablesManager() {
                           >
                             <Copy className="h-4 w-4" />
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => startEditing(envVar)}
+                            disabled={editingVar === envVar.id}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
                           {envVar.key.includes('API_KEY') && (
                             <Button
                               variant="ghost"
@@ -494,9 +595,37 @@ export function EnvironmentVariablesManager() {
                       </div>
 
                       <div className="text-sm">
-                        <div className="font-mono bg-gray-100 p-2 rounded">
-                          {maskValue(envVar.value, showSecrets[envVar.id!] || !envVar.is_secret)}
-                        </div>
+                        {editingVar === envVar.id ? (
+                          <div className="space-y-2">
+                            <div className="flex gap-2">
+                              <Input
+                                type={envVar.is_secret ? 'password' : 'text'}
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                className="font-mono text-xs"
+                                placeholder="Enter new value..."
+                              />
+                              <Button
+                                size="sm"
+                                onClick={() => saveEdit(envVar)}
+                                disabled={!editValue.trim() || isLoading}
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={cancelEditing}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="font-mono bg-gray-100 p-2 rounded break-all overflow-hidden">
+                            {maskValue(envVar.value, showSecrets[envVar.id!] || !envVar.is_secret)}
+                          </div>
+                        )}
                       </div>
 
                       {envVar.description && (
