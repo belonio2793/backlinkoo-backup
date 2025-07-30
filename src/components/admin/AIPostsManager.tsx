@@ -292,6 +292,43 @@ export function AIPostsManager() {
     );
   }
 
+  // Show helpful message if no posts and likely table doesn't exist
+  if (posts.length === 0 && !loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">AI Posts Manager</h2>
+            <p className="text-gray-600">Manage all AI-generated blog posts</p>
+          </div>
+          <Button onClick={loadPosts}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
+
+        <Card>
+          <CardContent className="p-8">
+            <div className="text-center">
+              <Sparkles className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No AI Posts Found</h3>
+              <p className="text-gray-600 mb-4">
+                There are no AI-generated posts yet, or the database table might not be configured.
+              </p>
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  If you're seeing connection errors, the "ai_generated_posts" table might not exist in your Supabase database.
+                  Please check your database schema or contact support.
+                </AlertDescription>
+              </Alert>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
