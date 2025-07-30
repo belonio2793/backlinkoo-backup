@@ -785,12 +785,12 @@ export function BlogPost() {
                     )}
                     
                     <Button
-                      onClick={() => navigate('/')}
+                      onClick={() => setIsPaymentModalOpen(true)}
                       variant="outline"
                       className="border-amber-600 text-amber-700 hover:bg-amber-100 px-6 py-3"
                     >
                       <Zap className="mr-2 h-5 w-5" />
-                      Create More Content
+                      Buy Backlinks
                     </Button>
                     
                     <Button
