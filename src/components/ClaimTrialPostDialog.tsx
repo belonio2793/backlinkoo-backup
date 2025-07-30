@@ -122,23 +122,22 @@ export function ClaimTrialPostDialog({
         .eq('user_id', currentUser.id)
         .single();
 
-      // Call Netlify function to claim the post
-      const response = await fetch('/.netlify/functions/claim-post', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          slug: trialPostSlug,
-          userId: currentUser.id,
-          userEmail: profile?.email || currentUser.email
-        })
-      });
+      // Find the blog post to claim
+      const blogPostKey = `blog_post_${trialPostSlug}`;
+      const localBlogPost = localStorage.getItem(blogPostKey);
 
-      const data = await response.json();
+      if (!localBlogPost) {
+        throw new Error('Blog post not found');
+      }
 
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to claim blog post');
+      const blogPostData = JSON.parse(localBlogPost);
+
+      // Use BlogClaimService directly since Netlify functions are not available
+      const { BlogClaimService } = await import('@/services/blogClaimService');
+      const claimResult = await BlogClaimService.claimPost(blogPostData.id, currentUser);
+
+      if (!claimResult.success) {
+        throw new Error(claimResult.message || claimResult.error || 'Failed to claim blog post');
       }
 
       // Track the claimed post for this user
