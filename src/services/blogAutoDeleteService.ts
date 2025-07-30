@@ -120,11 +120,24 @@ export class BlogAutoDeleteService {
     }
 
     this.cleanupInterval = setInterval(() => {
-      this.cleanupExpiredPosts().catch(console.error);
+      this.cleanupExpiredPosts().catch(error => {
+        console.error('⚠️ Automatic cleanup failed:', error instanceof Error ? error.message : String(error));
+      });
     }, this.CLEANUP_INTERVAL_MS);
 
+    console.log('✅ Automatic cleanup interval started');
+  }
+
+  /**
+   * Start cleanup interval with initial run (use with caution)
+   */
+  startCleanupWithInitialRun() {
+    this.startCleanupInterval();
+
     // Run initial cleanup
-    this.cleanupExpiredPosts().catch(console.error);
+    this.cleanupExpiredPosts().catch(error => {
+      console.error('⚠️ Initial cleanup failed:', error instanceof Error ? error.message : String(error));
+    });
   }
 
   /**
