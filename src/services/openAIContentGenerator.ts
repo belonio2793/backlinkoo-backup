@@ -184,7 +184,9 @@ export class OpenAIContentGenerator {
           const errorMessage = `API key ${i + 1} (${keyPreview}) failed: ${response.status} - ${errorData.error?.message || 'Unknown error'}`;
 
           console.error(`❌ ${errorMessage}`);
-          console.error('Full error details:', errorData);
+          console.error('Full error details:', JSON.stringify(errorData, null, 2));
+          console.error('Response status:', response.status);
+          console.error('Response headers:', Object.fromEntries(response.headers.entries()));
 
           if (response.status === 401) {
             console.warn(`🔑 Key ${i + 1} is invalid or expired. Check OpenAI dashboard.`);
