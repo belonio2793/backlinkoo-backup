@@ -346,7 +346,16 @@ export function ClaimTrialPostDialog({
               </Button>
             ) : (
               <Button
-                onClick={() => navigate('/auth/callback?action=signup&claim=true')}
+                onClick={() => {
+                  localStorage.setItem('claim_intent', JSON.stringify({
+                    action: 'claim_trial_post',
+                    postSlug: trialPostSlug,
+                    postTitle: trialPostTitle,
+                    targetUrl: targetUrl,
+                    timestamp: Date.now()
+                  }));
+                  navigate('/login');
+                }}
                 className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               >
                 Sign Up to Claim
