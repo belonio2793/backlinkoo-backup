@@ -6,10 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { blogService, type BlogPost } from '@/services/blogService';
 import { useAuth } from '@/hooks/useAuth';
-import { 
-  Calendar, 
-  Clock, 
-  Eye, 
+import { Footer } from '@/components/Footer';
+import { PurgeStorageButton } from '@/components/PurgeStorageButton';
+import {
+  Calendar,
+  Clock,
+  Eye,
   Search,
   Tag,
   User,
@@ -24,7 +26,8 @@ import {
   LayoutList,
   Star,
   CheckCircle2,
-  Globe
+  Globe,
+  Infinity
 } from 'lucide-react';
 
 export function Blog() {
@@ -166,6 +169,51 @@ export function Blog() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      {/* Header */}
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+              <Infinity className="h-7 w-7 text-primary" />
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <PurgeStorageButton
+                variant="ghost"
+                size="sm"
+                showIcon={true}
+                className="text-muted-foreground hover:text-foreground"
+              />
+              {user ? (
+                <>
+                  <Button
+                    onClick={() => navigate("/dashboard")}
+                    className="bg-transparent hover:bg-blue-50/50 border border-blue-200/60 text-blue-700 hover:text-blue-800 hover:border-blue-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+                  >
+                    Dashboard
+                  </Button>
+                  <Button
+                    onClick={() => navigate("/auth")}
+                    className="bg-transparent hover:bg-red-50/50 border border-red-200/60 text-red-600 hover:text-red-700 hover:border-red-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+                  >
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" onClick={() => navigate("/auth")} className="font-medium">
+                    Sign In
+                  </Button>
+                  <Button onClick={() => navigate("/auth")} className="font-medium">
+                    Get Started
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Header */}
       <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600">
         <div className="absolute inset-0 bg-black/20"></div>
@@ -177,7 +225,7 @@ export function Blog() {
                 Expert Content Hub
               </Badge>
               <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight">
-                Backlinkoo
+                Backlink ∞
                 <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
                   {" "}Blog
                 </span>
@@ -187,41 +235,7 @@ export function Blog() {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button
-                onClick={() => navigate('/')}
-                size="lg"
-                className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold px-8 py-4 text-lg shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
-              >
-                <Sparkles className="mr-2 h-5 w-5" />
-                Create AI Content
-              </Button>
-              <Button
-                onClick={() => document.getElementById('blog-grid')?.scrollIntoView({ behavior: 'smooth' })}
-                variant="outline"
-                size="lg"
-                className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-8 py-4 text-lg"
-              >
-                <BookOpen className="mr-2 h-5 w-5" />
-                Explore Posts
-              </Button>
-            </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto pt-12 border-t border-white/20">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-400">{blogPosts.length}</div>
-                <div className="text-sm text-blue-100">AI Articles</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-400">{Math.round(blogPosts.reduce((acc, post) => acc + (post.seo_score || 75), 0) / blogPosts.length) || 0}</div>
-                <div className="text-sm text-blue-100">Avg SEO Score</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-400">{blogPosts.reduce((acc, post) => acc + (post.view_count || 0), 0)}</div>
-                <div className="text-sm text-blue-100">Total Views</div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -391,19 +405,9 @@ export function Blog() {
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 text-lg"
             >
               <Zap className="mr-2 h-5 w-5" />
-              Start Creating Content
+              Buy Backlinks
             </Button>
-            {!user && (
-              <Button 
-                onClick={() => navigate('/auth')}
-                variant="outline"
-                size="lg"
-                className="border-2 border-white/30 text-white hover:bg-white/10 px-8 py-4 text-lg"
-              >
-                <User className="mr-2 h-5 w-5" />
-                Sign Up Free
-              </Button>
-            )}
+
           </div>
 
           {/* Features */}
@@ -426,6 +430,9 @@ export function Blog() {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
