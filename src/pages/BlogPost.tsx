@@ -1127,6 +1127,7 @@ export function BlogPost() {
           setShowLoginModal(true);
         }}
         isAuthenticated={!!currentUser}
+        isClaiming={isClaiming}
       />
 
       {/* Login Modal */}
