@@ -350,30 +350,75 @@ export function ServiceConnectionStatus() {
   };
 
   const runConnectionTests = async () => {
-    setIsChecking(true);
-    setLastChecked(new Date());
+    try {
+      setIsChecking(true);
+      setLastChecked(new Date());
 
-    // Reset all services to checking
-    setServices(prev => prev.map(service => ({
-      ...service,
-      status: 'checking' as const,
-      message: `Testing ${service.name}...`,
-      responseTime: undefined
-    })));
+      // Reset all services to checking
+      setServices(prev => prev.map(service => ({
+        ...service,
+        status: 'checking' as const,
+        message: `Testing ${service.name}...`,
+        responseTime: undefined
+      })));
 
-    // Run tests in parallel for faster results
-    await Promise.allSettled([
-      checkNetlifyFunctions(),
-      checkSupabase(),
-      checkOpenAI(),
-      checkResend()
-    ]);
+      // Run tests in parallel for faster results with individual error handling
+      const results = await Promise.allSettled([
+        checkNetlifyFunctions().catch(err => {
+          console.warn('Netlify functions check failed:', err);
+          updateServiceStatus('Netlify Functions', {
+            status: 'error',
+            message: 'Function test failed',
+            responseTime: 0
+          });
+        }),
+        checkSupabase().catch(err => {
+          console.warn('Supabase check failed:', err);
+          updateServiceStatus('Supabase Database', {
+            status: 'error',
+            message: 'Database test failed',
+            responseTime: 0
+          });
+        }),
+        checkOpenAI().catch(err => {
+          console.warn('OpenAI check failed:', err);
+          updateServiceStatus('OpenAI API', {
+            status: 'error',
+            message: 'API test failed',
+            hasApiKey: false,
+            responseTime: 0
+          });
+        }),
+        checkResend().catch(err => {
+          console.warn('Resend check failed:', err);
+          updateServiceStatus('Resend Email', {
+            status: 'error',
+            message: 'Email service test failed',
+            hasApiKey: false,
+            responseTime: 0
+          });
+        })
+      ]);
 
-    setIsChecking(false);
+      console.log('Connection tests completed:', results);
+    } catch (error) {
+      console.error('Critical error in runConnectionTests:', error);
+    } finally {
+      setIsChecking(false);
+    }
   };
 
   useEffect(() => {
-    runConnectionTests();
+    // Wrap in try-catch to prevent any unhandled errors from crashing the component
+    try {
+      runConnectionTests().catch(error => {
+        console.error('Failed to run connection tests:', error);
+        setIsChecking(false);
+      });
+    } catch (error) {
+      console.error('Critical error initializing connection tests:', error);
+      setIsChecking(false);
+    }
   }, []);
 
   const getStatusIcon = (status: ServiceStatus['status']) => {
