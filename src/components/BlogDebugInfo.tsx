@@ -128,12 +128,7 @@ export function BlogDebugInfo() {
                 </Badge>
               </div>
               
-              <div>
-                <strong>Unclaimed Posts:</strong>
-                <Badge variant="secondary" className="ml-2">
-                  {debugInfo.unclaimedPosts || 0}
-                </Badge>
-              </div>
+
 
               {debugInfo.storageKeys && (
                 <div>
@@ -151,21 +146,7 @@ export function BlogDebugInfo() {
                 </div>
               )}
 
-              {debugInfo.freeBacklinkPosts && debugInfo.freeBacklinkPosts.length > 0 && (
-                <div>
-                  <strong>Recent Free Backlinks:</strong>
-                  <div className="mt-1 space-y-1">
-                    {debugInfo.freeBacklinkPosts.slice(0, 3).map((post: any) => (
-                      <div key={post.id} className="text-xs bg-gray-50 p-1 rounded">
-                        <div className="truncate font-medium">{post.title}</div>
-                        <div className="text-gray-500">
-                          Status: {post.status} | Views: {post.viewCount}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+
 
               {debugInfo.error && (
                 <div className="text-red-600">
