@@ -16,7 +16,7 @@ export const SupabaseConnectionTest = () => {
     setTestResult(null);
 
     try {
-      console.log('���� Starting Supabase connection test...');
+      console.log('🔍 Starting Supabase connection test...');
       
       // Test 1: Basic client configuration
       const isConfigured = !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY;
