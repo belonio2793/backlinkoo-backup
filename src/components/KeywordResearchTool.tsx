@@ -341,7 +341,7 @@ export const KeywordResearchTool = () => {
     { code: "MF", name: "Saint Martin", flag: "🇲🇫" },
     { code: "MG", name: "Madagascar", flag: "🇲🇬" },
     { code: "MH", name: "Marshall Islands", flag: "🇲🇭" },
-    { code: "MK", name: "North Macedonia", flag: "��������" },
+    { code: "MK", name: "North Macedonia", flag: "🇲🇰" },
     { code: "ML", name: "Mali", flag: "🇲🇱" },
     { code: "MM", name: "Myanmar", flag: "🇲🇲" },
     { code: "MN", name: "Mongolia", flag: "🇲🇳" },
