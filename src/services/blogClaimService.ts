@@ -486,6 +486,32 @@ export class BlogClaimService {
         user_id: postToInsert.user_id
       });
 
+      // Test database connection first
+      try {
+        const { error: connectionError } = await supabase
+          .from('published_blog_posts')
+          .select('id')
+          .limit(1);
+
+        if (connectionError) {
+          console.warn('⚠️ BlogClaimService: Database connection test failed before insertion:', connectionError.message);
+          if (connectionError.message?.includes('relation') || connectionError.message?.includes('does not exist')) {
+            return {
+              success: false,
+              message: 'Database table is not available. Please contact support.',
+              error: 'Database table does not exist'
+            };
+          }
+        }
+      } catch (testError: any) {
+        console.warn('⚠️ BlogClaimService: Database test failed:', testError.message);
+        return {
+          success: false,
+          message: 'Database is not available. Please try again later.',
+          error: testError.message
+        };
+      }
+
       let insertedPost, insertError;
       try {
         const result = await supabase
