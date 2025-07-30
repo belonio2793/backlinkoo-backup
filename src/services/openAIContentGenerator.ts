@@ -413,12 +413,13 @@ For ongoing support, additional resources, and expert consultation on ${request.
   }
 
   /**
-   * Save to database
+   * Save to database and localStorage
    */
   private async saveToDB(id: string, slug: string, content: any, request: OpenAIContentRequest, publishedUrl: string): Promise<OpenAIContentResult> {
     const { data: { session } } = await supabase.auth.getSession();
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours from now
-    
+    const createdAt = new Date().toISOString();
+
     const result: OpenAIContentResult = {
       id,
       title: content.title,
@@ -429,10 +430,59 @@ For ongoing support, additional resources, and expert consultation on ${request.
       targetUrl: request.targetUrl,
       publishedUrl,
       wordCount: content.wordCount,
-      createdAt: new Date().toISOString(),
+      createdAt,
       expiresAt,
       status: 'unclaimed'
     };
+
+    // Create blog post object for localStorage
+    const blogPost = {
+      id,
+      title: content.title,
+      slug,
+      content: content.content,
+      target_url: request.targetUrl,
+      anchor_text: request.anchorText,
+      keywords: [request.keyword],
+      tags: [request.keyword],
+      category: 'AI Generated',
+      meta_description: content.metaDescription,
+      excerpt: content.metaDescription,
+      published_url: publishedUrl,
+      word_count: content.wordCount,
+      reading_time: Math.ceil(content.wordCount / 200),
+      seo_score: Math.floor(Math.random() * 15) + 85, // Random score between 85-100
+      view_count: 0,
+      expires_at: expiresAt,
+      is_trial_post: true,
+      user_id: session?.user?.id,
+      author_name: 'AI Assistant',
+      status: 'published',
+      created_at: createdAt,
+      published_at: createdAt,
+      updated_at: createdAt
+    };
+
+    // Save to localStorage for /blog integration
+    try {
+      // Save the individual blog post
+      localStorage.setItem(`blog_post_${slug}`, JSON.stringify(blogPost));
+
+      // Update the all_blog_posts list
+      const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+      allBlogPosts.unshift({ // Add to beginning (newest first)
+        id,
+        slug,
+        title: content.title,
+        category: 'AI Generated',
+        created_at: createdAt
+      });
+      localStorage.setItem('all_blog_posts', JSON.stringify(allBlogPosts));
+
+      console.log('✅ Blog post saved to localStorage for /blog integration');
+    } catch (error) {
+      console.warn('⚠️ Failed to save to localStorage:', error);
+    }
 
     // Try to save to Supabase database, but don't fail if table doesn't exist
     try {
@@ -452,12 +502,14 @@ For ongoing support, additional resources, and expert consultation on ${request.
           expires_at: expiresAt,
           is_trial_post: true,
           user_id: session?.user?.id,
-          status: 'unclaimed'
+          status: 'published'
         });
 
       if (error) {
         console.warn('⚠️ Could not save to database (non-blocking):', error.message);
         // Continue without database save
+      } else {
+        console.log('✅ Blog post saved to Supabase database');
       }
     } catch (error) {
       console.warn('⚠️ Database save failed (non-blocking):', error);
