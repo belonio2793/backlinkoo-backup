@@ -1025,7 +1025,7 @@ const Dashboard = () => {
                     <span className="xs:hidden">{credits}</span>
                     <span className="hidden sm:inline">Credits</span>
                   </Badge>
-                  <Button variant="outline" size="sm" onClick={() => setIsPaymentModalOpen(true)} className="px-2 sm:px-4">
+                  <Button variant="outline" size="sm" onClick={() => setIsPricingModalOpen(true)} className="px-2 sm:px-4">
                     <Plus className="h-4 w-4 sm:mr-1" />
                     <span className="hidden sm:inline">Buy Credits</span>
                   </Button>
