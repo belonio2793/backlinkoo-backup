@@ -141,18 +141,19 @@ export class SecureConfig {
     return decode(SECURE_STORE.paypal_client_secret);
   }
   
-  // API keys - Environment variables take priority over stored values
+  // API keys - Server-side only (via Netlify functions)
+  // Client-side access removed for security
   static get OPENAI_API_KEY(): string {
-    // Always prefer environment variables (Netlify) over stored values
-    return import.meta.env.VITE_OPENAI_API_KEY || decode(SECURE_STORE.openai_api_key);
+    // API keys are now handled server-side only
+    throw new Error('API keys are not accessible from client-side. Use Netlify functions instead.');
   }
-  
+
   static get ANTHROPIC_API_KEY(): string {
-    return decode(SECURE_STORE.anthropic_api_key);
+    throw new Error('API keys are not accessible from client-side. Use Netlify functions instead.');
   }
-  
+
   static get GOOGLE_API_KEY(): string {
-    return decode(SECURE_STORE.google_api_key);
+    throw new Error('API keys are not accessible from client-side. Use Netlify functions instead.');
   }
   
   // Application secrets
