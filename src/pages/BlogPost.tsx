@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { publishedBlogService, type PublishedBlogPost } from '@/services/publishedBlogService';
+import { blogService, type BlogPost as BlogPostType } from '@/services/blogService';
 import { ClaimTrialPostDialog } from '@/components/ClaimTrialPostDialog';
 import { LoginModal } from '@/components/LoginModal';
 import { supabase } from '@/integrations/supabase/client';
