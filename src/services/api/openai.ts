@@ -216,7 +216,7 @@ export class OpenAIService {
     }
 
     // Don't retry on authentication errors (but log them)
-    if (message.includes('401') || message.includes('unauthorized') || message.includes('invalid api key')) {
+    if (message.includes('401') || message.includes('unauthorized') || message.includes('invalid api key') || error.name === 'AuthenticationError') {
       console.error('🔑 Authentication error - check API key validity');
       return false;
     }
