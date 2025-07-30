@@ -395,35 +395,9 @@ const generateContextualLinks = (request) => {
   };
 };
 
-// Rate limiting per IP
-const rateLimits = new Map();
-
+// Rate limiting disabled - unlimited usage
 const checkRateLimit = (ip) => {
-  const now = Date.now();
-  const windowMs = 60 * 60 * 1000; // 1 hour
-  const maxRequests = 10; // 10 requests per hour per IP
-
-  if (!rateLimits.has(ip)) {
-    rateLimits.set(ip, { requests: 1, windowStart: now });
-    return { allowed: true };
-  }
-
-  const userLimit = rateLimits.get(ip);
-  
-  // Reset window if expired
-  if (now - userLimit.windowStart > windowMs) {
-    rateLimits.set(ip, { requests: 1, windowStart: now });
-    return { allowed: true };
-  }
-
-  // Check if within limit
-  if (userLimit.requests >= maxRequests) {
-    const retryAfter = Math.ceil((userLimit.windowStart + windowMs - now) / 1000);
-    return { allowed: false, retryAfter };
-  }
-
-  // Increment counter
-  userLimit.requests++;
+  // Always allow unlimited usage
   return { allowed: true };
 };
 
