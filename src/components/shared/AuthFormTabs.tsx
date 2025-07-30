@@ -93,14 +93,14 @@ export function AuthFormTabs({
     });
 
     try {
-      // Add timeout to prevent infinite loading
+      // Add timeout to prevent infinite loading (increased to 30 seconds)
       const signInPromise = AuthService.signIn({
         email: loginEmail,
         password: loginPassword,
       });
 
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Sign in timeout')), 10000)
+        setTimeout(() => reject(new Error('Sign in is taking longer than expected. Please check your internet connection and try again.')), 30000)
       );
 
       const result = await Promise.race([signInPromise, timeoutPromise]) as any;
