@@ -27,6 +27,7 @@ import { Footer } from "@/components/Footer";
 import { SystemStatusCheck } from "@/components/SystemStatusCheck";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 import { AdminAuthService } from "@/services/adminAuthService";
+import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 import {
   Users,
   Activity,
