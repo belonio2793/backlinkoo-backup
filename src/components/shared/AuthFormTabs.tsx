@@ -48,6 +48,7 @@ export function AuthFormTabs({
   const [firstName, setFirstName] = useState("");
   const [retryAttempts, setRetryAttempts] = useState(0);
   const [timeoutCountdown, setTimeoutCountdown] = useState(0);
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
 
   const { toast } = useToast();
 
