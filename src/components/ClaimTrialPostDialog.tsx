@@ -132,9 +132,54 @@ export function ClaimTrialPostDialog({
 
       const blogPostData = JSON.parse(localBlogPost);
 
-      // Use BlogClaimService directly since Netlify functions are not available
-      const { BlogClaimService } = await import('@/services/blogClaimService');
-      const claimResult = await BlogClaimService.claimPost(blogPostData.id, currentUser);
+      // Handle claiming of localStorage blog posts
+      let claimResult;
+
+      // First, try to find or create the post in the database
+      try {
+        // Check if this post already exists in database by slug
+        const { data: existingPost } = await supabase
+          .from('published_blog_posts')
+          .select('id, user_id, is_trial_post')
+          .eq('slug', trialPostSlug)
+          .eq('status', 'published')
+          .single();
+
+        if (existingPost) {
+          // Post exists in database, use BlogClaimService
+          const { BlogClaimService } = await import('@/services/blogClaimService');
+          claimResult = await BlogClaimService.claimPost(existingPost.id, currentUser);
+        } else {
+          // Post doesn't exist in database, create it first
+          const postToInsert = {
+            ...blogPostData,
+            user_id: currentUser.id,
+            is_trial_post: false,
+            expires_at: null,
+            status: 'published',
+            updated_at: new Date().toISOString()
+          };
+
+          const { data: insertedPost, error: insertError } = await supabase
+            .from('published_blog_posts')
+            .insert([postToInsert])
+            .select()
+            .single();
+
+          if (insertError) {
+            throw new Error(`Failed to save post to database: ${insertError.message}`);
+          }
+
+          claimResult = {
+            success: true,
+            message: 'Blog post claimed successfully! It has been saved to your account.',
+            post: insertedPost
+          };
+        }
+      } catch (error) {
+        console.error('Error during claim process:', error);
+        throw new Error(error instanceof Error ? error.message : 'Failed to claim blog post');
+      }
 
       if (!claimResult.success) {
         throw new Error(claimResult.message || claimResult.error || 'Failed to claim blog post');
