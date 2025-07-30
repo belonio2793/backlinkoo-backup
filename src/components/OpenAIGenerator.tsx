@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { chatGPTFallbackService } from '@/services/chatGPTFallbackService';
+import { openAIContentGenerator } from '@/services/openAIContentGenerator';
 import {
   Zap,
   CheckCircle2,
