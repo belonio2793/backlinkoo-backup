@@ -432,7 +432,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
               <div>• Displayed: {debugInfo.displayedPosts}</div>
-              <div>• Has Errors: {debugInfo.hasError ? '⚠���' : '��'}</div>
+              <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '��'}</div>
             </div>
           </div>
           {debugInfo.errorMessage && (
@@ -1768,9 +1768,12 @@ const Dashboard = () => {
         )}
       </div>
 
-      <PaymentModal
-        isOpen={isPaymentModalOpen}
-        onClose={() => setIsPaymentModalOpen(false)}
+      <PricingModal
+        isOpen={isPricingModalOpen}
+        onClose={() => setIsPricingModalOpen(false)}
+        onAuthSuccess={(user) => {
+          setUser(user);
+        }}
       />
 
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
