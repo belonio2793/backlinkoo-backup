@@ -142,16 +142,16 @@ export function EnhancedDashboardRouter() {
         console.log('✅ User authenticated and verified, showing dashboard');
         setIsLoading(false);
       } else {
-        // Check if this is a recent claim operation - give more time for auth to stabilize
+        // Check if this is a recent claim operation or claim intent - give more time for auth to stabilize
         const recentClaim = localStorage.getItem('recent_claim_operation');
+        const claimIntent = localStorage.getItem('claim_intent');
         const isRecentClaim = recentClaim && (Date.now() - parseInt(recentClaim)) < 15000; // Within last 15 seconds
+        const hasClaimIntent = claimIntent && JSON.parse(claimIntent).timestamp && (Date.now() - JSON.parse(claimIntent).timestamp) < 60000; // Within last minute
 
-        if (isRecentClaim) {
-          console.log('🎯 Recent claim operation detected, giving auth more time to stabilize...');
-          setTimeout(() => {
-            // Retry auth check after claim operation
-            window.location.reload();
-          }, 3000);
+        if (isRecentClaim || hasClaimIntent) {
+          console.log('🎯 Recent claim operation or claim intent detected, redirecting to login...');
+          setIsLoading(false);
+          navigate('/login');
           return;
         }
 
