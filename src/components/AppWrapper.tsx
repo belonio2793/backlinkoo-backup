@@ -19,6 +19,8 @@ import NotFound from '@/pages/NotFound';
 import AdminDashboard from '@/pages/AdminDashboard';
 import PaymentSuccess from '@/pages/PaymentSuccess';
 import PaymentCancelled from '@/pages/PaymentCancelled';
+import SubscriptionSuccess from '@/pages/SubscriptionSuccess';
+import SubscriptionCancelled from '@/pages/SubscriptionCancelled';
 import { CampaignDeliverables } from '@/pages/CampaignDeliverables';
 import EmailMarketing from '@/pages/EmailMarketing';
 import BacklinkReport from '@/pages/BacklinkReport';
