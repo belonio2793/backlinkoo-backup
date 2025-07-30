@@ -33,14 +33,31 @@ export function EnhancedDashboardRouter() {
     try {
       console.log('🔍 Checking user authentication for dashboard...');
 
-      // Add timeout to prevent hanging auth checks
+      // Add timeout to prevent hanging auth checks (increased to 10 seconds)
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Auth check timeout')), 5000)
+        setTimeout(() => reject(new Error('Auth check timeout')), 10000)
       );
 
       const sessionPromise = supabase.auth.getSession();
 
-      const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+      let sessionResult;
+      try {
+        sessionResult = await Promise.race([sessionPromise, timeoutPromise]);
+      } catch (timeoutError) {
+        console.warn('⚠️ Auth check timed out, trying fallback method...');
+        // Fallback: try direct user check
+        try {
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          sessionResult = { data: { session: user ? { user } : null }, error: userError };
+        } catch (fallbackError) {
+          console.error('❌ Fallback auth check also failed:', fallbackError);
+          setIsLoading(false);
+          navigate('/login');
+          return;
+        }
+      }
+
+      const { data: { session }, error } = sessionResult as any;
 
       if (!isMounted) return;
 
