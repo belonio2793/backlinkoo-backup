@@ -18,6 +18,7 @@ import { contentModerationService } from '@/services/contentModerationService';
 import { adminSyncService } from '@/services/adminSyncService';
 import { useAuth } from '@/hooks/useAuth';
 import { trackBlogGeneration } from '@/hooks/useGuestTracking';
+import { SlugPreview } from './SlugPreview';
 
 import {
   Globe, Zap, Target, Clock, CheckCircle2, ExternalLink, Sparkles,
