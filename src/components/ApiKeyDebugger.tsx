@@ -39,10 +39,14 @@ export function ApiKeyDebugger() {
 
   const handleTest = async () => {
     if (!currentKey) return;
-    
+
     setTesting(true);
-    const result = await testOpenAIKey(currentKey);
-    setTestResult(result);
+    try {
+      const result = await testProvidedApiKey();
+      setTestResult({ valid: result.success, error: result.error });
+    } catch (error) {
+      setTestResult({ valid: false, error: error instanceof Error ? error.message : 'Test failed' });
+    }
     setTesting(false);
   };
 
@@ -56,7 +60,7 @@ export function ApiKeyDebugger() {
 
   const getKeyStatus = (key: string) => {
     if (!key) return { status: 'missing', message: 'No API key configured' };
-    if (!validateOpenAIKey(key)) return { status: 'invalid', message: 'Invalid key format' };
+    if (!key.startsWith('sk-')) return { status: 'invalid', message: 'Invalid key format' };
     return { status: 'format-valid', message: 'Key format is valid' };
   };
 
