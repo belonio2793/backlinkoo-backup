@@ -331,8 +331,18 @@ export function EnvironmentVariablesManager() {
   const saveEdit = async (envVar: EnvironmentVariable) => {
     const updatedVar = { ...envVar, value: editValue.trim() };
     await saveEnvironmentVariable(updatedVar);
+
+    // Also update localStorage for immediate persistence
+    const currentVars = envVars.map(v => v.id === envVar.id ? updatedVar : v);
+    localStorage.setItem('admin_env_vars', JSON.stringify(currentVars));
+
     setEditingVar(null);
     setEditValue('');
+
+    toast({
+      title: 'Environment variable updated',
+      description: `${envVar.key} has been updated successfully`
+    });
   };
 
   const maskValue = (value: string, show: boolean) => {
