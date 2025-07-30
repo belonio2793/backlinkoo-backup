@@ -833,6 +833,9 @@ Return the content as clean HTML with proper tags including the backlink. Ensure
                 onChange={(e) => setPrimaryKeyword(e.target.value)}
                 disabled={isGenerating}
               />
+              <p className="text-xs text-gray-600">
+                Will generate minimum 500 words of high-quality content focused on this keyword
+              </p>
             </div>
           </div>
 
