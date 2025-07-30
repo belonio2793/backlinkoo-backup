@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { publishedBlogService, type PublishedBlogPost } from '@/services/publishedBlogService';
+import { blogService, type BlogPost } from '@/services/blogService';
 
 import { BlogDebugInfo } from '@/components/BlogDebugInfo';
 import { 
