@@ -93,7 +93,7 @@ export function BlogPost() {
         if (!post) {
           try {
             const blogStorageKey = `blog_post_${slug}`;
-            console.log('🔍 Looking for blog post with key:', blogStorageKey);
+            console.log('�� Looking for blog post with key:', blogStorageKey);
 
             const allKeys = Object.keys(localStorage).filter(key => key.startsWith('blog_post_'));
             console.log('📋 Available blog post keys:', allKeys);
@@ -786,8 +786,7 @@ export function BlogPost() {
                     
                     <Button
                       onClick={() => setIsPaymentModalOpen(true)}
-                      variant="outline"
-                      className="border-amber-600 text-amber-700 hover:bg-amber-100 px-6 py-3"
+                      className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0 px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
                     >
                       <Zap className="mr-2 h-5 w-5" />
                       Buy Backlinks
