@@ -61,6 +61,7 @@ export function BlogPost() {
   const [isLiked, setIsLiked] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [showClaimExplanation, setShowClaimExplanation] = useState(false);
 
   useEffect(() => {
     const loadBlogPost = async () => {
