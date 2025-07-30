@@ -60,6 +60,12 @@ export function EnvironmentVariablesManager() {
       placeholder: 'sk-proj-...'
     },
     {
+      key: 'SUPABASE_ACCESS_TOKEN',
+      description: 'Supabase account access token for database operations',
+      is_secret: true,
+      placeholder: 'sbp_...'
+    },
+    {
       key: 'VITE_ANTHROPIC_API_KEY',
       description: 'Anthropic Claude API key for AI features',
       is_secret: true,
