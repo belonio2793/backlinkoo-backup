@@ -369,7 +369,7 @@ export function APIManagementDashboard() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">{key.name}</Badge>
-                        {key.isSecret && <Badge variant="secondary">Secret</Badge>
+                        {key.isSecret && <Badge variant="secondary">Secret</Badge>}
                         {getStatusBadge(key.status)}
                       </div>
                       <div className="flex items-center gap-2">
