@@ -112,20 +112,71 @@ export function AuthFormTabs({
     }, 1000);
 
     try {
-      // Add timeout to prevent infinite loading (increased to 30 seconds)
-      const signInPromise = AuthService.signIn({
-        email: loginEmail,
-        password: loginPassword,
-      });
+      // Try multiple authentication methods with shorter timeouts
+      let result;
+      let authError;
 
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => {
-          clearInterval(countdownInterval);
-          reject(new Error('Sign in is taking longer than expected. Please check your internet connection and try again.'));
-        }, 30000)
-      );
+      // Method 1: Quick AuthService attempt (15 seconds)
+      try {
+        console.log('🔐 Attempting quick AuthService login...');
+        const quickSignInPromise = AuthService.signIn({
+          email: loginEmail,
+          password: loginPassword,
+        });
 
-      const result = await Promise.race([signInPromise, timeoutPromise]) as any;
+        const quickTimeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Quick auth timeout')), 15000)
+        );
+
+        result = await Promise.race([quickSignInPromise, quickTimeoutPromise]) as any;
+        console.log('✅ Quick auth successful');
+      } catch (quickError: any) {
+        console.warn('⚠️ Quick auth failed, trying direct Supabase...', quickError.message);
+        authError = quickError;
+
+        // Method 2: Direct Supabase authentication (fallback)
+        try {
+          console.log('🔐 Attempting direct Supabase login...');
+          const { supabase } = await import('@/integrations/supabase/client');
+
+          const directAuthPromise = supabase.auth.signInWithPassword({
+            email: loginEmail.trim(),
+            password: loginPassword
+          });
+
+          const directTimeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Direct auth timeout')), 10000)
+          );
+
+          const directResult = await Promise.race([directAuthPromise, directTimeoutPromise]) as any;
+
+          if (directResult.error) {
+            throw new Error(directResult.error.message);
+          }
+
+          if (directResult.data?.user) {
+            // Check email verification
+            if (!directResult.data.user.email_confirmed_at) {
+              throw new Error('Email verification required. Please check your email for a verification link.');
+            }
+
+            result = {
+              success: true,
+              user: directResult.data.user,
+              session: directResult.data.session
+            };
+            console.log('✅ Direct Supabase auth successful');
+          } else {
+            throw new Error('No user data received');
+          }
+        } catch (directError: any) {
+          console.error('❌ Direct Supabase auth also failed:', directError.message);
+          // If both methods fail, throw the more descriptive error
+          throw authError?.message?.includes('timeout') ?
+            new Error('Authentication is taking too long. Please check your connection and try again.') :
+            directError;
+        }
+      }
 
       // Clear countdown on success
       clearInterval(countdownInterval);
