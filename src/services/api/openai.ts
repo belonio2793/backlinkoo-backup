@@ -459,7 +459,7 @@ export class OpenAIService {
   }
 
   isConfigured(): boolean {
-    return Boolean(this.apiKey);
+    return Boolean(this.apiKey && this.apiKey.startsWith('sk-') && this.apiKey.length > 20);
   }
 }
 
