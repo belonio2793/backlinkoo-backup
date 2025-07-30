@@ -355,21 +355,20 @@ Focus on creating valuable, informative content that genuinely helps readers whi
    * Test all provider connections
    */
   async testConnection(): Promise<boolean> {
-    const result = await enhancedOpenAIService.testConnection();
-    return result.success;
+    return await multiKeyOpenAIService.testConnection();
   }
 
   /**
    * Get detailed provider status
    */
   async getProviderStatus(): Promise<Record<string, any>> {
-    const health = enhancedOpenAIService.getServiceHealth();
-    const connectionTest = await enhancedOpenAIService.testConnection();
+    const health = multiKeyOpenAIService.getServiceHealth();
+    const connectionTest = await multiKeyOpenAIService.testConnection();
     return {
-      'Enhanced OpenAI': {
-        configured: enhancedOpenAIService.isConfigured(),
+      'Multi-Key OpenAI': {
+        configured: multiKeyOpenAIService.isConfigured(),
         healthy: health.status === 'healthy',
-        connectionWorking: connectionTest.success,
+        connectionWorking: connectionTest,
         details: health.details
       }
     };
@@ -379,7 +378,7 @@ Focus on creating valuable, informative content that genuinely helps readers whi
    * Check if any provider is configured
    */
   isConfigured(): boolean {
-    return enhancedOpenAIService.isConfigured();
+    return multiKeyOpenAIService.isConfigured();
   }
 }
 
