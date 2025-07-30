@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { builderAIAgent, AIGenerationRequest, GenerationProgress, BlogPostResult } from '@/services/builderAIAgent';
 import { useAuthStatus } from '@/hooks/useAuth';
+import { OpenAIConnectionTester } from './OpenAIConnectionTester';
 import { 
   Sparkles, 
   Zap, 
