@@ -361,6 +361,13 @@ Return the content as clean HTML with proper tags including the backlink. Ensure
         throw new Error('Failed to generate content after all retry attempts');
       }
 
+      // Validate content meets requirements before proceeding
+      const finalWordCount = reliableResult.content.replace(/<[^>]+>/g, ' ').split(' ').filter(w => w.length > 0).length;
+
+      if (finalWordCount < 500) {
+        throw new Error(`Generated content is too short (${finalWordCount} words). Minimum 500 words required.`);
+      }
+
       // Convert reliable result to expected format
       const result = {
         id: crypto.randomUUID(),
@@ -371,9 +378,9 @@ Return the content as clean HTML with proper tags including the backlink. Ensure
         keywords: [request.primaryKeyword, `${request.primaryKeyword} guide`, `best ${request.primaryKeyword}`],
         targetUrl: request.targetUrl,
         anchorText: request.anchorText || request.primaryKeyword,
-        wordCount: reliableResult.content.replace(/<[^>]+>/g, ' ').split(' ').filter(w => w.length > 0).length,
-        readingTime: Math.ceil(reliableResult.content.replace(/<[^>]+>/g, ' ').split(' ').filter(w => w.length > 0).length / 200),
-        seoScore: 85,
+        wordCount: finalWordCount,
+        readingTime: Math.ceil(finalWordCount / 200),
+        seoScore: finalWordCount >= 800 ? 95 : finalWordCount >= 600 ? 85 : 75,
         status: 'unclaimed' as const,
         createdAt: new Date().toISOString(),
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
@@ -382,6 +389,8 @@ Return the content as clean HTML with proper tags including the backlink. Ensure
         provider: reliableResult.provider,
         fallbacksUsed: reliableResult.fallbacksUsed
       };
+
+      console.log(`✅ Final content validation: ${finalWordCount} words generated successfully`);
 
       // Update progress after successful generation
       setProgress(80);
