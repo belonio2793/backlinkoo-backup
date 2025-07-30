@@ -109,8 +109,22 @@ export function EnhancedDashboardRouter() {
     } catch (error: any) {
       console.error('Dashboard router error:', error);
       if (isMounted) {
+        // Show user-friendly error message
+        if (error.message.includes('timeout')) {
+          toast({
+            title: "Connection Slow",
+            description: "Authentication is taking longer than expected. Redirecting to login...",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Authentication Error",
+            description: "Unable to verify your login status. Please sign in again.",
+            variant: "destructive"
+          });
+        }
         setIsLoading(false);
-        setTimeout(() => navigate('/login'), 100);
+        setTimeout(() => navigate('/login'), 1500); // Give user time to read the message
       }
     }
   };
