@@ -65,6 +65,8 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
   const [loadingStatus, setLoadingStatus] = useState<string>('Initializing...');
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [claimingPostId, setClaimingPostId] = useState<string | null>(null);
+  const [showDebug, setShowDebug] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<any>({});
   const { toast } = useToast();
   const navigate = useNavigate();
 
