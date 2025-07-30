@@ -1,4 +1,4 @@
--- Create blog_posts table for Builder.io AI blog management
+-- Create blog_posts table for OpenAI blog management
 -- Run this SQL in your Supabase SQL Editor
 
 CREATE TABLE IF NOT EXISTS blog_posts (
@@ -66,7 +66,7 @@ INSERT INTO blog_posts (
   '<h1>Test Blog Post</h1><p>This is a test blog post created during table setup.</p>',
   'https://example.com',
   'example link',
-  'This is a test blog post for the Builder.io AI system.',
+  'This is a test blog post for the OpenAI system.',
   '/blog/test-blog-post',
   50,
   true,
