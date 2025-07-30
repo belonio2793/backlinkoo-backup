@@ -111,7 +111,10 @@ export class AuthService {
       });
 
       if (error) {
-        console.error('AuthService: Signin error:', error);
+        console.error('AuthService: Signin error:', {
+          message: error.message,
+          details: error
+        });
         return {
           success: false,
           error: this.formatErrorMessage(error.message)
