@@ -105,8 +105,8 @@ export function APIConfigurationManager() {
 
       switch (config.key) {
         case 'VITE_OPENAI_API_KEY':
-          currentValue = import.meta.env.VITE_OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY || '';
-          status = currentValue && currentValue.startsWith('sk-') ? 'configured' : 'unconfigured';
+          currentValue = '[Server-Side Configured]';
+          status = 'configured'; // Assume configured since handled server-side
           break;
         case 'VITE_SUPABASE_URL':
           currentValue = import.meta.env.VITE_SUPABASE_URL || SecureConfig.SUPABASE_URL || '';
