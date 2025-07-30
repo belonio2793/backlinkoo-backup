@@ -172,9 +172,21 @@ export function BuilderAIGenerator({ onSuccess, variant = 'homepage' }: BuilderA
 
     } catch (error: any) {
       console.error('Generation failed:', error);
+
+      // Provide user-friendly error messages without technical details
+      let userMessage = "Unable to generate content at this time. Please try again.";
+
+      if (error.message?.includes('limit') || error.message?.includes('quota')) {
+        userMessage = "Service is currently at capacity. Please try again in a few minutes.";
+      } else if (error.message?.includes('timeout')) {
+        userMessage = "Generation is taking longer than expected. Please try again.";
+      } else if (error.message?.includes('validation') || error.message?.includes('short')) {
+        userMessage = "Content generation needs to be adjusted. Please try again with different keywords.";
+      }
+
       toast({
-        title: "Generation Failed",
-        description: error.message || "Failed to generate blog post",
+        title: "Generation Temporarily Unavailable",
+        description: userMessage,
         variant: "destructive",
       });
     } finally {
