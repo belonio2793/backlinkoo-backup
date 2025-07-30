@@ -56,33 +56,52 @@ exports.handler = async (event, context) => {
 
     if (!apiKey) {
       return {
-        statusCode: 500,
+        statusCode: 200,
         headers,
-        body: JSON.stringify({ error: `${provider} API key not configured` })
+        body: JSON.stringify({
+          provider,
+          configured: false,
+          message: `${provider} API key not configured in Netlify environment`
+        })
       };
     }
 
     // Check provider health
-    const response = await fetch(endpoint, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    try {
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
-    const isHealthy = response.ok;
+      const isHealthy = response.ok;
 
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ 
-        provider,
-        healthy: isHealthy,
-        status: response.status,
-        latency: Date.now() - Date.now() // This would be calculated properly in real implementation
-      })
-    };
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          provider,
+          configured: true,
+          healthy: isHealthy,
+          status: response.status,
+          message: isHealthy ? `${provider} API is working correctly` : `${provider} API key invalid`
+        })
+      };
+    } catch (fetchError) {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          provider,
+          configured: true,
+          healthy: false,
+          message: `${provider} API connection failed`,
+          error: fetchError.message
+        })
+      };
+    }
 
   } catch (error) {
     console.error('Health check error:', error);
