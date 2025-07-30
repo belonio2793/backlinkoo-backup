@@ -270,7 +270,10 @@ export class ContentModerationService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Failed to fetch moderation requests:', error);
+      console.error('Failed to fetch moderation requests:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: String(error)
+      });
       // Fallback to localStorage
       const stored = JSON.parse(localStorage.getItem('moderation_queue') || '[]');
       return stored.filter((req: ModerationRequest) => 
