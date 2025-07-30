@@ -189,13 +189,10 @@ Return clean HTML content optimized for SEO.`;
     for (let i = 0; i < maxRetries; i++) {
       try {
         setGenerationStage(`Generating content... Attempt ${i + 1}`);
-        const res = await directOpenAI.generateContentWithPrompt(prompt, {
+        const res = await openAIService.generateContent(prompt, {
           systemPrompt,
           maxTokens: 3000,
-          temperature: 0.7,
-          targetUrl: request.targetUrl,
-          primaryKeyword: request.primaryKeyword,
-          anchorText: request.anchorText
+          temperature: 0.7
         });
 
         if (res.success && res.content) {
