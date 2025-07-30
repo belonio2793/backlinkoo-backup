@@ -20,6 +20,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { liveBlogPublisher, type LiveBlogPost } from '@/services/liveBlogPublisher';
 import { supabase } from '@/integrations/supabase/client';
+import { blogClaimService, type ClaimablePost } from '@/services/blogClaimService';
 import { format, formatDistanceToNow } from 'date-fns';
 
 interface UserBlogDashboardProps {
