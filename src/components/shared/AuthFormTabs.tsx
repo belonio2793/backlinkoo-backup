@@ -408,7 +408,7 @@ export function AuthFormTabs({
             {isLoading ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Signing in...
+                {timeoutCountdown > 0 ? `Signing in... (${timeoutCountdown}s)` : 'Signing in...'}
               </>
             ) : (
               <>
