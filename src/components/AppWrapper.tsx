@@ -96,6 +96,16 @@ export const AppWrapper = () => {
             <PaymentCancelled />
           </EmailVerificationGuard>
         } />
+        <Route path="/subscription-success" element={
+          <EmailVerificationGuard>
+            <SubscriptionSuccess />
+          </EmailVerificationGuard>
+        } />
+        <Route path="/subscription-cancelled" element={
+          <EmailVerificationGuard>
+            <SubscriptionCancelled />
+          </EmailVerificationGuard>
+        } />
         <Route path="/campaign/:campaignId" element={
           <EmailVerificationGuard>
             <CampaignDeliverables />
