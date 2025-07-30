@@ -52,10 +52,9 @@ export function BlogDebugInfo() {
           viewCount: (post as any).viewCount || 0
         })),
         unclaimedPosts: unclaimedPosts.length,
-        storageKeys: Object.keys(localStorage).filter(key => 
-          key.startsWith('blog_post_') || 
-          key === 'all_blog_posts' || 
-          key === 'free_backlinks'
+        storageKeys: Object.keys(localStorage).filter(key =>
+          key.startsWith('blog_post_') ||
+          key === 'all_blog_posts'
         ).map(key => ({
           key,
           size: localStorage.getItem(key)?.length || 0
