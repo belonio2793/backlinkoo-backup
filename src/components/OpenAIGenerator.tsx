@@ -8,7 +8,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { openAIContentGenerator } from '@/services/openAIContentGenerator';
-import { testAllKeys } from '@/utils/testOpenAI';
 import {
   Zap,
   CheckCircle2,
