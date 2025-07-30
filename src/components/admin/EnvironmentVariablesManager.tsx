@@ -81,7 +81,7 @@ export function EnvironmentVariablesManager() {
 
   useEffect(() => {
     loadEnvironmentVariables();
-    initializeWithOpenAIKey();
+    initializeWithAPIKeys();
   }, []);
 
   const initializeWithAPIKeys = () => {
