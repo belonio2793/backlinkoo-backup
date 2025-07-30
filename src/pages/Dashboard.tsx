@@ -200,15 +200,27 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
     }
   };
 
-  if (trialPosts.length === 0) {
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+          <BarChart3 className="h-10 w-10 text-purple-600" />
+        </div>
+        <h3 className="text-xl font-semibold text-gray-800 mb-3">Loading Posts...</h3>
+        <p className="text-gray-600">Fetching the latest blog posts for you.</p>
+      </div>
+    );
+  }
+
+  if (allPosts.length === 0) {
     return (
       <div className="text-center py-12">
         <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <BarChart3 className="h-10 w-10 text-purple-600" />
         </div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-3">No Trial Posts Yet</h3>
+        <h3 className="text-xl font-semibold text-gray-800 mb-3">No Posts Available</h3>
         <p className="text-gray-600 mb-6 max-w-md mx-auto">
-          Start creating amazing blog posts with our free trial generator. Your content will appear here instantly.
+          No blog posts are currently available for claiming. Start creating amazing blog posts with our generator.
         </p>
         <Button
           onClick={() => navigate('/?focus=generator')}
