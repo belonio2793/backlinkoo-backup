@@ -6,13 +6,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/services/authService";
 import { TrialConversionService } from "@/services/trialConversionService";
-import { 
-  Eye, 
-  EyeOff, 
-  RefreshCw, 
-  Shield, 
+import {
+  Eye,
+  EyeOff,
+  RefreshCw,
+  Shield,
   CheckCircle,
-  Mail
+  Mail,
+  Wifi
 } from "lucide-react";
 
 interface AuthFormTabsProps {
