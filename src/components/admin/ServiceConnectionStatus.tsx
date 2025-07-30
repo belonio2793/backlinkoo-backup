@@ -414,11 +414,13 @@ export function ServiceConnectionStatus() {
             <Card key={service.name} className={`border-2 ${getStatusColor(service.status)}`}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <IconComponent className="h-5 w-5" />
-                    <h3 className="font-semibold">{service.name}</h3>
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <IconComponent className="h-5 w-5 shrink-0" />
+                    <h3 className="font-semibold truncate">{service.name}</h3>
                   </div>
-                  {getStatusIcon(service.status)}
+                  <div className="shrink-0">
+                    {getStatusIcon(service.status)}
+                  </div>
                 </div>
                 
                 <p className="text-sm text-muted-foreground mb-3 break-words overflow-hidden">{service.message}</p>
