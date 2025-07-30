@@ -183,6 +183,7 @@ const AdminDashboard = () => {
         <Tabs defaultValue="connections" className="space-y-6">
           <TabsList>
             <TabsTrigger value="connections">Service Status</TabsTrigger>
+            <TabsTrigger value="api-config">API Configuration</TabsTrigger>
             <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
             <TabsTrigger value="blog-posts">Blog Posts</TabsTrigger>
             <TabsTrigger value="blog-claims">Blog Claims</TabsTrigger>
