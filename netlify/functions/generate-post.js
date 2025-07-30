@@ -194,7 +194,7 @@ async function generateChatGPTBlogContent(destinationUrl, keyword, anchorText) {
 
   // If OpenAI fails, use ChatGPT structured fallback
   if (!aiContent.content) {
-    return generateChatGPTFallbackContent(destinationUrl, keyword, finalAnchorText, domain);
+    return generateOpenAIContent(destinationUrl, keyword, finalAnchorText, domain);
   }
 
   return aiContent;
@@ -600,7 +600,7 @@ Format as JSON:
   }
 }
 
-function generateChatGPTFallbackContent(destinationUrl, keyword, anchorText, domain) {
+function generateOpenAIContent(destinationUrl, keyword, anchorText, domain) {
   const title = `${keyword}: Complete Professional Guide for 2024`;
 
   const content = `

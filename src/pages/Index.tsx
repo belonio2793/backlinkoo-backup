@@ -23,7 +23,7 @@ import { AnimatedHeadline } from "@/components/AnimatedHeadline";
 import { HomepageBlogGenerator } from "@/components/HomepageBlogGenerator";
 import { ProductionBlogGenerator } from "@/components/ProductionBlogGenerator";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
-import { BuilderAIGenerator } from "@/components/BuilderAIGenerator";
+import { OpenAIGenerator } from "@/components/OpenAIGenerator";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
@@ -359,7 +359,7 @@ const Index = () => {
 
           {/* Generator Rendering */}
           <div className="max-w-6xl mx-auto">
-            <BuilderAIGenerator
+            <OpenAIGenerator
               variant="homepage"
               onSuccess={(blogPost) => {
                 setUser(user); // Refresh state

@@ -286,9 +286,219 @@ Return clean HTML content optimized for SEO.`;
   };
 
   return (
-    <div className="text-sm">
-      {/* Insert your full UI code here (form inputs, progress bar, preview modal, etc.) */}
-      {/* This drop-in file focuses on the core logic fix. Use your original form & UI code from earlier to plug in around it. */}
-    </div>
+    <Card className="w-full max-w-4xl mx-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Globe className="h-5 w-5" />
+          Global Blog Generator
+          {globalStats && (
+            <Badge variant="secondary">
+              {globalStats.totalPosts} posts created
+            </Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent className="space-y-6">
+        {/* Basic Form */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="targetUrl">Target URL *</Label>
+            <Input
+              id="targetUrl"
+              placeholder="https://yourwebsite.com"
+              value={targetUrl}
+              onChange={(e) => setTargetUrl(e.target.value)}
+              disabled={isGenerating}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="primaryKeyword">Primary Keyword *</Label>
+            <Input
+              id="primaryKeyword"
+              placeholder="e.g., digital marketing"
+              value={primaryKeyword}
+              onChange={(e) => setPrimaryKeyword(e.target.value)}
+              disabled={isGenerating}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="anchorText">Anchor Text (Optional)</Label>
+          <Input
+            id="anchorText"
+            placeholder="e.g., learn more about digital marketing"
+            value={anchorText}
+            onChange={(e) => setAnchorText(e.target.value)}
+            disabled={isGenerating}
+          />
+        </div>
+
+        {/* Advanced Options */}
+        {showAdvancedOptions && (
+          <Tabs defaultValue="content" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="content">Content</TabsTrigger>
+              <TabsTrigger value="seo">SEO</TabsTrigger>
+              <TabsTrigger value="style">Style</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="content" className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Content Length</Label>
+                  <Select value={contentLength} onValueChange={(value: any) => setContentLength(value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="short">Short (500-800 words)</SelectItem>
+                      <SelectItem value="medium">Medium (800-1200 words)</SelectItem>
+                      <SelectItem value="long">Long (1200+ words)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Industry (Optional)</Label>
+                  <Input
+                    placeholder="e.g., Technology, Healthcare"
+                    value={industry}
+                    onChange={(e) => setIndustry(e.target.value)}
+                    disabled={isGenerating}
+                  />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="seo" className="space-y-4">
+              <div className="space-y-2">
+                <Label>SEO Focus</Label>
+                <Select value={seoFocus} onValueChange={(value: any) => setSeoFocus(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="high">High SEO Focus</SelectItem>
+                    <SelectItem value="medium">Medium SEO Focus</SelectItem>
+                    <SelectItem value="balanced">Balanced Approach</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="style" className="space-y-4">
+              <div className="space-y-2">
+                <Label>Content Tone</Label>
+                <Select value={contentTone} onValueChange={(value: any) => setContentTone(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="professional">Professional</SelectItem>
+                    <SelectItem value="casual">Casual</SelectItem>
+                    <SelectItem value="technical">Technical</SelectItem>
+                    <SelectItem value="friendly">Friendly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </TabsContent>
+          </Tabs>
+        )}
+
+        {/* Progress Display */}
+        {isGenerating && (
+          <div className="space-y-3 p-4 bg-blue-50 rounded-lg border">
+            <div className="flex items-center justify-between">
+              <span className="font-medium">{generationStage}</span>
+              <span className="text-sm text-gray-600">{progress}%</span>
+            </div>
+            <Progress value={progress} className="h-2" />
+          </div>
+        )}
+
+        {/* Generate Button */}
+        <Button
+          onClick={handleGenerate}
+          disabled={isGenerating || remainingRequests <= 0}
+          className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+        >
+          {isGenerating ? (
+            <>
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+              Generating Blog Post...
+            </>
+          ) : (
+            <>
+              <Zap className="mr-2 h-4 w-4" />
+              Generate Blog Post
+            </>
+          )}
+        </Button>
+
+        {/* Stats */}
+        {globalStats && (
+          <div className="flex items-center justify-center gap-6 text-sm text-gray-600">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              <span>{globalStats.totalPosts} total posts</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              <span>{globalStats.postsToday} posts today</span>
+            </div>
+          </div>
+        )}
+
+        {/* Preview Modal */}
+        {showPreview && generatedPost && (
+          <div className="mt-6 p-4 border rounded-lg bg-gray-50">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Generated Content Preview</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPreview(false)}
+              >
+                Close Preview
+              </Button>
+            </div>
+
+            <Tabs value={previewMode} onValueChange={(value: any) => setPreviewMode(value)}>
+              <TabsList>
+                <TabsTrigger value="content">Content</TabsTrigger>
+                <TabsTrigger value="seo">SEO</TabsTrigger>
+                <TabsTrigger value="links">Links</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="content" className="mt-4">
+                <div className="max-h-60 overflow-y-auto bg-white p-4 rounded border">
+                  <h4 className="font-bold text-lg mb-2">{generatedPost.title}</h4>
+                  <div className="prose prose-sm max-w-none">
+                    {generatedPost.content?.slice(0, 500)}...
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="seo" className="mt-4">
+                <div className="space-y-2 text-sm">
+                  <div><strong>Word Count:</strong> {generatedPost.wordCount || 'N/A'}</div>
+                  <div><strong>SEO Score:</strong> {generatedPost.seoScore || 'N/A'}</div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="links" className="mt-4">
+                <div className="space-y-2 text-sm">
+                  <div><strong>Backlink URL:</strong> {generatedPost.targetUrl}</div>
+                  <div><strong>Anchor Text:</strong> {generatedPost.anchorText}</div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

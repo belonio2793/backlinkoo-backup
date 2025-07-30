@@ -1,5 +1,5 @@
-import { environmentVariablesService } from '@/lib/environmentVariablesService';
-import { SecureConfig } from '@/lib/secureConfig';
+import { environmentVariablesService } from '@/services/environmentVariablesService';
+import { SecureConfig } from '@/lib/secure-config';
 
 export class OpenAIService {
   private apiKey: string = '';

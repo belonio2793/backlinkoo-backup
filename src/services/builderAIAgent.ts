@@ -1,5 +1,5 @@
 /**
- * Builder.io AI Agent Service
+ * OpenAI Agent Service
  * Comprehensive AI content generation system with all specified requirements
  */
 

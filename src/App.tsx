@@ -8,6 +8,7 @@ import { GlobalNotifications } from "@/components/GlobalNotifications";
 import { BetaNotification } from "@/components/BetaNotification";
 import { AppWrapper } from "@/components/AppWrapper";
 import { AuthProfileChecker } from "@/components/AuthProfileChecker";
+import { AuthRedirectHandler } from "@/components/AuthRedirectHandler";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 
@@ -39,7 +40,9 @@ const App = () => (
           <GlobalNotifications />
           <BetaNotification />
           <BrowserRouter>
-            <AppWrapper />
+            <AuthRedirectHandler>
+              <AppWrapper />
+            </AuthRedirectHandler>
           </BrowserRouter>
         </AuthProfileChecker>
       </TooltipProvider>
