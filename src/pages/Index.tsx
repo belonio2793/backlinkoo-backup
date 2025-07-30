@@ -946,7 +946,7 @@ const Index = () => {
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3">
                   <CheckCircle className="h-5 w-5 text-primary" />
-                  <span className="font-light">GPT-4 powered content generation</span>
+                  <span className="font-light">GPT-3.5 Turbo powered content generation</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <CheckCircle className="h-5 w-5 text-primary" />
