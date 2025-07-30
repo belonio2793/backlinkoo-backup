@@ -48,6 +48,7 @@ export function BlogEditor({ postId, mode = 'edit', onSave, onCancel }: BlogEdit
   // Form state
   const [formData, setFormData] = useState({
     title: '',
+    slug: '',
     content: '',
     excerpt: '',
     meta_description: '',
