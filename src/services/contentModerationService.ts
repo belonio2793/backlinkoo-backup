@@ -363,7 +363,7 @@ export class ContentModerationService {
         approvalRate: total > 0 ? ((approved / total) * 100).toFixed(1) : '0',
         bySeverity,
         byCategory,
-        topFlaggedTerms: this.getTopFlaggedTerms(data)
+        topFlaggedTerms: this.getTopFlaggedTerms(safeData)
       };
     } catch (error) {
       console.error('Failed to get moderation stats:', {
