@@ -162,11 +162,7 @@ export class BlogClaimService {
         .single();
 
       if (fetchError || !existingPost) {
-        console.error('❌ BlogClaimService: Post not found in database:', {
-          postId,
-          error: fetchError?.message,
-          hint: 'This might be a localStorage-only post'
-        });
+        console.error('❌ BlogClaimService: Post not found in database:', `ID: ${postId}, Error: ${fetchError?.message || 'Unknown error'}, Hint: This might be a localStorage-only post`);
         return {
           success: false,
           message: 'Blog post not found or unavailable for claiming',
