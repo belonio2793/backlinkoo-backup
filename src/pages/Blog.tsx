@@ -618,16 +618,27 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
 
 // Blog Post List Item Component
 function BlogPostListItem({ post, navigate, formatDate }: any) {
+  const isClaimed = !post.is_trial_post && post.user_id;
+  const isPremiumContent = isClaimed || (post.seo_score || 0) > 85;
+
   return (
-    <Card 
-      className="group hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-200 hover:border-blue-300"
+    <Card
+      className={`group hover:shadow-lg transition-all duration-200 cursor-pointer border hover:border-blue-300 ${
+        isClaimed
+          ? 'border-green-200 bg-gradient-to-r from-green-50/30 to-emerald-50/30'
+          : 'border-gray-200'
+      }`}
       onClick={() => navigate(`/blog/${post.slug}`)}
     >
       <CardContent className="p-6">
         <div className="flex items-start space-x-6">
           <div className="flex-1 space-y-3">
             <div className="flex items-center gap-3">
-              <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0">
+              <Badge className={`border-0 ${
+                isClaimed
+                  ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
+                  : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
+              }`}>
                 {post.category || 'Expert Content'}
               </Badge>
               {post.is_trial_post ? (
@@ -636,9 +647,19 @@ function BlogPostListItem({ post, navigate, formatDate }: any) {
                   Trial
                 </Badge>
               ) : (
-                <Badge className="bg-green-50 text-green-700 border-green-200">
+                <Badge className={`${
+                  isClaimed
+                    ? 'bg-green-100 text-green-800 border-green-300'
+                    : 'bg-green-50 text-green-700 border-green-200'
+                }`}>
                   <CheckCircle2 className="mr-1 h-3 w-3" />
-                  Live
+                  {isClaimed ? 'Claimed' : 'Live'}
+                </Badge>
+              )}
+              {isPremiumContent && (
+                <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                  <Star className="mr-1 h-3 w-3" />
+                  Premium
                 </Badge>
               )}
             </div>
