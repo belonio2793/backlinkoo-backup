@@ -5,6 +5,7 @@ import { trialPostCleanupService } from './services/trialPostCleanupService'
 import './utils/setupApiKey'
 import './utils/setApiKey'
 import './utils/testNewApiKey'
+import './utils/validateApiKey'
 // Auto-run debug disabled to prevent concurrent API calls
 // Use the admin interface to test API keys manually
 // import { debugApiKey } from './utils/debugApiKey';
