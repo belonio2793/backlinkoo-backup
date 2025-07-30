@@ -93,12 +93,12 @@ export const OpenAIGenerator = () => {
 
     try {
       // Set up real-time progress callback for OpenAI/ChatGPT
-      chatGPTFallbackService.setProgressCallback((update) => {
+      openAIContentGenerator.setProgressCallback((update) => {
         setProgress(update);
       });
 
       // Generate content using OpenAI/ChatGPT
-      const result = await chatGPTFallbackService.generateContentWithChatGPT({
+      const result = await openAIContentGenerator.generateContent({
         keyword: keyword.trim(),
         anchorText: anchorText.trim(),
         targetUrl: formattedUrl
