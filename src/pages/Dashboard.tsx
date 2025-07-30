@@ -233,113 +233,162 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
     );
   }
 
+  // Separate posts into categories
+  const userClaimedPosts = allPosts.filter(post => post.user_id === user?.id && !post.is_trial_post);
+  const availablePosts = allPosts.filter(post => !post.user_id || post.is_trial_post);
+  const otherClaimedPosts = allPosts.filter(post => post.user_id && post.user_id !== user?.id && !post.is_trial_post);
+
   return (
     <div className="space-y-6">
       {/* Summary Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
-          <div className="text-2xl font-bold text-purple-700">{trialPosts.length}</div>
-          <div className="text-sm text-purple-600">Generated Posts</div>
-        </div>
-        <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
-          <div className="text-2xl font-bold text-blue-700">
-            {Math.round(trialPosts.reduce((acc, post) => acc + (post.seo_score || 0), 0) / trialPosts.length) || 0}
-          </div>
-          <div className="text-sm text-blue-600">Avg SEO Score</div>
+          <div className="text-2xl font-bold text-purple-700">{allPosts.length}</div>
+          <div className="text-sm text-purple-600">Total Posts</div>
         </div>
         <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200">
-          <div className="text-2xl font-bold text-emerald-700">
-            {trialPosts.reduce((acc, post) => acc + (post.reading_time || 0), 0)}m
-          </div>
-          <div className="text-sm text-emerald-600">Total Reading</div>
+          <div className="text-2xl font-bold text-emerald-700">{userClaimedPosts.length}</div>
+          <div className="text-sm text-emerald-600">Your Posts</div>
+        </div>
+        <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+          <div className="text-2xl font-bold text-blue-700">{availablePosts.length}</div>
+          <div className="text-sm text-blue-600">Available</div>
         </div>
       </div>
 
-      {/* Blog Posts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {trialPosts.map((post, index) => {
-          const timeRemaining = post.expires_at ?
-            Math.max(0, Math.floor((new Date(post.expires_at).getTime() - Date.now()) / (1000 * 60 * 60))) : 0;
-
-          return (
-            <Card
-              key={post.id || index}
-              className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50 overflow-hidden"
-            >
-              <CardContent className="p-6">
-                {/* Post Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-purple-700 transition-colors">
-                      {post.title || 'Untitled Post'}
-                    </h3>
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                      {post.excerpt || 'No description available'}
-                    </p>
+      {/* Claimed Posts Section */}
+      {userClaimedPosts.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+            Your Claimed Posts ({userClaimedPosts.length})
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {userClaimedPosts.map((post, index) => (
+              <Card key={post.id || index} className="group hover:shadow-lg transition-all duration-300 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="font-medium text-gray-800 line-clamp-2 text-sm">{post.title}</h4>
+                    <Badge variant="outline" className="bg-emerald-50 border-emerald-200 text-emerald-700 text-xs">Owned</Badge>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="bg-purple-50 border-purple-200 text-purple-700 text-xs"
-                  >
-                    Trial
-                  </Badge>
-                </div>
+                  <div className="flex gap-2 mb-3">
+                    <Button size="sm" className="flex-1" onClick={() => navigate(`/blog/${post.slug}`)}>
+                      <Eye className="h-3 w-3 mr-1" />View
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleUnclaimPost(post)}
+                      disabled={claimingPostId === post.id}
+                      className="border-red-200 text-red-600 hover:bg-red-50"
+                    >
+                      Unclaim
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
-                {/* Post Stats */}
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                  <div className="text-center p-2 bg-blue-50 rounded-lg">
-                    <div className="text-sm font-semibold text-blue-700">
-                      {post.seo_score || 0}
+      {/* Available Posts Section */}
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <Target className="h-5 w-5 text-blue-600" />
+          Available Posts ({availablePosts.length})
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {availablePosts.map((post, index) => {
+            const timeRemaining = post.expires_at ?
+              Math.max(0, Math.floor((new Date(post.expires_at).getTime() - Date.now()) / (1000 * 60 * 60))) : null;
+
+            return (
+              <Card key={post.id || index} className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="font-medium text-gray-800 line-clamp-2 text-sm">{post.title}</h4>
+                    <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-700 text-xs">
+                      {post.is_trial_post ? 'Trial' : 'Available'}
+                    </Badge>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-3 gap-2 mb-3 text-xs">
+                    <div className="text-center p-2 bg-blue-50 rounded">
+                      <div className="font-semibold text-blue-700">{post.seo_score || 0}</div>
+                      <div className="text-blue-600">SEO</div>
                     </div>
-                    <div className="text-xs text-blue-600">SEO</div>
-                  </div>
-                  <div className="text-center p-2 bg-emerald-50 rounded-lg">
-                    <div className="text-sm font-semibold text-emerald-700">
-                      {post.reading_time || 0}m
+                    <div className="text-center p-2 bg-emerald-50 rounded">
+                      <div className="font-semibold text-emerald-700">{post.reading_time || 0}m</div>
+                      <div className="text-emerald-600">Read</div>
                     </div>
-                    <div className="text-xs text-emerald-600">Read</div>
-                  </div>
-                  <div className="text-center p-2 bg-amber-50 rounded-lg">
-                    <div className="text-sm font-semibold text-amber-700">
-                      {timeRemaining}h
-                    </div>
-                    <div className="text-xs text-amber-600">Left</div>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
-                    onClick={() => navigate(`/blog/${post.slug}`)}
-                  >
-                    <Eye className="h-3 w-3 mr-1" />
-                    View
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-purple-200 text-purple-700 hover:bg-purple-50"
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                  </Button>
-                </div>
-
-                {/* Expiry Warning */}
-                {timeRemaining < 6 && (
-                  <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
-                    <div className="flex items-center gap-2 text-xs text-amber-700">
-                      <AlertCircle className="h-3 w-3" />
-                      <span>Expires in {timeRemaining} hours - Upgrade to keep forever!</span>
+                    <div className="text-center p-2 bg-purple-50 rounded">
+                      <div className="font-semibold text-purple-700">{Math.floor((post.word_count || 0) / 100)}k</div>
+                      <div className="text-purple-600">Words</div>
                     </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
+
+                  <div className="flex gap-2 mb-3">
+                    <Button size="sm" variant="outline" className="flex-1" onClick={() => navigate(`/blog/${post.slug}`)}>
+                      <Eye className="h-3 w-3 mr-1" />View
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleClaimPost(post)}
+                      disabled={claimingPostId === post.id || !user}
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                    >
+                      {claimingPostId === post.id ? (
+                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <Plus className="h-3 w-3 mr-1" />
+                          Claim
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {/* Expiry Warning */}
+                  {timeRemaining !== null && timeRemaining < 6 && (
+                    <div className="p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700">
+                      <AlertCircle className="h-3 w-3 inline mr-1" />
+                      Expires in {timeRemaining}h
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
+
+      {/* Other Claimed Posts Section */}
+      {otherClaimedPosts.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Users className="h-5 w-5 text-gray-600" />
+            Claimed by Others ({otherClaimedPosts.length})
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {otherClaimedPosts.map((post, index) => (
+              <Card key={post.id || index} className="border-gray-200 bg-gradient-to-br from-gray-50 to-white opacity-75">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="font-medium text-gray-600 line-clamp-2 text-sm">{post.title}</h4>
+                    <Badge variant="outline" className="bg-gray-50 border-gray-300 text-gray-600 text-xs">Claimed</Badge>
+                  </div>
+                  <div className="text-xs text-gray-500 mb-3">claimed***@user.com</div>
+                  <Button size="sm" variant="outline" className="w-full" onClick={() => navigate(`/blog/${post.slug}`)}>
+                    <Eye className="h-3 w-3 mr-1" />View Only
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Call to Action */}
       <div className="text-center pt-6 border-t border-gray-200">
@@ -348,7 +397,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Generate Another Post
+          Generate New Post
         </Button>
       </div>
     </div>
