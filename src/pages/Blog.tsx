@@ -256,14 +256,7 @@ export function Blog() {
               >
                 Create Your First Backlink
               </Button>
-              <br />
-              <Button
-                variant="outline"
-                onClick={() => navigate('/free-backlink')}
-                className="ml-2"
-              >
-                Try Free Backlink Generator
-              </Button>
+
             </div>
           </div>
         ) : (
