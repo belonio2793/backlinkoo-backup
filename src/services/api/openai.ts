@@ -322,11 +322,13 @@ export class OpenAIService {
     error?: string;
   }> {
     if (!this.isConfigured()) {
+      const errorMessage = 'OpenAI API key not configured. Please visit https://platform.openai.com/api-keys to get a valid API key and set the VITE_OPENAI_API_KEY environment variable.';
+      console.warn('❌', errorMessage);
       return {
         content: '',
         usage: { tokens: 0, cost: 0 },
         success: false,
-        error: 'OpenAI API key not configured'
+        error: errorMessage
       };
     }
 
