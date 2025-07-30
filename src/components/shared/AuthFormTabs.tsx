@@ -141,7 +141,7 @@ export function AuthFormTabs({
     });
 
     // Start countdown timer (reduced for better UX)
-    setTimeoutCountdown(25);
+    setTimeoutCountdown(35); // Increased to account for longer timeouts
     const countdownInterval = setInterval(() => {
       setTimeoutCountdown(prev => {
         if (prev <= 1) {
