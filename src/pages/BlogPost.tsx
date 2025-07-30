@@ -1053,6 +1053,35 @@ export function BlogPost() {
         }}
       />
 
+      {/* Blog Claim Explanation Modal */}
+      <BlogClaimExplanationModal
+        isOpen={showClaimExplanation}
+        onClose={() => setShowClaimExplanation(false)}
+        onClaim={handleClaimPost}
+        onLogin={() => {
+          setShowClaimExplanation(false);
+          setShowLoginModal(true);
+        }}
+        isAuthenticated={!!currentUser}
+      />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onAuthSuccess={(user) => {
+          setCurrentUser(user);
+          setShowLoginModal(false);
+          toast({
+            title: "Welcome!",
+            description: "You're now signed in. You can claim this post!",
+          });
+          // Automatically show claim explanation after login
+          setTimeout(() => setShowClaimExplanation(true), 500);
+        }}
+        defaultTab="signup"
+      />
+
       {/* Footer */}
       <Footer />
     </div>
