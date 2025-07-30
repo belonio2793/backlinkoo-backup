@@ -129,7 +129,9 @@ export function EnhancedDashboardRouter() {
         hasUser: !!session?.user,
         userEmail: session?.user?.email,
         emailConfirmed: session?.user?.email_confirmed_at,
-        sessionValid: !!(session?.user && session.user.email_confirmed_at)
+        sessionValid: !!(session?.user && session.user.email_confirmed_at),
+        recentClaimOperation: localStorage.getItem('recent_claim_operation'),
+        hasRecentClaim: !!localStorage.getItem('recent_claim_operation')
       });
 
       const validUser = session?.user && session.user.email_confirmed_at;
