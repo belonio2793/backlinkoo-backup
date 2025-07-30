@@ -314,7 +314,7 @@ export function ClaimTrialPostDialog({
               <Badge className="bg-green-600 text-white">No Cost</Badge>
             </div>
             <p className="text-xs text-green-700 mt-1">
-              Each account can claim one free trial post to prevent it from auto-deletion
+              Each account can claim up to 3 trial posts to prevent them from auto-deletion
             </p>
           </div>
 
