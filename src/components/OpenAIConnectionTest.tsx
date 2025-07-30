@@ -18,25 +18,11 @@ export function OpenAIConnectionTest() {
     setTestResult({ status: 'testing', message: 'Testing OpenAI API connection...' });
 
     try {
-      // Simple and direct API key access
-      const apiKey = SecureConfig.OPENAI_API_KEY;
-      console.log('🔑 API Key found:', apiKey ? `${apiKey.substring(0, 15)}...` : 'No key found');
-
-      if (!apiKey) {
-        setTestResult({
-          status: 'error',
-          message: 'No OpenAI API key configured',
-          details: { source: 'VITE_OPENAI_API_KEY or SecureConfig' }
-        });
-        return;
-      }
-
-      // Test API connection
-      console.log('🧪 Testing OpenAI API connection...');
-      const response = await fetch('https://api.openai.com/v1/models', {
-        method: 'GET',
+      // Test via secure Netlify function
+      console.log('🧪 Testing OpenAI connection via Netlify function...');
+      const response = await fetch('/.netlify/functions/check-ai-provider', {
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
         }
       });
