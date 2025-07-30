@@ -523,7 +523,7 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <User className="h-4 w-4" />
-            <span>{post.author_name || 'Expert Writer'}</span>
+            <span>{post.author_name || 'Backlink ∞'}</span>
           </div>
           <div className="flex items-center gap-2">
             <Button
