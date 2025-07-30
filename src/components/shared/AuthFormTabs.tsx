@@ -134,15 +134,33 @@ export function AuthFormTabs({
       console.error('Login error:', error);
 
       let errorMessage = "Network error or server unavailable. Please check your connection and try again.";
+      const isTimeoutError = error.message.includes('Sign in is taking longer than expected') || error.message === 'Sign in timeout';
 
-      if (error.message.includes('Sign in is taking longer than expected')) {
-        errorMessage = error.message + " You may also try refreshing the page.";
-      } else if (error.message === 'Sign in timeout') {
-        errorMessage = "Sign in timed out. Please check your connection and try again.";
+      if (isTimeoutError) {
+        setRetryAttempts(prev => prev + 1);
+
+        if (retryAttempts < 2) {
+          errorMessage = `Connection timeout (attempt ${retryAttempts + 1}/3). Retrying automatically...`;
+          toast({
+            title: "Retrying sign in...",
+            description: errorMessage,
+          });
+
+          // Auto-retry after a short delay
+          setTimeout(() => {
+            if (loginEmail && loginPassword) {
+              handleLogin(e);
+            }
+          }, 2000);
+          return;
+        } else {
+          errorMessage = error.message + " Maximum retry attempts reached. Please check your connection or try refreshing the page.";
+        }
       } else if (error.message?.includes('NetworkError') || error.message?.includes('fetch')) {
         errorMessage = "Network connection failed. Please check your internet connection.";
       } else if (error.message?.includes('Invalid login credentials')) {
         errorMessage = "Invalid email or password. Please check your credentials.";
+        setRetryAttempts(0); // Reset retry attempts for credential errors
       }
 
       toast({
