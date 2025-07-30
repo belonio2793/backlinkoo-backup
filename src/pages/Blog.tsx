@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { publishedBlogService, type PublishedBlogPost } from '@/services/publishedBlogService';
-import { freeBacklinkService } from '@/services/freeBacklinkService';
+
 import { BlogDebugInfo } from '@/components/BlogDebugInfo';
 import { 
   Calendar, 
@@ -73,44 +73,7 @@ export function Blog() {
         }
 
         // Also load from free backlink service
-        try {
-          const freeBacklinkPosts = freeBacklinkService.getAllPosts();
-          freeBacklinkPosts.forEach(freePost => {
-            // Convert free backlink post to PublishedBlogPost format
-            const convertedPost: PublishedBlogPost = {
-              id: freePost.id,
-              title: freePost.title,
-              slug: freePost.slug,
-              content: freePost.content,
-              excerpt: freePost.metaDescription,
-              meta_description: freePost.metaDescription,
-              keywords: freePost.keywords,
-              tags: freePost.keywords, // Use keywords as tags
-              category: 'Free Backlink',
-              author_name: 'AI Generator',
-              target_url: freePost.targetUrl,
-              anchor_text: freePost.anchorText,
-              seo_score: freePost.seoScore,
-              reading_time: freePost.readingTime,
-              word_count: freePost.wordCount,
-              view_count: (freePost as any).viewCount || 0,
-              published_at: freePost.createdAt,
-              created_at: freePost.createdAt,
-              updated_at: freePost.createdAt,
-              published_url: `${window.location.origin}/blog/${freePost.slug}`,
-              is_trial_post: true,
-              expires_at: freePost.expiresAt,
-              status: freePost.status as 'published'
-            };
 
-            // Only add if not already in localBlogPosts
-            if (!localBlogPosts.find(post => post.id === convertedPost.id)) {
-              localBlogPosts.push(convertedPost);
-            }
-          });
-        } catch (freeBacklinkError) {
-          console.warn('Failed to load free backlink posts:', freeBacklinkError);
-        }
 
         // Combine database and localStorage posts, removing duplicates
         const allPosts = [...posts];
@@ -129,7 +92,7 @@ export function Blog() {
           databasePosts: posts.length,
           localBlogPosts: localBlogPosts.length,
           totalPosts: allPosts.length,
-          freeBacklinkPosts: freeBacklinkService.getAllPosts().length
+
         });
       } catch (error) {
         console.error('Failed to load blog posts:', error);
