@@ -24,29 +24,41 @@ export function OpenAIConnectionTest() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({
+          provider: 'OpenAI'
+        })
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ OpenAI API test successful!');
-        setTestResult({
-          status: 'success',
-          message: `OpenAI API connected successfully! ${data.data?.length || 0} models available.`,
-          details: {
-            keyPreview: `${apiKey.substring(0, 15)}...`,
-            modelsCount: data.data?.length || 0,
-            sampleModels: data.data?.slice(0, 3).map((m: any) => m.id).join(', ') || 'None'
-          }
-        });
+        console.log('✅ OpenAI connection test successful via Netlify function!');
+        if (data.success) {
+          setTestResult({
+            status: 'success',
+            message: 'OpenAI connection successful via secure Netlify function!',
+            details: {
+              method: 'Server-side Netlify function',
+              provider: 'OpenAI',
+              secure: true
+            }
+          });
+        } else {
+          setTestResult({
+            status: 'error',
+            message: 'OpenAI connection failed on server',
+            details: {
+              error: data.error || 'Server-side configuration issue'
+            }
+          });
+        }
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('❌ OpenAI API test failed:', response.status, errorData);
+        console.error('❌ Netlify function failed:', response.status);
         setTestResult({
           status: 'error',
-          message: `API test failed: ${response.status} - ${errorData.error?.message || 'Unknown error'}`,
+          message: `Netlify function error: ${response.status}`,
           details: {
-            keyPreview: `${apiKey.substring(0, 15)}...`,
+            error: 'Check Netlify function deployment',
             status: response.status,
             error: errorData.error?.message || 'Unknown error'
           }
