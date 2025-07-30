@@ -144,14 +144,34 @@ export function Blog() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-6">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => navigate('/')}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Home
             </Button>
+
+            {user && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/my-blog')}
+                  className="flex items-center gap-2"
+                >
+                  <User className="h-4 w-4" />
+                  My Blog Posts
+                </Button>
+                <Button
+                  onClick={() => navigate('/blog/create')}
+                  className="flex items-center gap-2"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Create Post
+                </Button>
+              </div>
+            )}
           </div>
           
           <div className="text-center mb-8">
