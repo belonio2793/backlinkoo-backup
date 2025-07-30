@@ -20,9 +20,7 @@ export class SimpleOpenAIService {
   private apiKey: string;
   
   constructor() {
-    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || 
-                  import.meta.env.OPENAI_API_KEY || 
-                  '';
+    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY;
   }
 
   async generateContent(prompt: string, options: {
