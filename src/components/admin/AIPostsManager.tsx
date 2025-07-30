@@ -1,507 +1,522 @@
-/**
- * Admin AI Posts Manager
- * View, edit, and manage AI-generated blog posts
- */
-
 import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
-import { 
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { 
-  Brain,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Sparkles,
   Eye,
-  Edit,
   Trash2,
-  Clock,
-  User,
-  ExternalLink,
+  MoreHorizontal,
   RefreshCw,
-  CheckCircle2,
-  AlertCircle,
+  Download,
+  Clock,
+  Users,
+  BarChart3,
   Search,
-  Filter
+  ExternalLink,
+  AlertCircle,
+  CheckCircle2,
+  Calendar
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 
-interface AIPost {
+interface AIGeneratedPost {
   id: string;
-  slug: string;
   title: string;
   content: string;
-  keyword: string;
-  anchor_text: string;
-  target_url: string;
-  ai_provider: string;
-  prompt_index: number;
+  slug: string;
+  published_url: string;
+  meta_description: string;
+  keywords: string[];
   word_count: number;
-  status: string;
-  auto_delete_at: string | null;
-  is_claimed: boolean;
-  user_id: string | null;
+  user_id?: string;
+  session_id: string;
   created_at: string;
+  expires_at: string;
+  is_claimed: boolean;
+  claimed_at?: string;
   updated_at: string;
-  claimed_at: string | null;
+}
+
+interface AIPostsStats {
+  total: number;
+  claimed: number;
+  unclaimed: number;
+  expired: number;
+  totalWords: number;
+  averageWords: number;
 }
 
 export function AIPostsManager() {
-  const [posts, setPosts] = useState<AIPost[]>([]);
+  const [posts, setPosts] = useState<AIGeneratedPost[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<AIGeneratedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedPost, setSelectedPost] = useState<AIPost | null>(null);
-  const [editingPost, setEditingPost] = useState<AIPost | null>(null);
-  const [stats, setStats] = useState({
-    total: 0,
-    claimed: 0,
-    unclaimed: 0,
-    expired: 0
-  });
+  const [filterStatus, setFilterStatus] = useState<'all' | 'claimed' | 'unclaimed' | 'expired'>('all');
+  const [stats, setStats] = useState<AIPostsStats | null>(null);
+  const [selectedPost, setSelectedPost] = useState<AIGeneratedPost | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  
+  const { toast } = useToast();
 
-  const fetchPosts = async () => {
-    setLoading(true);
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
+  useEffect(() => {
+    filterPosts();
+  }, [posts, searchTerm, filterStatus]);
+
+  const loadPosts = async () => {
     try {
+      setLoading(true);
+      
       const { data, error } = await supabase
         .from('ai_generated_posts')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading AI posts:', error);
+        toast({
+          title: "Loading Error",
+          description: "Failed to load AI-generated posts",
+          variant: "destructive",
+        });
+        return;
+      }
 
       setPosts(data || []);
-      
-      // Calculate stats
-      const now = new Date();
-      const stats = {
-        total: data?.length || 0,
-        claimed: data?.filter(p => p.is_claimed).length || 0,
-        unclaimed: data?.filter(p => !p.is_claimed).length || 0,
-        expired: data?.filter(p => 
-          p.auto_delete_at && new Date(p.auto_delete_at) < now && !p.is_claimed
-        ).length || 0
-      };
-      setStats(stats);
-
+      calculateStats(data || []);
     } catch (error) {
-      console.error('Error fetching AI posts:', error);
+      console.error('Error loading posts:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const deletePost = async (postId: string) => {
-    if (!confirm('Are you sure you want to delete this post?')) return;
+  const calculateStats = (postsData: AIGeneratedPost[]) => {
+    const now = new Date();
+    const expired = postsData.filter(post => new Date(post.expires_at) < now && !post.is_claimed);
+    const claimed = postsData.filter(post => post.is_claimed);
+    const unclaimed = postsData.filter(post => !post.is_claimed && new Date(post.expires_at) >= now);
+    
+    const totalWords = postsData.reduce((sum, post) => sum + post.word_count, 0);
+    
+    setStats({
+      total: postsData.length,
+      claimed: claimed.length,
+      unclaimed: unclaimed.length,
+      expired: expired.length,
+      totalWords,
+      averageWords: postsData.length ? Math.round(totalWords / postsData.length) : 0
+    });
+  };
 
+  const filterPosts = () => {
+    let filtered = posts;
+
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(post =>
+        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        post.slug.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Apply status filter
+    const now = new Date();
+    switch (filterStatus) {
+      case 'claimed':
+        filtered = filtered.filter(post => post.is_claimed);
+        break;
+      case 'unclaimed':
+        filtered = filtered.filter(post => !post.is_claimed && new Date(post.expires_at) >= now);
+        break;
+      case 'expired':
+        filtered = filtered.filter(post => new Date(post.expires_at) < now && !post.is_claimed);
+        break;
+    }
+
+    setFilteredPosts(filtered);
+  };
+
+  const deletePost = async (postId: string) => {
     try {
+      setIsDeleting(postId);
+      
       const { error } = await supabase
         .from('ai_generated_posts')
         .delete()
         .eq('id', postId);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      await fetchPosts();
-    } catch (error) {
+      setPosts(posts.filter(post => post.id !== postId));
+      toast({
+        title: "Post Deleted",
+        description: "AI-generated post has been permanently deleted",
+      });
+    } catch (error: any) {
       console.error('Error deleting post:', error);
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete post",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(null);
     }
   };
 
-  const updatePost = async (post: AIPost) => {
+  const cleanupExpiredPosts = async () => {
     try {
+      const now = new Date().toISOString();
+      
       const { error } = await supabase
         .from('ai_generated_posts')
-        .update({
-          title: post.title,
-          content: post.content,
-          status: post.status
-        })
-        .eq('id', post.id);
+        .delete()
+        .eq('is_claimed', false)
+        .lt('expires_at', now);
 
-      if (error) throw error;
-
-      setEditingPost(null);
-      await fetchPosts();
-    } catch (error) {
-      console.error('Error updating post:', error);
-    }
-  };
-
-  const runCleanup = async () => {
-    try {
-      const response = await fetch('/.netlify/functions/cleanup-expired-posts', {
-        method: 'POST'
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        alert(`Cleanup completed: ${result.deletedCount} posts deleted`);
-        await fetchPosts();
+      if (error) {
+        throw error;
       }
-    } catch (error) {
-      console.error('Error running cleanup:', error);
+
+      await loadPosts();
+      toast({
+        title: "Cleanup Complete",
+        description: "All expired unclaimed posts have been removed",
+      });
+    } catch (error: any) {
+      console.error('Error cleaning up posts:', error);
+      toast({
+        title: "Cleanup Failed", 
+        description: error.message || "Failed to cleanup expired posts",
+        variant: "destructive",
+      });
     }
   };
 
-  const filteredPosts = posts.filter(post => {
-    const matchesSearch = 
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.keyword.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.slug.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatus = 
-      statusFilter === 'all' ||
-      (statusFilter === 'claimed' && post.is_claimed) ||
-      (statusFilter === 'unclaimed' && !post.is_claimed) ||
-      (statusFilter === 'expired' && post.auto_delete_at && 
-       new Date(post.auto_delete_at) < new Date() && !post.is_claimed);
-
-    return matchesSearch && matchesStatus;
-  });
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const getStatusBadge = (post: AIPost) => {
-    if (post.is_claimed) {
-      return <Badge className="bg-green-100 text-green-800">Claimed</Badge>;
-    }
+  const exportData = () => {
+    const csvContent = [
+      ['ID', 'Title', 'Slug', 'Word Count', 'Keywords', 'Status', 'Created', 'Expires'],
+      ...filteredPosts.map(post => [
+        post.id,
+        post.title,
+        post.slug,
+        post.word_count.toString(),
+        post.keywords.join('; '),
+        post.is_claimed ? 'Claimed' : 'Unclaimed',
+        new Date(post.created_at).toLocaleDateString(),
+        new Date(post.expires_at).toLocaleDateString()
+      ])
+    ].map(row => row.join(',')).join('\n');
     
-    if (post.auto_delete_at && new Date(post.auto_delete_at) < new Date()) {
-      return <Badge className="bg-red-100 text-red-800">Expired</Badge>;
-    }
-    
-    return <Badge className="bg-yellow-100 text-yellow-800">Unclaimed</Badge>;
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ai-posts-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
-  };
-
-  const getTimeRemaining = (autoDeleteAt: string | null) => {
-    if (!autoDeleteAt) return 'N/A';
-    
+  const getStatusBadge = (post: AIGeneratedPost) => {
     const now = new Date();
-    const deleteTime = new Date(autoDeleteAt);
-    const diff = deleteTime.getTime() - now.getTime();
+    const expires = new Date(post.expires_at);
     
-    if (diff <= 0) return 'Expired';
-    
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
-    return `${hours}h ${minutes}m`;
+    if (post.is_claimed) {
+      return <Badge variant="default" className="bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" />Claimed</Badge>;
+    } else if (expires < now) {
+      return <Badge variant="destructive"><AlertCircle className="h-3 w-3 mr-1" />Expired</Badge>;
+    } else {
+      return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Unclaimed</Badge>;
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <RefreshCw className="h-6 w-6 animate-spin mr-2" />
+        Loading AI posts...
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Brain className="h-6 w-6 text-blue-600" />
-          <h2 className="text-2xl font-bold">AI Posts Manager</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">AI Posts Manager</h2>
+          <p className="text-gray-600">Manage all AI-generated blog posts</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={runCleanup} variant="outline" size="sm">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Run Cleanup
+          <Button onClick={cleanupExpiredPosts} variant="outline">
+            <Trash2 className="h-4 w-4 mr-2" />
+            Cleanup Expired
           </Button>
-          <Button onClick={fetchPosts} size="sm">
-            <RefreshCw className="mr-2 h-4 w-4" />
+          <Button onClick={exportData} variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+          <Button onClick={loadPosts}>
+            <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Posts</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
+      {stats && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <BarChart3 className="h-8 w-8 text-blue-600" />
+                <div>
+                  <p className="text-2xl font-bold">{stats.total}</p>
+                  <p className="text-sm text-gray-600">Total Posts</p>
+                </div>
               </div>
-              <Brain className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Claimed</p>
-                <p className="text-2xl font-bold text-green-600">{stats.claimed}</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="h-8 w-8 text-green-600" />
+                <div>
+                  <p className="text-2xl font-bold">{stats.claimed}</p>
+                  <p className="text-sm text-gray-600">Claimed</p>
+                </div>
               </div>
-              <CheckCircle2 className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Unclaimed</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats.unclaimed}</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <Clock className="h-8 w-8 text-orange-600" />
+                <div>
+                  <p className="text-2xl font-bold">{stats.unclaimed}</p>
+                  <p className="text-sm text-gray-600">Unclaimed</p>
+                </div>
               </div>
-              <Clock className="h-8 w-8 text-yellow-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Expired</p>
-                <p className="text-2xl font-bold text-red-600">{stats.expired}</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <Sparkles className="h-8 w-8 text-purple-600" />
+                <div>
+                  <p className="text-2xl font-bold">{stats.averageWords}</p>
+                  <p className="text-sm text-gray-600">Avg Words</p>
+                </div>
               </div>
-              <AlertCircle className="h-8 w-8 text-red-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Filters */}
-      <div className="flex gap-4 items-center">
+      <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 text-gray-400 transform -translate-y-1/2" />
             <Input
-              placeholder="Search posts by title, keyword, or slug..."
+              placeholder="Search posts by title, keywords, or slug..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
             />
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-gray-600" />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border rounded-md text-sm"
-          >
-            <option value="all">All Posts</option>
-            <option value="claimed">Claimed</option>
-            <option value="unclaimed">Unclaimed</option>
-            <option value="expired">Expired</option>
-          </select>
-        </div>
+        
+        <Tabs value={filterStatus} onValueChange={(value: any) => setFilterStatus(value)}>
+          <TabsList>
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="claimed">Claimed</TabsTrigger>
+            <TabsTrigger value="unclaimed">Unclaimed</TabsTrigger>
+            <TabsTrigger value="expired">Expired</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Posts Table */}
       <Card>
-        <CardHeader>
-          <CardTitle>AI Generated Posts ({filteredPosts.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8">Loading posts...</div>
-          ) : filteredPosts.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">No posts found</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Provider</TableHead>
-                    <TableHead>Words</TableHead>
-                    <TableHead>Time Left</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredPosts.map((post) => (
-                    <TableRow key={post.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium truncate max-w-xs" title={post.title}>
-                            {post.title}
-                          </p>
-                          <p className="text-sm text-gray-500">/{post.slug}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(post)}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{post.ai_provider}</Badge>
-                      </TableCell>
-                      <TableCell>{post.word_count}</TableCell>
-                      <TableCell>
-                        <span className={
-                          post.auto_delete_at && new Date(post.auto_delete_at) < new Date()
-                            ? 'text-red-600 font-medium'
-                            : 'text-gray-600'
-                        }>
-                          {getTimeRemaining(post.auto_delete_at)}
-                        </span>
-                      </TableCell>
-                      <TableCell>{formatDate(post.created_at)}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setSelectedPost(post)}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                              <DialogHeader>
-                                <DialogTitle>{selectedPost?.title}</DialogTitle>
-                                <DialogDescription>
-                                  <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
-                                    <div>
-                                      <strong>Keyword:</strong> {selectedPost?.keyword}
-                                    </div>
-                                    <div>
-                                      <strong>Provider:</strong> {selectedPost?.ai_provider}
-                                    </div>
-                                    <div>
-                                      <strong>Word Count:</strong> {selectedPost?.word_count}
-                                    </div>
-                                    <div>
-                                      <strong>Status:</strong> {selectedPost && getStatusBadge(selectedPost)}
-                                    </div>
-                                  </div>
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="mt-4">
-                                <div className="border rounded p-4 max-h-96 overflow-y-auto">
-                                  <div 
-                                    className="prose prose-sm max-w-none"
-                                    dangerouslySetInnerHTML={{ __html: selectedPost?.content || '' }}
-                                  />
-                                </div>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setEditingPost(post)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            asChild
-                          >
-                            <a 
-                              href={`/blog/${post.slug}`} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
-                          </Button>
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => deletePost(post.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Words</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead>Expires</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredPosts.map((post) => (
+                <TableRow key={post.id}>
+                  <TableCell>
+                    <div>
+                      <div className="font-medium">{post.title}</div>
+                      <div className="text-sm text-gray-500">/{post.slug}</div>
+                      <div className="flex gap-1 mt-1">
+                        {post.keywords.slice(0, 3).map((keyword, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {keyword}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>{getStatusBadge(post)}</TableCell>
+                  <TableCell>{post.word_count}</TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {new Date(post.created_at).toLocaleDateString()}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {new Date(post.expires_at).toLocaleDateString()}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setSelectedPost(post)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => window.open(post.published_url, '_blank')}>
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Open Post
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => deletePost(post.id)}
+                          disabled={isDeleting === post.id}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          
+          {filteredPosts.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No posts found matching your criteria
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Edit Dialog */}
-      {editingPost && (
-        <Dialog open={true} onOpenChange={() => setEditingPost(null)}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Edit Post</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
+      {/* Post Details Modal */}
+      <Dialog open={!!selectedPost} onOpenChange={() => setSelectedPost(null)}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Post Details</DialogTitle>
+          </DialogHeader>
+          
+          {selectedPost && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="font-medium">Title</Label>
+                  <p className="text-sm">{selectedPost.title}</p>
+                </div>
+                <div>
+                  <Label className="font-medium">Word Count</Label>
+                  <p className="text-sm">{selectedPost.word_count} words</p>
+                </div>
+                <div>
+                  <Label className="font-medium">Status</Label>
+                  {getStatusBadge(selectedPost)}
+                </div>
+                <div>
+                  <Label className="font-medium">URL</Label>
+                  <a 
+                    href={selectedPost.published_url} 
+                    target="_blank" 
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    {selectedPost.published_url}
+                  </a>
+                </div>
+              </div>
+              
               <div>
-                <label className="text-sm font-medium">Title</label>
-                <Input
-                  value={editingPost.title}
-                  onChange={(e) => setEditingPost({
-                    ...editingPost,
-                    title: e.target.value
-                  })}
+                <Label className="font-medium">Meta Description</Label>
+                <p className="text-sm text-gray-600">{selectedPost.meta_description}</p>
+              </div>
+              
+              <div>
+                <Label className="font-medium">Keywords</Label>
+                <div className="flex gap-1 mt-1">
+                  {selectedPost.keywords.map((keyword, idx) => (
+                    <Badge key={idx} variant="outline">{keyword}</Badge>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <Label className="font-medium">Content Preview</Label>
+                <div 
+                  className="text-sm border rounded p-4 max-h-40 overflow-y-auto bg-gray-50"
+                  dangerouslySetInnerHTML={{ 
+                    __html: selectedPost.content.substring(0, 500) + '...' 
+                  }}
                 />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Content</label>
-                <Textarea
-                  value={editingPost.content}
-                  onChange={(e) => setEditingPost({
-                    ...editingPost,
-                    content: e.target.value
-                  })}
-                  rows={20}
-                  className="font-mono text-sm"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Status</label>
-                <select
-                  value={editingPost.status}
-                  onChange={(e) => setEditingPost({
-                    ...editingPost,
-                    status: e.target.value
-                  })}
-                  className="w-full px-3 py-2 border rounded-md"
-                >
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
-                  <option value="archived">Archived</option>
-                </select>
-              </div>
-              <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setEditingPost(null)}>
-                  Cancel
-                </Button>
-                <Button onClick={() => updatePost(editingPost)}>
-                  Save Changes
-                </Button>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
