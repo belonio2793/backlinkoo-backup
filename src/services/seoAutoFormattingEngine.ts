@@ -45,7 +45,7 @@ export interface HeadingAnalysis {
 }
 
 export class SEOAutoFormattingEngine {
-  private chatGPTService = multiKeyOpenAIService;
+  private chatGPTService = openAIService;
 
   /**
    * Main formatting method that applies all SEO principles

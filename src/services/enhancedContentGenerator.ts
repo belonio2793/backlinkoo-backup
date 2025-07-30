@@ -41,7 +41,7 @@ export interface GeneratedContentResult {
 }
 
 export class EnhancedContentGenerator {
-  private chatGPTService = multiKeyOpenAIService;
+  private chatGPTService = openAIService;
 
   /**
    * Generate high-quality content with advanced SEO optimization

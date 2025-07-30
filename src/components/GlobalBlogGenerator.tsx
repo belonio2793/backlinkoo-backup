@@ -89,7 +89,7 @@ export function GlobalBlogGenerator({
   };
 
   const updateRemainingRequests = () => {
-    setRemainingRequests(directOpenAI.isConfigured() ? 999 : 0);
+    setRemainingRequests(999); // Server-side API key management
   };
 
   const formatUrl = (url: string): string => {
