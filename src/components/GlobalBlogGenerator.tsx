@@ -513,9 +513,20 @@ Return clean HTML content optimized for SEO.`;
               </TabsContent>
 
               <TabsContent value="seo" className="mt-4">
-                <div className="space-y-2 text-sm">
-                  <div><strong>Word Count:</strong> {generatedPost.wordCount || 'N/A'}</div>
-                  <div><strong>SEO Score:</strong> {generatedPost.seoScore || 'N/A'}</div>
+                <div className="space-y-4">
+                  <div className="space-y-2 text-sm">
+                    <div><strong>Word Count:</strong> {generatedPost.wordCount || 'N/A'}</div>
+                    <div><strong>SEO Score:</strong> {generatedPost.seoScore || 'N/A'}</div>
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <SlugPreview
+                      title={generatedPost.title}
+                      keywords={generatedPost.keywords || []}
+                      slug={generatedPost.slug}
+                      showActions={true}
+                    />
+                  </div>
                 </div>
               </TabsContent>
 
