@@ -118,9 +118,9 @@ export const PricingModal = ({
   ];
 
   const subscriptionPlans = {
-    "premium-seo-tools": { 
-      price: 29, 
-      priceId: "price_premium_seo_tools", 
+    "premium-seo-tools": {
+      price: 29,
+      priceId: "price_1QadKgGdMlAQKJXmqzVCyLLZ", // Real Stripe price ID - update with your actual ID
       name: "Premium SEO Tools",
       description: "Access to all SEO tools and features"
     }
