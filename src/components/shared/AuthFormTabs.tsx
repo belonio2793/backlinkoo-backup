@@ -186,7 +186,7 @@ export function AuthFormTabs({
           });
 
           const directTimeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Direct auth timeout')), 10000)
+            setTimeout(() => reject(new Error('Direct auth timeout')), 20000) // Increased to 20 seconds
           );
 
           const directResult = await Promise.race([directAuthPromise, directTimeoutPromise]) as any;
@@ -211,11 +211,21 @@ export function AuthFormTabs({
             throw new Error('No user data received');
           }
         } catch (directError: any) {
-          console.error('❌ Direct Supabase auth also failed:', directError.message);
-          // If both methods fail, throw the more descriptive error
-          throw authError?.message?.includes('timeout') ?
-            new Error('Authentication is taking too long. Please check your connection and try again.') :
-            directError;
+          console.error('❌ Direct Supabase auth failed:', directError.message);
+
+          // Provide specific error messages based on the error type
+          if (directError.message.includes('timeout') && authError?.message?.includes('timeout')) {
+            throw new Error('Connection timeout. Please check your internet connection and try again later.');
+          } else if (directError.message.includes('Invalid login credentials')) {
+            throw new Error('Invalid email or password. Please check your credentials.');
+          } else if (directError.message.includes('Email verification required')) {
+            throw new Error('Email verification required. Please check your email for a verification link.');
+          } else if (directError.message.includes('timeout')) {
+            throw new Error('Authentication is taking longer than expected. Please try again.');
+          } else {
+            // Use the more specific error message
+            throw new Error(directError.message || 'Authentication failed. Please try again.');
+          }
         }
       }
 
