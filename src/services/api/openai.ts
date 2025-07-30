@@ -118,8 +118,9 @@ export class OpenAIService {
         const jitterRange = delay * config.jitterFactor;
         const jitteredDelay = delay + (Math.random() * 2 - 1) * jitterRange;
 
-        console.warn(`⏳ OpenAI API attempt ${attempt} failed: ${lastError.message}. Retrying in ${Math.round(jitteredDelay)}ms...`, {
-          error: lastError.message,
+        const errorMsg = lastError?.message || String(lastError);
+        console.warn(`⏳ OpenAI API attempt ${attempt} failed: ${errorMsg}. Retrying in ${Math.round(jitteredDelay)}ms...`, {
+          error: errorMsg,
           attempt,
           maxRetries: config.maxRetries,
           delay: Math.round(jitteredDelay),
