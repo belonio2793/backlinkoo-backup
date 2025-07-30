@@ -353,7 +353,7 @@ const Index = () => {
       </header>
 
       {/* Free Blog Generator - Top Feature */}
-      <section className="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
+      <section id="blog-generator" className="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
         <div className="container mx-auto">
           {/* Optional: Advanced Generator Toggle (Hidden by default) */}
 
@@ -366,11 +366,11 @@ const Index = () => {
                 setUser(user); // Refresh state
                 toast({
                   title: "Success! 🎉",
-                  description: `Your ${blogPost.word_count}-word blog post "${blogPost.title}" is now live!`,
+                  description: `Your ${blogPost.word_count}-word blog post "${blogPost.title}" is now live! Check it out in the blog section.`,
                 });
-                // Navigate to blog after a short delay
+                // Navigate to blog section after a short delay to show the new post
                 setTimeout(() => {
-                  navigate(`/blog/${blogPost.slug}`);
+                  navigate('/blog');
                 }, 2000);
               }}
             />
