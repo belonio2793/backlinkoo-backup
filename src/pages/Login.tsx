@@ -10,6 +10,7 @@ import { AuthFormTabs } from "@/components/shared/AuthFormTabs";
 
 import { useNavigate } from "react-router-dom";
 import { Infinity, Mail, RefreshCw, ArrowLeft } from "lucide-react";
+import { testAuthFlow } from "@/utils/testAuth";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
