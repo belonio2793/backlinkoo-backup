@@ -83,7 +83,7 @@ export class OpenAIService {
         const result = await fn();
 
         if (attempt > 0) {
-          console.log(`✅ OpenAI API succeeded on attempt ${attempt + 1}`);
+          console.log(`�� OpenAI API succeeded on attempt ${attempt + 1}`);
         }
 
         return result;
@@ -101,15 +101,17 @@ export class OpenAIService {
         const shouldRetry = this.shouldRetryError(lastError, config);
 
         if (!shouldRetry || attempt >= config.maxRetries) {
+          const errorDetails = this.serializeError(lastError);
           console.error(`❌ OpenAI API failed after ${attempt} attempts:`, {
-          error: lastError?.message || String(lastError),
-          stack: lastError?.stack,
-          attempt,
-          maxRetries: config.maxRetries,
-          shouldRetry
-        });
+            error: errorDetails.message,
+            details: errorDetails,
+            stack: lastError?.stack,
+            attempt,
+            maxRetries: config.maxRetries,
+            shouldRetry
+          });
           // Add more detailed error information for debugging
-          const errorMessage = lastError?.message || String(lastError);
+          const errorMessage = errorDetails.message;
           const enhancedError = new Error(`OpenAI API failed after ${attempt} attempts: ${errorMessage}`);
           enhancedError.cause = lastError;
           throw enhancedError;
@@ -416,10 +418,11 @@ export class OpenAIService {
       return result;
 
     } catch (error) {
+      const errorDetails = this.serializeError(error);
       console.error('❌ OpenAI API failed after all retries:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorDetails.message,
+        details: errorDetails,
         stack: error instanceof Error ? error.stack : undefined,
-        context: (error as any)?.context,
         timestamp: new Date().toISOString()
       });
 
