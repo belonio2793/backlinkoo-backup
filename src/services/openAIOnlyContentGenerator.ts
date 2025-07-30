@@ -1,37 +1,31 @@
 /**
- * OpenAI Only Content Generator - Simplified Implementation
- * Uses only OpenAI API for content generation without fallbacks
+ * OpenAI-Only Content Generator
+ * Simplified content generation using only OpenAI API.
+ * Thin wrapper around the main OpenAI content generator.
+ * Used to restore homepage functionality with no external fallbacks.
  */
 
-import { openAIContentGenerator } from './openAIContentGenerator';
-import type { ContentGenerationRequest, GeneratedContentResult } from './openAIContentGenerator';
+import {
+  openAIContentGenerator,
+  ContentGenerationRequest,
+  GeneratedContentResult
+} from './openAIContentGenerator';
 
 export type { ContentGenerationRequest, GeneratedContentResult };
 
-/**
- * Simplified OpenAI-only content generator
- * This is a thin wrapper around the main OpenAI content generator
- */
-class OpenAIOnlyContentGenerator {
+export class OpenAIOnlyContentGenerator {
   /**
    * Generate content using only OpenAI
    */
   async generateContent(request: ContentGenerationRequest): Promise<GeneratedContentResult> {
-    return await openAIContentGenerator.generateContent(request);
+    return openAIContentGenerator.generateContent(request);
   }
 
   /**
    * Test OpenAI connection
    */
   async testConnection(): Promise<boolean> {
-    return await openAIContentGenerator.testConnection();
-  }
-
-  /**
-   * Get provider status
-   */
-  async getProviderStatus(): Promise<Record<string, any>> {
-    return await openAIContentGenerator.getProviderStatus();
+    return openAIContentGenerator.testConnection();
   }
 
   /**
@@ -39,6 +33,13 @@ class OpenAIOnlyContentGenerator {
    */
   isConfigured(): boolean {
     return openAIContentGenerator.isConfigured();
+  }
+
+  /**
+   * Get provider status
+   */
+  async getProviderStatus(): Promise<Record<string, any>> {
+    return openAIContentGenerator.getProviderStatus();
   }
 }
 
