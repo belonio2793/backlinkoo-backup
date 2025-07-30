@@ -191,8 +191,18 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
                           <h3 className="text-lg font-semibold">{post.title}</h3>
-                          <Badge variant={post.isTrialPost ? 'secondary' : 'default'}>
-                            {post.isTrialPost ? 'Trial' : 'Permanent'}
+                          <Badge
+                            variant={post.isTrialPost ? 'outline' : 'default'}
+                            className={post.isTrialPost ? 'bg-green-50 text-green-700 border-green-200' : ''}
+                          >
+                            {post.isTrialPost ? (
+                              <>
+                                <CheckCircle2 className="mr-1 h-3 w-3" />
+                                Claimed
+                              </>
+                            ) : (
+                              'Permanent'
+                            )}
                           </Badge>
                           {post.status === 'published' && (
                             <Badge variant="outline" className="text-green-600">
