@@ -128,17 +128,10 @@ export class OpenAIContentGenerator {
   }
 
   /**
-   * Generate content using OpenAI/ChatGPT
+   * Generate content using OpenAI via secure Netlify function
    */
   private async generateOpenAIContent(request: OpenAIContentRequest, prompt: string): Promise<string> {
-    // Simple and direct API key access
-    const apiKey = SecureConfig.OPENAI_API_KEY;
-    console.log('🔑 API key result:', apiKey ? 'Found (' + apiKey.substring(0, 10) + '...)' : 'Not found');
-
-    if (!apiKey) {
-      console.error('❌ No OpenAI API key configured');
-      throw new Error('OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable.');
-    }
+    console.log('🔧 Using secure Netlify function for OpenAI content generation...');
 
     console.log('🤖 Calling OpenAI API...');
 
