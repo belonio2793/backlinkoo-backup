@@ -608,7 +608,7 @@ export function BlogPost() {
                   <User className="h-6 w-6 text-blue-600" />
                 </div>
                 <span className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Author</span>
-                <span className="text-sm font-bold text-gray-900">{blogPost.author_name || 'Expert Writer'}</span>
+                <span className="text-sm font-bold text-gray-900">{blogPost.author_name || 'Backlink ∞'}</span>
               </div>
 
               <div className="flex flex-col items-center text-center">
