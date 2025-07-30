@@ -520,7 +520,7 @@ export class OpenAIContentGenerator {
         id,
         slug,
         title: content.title,
-        category: 'AI Generated',
+        category: 'Expert Content',
         created_at: createdAt
       });
       localStorage.setItem('all_blog_posts', JSON.stringify(allBlogPosts));
