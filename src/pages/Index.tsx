@@ -529,7 +529,10 @@ const Index = () => {
               <Button
                 variant="outline"
                 className="bg-white hover:bg-gray-50"
-                onClick={() => navigate('/create-blog')}
+                onClick={() => {
+                  // Scroll to blog creation form
+                  document.getElementById('blog-generator')?.scrollIntoView({ behavior: 'smooth' });
+                }}
               >
                 <Sparkles className="h-4 w-4 mr-2" />
                 Try Blog Generator
