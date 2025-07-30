@@ -7,11 +7,12 @@ import { useToast } from '@/hooks/use-toast';
 import { blogService, type BlogPost as BlogPostType } from '@/services/blogService';
 import { ClaimTrialPostDialog } from '@/components/ClaimTrialPostDialog';
 import { LoginModal } from '@/components/LoginModal';
+import { BlogClaimExplanationModal } from '@/components/BlogClaimExplanationModal';
 import { supabase } from '@/integrations/supabase/client';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatBlogTitle, formatBlogContent, getTrendingLabel, calculateWordCount, cleanHTMLContent } from '@/utils/textFormatting';
 import { EnhancedBlogContent } from '@/components/EnhancedBlogContent';
-import { PaymentModal } from '@/components/PaymentModal';
+import { PricingModal } from '@/components/PricingModal';
 import { getDisplayEmailForPost } from '@/utils/emailMasking';
 import { runImmediateContentCleanup } from '@/utils/immediateContentCleanup';
 import { openAIOnlyContentGenerator } from '@/services/openAIOnlyContentGenerator';
@@ -58,8 +59,10 @@ export function BlogPost() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [showClaimExplanation, setShowClaimExplanation] = useState(false);
+  const [isClaiming, setIsClaiming] = useState(false);
 
   useEffect(() => {
     const loadBlogPost = async () => {
@@ -223,6 +226,121 @@ export function BlogPost() {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const handleClaimPost = async () => {
+    if (!blogPost || isClaiming) return;
+
+    setIsClaiming(true);
+
+    try {
+      // Get user authentication
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        setShowLoginModal(true);
+        return;
+      }
+
+      // Check if user can claim (using same logic as ClaimTrialPostDialog)
+      const { data: userPosts } = await supabase
+        .from('published_blog_posts')
+        .select('id, is_trial_post, user_id')
+        .eq('user_id', user.id)
+        .eq('is_trial_post', false);
+
+      const hasExistingClaim = (userPosts?.length || 0) > 0;
+      const localClaims = localStorage.getItem(`user_claimed_posts_${user.id}`);
+      const hasLocalClaims = localClaims ? JSON.parse(localClaims).length > 0 : false;
+
+      if (hasExistingClaim || hasLocalClaims) {
+        toast({
+          title: "Claim Limit Reached",
+          description: "You already have a free blog post saved. Each account can only claim one free trial post.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Create request body once
+      const requestBody = {
+        slug: blogPost.slug,
+        userId: user.id,
+        userEmail: user.email
+      };
+
+      // Proceed with claim via Netlify function
+      const response = await fetch('/.netlify/functions/claim-post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      // Parse response once and handle errors
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('Failed to parse response:', parseError);
+        throw new Error(`Invalid response from server (Status: ${response.status})`);
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP ${response.status}: Request failed`);
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to claim blog post');
+      }
+
+      // Update localStorage to mark as claimed
+      const blogStorageKey = `blog_post_${blogPost.slug}`;
+      const storedBlogData = localStorage.getItem(blogStorageKey);
+      if (storedBlogData) {
+        const updatedPost = JSON.parse(storedBlogData);
+        updatedPost.is_trial_post = false;
+        updatedPost.claimed_by_user_id = user.id;
+        updatedPost.claimed_by_email = user.email;
+        updatedPost.claimed_at = new Date().toISOString();
+        localStorage.setItem(blogStorageKey, JSON.stringify(updatedPost));
+        setBlogPost(updatedPost);
+      }
+
+      // Track claimed post
+      const userClaimedPosts = localStorage.getItem(`user_claimed_posts_${user.id}`);
+      const claimedPosts = userClaimedPosts ? JSON.parse(userClaimedPosts) : [];
+      claimedPosts.push({
+        slug: blogPost.slug,
+        title: blogPost.title,
+        claimedAt: new Date().toISOString(),
+        userId: user.id,
+        userEmail: user.email
+      });
+      localStorage.setItem(`user_claimed_posts_${user.id}`, JSON.stringify(claimedPosts));
+
+      toast({
+        title: "🎉 Post Claimed Successfully!",
+        description: "Your backlink is now permanent and saved to your dashboard!",
+      });
+
+      setShowClaimExplanation(false);
+
+    } catch (error) {
+      console.error('Failed to claim post:', error);
+      toast({
+        title: "Claim Failed",
+        description: error instanceof Error ? error.message : "Failed to claim the post. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsClaiming(false);
+    }
+  };
+
+  const handleShowClaimExplanation = () => {
+    setShowClaimExplanation(true);
   };
 
   const handleDeletePost = async () => {
@@ -487,12 +605,12 @@ export function BlogPost() {
                         <TooltipTrigger asChild>
                           <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md cursor-help">
                             <CheckCircle2 className="mr-1 h-3 w-3" />
-                            Permanent
+                            Claimed & Permanent
                           </Badge>
                         </TooltipTrigger>
                         <TooltipContent>
                           <p className="max-w-xs">
-                            This post is permanent and will never expire. It's a live backlink!
+                            This post has been claimed by a user and is now permanent! It will never auto-delete and provides a lasting backlink.
                           </p>
                         </TooltipContent>
                       </Tooltip>
@@ -739,8 +857,58 @@ export function BlogPost() {
           />
         </div>
 
+        {/* Claimed Post Information */}
+        {(blogPost.claimed_by_user_id || (!blogPost.is_trial_post && (blogPost as any).user_id)) && (
+          <Card className="mt-8 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 shadow-lg">
+            <CardContent className="p-8">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-green-100 rounded-full">
+                  <CheckCircle2 className="h-6 w-6 text-green-600" />
+                </div>
+                <div className="flex-1 space-y-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-green-800 mb-2">
+                      ✅ Claimed & Permanent Blog Post
+                    </h3>
+                    <p className="text-green-700 leading-relaxed">
+                      This high-quality AI-generated content has been permanently claimed and will never expire.
+                      <strong className="block mt-2">This provides a lasting, valuable backlink!</strong>
+                      {blogPost.claimed_at && (
+                        <span className="block mt-1 text-sm">
+                          Claimed on {formatDate(blogPost.claimed_at)}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <Button
+                      onClick={() => setIsPricingModalOpen(true)}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 shadow-lg"
+                    >
+                      <Zap className="mr-2 h-5 w-5" />
+                      Get More Backlinks
+                    </Button>
+
+                    {currentUser && (
+                      <Button
+                        onClick={() => navigate('/dashboard')}
+                        variant="outline"
+                        className="border-green-600 text-green-600 hover:bg-green-50 px-6 py-3"
+                      >
+                        <CheckCircle2 className="mr-2 h-5 w-5" />
+                        View Dashboard
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Trial Post Management */}
-        {blogPost.is_trial_post && blogPost.expires_at && (
+        {blogPost.is_trial_post && blogPost.expires_at && !blogPost.claimed_by_user_id && (
           <Card className="mt-8 border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 shadow-lg">
             <CardContent className="p-8">
               <div className="flex items-start gap-4">
@@ -759,25 +927,20 @@ export function BlogPost() {
                   </div>
                   
                   <div className="flex flex-wrap gap-3">
-                    {!currentUser ? (
-                      <ClaimTrialPostDialog
-                        trialPostSlug={blogPost.slug}
-                        trialPostTitle={blogPost.title}
-                        expiresAt={blogPost.expires_at}
-                        targetUrl={blogPost.target_url}
-                        onClaimed={() => {
-                          window.location.reload();
-                        }}
-                      >
-                        <Button className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-bold px-6 py-3 animate-pulse shadow-lg">
-                          <Sparkles className="mr-2 h-5 w-5" />
-                          Claim This Post Forever
-                        </Button>
-                      </ClaimTrialPostDialog>
-                    ) : (
+                    <Button
+                      onClick={handleShowClaimExplanation}
+                      disabled={isClaiming}
+                      className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-bold px-6 py-3 animate-pulse shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Sparkles className="mr-2 h-5 w-5" />
+                      {isClaiming ? 'Processing...' : 'Claim This Post Forever'}
+                    </Button>
+
+                    {currentUser && (
                       <Button
                         onClick={() => navigate('/dashboard')}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3"
+                        variant="outline"
+                        className="border-green-600 text-green-600 hover:bg-green-50 px-6 py-3"
                       >
                         <CheckCircle2 className="mr-2 h-5 w-5" />
                         View in Dashboard
@@ -785,7 +948,7 @@ export function BlogPost() {
                     )}
                     
                     <Button
-                      onClick={() => setIsPaymentModalOpen(true)}
+                      onClick={() => setIsPricingModalOpen(true)}
                       className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0 px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
                     >
                       <Zap className="mr-2 h-5 w-5" />
@@ -948,10 +1111,46 @@ export function BlogPost() {
         }}
       />
 
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={isPaymentModalOpen}
-        onClose={() => setIsPaymentModalOpen(false)}
+      {/* Pricing Modal */}
+      <PricingModal
+        isOpen={isPricingModalOpen}
+        onClose={() => setIsPricingModalOpen(false)}
+        onAuthSuccess={(user) => {
+          toast({
+            title: "Welcome!",
+            description: "You have been successfully signed in. Continue with your purchase.",
+          });
+        }}
+      />
+
+      {/* Blog Claim Explanation Modal */}
+      <BlogClaimExplanationModal
+        isOpen={showClaimExplanation}
+        onClose={() => setShowClaimExplanation(false)}
+        onClaim={handleClaimPost}
+        onLogin={() => {
+          setShowClaimExplanation(false);
+          setShowLoginModal(true);
+        }}
+        isAuthenticated={!!currentUser}
+        isClaiming={isClaiming}
+      />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onAuthSuccess={(user) => {
+          setCurrentUser(user);
+          setShowLoginModal(false);
+          toast({
+            title: "Welcome!",
+            description: "You're now signed in. You can claim this post!",
+          });
+          // Automatically show claim explanation after login
+          setTimeout(() => setShowClaimExplanation(true), 500);
+        }}
+        defaultTab="signup"
       />
 
       {/* Footer */}

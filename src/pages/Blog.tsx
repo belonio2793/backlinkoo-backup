@@ -8,6 +8,8 @@ import { blogService, type BlogPost } from '@/services/blogService';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/Footer';
 import { PurgeStorageButton } from '@/components/PurgeStorageButton';
+import { PricingModal } from '@/components/PricingModal';
+import { useToast } from '@/hooks/use-toast';
 import {
   Calendar,
   Clock,
@@ -33,12 +35,14 @@ import {
 export function Blog() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'trending'>('newest');
+  const [pricingModalOpen, setPricingModalOpen] = useState(false);
 
   useEffect(() => {
     const loadBlogPosts = async () => {
@@ -355,16 +359,7 @@ export function Blog() {
                   : 'Be the first to create expert content! Generate high-quality blog posts with contextual backlinks.'
                 }
               </p>
-              <div className="pt-4">
-                <Button
-                  onClick={() => navigate('/')}
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3"
-                >
-                  <Sparkles className="mr-2 h-5 w-5" />
-                  Create Your First Post
-                </Button>
-              </div>
+
             </div>
           </div>
         ) : (
@@ -400,7 +395,7 @@ export function Blog() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
-              onClick={() => navigate('/')}
+              onClick={() => setPricingModalOpen(true)}
               size="lg"
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 text-lg"
             >
@@ -433,6 +428,18 @@ export function Blog() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Pricing Modal */}
+      <PricingModal
+        isOpen={pricingModalOpen}
+        onClose={() => setPricingModalOpen(false)}
+        onAuthSuccess={(user) => {
+          toast({
+            title: "Welcome!",
+            description: "You have been successfully signed in. Continue with your purchase.",
+          });
+        }}
+      />
     </div>
   );
 }
@@ -516,7 +523,7 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <User className="h-4 w-4" />
-            <span>{post.author_name || 'Expert Writer'}</span>
+            <span>{post.author_name || 'Backlink ∞'}</span>
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -583,7 +590,7 @@ function BlogPostListItem({ post, navigate, formatDate }: any) {
               <div className="flex items-center gap-6 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <User className="h-4 w-4" />
-                  <span>{post.author_name || 'Expert Writer'}</span>
+                  <span>{post.author_name || 'Backlink ∞'}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />

@@ -39,7 +39,7 @@ import {
   Crown,
   RefreshCw
 } from "lucide-react";
-import { PaymentModal } from "@/components/PaymentModal";
+import { PricingModal } from "@/components/PricingModal";
 import { CampaignForm } from "@/components/CampaignForm";
 import { KeywordResearchTool } from "@/components/KeywordResearchTool";
 import { RankingTracker } from "@/components/RankingTracker";
@@ -48,10 +48,11 @@ import AdminVerificationQueue from "@/components/AdminVerificationQueue";
 import SEOToolsSection from "@/components/SEOToolsSection";
 import { ProfileSettings } from "@/components/ProfileSettings";
 import { ApiConfigStatus } from "@/components/ApiConfigStatus";
+import { TrialBlogShowcase } from "@/components/TrialBlogShowcase";
+
 import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
-import { OpenAIDebugTest } from "@/components/OpenAIDebugTest";
-import { SupabaseConnectionTest } from "@/components/SupabaseConnectionTest";
+
 import { AIPostsManager } from "@/components/admin/AIPostsManager";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -613,7 +614,7 @@ const Dashboard = () => {
   const [userType, setUserType] = useState<"user" | "admin">("user");
   const [credits, setCredits] = useState(0);
   const [campaigns, setCampaigns] = useState<any[]>([]);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -1025,7 +1026,7 @@ const Dashboard = () => {
                     <span className="xs:hidden">{credits}</span>
                     <span className="hidden sm:inline">Credits</span>
                   </Badge>
-                  <Button variant="outline" size="sm" onClick={() => setIsPaymentModalOpen(true)} className="px-2 sm:px-4">
+                  <Button variant="outline" size="sm" onClick={() => setIsPricingModalOpen(true)} className="px-2 sm:px-4">
                     <Plus className="h-4 w-4 sm:mr-1" />
                     <span className="hidden sm:inline">Buy Credits</span>
                   </Button>
@@ -1104,7 +1105,7 @@ const Dashboard = () => {
           <>
             {activeSection === "dashboard" ? (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 h-auto">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
               <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Overview</span>
                 <span className="sm:hidden">Home</span>
@@ -1112,6 +1113,14 @@ const Dashboard = () => {
               <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Campaigns</span>
                 <span className="sm:hidden">Camps</span>
+              </TabsTrigger>
+              <TabsTrigger value="keyword-research" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
+                <span className="hidden sm:inline">Keyword Research</span>
+                <span className="sm:hidden">Keywords</span>
+              </TabsTrigger>
+              <TabsTrigger value="rank-tracker" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
+                <span className="hidden sm:inline">Rankings</span>
+                <span className="sm:hidden">Ranks</span>
               </TabsTrigger>
             </TabsList>
 
@@ -1126,7 +1135,7 @@ const Dashboard = () => {
                       Get started by purchasing credits to create your first backlink campaign. 
                       Our high-quality backlinks will help improve your website's search engine rankings.
                     </p>
-                    <Button onClick={() => setIsPaymentModalOpen(true)}>
+                    <Button onClick={() => setIsPricingModalOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
                       Buy Your First Credits
                     </Button>
@@ -1545,8 +1554,6 @@ const Dashboard = () => {
               </Tabs>
             ) : activeSection === "seo-tools" ? (
               <div className="space-y-6">
-                <SupabaseConnectionTest />
-                <OpenAIDebugTest />
                 <SEOToolsSection user={user} />
               </div>
             ) : activeSection === "trial" ? (
@@ -1613,7 +1620,7 @@ const Dashboard = () => {
                         </CardHeader>
 
                         <CardContent className="p-6">
-                          <TrialBlogPostsDisplay user={user} />
+                          <TrialBlogShowcase limit={6} />
                         </CardContent>
                       </Card>
                     </div>
@@ -1768,9 +1775,12 @@ const Dashboard = () => {
         )}
       </div>
 
-      <PaymentModal
-        isOpen={isPaymentModalOpen}
-        onClose={() => setIsPaymentModalOpen(false)}
+      <PricingModal
+        isOpen={isPricingModalOpen}
+        onClose={() => setIsPricingModalOpen(false)}
+        onAuthSuccess={(user) => {
+          setUser(user);
+        }}
       />
 
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>

@@ -537,7 +537,7 @@ export class OpenAIContentGenerator {
       expires_at: expiresAt,
       is_trial_post: true,
       user_id: session?.user?.id,
-      author_name: 'Expert Writer',
+      author_name: 'Backlink ∞',
       status: 'published',
       created_at: createdAt,
       published_at: createdAt,
@@ -593,7 +593,7 @@ export class OpenAIContentGenerator {
         console.log('✅ Blog post saved to Supabase database');
       }
     } catch (error) {
-      console.warn('⚠️ Database save failed (non-blocking):', error);
+      console.warn('��️ Database save failed (non-blocking):', error);
       // Continue without database save
     }
 

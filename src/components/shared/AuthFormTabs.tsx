@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,8 +45,15 @@ export function AuthFormTabs({
   const [signupPassword, setSignupPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [retryAttempts, setRetryAttempts] = useState(0);
+  const [timeoutCountdown, setTimeoutCountdown] = useState(0);
 
   const { toast } = useToast();
+
+  // Reset retry attempts when switching tabs
+  useEffect(() => {
+    setRetryAttempts(0);
+  }, [activeTab]);
 
   const validateEmailFormat = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -92,18 +99,37 @@ export function AuthFormTabs({
       description: "Please wait while we verify your credentials.",
     });
 
+    // Start countdown timer
+    setTimeoutCountdown(30);
+    const countdownInterval = setInterval(() => {
+      setTimeoutCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownInterval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
     try {
-      // Add timeout to prevent infinite loading
+      // Add timeout to prevent infinite loading (increased to 30 seconds)
       const signInPromise = AuthService.signIn({
         email: loginEmail,
         password: loginPassword,
       });
 
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Sign in timeout')), 10000)
+        setTimeout(() => {
+          clearInterval(countdownInterval);
+          reject(new Error('Sign in is taking longer than expected. Please check your internet connection and try again.'));
+        }, 30000)
       );
 
       const result = await Promise.race([signInPromise, timeoutPromise]) as any;
+
+      // Clear countdown on success
+      clearInterval(countdownInterval);
+      setTimeoutCountdown(0);
 
       if (result.success && result.user) {
         toast({
@@ -113,9 +139,10 @@ export function AuthFormTabs({
 
         onAuthSuccess?.(result.user);
 
-        // Reset form
+        // Reset form and retry attempts
         setLoginEmail("");
         setLoginPassword("");
+        setRetryAttempts(0);
       } else if (result.requiresEmailVerification) {
         toast({
           title: "Email verification required",
@@ -131,15 +158,36 @@ export function AuthFormTabs({
       }
     } catch (error: any) {
       console.error('Login error:', error);
+      setTimeoutCountdown(0); // Clear countdown on error
 
       let errorMessage = "Network error or server unavailable. Please check your connection and try again.";
+      const isTimeoutError = error.message.includes('Sign in is taking longer than expected') || error.message === 'Sign in timeout';
 
-      if (error.message === 'Sign in timeout') {
-        errorMessage = "Sign in timed out. Please check your connection and try again.";
+      if (isTimeoutError) {
+        setRetryAttempts(prev => prev + 1);
+
+        if (retryAttempts < 2) {
+          errorMessage = `Connection timeout (attempt ${retryAttempts + 1}/3). Retrying automatically...`;
+          toast({
+            title: "Retrying sign in...",
+            description: errorMessage,
+          });
+
+          // Auto-retry after a short delay
+          setTimeout(() => {
+            if (loginEmail && loginPassword) {
+              handleLogin(e);
+            }
+          }, 2000);
+          return;
+        } else {
+          errorMessage = error.message + " Maximum retry attempts reached. Please check your connection or try refreshing the page.";
+        }
       } else if (error.message?.includes('NetworkError') || error.message?.includes('fetch')) {
         errorMessage = "Network connection failed. Please check your internet connection.";
       } else if (error.message?.includes('Invalid login credentials')) {
         errorMessage = "Invalid email or password. Please check your credentials.";
+        setRetryAttempts(0); // Reset retry attempts for credential errors
       }
 
       toast({
@@ -360,7 +408,7 @@ export function AuthFormTabs({
             {isLoading ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Signing in...
+                {timeoutCountdown > 0 ? `Signing in... (${timeoutCountdown}s)` : 'Signing in...'}
               </>
             ) : (
               <>

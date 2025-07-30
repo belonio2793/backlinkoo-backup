@@ -74,7 +74,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
   const [projects, setProjects] = useState<NoHandsSEOProject[]>([]);
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("no-hands-seo");
+  const [activeTab, setActiveTab] = useState("keyword-research");
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isCancellingSubscription, setIsCancellingSubscription] = useState(false);
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
@@ -360,11 +360,11 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold">SEO Tools</h2>
           <Badge variant="secondary" className="text-xs">
             <Crown className="h-3 w-3 mr-1" />
             Premium Active
           </Badge>
-          <span className="text-sm text-muted-foreground">$29/month</span>
         </div>
         <Button variant="outline" onClick={() => setIsSubscriptionModalOpen(true)}>
           <Settings className="h-4 w-4 mr-2" />
@@ -374,9 +374,9 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="no-hands-seo">Backlink ∞ Automation Link Building (beta)</TabsTrigger>
           <TabsTrigger value="keyword-research">Keyword Research</TabsTrigger>
           <TabsTrigger value="rank-tracker">Rankings</TabsTrigger>
+          <TabsTrigger value="no-hands-seo">Backlink ∞ Automation Link Building (beta)</TabsTrigger>
         </TabsList>
 
         <TabsContent value="no-hands-seo" className="space-y-6">

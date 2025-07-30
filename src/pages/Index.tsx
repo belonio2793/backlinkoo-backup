@@ -19,7 +19,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { PaymentModal } from "@/components/PaymentModal";
+import { PricingModal } from "@/components/PricingModal";
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
 import { HomepageBlogGenerator } from "@/components/HomepageBlogGenerator";
 import { ProductionBlogGenerator } from "@/components/ProductionBlogGenerator";
@@ -45,7 +45,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { trackInteraction, trackPageView, shouldShowConversionPrompt } = useGuestTracking();
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [pricingModalOpen, setPricingModalOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'starter_100' | 'starter_200' | 'starter_300'>('starter_200');
@@ -237,11 +237,7 @@ const Index = () => {
       setSelectedPlan(planId as 'starter_100' | 'starter_200' | 'starter_300');
     }
 
-    if (user) {
-      setPaymentModalOpen(true);
-    } else {
-      navigate("/login");
-    }
+    setPricingModalOpen(true);
   };
 
   const stats = [
@@ -1062,14 +1058,21 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={paymentModalOpen}
+      {/* Pricing Modal */}
+      <PricingModal
+        isOpen={pricingModalOpen}
         onClose={() => {
-          setPaymentModalOpen(false);
+          setPricingModalOpen(false);
           setIsCustomPackage(false);
         }}
         initialCredits={isCustomPackage ? customCredits : pricingPlans.find(p => p.id === selectedPlan)?.credits}
+        onAuthSuccess={(user) => {
+          setUser(user);
+          toast({
+            title: "Welcome!",
+            description: "You have been successfully signed in.",
+          });
+        }}
       />
 
       {/* Guest Session Reminder - Show for non-authenticated users */}
