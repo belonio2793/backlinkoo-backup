@@ -259,7 +259,7 @@ export function BlogPost() {
       if (hasExistingClaim || hasLocalClaims) {
         toast({
           title: "Claim Limit Reached",
-          description: "You already have a free blog post saved. Each account can only claim one free trial post.",
+          description: "You have reached the maximum limit of 3 claimed posts. Please unclaim a post to claim a new one.",
           variant: "destructive"
         });
         return;
