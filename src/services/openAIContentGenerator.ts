@@ -4,7 +4,6 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
-import { SecureConfig } from '@/lib/secure-config';
 
 export interface OpenAIContentRequest {
   keyword: string;
