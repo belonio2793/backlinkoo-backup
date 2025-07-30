@@ -168,24 +168,22 @@ export function APIManagementDashboard() {
 
     try {
       if (key.service === 'openai') {
-        const response = await fetch('https://api.openai.com/v1/models', {
-          headers: { 'Authorization': `Bearer ${key.key}` }
+        // Test via Netlify function instead of direct API call
+        const response = await fetch('/.netlify/functions/check-ai-provider', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider: 'OpenAI' })
         });
 
-        let isValid = response.ok;
+        let isValid = false;
         let toastMessage = '';
 
         if (response.ok) {
-          toastMessage = 'OpenAI API key is working correctly';
+          const result = await response.json();
+          isValid = result.configured;
+          toastMessage = isValid ? 'OpenAI API configured and working via Netlify functions' : 'OpenAI not configured in Netlify environment';
         } else {
-          // Read response body properly for error details
-          try {
-            const errorText = await response.text();
-            const errorData = JSON.parse(errorText);
-            toastMessage = errorData.error?.message || `API key is not valid (${response.status})`;
-          } catch (e) {
-            toastMessage = `API key is not valid (${response.status})`;
-          }
+          toastMessage = 'Unable to test API - Netlify function error';
         }
 
         setApiKeys(prev => prev.map(k =>
