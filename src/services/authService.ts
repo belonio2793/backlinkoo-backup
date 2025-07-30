@@ -357,20 +357,32 @@ export class AuthService {
 
   private static async cleanupAuthState(): Promise<void> {
     try {
-      // Sign out any existing session
-      await supabase.auth.signOut({ scope: 'global' });
-      
-      // Clear problematic localStorage keys
+      // Check if there's already a valid session before cleaning up
+      const { data: { session }, error } = await supabase.auth.getSession();
+
+      if (session && session.user && session.user.email_confirmed_at) {
+        console.log('AuthService: Valid session exists, skipping cleanup');
+        return;
+      }
+
+      // Only sign out if there's no valid session or user isn't verified
+      if (session && (!session.user || !session.user.email_confirmed_at)) {
+        console.log('AuthService: Cleaning up invalid/unverified session');
+        await supabase.auth.signOut({ scope: 'global' });
+      }
+
+      // Clear only problematic localStorage keys, not all auth tokens
       if (typeof window !== 'undefined') {
         const keysToRemove = [];
-        
+
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
-          if (key && (key.includes('sb-') && key.includes('token'))) {
+          // Only remove specific problematic keys, not all auth tokens
+          if (key && key.includes('sb-') && key.includes('error')) {
             keysToRemove.push(key);
           }
         }
-        
+
         keysToRemove.forEach(key => {
           try {
             localStorage.removeItem(key);
@@ -379,10 +391,10 @@ export class AuthService {
           }
         });
       }
-      
-      // Wait a moment for cleanup
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
+
+      // Shorter wait time
+      await new Promise(resolve => setTimeout(resolve, 50));
+
     } catch (error) {
       console.warn('AuthService: Cleanup failed:', error);
     }
