@@ -110,9 +110,27 @@ export class OpenAIContentGenerator {
   }
 
   /**
-   * Simulate ChatGPT content generation
+   * Get rotating prompt from the three specified prompts
    */
-  private async simulateOpenAIGeneration(request: OpenAIContentRequest, prompt: string): Promise<string> {
+  private getRotatingPrompt(request: OpenAIContentRequest): string {
+    const prompts = [
+      `Generate a 1000 word article on ${request.keyword} including the ${request.anchorText} hyperlinked to ${request.targetUrl}`,
+      `Write a 1000 word blog post about ${request.keyword} with a hyperlinked ${request.anchorText} linked to ${request.targetUrl}`,
+      `Produce a 1000-word reader friendly post on ${request.keyword} that links ${request.anchorText} to ${request.targetUrl}`
+    ];
+
+    // Get current prompt index based on time (rotates every few minutes)
+    const promptIndex = Math.floor(Date.now() / (5 * 60 * 1000)) % prompts.length;
+    const selectedPrompt = prompts[promptIndex];
+
+    console.log(`🔄 Using prompt ${promptIndex + 1}/3: ${selectedPrompt}`);
+    return selectedPrompt;
+  }
+
+  /**
+   * Generate content using OpenAI/ChatGPT
+   */
+  private async generateOpenAIContent(request: OpenAIContentRequest, prompt: string): Promise<string> {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 3000));
 
