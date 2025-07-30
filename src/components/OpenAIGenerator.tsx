@@ -117,8 +117,7 @@ export const OpenAIGenerator = () => {
       // Redirect to the published blog post
       setTimeout(() => {
         window.open(result.publishedUrl, '_blank');
-        // Also navigate to our internal view
-        navigate(`/free-backlink/${result.id}`);
+
       }, 2000);
 
     } catch (error) {
