@@ -248,6 +248,14 @@ export class OpenAIContentGenerator {
   private async generateOpenAIContent(request: OpenAIContentRequest, prompt: string): Promise<string> {
     console.log('🔧 Using secure Netlify function for OpenAI content generation...');
 
+    // Check if we're in an environment where Netlify functions are likely available
+    const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
+
+    if (!isProduction) {
+      console.log('🔄 Development environment detected, skipping to direct fallback...');
+      return await this.generateDirectOpenAIContent(request, prompt);
+    }
+
     try {
       console.log('🤖 Making secure OpenAI request via Netlify function...');
 
