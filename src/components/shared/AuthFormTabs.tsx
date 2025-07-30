@@ -134,7 +134,9 @@ export function AuthFormTabs({
 
       let errorMessage = "Network error or server unavailable. Please check your connection and try again.";
 
-      if (error.message === 'Sign in timeout') {
+      if (error.message.includes('Sign in is taking longer than expected')) {
+        errorMessage = error.message + " You may also try refreshing the page.";
+      } else if (error.message === 'Sign in timeout') {
         errorMessage = "Sign in timed out. Please check your connection and try again.";
       } else if (error.message?.includes('NetworkError') || error.message?.includes('fetch')) {
         errorMessage = "Network connection failed. Please check your internet connection.";
