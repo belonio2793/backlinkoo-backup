@@ -296,7 +296,18 @@ export function EnhancedBlogContent({ content, keyword, anchorText, targetUrl }:
 
       {/* Content with enhanced styling */}
       <div className="space-y-6">
-        {elements.map(renderElement)}
+        {elements.map((element, index) => (
+          <div
+            key={element.id}
+            className="animate-fade-in"
+            style={{
+              animationDelay: `${index * 100}ms`,
+              animationFillMode: 'both'
+            }}
+          >
+            {renderElement(element)}
+          </div>
+        ))}
       </div>
 
       {/* Call-to-action section if there's a target link */}
