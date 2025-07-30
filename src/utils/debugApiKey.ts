@@ -87,14 +87,25 @@ export async function debugApiKey() {
         };
       } else {
         // Get detailed error information
-        let errorText;
+        let errorText = 'Unknown error';
+        let errorData = null;
+
         try {
-          const errorData = await response.json();
-          errorText = errorData.error?.message || 'Unknown error';
+          // Clone the response to read it multiple times if needed
+          const responseClone = response.clone();
+          errorData = await response.json();
+          errorText = errorData.error?.message || errorData.message || 'Unknown error';
           console.log('❌ OpenAI Error Response:', errorData);
         } catch (e) {
-          errorText = await response.text();
-          console.log('❌ OpenAI Error Text:', errorText);
+          try {
+            // If JSON parsing failed, try reading as text
+            const responseClone = response.clone();
+            errorText = await responseClone.text() || 'Unknown error';
+            console.log('❌ OpenAI Error Text:', errorText);
+          } catch (textError) {
+            errorText = `Failed to read error response: ${e}`;
+            console.log('❌ Error reading response:', textError);
+          }
         }
 
         const errors = {
