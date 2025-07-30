@@ -37,6 +37,7 @@ import { AILive } from '@/components/AILive';
 import { EnhancedDashboardRouter } from '@/components/EnhancedDashboardRouter';
 import { UserBlogManagement } from '@/components/UserBlogManagement';
 import { BlogEditPage } from '@/pages/BlogEditPage';
+import { EnhancedBlogCreationForm } from '@/components/EnhancedBlogCreationForm';
 
 export const AppWrapper = () => {
   useReferralTracking();
