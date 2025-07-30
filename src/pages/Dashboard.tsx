@@ -630,6 +630,7 @@ const Dashboard = () => {
     return () => clearTimeout(maxLoadingTime);
   }, []);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
