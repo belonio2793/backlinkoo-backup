@@ -26,20 +26,20 @@ class StreamlinedOpenAI {
   }
 
   async generateContent(prompt: string, options: {
-    keyword?: string;
-    url?: string;
-    wordCount?: number;
-    tone?: string;
+    type?: string;
+    maxTokens?: number;
+    temperature?: number;
+    topic?: string;
+    keywords?: string[];
   } = {}): Promise<string> {
     try {
-      // Use the generate-openai Netlify function
-      const result = await this.callNetlifyFunction('generate-openai', {
-        keyword: options.keyword || 'Content Generation',
-        url: options.url || 'https://example.com',
-        anchorText: options.keyword || 'generated content',
-        wordCount: options.wordCount || 1000,
-        contentType: 'article',
-        tone: options.tone || 'professional'
+      const result = await this.callNetlifyFunction('generate-content', {
+        prompt,
+        type: options.type || 'general',
+        maxTokens: options.maxTokens || 1000,
+        temperature: options.temperature || 0.7,
+        topic: options.topic,
+        keywords: options.keywords || []
       });
 
       if (result.success) {
