@@ -80,7 +80,7 @@ export class BlogClaimService {
 
         // Check if it's a table/schema issue
         if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
-          console.warn('��� BlogClaimService: Database table may not exist, falling back to empty array');
+          console.warn('🔧 BlogClaimService: Database table may not exist, falling back to empty array');
         }
         return [];
       }
@@ -561,6 +561,18 @@ export class BlogClaimService {
           } catch (retryError) {
             console.warn('Failed to claim existing duplicate post:', retryError);
           }
+        }
+
+        // Provide specific error messages based on error type
+        let userMessage = 'Failed to save post to database';
+        if (insertError.code === '23505') {
+          userMessage = 'This post already exists in the database';
+        } else if (insertError.code === '23502') {
+          userMessage = 'Missing required information for database entry';
+        } else if (insertError.code === '23514') {
+          userMessage = 'Invalid data format for database entry';
+        } else if (insertError.message?.includes('relation') || insertError.message?.includes('does not exist')) {
+          userMessage = 'Database table is not available';
         }
 
         // Fallback: Store claim information locally even if database fails
