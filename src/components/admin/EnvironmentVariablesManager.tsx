@@ -283,15 +283,22 @@ export function EnvironmentVariablesManager() {
 
     try {
       if (key === 'VITE_OPENAI_API_KEY') {
-        const response = await fetch('https://api.openai.com/v1/models', {
-          headers: { 'Authorization': `Bearer ${value}` }
+        // Test via Netlify function instead of direct API call
+        const response = await fetch('/.netlify/functions/check-ai-provider', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider: 'OpenAI' })
         });
-        
+
         if (response.ok) {
-          setTestResults(prev => ({ ...prev, [key]: { key, status: 'success', message: 'API key is valid' } }));
+          const result = await response.json();
+          if (result.configured) {
+            setTestResults(prev => ({ ...prev, [key]: { key, status: 'success', message: 'OpenAI configured via Netlify functions' } }));
+          } else {
+            setTestResults(prev => ({ ...prev, [key]: { key, status: 'error', message: 'OpenAI not configured in Netlify environment' } }));
+          }
         } else {
-          const errorData = await response.text();
-          setTestResults(prev => ({ ...prev, [key]: { key, status: 'error', message: `API test failed: ${response.status}` } }));
+          setTestResults(prev => ({ ...prev, [key]: { key, status: 'error', message: 'Netlify function test failed' } }));
         }
       } else {
         // For other APIs, just validate format
