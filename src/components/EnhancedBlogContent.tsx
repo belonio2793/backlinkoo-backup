@@ -12,6 +12,27 @@ interface EnhancedBlogContentProps {
 }
 
 export function EnhancedBlogContent({ content, keyword, anchorText, targetUrl }: EnhancedBlogContentProps) {
+  const [readingProgress, setReadingProgress] = useState(0);
+  const [showTOC, setShowTOC] = useState(false);
+
+  // Calculate reading progress
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (window.scrollY / totalHeight) * 100;
+      setReadingProgress(Math.min(progress, 100));
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Calculate reading time
+  const calculateReadingTime = (text: string) => {
+    const wordsPerMinute = 200;
+    const words = text.replace(/<[^>]*>/g, '').split(/\s+/).length;
+    return Math.ceil(words / wordsPerMinute);
+  };
   // Parse the content and extract structured elements
   const parseContent = (htmlContent: string) => {
     const parser = new DOMParser();
