@@ -407,6 +407,47 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
         </div>
       </div>
 
+      {/* Debug Panel */}
+      {showDebug && (
+        <div className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-xs border border-gray-700">
+          <div className="flex justify-between items-center mb-3">
+            <h4 className="text-green-300 font-semibold">🔧 Debug Information</h4>
+            <Button
+              onClick={() => setShowDebug(false)}
+              variant="ghost"
+              size="sm"
+              className="text-gray-400 hover:text-white p-1 h-auto"
+            >
+              ✕
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <div className="text-yellow-400 mb-2">System Status:</div>
+              <div>• Status: {debugInfo.loadingStatus}</div>
+              <div>• Online: {debugInfo.connectionOnline ? '✅' : '❌'}</div>
+              <div>• Last Update: {debugInfo.timestamp}</div>
+              <div>• User Auth: {debugInfo.userAuthenticated ? '✅' : '❌'}</div>
+              <div>• User ID: {debugInfo.userId || 'None'}</div>
+            </div>
+            <div>
+              <div className="text-yellow-400 mb-2">Data Sources:</div>
+              <div>• Database Posts: {debugInfo.dbPosts}</div>
+              <div>• Local Storage: {debugInfo.localPosts}</div>
+              <div>• Combined Total: {debugInfo.combinedPosts}</div>
+              <div>• Displayed: {debugInfo.displayedPosts}</div>
+              <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '✅'}</div>
+            </div>
+          </div>
+          {debugInfo.errorMessage && (
+            <div className="mt-3 p-2 bg-red-900 border border-red-700 rounded text-red-300">
+              <div className="text-red-200 font-semibold">Error Details:</div>
+              <div className="whitespace-pre-wrap">{debugInfo.errorMessage}</div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Summary Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
