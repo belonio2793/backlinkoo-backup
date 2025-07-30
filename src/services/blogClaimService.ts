@@ -496,7 +496,10 @@ export class BlogClaimService {
         id: postToInsert.id,
         slug: postToInsert.slug,
         title: postToInsert.title,
-        user_id: postToInsert.user_id
+        user_id: postToInsert.user_id,
+        contentLength: postToInsert.content?.length || 0,
+        keywordsLength: postToInsert.keywords?.length || 0,
+        tagsLength: postToInsert.tags?.length || 0
       });
 
       // Test database connection first
