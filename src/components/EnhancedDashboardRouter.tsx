@@ -141,6 +141,19 @@ export function EnhancedDashboardRouter() {
         console.log('✅ User authenticated and verified, showing dashboard');
         setIsLoading(false);
       } else {
+        // Check if this is a recent claim operation - give more time for auth to stabilize
+        const recentClaim = localStorage.getItem('recent_claim_operation');
+        const isRecentClaim = recentClaim && (Date.now() - parseInt(recentClaim)) < 15000; // Within last 15 seconds
+
+        if (isRecentClaim) {
+          console.log('🎯 Recent claim operation detected, giving auth more time to stabilize...');
+          setTimeout(() => {
+            // Retry auth check after claim operation
+            window.location.reload();
+          }, 3000);
+          return;
+        }
+
         console.log('❌ User not authenticated or email not verified, redirecting to login');
         setIsLoading(false);
         // Small delay to prevent redirect loop
