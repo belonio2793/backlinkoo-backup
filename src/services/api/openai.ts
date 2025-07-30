@@ -257,7 +257,7 @@ export class OpenAIService {
     success: boolean;
     error?: string;
   }> {
-    if (!this.apiKey) {
+    if (!this.isConfigured()) {
       return {
         content: '',
         usage: { tokens: 0, cost: 0 },
