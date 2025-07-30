@@ -486,11 +486,19 @@ export class BlogClaimService {
         user_id: postToInsert.user_id
       });
 
-      const { data: insertedPost, error: insertError } = await supabase
-        .from('published_blog_posts')
-        .insert([postToInsert])
-        .select()
-        .single();
+      let insertedPost, insertError;
+      try {
+        const result = await supabase
+          .from('published_blog_posts')
+          .insert([postToInsert])
+          .select()
+          .single();
+        insertedPost = result.data;
+        insertError = result.error;
+      } catch (dbException: any) {
+        console.error('❌ BlogClaimService: Database insertion exception:', dbException);
+        insertError = dbException;
+      }
 
       if (insertError) {
         console.error('❌ BlogClaimService: Failed to create database entry:', {
