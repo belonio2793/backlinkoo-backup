@@ -95,41 +95,88 @@ export const BuilderAIGenerator = () => {
 
     setIsGenerating(true);
 
-    // Set up real-time progress callback
-    builderAIContentGenerator.setProgressCallback((update) => {
-      setProgress(update);
-    });
-
     try {
-      // Generate content using Builder.io AI with the 3 specific prompts
-      const result = await builderAIContentGenerator.generateContent({
-        keyword: keyword.trim(),
-        anchorText: anchorText.trim(),
-        targetUrl: formattedUrl
-      });
+      // First try Builder.io AI
+      try {
+        // Set up real-time progress callback for Builder.io AI
+        builderAIContentGenerator.setProgressCallback((update) => {
+          setProgress(update);
+        });
 
-      toast({
-        title: "Blog Post Generated & Published!",
-        description: `Your content has been published successfully! Redirecting to: ${result.publishedUrl}`,
-      });
+        // Generate content using Builder.io AI with the 3 specific prompts
+        const result = await builderAIContentGenerator.generateContent({
+          keyword: keyword.trim(),
+          anchorText: anchorText.trim(),
+          targetUrl: formattedUrl
+        });
 
-      // Reset form
-      setKeyword('');
-      setAnchorText('');
-      setTargetUrl('');
+        toast({
+          title: "Blog Post Generated & Published!",
+          description: `Your content has been published successfully! Redirecting to: ${result.publishedUrl}`,
+        });
 
-      // Redirect to the published blog post
-      setTimeout(() => {
-        window.open(result.publishedUrl, '_blank');
-        // Also navigate to our internal view
-        navigate(`/free-backlink/${result.id}`);
-      }, 2000);
+        // Reset form
+        setKeyword('');
+        setAnchorText('');
+        setTargetUrl('');
+
+        // Redirect to the published blog post
+        setTimeout(() => {
+          window.open(result.publishedUrl, '_blank');
+          // Also navigate to our internal view
+          navigate(`/free-backlink/${result.id}`);
+        }, 2000);
+
+      } catch (builderError) {
+        console.warn('Builder.io AI failed, trying ChatGPT fallback:', builderError);
+
+        // Use ChatGPT fallback when Builder.io AI fails
+        setProgress({
+          stage: "Fallback Mode",
+          progress: 10,
+          details: "Builder.io AI unavailable, switching to ChatGPT fallback...",
+          timestamp: new Date()
+        });
+
+        // Set up progress callback for ChatGPT fallback
+        chatGPTFallbackService.setProgressCallback((update) => {
+          setProgress(update);
+        });
+
+        const fallbackResult = await chatGPTFallbackService.generateContentWithChatGPT({
+          keyword: keyword.trim(),
+          anchorText: anchorText.trim(),
+          targetUrl: formattedUrl
+        });
+
+        toast({
+          title: "Blog Post Generated with ChatGPT!",
+          description: `Content generated using ChatGPT fallback. Published at: ${fallbackResult.publishedUrl}`,
+          variant: "default",
+        });
+
+        // Reset form
+        setKeyword('');
+        setAnchorText('');
+        setTargetUrl('');
+
+        // Redirect to the published blog post
+        setTimeout(() => {
+          window.open(fallbackResult.publishedUrl, '_blank');
+          // Also navigate to our internal view if available
+          try {
+            navigate(`/free-backlink/${fallbackResult.id}`);
+          } catch (navError) {
+            console.warn('Navigation failed, opening published URL directly');
+          }
+        }, 2000);
+      }
 
     } catch (error) {
-      console.error('Generation error:', error);
+      console.error('Both Builder.io AI and ChatGPT fallback failed:', error);
       toast({
         title: "Generation Failed",
-        description: error instanceof Error ? error.message : "There was an error generating your content. Please try again.",
+        description: "Both Builder.io AI and ChatGPT fallback failed. Please try again later.",
         variant: "destructive",
       });
     } finally {
