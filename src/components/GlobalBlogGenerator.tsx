@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { directOpenAI } from '@/services/directOpenAI';
+import { openAIService } from '@/services/api/openai';
 import { blogService, BlogPostGenerationData } from '@/services/blogService';
 
 import { WordCountProgress } from './WordCountProgress';

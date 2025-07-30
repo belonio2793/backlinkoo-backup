@@ -5,7 +5,7 @@
  */
 
 import { formatBlogContent, formatBlogTitle, capitalizeSentences, calculateWordCount } from '@/utils/textFormatting';
-import { multiKeyOpenAIService } from '@/services/api/multiKeyOpenAI';
+import { openAIService } from '@/services/api/openai';
 
 export interface SEOFormattingOptions {
   targetUrl?: string;
