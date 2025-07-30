@@ -238,22 +238,50 @@ Return clean HTML content optimized for SEO.`;
     setProgress(100);
     setGenerationStage('Complete!');
 
-    const uniqueSlug = `${result.slug}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-    const blogPost = {
-      ...result,
-      slug: uniqueSlug,
-      published_url: `${window.location.origin}/blog/${uniqueSlug}`,
-      is_trial_post: true
-    };
+    // Save to Supabase using blog service
+    try {
+      const blogPostData: BlogPostGenerationData = {
+        title: result.title,
+        content: result.content,
+        keywords: result.keywords,
+        targetUrl: result.targetUrl,
+        anchorText: result.anchorText,
+        wordCount: result.wordCount,
+        readingTime: result.readingTime,
+        seoScore: result.seoScore,
+        metaDescription: result.metaDescription,
+        contextualLinks: []
+      };
 
-    localStorage.setItem(`blog_post_${uniqueSlug}`, JSON.stringify(blogPost));
+      const blogPost = await blogService.createBlogPost(
+        blogPostData,
+        user?.id, // Use current user ID if logged in
+        !user?.id // Is trial post if user not logged in
+      );
 
-    const existing = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-    localStorage.setItem('all_blog_posts', JSON.stringify([{ ...blogPost }, ...existing]));
+      // For backward compatibility, also store slug in localStorage
+      localStorage.setItem(`latest_blog_slug`, blogPost.slug);
 
 
 
-    setGeneratedPost(blogPost);
+      setGeneratedPost(blogPost);
+    } catch (error) {
+      console.error('Failed to save blog post to database:', error);
+      toast({
+        title: "Save Warning",
+        description: "Post generated but may not be permanently saved. Please try again.",
+        variant: "destructive"
+      });
+      // Fallback to original behavior
+      const uniqueSlug = `${result.slug}-${Date.now().toString(36)}`;
+      const fallbackPost = {
+        ...result,
+        slug: uniqueSlug,
+        published_url: `${window.location.origin}/blog/${uniqueSlug}`,
+        is_trial_post: true
+      };
+      setGeneratedPost(fallbackPost);
+    }
     updateRemainingRequests();
 
     toast({
