@@ -331,25 +331,7 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
           </div>
         )}
 
-        {/* Test API Keys Button */}
-        <Button
-          onClick={handleTestKeys}
-          disabled={isTesting || isGenerating}
-          variant="outline"
-          className="w-full h-10 border-2 border-orange-200 text-orange-700 hover:bg-orange-50 mb-4"
-        >
-          {isTesting ? (
-            <>
-              <TestTube className="mr-2 h-4 w-4 animate-spin" />
-              Testing API Keys...
-            </>
-          ) : (
-            <>
-              <TestTube className="mr-2 h-4 w-4" />
-              🔧 Debug: Test API Keys
-            </>
-          )}
-        </Button>
+
 
         {/* Generation Button */}
         <Button
