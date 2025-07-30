@@ -1736,6 +1736,10 @@ const Dashboard = () => {
               <AdminVerificationQueue />
             </TabsContent>
 
+            <TabsContent value="ai-posts" className="space-y-6">
+              <AIPostsManager />
+            </TabsContent>
+
             <TabsContent value="campaigns" className="space-y-6">
               <Card>
                 <CardHeader>
