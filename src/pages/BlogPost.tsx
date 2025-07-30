@@ -858,25 +858,19 @@ export function BlogPost() {
                   </div>
                   
                   <div className="flex flex-wrap gap-3">
-                    {!currentUser ? (
-                      <ClaimTrialPostDialog
-                        trialPostSlug={blogPost.slug}
-                        trialPostTitle={blogPost.title}
-                        expiresAt={blogPost.expires_at}
-                        targetUrl={blogPost.target_url}
-                        onClaimed={() => {
-                          window.location.reload();
-                        }}
-                      >
-                        <Button className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-bold px-6 py-3 animate-pulse shadow-lg">
-                          <Sparkles className="mr-2 h-5 w-5" />
-                          Claim This Post Forever
-                        </Button>
-                      </ClaimTrialPostDialog>
-                    ) : (
+                    <Button
+                      onClick={handleShowClaimExplanation}
+                      className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-bold px-6 py-3 animate-pulse shadow-lg"
+                    >
+                      <Sparkles className="mr-2 h-5 w-5" />
+                      Claim This Post Forever
+                    </Button>
+
+                    {currentUser && (
                       <Button
                         onClick={() => navigate('/dashboard')}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3"
+                        variant="outline"
+                        className="border-green-600 text-green-600 hover:bg-green-50 px-6 py-3"
                       >
                         <CheckCircle2 className="mr-2 h-5 w-5" />
                         View in Dashboard
