@@ -63,27 +63,56 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
       setLoading(true);
       const posts: TrialPost[] = [];
 
-      // Load from localStorage (trial posts)
+      // First load from database (all published posts - claimed and unclaimed)
+      try {
+        const { BlogClaimService } = await import('@/services/blogClaimService');
+        const dbPosts = await BlogClaimService.getClaimablePosts(50);
+
+        // Add all database posts (claimed and unclaimed)
+        dbPosts.forEach(dbPost => {
+          posts.push({
+            id: dbPost.id,
+            title: dbPost.title,
+            slug: dbPost.slug,
+            created_at: dbPost.created_at,
+            expires_at: dbPost.expires_at,
+            word_count: dbPost.word_count || 0,
+            seo_score: dbPost.seo_score || 0,
+            target_url: dbPost.target_url,
+            anchor_text: dbPost.tags?.[0] || 'keyword',
+            keyword: dbPost.tags?.[0] || 'keyword',
+            is_trial_post: dbPost.is_trial_post,
+            user_id: dbPost.user_id,
+            view_count: dbPost.view_count || 0,
+            excerpt: dbPost.excerpt
+          });
+        });
+        console.log(`✅ Loaded ${dbPosts.length} posts from database`);
+      } catch (error) {
+        console.warn('Error loading posts from database:', error);
+      }
+
+      // Also load from localStorage (all posts - not just trial)
       try {
         const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-        
+
         for (const blogMeta of allBlogs) {
           const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
           if (blogData) {
             const blogPost = JSON.parse(blogData);
-            
-            // Only include trial posts
-            if (blogPost.is_trial_post) {
-              // Check if expired
-              if (blogPost.expires_at) {
-                const isExpired = new Date() > new Date(blogPost.expires_at);
-                if (isExpired) {
-                  // Remove expired post
-                  localStorage.removeItem(`blog_post_${blogPost.slug}`);
-                  continue;
-                }
+
+            // Check if trial post is expired
+            if (blogPost.is_trial_post && blogPost.expires_at) {
+              const isExpired = new Date() > new Date(blogPost.expires_at);
+              if (isExpired) {
+                // Remove expired post
+                localStorage.removeItem(`blog_post_${blogPost.slug}`);
+                continue;
               }
-              
+            }
+
+            // Only add if not already in database posts
+            if (!posts.find(dbPost => dbPost.slug === blogPost.slug)) {
               posts.push({
                 id: blogPost.id,
                 title: blogPost.title,
@@ -106,28 +135,13 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
 
         // Update the all_blog_posts list to remove expired ones
         const validBlogMetas = allBlogs.filter((meta: any) => {
-          return posts.some(post => post.slug === meta.slug);
+          return posts.some(post => post.slug === meta.slug) ||
+                 !JSON.parse(localStorage.getItem(`blog_post_${meta.slug}`) || '{}').expires_at;
         });
         localStorage.setItem('all_blog_posts', JSON.stringify(validBlogMetas));
 
       } catch (error) {
-        console.warn('Error loading trial posts from localStorage:', error);
-      }
-
-      // Load trial posts from database if available
-      try {
-        const { BlogClaimService } = await import('@/services/blogClaimService');
-        const dbPosts = await BlogClaimService.getClaimablePosts(50);
-        const trialDbPosts = dbPosts.filter(post => post.is_trial_post);
-        
-        // Add database trial posts that aren't already in localStorage
-        trialDbPosts.forEach(dbPost => {
-          if (!posts.find(localPost => localPost.slug === dbPost.slug)) {
-            posts.push(dbPost as TrialPost);
-          }
-        });
-      } catch (error) {
-        console.warn('Error loading trial posts from database:', error);
+        console.warn('Error loading posts from localStorage:', error);
       }
 
       // Sort by creation date (newest first)
