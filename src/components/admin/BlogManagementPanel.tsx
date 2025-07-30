@@ -19,6 +19,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { blogAutoDeleteService } from '@/services/blogAutoDeleteService';
 import { supabase } from '@/integrations/supabase/client';
+import { databaseDiagnostic } from '@/utils/databaseDiagnostic';
 import {
   FileText,
   Trash2,
@@ -58,6 +59,7 @@ export function BlogManagementPanel() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [runningCleanup, setRunningCleanup] = useState(false);
+  const [runningDiagnostic, setRunningDiagnostic] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -163,6 +165,43 @@ export function BlogManagementPanel() {
       });
     } finally {
       setRunningCleanup(false);
+    }
+  };
+
+  const runDiagnostic = async () => {
+    setRunningDiagnostic(true);
+    try {
+      console.log('🔍 Running database diagnostic...');
+      const results = await databaseDiagnostic.runCompleteDiagnostic();
+
+      const hasErrors = results.some(r => !r.success);
+
+      toast({
+        title: hasErrors ? "Diagnostic Issues Found" : "Diagnostic Complete",
+        description: hasErrors
+          ? "Check console for detailed error information"
+          : "All database checks passed successfully",
+        variant: hasErrors ? "destructive" : "default",
+      });
+
+      // If there are errors, also show them in an alert
+      if (hasErrors) {
+        const errorMessages = results
+          .filter(r => !r.success)
+          .map(r => r.message)
+          .join(', ');
+
+        console.error('❌ Diagnostic errors found:', errorMessages);
+      }
+    } catch (error) {
+      console.error('Diagnostic failed:', error);
+      toast({
+        title: "Diagnostic Failed",
+        description: "Could not run diagnostic check",
+        variant: "destructive",
+      });
+    } finally {
+      setRunningDiagnostic(false);
     }
   };
 
@@ -284,9 +323,9 @@ export function BlogManagementPanel() {
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
-              <Button 
-                onClick={runCleanup} 
-                variant="secondary" 
+              <Button
+                onClick={runCleanup}
+                variant="secondary"
                 size="sm"
                 disabled={runningCleanup}
               >
@@ -296,6 +335,19 @@ export function BlogManagementPanel() {
                   <Trash2 className="h-4 w-4 mr-2" />
                 )}
                 Run Cleanup
+              </Button>
+              <Button
+                onClick={runDiagnostic}
+                variant="outline"
+                size="sm"
+                disabled={runningDiagnostic}
+              >
+                {runningDiagnostic ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                )}
+                Run Diagnostic
               </Button>
             </div>
           </CardTitle>
