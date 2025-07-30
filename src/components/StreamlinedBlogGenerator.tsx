@@ -76,20 +76,35 @@ export function StreamlinedBlogGenerator() {
   };
 
   const handleGenerate = async (saveImmediately = false) => {
-    if (!request.targetUrl || !request.keywords) {
-      setError('Target URL and keywords are required');
+    if (!request.targetUrl || (!request.keywords.length && !request.primaryKeyword)) {
+      setError('Target URL and at least one keyword are required');
       return;
     }
+
+    // Ensure keywords array includes primary keyword
+    const keywords = request.primaryKeyword ?
+      [request.primaryKeyword, ...request.keywords.filter(k => k !== request.primaryKeyword)] :
+      request.keywords;
 
     setIsGenerating(true);
     setError('');
     setGeneratedPost(null);
 
     try {
-      const result = await BlogWorkflowManager.generateBlog(request, {
-        requireAuth: saveImmediately,
-        saveImmediately
-      });
+      const result = await EnhancedBlogWorkflow.createBlogPost(
+        {
+          ...request,
+          keywords,
+          primaryKeyword: request.primaryKeyword || keywords[0]
+        },
+        {
+          saveToDatabase: true,
+          generateSlug: true,
+          requireAuth: saveImmediately,
+          isTrialPost: !user?.id,
+          userId: user?.id
+        }
+      );
 
       if (result.requiresAuth) {
         setShowLoginModal(true);
@@ -101,9 +116,9 @@ export function StreamlinedBlogGenerator() {
         return;
       }
 
-      setGeneratedPost(result.post!);
+      setGeneratedPost(result.blogPost!);
       setActiveTab('preview');
-      
+
       if (saveImmediately && user) {
         await loadUserPosts(); // Refresh user posts
       }
