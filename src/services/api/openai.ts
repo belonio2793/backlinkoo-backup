@@ -422,7 +422,10 @@ export class OpenAIService {
   }
 
   async testConnection(): Promise<boolean> {
-    if (!this.apiKey) return false;
+    if (!this.apiKey || !this.apiKey.startsWith('sk-')) {
+      console.log('⚠️ Skipping OpenAI connection test - no valid API key configured');
+      return false;
+    }
 
     try {
       console.log('🔍 Testing OpenAI connection with retry logic...');
@@ -435,20 +438,22 @@ export class OpenAIService {
         });
 
         if (!response.ok) {
-          throw new Error(`Connection test failed: ${response.status} - ${response.statusText}`);
+          const errorText = await response.text().catch(() => response.statusText);
+          throw new Error(`Connection test failed: ${response.status} - ${errorText}`);
         }
 
         return response.ok;
       }, {
         ...this.defaultRetryConfig,
-        maxRetries: 3, // Use fewer retries for connection test
-        baseDelay: 500
+        maxRetries: 1, // Only try once for connection test to avoid spam
+        baseDelay: 1000
       });
 
       console.log('✅ OpenAI connection test successful');
       return result;
     } catch (error) {
-      console.error('❌ OpenAI connection test failed:', error);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.warn('⚠️ OpenAI connection test failed:', errorMsg);
       return false;
     }
   }
