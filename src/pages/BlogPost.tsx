@@ -38,7 +38,7 @@ export function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [blogPost, setBlogPost] = useState<PublishedBlogPost | null>(null);
+  const [blogPost, setBlogPost] = useState<BlogPostType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -67,7 +67,7 @@ export function BlogPost() {
         setCurrentUser(user);
 
         // Try database first
-        let post: PublishedBlogPost | null = null;
+        let post: BlogPostType | null = null;
         try {
           post = await publishedBlogService.getBlogPostBySlug(slug);
         } catch (dbError) {
