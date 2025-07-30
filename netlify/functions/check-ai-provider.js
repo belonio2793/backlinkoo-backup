@@ -16,7 +16,7 @@ exports.handler = async (event, context) => {
     return { statusCode: 200, headers, body: '' };
   }
 
-  if (event.httpMethod !== 'POST') {
+  if (event.httpMethod !== 'POST' && event.httpMethod !== 'GET') {
     return {
       statusCode: 405,
       headers,
@@ -25,7 +25,15 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { provider } = JSON.parse(event.body);
+    let provider;
+
+    if (event.httpMethod === 'POST') {
+      const body = JSON.parse(event.body);
+      provider = body.provider;
+    } else {
+      // GET request - get provider from query parameters
+      provider = event.queryStringParameters?.provider;
+    }
 
     if (!provider) {
       return {
