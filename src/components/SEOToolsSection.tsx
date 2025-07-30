@@ -398,15 +398,33 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
         </TabsList>
 
         <TabsContent value="no-hands-seo" className="space-y-6">
-          <NoHandsSEODashboard />
+          <FeatureAccessGuard
+            feature="automatedCampaigns"
+            featureName="Automated Link Building"
+            fallbackMessage="Upgrade to Premium to access our automated link building system with unlimited campaigns and 24/7 automation."
+          >
+            <NoHandsSEODashboard />
+          </FeatureAccessGuard>
         </TabsContent>
 
         <TabsContent value="keyword-research" className="space-y-6">
-          <KeywordResearchTool />
+          <FeatureAccessGuard
+            feature="keywordResearch"
+            featureName="Advanced Keyword Research"
+            fallbackMessage="Upgrade to Premium for unlimited keyword research with geographic targeting, difficulty analysis, and SERP insights."
+          >
+            <KeywordResearchTool />
+          </FeatureAccessGuard>
         </TabsContent>
 
         <TabsContent value="rank-tracker" className="space-y-6">
-          <RankingTracker />
+          <FeatureAccessGuard
+            feature="rankTracker"
+            featureName="Real-time Rank Tracking"
+            fallbackMessage="Upgrade to Premium for unlimited rank tracking across multiple search engines with historical data and trend analysis."
+          >
+            <RankingTracker />
+          </FeatureAccessGuard>
         </TabsContent>
       </Tabs>
 
