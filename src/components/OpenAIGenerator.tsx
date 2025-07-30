@@ -253,8 +253,8 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
                 : 'text-red-800'
               }`}>
                 {apiStatus.accessible
-                  ? 'OpenAI API is ready'
-                  : `API Error: ${apiStatus.error}`
+                  ? 'Content service is ready'
+                  : `Service Error: ${apiStatus.error}`
                 }
               </span>
             </div>
