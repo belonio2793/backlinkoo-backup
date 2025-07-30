@@ -338,6 +338,9 @@ Summary of key points and actionable takeaways for readers.
    * Create beautiful HTML template for blog post
    */
   private createBlogHTML(content: any, request: BuilderAIRequest): string {
+    const currentDate = new Date();
+    const readingTime = Math.ceil(content.wordCount / 200); // Average reading speed
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -345,20 +348,294 @@ Summary of key points and actionable takeaways for readers.
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${content.title}</title>
     <meta name="description" content="${content.metaDescription}">
+    <meta name="keywords" content="${request.keyword}, blog, guide, tips">
+    <meta name="author" content="Builder.io AI">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="${content.title}">
+    <meta property="og:description" content="${content.metaDescription}">
+    <meta property="og:url" content="${window.location.origin}/blog/${this.generateSlug(request.keyword)}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="${content.title}">
+    <meta property="twitter:description" content="${content.metaDescription}">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "${content.title}",
+      "description": "${content.metaDescription}",
+      "author": {
+        "@type": "Organization",
+        "name": "Builder.io AI"
+      },
+      "datePublished": "${currentDate.toISOString()}",
+      "wordCount": ${content.wordCount},
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "${window.location.origin}/blog/${this.generateSlug(request.keyword)}"
+      }
+    }
+    </script>
+
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
-        h1 { color: #2563eb; border-bottom: 3px solid #2563eb; padding-bottom: 10px; }
-        h2 { color: #1e40af; margin-top: 30px; }
-        a { color: #2563eb; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        .meta { color: #666; font-size: 14px; margin-bottom: 20px; }
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --background: #ffffff;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--background);
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: white;
+            box-shadow: var(--shadow);
+            border-radius: 12px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .meta {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .meta-icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.7;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        h3 {
+            color: var(--text-color);
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            margin-bottom: 1.5rem;
+            text-align: justify;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        a:hover {
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+        }
+
+        .content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+            text-align: center;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .warning {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem 0;
+            color: #92400e;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #a78bfa 0%, #ec4899 100%);
+            background-repeat: no-repeat;
+            background-size: 100% 0.2em;
+            background-position: 0 88%;
+            transition: background-size 0.25s ease-in;
+        }
+
+        ul, ol {
+            margin: 1.5rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .meta {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Reading Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            z-index: 9999;
+            transition: width 0.1s ease;
+        }
     </style>
 </head>
 <body>
-    <div class="meta">Published: ${new Date().toLocaleDateString()} | Keyword: ${request.keyword}</div>
-    <h1>${content.title}</h1>
-    <div class="content">${content.content}</div>
-    <div class="meta">Word count: ${content.wordCount} | Auto-expires in 24 hours if unclaimed</div>
+    <div class="progress-bar" id="progress-bar"></div>
+
+    <div class="container">
+        <div class="header">
+            <div class="meta">
+                <div class="meta-item">
+                    📅 Published: ${currentDate.toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                </div>
+                <div class="meta-item">
+                    🏷️ Keyword: <span class="highlight">${request.keyword}</span>
+                </div>
+                <div class="meta-item">
+                    ⏱️ ${readingTime} min read
+                </div>
+                <div class="meta-item">
+                    📝 ${content.wordCount} words
+                </div>
+            </div>
+
+            <h1>${content.title}</h1>
+        </div>
+
+        <div class="content">
+            ${content.content}
+        </div>
+
+        <div class="warning">
+            ⚠️ <strong>Auto-Expiring Content:</strong> This blog post will automatically expire and be removed in 24 hours unless claimed by a registered account.
+        </div>
+
+        <div class="footer">
+            <p>🤖 Generated with <strong>Builder.io AI</strong> | 🎯 Target: <a href="${request.targetUrl}" target="_blank" rel="noopener noreferrer">${request.targetUrl}</a></p>
+            <p>📊 SEO Optimized • 🚀 High Performance • ⚡ Real-time Generation</p>
+        </div>
+    </div>
+
+    <script>
+        // Reading progress indicator
+        window.addEventListener('scroll', function() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progress-bar').style.width = scrolled + '%';
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Analytics tracking (if needed)
+        console.log('📊 Builder.io AI Blog Post Loaded:', {
+            title: '${content.title}',
+            keyword: '${request.keyword}',
+            wordCount: ${content.wordCount},
+            readingTime: ${readingTime},
+            targetUrl: '${request.targetUrl}'
+        });
+    </script>
 </body>
 </html>`;
   }
