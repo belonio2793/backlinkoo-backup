@@ -290,7 +290,7 @@ Return clean HTML content optimized for SEO.`;
       action: (
         <Button
           size="sm"
-          onClick={() => navigate(`/blog/${uniqueSlug}`)}
+          onClick={() => navigate(`/blog/${generatedPost?.slug}`)}
           className="bg-purple-600 text-white"
         >
           View Post
