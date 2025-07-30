@@ -3,6 +3,7 @@ import App from './App.tsx'
 import './index.css'
 import { trialPostCleanupService } from './services/trialPostCleanupService'
 import './utils/setupApiKey'
+import './utils/refreshApiKeys'
 
 // Prevent ethereum property conflicts from browser extensions
 try {
