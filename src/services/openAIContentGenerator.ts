@@ -491,7 +491,7 @@ export class OpenAIContentGenerator {
       anchor_text: request.anchorText,
       keywords: [request.keyword],
       tags: [request.keyword],
-      category: 'AI Generated',
+      category: 'Expert Content',
       meta_description: content.metaDescription,
       excerpt: content.metaDescription,
       published_url: publishedUrl,
