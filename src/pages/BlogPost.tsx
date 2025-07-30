@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatBlogTitle, formatBlogContent, getTrendingLabel, calculateWordCount, cleanHTMLContent } from '@/utils/textFormatting';
 import { EnhancedBlogContent } from '@/components/EnhancedBlogContent';
-import { PaymentModal } from '@/components/PaymentModal';
+import { PricingModal } from '@/components/PricingModal';
 import { getDisplayEmailForPost } from '@/utils/emailMasking';
 import { runImmediateContentCleanup } from '@/utils/immediateContentCleanup';
 import { openAIOnlyContentGenerator } from '@/services/openAIOnlyContentGenerator';
