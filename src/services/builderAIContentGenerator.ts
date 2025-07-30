@@ -123,8 +123,15 @@ export class BuilderAIContentGenerator {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Check if we have necessary environment variables or API keys
-      const hasBuilderConfig = process.env.VITE_BUILDER_API_KEY || 
-                              import.meta.env.VITE_BUILDER_API_KEY;
+      // Use safe environment variable access to prevent "process is not defined" error
+      let hasBuilderConfig = false;
+      try {
+        hasBuilderConfig = import.meta.env.VITE_BUILDER_API_KEY ||
+                          (typeof process !== 'undefined' && process.env?.VITE_BUILDER_API_KEY);
+      } catch (error) {
+        console.warn('⚠️ Environment variable access failed, Builder.io API not configured');
+        hasBuilderConfig = false;
+      }
       
       if (!hasBuilderConfig) {
         return {
