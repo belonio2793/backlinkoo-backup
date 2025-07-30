@@ -57,7 +57,7 @@ export const AppWrapper = () => {
         <Route path="/preview/:slug" element={<BlogPreview />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/create" element={<BlogCreator />} />
-        <Route path="/create-blog" element={<EnhancedBlogCreation />} />
+
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/trial-dashboard" element={<GuestDashboard />} />
         <Route path="/ai-test" element={<AIContentTest />} />
