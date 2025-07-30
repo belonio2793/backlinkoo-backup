@@ -4,6 +4,7 @@
  */
 
 import { SecureConfig } from '@/lib/secure-config';
+import { environmentVariablesService } from '@/services/environmentVariablesService';
 
 interface OpenAIRequest {
   model: string;
