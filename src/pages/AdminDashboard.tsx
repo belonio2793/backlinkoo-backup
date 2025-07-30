@@ -196,6 +196,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="content-filter">Content Filter</TabsTrigger>
             <TabsTrigger value="moderation-queue">Moderation Queue</TabsTrigger>
             <TabsTrigger value="trial-cleanup">Trial Cleanup</TabsTrigger>
+            <TabsTrigger value="blog-management">Blog Management</TabsTrigger>
             <TabsTrigger value="affiliates">Affiliate Program</TabsTrigger>
             <TabsTrigger value="auth-test">Auth & Email Test</TabsTrigger>
             <TabsTrigger value="deployment">Deployment</TabsTrigger>
@@ -250,6 +251,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="trial-cleanup">
             <TrialPostCleanupManager />
+          </TabsContent>
+
+          <TabsContent value="blog-management">
+            <BlogManagementPanel />
           </TabsContent>
 
           <TabsContent value="affiliates">
