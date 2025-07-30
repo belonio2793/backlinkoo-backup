@@ -141,13 +141,12 @@ export class OpenAIContentGenerator {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          prompt,
-          options: {
-            model: 'gpt-3.5-turbo',
-            maxTokens: 4000,
-            temperature: 0.7,
-            systemPrompt: 'You are a professional content writer. Create engaging, well-structured blog posts with proper HTML formatting. Always include the specified anchor text as a clickable link to the target URL. Make the content natural, informative, and reader-friendly.'
-          }
+          keyword: request.keyword,
+          url: request.targetUrl,
+          anchorText: request.anchorText,
+          wordCount: 1500,
+          contentType: 'how-to',
+          tone: 'professional'
         })
       });
 
