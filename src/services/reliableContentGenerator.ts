@@ -118,7 +118,7 @@ export class ReliableContentGenerator {
    */
   private async generateWithOpenAI(prompt: string, options: any): Promise<GenerationResult> {
     if (!openAIService.isConfigured()) {
-      throw new Error('OpenAI not configured');
+      throw new Error('OpenAI API key not configured - please set a valid API key');
     }
     
     const result = await openAIService.generateContent(prompt, {
