@@ -420,7 +420,10 @@ export class ContentModerationService {
 
       await supabase.from('content_removal_list').insert(entries);
     } catch (error) {
-      console.error('Failed to add terms to removal list:', error);
+      console.error('Failed to add terms to removal list:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: String(error)
+      });
     }
   }
 
