@@ -122,25 +122,60 @@ export class APIKeyTester {
 
       const responseTime = Date.now() - startTime;
 
-      if (response.ok) {
-        // Try to read as JSON, fallback to text
-        let data;
-        try {
-          data = await response.json();
-        } catch (e) {
-          data = await response.text();
+      // Read response body immediately to avoid "body stream already read" errors
+      let responseText = '';
+      let responseData = null;
+
+      try {
+        responseText = await response.text();
+        if (responseText) {
+          try {
+            responseData = JSON.parse(responseText);
+          } catch (parseError) {
+            responseData = responseText;
+          }
         }
-        
+      } catch (readError) {
+        console.error('Error reading response:', readError);
+        responseText = 'Failed to read response';
+      }
+
+      if (response.ok) {
         console.log(`✅ ${serviceName} API key is valid!`);
-        
+
         return {
           success: true,
           message: `${serviceName} API key is valid and responding correctly.`,
           responseTime,
-          details: data
+          details: responseData
         };
       } else {
-        return await this.handleErrorResponse(response, responseTime, `${serviceName} API key`);
+        // Handle error with already-read response data
+        const errorMessage = (typeof responseData === 'object' && responseData?.error?.message) ||
+                            (typeof responseData === 'object' && responseData?.message) ||
+                            responseText ||
+                            'API request failed';
+
+        const errorCategories = {
+          401: 'Invalid API key or authentication failed',
+          403: 'Access forbidden - insufficient permissions',
+          429: 'Rate limit exceeded - too many requests',
+          500: 'Server error - try again later',
+          502: 'Bad gateway - service temporarily unavailable',
+          503: 'Service unavailable - try again later'
+        };
+
+        const categorizedError = errorCategories[response.status as keyof typeof errorCategories] || 'API request failed';
+
+        console.error(`❌ ${serviceName} API test failed:`, response.status, errorMessage);
+
+        return {
+          success: false,
+          message: `${categorizedError}: ${errorMessage}`,
+          status: response.status,
+          responseTime,
+          details: responseData
+        };
       }
     } catch (error) {
       console.error(`❌ Network error testing ${serviceName} API:`, error);
