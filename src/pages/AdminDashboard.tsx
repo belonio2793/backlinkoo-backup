@@ -33,6 +33,7 @@ import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionSta
 import { APIConfigurationManager } from "@/components/admin/APIConfigurationManager";
 import { OpenAIConnectionTester } from "@/components/OpenAIConnectionTester";
 import { OpenAIConnectionTest } from "@/components/OpenAIConnectionTest";
+import { APIKeyDebug } from "@/components/APIKeyDebug";
 import {
   Users,
   Activity,
