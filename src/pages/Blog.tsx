@@ -498,14 +498,25 @@ export function Blog() {
 
 // Blog Post Card Component
 function BlogPostCard({ post, navigate, formatDate }: any) {
+  const isClaimed = !post.is_trial_post && post.user_id;
+  const isPremiumContent = isClaimed || (post.seo_score || 0) > 85;
+
   return (
-    <Card 
-      className="group hover:shadow-2xl transition-all duration-300 cursor-pointer border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:bg-white transform hover:-translate-y-2"
+    <Card
+      className={`group hover:shadow-2xl transition-all duration-300 cursor-pointer border-0 shadow-lg backdrop-blur-sm hover:bg-white transform hover:-translate-y-2 ${
+        isClaimed
+          ? 'bg-gradient-to-br from-green-50/80 to-emerald-50/80 ring-1 ring-green-200/50'
+          : 'bg-white/80'
+      }`}
       onClick={() => navigate(`/blog/${post.slug}`)}
     >
       <CardHeader className="pb-4 space-y-4">
         <div className="flex items-start justify-between">
-          <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-md">
+          <Badge className={`border-0 shadow-md ${
+            isClaimed
+              ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
+              : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
+          }`}>
             {post.category || 'Expert Content'}
           </Badge>
           <div className="flex items-center gap-2">
@@ -515,15 +526,19 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
                 Trial
               </Badge>
             ) : (
-              <Badge className="bg-green-50 text-green-700 border-green-200">
+              <Badge className={`${
+                isClaimed
+                  ? 'bg-green-100 text-green-800 border-green-300'
+                  : 'bg-green-50 text-green-700 border-green-200'
+              }`}>
                 <CheckCircle2 className="mr-1 h-3 w-3" />
-                Live
+                {isClaimed ? 'Claimed' : 'Live'}
               </Badge>
             )}
-            {(post.seo_score || 0) > 80 && (
+            {isPremiumContent && (
               <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200">
                 <Star className="mr-1 h-3 w-3" />
-                Featured
+                Premium
               </Badge>
             )}
           </div>
