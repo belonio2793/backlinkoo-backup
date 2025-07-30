@@ -29,12 +29,7 @@ import { Footer } from "@/components/Footer";
 import { SystemStatusCheck } from "@/components/SystemStatusCheck";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 import { AdminAuthService } from "@/services/adminAuthService";
-import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
-import { APIConfigurationManager } from "@/components/admin/APIConfigurationManager";
-import { OpenAIConnectionTester } from "@/components/OpenAIConnectionTester";
-import { OpenAIConnectionTest } from "@/components/OpenAIConnectionTest";
-import { APIKeyDebug } from "@/components/APIKeyDebug";
-import { APIKeyDebugAdvanced } from "@/components/APIKeyDebugAdvanced";
+// API validation components removed - auto-configured system
 import { APIManagementDashboard } from "@/components/admin/APIManagementDashboard";
 import { OrganizedAdminDashboard } from "@/components/admin/OrganizedAdminDashboard";
 import {
