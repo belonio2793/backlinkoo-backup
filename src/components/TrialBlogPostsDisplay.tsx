@@ -4,12 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Clock, 
-  ExternalLink, 
-  AlertCircle, 
-  Sparkles, 
-  TrendingUp, 
+import {
+  Clock,
+  ExternalLink,
+  AlertCircle,
+  Sparkles,
+  TrendingUp,
   FileText,
   Save,
   ArrowRight,
@@ -18,7 +18,8 @@ import {
   RefreshCw,
   Plus,
   Eye,
-  User
+  User,
+  CheckCircle2
 } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 
