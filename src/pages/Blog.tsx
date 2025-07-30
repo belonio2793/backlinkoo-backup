@@ -343,7 +343,7 @@ export function Blog() {
               </p>
               <div className="pt-4">
                 <Button
-                  onClick={() => navigate('/create-blog')}
+                  onClick={() => navigate('/')}
                   size="lg"
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3"
                 >
