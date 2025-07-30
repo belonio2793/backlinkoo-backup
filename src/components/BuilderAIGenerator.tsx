@@ -105,7 +105,7 @@ export const BuilderAIGenerator = () => {
   return (
     <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-blue-50">
       <CardHeader className="pb-4">
-        <CardTitle>AI Content Generator</CardTitle>
+        <CardTitle>Create a Backlink</CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-6">
