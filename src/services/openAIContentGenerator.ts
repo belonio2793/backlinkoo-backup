@@ -4,7 +4,6 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
-import { validateAllOpenAIKeys } from '@/utils/validateOpenAIKeys';
 
 export interface OpenAIContentRequest {
   keyword: string;
