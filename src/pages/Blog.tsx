@@ -76,6 +76,12 @@ export function Blog() {
           } else {
             posts = data || [];
             console.log('✅ Database posts loaded:', posts.length);
+            console.log('📊 Post breakdown:', {
+              total: posts.length,
+              claimed: posts.filter(p => !p.is_trial_post && p.user_id).length,
+              trial: posts.filter(p => p.is_trial_post).length,
+              unclaimed: posts.filter(p => !p.user_id).length
+            });
           }
         } catch (dbError) {
           console.warn('❌ Database unavailable, using localStorage:', dbError);
