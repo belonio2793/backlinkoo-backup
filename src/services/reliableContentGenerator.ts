@@ -65,10 +65,22 @@ export class ReliableContentGenerator {
     // Try each provider in order
     for (const provider of this.config.fallbackOrder) {
       try {
+        // Skip providers that aren't configured
+        if (provider === 'openai' && !openAIService.isConfigured()) {
+          console.log(`⚠️ Skipping ${provider} - not properly configured`);
+          fallbacksUsed.push(provider);
+          continue;
+        }
+        if (provider === 'cohere' && !cohereService.isConfigured()) {
+          console.log(`⚠️ Skipping ${provider} - not properly configured`);
+          fallbacksUsed.push(provider);
+          continue;
+        }
+
         console.log(`🔄 Attempting content generation with ${provider}...`);
-        
+
         const result = await this.generateWithProvider(provider, prompt, options);
-        
+
         if (result.success && result.content) {
           return {
             ...result,
@@ -77,12 +89,13 @@ export class ReliableContentGenerator {
             responseTime: Date.now() - startTime
           };
         }
-        
+
         fallbacksUsed.push(provider);
         console.warn(`⚠️ ${provider} failed, trying next provider...`);
-        
+
       } catch (error) {
-        console.warn(`❌ ${provider} error:`, error);
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.warn(`❌ ${provider} error: ${errorMsg}`);
         fallbacksUsed.push(provider);
         this.providerHealth.set(provider, false);
       }
