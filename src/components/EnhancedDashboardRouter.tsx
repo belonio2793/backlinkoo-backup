@@ -26,8 +26,8 @@ export function EnhancedDashboardRouter() {
       const hasStoredAuth = localStorage.getItem('sb-dfhanacsmsvvkpunurnp-auth-token') !== null;
       const recentClaimOperation = localStorage.getItem('recent_claim_operation');
       const hasRecentClaim = recentClaimOperation && (Date.now() - parseInt(recentClaimOperation)) < 30000; // Within last 30 seconds
-      if (hasStoredAuth) {
-        console.log('🔑 Found stored auth token, allowing dashboard access');
+      if (hasStoredAuth || hasRecentClaim) {
+        console.log('🔑 Found stored auth token or recent claim operation, allowing dashboard access');
         setUser({ id: 'fallback-user', email: 'stored@auth.user', email_confirmed_at: new Date().toISOString() });
       } else {
         console.log('🚪 No stored auth found, redirecting to login');
