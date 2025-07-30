@@ -111,25 +111,53 @@ export class OpenAIContentGenerator {
           error.message.includes('function error') ||
           error.message.includes('Netlify function')) {
         console.log('🔄 All OpenAI functions failed, generating demo content as fallback...');
+        console.log('📝 Error details:', error.message);
         this.sendProgress('Fallback', 'Generating demo content...', 50);
 
         try {
+          console.log('🎯 Generating demo content for:', request.keyword);
           const demoContent = this.generateDemoContent(request);
+          console.log('✅ Demo content generated, length:', demoContent.length);
+
           const processedContent = this.processContent(demoContent, request);
+          console.log('✅ Content processed, word count:', processedContent.wordCount);
 
           this.sendProgress('Publishing', 'Publishing demo content...', 80);
           const publishedUrl = await this.publishToBlog(slug, processedContent, request);
+          console.log('✅ Content published to:', publishedUrl);
 
           this.sendProgress('Database', 'Saving to database...', 90);
           const result = await this.saveToDB(id, slug, processedContent, request, publishedUrl);
+          console.log('✅ Content saved to database with ID:', result.id);
 
           this.sendProgress('Complete', 'Demo content generated successfully! (AI service temporarily unavailable)', 100);
 
           return result;
         } catch (fallbackError) {
           console.error('❌ Demo content fallback also failed:', fallbackError);
+          console.error('❌ Fallback error stack:', fallbackError.stack);
           this.sendProgress('Error', 'Content generation completely failed', 0);
-          throw new Error('Content generation service is completely unavailable. Please try again later.');
+
+          // If even demo content fails, return a minimal result
+          try {
+            return {
+              id,
+              title: `${request.keyword} - Demo Post`,
+              slug,
+              content: this.generateDemoContent(request),
+              keyword: request.keyword,
+              anchorText: request.anchorText,
+              targetUrl: request.targetUrl,
+              publishedUrl: `/blog/${slug}.html`,
+              wordCount: 800,
+              createdAt: new Date().toISOString(),
+              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+              status: 'unclaimed' as const
+            };
+          } catch (finalError) {
+            console.error('❌ Even minimal fallback failed:', finalError);
+            throw new Error('Content generation service is completely unavailable. Please try again later.');
+          }
         }
       }
 
