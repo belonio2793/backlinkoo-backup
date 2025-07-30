@@ -361,7 +361,7 @@ export const KeywordResearchTool = () => {
     { code: "NC", name: "New Caledonia", flag: "🇳🇨" },
     { code: "NE", name: "Niger", flag: "🇳🇪" },
     { code: "NF", name: "Norfolk Island", flag: "🇳🇫" },
-    { code: "NG", name: "Nigeria", flag: "����🇬" },
+    { code: "NG", name: "Nigeria", flag: "🇳🇬" },
     { code: "NI", name: "Nicaragua", flag: "🇳🇮" },
     { code: "NL", name: "Netherlands", flag: "🇳🇱" },
     { code: "NO", name: "Norway", flag: "🇳🇴" },
