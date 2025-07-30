@@ -1,0 +1,46 @@
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+const Home = () => (
+  <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+    <h1>Backlinkoo - Home</h1>
+    <p>Welcome to Backlinkoo!</p>
+    <nav>
+      <a href="/login" style={{ marginRight: '10px' }}>Login</a>
+      <a href="/dashboard">Dashboard</a>
+    </nav>
+  </div>
+);
+
+const Login = () => (
+  <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+    <h1>Login</h1>
+    <p>Login page works!</p>
+    <a href="/">Back to Home</a>
+  </div>
+);
+
+const Dashboard = () => (
+  <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+    <h1>Dashboard</h1>
+    <p>Dashboard page works!</p>
+    <a href="/">Back to Home</a>
+  </div>
+);
+
+const App = () => {
+  console.log('Minimal App rendering...');
+  
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="*" element={<div>Page not found</div>} />
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
+export default App;
