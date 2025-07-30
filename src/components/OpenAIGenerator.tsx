@@ -232,7 +232,7 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
           <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4 animate-pulse text-blue-600" />
-              <span className="text-sm font-medium text-blue-800">Checking OpenAI API status...</span>
+              <span className="text-sm font-medium text-blue-800">Checking content service status...</span>
             </div>
           </div>
         )}
