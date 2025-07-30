@@ -21,6 +21,7 @@ interface BlogClaimExplanationModalProps {
   onClaim: () => void;
   onLogin: () => void;
   isAuthenticated: boolean;
+  isClaiming?: boolean;
 }
 
 export const BlogClaimExplanationModal = ({ 
