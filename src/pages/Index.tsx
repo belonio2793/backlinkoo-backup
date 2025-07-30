@@ -1058,14 +1058,21 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={paymentModalOpen}
+      {/* Pricing Modal */}
+      <PricingModal
+        isOpen={pricingModalOpen}
         onClose={() => {
-          setPaymentModalOpen(false);
+          setPricingModalOpen(false);
           setIsCustomPackage(false);
         }}
         initialCredits={isCustomPackage ? customCredits : pricingPlans.find(p => p.id === selectedPlan)?.credits}
+        onAuthSuccess={(user) => {
+          setUser(user);
+          toast({
+            title: "Welcome!",
+            description: "You have been successfully signed in.",
+          });
+        }}
       />
 
       {/* Guest Session Reminder - Show for non-authenticated users */}
