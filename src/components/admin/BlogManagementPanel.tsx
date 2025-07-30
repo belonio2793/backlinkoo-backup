@@ -442,10 +442,97 @@ export function BlogManagementPanel() {
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Admin controls: You have full edit and delete capabilities for all blog posts. 
+              Admin controls: You have full edit and delete capabilities for all blog posts.
               Posts auto-delete after 24 hours if unclaimed. Use "Run Cleanup" to manually trigger expired post removal.
+              <br /><br />
+              <strong>⚠️ If you see "[object Object]" errors:</strong> The blog_posts table likely doesn't exist in your Supabase database.
+              <br />
+              <strong>Solution:</strong> Go to your Supabase SQL Editor and run the table creation script.
             </AlertDescription>
           </Alert>
+
+          {/* SQL Script Display */}
+          <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+            <h4 className="font-semibold mb-2">🗄️ Database Setup Required</h4>
+            <p className="text-sm text-gray-600 mb-3">
+              If you're seeing database errors, copy and run this SQL in your Supabase SQL Editor:
+            </p>
+            <div className="bg-black text-green-400 p-3 rounded font-mono text-xs overflow-x-auto">
+              <pre>{`-- Create blog_posts table
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  content TEXT NOT NULL,
+  target_url TEXT NOT NULL,
+  anchor_text TEXT NOT NULL,
+  keywords TEXT[],
+  meta_description TEXT,
+  published_url TEXT,
+  word_count INTEGER DEFAULT 0,
+  expires_at TIMESTAMP WITH TIME ZONE,
+  is_trial_post BOOLEAN DEFAULT false,
+  user_id UUID REFERENCES auth.users(id),
+  status TEXT DEFAULT 'unclaimed',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create indexes
+CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON blog_posts(status);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_trial ON blog_posts(is_trial_post);
+
+-- Enable RLS
+ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
+
+-- Create policies
+CREATE POLICY "Public can read trial posts" ON blog_posts
+  FOR SELECT USING (is_trial_post = true);`}</pre>
+            </div>
+            <div className="mt-2 flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  navigator.clipboard.writeText(`-- Create blog_posts table for Builder.io AI
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  content TEXT NOT NULL,
+  target_url TEXT NOT NULL,
+  anchor_text TEXT NOT NULL,
+  keywords TEXT[],
+  meta_description TEXT,
+  published_url TEXT,
+  word_count INTEGER DEFAULT 0,
+  expires_at TIMESTAMP WITH TIME ZONE,
+  is_trial_post BOOLEAN DEFAULT false,
+  user_id UUID REFERENCES auth.users(id),
+  status TEXT DEFAULT 'unclaimed' CHECK (status IN ('unclaimed', 'claimed', 'expired')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON blog_posts(status);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_trial ON blog_posts(is_trial_post);
+
+ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public can read trial posts" ON blog_posts
+  FOR SELECT USING (is_trial_post = true);`);
+                  toast({ title: "SQL Copied!", description: "Paste this in your Supabase SQL Editor" });
+                }}
+              >
+                📋 Copy SQL
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => window.open('https://supabase.com/dashboard/project', '_blank')}
+              >
+                🔗 Open Supabase
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
