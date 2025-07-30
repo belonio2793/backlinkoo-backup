@@ -11,6 +11,7 @@ import { AuthProfileChecker } from "@/components/AuthProfileChecker";
 import { AuthRedirectHandler } from "@/components/AuthRedirectHandler";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
+import "@/utils/routeTest";
 
 const queryClient = new QueryClient();
 
