@@ -1,9 +1,10 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { AppWrapper } from "@/components/AppWrapper";
 
 const Home = () => (
   <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
@@ -43,12 +44,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="*" element={<div>Page not found</div>} />
-          </Routes>
+          <AppWrapper />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
