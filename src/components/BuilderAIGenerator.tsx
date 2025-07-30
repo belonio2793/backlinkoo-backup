@@ -35,6 +35,8 @@ export const BuilderAIGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState<ProgressUpdate | null>(null);
   const [userCanGenerate, setUserCanGenerate] = useState<UserGenerationStatus>({ canGenerate: true });
+  const [apiStatus, setApiStatus] = useState<{ accessible: boolean; error?: string } | null>(null);
+  const [isCheckingAPI, setIsCheckingAPI] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
