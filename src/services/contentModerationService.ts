@@ -291,7 +291,40 @@ export class ContentModerationService {
         .select('*')
         .gte('created_at', since);
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific error types gracefully
+        if (error.code === '42P01') {
+          console.warn('📋 content_moderation_queue table does not exist yet - this is normal for new installations');
+          return {
+            total: 0,
+            pending: 0,
+            approved: 0,
+            rejected: 0,
+            autoRejected: 0,
+            approvalRate: '0',
+            bySeverity: {},
+            byCategory: {},
+            topFlaggedTerms: []
+          };
+        }
+
+        if (error.message?.includes('permission') || error.message?.includes('RLS')) {
+          console.warn('🔒 Database permission issue - check RLS policies for content_moderation_queue table');
+          return {
+            total: 0,
+            pending: 0,
+            approved: 0,
+            rejected: 0,
+            autoRejected: 0,
+            approvalRate: '0',
+            bySeverity: {},
+            byCategory: {},
+            topFlaggedTerms: []
+          };
+        }
+
+        throw error;
+      }
 
       const total = data.length;
       const pending = data.filter(req => req.status === 'pending').length;
