@@ -289,7 +289,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
     }
   };
 
-  if (!isSubscribed) {
+  if (!subscriptionStatus.isSubscribed) {
     return (
       <div className="space-y-6">
         {/* Subscription CTA */}
