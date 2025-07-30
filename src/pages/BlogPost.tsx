@@ -325,10 +325,34 @@ export function BlogPost() {
       setShowClaimExplanation(false);
 
     } catch (error) {
-      console.error('Failed to claim post:', error);
+      console.error('Failed to claim post:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        postSlug: blogPost?.slug,
+        postId: blogPost?.id,
+        hasUser: !!user
+      });
+
+      let errorMessage = "Failed to claim the post. Please try again.";
+
+      if (error instanceof Error) {
+        // Provide more specific error messages
+        if (error.message.includes('not found')) {
+          errorMessage = "Blog post not found. It may have been removed or is no longer available for claiming.";
+        } else if (error.message.includes('already claimed')) {
+          errorMessage = "This blog post has already been claimed by another user.";
+        } else if (error.message.includes('limit')) {
+          errorMessage = "You have reached your claim limit. You can only claim one free trial post per account.";
+        } else if (error.message.includes('expired')) {
+          errorMessage = "This trial post has expired and is no longer available for claiming.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
       toast({
         title: "Claim Failed",
-        description: error instanceof Error ? error.message : "Failed to claim the post. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
