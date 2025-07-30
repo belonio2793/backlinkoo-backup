@@ -250,16 +250,16 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
         <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Sparkles className="h-8 w-8 text-blue-600" />
         </div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-2">No Trial Posts</h3>
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">No Blog Posts</h3>
         <p className="text-gray-600 mb-6 max-w-md mx-auto">
-          You don't have any trial posts yet. Trial posts are temporary content that expires in 24 hours unless claimed.
+          No blog posts found in the system. Visit the blog page or generate new content to get started.
         </p>
         <Button
           onClick={() => navigate('/?focus=generator')}
           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Generate Trial Post
+          Generate New Post
         </Button>
       </div>
     );
