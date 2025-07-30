@@ -838,8 +838,58 @@ export function BlogPost() {
           />
         </div>
 
+        {/* Claimed Post Information */}
+        {(blogPost.claimed_by_user_id || (!blogPost.is_trial_post && (blogPost as any).user_id)) && (
+          <Card className="mt-8 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 shadow-lg">
+            <CardContent className="p-8">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-green-100 rounded-full">
+                  <CheckCircle2 className="h-6 w-6 text-green-600" />
+                </div>
+                <div className="flex-1 space-y-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-green-800 mb-2">
+                      ✅ Claimed & Permanent Blog Post
+                    </h3>
+                    <p className="text-green-700 leading-relaxed">
+                      This high-quality AI-generated content has been permanently claimed and will never expire.
+                      <strong className="block mt-2">This provides a lasting, valuable backlink!</strong>
+                      {blogPost.claimed_at && (
+                        <span className="block mt-1 text-sm">
+                          Claimed on {formatDate(blogPost.claimed_at)}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <Button
+                      onClick={() => setIsPricingModalOpen(true)}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 shadow-lg"
+                    >
+                      <Zap className="mr-2 h-5 w-5" />
+                      Get More Backlinks
+                    </Button>
+
+                    {currentUser && (
+                      <Button
+                        onClick={() => navigate('/dashboard')}
+                        variant="outline"
+                        className="border-green-600 text-green-600 hover:bg-green-50 px-6 py-3"
+                      >
+                        <CheckCircle2 className="mr-2 h-5 w-5" />
+                        View Dashboard
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Trial Post Management */}
-        {blogPost.is_trial_post && blogPost.expires_at && (
+        {blogPost.is_trial_post && blogPost.expires_at && !blogPost.claimed_by_user_id && (
           <Card className="mt-8 border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 shadow-lg">
             <CardContent className="p-8">
               <div className="flex items-start gap-4">
