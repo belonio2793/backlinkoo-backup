@@ -187,7 +187,7 @@ export class AITestWorkflow {
           view_count: 0,
           expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           is_trial_post: true,
-          author_name: 'Expert Writer',
+          author_name: 'Backlink ∞',
           status: 'published',
           created_at: new Date().toISOString(),
           published_at: new Date().toISOString(),
