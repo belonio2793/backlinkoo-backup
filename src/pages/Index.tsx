@@ -38,6 +38,7 @@ import { QuickTrialUpgrade } from "@/components/QuickTrialUpgrade";
 import { TrialConversionService } from "@/services/trialConversionService";
 import { GuestSessionReminder } from "@/components/GuestSessionReminder";
 import { useGuestTracking } from "@/hooks/useGuestTracking";
+import { APIConnectionTest } from "@/components/APIConnectionTest";
 
 
 const Index = () => {
