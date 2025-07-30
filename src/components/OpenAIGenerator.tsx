@@ -111,7 +111,7 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
 
       toast({
         title: "Blog Post Generated & Published!",
-        description: `Your content has been published successfully! Redirecting to: ${result.publishedUrl}`,
+        description: `Your ${result.wordCount}-word blog post "${result.title}" has been published successfully!`,
       });
 
       // Reset form
@@ -119,11 +119,24 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
       setAnchorText('');
       setTargetUrl('');
 
-      // Redirect to the published blog post
-      setTimeout(() => {
-        window.open(result.publishedUrl, '_blank');
-
-      }, 2000);
+      // Call success callback if provided (for homepage integration)
+      if (onSuccess) {
+        onSuccess({
+          id: result.id,
+          title: result.title,
+          slug: result.slug,
+          word_count: result.wordCount,
+          publishedUrl: result.publishedUrl,
+          targetUrl: result.targetUrl,
+          anchorText: result.anchorText,
+          keyword: result.keyword
+        });
+      } else {
+        // Default behavior for standalone usage
+        setTimeout(() => {
+          window.open(result.publishedUrl, '_blank');
+        }, 2000);
+      }
 
     } catch (error) {
       console.error('OpenAI/ChatGPT generation failed:', error);
