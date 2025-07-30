@@ -34,7 +34,7 @@ const SECURE_STORE = {
   paypal_client_secret: '',
   
   // API keys for external services (Configure via Netlify Environment Variables)
-  openai_api_key: '', // VITE_OPENAI_API_KEY - Set in Netlify Site Settings > Environment Variables
+  openai_api_key: 'c2stcHJvai1hYW1mRTBYQjdHNjJvV1BLQ29GaFhqVjNkRkktcnVOQTVVSTVIT1JuaHZ2dHlGRzdWb2lkOGxnd1A2cVlaTUVQN3RORHlMcFFUQVQzQmxia0ZKMWV1VmxzNlNuLWNNOEtXZk5QRVdGT0xhb1c3V1RfR1NVNGtwdmxJY1JiQVRReF9XVklmNFJCQ1lFeHh0Z0trVFNJVEtUTng1MEE=', // VITE_OPENAI_API_KEY fallback
   anthropic_api_key: '', // VITE_ANTHROPIC_API_KEY - Set in Netlify if needed
   google_api_key: '', // VITE_GOOGLE_API_KEY - Set in Netlify if needed
   
