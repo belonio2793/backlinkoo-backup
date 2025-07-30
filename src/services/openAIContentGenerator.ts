@@ -203,10 +203,14 @@ export class OpenAIContentGenerator {
       } else if (data.content && !data.error) {
         // generate-ai-content format
         content = data.content;
+      } else if (data.success && data.blogPost && data.blogPost.content) {
+        // generate-post format
+        content = data.blogPost.content;
       } else if (data.error) {
         throw new Error(data.error);
       } else {
-        throw new Error('No content generated from OpenAI');
+        console.error('Unexpected response format:', data);
+        throw new Error('No content generated from OpenAI - unexpected response format');
       }
 
       if (!content) {
