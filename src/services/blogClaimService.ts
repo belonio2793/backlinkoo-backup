@@ -161,6 +161,40 @@ export class BlogClaimService {
         .eq('status', 'published')
         .single();
 
+      // Check for database table not existing
+      if (fetchError && fetchError.message?.includes('relation') && fetchError.message?.includes('does not exist')) {
+        console.warn('⚠️ BlogClaimService: Database table does not exist, trying localStorage fallback...');
+
+        // Try to find the post in localStorage and use claimLocalStoragePost
+        const blogStorageKey = `blog_post_${postId}`;
+        const storedBlogData = localStorage.getItem(blogStorageKey);
+
+        if (storedBlogData) {
+          const blogPost = JSON.parse(storedBlogData);
+          console.log('🔄 BlogClaimService: Found post in localStorage, using claimLocalStoragePost method');
+          return await this.claimLocalStoragePost(blogPost, user);
+        }
+
+        // Try to find by scanning all blog posts in localStorage
+        const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+        for (const blogMeta of allBlogPosts) {
+          const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
+          if (blogData) {
+            const blogPost = JSON.parse(blogData);
+            if (blogPost.id === postId) {
+              console.log('🔄 BlogClaimService: Found post by scanning localStorage, using claimLocalStoragePost method');
+              return await this.claimLocalStoragePost(blogPost, user);
+            }
+          }
+        }
+
+        return {
+          success: false,
+          message: 'Database table not available and post not found in localStorage',
+          error: 'Table does not exist and localStorage fallback failed'
+        };
+      }
+
       if (fetchError || !existingPost) {
         console.error('❌ BlogClaimService: Post not found in database:', `ID: ${postId}, Error: ${fetchError?.message || 'Unknown error'}, Hint: This might be a localStorage-only post`);
         return {
