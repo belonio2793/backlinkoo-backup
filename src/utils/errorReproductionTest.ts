@@ -76,7 +76,7 @@ export class ErrorReproductionTest {
     }
     
     console.log('====================================');
-    console.log('���� Error reproduction test complete');
+    console.log('✅ Error reproduction test complete');
   }
 
   /**
