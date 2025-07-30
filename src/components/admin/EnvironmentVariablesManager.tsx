@@ -97,7 +97,7 @@ export function EnvironmentVariablesManager() {
 
   const initializeWithAPIKeys = () => {
     // Pre-populate with essential API keys if no variables exist and no database connection
-    const openAIKey = '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';
+    const openAIKey = 'sk-proj--ruNA5UI5HORnhvvtyFG7Void8lgwP6qYZMEP7tNDyLpQTAT3BlbkFJ1euVls6Sn-cM8KWfNPEWFOLaoW7WT_GSU4kpvlIcRbATQx_WVIf4RBCYExxtgKkTSITKTNx50A';
     const supabaseToken = 'sbp_65f13d3ef84fae093dbb2b2d5368574f69b3cea2';
 
     setTimeout(() => {
