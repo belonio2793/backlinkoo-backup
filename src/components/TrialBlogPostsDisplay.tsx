@@ -288,7 +288,7 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
                     isExpiringSoon ? 'bg-red-100 text-red-700 border-red-200' : 'bg-amber-100 text-amber-700 border-amber-200'
                   }`}>
                     <Timer className="mr-1 h-3 w-3" />
-                    Trial
+                    Unclaimed
                   </Badge>
                   {timeRemaining && (
                     <div className={`text-xs font-medium ${
