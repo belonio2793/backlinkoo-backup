@@ -39,7 +39,7 @@ import {
   Crown,
   RefreshCw
 } from "lucide-react";
-import { PaymentModal } from "@/components/PaymentModal";
+import { PricingModal } from "@/components/PricingModal";
 import { CampaignForm } from "@/components/CampaignForm";
 import { KeywordResearchTool } from "@/components/KeywordResearchTool";
 import { RankingTracker } from "@/components/RankingTracker";
