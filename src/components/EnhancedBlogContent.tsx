@@ -158,15 +158,19 @@ export function EnhancedBlogContent({ content, keyword, anchorText, targetUrl }:
 
       case 'list':
         return (
-          <Card key={id} className="mb-8 border-gray-200 bg-gray-50">
+          <Card key={id} className="mb-8 border-gray-200 bg-gradient-to-br from-gray-50 to-blue-50 hover:shadow-lg transition-all duration-300">
             <div className="p-6">
               <ul className="space-y-4">
                 {element.items.map((item: any, index: number) => (
-                  <li key={item.id} className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mt-0.5">
+                  <li
+                    key={item.id}
+                    className="flex items-start gap-3 group hover:transform hover:scale-[1.02] transition-all duration-200"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mt-0.5 group-hover:shadow-md transition-shadow">
                       <CheckCircle className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-gray-800 leading-relaxed font-medium">
+                    <span className="text-gray-800 leading-relaxed font-medium group-hover:text-gray-900 transition-colors">
                       {item.content}
                     </span>
                   </li>
