@@ -172,9 +172,10 @@ export class OpenAIService {
         const jitterRange = delay * config.jitterFactor;
         const jitteredDelay = delay + (Math.random() * 2 - 1) * jitterRange;
 
-        const errorMsg = lastError?.message || String(lastError);
-        console.warn(`⏳ OpenAI API attempt ${attempt} failed: ${errorMsg}. Retrying in ${Math.round(jitteredDelay)}ms...`, {
-          error: errorMsg,
+        const errorDetails = this.serializeError(lastError);
+        console.warn(`⏳ OpenAI API attempt ${attempt} failed: ${errorDetails.message}. Retrying in ${Math.round(jitteredDelay)}ms...`, {
+          error: errorDetails.message,
+          details: errorDetails,
           attempt,
           maxRetries: config.maxRetries,
           delay: Math.round(jitteredDelay),
@@ -186,8 +187,8 @@ export class OpenAIService {
     }
 
     // Ensure we always throw a proper Error with a string message
-    const finalErrorMessage = lastError?.message || String(lastError);
-    const finalError = new Error(`OpenAI API failed: ${finalErrorMessage}`);
+    const errorDetails = this.serializeError(lastError);
+    const finalError = new Error(`OpenAI API failed: ${errorDetails.message}`);
     finalError.cause = lastError;
     throw finalError;
   }
