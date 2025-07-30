@@ -15,7 +15,8 @@ import {
   ArrowRight,
   Users,
   Target,
-  Zap
+  Zap,
+  Sparkles
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PaymentModal } from "@/components/PaymentModal";
