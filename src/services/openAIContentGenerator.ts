@@ -106,7 +106,7 @@ export class OpenAIContentGenerator {
       console.error('❌ OpenAI content generation failed:', error);
 
       // If all OpenAI functions fail, generate demo content as fallback
-      if (error.message.includes('404') || error.message.includes('unavailable')) {
+      if (error.message.includes('404') || error.message.includes('unavailable') || error.message.includes('service unavailable')) {
         console.log('🔄 All OpenAI functions failed, generating demo content as fallback...');
         this.sendProgress('Fallback', 'Generating demo content...', 50);
 
