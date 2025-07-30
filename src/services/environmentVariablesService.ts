@@ -63,7 +63,8 @@ class EnvironmentVariablesService {
         .select('key, value');
 
       if (error) {
-        console.warn('Could not fetch environment variables from database:', error);
+        console.warn('Could not fetch environment variables from database, using localStorage fallback:', error);
+        this.loadFromLocalStorage();
         return;
       }
 
@@ -74,9 +75,29 @@ class EnvironmentVariablesService {
       });
 
       this.lastFetch = Date.now();
-      console.log('✅ Environment variables cache refreshed');
+      console.log('✅ Environment variables cache refreshed from database');
     } catch (error) {
-      console.warn('Error refreshing environment variables cache:', error);
+      console.warn('Error refreshing environment variables cache, using localStorage fallback:', error);
+      this.loadFromLocalStorage();
+    }
+  }
+
+  /**
+   * Load environment variables from localStorage fallback
+   */
+  private loadFromLocalStorage(): void {
+    try {
+      const stored = localStorage.getItem('admin_env_vars');
+      if (stored) {
+        const vars = JSON.parse(stored);
+        this.cache.clear();
+        vars.forEach((item: any) => {
+          this.cache.set(item.key, item.value);
+        });
+        console.log('✅ Environment variables loaded from localStorage fallback');
+      }
+    } catch (error) {
+      console.warn('Error loading from localStorage:', error);
     }
   }
 
