@@ -353,7 +353,6 @@ export class ReliableContentGenerator {
     try {
       // Skip health check if not configured
       if (!openAIService.isConfigured()) {
-        console.log('⚠️ Skipping OpenAI health check - API key not configured');
         this.providerHealth.set('openai', false);
         return;
       }
@@ -361,11 +360,10 @@ export class ReliableContentGenerator {
       const healthy = await openAIService.testConnection();
       this.providerHealth.set('openai', healthy);
 
-      if (!healthy) {
-        console.warn('⚠️ OpenAI health check failed - API may be down or key invalid');
+      if (healthy) {
+        console.log('✅ OpenAI health check passed');
       }
     } catch (error) {
-      console.warn('⚠️ OpenAI health check error:', error instanceof Error ? error.message : 'Unknown error');
       this.providerHealth.set('openai', false);
     }
   }
