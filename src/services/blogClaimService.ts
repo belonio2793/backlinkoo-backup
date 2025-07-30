@@ -450,6 +450,15 @@ export class BlogClaimService {
         return await this.claimPost(existingPost.id, user);
       }
 
+      // Validate required fields first
+      if (!localPost.id || !localPost.slug || !localPost.title) {
+        return {
+          success: false,
+          message: 'Invalid post data: missing required fields (id, slug, or title)',
+          error: 'Missing required fields'
+        };
+      }
+
       // Create new database entry with user as owner
       // Only include fields that match the database schema
       const postToInsert = {
@@ -465,10 +474,10 @@ export class BlogClaimService {
         author_name: localPost.author_name || 'User',
         tags: Array.isArray(localPost.tags) ? localPost.tags : (localPost.tags ? [localPost.tags] : []),
         category: localPost.category || 'General',
-        seo_score: localPost.seo_score || localPost.seoScore || 85,
-        reading_time: localPost.reading_time || localPost.readingTime || 5,
-        word_count: localPost.word_count || localPost.wordCount || 1000,
-        view_count: localPost.view_count || localPost.viewCount || 0,
+        seo_score: Number(localPost.seo_score || localPost.seoScore || 85),
+        reading_time: Number(localPost.reading_time || localPost.readingTime || 5),
+        word_count: Number(localPost.word_count || localPost.wordCount || 1000),
+        view_count: Number(localPost.view_count || localPost.viewCount || 0),
         created_at: localPost.created_at || localPost.createdAt || new Date().toISOString(),
         published_at: localPost.published_at || localPost.publishedAt || new Date().toISOString(),
         anchor_text: localPost.anchor_text || localPost.anchorText || '',
