@@ -1785,6 +1785,19 @@ const Dashboard = () => {
         }}
       />
 
+      {/* Debug Panel Dialog */}
+      <Dialog open={showDebugPanel} onOpenChange={setShowDebugPanel}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Blog Claiming Debug Panel</DialogTitle>
+          </DialogHeader>
+          <BlogClaimDebugPanel
+            isOpen={true}
+            onClose={() => setShowDebugPanel(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
