@@ -407,10 +407,8 @@ Return the content as HTML with proper tags including the backlink.`;
           : `Generated using ${result.provider.toUpperCase()} ${result.fallbacksUsed?.length ? '(with fallback)' : ''}`;
 
         toast({
-          title: "Blog post generated successfully! ����",
-          description: isFromFallback
-            ? "Your free backlink post is ready! Generated using our reliable fallback system. It will auto-delete in 24 hours unless you register an account."
-            : "Your free backlink post is ready! It will auto-delete in 24 hours unless you register an account.",
+          title: "Blog post generated successfully! �����",
+          description: `Your free backlink post is ready! ${providerInfo}. It will auto-delete in 24 hours unless you register an account.`,
           action: (
             <Button
               size="sm"
