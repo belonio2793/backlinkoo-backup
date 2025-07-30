@@ -586,12 +586,12 @@ export function BlogPost() {
                         <TooltipTrigger asChild>
                           <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md cursor-help">
                             <CheckCircle2 className="mr-1 h-3 w-3" />
-                            Permanent
+                            Claimed & Permanent
                           </Badge>
                         </TooltipTrigger>
                         <TooltipContent>
                           <p className="max-w-xs">
-                            This post is permanent and will never expire. It's a live backlink!
+                            This post has been claimed by a user and is now permanent! It will never auto-delete and provides a lasting backlink.
                           </p>
                         </TooltipContent>
                       </Tooltip>
