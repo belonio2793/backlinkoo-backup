@@ -326,7 +326,12 @@ export class OpenAIService {
             throw new Error(`Request timeout after ${finalRetryConfig.timeoutMs}ms`);
           }
 
-          throw fetchError;
+          // Ensure we throw a proper Error object
+          if (fetchError instanceof Error) {
+            throw fetchError;
+          } else {
+            throw new Error(`Fetch error: ${String(fetchError)}`);
+          }
         }
 
         if (!response.ok) {
