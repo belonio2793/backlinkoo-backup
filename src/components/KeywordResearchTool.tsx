@@ -425,7 +425,7 @@ export const KeywordResearchTool = () => {
     { code: "TR", name: "Turkey", flag: "🇹🇷" },
     { code: "TT", name: "Trinidad and Tobago", flag: "🇹🇹" },
     { code: "TV", name: "Tuvalu", flag: "🇹🇻" },
-    { code: "TW", name: "Taiwan", flag: "��🇼" },
+    { code: "TW", name: "Taiwan", flag: "🇹��" },
     { code: "TZ", name: "Tanzania", flag: "🇹🇿" },
     { code: "UA", name: "Ukraine", flag: "🇺🇦" },
     { code: "UG", name: "Uganda", flag: "🇺🇬" },
