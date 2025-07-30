@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, Lightbulb, ArrowRight, Quote } from 'lucide-react';
+import { CheckCircle, Lightbulb, ArrowRight, Quote, Clock, BookOpen, List } from 'lucide-react';
 
 interface EnhancedBlogContentProps {
   content: string;
