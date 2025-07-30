@@ -470,7 +470,7 @@ Return the content as clean HTML with proper tags including the backlink. Ensure
 
         toast({
           title: "Blog post generated successfully! ���",
-          description: `Your free backlink post is ready! ${providerInfo}. It will auto-delete in 24 hours unless you register an account.`,
+          description: `Your ${result.wordCount}-word free backlink post is ready! ${providerInfo}. Auto-deletes in 24 hours unless you register.`,
           action: (
             <Button
               size="sm"
