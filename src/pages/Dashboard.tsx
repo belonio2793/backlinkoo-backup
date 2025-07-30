@@ -741,7 +741,7 @@ const Dashboard = () => {
       const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (!isMounted) return;
 
-        console.log('���� Dashboard - Auth state change:', { event, hasUser: !!session?.user });
+        console.log('🔄 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
 
         if (event === 'SIGNED_OUT' || !session) {
           console.log('🏠 Dashboard - User signed out, redirecting to login...');
