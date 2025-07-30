@@ -16,7 +16,7 @@ import { blogService, BlogPostGenerationData } from '@/services/blogService';
 import { WordCountProgress } from './WordCountProgress';
 import { contentModerationService } from '@/services/contentModerationService';
 import { adminSyncService } from '@/services/adminSyncService';
-import { useAuthStatus } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { trackBlogGeneration } from '@/hooks/useGuestTracking';
 
 import {
