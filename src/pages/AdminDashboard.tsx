@@ -29,6 +29,7 @@ import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 import { AdminAuthService } from "@/services/adminAuthService";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 import { APIConfigurationManager } from "@/components/admin/APIConfigurationManager";
+import { OpenAIConnectionTester } from "@/components/OpenAIConnectionTester";
 import {
   Users,
   Activity,
