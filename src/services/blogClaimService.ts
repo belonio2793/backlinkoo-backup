@@ -34,11 +34,13 @@ export class BlogClaimService {
    */
   static async getClaimablePosts(limit: number = 20): Promise<ClaimablePost[]> {
     try {
+      console.log(`🔍 BlogClaimService: Fetching up to ${limit} claimable posts...`);
+
       const { data, error } = await supabase
         .from('published_blog_posts')
         .select(`
-          id, slug, title, excerpt, published_url, target_url, 
-          created_at, expires_at, seo_score, reading_time, word_count, 
+          id, slug, title, excerpt, published_url, target_url,
+          created_at, expires_at, seo_score, reading_time, word_count,
           view_count, is_trial_post, user_id, author_name, tags, category
         `)
         .eq('status', 'published')
@@ -46,13 +48,33 @@ export class BlogClaimService {
         .limit(limit);
 
       if (error) {
-        console.error('Error fetching claimable posts:', error);
+        console.error('❌ BlogClaimService: Database error fetching posts:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         return [];
       }
 
+      console.log(`✅ BlogClaimService: Successfully fetched ${data?.length || 0} posts from database`);
+
+      if (data && data.length > 0) {
+        console.log('📋 BlogClaimService: Post breakdown:', {
+          total: data.length,
+          trial: data.filter(p => p.is_trial_post).length,
+          claimed: data.filter(p => p.user_id && !p.is_trial_post).length,
+          available: data.filter(p => !p.user_id || p.is_trial_post).length
+        });
+      }
+
       return data || [];
-    } catch (error) {
-      console.error('Exception fetching claimable posts:', error);
+    } catch (error: any) {
+      console.error('💥 BlogClaimService: Exception fetching claimable posts:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       return [];
     }
   }
