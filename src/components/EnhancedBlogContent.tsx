@@ -312,17 +312,28 @@ export function EnhancedBlogContent({ content, keyword, anchorText, targetUrl }:
         </Card>
       )}
 
-      {/* Floating Table of Contents Button (Mobile) */}
-      {headings.length > 2 && (
-        <div className="fixed bottom-6 right-6 z-40 lg:hidden">
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
+        {/* Scroll to Top Button */}
+        {showScrollTop && (
+          <button
+            onClick={scrollToTop}
+            className="w-12 h-12 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 rounded-full shadow-lg flex items-center justify-center text-white transition-all duration-300 hover:scale-110"
+          >
+            <ChevronUp className="w-5 h-5" />
+          </button>
+        )}
+
+        {/* Table of Contents Button (Mobile) */}
+        {headings.length > 2 && (
           <button
             onClick={() => setShowTOC(!showTOC)}
-            className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-full shadow-lg flex items-center justify-center text-white transition-all duration-300 hover:scale-110"
+            className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-full shadow-lg flex items-center justify-center text-white transition-all duration-300 hover:scale-110 lg:hidden"
           >
             <List className="w-5 h-5" />
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Reading progress indicator */}
       <div className="mt-12 text-center">
