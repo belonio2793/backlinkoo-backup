@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { freeBacklinkService } from '@/services/freeBacklinkService';
+
 import { Database, RefreshCw, Eye, EyeOff } from 'lucide-react';
 
 export function BlogDebugInfo() {
@@ -13,8 +13,7 @@ export function BlogDebugInfo() {
     try {
       // Check localStorage for blog posts
       const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-      const freeBacklinkPosts = freeBacklinkService.getAllPosts();
-      const unclaimedPosts = freeBacklinkService.getUnclaimedPosts();
+
       
       // Check individual blog post entries
       const individualPosts = [];
@@ -42,16 +41,7 @@ export function BlogDebugInfo() {
       setDebugInfo({
         allBlogPostsMeta: allBlogPosts,
         individualPosts,
-        freeBacklinkPosts: freeBacklinkPosts.map(post => ({
-          id: post.id,
-          title: post.title,
-          slug: post.slug,
-          status: post.status,
-          created_at: post.createdAt,
-          expires_at: post.expiresAt,
-          viewCount: (post as any).viewCount || 0
-        })),
-        unclaimedPosts: unclaimedPosts.length,
+
         storageKeys: Object.keys(localStorage).filter(key =>
           key.startsWith('blog_post_') ||
           key === 'all_blog_posts'
