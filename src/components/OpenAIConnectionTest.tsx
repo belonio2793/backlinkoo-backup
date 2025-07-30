@@ -25,11 +25,8 @@ export function OpenAIConnectionTest() {
       if (!apiKey) {
         setTestResult({
           status: 'error',
-          message: 'No OpenAI API key found in environment variables',
-          details: {
-            adminEnvVar: 'Not found',
-            envVar: 'Not found'
-          }
+          message: 'No OpenAI API key configured',
+          details: { source: 'VITE_OPENAI_API_KEY or SecureConfig' }
         });
         return;
       }
