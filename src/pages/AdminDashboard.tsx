@@ -213,7 +213,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="api-config">
             <div className="space-y-6">
-              <OpenAIConnectionTester />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <OpenAIConnectionTest />
+                <OpenAIConnectionTester />
+              </div>
               <APIConfigurationManager />
             </div>
           </TabsContent>
