@@ -28,7 +28,12 @@ interface UserGenerationStatus {
   reason?: string;
 }
 
-export const OpenAIGenerator = () => {
+interface OpenAIGeneratorProps {
+  variant?: 'homepage' | 'standalone';
+  onSuccess?: (blogPost: any) => void;
+}
+
+export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGeneratorProps) => {
   const [keyword, setKeyword] = useState('');
   const [anchorText, setAnchorText] = useState('');
   const [targetUrl, setTargetUrl] = useState('');
@@ -106,7 +111,7 @@ export const OpenAIGenerator = () => {
 
       toast({
         title: "Blog Post Generated & Published!",
-        description: `Your content has been published successfully! Redirecting to: ${result.publishedUrl}`,
+        description: `Your ${result.wordCount}-word blog post "${result.title}" has been published successfully!`,
       });
 
       // Reset form
@@ -114,12 +119,24 @@ export const OpenAIGenerator = () => {
       setAnchorText('');
       setTargetUrl('');
 
-      // Redirect to the published blog post
-      setTimeout(() => {
-        window.open(result.publishedUrl, '_blank');
-        // Also navigate to our internal view
-        navigate(`/free-backlink/${result.id}`);
-      }, 2000);
+      // Call success callback if provided (for homepage integration)
+      if (onSuccess) {
+        onSuccess({
+          id: result.id,
+          title: result.title,
+          slug: result.slug,
+          word_count: result.wordCount,
+          publishedUrl: result.publishedUrl,
+          targetUrl: result.targetUrl,
+          anchorText: result.anchorText,
+          keyword: result.keyword
+        });
+      } else {
+        // Default behavior for standalone usage
+        setTimeout(() => {
+          window.open(result.publishedUrl, '_blank');
+        }, 2000);
+      }
 
     } catch (error) {
       console.error('OpenAI/ChatGPT generation failed:', error);
@@ -141,7 +158,7 @@ export const OpenAIGenerator = () => {
       <CardHeader className="pb-4">
         <CardTitle>Create a Backlink</CardTitle>
         <p className="text-sm text-gray-600 mt-2">
-          🤖 Powered by OpenAI & ChatGPT for maximum reliability
+          🚀 Powered by advanced content generation for maximum reliability
         </p>
       </CardHeader>
 
@@ -215,7 +232,7 @@ export const OpenAIGenerator = () => {
           <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4 animate-pulse text-blue-600" />
-              <span className="text-sm font-medium text-blue-800">Checking OpenAI API status...</span>
+              <span className="text-sm font-medium text-blue-800">Checking content service status...</span>
             </div>
           </div>
         )}
@@ -236,8 +253,8 @@ export const OpenAIGenerator = () => {
                 : 'text-red-800'
               }`}>
                 {apiStatus.accessible
-                  ? 'OpenAI API is ready'
-                  : `API Error: ${apiStatus.error}`
+                  ? 'Content service is ready'
+                  : `Service Error: ${apiStatus.error}`
                 }
               </span>
             </div>
@@ -255,7 +272,7 @@ export const OpenAIGenerator = () => {
             <div className="text-sm text-gray-700 font-medium">{progress.details}</div>
             <div className="flex items-center gap-4 text-xs text-gray-500">
               <span>⏰ {progress.timestamp.toLocaleTimeString()}</span>
-              <span>🤖 OpenAI Engine</span>
+              <span>⚡ Content Engine</span>
               <span>📝 Real-time Generation</span>
             </div>
 
@@ -265,7 +282,7 @@ export const OpenAIGenerator = () => {
                 ✓ API Check
               </div>
               <div className={`p-2 rounded text-center ${progress.progress >= 30 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'}`}>
-                ✓ AI Generation
+                ✓ Content Generation
               </div>
               <div className={`p-2 rounded text-center ${progress.progress >= 80 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'}`}>
                 ✓ Publishing
@@ -312,7 +329,7 @@ export const OpenAIGenerator = () => {
             </div>
             <div className="flex items-center gap-1">
               <Zap className="h-4 w-4 text-orange-600" />
-              <span>OpenAI powered</span>
+              <span>Advanced content engine</span>
             </div>
           </div>
         </div>

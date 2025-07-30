@@ -11,12 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { directOpenAI } from '@/services/directOpenAI';
-import { freeBacklinkService } from '@/services/freeBacklinkService';
+import { blogService, BlogPostGenerationData } from '@/services/blogService';
+
 import { WordCountProgress } from './WordCountProgress';
 import { contentModerationService } from '@/services/contentModerationService';
 import { adminSyncService } from '@/services/adminSyncService';
-import { useAuthStatus } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { trackBlogGeneration } from '@/hooks/useGuestTracking';
+import { SlugPreview } from './SlugPreview';
 
 import {
   Globe, Zap, Target, Clock, CheckCircle2, ExternalLink, Sparkles,
@@ -67,7 +69,7 @@ export function GlobalBlogGenerator({
 
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuthStatus();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     loadGlobalStats();
@@ -160,7 +162,7 @@ export function GlobalBlogGenerator({
       } : undefined
     };
 
-    adminSyncService.trackFreeBacklinkRequest({ ...request });
+
 
     const promptTemplates = [
       `Generate a 1000 word article on ${request.primaryKeyword} including the ${request.anchorText || request.primaryKeyword} hyperlinked to ${request.targetUrl}`,
@@ -237,22 +239,50 @@ Return clean HTML content optimized for SEO.`;
     setProgress(100);
     setGenerationStage('Complete!');
 
-    const uniqueSlug = `${result.slug}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-    const blogPost = {
-      ...result,
-      slug: uniqueSlug,
-      published_url: `${window.location.origin}/blog/${uniqueSlug}`,
-      is_trial_post: true
-    };
+    // Save to Supabase using blog service
+    try {
+      const blogPostData: BlogPostGenerationData = {
+        title: result.title,
+        content: result.content,
+        keywords: result.keywords,
+        targetUrl: result.targetUrl,
+        anchorText: result.anchorText,
+        wordCount: result.wordCount,
+        readingTime: result.readingTime,
+        seoScore: result.seoScore,
+        metaDescription: result.metaDescription,
+        contextualLinks: []
+      };
 
-    localStorage.setItem(`blog_post_${uniqueSlug}`, JSON.stringify(blogPost));
+      const blogPost = await blogService.createBlogPost(
+        blogPostData,
+        user?.id, // Use current user ID if logged in
+        !user?.id // Is trial post if user not logged in
+      );
 
-    const existing = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-    localStorage.setItem('all_blog_posts', JSON.stringify([{ ...blogPost }, ...existing]));
+      // For backward compatibility, also store slug in localStorage
+      localStorage.setItem(`latest_blog_slug`, blogPost.slug);
 
-    freeBacklinkService.storeFreeBacklink(result);
 
-    setGeneratedPost(blogPost);
+
+      setGeneratedPost(blogPost);
+    } catch (error) {
+      console.error('Failed to save blog post to database:', error);
+      toast({
+        title: "Save Warning",
+        description: "Post generated but may not be permanently saved. Please try again.",
+        variant: "destructive"
+      });
+      // Fallback to original behavior
+      const uniqueSlug = `${result.slug}-${Date.now().toString(36)}`;
+      const fallbackPost = {
+        ...result,
+        slug: uniqueSlug,
+        published_url: `${window.location.origin}/blog/${uniqueSlug}`,
+        is_trial_post: true
+      };
+      setGeneratedPost(fallbackPost);
+    }
     updateRemainingRequests();
 
     toast({
@@ -261,7 +291,7 @@ Return clean HTML content optimized for SEO.`;
       action: (
         <Button
           size="sm"
-          onClick={() => navigate(`/blog/${uniqueSlug}`)}
+          onClick={() => navigate(`/blog/${generatedPost?.slug}`)}
           className="bg-purple-600 text-white"
         >
           View Post
@@ -483,9 +513,20 @@ Return clean HTML content optimized for SEO.`;
               </TabsContent>
 
               <TabsContent value="seo" className="mt-4">
-                <div className="space-y-2 text-sm">
-                  <div><strong>Word Count:</strong> {generatedPost.wordCount || 'N/A'}</div>
-                  <div><strong>SEO Score:</strong> {generatedPost.seoScore || 'N/A'}</div>
+                <div className="space-y-4">
+                  <div className="space-y-2 text-sm">
+                    <div><strong>Word Count:</strong> {generatedPost.wordCount || 'N/A'}</div>
+                    <div><strong>SEO Score:</strong> {generatedPost.seoScore || 'N/A'}</div>
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <SlugPreview
+                      title={generatedPost.title}
+                      keywords={generatedPost.keywords || []}
+                      slug={generatedPost.slug}
+                      showActions={true}
+                    />
+                  </div>
                 </div>
               </TabsContent>
 

@@ -10,11 +10,11 @@ import PasswordReset from '@/pages/PasswordReset';
 import TermsOfService from '@/pages/TermsOfService';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import BlogPreview from '@/pages/BlogPreview';
-import StreamlinedBlog from '@/pages/StreamlinedBlog';
+import { Blog } from '@/pages/Blog';
 import { BlogCreator } from '@/pages/BlogCreator';
 import { BlogPost } from '@/pages/BlogPost';
 import AIContentTest from '@/pages/AIContentTest';
-import { FreeBacklink } from '@/pages/FreeBacklink';
+
 import NotFound from '@/pages/NotFound';
 import AdminDashboard from '@/pages/AdminDashboard';
 import PaymentSuccess from '@/pages/PaymentSuccess';
@@ -33,8 +33,11 @@ import { EmailVerificationGuard } from '@/components/EmailVerificationGuard';
 import { TrialNotificationBanner } from '@/components/TrialNotificationBanner';
 import { GuestDashboard } from '@/components/GuestDashboard';
 import { AILive } from '@/components/AILive';
-import { TestFreeBacklink } from '@/components/TestFreeBacklink';
+
 import { EnhancedDashboardRouter } from '@/components/EnhancedDashboardRouter';
+import { UserBlogManagement } from '@/components/UserBlogManagement';
+import { BlogEditPage } from '@/pages/BlogEditPage';
+
 
 export const AppWrapper = () => {
   useReferralTracking();
@@ -52,20 +55,29 @@ export const AppWrapper = () => {
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/preview/:slug" element={<BlogPreview />} />
-        <Route path="/blog" element={<StreamlinedBlog />} />
+        <Route path="/blog" element={<Blog />} />
         <Route path="/blog/create" element={<BlogCreator />} />
+
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/trial-dashboard" element={<GuestDashboard />} />
         <Route path="/ai-test" element={<AIContentTest />} />
         <Route path="/ai-live" element={<AILive />} />
-        <Route path="/free-backlink" element={<FreeBacklink />} />
-        <Route path="/free-backlink/:id" element={<FreeBacklink />} />
-        <Route path="/test-free-backlink" element={<TestFreeBacklink />} />
+
         <Route path="*" element={<NotFound />} />
 
         {/* Protected routes - require authentication and email verification */}
         <Route path="/dashboard" element={<EnhancedDashboardRouter />} />
         <Route path="/my-dashboard" element={<EnhancedDashboardRouter />} />
+        <Route path="/my-blog" element={
+          <EmailVerificationGuard>
+            <UserBlogManagement />
+          </EmailVerificationGuard>
+        } />
+        <Route path="/blog/:postId/edit" element={
+          <EmailVerificationGuard>
+            <BlogEditPage />
+          </EmailVerificationGuard>
+        } />
 
         <Route path="/admin" element={
           <AdminAuthGuard>

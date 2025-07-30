@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { freeBacklinkService } from '@/services/freeBacklinkService';
+
 import { Database, RefreshCw, Eye, EyeOff } from 'lucide-react';
 
 export function BlogDebugInfo() {
@@ -13,8 +13,7 @@ export function BlogDebugInfo() {
     try {
       // Check localStorage for blog posts
       const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-      const freeBacklinkPosts = freeBacklinkService.getAllPosts();
-      const unclaimedPosts = freeBacklinkService.getUnclaimedPosts();
+
       
       // Check individual blog post entries
       const individualPosts = [];
@@ -42,20 +41,10 @@ export function BlogDebugInfo() {
       setDebugInfo({
         allBlogPostsMeta: allBlogPosts,
         individualPosts,
-        freeBacklinkPosts: freeBacklinkPosts.map(post => ({
-          id: post.id,
-          title: post.title,
-          slug: post.slug,
-          status: post.status,
-          created_at: post.createdAt,
-          expires_at: post.expiresAt,
-          viewCount: (post as any).viewCount || 0
-        })),
-        unclaimedPosts: unclaimedPosts.length,
-        storageKeys: Object.keys(localStorage).filter(key => 
-          key.startsWith('blog_post_') || 
-          key === 'all_blog_posts' || 
-          key === 'free_backlinks'
+
+        storageKeys: Object.keys(localStorage).filter(key =>
+          key.startsWith('blog_post_') ||
+          key === 'all_blog_posts'
         ).map(key => ({
           key,
           size: localStorage.getItem(key)?.length || 0
@@ -139,12 +128,7 @@ export function BlogDebugInfo() {
                 </Badge>
               </div>
               
-              <div>
-                <strong>Unclaimed Posts:</strong>
-                <Badge variant="secondary" className="ml-2">
-                  {debugInfo.unclaimedPosts || 0}
-                </Badge>
-              </div>
+
 
               {debugInfo.storageKeys && (
                 <div>
@@ -162,21 +146,7 @@ export function BlogDebugInfo() {
                 </div>
               )}
 
-              {debugInfo.freeBacklinkPosts && debugInfo.freeBacklinkPosts.length > 0 && (
-                <div>
-                  <strong>Recent Free Backlinks:</strong>
-                  <div className="mt-1 space-y-1">
-                    {debugInfo.freeBacklinkPosts.slice(0, 3).map((post: any) => (
-                      <div key={post.id} className="text-xs bg-gray-50 p-1 rounded">
-                        <div className="truncate font-medium">{post.title}</div>
-                        <div className="text-gray-500">
-                          Status: {post.status} | Views: {post.viewCount}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+
 
               {debugInfo.error && (
                 <div className="text-red-600">

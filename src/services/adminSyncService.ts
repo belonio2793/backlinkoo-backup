@@ -1,11 +1,11 @@
 interface AdminSyncEvent {
-  type: 'free_backlink_request' | 'blog_generated' | 'post_claimed' | 'post_expired' | 'user_activity';
+  type: 'blog_generated' | 'post_claimed' | 'post_expired' | 'user_activity';
   data: any;
   timestamp: string;
   sessionId: string;
 }
 
-interface FreeBacklinkMetrics {
+interface BlogMetrics {
   totalRequests: number;
   todayRequests: number;
   completionRate: number;
@@ -17,7 +17,7 @@ interface FreeBacklinkMetrics {
 class AdminSyncService {
   private events: AdminSyncEvent[] = [];
   private listeners: Map<string, Function[]> = new Map();
-  private metricsCache: FreeBacklinkMetrics | null = null;
+  private metricsCache: BlogMetrics | null = null;
   private lastUpdate: number = 0;
 
   constructor() {
@@ -26,28 +26,6 @@ class AdminSyncService {
   }
 
   // Event tracking methods
-  trackFreeBacklinkRequest(data: {
-    targetUrl: string;
-    primaryKeyword: string;
-    anchorText?: string;
-    userCountry?: string;
-    sessionId: string;
-  }) {
-    const event: AdminSyncEvent = {
-      type: 'free_backlink_request',
-      data: {
-        ...data,
-        userAgent: navigator.userAgent,
-        timestamp: new Date().toISOString(),
-        ipAddress: 'hidden' // For privacy
-      },
-      timestamp: new Date().toISOString(),
-      sessionId: data.sessionId
-    };
-
-    this.addEvent(event);
-    this.notifyListeners('free_backlink_request', event);
-  }
 
   trackBlogGenerated(data: {
     sessionId: string;
@@ -125,7 +103,7 @@ class AdminSyncService {
   }
 
   // Get metrics for admin dashboard
-  getMetrics(forceRefresh = false): FreeBacklinkMetrics {
+  getMetrics(forceRefresh = false): BlogMetrics {
     const now = Date.now();
     if (!forceRefresh && this.metricsCache && (now - this.lastUpdate) < 30000) {
       return this.metricsCache;
@@ -133,7 +111,7 @@ class AdminSyncService {
 
     const today = new Date().toDateString();
     const blogEvents = this.events.filter(e => e.type === 'blog_generated');
-    const requestEvents = this.events.filter(e => e.type === 'free_backlink_request');
+
     const claimEvents = this.events.filter(e => e.type === 'post_claimed');
 
     const todayEvents = blogEvents.filter(e => 
@@ -201,7 +179,7 @@ class AdminSyncService {
   }) {
     const currentConfig = this.getConfiguration();
     const newConfig = { ...currentConfig, ...config };
-    localStorage.setItem('admin_free_backlink_config', JSON.stringify(newConfig));
+    localStorage.setItem('admin_blog_config', JSON.stringify(newConfig));
     
     this.notifyListeners('config_updated', { config: newConfig });
   }
@@ -215,7 +193,7 @@ class AdminSyncService {
     };
 
     try {
-      const stored = localStorage.getItem('admin_free_backlink_config');
+      const stored = localStorage.getItem('admin_blog_config');
       return stored ? { ...defaultConfig, ...JSON.parse(stored) } : defaultConfig;
     } catch {
       return defaultConfig;
@@ -349,4 +327,4 @@ class AdminSyncService {
 }
 
 export const adminSyncService = new AdminSyncService();
-export type { AdminSyncEvent, FreeBacklinkMetrics };
+export type { AdminSyncEvent, BlogMetrics };

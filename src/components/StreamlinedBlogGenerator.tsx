@@ -15,7 +15,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/hooks/useAuth';
-import { BlogWorkflowManager, type BlogGenerationRequest, type BlogPost } from '@/services/blogWorkflowManager';
+import { EnhancedBlogWorkflow, type BlogCreationRequest } from '@/services/enhancedBlogWorkflow';
+import { blogService } from '@/services/blogService';
 import { LoginModal } from './LoginModal';
 import { 
   Sparkles, 
@@ -34,9 +35,10 @@ export function StreamlinedBlogGenerator() {
   const [activeTab, setActiveTab] = useState('generate');
   
   // Generation state
-  const [request, setRequest] = useState<BlogGenerationRequest>({
+  const [request, setRequest] = useState<BlogCreationRequest>({
     targetUrl: '',
-    keywords: '',
+    keywords: [],
+    primaryKeyword: '',
     contentType: 'blog',
     tone: 'professional',
     wordCount: 800
@@ -49,7 +51,7 @@ export function StreamlinedBlogGenerator() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   
   // User posts state
-  const [userPosts, setUserPosts] = useState<BlogPost[]>([]);
+  const [userPosts, setUserPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
 
   // Load user posts when authenticated
@@ -61,10 +63,10 @@ export function StreamlinedBlogGenerator() {
 
   const loadUserPosts = async () => {
     if (!user?.id) return;
-    
+
     setLoadingPosts(true);
     try {
-      const posts = await BlogWorkflowManager.getUserPosts(user.id);
+      const posts = await EnhancedBlogWorkflow.getUserBlogPosts(user.id);
       setUserPosts(posts);
     } catch (error) {
       console.error('Failed to load user posts:', error);
@@ -74,20 +76,35 @@ export function StreamlinedBlogGenerator() {
   };
 
   const handleGenerate = async (saveImmediately = false) => {
-    if (!request.targetUrl || !request.keywords) {
-      setError('Target URL and keywords are required');
+    if (!request.targetUrl || (!request.keywords.length && !request.primaryKeyword)) {
+      setError('Target URL and at least one keyword are required');
       return;
     }
+
+    // Ensure keywords array includes primary keyword
+    const keywords = request.primaryKeyword ?
+      [request.primaryKeyword, ...request.keywords.filter(k => k !== request.primaryKeyword)] :
+      request.keywords;
 
     setIsGenerating(true);
     setError('');
     setGeneratedPost(null);
 
     try {
-      const result = await BlogWorkflowManager.generateBlog(request, {
-        requireAuth: saveImmediately,
-        saveImmediately
-      });
+      const result = await EnhancedBlogWorkflow.createBlogPost(
+        {
+          ...request,
+          keywords,
+          primaryKeyword: request.primaryKeyword || keywords[0]
+        },
+        {
+          saveToDatabase: true,
+          generateSlug: true,
+          requireAuth: saveImmediately,
+          isTrialPost: !user?.id,
+          userId: user?.id
+        }
+      );
 
       if (result.requiresAuth) {
         setShowLoginModal(true);
@@ -99,9 +116,9 @@ export function StreamlinedBlogGenerator() {
         return;
       }
 
-      setGeneratedPost(result.post!);
+      setGeneratedPost(result.blogPost!);
       setActiveTab('preview');
-      
+
       if (saveImmediately && user) {
         await loadUserPosts(); // Refresh user posts
       }

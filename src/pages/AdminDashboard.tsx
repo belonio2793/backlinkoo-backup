@@ -9,7 +9,7 @@ import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager"
 
 import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
 import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
-import { FreeBacklinkMonitor } from "@/components/admin/FreeBacklinkMonitor";
+
 import { TrialPostCleanupManager } from "@/components/admin/TrialPostCleanupManager";
 import { BlogManagementPanel } from "@/components/admin/BlogManagementPanel";
 import { ContentFilterManager } from "@/components/admin/ContentFilterManager";
@@ -192,7 +192,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="blog-posts">Blog Posts</TabsTrigger>
             <TabsTrigger value="blog-claims">Blog Claims</TabsTrigger>
             <TabsTrigger value="ai-posts">AI Posts</TabsTrigger>
-            <TabsTrigger value="free-backlinks">Free Backlinks</TabsTrigger>
+
             <TabsTrigger value="content-filter">Content Filter</TabsTrigger>
             <TabsTrigger value="moderation-queue">Moderation Queue</TabsTrigger>
             <TabsTrigger value="trial-cleanup">Trial Cleanup</TabsTrigger>
@@ -237,9 +237,7 @@ const AdminDashboard = () => {
             <AIPostsManager />
           </TabsContent>
 
-          <TabsContent value="free-backlinks">
-            <FreeBacklinkMonitor />
-          </TabsContent>
+
 
           <TabsContent value="content-filter">
             <ContentFilterManager />

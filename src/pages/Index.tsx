@@ -15,7 +15,8 @@ import {
   ArrowRight,
   Users,
   Target,
-  Zap
+  Zap,
+  Sparkles
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PaymentModal } from "@/components/PaymentModal";
@@ -352,7 +353,7 @@ const Index = () => {
       </header>
 
       {/* Free Blog Generator - Top Feature */}
-      <section className="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
+      <section id="blog-generator" className="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
         <div className="container mx-auto">
           {/* Optional: Advanced Generator Toggle (Hidden by default) */}
 
@@ -365,11 +366,11 @@ const Index = () => {
                 setUser(user); // Refresh state
                 toast({
                   title: "Success! 🎉",
-                  description: `Your ${blogPost.word_count}-word blog post "${blogPost.title}" is now live!`,
+                  description: `Your ${blogPost.word_count}-word blog post "${blogPost.title}" is now live! Check it out in the blog section.`,
                 });
-                // Navigate to blog after a short delay
+                // Navigate to blog section after a short delay to show the new post
                 setTimeout(() => {
-                  navigate(`/blog/${blogPost.slug}`);
+                  navigate('/blog');
                 }, 2000);
               }}
             />
@@ -497,23 +498,46 @@ const Index = () => {
             High-authority links • Competitive intelligence
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-20">
-            <Button 
-              size="lg" 
-              className="text-base px-8 py-6 font-medium" 
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12">
+            <Button
+              size="lg"
+              className="text-base px-8 py-6 font-medium"
               onClick={() => handleGetStarted('starter_200')}
             >
               Start Campaign
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
+            <Button
+              variant="outline"
+              size="lg"
               className="text-base px-8 py-6 font-medium"
               onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
             >
               View Pricing
             </Button>
+          </div>
+
+          {/* Blog Creation CTA */}
+          <div className="mb-20">
+            <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border border-blue-200 max-w-2xl mx-auto">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                🚀 Expert Blog Creation
+              </h3>
+              <p className="text-gray-600 text-sm mb-4">
+                Generate high-quality blog posts with natural backlinks in minutes
+              </p>
+              <Button
+                variant="outline"
+                className="bg-white hover:bg-gray-50"
+                onClick={() => {
+                  // Scroll to blog creation form
+                  document.getElementById('blog-generator')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Try Blog Generator
+              </Button>
+            </div>
           </div>
 
           {/* Stats Grid */}
@@ -607,7 +631,7 @@ const Index = () => {
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3">
                   <CheckCircle className="h-5 w-5 text-primary" />
-                  <span className="font-light">AI-powered optimization</span>
+                  <span className="font-light">Advanced optimization</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <CheckCircle className="h-5 w-5 text-primary" />
@@ -896,8 +920,121 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Blog Showcase Section */}
+      <section className="py-24 px-6 bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <Badge variant="outline" className="mb-6 bg-blue-50 text-blue-600 border-blue-200 font-mono text-xs">
+              EXPERT CONTENT
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">
+              Explore Our AI Blog
+            </h2>
+            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed font-light">
+              Discover high-quality, AI-generated content designed to boost SEO rankings with contextual backlinks.
+              See the power of our content generation system in action.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-16">
+            <div>
+              <h3 className="text-3xl font-light mb-6 tracking-tight">World-Class Publishing Platform</h3>
+              <p className="text-lg text-gray-600 mb-8 leading-relaxed font-light">
+                Our AI blog showcases the same high-quality content generation technology that powers your backlink campaigns.
+                Every post is optimized for SEO and includes contextual links for maximum ranking impact.
+              </p>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-primary" />
+                  <span className="font-light">GPT-4 powered content generation</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-primary" />
+                  <span className="font-light">SEO-optimized article structure</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-primary" />
+                  <span className="font-light">Natural contextual backlinks</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-primary" />
+                  <span className="font-light">Instant publishing & sharing</span>
+                </li>
+              </ul>
+              <div className="flex gap-4">
+                <Button onClick={() => navigate("/blog")} className="font-medium">
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Explore Blog
+                </Button>
+                <Button onClick={() => {
+                  // Scroll to blog creation form
+                  document.getElementById('blog-generator')?.scrollIntoView({ behavior: 'smooth' });
+                }} variant="outline" className="font-medium">
+                  Create Content
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 p-12 rounded-2xl">
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl p-6 shadow-lg">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                      <Sparkles className="h-4 w-4 text-white" />
+                    </div>
+                    <div className="text-sm font-medium text-gray-600">AI Assistant</div>
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2">The Ultimate Guide to Modern SEO</h4>
+                  <p className="text-sm text-gray-600 mb-3">Learn advanced SEO strategies that actually work in 2024...</p>
+                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <span>5 min read</span>
+                    <span>SEO Score: 95/100</span>
+                    <span>324 views</span>
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl p-6 shadow-lg">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                      <TrendingUp className="h-4 w-4 text-white" />
+                    </div>
+                    <div className="text-sm font-medium text-gray-600">AI Generated</div>
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Content Marketing Trends 2024</h4>
+                  <p className="text-sm text-gray-600 mb-3">Discover the latest content marketing strategies...</p>
+                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <span>7 min read</span>
+                    <span>SEO Score: 88/100</span>
+                    <span>189 views</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <div className="text-3xl font-bold text-blue-600 mb-2">100%</div>
+              <div className="text-sm text-gray-600">AI Generated</div>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <div className="text-3xl font-bold text-green-600 mb-2">95+</div>
+              <div className="text-sm text-gray-600">Avg SEO Score</div>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <div className="text-3xl font-bold text-purple-600 mb-2">1500+</div>
+              <div className="text-sm text-gray-600">Words Per Post</div>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <div className="text-3xl font-bold text-orange-600 mb-2">24/7</div>
+              <div className="text-sm text-gray-600">Content Creation</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
-      <section 
+      <section
         className="relative py-24 px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
