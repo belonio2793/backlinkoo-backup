@@ -99,7 +99,13 @@ export function BlogManagementPanel() {
       const stats = await blogAutoDeleteService.getCleanupStats();
       setStats(stats);
     } catch (error) {
-      console.error('Error loading stats:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error loading stats:', errorMessage);
+      toast({
+        title: "Warning",
+        description: `Could not load statistics: ${errorMessage}`,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
