@@ -23,12 +23,23 @@ export async function validateOpenAIKey(apiKey: string): Promise<KeyValidationRe
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorText = await response.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { error: { message: errorText } };
+      }
+
+      console.error(`API Key validation failed for ${keyPreview}:`);
+      console.error('Status:', response.status);
+      console.error('Error details:', JSON.stringify(errorData, null, 2));
+
       return {
         key: apiKey,
         keyPreview,
         valid: false,
-        error: `${response.status}: ${errorData.error?.message || 'Unknown error'}`
+        error: `${response.status}: ${errorData.error?.message || errorText || 'Unknown error'}`
       };
     }
 
