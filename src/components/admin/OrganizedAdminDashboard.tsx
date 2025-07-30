@@ -206,22 +206,7 @@ export function OrganizedAdminDashboard() {
       <div className="space-y-6">
         {activeCategory === "overview" && (
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MonitorSpeaker className="h-5 w-5" />
-                  System Overview
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-4">
-                  <p className="text-green-600 font-semibold">✅ All systems operational</p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Secure configuration automatically integrated
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <AutoConfiguredStatus />
             
             <Card>
               <CardHeader>
