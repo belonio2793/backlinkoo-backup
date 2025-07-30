@@ -40,6 +40,7 @@ import type { User } from '@supabase/supabase-js';
 import { KeywordResearchTool } from "@/components/KeywordResearchTool";
 import { RankingTracker } from "@/components/RankingTracker";
 import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
+import SubscriptionService, { type SubscriptionStatus } from "@/services/subscriptionService";
 
 interface SEOToolsSectionProps {
   user: User | null;
