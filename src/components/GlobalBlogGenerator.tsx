@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { openAIOnlyContentGenerator, ContentGenerationRequest } from '@/services/openAIOnlyContentGenerator';
 import { reliableContentGenerator } from '@/services/reliableContentGenerator';
+import { unlimitedContentGenerator } from '@/services/unlimitedContentGenerator';
 import { freeBacklinkService } from '@/services/freeBacklinkService';
 import { WordCountProgress } from './WordCountProgress';
 import { contentModerationService } from '@/services/contentModerationService';
