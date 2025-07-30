@@ -418,7 +418,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               size="sm"
               className="text-gray-400 hover:text-white p-1 h-auto"
             >
-              ��
+              Debug
             </Button>
           </div>
           <div className="grid grid-cols-2 gap-4">
