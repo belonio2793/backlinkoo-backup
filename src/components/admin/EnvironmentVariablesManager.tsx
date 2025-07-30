@@ -81,7 +81,35 @@ export function EnvironmentVariablesManager() {
 
   useEffect(() => {
     loadEnvironmentVariables();
+    initializeWithOpenAIKey();
   }, []);
+
+  const initializeWithOpenAIKey = () => {
+    // Pre-populate with the OpenAI key if no variables exist and no database connection
+    const openAIKey = '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';
+
+    setTimeout(() => {
+      if (envVars.length === 0) {
+        const initialVars = [{
+          id: crypto.randomUUID(),
+          key: 'VITE_OPENAI_API_KEY',
+          value: openAIKey,
+          description: 'OpenAI API key for AI content generation and backlink creation',
+          is_secret: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }];
+
+        setEnvVars(initialVars);
+        localStorage.setItem('admin_env_vars', JSON.stringify(initialVars));
+
+        toast({
+          title: 'Environment variables initialized',
+          description: 'OpenAI API key has been pre-configured for you'
+        });
+      }
+    }, 2000); // Wait 2 seconds to see if database loads
+  };
 
   const loadEnvironmentVariables = async () => {
     setIsLoading(true);
