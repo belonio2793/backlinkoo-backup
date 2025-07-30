@@ -223,6 +223,63 @@ export function EnhancedBlogContent({ content, keyword, anchorText, targetUrl }:
 
   return (
     <div className="max-w-4xl mx-auto">
+      {/* Reading Progress Bar */}
+      <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
+        <div
+          className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
+          style={{ width: `${readingProgress}%` }}
+        />
+      </div>
+
+      {/* Article Meta Information */}
+      <Card className="mb-8 border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div className="p-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2 text-blue-600">
+                <Clock className="w-4 h-4" />
+                <span className="text-sm font-medium">{readingTime} min read</span>
+              </div>
+              <div className="flex items-center gap-2 text-blue-600">
+                <BookOpen className="w-4 h-4" />
+                <span className="text-sm font-medium">{elements.length} sections</span>
+              </div>
+            </div>
+            {headings.length > 2 && (
+              <button
+                onClick={() => setShowTOC(!showTOC)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors text-blue-700 font-medium"
+              >
+                <List className="w-4 h-4" />
+                Table of Contents
+              </button>
+            )}
+          </div>
+
+          {/* Table of Contents */}
+          {showTOC && headings.length > 2 && (
+            <div className="mt-6 pt-6 border-t border-blue-200">
+              <h3 className="text-lg font-semibold text-blue-800 mb-4">Contents</h3>
+              <nav className="space-y-2">
+                {headings.map((heading, index) => (
+                  <a
+                    key={heading.id}
+                    href={`#${heading.id}`}
+                    className={`block px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors ${
+                      heading.type === 'h1' ? 'text-blue-800 font-semibold text-base' :
+                      heading.type === 'h2' ? 'text-blue-700 font-medium text-sm ml-4' :
+                      'text-blue-600 text-sm ml-8'
+                    }`}
+                  >
+                    {heading.content}
+                  </a>
+                ))}
+              </nav>
+            </div>
+          )}
+        </div>
+      </Card>
+
       {/* Content with enhanced styling */}
       <div className="space-y-6">
         {elements.map(renderElement)}
