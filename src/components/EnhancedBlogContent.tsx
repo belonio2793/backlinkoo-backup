@@ -217,6 +217,10 @@ export function EnhancedBlogContent({ content, keyword, anchorText, targetUrl }:
 
   const elements = parseContent(content);
 
+  // Extract headings for table of contents
+  const headings = elements.filter(el => ['h1', 'h2', 'h3'].includes(el.type));
+  const readingTime = calculateReadingTime(content);
+
   return (
     <div className="max-w-4xl mx-auto">
       {/* Content with enhanced styling */}
