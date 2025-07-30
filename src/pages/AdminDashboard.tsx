@@ -34,6 +34,7 @@ import { APIConfigurationManager } from "@/components/admin/APIConfigurationMana
 import { OpenAIConnectionTester } from "@/components/OpenAIConnectionTester";
 import { OpenAIConnectionTest } from "@/components/OpenAIConnectionTest";
 import { APIKeyDebug } from "@/components/APIKeyDebug";
+import { APIKeyDebugAdvanced } from "@/components/APIKeyDebugAdvanced";
 import {
   Users,
   Activity,
