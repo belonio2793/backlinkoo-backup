@@ -4,7 +4,7 @@
  * Implements intent-based logic and keyword relevance optimization
  */
 
-import { multiKeyOpenAIService } from '@/services/api/multiKeyOpenAI';
+import { openAIService } from '@/services/api/openai';
 import { seoAutoFormattingEngine, type SEOFormattingOptions, type FormattedContent } from './seoAutoFormattingEngine';
 import { formatBlogTitle } from '@/utils/textFormatting';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,7 +41,7 @@ export interface GeneratedContentResult {
 }
 
 export class EnhancedContentGenerator {
-  private chatGPTService = multiKeyOpenAIService;
+  private chatGPTService = openAIService;
 
   /**
    * Generate high-quality content with advanced SEO optimization

@@ -45,12 +45,7 @@ CREATE TRIGGER update_admin_environment_variables_updated_at
 -- Insert initial API keys
 INSERT INTO admin_environment_variables (key, value, description, is_secret)
 VALUES
-    (
-        'VITE_OPENAI_API_KEY',
-        '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',
-        'OpenAI API key for AI content generation and backlink creation',
-        true
-    ),
+    -- OpenAI API key removed for security - handled server-side only via Netlify functions
     (
         'SUPABASE_ACCESS_TOKEN',
         'sbp_65f13d3ef84fae093dbb2b2d5368574f69b3cea2',

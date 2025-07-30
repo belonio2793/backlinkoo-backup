@@ -5,7 +5,7 @@
  */
 
 import { formatBlogContent, formatBlogTitle, capitalizeSentences, calculateWordCount } from '@/utils/textFormatting';
-import { multiKeyOpenAIService } from '@/services/api/multiKeyOpenAI';
+import { openAIService } from '@/services/api/openai';
 
 export interface SEOFormattingOptions {
   targetUrl?: string;
@@ -45,7 +45,7 @@ export interface HeadingAnalysis {
 }
 
 export class SEOAutoFormattingEngine {
-  private chatGPTService = multiKeyOpenAIService;
+  private chatGPTService = openAIService;
 
   /**
    * Main formatting method that applies all SEO principles

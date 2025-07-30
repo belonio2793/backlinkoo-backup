@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { directOpenAI } from '@/services/directOpenAI';
+import { openAIService } from '@/services/api/openai';
 import { blogService, BlogPostGenerationData } from '@/services/blogService';
 
 import { WordCountProgress } from './WordCountProgress';
@@ -89,7 +89,7 @@ export function GlobalBlogGenerator({
   };
 
   const updateRemainingRequests = () => {
-    setRemainingRequests(directOpenAI.isConfigured() ? 999 : 0);
+    setRemainingRequests(999); // Server-side API key management
   };
 
   const formatUrl = (url: string): string => {
@@ -189,13 +189,10 @@ Return clean HTML content optimized for SEO.`;
     for (let i = 0; i < maxRetries; i++) {
       try {
         setGenerationStage(`Generating content... Attempt ${i + 1}`);
-        const res = await directOpenAI.generateContentWithPrompt(prompt, {
+        const res = await openAIService.generateContent(prompt, {
           systemPrompt,
           maxTokens: 3000,
-          temperature: 0.7,
-          targetUrl: request.targetUrl,
-          primaryKeyword: request.primaryKeyword,
-          anchorText: request.anchorText
+          temperature: 0.7
         });
 
         if (res.success && res.content) {

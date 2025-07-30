@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, AlertCircle, Loader2, TestTube } from 'lucide-react';
-import { environmentVariablesService } from '@/services/environmentVariablesService';
+// Removed SecureConfig import - using server-side calls only
 
 interface TestResult {
   status: 'idle' | 'testing' | 'success' | 'error';
@@ -18,60 +18,47 @@ export function OpenAIConnectionTest() {
     setTestResult({ status: 'testing', message: 'Testing OpenAI API connection...' });
 
     try {
-      // Get API key from admin environment variables
-      console.log('🔍 Getting API key from environment variables service...');
-      let apiKey = await environmentVariablesService.getVariable('VITE_OPENAI_API_KEY');
-      
-      // Fallback to environment variable
-      if (!apiKey) {
-        console.log('🔍 Falling back to import.meta.env...');
-        apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      }
-
-      console.log('🔑 API Key found:', apiKey ? `${apiKey.substring(0, 15)}...` : 'No key found');
-
-      if (!apiKey) {
-        setTestResult({
-          status: 'error',
-          message: 'No OpenAI API key found in environment variables',
-          details: {
-            adminEnvVar: 'Not found',
-            envVar: 'Not found'
-          }
-        });
-        return;
-      }
-
-      // Test API connection
-      console.log('🧪 Testing OpenAI API connection...');
-      const response = await fetch('https://api.openai.com/v1/models', {
-        method: 'GET',
+      // Test via secure Netlify function
+      console.log('🧪 Testing OpenAI connection via Netlify function...');
+      const response = await fetch('/.netlify/functions/check-ai-provider', {
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({
+          provider: 'OpenAI'
+        })
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ OpenAI API test successful!');
-        setTestResult({
-          status: 'success',
-          message: `OpenAI API connected successfully! ${data.data?.length || 0} models available.`,
-          details: {
-            keyPreview: `${apiKey.substring(0, 15)}...`,
-            modelsCount: data.data?.length || 0,
-            sampleModels: data.data?.slice(0, 3).map((m: any) => m.id).join(', ') || 'None'
-          }
-        });
+        console.log('✅ OpenAI connection test successful via Netlify function!');
+        if (data.success) {
+          setTestResult({
+            status: 'success',
+            message: 'OpenAI connection successful via secure Netlify function!',
+            details: {
+              method: 'Server-side Netlify function',
+              provider: 'OpenAI',
+              secure: true
+            }
+          });
+        } else {
+          setTestResult({
+            status: 'error',
+            message: 'OpenAI connection failed on server',
+            details: {
+              error: data.error || 'Server-side configuration issue'
+            }
+          });
+        }
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('❌ OpenAI API test failed:', response.status, errorData);
+        console.error('❌ Netlify function failed:', response.status);
         setTestResult({
           status: 'error',
-          message: `API test failed: ${response.status} - ${errorData.error?.message || 'Unknown error'}`,
+          message: `Netlify function error: ${response.status}`,
           details: {
-            keyPreview: `${apiKey.substring(0, 15)}...`,
+            error: 'Check Netlify function deployment',
             status: response.status,
             error: errorData.error?.message || 'Unknown error'
           }

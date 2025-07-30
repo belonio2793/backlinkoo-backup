@@ -33,8 +33,8 @@ const SECURE_STORE = {
   paypal_client_id: '',
   paypal_client_secret: '',
   
-  // API keys for external services (Configure via Netlify Environment Variables)
-  openai_api_key: '', // VITE_OPENAI_API_KEY - Set in Netlify Site Settings > Environment Variables
+  // API keys removed for security - OpenAI calls now handled server-side only
+  openai_api_key: '', // Removed - use Netlify functions for OpenAI calls
   anthropic_api_key: '', // VITE_ANTHROPIC_API_KEY - Set in Netlify if needed
   google_api_key: '', // VITE_GOOGLE_API_KEY - Set in Netlify if needed
   
@@ -141,10 +141,11 @@ export class SecureConfig {
     return decode(SECURE_STORE.paypal_client_secret);
   }
   
-  // API keys - Environment variables take priority over stored values
+  // API keys - Security: OpenAI calls moved to server-side only
   static get OPENAI_API_KEY(): string {
-    // Always prefer environment variables (Netlify) over stored values
-    return import.meta.env.VITE_OPENAI_API_KEY || decode(SECURE_STORE.openai_api_key);
+    // Return empty for security - all OpenAI calls should go through Netlify functions
+    console.warn('⚠️ OpenAI API calls should use server-side functions only for security');
+    return '';
   }
   
   static get ANTHROPIC_API_KEY(): string {
