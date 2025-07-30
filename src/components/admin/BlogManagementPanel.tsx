@@ -60,6 +60,7 @@ export function BlogManagementPanel() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [runningCleanup, setRunningCleanup] = useState(false);
   const [runningDiagnostic, setRunningDiagnostic] = useState(false);
+  const [runningDebug, setRunningDebug] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -218,6 +219,28 @@ export function BlogManagementPanel() {
     }
   };
 
+  const runDebugTest = async () => {
+    setRunningDebug(true);
+    try {
+      console.log('🐛 Running debug test...');
+      await blogAutoDeleteService.debugDatabaseConnection();
+
+      toast({
+        title: "Debug Test Complete",
+        description: "Check the browser console for detailed debug information",
+      });
+    } catch (error) {
+      console.error('Debug test failed:', error);
+      toast({
+        title: "Debug Test Failed",
+        description: "Could not run debug test",
+        variant: "destructive",
+      });
+    } finally {
+      setRunningDebug(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'claimed':
@@ -361,6 +384,19 @@ export function BlogManagementPanel() {
                   <BarChart3 className="h-4 w-4 mr-2" />
                 )}
                 Run Diagnostic
+              </Button>
+              <Button
+                onClick={runDebugTest}
+                variant="destructive"
+                size="sm"
+                disabled={runningDebug}
+              >
+                {runningDebug ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                )}
+                Debug Error
               </Button>
             </div>
           </CardTitle>
