@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, AlertCircle, Loader2, TestTube } from 'lucide-react';
-import { SecureConfig } from '@/lib/secure-config';
+// Removed SecureConfig import - using server-side calls only
 
 interface TestResult {
   status: 'idle' | 'testing' | 'success' | 'error';
