@@ -24,6 +24,7 @@ import {
   Plus,
   Activity,
   LogOut,
+  Bug,
   Calendar,
   Target,
   BarChart3,
