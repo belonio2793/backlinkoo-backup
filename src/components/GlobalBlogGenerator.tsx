@@ -160,7 +160,7 @@ export function GlobalBlogGenerator({
       } : undefined
     };
 
-    adminSyncService.trackFreeBacklinkRequest({ ...request });
+
 
     const promptTemplates = [
       `Generate a 1000 word article on ${request.primaryKeyword} including the ${request.anchorText || request.primaryKeyword} hyperlinked to ${request.targetUrl}`,
