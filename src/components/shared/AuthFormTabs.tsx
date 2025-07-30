@@ -296,6 +296,31 @@ export function AuthFormTabs({
           description: `Successfully signed in as ${result.user.email}`,
         });
 
+        // Check for claim intent and handle it
+        const claimIntent = localStorage.getItem('claim_intent');
+        if (claimIntent) {
+          try {
+            const intent = JSON.parse(claimIntent);
+            // Clear the intent to prevent repeated execution
+            localStorage.removeItem('claim_intent');
+
+            // Show notification about continuing with claim
+            toast({
+              title: "Continuing with your claim...",
+              description: `Processing your request to claim "${intent.postTitle}"`,
+            });
+
+            // Navigate to the blog post to complete the claim
+            setTimeout(() => {
+              window.location.href = `/blog/${intent.postSlug}`;
+            }, 1500);
+            return;
+          } catch (error) {
+            console.warn('Failed to parse claim intent:', error);
+            localStorage.removeItem('claim_intent');
+          }
+        }
+
         onAuthSuccess?.(result.user);
 
         // Reset form and retry attempts
