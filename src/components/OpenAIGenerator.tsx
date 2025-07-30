@@ -43,7 +43,7 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
   const [userCanGenerate, setUserCanGenerate] = useState<UserGenerationStatus>({ canGenerate: true });
   const [apiStatus, setApiStatus] = useState<{ accessible: boolean; error?: string } | null>(null);
   const [isCheckingAPI, setIsCheckingAPI] = useState(false);
-  const [isTesting, setIsTesting] = useState(false);
+  // Testing removed - handled server-side
   const { toast } = useToast();
   const navigate = useNavigate();
 
