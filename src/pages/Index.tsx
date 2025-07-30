@@ -497,23 +497,43 @@ const Index = () => {
             High-authority links • Competitive intelligence
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-20">
-            <Button 
-              size="lg" 
-              className="text-base px-8 py-6 font-medium" 
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12">
+            <Button
+              size="lg"
+              className="text-base px-8 py-6 font-medium"
               onClick={() => handleGetStarted('starter_200')}
             >
               Start Campaign
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
+            <Button
+              variant="outline"
+              size="lg"
               className="text-base px-8 py-6 font-medium"
               onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
             >
               View Pricing
             </Button>
+          </div>
+
+          {/* Blog Creation CTA */}
+          <div className="mb-20">
+            <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border border-blue-200 max-w-2xl mx-auto">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                🤖 AI-Powered Blog Creation
+              </h3>
+              <p className="text-gray-600 text-sm mb-4">
+                Generate high-quality blog posts with natural backlinks in minutes
+              </p>
+              <Button
+                variant="outline"
+                className="bg-white hover:bg-gray-50"
+                onClick={() => navigate('/create-blog')}
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Try Blog Generator
+              </Button>
+            </div>
           </div>
 
           {/* Stats Grid */}
