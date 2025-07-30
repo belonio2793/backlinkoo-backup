@@ -3,9 +3,10 @@
  * Uses only OpenAI API for content generation without fallbacks
  */
 
-import { openAIContentGenerator, ContentGenerationRequest, GeneratedContentResult } from './openAIContentGenerator';
+import { openAIContentGenerator } from './openAIContentGenerator';
+import type { ContentGenerationRequest, GeneratedContentResult } from './openAIContentGenerator';
 
-export { ContentGenerationRequest, GeneratedContentResult } from './openAIContentGenerator';
+export type { ContentGenerationRequest, GeneratedContentResult };
 
 /**
  * Simplified OpenAI-only content generator
