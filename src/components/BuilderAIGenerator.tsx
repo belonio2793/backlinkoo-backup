@@ -348,7 +348,7 @@ export const BuilderAIGenerator = () => {
 
         {/* Usage Info */}
         <div className="text-center text-sm text-gray-600">
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center justify-center gap-4 flex-wrap">
             <div className="flex items-center gap-1">
               <CheckCircle2 className="h-4 w-4 text-green-600" />
               <span>1000+ words guaranteed</span>
@@ -359,7 +359,11 @@ export const BuilderAIGenerator = () => {
             </div>
             <div className="flex items-center gap-1">
               <Clock className="h-4 w-4 text-purple-600" />
-              <span>permanent link</span>
+              <span>Auto-published to /blog</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Zap className="h-4 w-4 text-orange-600" />
+              <span>ChatGPT fallback</span>
             </div>
           </div>
         </div>
