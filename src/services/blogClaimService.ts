@@ -609,7 +609,7 @@ export class BlogClaimService {
 
           return {
             success: true,
-            message: 'Blog post claimed successfully! (Saved locally - will sync to database when available)',
+            message: `Blog post claimed successfully! (${userMessage} - saved locally and will sync when database is available)`,
             post: updatedLocalPost
           };
         } catch (fallbackError) {
