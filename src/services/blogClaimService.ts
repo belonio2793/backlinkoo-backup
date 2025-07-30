@@ -382,7 +382,7 @@ export class BlogClaimService {
           try {
             const userClaimedPosts = localStorage.getItem(`user_claimed_posts_${user.id}`);
             const claimedCount = userClaimedPosts ? JSON.parse(userClaimedPosts).length : 0;
-            const maxClaims = 5;
+            const maxClaims = 3;
 
             if (claimedCount >= maxClaims) {
               return {
