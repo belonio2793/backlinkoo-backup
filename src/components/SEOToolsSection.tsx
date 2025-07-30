@@ -171,22 +171,21 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
 
   const handleSubscribe = async () => {
     try {
-      // Create Stripe checkout session for $29/month subscription
-      const { data, error } = await supabase.functions.invoke('create-seo-subscription', {
-        body: { user_id: user?.id, plan: 'no_hands_seo' }
-      });
+      const result = await SubscriptionService.createSubscription(user);
 
-      if (error) throw error;
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
       // Redirect to Stripe checkout
-      if (data?.url) {
-        window.location.href = data.url;
+      if (result.url) {
+        window.location.href = result.url;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating subscription:', error);
       toast({
         title: "Error",
-        description: "Failed to start subscription process. Please try again.",
+        description: error.message || "Failed to start subscription process. Please try again.",
         variant: "destructive",
       });
     }
