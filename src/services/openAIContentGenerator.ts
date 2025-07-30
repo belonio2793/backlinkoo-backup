@@ -179,14 +179,28 @@ export class OpenAIContentGenerator {
         });
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
           const keyPreview = `${apiKey.substring(0, 12)}...${apiKey.substring(apiKey.length - 4)}`;
-          const errorMessage = `API key ${i + 1} (${keyPreview}) failed: ${response.status} - ${errorData.error?.message || 'Unknown error'}`;
+
+          // Try to get error details
+          let errorData = {};
+          let errorText = '';
+          try {
+            errorText = await response.text();
+            errorData = JSON.parse(errorText);
+          } catch (parseError) {
+            console.warn('Could not parse error response:', parseError);
+            errorData = { error: { message: errorText || 'Failed to parse error response' } };
+          }
+
+          const errorMessage = `API key ${i + 1} (${keyPreview}) failed: ${response.status} - ${errorData.error?.message || errorText || 'Unknown error'}`;
 
           console.error(`❌ ${errorMessage}`);
           console.error('Full error details:', JSON.stringify(errorData, null, 2));
+          console.error('Raw error text:', errorText);
           console.error('Response status:', response.status);
           console.error('Response headers:', Object.fromEntries(response.headers.entries()));
+          console.error('Request URL:', 'https://api.openai.com/v1/chat/completions');
+          console.error('Request headers:', { 'Authorization': `Bearer ${keyPreview}`, 'Content-Type': 'application/json' });
 
           if (response.status === 401) {
             console.warn(`🔑 Key ${i + 1} is invalid or expired. Check OpenAI dashboard.`);
