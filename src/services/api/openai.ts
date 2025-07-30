@@ -55,12 +55,21 @@ export class OpenAIService {
     // Get API key from environment variables or secure config
     this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY;
 
-    if (!this.apiKey || this.apiKey === 'your-openai-api-key-here' || this.apiKey === 'sk-proj-YOUR_ACTUAL_OPENAI_API_KEY_HERE') {
-      console.warn('❌ OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable.');
+    // List of known invalid/placeholder keys
+    const invalidKeys = [
+      'your-openai-api-key-here',
+      'sk-proj-YOUR_ACTUAL_OPENAI_API_KEY_HERE',
+      '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'
+    ];
+
+    if (!this.apiKey || invalidKeys.includes(this.apiKey)) {
+      console.warn('❌ OpenAI API key not configured or invalid. Please set a valid VITE_OPENAI_API_KEY environment variable.');
       console.warn('📋 Get your API key from: https://platform.openai.com/api-keys');
+      this.apiKey = ''; // Clear invalid key
     } else if (!this.apiKey.startsWith('sk-')) {
       console.warn('❌ OpenAI API key appears to be invalid format. Keys should start with "sk-"');
       console.warn('📋 Current key preview:', this.apiKey.substring(0, 10) + '...');
+      this.apiKey = ''; // Clear invalid key
     } else {
       console.log('✅ OpenAI API key configured successfully');
       console.log('🔑 Key preview:', this.apiKey.substring(0, 10) + '...');
