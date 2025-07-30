@@ -72,34 +72,22 @@ export const BuilderAIGenerator = () => {
 
     setIsGenerating(true);
 
+    // Set up real-time progress callback
+    builderAIContentGenerator.setProgressCallback((update) => {
+      setProgress(update);
+    });
+
     try {
-      // Progress updates
-      setProgress({ stage: "Initializing", progress: 10, details: "Preparing AI content generation...", timestamp: new Date() });
-
-      setProgress({ stage: "Research", progress: 30, details: "Researching keyword and topic...", timestamp: new Date() });
-
-      // Generate content using OpenAI service
-      setProgress({ stage: "Writing", progress: 60, details: "Generating high-quality content...", timestamp: new Date() });
-
-      const result = await openAIContentGenerator.generateContent({
-        targetUrl: formattedUrl,
-        primaryKeyword: keyword.trim(),
+      // Generate content using Builder.io AI with the 3 specific prompts
+      const result = await builderAIContentGenerator.generateContent({
+        keyword: keyword.trim(),
         anchorText: anchorText.trim(),
-        wordCount: 1000,
-        tone: 'professional',
-        contentType: 'how-to'
+        targetUrl: formattedUrl
       });
 
-      setProgress({ stage: "Optimization", progress: 80, details: "Optimizing for SEO...", timestamp: new Date() });
-
-      // Store as free backlink
-      freeBacklinkService.storeFreeBacklink(result);
-
-      setProgress({ stage: "Complete", progress: 100, details: "Blog post created successfully!", timestamp: new Date() });
-
       toast({
-        title: "Blog Post Generated!",
-        description: "Your backlink content has been created successfully. Redirecting to your post...",
+        title: "Blog Post Generated & Published!",
+        description: `Your content has been published successfully! Redirecting to: ${result.publishedUrl}`,
       });
 
       // Reset form
@@ -107,8 +95,10 @@ export const BuilderAIGenerator = () => {
       setAnchorText('');
       setTargetUrl('');
 
-      // Redirect to the blog post after a short delay
+      // Redirect to the published blog post
       setTimeout(() => {
+        window.open(result.publishedUrl, '_blank');
+        // Also navigate to our internal view
         navigate(`/free-backlink/${result.id}`);
       }, 2000);
 
