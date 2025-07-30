@@ -53,32 +53,40 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!user) return;
+      if (!user) {
+        console.warn('🔧 ProfileSettings: No user provided, setting loading to false');
+        setIsLoading(false);
+        return;
+      }
 
-
+      console.log('🔧 ProfileSettings: Starting profile fetch for user:', user.id);
 
       try {
-        // Try to fetch from database with timeout
-        const fetchPromise = supabase
+        // Try to fetch from database with longer timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+        const { data, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('user_id', user.id)
+          .abortSignal(controller.signal)
           .single();
 
-        const { data, error } = await Promise.race([
-          fetchPromise,
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Profile fetch timeout')), 2000)
-          )
-        ]) as any;
+        clearTimeout(timeoutId);
 
         if (error && error.code !== 'PGRST116') { // PGRST116 = row not found
           console.error('🔧 ProfileSettings: Error fetching profile:', error);
-          toast({
-            title: "Warning",
-            description: "Could not load profile data from database.",
-            variant: "destructive",
-          });
+
+          // Only show error for non-timeout issues
+          if (!error.message?.includes('aborted')) {
+            toast({
+              title: "Warning",
+              description: "Could not load profile data from database.",
+              variant: "destructive",
+            });
+          }
+
           // Initialize with user data as fallback
           setProfile(prev => ({
             ...prev,
@@ -88,12 +96,14 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
             display_name: user.user_metadata?.display_name || user.user_metadata?.full_name || '',
           }));
         } else if (data) {
+          console.log('🔧 ProfileSettings: Successfully loaded profile from database');
           setProfile({
             ...data,
             email: user.email || data.email,
           });
         } else {
           // Initialize with user data if no profile exists
+          console.log('🔧 ProfileSettings: No profile found, using user metadata');
           setProfile(prev => ({
             ...prev,
             user_id: user.id,
@@ -102,8 +112,18 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
             display_name: user.user_metadata?.display_name || user.user_metadata?.full_name || '',
           }));
         }
-      } catch (error) {
-        console.error('🔧 ProfileSettings: Error fetching profile:', error);
+      } catch (error: any) {
+        console.error('🔧 ProfileSettings: Exception fetching profile:', error);
+
+        // Handle timeout gracefully
+        if (error.name === 'AbortError') {
+          console.warn('🔧 ProfileSettings: Request timeout, using fallback data');
+          toast({
+            title: "Notice",
+            description: "Profile loading timed out, using cached data.",
+          });
+        }
+
         // Always provide fallback data
         setProfile(prev => ({
           ...prev,
