@@ -519,7 +519,7 @@ CREATE POLICY "Public can read trial posts" ON blog_posts
                 size="sm"
                 variant="outline"
                 onClick={() => {
-                  navigator.clipboard.writeText(`-- Create blog_posts table for Builder.io AI
+                  navigator.clipboard.writeText(`-- Create blog_posts table for OpenAI
 CREATE TABLE IF NOT EXISTS blog_posts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
