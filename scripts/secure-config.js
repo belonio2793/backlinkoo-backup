@@ -23,7 +23,7 @@ const SECURE_STORE = {
   resend_api_key: 'cmVfZjJpeHlSQXdfRUExZHRRQ285S25BTmZKZ3JncWZYRkVx', // re_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq
 
   // API keys for external services
-  openai_api_key: 'c2stcHJvai15eEMyd09xQVhwN2ozZVZVRUhuMkR5a05TeFRFZnoyTDdtM001c2JBbDRXMUprRGEtaC1WaVNDTEkxcGZ2WXdfLWZ6NVlWNVVhalQzQmxia0ZKeDFIYVJjeHpVVGVXbFZlTnZsSC1uUkxkMkpOQTlpSHZsWjVrRDhybGdOWG9ZVUNFekdoT1VCdjAzNW12SElWWEV5aXhjdDRLTUE=', // Encoded OpenAI API key
+  openai_api_key: 'c2stcHJvai1hYW1mRTBYQjdHNjJvV1BLQ29GaFhqVjNkRkktcnVOQTVVSTVIT1JuaHZ2dHlGRzdWb2lkOGxnd1A2cVlaTUVQN3RORHlMcFFUQVQzQmxia0ZKMWV1VmxzNlNuLWNNOEtXZk5QRVdGT0xhb1c3V1RfR1NVNGtwdmxJY1JiQVRReF9XVklmNFJCQ1lFeHh0Z0trVFNJVEtUTng1MEE=', // Encoded OpenAI API key
 };
 
 /**
