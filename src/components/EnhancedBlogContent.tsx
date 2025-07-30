@@ -306,13 +306,33 @@ export function EnhancedBlogContent({ content, keyword, anchorText, targetUrl }:
         </Card>
       )}
 
+      {/* Floating Table of Contents Button (Mobile) */}
+      {headings.length > 2 && (
+        <div className="fixed bottom-6 right-6 z-40 lg:hidden">
+          <button
+            onClick={() => setShowTOC(!showTOC)}
+            className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-full shadow-lg flex items-center justify-center text-white transition-all duration-300 hover:scale-110"
+          >
+            <List className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
       {/* Reading progress indicator */}
       <div className="mt-12 text-center">
-        <Badge variant="secondary" className="px-4 py-2">
-          <span className="text-sm font-medium">
-            {keyword ? `Learn more about ${keyword}` : 'Continue reading for more insights'}
-          </span>
-        </Badge>
+        <div className="inline-flex items-center gap-4 px-6 py-3 bg-gradient-to-r from-gray-50 to-blue-50 rounded-full border border-gray-200">
+          <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
+              style={{ width: `${readingProgress}%` }}
+            />
+          </div>
+          <Badge variant="secondary" className="px-3 py-1">
+            <span className="text-sm font-medium">
+              {keyword ? `Learn more about ${keyword}` : 'Continue reading for more insights'}
+            </span>
+          </Badge>
+        </div>
       </div>
     </div>
   );
