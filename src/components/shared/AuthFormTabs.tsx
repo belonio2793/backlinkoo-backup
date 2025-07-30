@@ -99,8 +99,8 @@ export function AuthFormTabs({
       description: "Please wait while we verify your credentials.",
     });
 
-    // Start countdown timer
-    setTimeoutCountdown(30);
+    // Start countdown timer (reduced for better UX)
+    setTimeoutCountdown(25);
     const countdownInterval = setInterval(() => {
       setTimeoutCountdown(prev => {
         if (prev <= 1) {
@@ -211,41 +211,54 @@ export function AuthFormTabs({
       console.error('Login error:', error);
       setTimeoutCountdown(0); // Clear countdown on error
 
-      let errorMessage = "Network error or server unavailable. Please check your connection and try again.";
-      const isTimeoutError = error.message.includes('Sign in is taking longer than expected') || error.message === 'Sign in timeout';
+      let errorMessage = "Authentication failed. Please try again.";
+      let shouldRetry = false;
 
-      if (isTimeoutError) {
+      // Categorize error types for better user feedback
+      if (error.message?.includes('timeout') || error.message?.includes('taking longer than expected')) {
+        // Timeout errors - offer retry
         setRetryAttempts(prev => prev + 1);
 
         if (retryAttempts < 2) {
+          shouldRetry = true;
           errorMessage = `Connection timeout (attempt ${retryAttempts + 1}/3). Retrying automatically...`;
           toast({
             title: "Retrying sign in...",
             description: errorMessage,
           });
 
-          // Auto-retry after a short delay
+          // Auto-retry with longer delay
           setTimeout(() => {
             if (loginEmail && loginPassword) {
               handleLogin(e);
             }
-          }, 2000);
+          }, 3000);
           return;
         } else {
-          errorMessage = error.message + " Maximum retry attempts reached. Please check your connection or try refreshing the page.";
+          errorMessage = "Connection keeps timing out. Please check your internet connection or try refreshing the page.";
         }
-      } else if (error.message?.includes('NetworkError') || error.message?.includes('fetch')) {
-        errorMessage = "Network connection failed. Please check your internet connection.";
-      } else if (error.message?.includes('Invalid login credentials')) {
+      } else if (error.message?.includes('Invalid login credentials') || error.message?.includes('Invalid email or password')) {
         errorMessage = "Invalid email or password. Please check your credentials.";
         setRetryAttempts(0); // Reset retry attempts for credential errors
+      } else if (error.message?.includes('Email verification required') || error.message?.includes('Email not confirmed')) {
+        errorMessage = "Please verify your email address before signing in. Check your email for a verification link.";
+        setRetryAttempts(0);
+      } else if (error.message?.includes('NetworkError') || error.message?.includes('fetch') || error.message?.includes('network')) {
+        errorMessage = "Network connection failed. Please check your internet connection and try again.";
+      } else if (error.message?.includes('rate limit') || error.message?.includes('too many')) {
+        errorMessage = "Too many login attempts. Please wait a few minutes before trying again.";
+      } else {
+        // Generic error with the actual error message
+        errorMessage = error.message || "An unexpected error occurred. Please try again.";
       }
 
-      toast({
-        title: "Sign in failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      if (!shouldRetry) {
+        toast({
+          title: "Sign in failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     } finally {
       console.log('🔐 Login attempt completed, setting loading to false');
       setIsLoading(false);
