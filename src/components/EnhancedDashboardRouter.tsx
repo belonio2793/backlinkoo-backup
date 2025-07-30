@@ -32,7 +32,7 @@ export function EnhancedDashboardRouter() {
         navigate('/login');
       }
       setIsLoading(false);
-    }, 8000); // Increased to 8 seconds
+    }, 15000); // Increased to 15 seconds to handle post-claim redirects
     return () => clearTimeout(timeout);
   }, [navigate]);
 
