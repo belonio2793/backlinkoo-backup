@@ -48,11 +48,12 @@ interface PricingPlan {
   features: string[];
 }
 
-export const PricingModal = ({ 
-  isOpen, 
-  onClose, 
-  initialCredits, 
-  onAuthSuccess 
+export const PricingModal = ({
+  isOpen,
+  onClose,
+  initialCredits,
+  onAuthSuccess,
+  defaultTab = "payment"
 }: PricingModalProps) => {
   const CREDIT_PRICE = 0.70;
   
