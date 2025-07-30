@@ -216,7 +216,12 @@ export class BlogAutoDeleteService {
         .lt('expires_at', twoHoursFromNow);
 
       if (error) {
-        console.error('Error fetching posts expiring soon:', error);
+        console.error('Error fetching posts expiring soon:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         return [];
       }
 
@@ -229,7 +234,7 @@ export class BlogAutoDeleteService {
         expiresAt: post.expires_at
       }));
     } catch (error) {
-      console.error('Error getting posts expiring soon:', error);
+      console.error('Error getting posts expiring soon:', error instanceof Error ? error.message : String(error));
       return [];
     }
   }
@@ -261,7 +266,7 @@ export class BlogAutoDeleteService {
         expiringSoon: expiringSoon.length
       };
     } catch (error) {
-      console.error('Error getting cleanup stats:', error);
+      console.error('Error getting cleanup stats:', error instanceof Error ? error.message : String(error));
       return {
         totalPosts: 0,
         unclaimedPosts: 0,
