@@ -26,13 +26,11 @@ export function BlogCreator() {
   const [generatedPost, setGeneratedPost] = useState<any>(null);
 
   // Track page visit
-  React.useEffect(() => {
-    trackPageView('blog_creator');
-  }, [trackPageView]);
+
 
   const handleBlogGenerated = (blogPost: any) => {
     setGeneratedPost(blogPost);
-    trackInteraction('blog_generated');
+
     
     // Navigate to the generated blog post
     setTimeout(() => {
@@ -68,7 +66,7 @@ export function BlogCreator() {
     "🌍 Content optimized for global audiences",
     "⚡ Generate posts in under 60 seconds",
     "🎯 Natural anchor text integration",
-    "���� Built-in SEO score optimization",
+    "📊 Built-in SEO score optimization",
     "🔗 Multi-link strategies for maximum impact"
   ];
 
@@ -209,7 +207,7 @@ export function BlogCreator() {
                 size="lg" 
                 className="bg-white text-blue-600 hover:bg-gray-100"
                 onClick={() => {
-                  trackInteraction('cta_signup');
+
                   navigate('/login');
                 }}
               >
@@ -221,7 +219,7 @@ export function BlogCreator() {
                 variant="outline" 
                 className="border-white text-white hover:bg-white/10"
                 onClick={() => {
-                  trackInteraction('cta_learn_more');
+
                   navigate('/');
                 }}
               >

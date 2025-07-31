@@ -65,8 +65,7 @@ const Index = () => {
       setShowInlineAuth(true);
     }
 
-    // Track homepage visit
-    trackPageView('homepage');
+
   }, [trackPageView]);
 
   // Check for authenticated user on component mount
@@ -227,8 +226,7 @@ const Index = () => {
   ];
 
   const handleGetStarted = (planId: 'starter_100' | 'starter_200' | 'starter_300' | 'custom') => {
-    // Track interaction
-    trackInteraction(`get_started_${planId}`);
+
 
     if (planId === 'custom') {
       setIsCustomPackage(true);
@@ -1071,10 +1069,9 @@ const Index = () => {
       />
 
       {/* Guest Session Reminder - Show for non-authenticated users */}
-      {!user && authChecked && shouldShowConversionPrompt() && (
+      {!user && authChecked && (
         <GuestSessionReminder
           onSignUp={() => {
-            trackInteraction('guest_reminder_signup');
             setLoginModalTab("signup");
             setShowLoginModal(true);
           }}
