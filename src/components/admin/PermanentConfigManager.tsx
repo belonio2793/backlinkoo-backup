@@ -206,7 +206,7 @@ export function PermanentConfigManager() {
 
           <TabsContent value="overview" className="space-y-4">
             {healthSummary && (
-              <>
+              <React.Fragment key="health-summary">
                 {/* Health Score Display */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Card key="overall-health" className="p-4">
@@ -374,7 +374,7 @@ export function PermanentConfigManager() {
                     </AlertDescription>
                   </Alert>
                 )}
-              </>
+              </React.Fragment>
             )}
           </TabsContent>
 
