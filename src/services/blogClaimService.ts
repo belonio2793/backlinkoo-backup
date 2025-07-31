@@ -99,7 +99,7 @@ export class BlogClaimService {
       // Validate data structure
       const validatedData = (data || []).filter(post => {
         if (!post.id || !post.slug || !post.title) {
-          console.warn('⚠️ BlogClaimService: Skipping invalid post data:', post);
+          console.warn('⚠��� BlogClaimService: Skipping invalid post data:', post);
           return false;
         }
         return true;
@@ -421,7 +421,14 @@ export class BlogClaimService {
         .single();
 
       if (insertError) {
-        console.error('❌ BlogClaimService: Failed to create database entry:', insertError);
+        console.error('❌ BlogClaimService: Failed to create database entry:', {
+          message: insertError.message,
+          code: insertError.code,
+          details: insertError.details,
+          hint: insertError.hint,
+          postSlug: localPost.slug,
+          postTitle: localPost.title
+        });
         return {
           success: false,
           message: 'Failed to save post to database',
