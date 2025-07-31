@@ -17,9 +17,9 @@ class AILiveContentService {
   private model = 'gpt-3.5-turbo';
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
+    this.apiKey = import.meta.env.OPENAI_API_KEY || '';
     if (!this.apiKey) {
-      console.warn('OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable.');
+      console.warn('OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.');
     }
   }
 
