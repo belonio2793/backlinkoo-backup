@@ -131,7 +131,7 @@ Please write the complete blog post now:`;
         slug,
         excerpt,
         blogUrl,
-        metadata: blogData
+        metadata: savedPost
       };
 
     } catch (error) {
