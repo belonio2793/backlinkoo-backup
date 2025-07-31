@@ -213,59 +213,16 @@ export function OrganizedAdminDashboard() {
       <div className="space-y-6">
         {activeCategory === "overview" && (
           <div className="space-y-6">
-            {/* API Key Status Fix - Priority Alert */}
-            <ApiKeyStatusFix />
-
-            {/* Featured: OpenAI Configuration */}
-            <Alert className="border-blue-200 bg-blue-50">
-              <Brain className="h-4 w-4 text-blue-600" />
-              <AlertDescription>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <strong>Quick Access:</strong> Configure your OpenAI API key for all AI features across the application.
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setActiveCategory("system")}
-                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                  >
-                    Configure OpenAI
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-
+            {/* Streamlined System Status */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MonitorSpeaker className="h-5 w-5" />
-                  System Status Overview
+                  System Status
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ServiceConnectionStatus />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>System Health Check</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <SystemStatusCheck />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
-                  Global API Status
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <GlobalAPIStatus />
               </CardContent>
             </Card>
 
