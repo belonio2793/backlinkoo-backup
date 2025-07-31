@@ -124,9 +124,24 @@ export class LocalDevAPI {
    * Check if we should use local dev API
    */
   static shouldUseMockAPI(): boolean {
-    return import.meta.env.DEV && 
-           !import.meta.env.OPENAI_API_KEY && 
+    return import.meta.env.DEV &&
+           !import.meta.env.OPENAI_API_KEY &&
            !import.meta.env.VITE_OPENAI_API_KEY;
+  }
+
+  /**
+   * Clean up invalid/expired blog posts
+   */
+  static async cleanupInvalidPosts(): Promise<number> {
+    try {
+      const { blogService } = await import('@/services/blogService');
+      const deletedCount = await blogService.cleanupExpiredTrialPosts();
+      console.log(`🧹 Cleaned up ${deletedCount} expired trial posts`);
+      return deletedCount;
+    } catch (error) {
+      console.warn('⚠️ Cleanup failed:', error);
+      return 0;
+    }
   }
 
   /**
