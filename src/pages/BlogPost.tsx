@@ -247,7 +247,7 @@ export function BlogPost() {
 
       // Check if user can claim (using same logic as ClaimTrialPostDialog)
       const { data: userPosts } = await supabase
-        .from('published_blog_posts')
+        .from('blog_posts')
         .select('id, is_trial_post, user_id')
         .eq('user_id', user.id)
         .eq('is_trial_post', false);
