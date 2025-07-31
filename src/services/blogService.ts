@@ -91,10 +91,6 @@ export class BlogService {
       title: data.title,
       slug: uniqueSlug,
       content: data.content,
-      meta_description: data.metaDescription,
-      keywords: data.keywords,
-      tags: this.generateTags(data.title, data.targetUrl),
-      category: this.categorizeContent(data.keywords.join(' ')),
       target_url: data.targetUrl,
       anchor_text: data.anchorText,
       published_url: publishedUrl,
@@ -105,10 +101,9 @@ export class BlogService {
       seo_score: data.seoScore,
       reading_time: data.readingTime,
       word_count: data.wordCount,
-      featured_image: this.generateFeaturedImage(data.keywords[0] || 'blog'),
-      author_name: 'AI Generator',
-      contextual_links: data.contextualLinks || [],
-      published_at: new Date().toISOString()
+      author_name: 'AI Writer',
+      tags: this.generateTags(data.title, data.targetUrl),
+      category: this.categorizeContent(data.keywords?.join(' ') || data.title)
     };
 
     // If this is a claimed post (has userId and not trial), use maximum persistence
