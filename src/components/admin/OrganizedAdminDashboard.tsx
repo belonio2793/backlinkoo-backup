@@ -30,6 +30,7 @@ import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionSta
 import { APIManagementDashboard } from "@/components/admin/APIManagementDashboard";
 import { GlobalAPIStatus } from "@/components/GlobalAPIStatus";
 import { ErrorDebugger } from "@/components/ErrorDebugger";
+import { PermanentConfigManager } from "@/components/admin/PermanentConfigManager";
 
 import {
   Users,
