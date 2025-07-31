@@ -55,6 +55,7 @@ const App = () => (
           <GlobalNotifications />
           <DatabaseHealthLogger />
           <BetaNotification />
+          <ConfigSaveNotification />
           <BrowserRouter>
             <AuthRedirectHandler>
               <AppWrapper />
