@@ -239,7 +239,9 @@ export function AuthFormTabs({
           });
 
           // Provide specific error messages based on the error type
-          if (directError.message.includes('timeout') && authError?.message?.includes('timeout')) {
+          if (directError.message.includes('Failed to fetch') || directError.message.includes('NetworkError')) {
+            throw new Error('Network connection issue. Please check your internet connection and try again.');
+          } else if (directError.message.includes('timeout') && authError?.message?.includes('timeout')) {
             throw new Error('Connection timeout. Please check your internet connection and try again later.');
           } else if (directError.message.includes('Invalid login credentials')) {
             throw new Error('Invalid email or password. Please check your credentials.');
