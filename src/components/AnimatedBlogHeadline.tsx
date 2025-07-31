@@ -67,7 +67,7 @@ export function AnimatedBlogHeadline() {
           {words.map((word, index) => (
             <span
               key={index}
-              className={`inline-block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 via-purple-500 via-pink-500 to-rose-400 mr-3 ${
+              className={`inline-block text-transparent bg-clip-text bg-gradient-to-r ${currentGradient} mr-3 ${
                 animateWords 
                   ? `animate-word-slide opacity-100` 
                   : 'opacity-0'
