@@ -500,7 +500,35 @@ export function AILive() {
                           <strong>Words Generated:</strong> {streamingProgress.wordCount}
                         </>
                       )}
+                      {streamingProgress.attempts && (
+                        <>
+                          <br />
+                          <strong>Attempts:</strong> {streamingProgress.attempts}
+                          {streamingProgress.fallbackUsed && <span className="text-amber-600"> (Fallback Used)</span>}
+                        </>
+                      )}
                     </div>
+
+                    {/* Prompt Display */}
+                    {streamingProgress.selectedPrompt && streamingProgress.userInputs && (
+                      <div className="space-y-3">
+                        <div className="text-sm font-medium text-blue-800 flex items-center gap-2">
+                          <Terminal className="h-4 w-4" />
+                          Prompt Template {(streamingProgress.promptIndex || 0) + 1}
+                        </div>
+                        <div className="bg-slate-900 text-green-400 p-3 rounded-lg font-mono text-xs overflow-x-auto">
+                          <div className="text-slate-400 mb-2"># Selected Prompt Template:</div>
+                          <div className="text-green-300">{streamingProgress.selectedPrompt}</div>
+
+                          <div className="text-slate-400 mt-3 mb-2"># User Inputs:</div>
+                          <div className="space-y-1">
+                            <div><span className="text-blue-400">keyword:</span> <span className="text-yellow-300">"{streamingProgress.userInputs.keyword}"</span></div>
+                            <div><span className="text-blue-400">anchor_text:</span> <span className="text-yellow-300">"{streamingProgress.userInputs.anchorText}"</span></div>
+                            <div><span className="text-blue-400">url:</span> <span className="text-yellow-300">"{streamingProgress.userInputs.url}"</span></div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Real-time Content Preview */}
                     {currentContent && currentWordCount > 0 && (
