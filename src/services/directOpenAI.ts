@@ -46,15 +46,18 @@ Please write the complete blog post now:`;
       console.log('📝 Generated prompt:', prompt);
 
       // Call OpenAI via Netlify function
-      const response = await fetch('/.netlify/functions/generate-content-openai', {
+      const response = await fetch('/.netlify/functions/generate-openai', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt: prompt,
-          maxTokens: 2500,
-          temperature: 0.7
+          keyword: request.keyword,
+          url: request.targetUrl,
+          anchorText: request.anchorText,
+          wordCount: 1000,
+          contentType: 'how-to',
+          tone: 'professional'
         })
       });
 
