@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Circle } from 'lucide-react';
+import { safeNetlifyFetch } from '@/utils/netlifyFunctionHelper';
 
 interface APIStatus {
   online: boolean;
