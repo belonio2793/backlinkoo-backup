@@ -474,9 +474,10 @@ export class OpenAIContentGenerator {
    */
   private extractTitleFromContent(content: string, keyword: string): string {
     // Try to extract h1 tag from content
-    const h1Match = content.match(/<h1[^>]*>([^<]+)<\/h1>/);
+    const h1Match = content.match(/<h1[^>]*>(.*?)<\/h1>/i);
     if (h1Match && h1Match[1]) {
-      return h1Match[1].trim();
+      // Strip any remaining HTML tags from the title
+      return h1Match[1].replace(/<[^>]*>/g, '').trim();
     }
 
     // If no h1 found, generate a simple title
