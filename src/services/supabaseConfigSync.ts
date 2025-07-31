@@ -556,7 +556,7 @@ export class SupabaseConfigSync {
    */
   private async testConfiguration(key: string, value: string): Promise<{ success: boolean; message: string }> {
     try {
-      if (key === 'VITE_OPENAI_API_KEY') {
+      if (key === 'OPENAI_API_KEY') {
         const response = await fetch('https://api.openai.com/v1/models', {
           headers: {
             'Authorization': `Bearer ${value}`,
