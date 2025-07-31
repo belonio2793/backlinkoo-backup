@@ -79,7 +79,7 @@ class EnvironmentVariablesService {
       console.log('📊 Cached variables:', keys.join(', '));
 
       // Check for OpenAI key specifically
-      const apiKey = this.cache.get('VITE_OPENAI_API_KEY') || import.meta.env.VITE_OPENAI_API_KEY;
+      const apiKey = this.cache.get('OPENAI_API_KEY') || import.meta.env.OPENAI_API_KEY;
       if (apiKey) {
         console.log('🔑 OpenAI API key available:', apiKey.substring(0, 15) + '...');
       } else {
