@@ -285,15 +285,6 @@ export function ServiceConnectionStatus() {
             responseTime: 0
           });
         }),
-        checkOpenAI().catch(err => {
-          console.warn('OpenAI check failed:', err);
-          updateServiceStatus('OpenAI API', {
-            status: 'error',
-            message: 'API test failed',
-            hasApiKey: false,
-            responseTime: 0
-          });
-        }),
         checkResend().catch(err => {
           console.warn('Resend check failed:', err);
           updateServiceStatus('Resend Email', {
