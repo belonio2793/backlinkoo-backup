@@ -153,13 +153,27 @@ export class BlogClaimService {
     try {
       console.log(`🔍 BlogClaimService: Attempting to claim post with ID: ${postId}`);
 
-      // First check if the post exists and is claimable
-      const { data: existingPost, error: fetchError } = await supabase
+      // First check if the post exists and is claimable - try by ID first, then by slug
+      let { data: existingPost, error: fetchError } = await supabase
         .from('published_blog_posts')
         .select('id, title, user_id, is_trial_post, expires_at, slug')
         .eq('id', postId)
         .eq('status', 'published')
         .single();
+
+      // If not found by ID, try by slug (for localStorage posts)
+      if (fetchError && fetchError.code === 'PGRST116') {
+        console.log(`🔄 BlogClaimService: Post not found by ID, trying by slug: ${postId}`);
+        const { data: postBySlug, error: slugError } = await supabase
+          .from('published_blog_posts')
+          .select('id, title, user_id, is_trial_post, expires_at, slug')
+          .eq('slug', postId)
+          .eq('status', 'published')
+          .single();
+
+        existingPost = postBySlug;
+        fetchError = slugError;
+      }
 
       if (fetchError || !existingPost) {
         console.error('❌ BlogClaimService: Post not found in database:', {
