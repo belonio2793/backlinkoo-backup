@@ -4,6 +4,7 @@ import { useReferralTracking } from '@/hooks/useReferralTracking';
 // Import all page components
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
+import Redirect from '@/pages/Redirect';
 import EmailConfirmation from '@/pages/EmailConfirmation';
 import AuthCallback from '@/pages/AuthCallback';
 import PasswordReset from '@/pages/PasswordReset';
