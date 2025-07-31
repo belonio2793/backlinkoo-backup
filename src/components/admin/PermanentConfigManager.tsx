@@ -248,7 +248,7 @@ export function PermanentConfigManager() {
                 </div>
 
                 {/* Service Health */}
-                <Card>
+                <Card key="service-health-scores">
                   <CardHeader>
                     <CardTitle className="text-lg">Service Health Scores</CardTitle>
                   </CardHeader>
