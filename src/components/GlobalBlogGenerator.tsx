@@ -396,6 +396,62 @@ Return clean HTML content optimized for SEO.`;
           />
         </div>
 
+        {/* Prompt Preview */}
+        {primaryKeyword.trim() && targetUrl.trim() && (
+          <div className="space-y-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+            <div className="flex items-center gap-2">
+              <Terminal className="h-4 w-4 text-blue-600" />
+              <span className="font-medium text-blue-800">
+                Prompt Preview (Random Selection)
+              </span>
+            </div>
+
+            {(() => {
+              const preview = getPromptPreview();
+              if (!preview) return null;
+
+              return (
+                <div className="space-y-3">
+                  {/* Template Selection */}
+                  <div className="text-xs font-medium text-blue-600 uppercase tracking-wide">
+                    Template {preview.index + 1} of {basePromptTemplates.length}:
+                  </div>
+                  <div className="bg-slate-900 text-green-400 p-3 rounded font-mono text-sm overflow-x-auto">
+                    {preview.template}
+                  </div>
+
+                  {/* User Inputs */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                    <div className="bg-white p-3 rounded border">
+                      <div className="font-medium text-blue-600 mb-1">keyword:</div>
+                      <div className="font-mono text-slate-800">"{primaryKeyword}"</div>
+                    </div>
+                    <div className="bg-white p-3 rounded border">
+                      <div className="font-medium text-purple-600 mb-1">anchor_text:</div>
+                      <div className="font-mono text-slate-800">"{anchorText || primaryKeyword}"</div>
+                    </div>
+                    <div className="bg-white p-3 rounded border">
+                      <div className="font-medium text-green-600 mb-1">url:</div>
+                      <div className="font-mono text-slate-800 truncate">"{targetUrl}"</div>
+                    </div>
+                  </div>
+
+                  {/* Final Result */}
+                  <div className="space-y-2">
+                    <div className="text-xs font-medium text-blue-600 uppercase tracking-wide">
+                      Final Prompt → ChatGPT:
+                    </div>
+                    <div className="bg-white p-3 rounded border-l-4 border-blue-400 text-sm">
+                      <Code className="h-4 w-4 inline mr-2 text-blue-500" />
+                      {preview.formatted}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
         {/* Advanced Options */}
         {showAdvancedOptions && (
           <Tabs defaultValue="content" className="w-full">
