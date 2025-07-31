@@ -279,7 +279,7 @@ export function OrganizedAdminDashboard() {
             </TabsList>
 
             <TabsContent value="api-config">
-              <APIManagementDashboard />
+              <ConsolidatedOpenAIConfig />
             </TabsContent>
 
             <TabsContent value="environment">
