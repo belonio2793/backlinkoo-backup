@@ -73,7 +73,7 @@ export async function testOpenAIKey(apiKey: string) {
 }
 
 export async function testAllKeys() {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  const apiKey = import.meta.env.OPENAI_API_KEY;
 
   if (!apiKey || apiKey === 'your-openai-api-key-here') {
     console.log('🚨 No OpenAI API key configured');
