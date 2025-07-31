@@ -228,9 +228,7 @@ Focus on creating valuable, informative content with proper HTML structure using
 
         // If API key is invalid, enable fallback mode
         if (response.status === 401) {
-          console.warn('⚠️ OpenAI API key invalid - switching to fallback mode');
-          localStorage.setItem('openai_fallback_mode', 'true');
-          return this.generateFallbackContent(params);
+          throw new Error('OpenAI API key is invalid');
         }
 
         throw new Error(errorData.error?.message || `API Error: ${response.status}`);
