@@ -323,11 +323,10 @@ const Index = () => {
           {/* Header */}
           <div className="text-center space-y-4 mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-              Create Blog Posts with Backlinks
+              Create a Backlink For Free
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Generate high-quality, SEO-optimized blog posts with natural backlinks.
-              Your post will be published immediately and can be claimed within 24 hours.
+              a free permanent natural backlink.
             </p>
           </div>
 
