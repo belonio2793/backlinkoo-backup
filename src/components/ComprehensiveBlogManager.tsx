@@ -267,16 +267,33 @@ export function ComprehensiveBlogManager() {
 
     setClaiming(post.id);
     try {
-      const result = await BlogClaimService.claimBlogPost(post.slug, user.id);
-      
+      // Check if user can claim more posts
+      const { canClaim, reason } = await BlogClaimService.canUserClaimMore(user);
+      if (!canClaim) {
+        toast({
+          title: "Cannot Claim Post",
+          description: reason,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Use enhanced claim method that works with both tables
+      const result = await BlogClaimService.claimBlogPostEnhanced(post.slug, user.id);
+
       if (result.success) {
-        setPosts(posts.map(p => 
-          p.id === post.id 
-            ? { ...p, status: 'claimed', user_id: user.id }
+        // Update the post in the local state
+        setPosts(posts.map(p =>
+          p.id === post.id
+            ? { ...p, status: 'claimed', user_id: user.id, expires_at: null }
             : p
         ));
+
+        // Refresh the data to get updated statistics
+        await loadBlogPosts();
+
         toast({
-          title: "Post Claimed!",
+          title: "Post Claimed! 🎉",
           description: result.message,
         });
       } else {
