@@ -95,8 +95,14 @@ Email System Manager`
   };
 
   const loadFailureLog = () => {
-    const failures = ResendEmailService.getFailureLog();
-    setFailureLog(failures);
+    try {
+      const failures = ResendEmailService.getFailureLog();
+      // Ensure failures is an array
+      setFailureLog(Array.isArray(failures) ? failures : []);
+    } catch (error) {
+      console.error('Failed to load failure log:', error);
+      setFailureLog([]);
+    }
   };
 
   const runEmailTest = async () => {
