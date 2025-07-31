@@ -59,6 +59,8 @@ export function ConsolidatedOpenAIConfig() {
   const [editingKey, setEditingKey] = useState(false);
   const [tempApiKey, setTempApiKey] = useState('');
   const [activeTab, setActiveTab] = useState('status');
+  const [isSettingUp, setIsSettingUp] = useState(false);
+  const [tableExists, setTableExists] = useState(false);
 
   useEffect(() => {
     loadCurrentStatus();
