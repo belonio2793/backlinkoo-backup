@@ -325,6 +325,41 @@ export function ConsolidatedOpenAIConfig() {
           </div>
         )}
 
+        {/* Update API Key Button - Show if table exists but maybe old key */}
+        {tableExists && !status.connected && (
+          <div className="mb-4">
+            <Alert className="border-orange-200 bg-orange-50">
+              <RefreshCw className="h-4 w-4 text-orange-600" />
+              <AlertDescription className="text-orange-800">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <strong>API Key Sync:</strong> Update OpenAI API key across all services.
+                    <br />
+                    This will sync the latest API key to the database, global services, and test connectivity.
+                  </div>
+                  <Button
+                    onClick={handleUpdateAPIKey}
+                    disabled={isUpdating}
+                    className="ml-4 bg-orange-600 hover:bg-orange-700"
+                  >
+                    {isUpdating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Sync API Key
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="status">Status & Health</TabsTrigger>
