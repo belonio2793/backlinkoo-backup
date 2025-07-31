@@ -21,8 +21,6 @@ import { BlogPostClaimsManager } from "@/components/admin/BlogPostClaimsManager"
 import { EnvironmentVariablesManager } from "@/components/admin/EnvironmentVariablesManager";
 import { NetlifyEnvironmentManager } from "@/components/admin/NetlifyEnvironmentManager";
 import { UnifiedOpenAIConfig } from "@/components/admin/UnifiedOpenAIConfig";
-import { ForceAPIKeyUpdate } from "@/components/admin/ForceAPIKeyUpdate";
-import { ApiKeyStatusFix } from "@/components/admin/ApiKeyStatusFix";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 
 // Testing Tools
