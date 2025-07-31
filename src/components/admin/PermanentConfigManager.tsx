@@ -419,9 +419,9 @@ export function PermanentConfigManager() {
                   </div>
 
                   <div className="text-sm text-gray-600">
-                    <div>API Key: {showKeys[config.id] ? config.apiKey : '***' + config.apiKey.slice(-4)}</div>
-                    <div>Last Tested: {new Date(config.lastTested).toLocaleString()}</div>
-                    <div>Updated: {new Date(config.updatedAt).toLocaleString()}</div>
+                    <div key={`api-key-${config.id}`}>API Key: {showKeys[config.id] ? config.apiKey : '***' + config.apiKey.slice(-4)}</div>
+                    <div key={`last-tested-${config.id}`}>Last Tested: {new Date(config.lastTested).toLocaleString()}</div>
+                    <div key={`updated-${config.id}`}>Updated: {new Date(config.updatedAt).toLocaleString()}</div>
                   </div>
 
                   {config.metadata && (
