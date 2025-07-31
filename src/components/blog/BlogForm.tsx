@@ -131,6 +131,20 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
         </div>
 
         <CardContent className="relative z-10 p-8 space-y-8">
+          {/* Beautiful integrated headline */}
+          <div className="text-center mb-8">
+            <div className="relative inline-block">
+              <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 leading-tight tracking-tight">
+                Create a Free Permanent Natural Backlink
+              </h2>
+              {/* Decorative gradient lines */}
+              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-20 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-70"></div>
+              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-14 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-50"></div>
+            </div>
+            <p className="mt-4 text-lg text-gray-600 font-light max-w-2xl mx-auto">
+              Generate high-quality, AI-powered blog posts with natural backlinks in minutes
+            </p>
+          </div>
           {/* Top row: Keyword and Anchor Text side by side */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Keyword Field */}
@@ -206,7 +220,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             </div>
             <p className="text-xs text-gray-500 flex items-center gap-1">
               <Link className="h-3 w-3 text-green-500" />
-              The destination URL where the anchor text will link to. Protocol (https://) will be added automatically if missing.
+              The destination URL where the anchor text will link to.
             </p>
           </div>
 
