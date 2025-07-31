@@ -406,7 +406,7 @@ export class SupabaseConfigSync {
    */
   private async syncToGlobalServices(config: DatabaseConfig): Promise<void> {
     try {
-      if (config.key === 'VITE_OPENAI_API_KEY' && config.value.startsWith('sk-')) {
+      if (config.key === 'OPENAI_API_KEY' && config.value.startsWith('sk-')) {
         await adminGlobalSync.saveAdminConfig(config.key, config.value);
         console.log(`🔄 Synced ${config.key} to global OpenAI service`);
       }
