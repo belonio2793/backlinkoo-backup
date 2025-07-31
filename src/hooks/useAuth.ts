@@ -13,16 +13,21 @@ export function useAuth(): AuthState {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     // Get initial session
     const getInitialSession = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
+        if (isMounted) {
+          setUser(user);
+          setIsLoading(false);
+        }
       } catch (error) {
-        console.error('Error getting initial session:', error);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setUser(null);
+          setIsLoading(false);
+        }
       }
     };
 
@@ -31,12 +36,15 @@ export function useAuth(): AuthState {
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        setUser(session?.user || null);
-        setIsLoading(false);
+        if (isMounted) {
+          setUser(session?.user || null);
+          setIsLoading(false);
+        }
       }
     );
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
