@@ -498,9 +498,9 @@ Email System Manager`
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {failureLog.length > 0 ? (
+              {(failureLog && failureLog.length > 0) ? (
                 <div className="space-y-2">
-                  {failureLog.map((failure, index) => (
+                  {(failureLog || []).map((failure, index) => (
                     <div key={index} className="flex items-center gap-3 p-2 bg-red-50 rounded-lg">
                       <AlertTriangle className="h-4 w-4 text-red-600" />
                       <div className="flex-1">
