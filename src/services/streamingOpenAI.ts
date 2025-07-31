@@ -1,6 +1,9 @@
 /**
  * Streaming OpenAI Service - Real-time generation with progress updates
+ * Enhanced with Supabase edge functions and prompt display
  */
+
+import { enhancedOpenAI } from './enhancedOpenAIService';
 
 export interface StreamingProgress {
   stage: 'preparing' | 'connecting' | 'generating' | 'formatting' | 'publishing' | 'complete' | 'error';
@@ -9,6 +12,15 @@ export interface StreamingProgress {
   details?: string;
   wordCount?: number;
   currentContent?: string;
+  selectedPrompt?: string;
+  promptIndex?: number;
+  userInputs?: {
+    keyword: string;
+    anchorText: string;
+    url: string;
+  };
+  attempts?: number;
+  fallbackUsed?: boolean;
   timestamp: Date;
 }
 
