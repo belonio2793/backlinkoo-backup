@@ -82,12 +82,33 @@ export class OpenAIService {
   }
 
   /**
-   * Test OpenAI connection via Netlify function
+   * Test OpenAI connection via Netlify function or direct API
    */
   async testConnection(): Promise<boolean> {
     try {
-      console.log('🔍 Testing OpenAI connection via Netlify function...');
+      console.log('🔍 Testing OpenAI connection...');
 
+      // Check for temporary key first - test directly
+      const tempKey = localStorage.getItem('temp_openai_key');
+      if (tempKey && tempKey.startsWith('sk-')) {
+        try {
+          const response = await fetch('https://api.openai.com/v1/models', {
+            headers: {
+              'Authorization': `Bearer ${tempKey}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            console.log('✅ OpenAI connection test successful (direct API)');
+            return true;
+          }
+        } catch (error) {
+          console.warn('Direct API test failed, trying Netlify function...', error);
+        }
+      }
+
+      // Fallback to Netlify function
       const response = await fetch(`${this.baseUrl}/check-ai-provider`, {
         method: 'POST',
         headers: {
@@ -104,7 +125,7 @@ export class OpenAIService {
       }
 
       const data = await response.json();
-      console.log('✅ OpenAI connection test successful');
+      console.log('✅ OpenAI connection test successful (Netlify function)');
       return data.success || false;
 
     } catch (error) {
