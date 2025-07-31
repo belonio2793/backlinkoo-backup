@@ -114,58 +114,87 @@ export function ServiceConnectionStatus() {
 
   const checkOpenAI = async (): Promise<void> => {
     const startTime = Date.now();
-    const openAIKey = import.meta.env.OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY;
-
-    if (!openAIKey || !openAIKey.startsWith('sk-')) {
-      const responseTime = Date.now() - startTime;
-      updateServiceStatus('OpenAI API', {
-        status: 'not_configured',
-        message: 'OpenAI API key not configured',
-        responseTime
-      });
-      return;
-    }
 
     try {
-      const response = await fetch('https://api.openai.com/v1/models', {
-        headers: {
-          'Authorization': `Bearer ${openAIKey}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
+      // Use TypeScript OpenAI status function (ChatGPT-style approach)
+      const result = await safeNetlifyFetch('openai-status');
       const responseTime = Date.now() - startTime;
 
-      if (response.ok) {
-        const data = await response.json();
-        updateServiceStatus('OpenAI API', {
-          status: 'connected',
-          message: `OpenAI API connected - ${data.data?.length || 0} models available`,
-          responseTime,
-          details: {
-            modelsAvailable: data.data?.length || 0,
-            keyPreview: openAIKey.substring(0, 12) + '...',
-            endpoint: 'https://api.openai.com/v1/models'
-          }
-        });
+      if (result.success && result.data) {
+        const { configured, status, message, modelCount, keyPreview } = result.data;
+
+        if (status === 'connected') {
+          updateServiceStatus('OpenAI API', {
+            status: 'connected',
+            message: message || 'OpenAI API connected',
+            responseTime,
+            details: {
+              configured: '✅ Yes',
+              modelCount: modelCount || 'Unknown',
+              keyPreview: keyPreview || 'Hidden',
+              method: 'Direct API Test',
+              environment: 'Production'
+            }
+          });
+        } else if (status === 'error') {
+          updateServiceStatus('OpenAI API', {
+            status: 'error',
+            message: message || 'OpenAI API error',
+            responseTime,
+            details: {
+              configured: configured ? '✅ Yes' : '❌ No',
+              error: result.data.error || 'API call failed',
+              method: 'Direct API Test'
+            }
+          });
+        } else {
+          updateServiceStatus('OpenAI API', {
+            status: 'not_configured',
+            message: message || 'OpenAI API key not configured',
+            responseTime,
+            details: {
+              configured: '❌ No',
+              method: 'Direct API Test'
+            }
+          });
+        }
       } else {
-        const errorData = await response.text().catch(() => '');
-        updateServiceStatus('OpenAI API', {
-          status: 'error',
-          message: `OpenAI API error: ${response.status} ${response.statusText}`,
-          responseTime,
-          details: {
-            statusCode: response.status,
-            error: errorData
-          }
-        });
+        // Fallback to old method if new function fails
+        const fallbackResult = await safeNetlifyFetch('api-status');
+        const fallbackResponseTime = Date.now() - startTime;
+
+        if (fallbackResult.success && fallbackResult.data?.providers?.OpenAI?.configured) {
+          updateServiceStatus('OpenAI API', {
+            status: 'connected',
+            message: 'OpenAI API configured (via fallback check)',
+            responseTime: fallbackResponseTime,
+            details: {
+              method: 'Fallback Check',
+              configured: '✅ Yes'
+            }
+          });
+        } else {
+          updateServiceStatus('OpenAI API', {
+            status: 'error',
+            message: 'Unable to verify OpenAI API status',
+            responseTime: fallbackResponseTime,
+            details: {
+              error: result.error || 'Status function unavailable',
+              method: 'Failed Check'
+            }
+          });
+        }
       }
     } catch (error) {
       const responseTime = Date.now() - startTime;
       updateServiceStatus('OpenAI API', {
         status: 'error',
-        message: `OpenAI connection failed: ${error instanceof Error ? error.message : 'Network error'}`,
-        responseTime
+        message: `OpenAI status check failed: ${error instanceof Error ? error.message : 'Network error'}`,
+        responseTime,
+        details: {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          method: 'Exception'
+        }
       });
     }
   };
@@ -212,28 +241,63 @@ export function ServiceConnectionStatus() {
 
   const checkResend = async (): Promise<void> => {
     const startTime = Date.now();
-    const resendKey = SecureConfig.RESEND_API_KEY || import.meta.env.RESEND_API_KEY;
+
+    // Check if we can access the configured Resend key (either from SecureConfig or production)
+    const resendKey = SecureConfig.RESEND_API_KEY;
     const responseTime = Date.now() - startTime;
 
-    if (!resendKey || !resendKey.startsWith('re_')) {
+    if (resendKey && resendKey.startsWith('re_')) {
+      // We have a valid Resend key in SecureConfig (production fallback)
       updateServiceStatus('Resend Email', {
-        status: 'not_configured',
-        message: 'Resend API key not configured',
-        responseTime
+        status: 'connected',
+        message: 'Resend API key configured in production',
+        responseTime,
+        details: {
+          keyPresent: true,
+          keyPreview: resendKey.substring(0, 6) + '...',
+          source: 'production-config',
+          environment: 'production'
+        }
       });
-      return;
-    }
+    } else {
+      // Check if we can verify via Netlify functions
+      try {
+        const result = await safeNetlifyFetch('send-email', {
+          method: 'POST',
+          body: JSON.stringify({
+            test: true,
+            to: 'test@example.com',
+            subject: 'Test',
+            html: 'Test'
+          })
+        });
 
-    updateServiceStatus('Resend Email', {
-      status: 'connected',
-      message: 'Resend API key configured',
-      responseTime,
-      details: {
-        keyPresent: true,
-        keyPreview: resendKey.substring(0, 6) + '...',
-        testStatus: 'configured'
+        if (result.success) {
+          updateServiceStatus('Resend Email', {
+            status: 'connected',
+            message: 'Resend email service available via Netlify functions',
+            responseTime: Date.now() - startTime,
+            details: {
+              available: true,
+              source: 'netlify-functions',
+              environment: 'production'
+            }
+          });
+        } else {
+          updateServiceStatus('Resend Email', {
+            status: 'not_configured',
+            message: 'Resend API key not configured in production',
+            responseTime: Date.now() - startTime
+          });
+        }
+      } catch (error) {
+        updateServiceStatus('Resend Email', {
+          status: 'not_configured',
+          message: 'Resend API key not configured',
+          responseTime: Date.now() - startTime
+        });
       }
-    });
+    }
   };
 
   const runConnectionTests = async () => {
