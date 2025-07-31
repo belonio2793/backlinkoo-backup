@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { blogService, type BlogPost } from '@/services/blogService';
 import { useAuth } from '@/hooks/useAuth';
+import { BlogClaimService } from '@/services/blogClaimService';
 import { supabase } from '@/integrations/supabase/client';
 import { Footer } from '@/components/Footer';
 
@@ -30,7 +31,8 @@ import {
   Star,
   CheckCircle2,
   Globe,
-  Infinity
+  Infinity,
+  Loader2
 } from 'lucide-react';
 
 export function Blog() {
@@ -471,6 +473,63 @@ export function Blog() {
 
 // Blog Post Card Component
 function BlogPostCard({ post, navigate, formatDate }: any) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [claiming, setClaiming] = useState(false);
+
+  const handleClaimPost = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!user) {
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in to claim blog posts.",
+        variant: "destructive"
+      });
+      navigate('/auth');
+      return;
+    }
+
+    if (!post.is_trial_post || post.user_id) {
+      return;
+    }
+
+    setClaiming(true);
+
+    try {
+      const result = await BlogClaimService.claimBlogPost(post.slug, user.id);
+
+      if (result.success) {
+        toast({
+          title: "Post Claimed!",
+          description: result.message,
+        });
+
+        // Refresh the page to show updated status
+        window.location.reload();
+
+      } else {
+        toast({
+          title: "Claim Failed",
+          description: result.message,
+          variant: "destructive"
+        });
+      }
+
+    } catch (error) {
+      console.error('Failed to claim post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to claim post. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setClaiming(false);
+    }
+  };
+
+  const canClaim = post.is_trial_post && !post.user_id && (!post.expires_at || new Date() <= new Date(post.expires_at));
+  const isOwnedByUser = post.user_id === user?.id;
   return (
     <Card 
       className="group hover:shadow-2xl transition-all duration-300 cursor-pointer border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:bg-white transform hover:-translate-y-2"
@@ -551,11 +610,40 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
           </div>
         </div>
 
+        {/* Claim Button */}
+        {canClaim && (
+          <div className="pt-3 border-t border-gray-100">
+            <Button
+              onClick={handleClaimPost}
+              disabled={claiming}
+              size="sm"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            >
+              {claiming ? (
+                <>
+                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                  Claiming...
+                </>
+              ) : (
+                <>
+                  <Star className="mr-2 h-3 w-3" />
+                  Claim This Post
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+
         {/* Action Footer */}
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <User className="h-4 w-4" />
             <span>{post.author_name || 'Backlink ∞'}</span>
+            {isOwnedByUser && (
+              <Badge className="bg-green-50 text-green-700 border-green-200 text-xs ml-2">
+                Yours
+              </Badge>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Button

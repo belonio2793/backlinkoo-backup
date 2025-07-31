@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Import existing components
 import { SecurityDashboard } from "@/components/SecurityDashboard";
@@ -27,7 +28,7 @@ import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { SystemStatusCheck } from "@/components/SystemStatusCheck";
 
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
-import { APIManagementDashboard } from "@/components/admin/APIManagementDashboard";
+import { UnifiedOpenAIConfig } from "@/components/admin/UnifiedOpenAIConfig";
 import { GlobalAPIStatus } from "@/components/GlobalAPIStatus";
 import { ErrorDebugger } from "@/components/ErrorDebugger";
 import { PermanentConfigManager } from "@/components/admin/PermanentConfigManager";
@@ -209,6 +210,26 @@ export function OrganizedAdminDashboard() {
       <div className="space-y-6">
         {activeCategory === "overview" && (
           <div className="space-y-6">
+            {/* Featured: OpenAI Configuration */}
+            <Alert className="border-blue-200 bg-blue-50">
+              <Brain className="h-4 w-4 text-blue-600" />
+              <AlertDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <strong>Quick Access:</strong> Configure your OpenAI API key for all AI features across the application.
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveCategory("system")}
+                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                  >
+                    Configure OpenAI
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -220,7 +241,7 @@ export function OrganizedAdminDashboard() {
                 <ServiceConnectionStatus />
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>System Health Check</CardTitle>
@@ -274,16 +295,24 @@ export function OrganizedAdminDashboard() {
         )}
 
         {activeCategory === "system" && (
-          <Tabs defaultValue="api-config" className="space-y-6">
+          <Tabs defaultValue="openai-config" className="space-y-6">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="api-config">API Management</TabsTrigger>
+              <TabsTrigger value="openai-config">OpenAI API</TabsTrigger>
               <TabsTrigger value="environment">Environment</TabsTrigger>
               <TabsTrigger value="deployment">Deployment</TabsTrigger>
               <TabsTrigger value="database">Database</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="api-config">
-              <APIManagementDashboard />
+            <TabsContent value="openai-config">
+              <div className="space-y-6">
+                <UnifiedOpenAIConfig />
+                <Alert>
+                  <Brain className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Master Configuration:</strong> This OpenAI API key setting controls all AI features across your entire application including blog generation, content creation, and more. Configure it once here and it syncs everywhere.
+                  </AlertDescription>
+                </Alert>
+              </div>
             </TabsContent>
 
             <TabsContent value="environment">

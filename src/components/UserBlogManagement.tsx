@@ -3,46 +3,37 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { blogService, type BlogPost } from '@/services/blogService';
 import { useAuth } from '@/hooks/useAuth';
-import { BlogEditor } from './BlogEditor';
+import { BlogClaimService } from '@/services/blogClaimService';
 import {
   Plus,
-  Edit3,
   Eye,
-  Trash2,
-  Search,
   Calendar,
   Clock,
-  Target,
   TrendingUp,
   FileText,
-  Archive,
-  BarChart3,
-  RefreshCw
+  ExternalLink,
+  Crown,
+  Loader2,
+  RefreshCw,
+  Globe
 } from 'lucide-react';
+
+interface UserClaimStats {
+  claimedCount: number;
+  maxClaims: number;
+  canClaim: boolean;
+}
 
 export function UserBlogManagement() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-  const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
-  const [stats, setStats] = useState({
-    total: 0,
-    published: 0,
-    drafts: 0,
-    totalViews: 0,
-    trialPosts: 0
-  });
-  const [editingPost, setEditingPost] = useState<string | null>(null);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [claimedPosts, setClaimedPosts] = useState<any[]>([]);
+  const [userStats, setUserStats] = useState<UserClaimStats | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (user) {

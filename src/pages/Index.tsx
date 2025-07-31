@@ -25,6 +25,7 @@ import { HomepageBlogGenerator } from "@/components/HomepageBlogGenerator";
 import { ProductionBlogGenerator } from "@/components/ProductionBlogGenerator";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 import { OpenAIGenerator } from "@/components/OpenAIGenerator";
+import { BlogForm } from "@/components/blog/BlogForm";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
@@ -318,15 +319,25 @@ const Index = () => {
           {/* Optional: Advanced Generator Toggle (Hidden by default) */}
 
 
-          {/* Generator Rendering */}
-          <div className="max-w-6xl mx-auto">
-            <OpenAIGenerator
-              variant="homepage"
-              onSuccess={(blogPost) => {
+          {/* Header */}
+          <div className="text-center space-y-4 mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              Create Blog Posts with Backlinks
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Generate high-quality, SEO-optimized blog posts with natural backlinks.
+              Your post will be published immediately and can be claimed within 24 hours.
+            </p>
+          </div>
+
+          {/* Generator */}
+          <div className="max-w-4xl mx-auto">
+            <BlogForm
+              onContentGenerated={(blogPost) => {
                 setUser(user); // Refresh state
                 toast({
                   title: "Success! 🎉",
-                  description: `Your ${blogPost.word_count}-word blog post "${blogPost.title}" is now live! Check it out in the blog section.`,
+                  description: `Your blog post "${blogPost.title}" is now live at ${blogPost.blogUrl}`,
                 });
                 // Navigate to blog section after a short delay to show the new post
                 setTimeout(() => {

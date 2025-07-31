@@ -48,34 +48,34 @@ if (typeof window !== 'undefined') {
     localStorage.setItem('content_cleanup_version', cleanupVersion);
   }
 
-  // Initialize auto-config saver
-  console.log('🚀 Initializing automatic configuration monitoring...');
-  autoConfigSaver.startMonitoring();
+  // Initialize auto-config saver (disabled to prevent fetch errors)
+  // console.log('🚀 Initializing automatic configuration monitoring...');
+  // autoConfigSaver.startMonitoring();
 
   // Load heavy initialization modules asynchronously to improve initial load time
   setTimeout(() => {
-    // Initialize real-time configuration sync
-    import('./utils/initializeConfigSync').then(({ initializeConfigSync }) => {
-      initializeConfigSync().then(result => {
-        if (result.success) {
-          console.log('✅ Real-time configuration sync initialized:', result.message);
-        } else {
-          console.error('❌ Configuration sync initialization failed:', result.message);
-        }
-      });
-    });
+    // Initialize real-time configuration sync (disabled to prevent fetch errors)
+    // import('./utils/initializeConfigSync').then(({ initializeConfigSync }) => {
+    //   initializeConfigSync().then(result => {
+    //     if (result.success) {
+    //       console.log('✅ Real-time configuration sync initialized:', result.message);
+    //     } else {
+    //       console.error('❌ Configuration sync initialization failed:', result.message);
+    //     }
+    //   });
+    // });
 
-    // Initialize production safety system
-    import('./services/productionSafeConfig').then(({ productionSafeConfig }) => {
-      productionSafeConfig.ensureHomepageSafety().then(result => {
-        if (result.safe) {
-          console.log('🛡️ Homepage safety verified - users protected');
-        } else {
-          console.warn('⚠️ Homepage safety issues detected:', result.issues);
-          console.log('🔧 Automatic fallbacks have been enabled to protect users');
-        }
-      });
-    });
+    // Initialize production safety system (disabled to prevent fetch errors)
+    // import('./services/productionSafeConfig').then(({ productionSafeConfig }) => {
+    //   productionSafeConfig.ensureHomepageSafety().then(result => {
+    //     if (result.safe) {
+    //       console.log('🛡️ Homepage safety verified - users protected');
+    //     } else {
+    //       console.warn('⚠️ Homepage safety issues detected:', result.issues);
+    //       console.log('🔧 Automatic fallbacks have been enabled to protect users');
+    //     }
+    //   });
+    // });
   }, 2000); // Delay heavy initialization by 2 seconds
 }
 
