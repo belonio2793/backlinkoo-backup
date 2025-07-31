@@ -348,19 +348,19 @@ export function PermanentConfigManager() {
                     <Database className={`h-4 w-4 text-${autoSaveStatus.success ? 'blue' : 'red'}-600`} />
                     <AlertDescription className={`text-${autoSaveStatus.success ? 'blue' : 'red'}-800`}>
                       {autoSaveStatus.success ? (
-                        <>
+                        <React.Fragment key="auto-save-success">
                           ✅ <strong>Auto-Save Successful!</strong> Configuration saved at{' '}
                           {new Date(autoSaveStatus.timestamp).toLocaleString()}
                           {autoSaveStatus.healthScore && ` with ${autoSaveStatus.healthScore}% health`}
-                        </>
+                        </React.Fragment>
                       ) : (
-                        <>
+                        <React.Fragment key="auto-save-failed">
                           ❌ <strong>Auto-Save Failed:</strong> {autoSaveStatus.error}
                           <br />
                           <Button size="sm" onClick={saveCurrentConfiguration} className="mt-2">
                             Retry Manual Save
                           </Button>
-                        </>
+                        </React.Fragment>
                       )}
                     </AlertDescription>
                   </Alert>
