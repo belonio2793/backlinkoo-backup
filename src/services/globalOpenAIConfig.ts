@@ -14,12 +14,19 @@ export class GlobalOpenAIConfig {
   static getAPIKey(): string {
     // Priority order:
     // 1. Environment variable (production)
-    // 2. Global hardcoded key (fallback)
-    // 3. Temporary localStorage key (development)
-    
+    // 2. Permanent storage (saved configurations)
+    // 3. Global hardcoded key (fallback)
+    // 4. Temporary localStorage key (development)
+
     const envKey = import.meta.env.VITE_OPENAI_API_KEY;
     if (envKey && envKey.startsWith('sk-')) {
       return envKey;
+    }
+
+    // Check permanent storage
+    const permanentKey = this.getPermanentKey();
+    if (permanentKey && permanentKey.startsWith('sk-')) {
+      return permanentKey;
     }
 
     if (GLOBAL_OPENAI_API_KEY && GLOBAL_OPENAI_API_KEY.startsWith('sk-')) {
@@ -33,6 +40,31 @@ export class GlobalOpenAIConfig {
     }
 
     throw new Error('No OpenAI API key configured');
+  }
+
+  /**
+   * Get API key from permanent storage
+   */
+  private static getPermanentKey(): string | null {
+    try {
+      const envBackup = JSON.parse(localStorage.getItem('environment_backup') || '{}');
+      const openaiBackup = envBackup['VITE_OPENAI_API_KEY'];
+
+      if (openaiBackup && openaiBackup.value && openaiBackup.value.startsWith('sk-')) {
+        return openaiBackup.value;
+      }
+
+      // Check permanent configurations
+      const permanentConfigs = JSON.parse(localStorage.getItem('permanent_api_configs') || '[]');
+      const openaiConfig = permanentConfigs.find((config: any) =>
+        config.service === 'OpenAI' && config.isActive && config.apiKey.startsWith('sk-')
+      );
+
+      return openaiConfig ? openaiConfig.apiKey : null;
+    } catch (error) {
+      console.warn('Failed to get permanent key:', error);
+      return null;
+    }
   }
 
   /**
