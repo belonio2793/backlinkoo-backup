@@ -167,8 +167,18 @@ Email System Manager`
       // This would call specific provider methods
       console.log(`Testing ${provider} provider directly...`);
       
-      // For demonstration, we'll use the main service
-      const result = await ResendEmailService.sendEmail(testData);
+      // Try main service first, then direct service as fallback
+      let result;
+      try {
+        if (provider === 'resend' || provider === 'admin') {
+          result = await directEmailService.sendEmail(testData);
+        } else {
+          result = await ResendEmailService.sendEmail(testData);
+        }
+      } catch (error) {
+        console.warn(`${provider} service failed, trying direct fallback:`, error);
+        result = await directEmailService.sendEmail(testData);
+      }
       
       toast({
         title: `${provider.toUpperCase()} Test`,
