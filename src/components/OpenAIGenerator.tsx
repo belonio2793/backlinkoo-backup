@@ -7,8 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { openAIContentGenerator } from '@/services/openAIContentGenerator';
-import { testAllKeys } from '@/utils/testOpenAI';
+import { globalOpenAI } from '@/services/globalOpenAIConfig';
 import {
   Zap,
   CheckCircle2,
