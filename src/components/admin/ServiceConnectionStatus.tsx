@@ -112,6 +112,64 @@ export function ServiceConnectionStatus() {
     }
   };
 
+  const checkOpenAI = async (): Promise<void> => {
+    const startTime = Date.now();
+    const openAIKey = import.meta.env.OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY;
+
+    if (!openAIKey || !openAIKey.startsWith('sk-')) {
+      const responseTime = Date.now() - startTime;
+      updateServiceStatus('OpenAI API', {
+        status: 'not_configured',
+        message: 'OpenAI API key not configured',
+        responseTime
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('https://api.openai.com/v1/models', {
+        headers: {
+          'Authorization': `Bearer ${openAIKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const responseTime = Date.now() - startTime;
+
+      if (response.ok) {
+        const data = await response.json();
+        updateServiceStatus('OpenAI API', {
+          status: 'connected',
+          message: `OpenAI API connected - ${data.data?.length || 0} models available`,
+          responseTime,
+          details: {
+            modelsAvailable: data.data?.length || 0,
+            keyPreview: openAIKey.substring(0, 12) + '...',
+            endpoint: 'https://api.openai.com/v1/models'
+          }
+        });
+      } else {
+        const errorData = await response.text().catch(() => '');
+        updateServiceStatus('OpenAI API', {
+          status: 'error',
+          message: `OpenAI API error: ${response.status} ${response.statusText}`,
+          responseTime,
+          details: {
+            statusCode: response.status,
+            error: errorData
+          }
+        });
+      }
+    } catch (error) {
+      const responseTime = Date.now() - startTime;
+      updateServiceStatus('OpenAI API', {
+        status: 'error',
+        message: `OpenAI connection failed: ${error instanceof Error ? error.message : 'Network error'}`,
+        responseTime
+      });
+    }
+  };
+
   const checkSupabase = async (): Promise<void> => {
     const startTime = Date.now();
     try {
