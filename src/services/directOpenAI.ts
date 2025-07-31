@@ -172,6 +172,8 @@ Please write the complete blog post now:`;
   private static generateSlug(title: string): string {
     const baseSlug = title
       .toLowerCase()
+      // Strip HTML tags first
+      .replace(/<[^>]*>/g, '')
       .replace(/[^a-z0-9\s-]/g, '')
       .trim()
       .replace(/\s+/g, '-')
