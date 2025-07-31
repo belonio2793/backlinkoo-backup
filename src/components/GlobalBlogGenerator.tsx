@@ -22,7 +22,7 @@ import { SlugPreview } from './SlugPreview';
 
 import {
   Globe, Zap, Target, Clock, CheckCircle2, ExternalLink, Sparkles,
-  BarChart3, Link2, Settings, RefreshCw, Eye
+  BarChart3, Link2, Settings, RefreshCw, Eye, Terminal, Code
 } from 'lucide-react';
 
 interface GlobalBlogRequest {
