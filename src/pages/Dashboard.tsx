@@ -39,7 +39,8 @@ import {
   Eye,
   Sparkles,
   Crown,
-  RefreshCw
+  RefreshCw,
+  Home
 } from "lucide-react";
 import { PricingModal } from "@/components/PricingModal";
 import { CampaignForm } from "@/components/CampaignForm";
