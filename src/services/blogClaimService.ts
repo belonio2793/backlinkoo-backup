@@ -39,7 +39,7 @@ export class BlogClaimService {
       // Test database connection first
       try {
         const { error: connectionError } = await supabase
-          .from('blog_posts')
+          .from('published_blog_posts')
           .select('id')
           .limit(1);
 
@@ -58,7 +58,7 @@ export class BlogClaimService {
       }
 
       const { data, error } = await supabase
-        .from('blog_posts')
+        .from('published_blog_posts')
         .select(`
           id, slug, title, excerpt, published_url, target_url,
           created_at, expires_at, seo_score, reading_time, word_count,
@@ -123,7 +123,7 @@ export class BlogClaimService {
   static async getUserClaimedPosts(userId: string): Promise<ClaimablePost[]> {
     try {
       const { data, error } = await supabase
-        .from('blog_posts')
+        .from('published_blog_posts')
         .select(`
           id, slug, title, excerpt, published_url, target_url, 
           created_at, expires_at, seo_score, reading_time, word_count, 
@@ -155,7 +155,7 @@ export class BlogClaimService {
 
       // First check if the post exists and is claimable - try by ID first, then by slug
       let { data: existingPost, error: fetchError } = await supabase
-        .from('blog_posts')
+        .from('published_blog_posts')
         .select('id, title, user_id, is_trial_post, expires_at, slug')
         .eq('id', postId)
         .eq('status', 'published')
@@ -165,7 +165,7 @@ export class BlogClaimService {
       if (fetchError && fetchError.code === 'PGRST116') {
         console.log(`🔄 BlogClaimService: Post not found by ID, trying by slug: ${postId}`);
         const { data: postBySlug, error: slugError } = await supabase
-          .from('blog_posts')
+          .from('published_blog_posts')
           .select('id, title, user_id, is_trial_post, expires_at, slug')
           .eq('slug', postId)
           .eq('status', 'published')
@@ -226,7 +226,7 @@ export class BlogClaimService {
 
       // Claim the post using the actual database ID
       const { data: updatedPost, error: updateError } = await supabase
-        .from('blog_posts')
+        .from('published_blog_posts')
         .update({
           user_id: user.id,
           is_trial_post: false,
@@ -274,7 +274,7 @@ export class BlogClaimService {
     try {
       // First check if the post exists and is owned by the user
       const { data: existingPost, error: fetchError } = await supabase
-        .from('blog_posts')
+        .from('published_blog_posts')
         .select('id, title, user_id, is_trial_post')
         .eq('id', postId)
         .eq('user_id', user.id)
@@ -294,7 +294,7 @@ export class BlogClaimService {
 
       // Unclaim the post
       const { data: updatedPost, error: updateError } = await supabase
-        .from('blog_posts')
+        .from('published_blog_posts')
         .update({
           user_id: null,
           is_trial_post: true,
@@ -335,7 +335,7 @@ export class BlogClaimService {
     try {
       // Get current claimed posts count
       const { data: claimedPosts, error } = await supabase
-        .from('blog_posts')
+        .from('published_blog_posts')
         .select('id')
         .eq('user_id', user.id)
         .eq('status', 'published')
@@ -393,7 +393,7 @@ export class BlogClaimService {
 
       // Check if post already exists by slug
       const { data: existingPost } = await supabase
-        .from('blog_posts')
+        .from('published_blog_posts')
         .select('id, user_id, is_trial_post')
         .eq('slug', localPost.slug)
         .eq('status', 'published')
@@ -434,7 +434,7 @@ export class BlogClaimService {
       };
 
       const { data: insertedPost, error: insertError } = await supabase
-        .from('blog_posts')
+        .from('published_blog_posts')
         .insert([postToInsert])
         .select()
         .single();
@@ -483,7 +483,7 @@ export class BlogClaimService {
   }> {
     try {
       const { data: claimedPosts, error } = await supabase
-        .from('blog_posts')
+        .from('published_blog_posts')
         .select('view_count, seo_score, word_count')
         .eq('user_id', userId)
         .eq('status', 'published')
