@@ -374,7 +374,21 @@ export class BlogClaimService {
    */
   static async claimLocalStoragePost(localPost: any, user: User): Promise<ClaimResult> {
     try {
-      console.log('🔄 BlogClaimService: Creating database entry for localStorage post:', localPost.slug);
+      console.log('🔄 BlogClaimService: Creating database entry for localStorage post:', {
+        slug: localPost?.slug,
+        title: localPost?.title,
+        hasContent: !!localPost?.content,
+        isTrialPost: localPost?.is_trial_post
+      });
+
+      // Validate required fields
+      if (!localPost || !localPost.slug || !localPost.title || !localPost.content) {
+        return {
+          success: false,
+          message: 'Invalid localStorage post data - missing required fields',
+          error: 'Missing slug, title, or content'
+        };
+      }
 
       // Check if post already exists by slug
       const { data: existingPost } = await supabase
