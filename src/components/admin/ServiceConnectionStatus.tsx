@@ -116,75 +116,179 @@ export function ServiceConnectionStatus() {
     const startTime = Date.now();
 
     try {
-      // Use TypeScript OpenAI status function (ChatGPT-style approach)
-      const result = await safeNetlifyFetch('openai-status');
-      const responseTime = Date.now() - startTime;
+      // First, check for API key availability directly
+      const envApiKey = import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.OPENAI_API_KEY;
+      const demoKey = localStorage.getItem('demo_openai_key');
+      const hasRealKey = envApiKey && envApiKey.startsWith('sk-') && envApiKey.length > 20;
+      const hasDemoKey = demoKey && demoKey.includes('demo-fallback');
 
-      if (result.success && result.data) {
-        const { configured, status, message, modelCount, keyPreview } = result.data;
+      if (hasRealKey) {
+        // Try to test the real API key with a lightweight request
+        try {
+          const testResponse = await fetch('https://api.openai.com/v1/models', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${envApiKey}`,
+              'Content-Type': 'application/json'
+            }
+          });
 
-        if (status === 'connected') {
+          const responseTime = Date.now() - startTime;
+
+          if (testResponse.ok) {
+            const data = await testResponse.json();
+            updateServiceStatus('OpenAI API', {
+              status: 'connected',
+              message: 'OpenAI API key verified and working',
+              responseTime,
+              details: {
+                configured: '✅ Yes',
+                keyPreview: envApiKey.substring(0, 15) + '...',
+                modelCount: data.data?.length || 'Available',
+                method: 'Direct API Test',
+                environment: 'Real API Key'
+              }
+            });
+            return;
+          } else if (testResponse.status === 401) {
+            updateServiceStatus('OpenAI API', {
+              status: 'error',
+              message: 'OpenAI API key is invalid or expired',
+              responseTime,
+              details: {
+                configured: '❌ No',
+                error: 'Authentication failed',
+                method: 'Direct API Test'
+              }
+            });
+            return;
+          } else {
+            updateServiceStatus('OpenAI API', {
+              status: 'error',
+              message: `OpenAI API error: ${testResponse.status}`,
+              responseTime,
+              details: {
+                configured: '⚠️ Partial',
+                error: `HTTP ${testResponse.status}`,
+                method: 'Direct API Test'
+              }
+            });
+            return;
+          }
+        } catch (apiError) {
+          console.warn('Direct OpenAI API test failed:', apiError);
+          // Continue to fallback methods
+        }
+      }
+
+      if (hasDemoKey) {
+        const responseTime = Date.now() - startTime;
+        updateServiceStatus('OpenAI API', {
+          status: 'connected',
+          message: 'Demo mode active - template content generation available',
+          responseTime,
+          details: {
+            configured: '🔧 Demo',
+            keyType: 'Demo/Fallback',
+            method: 'Demo Mode Check',
+            environment: 'Development'
+          }
+        });
+        return;
+      }
+
+      // Try Netlify functions as fallback
+      try {
+        const result = await safeNetlifyFetch('openai-status');
+        const responseTime = Date.now() - startTime;
+
+        if (result.success && result.data) {
+          const { configured, status, message, modelCount, keyPreview } = result.data;
+
+          if (status === 'connected') {
+            updateServiceStatus('OpenAI API', {
+              status: 'connected',
+              message: message || 'OpenAI API connected via Netlify',
+              responseTime,
+              details: {
+                configured: '✅ Yes',
+                modelCount: modelCount || 'Unknown',
+                keyPreview: keyPreview || 'Hidden',
+                method: 'Netlify Function',
+                environment: 'Production'
+              }
+            });
+          } else if (status === 'error') {
+            updateServiceStatus('OpenAI API', {
+              status: 'error',
+              message: message || 'OpenAI API error',
+              responseTime,
+              details: {
+                configured: configured ? '✅ Yes' : '❌ No',
+                error: result.data.error || 'API call failed',
+                method: 'Netlify Function'
+              }
+            });
+          } else {
+            updateServiceStatus('OpenAI API', {
+              status: 'not_configured',
+              message: message || 'OpenAI API key not configured',
+              responseTime,
+              details: {
+                configured: '❌ No',
+                method: 'Netlify Function'
+              }
+            });
+          }
+          return;
+        }
+      } catch (netlifyError) {
+        console.warn('Netlify function check failed:', netlifyError);
+      }
+
+      // Final fallback - check environment service
+      try {
+        const { environmentVariablesService } = await import('@/services/environmentVariablesService');
+        const apiKey = await environmentVariablesService.getOpenAIKey();
+        const responseTime = Date.now() - startTime;
+
+        if (apiKey && apiKey.startsWith('sk-')) {
           updateServiceStatus('OpenAI API', {
             status: 'connected',
-            message: message || 'OpenAI API connected',
+            message: 'OpenAI API key found in environment service',
             responseTime,
             details: {
               configured: '✅ Yes',
-              modelCount: modelCount || 'Unknown',
-              keyPreview: keyPreview || 'Hidden',
-              method: 'Direct API Test',
-              environment: 'Production'
-            }
-          });
-        } else if (status === 'error') {
-          updateServiceStatus('OpenAI API', {
-            status: 'error',
-            message: message || 'OpenAI API error',
-            responseTime,
-            details: {
-              configured: configured ? '✅ Yes' : '❌ No',
-              error: result.data.error || 'API call failed',
-              method: 'Direct API Test'
+              keyPreview: apiKey.substring(0, 15) + '...',
+              method: 'Environment Service',
+              environment: 'Local Storage'
             }
           });
         } else {
           updateServiceStatus('OpenAI API', {
             status: 'not_configured',
-            message: message || 'OpenAI API key not configured',
+            message: 'No OpenAI API key configured',
             responseTime,
             details: {
               configured: '❌ No',
-              method: 'Direct API Test'
+              method: 'Environment Service'
             }
           });
         }
-      } else {
-        // Fallback to old method if new function fails
-        const fallbackResult = await safeNetlifyFetch('api-status');
-        const fallbackResponseTime = Date.now() - startTime;
-
-        if (fallbackResult.success && fallbackResult.data?.providers?.OpenAI?.configured) {
-          updateServiceStatus('OpenAI API', {
-            status: 'connected',
-            message: 'OpenAI API configured (via fallback check)',
-            responseTime: fallbackResponseTime,
-            details: {
-              method: 'Fallback Check',
-              configured: '✅ Yes'
-            }
-          });
-        } else {
-          updateServiceStatus('OpenAI API', {
-            status: 'error',
-            message: 'Unable to verify OpenAI API status',
-            responseTime: fallbackResponseTime,
-            details: {
-              error: result.error || 'Status function unavailable',
-              method: 'Failed Check'
-            }
-          });
-        }
+      } catch (envError) {
+        const responseTime = Date.now() - startTime;
+        updateServiceStatus('OpenAI API', {
+          status: 'not_configured',
+          message: 'No OpenAI API key found in any location',
+          responseTime,
+          details: {
+            configured: '❌ No',
+            error: 'No valid API key source found',
+            method: 'All Methods Failed'
+          }
+        });
       }
+
     } catch (error) {
       const responseTime = Date.now() - startTime;
       updateServiceStatus('OpenAI API', {
@@ -193,7 +297,7 @@ export function ServiceConnectionStatus() {
         responseTime,
         details: {
           error: error instanceof Error ? error.message : 'Unknown error',
-          method: 'Exception'
+          method: 'Exception Handler'
         }
       });
     }
