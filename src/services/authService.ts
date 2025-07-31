@@ -35,11 +35,6 @@ export class AuthService {
    */
   static async signUp(signUpData: SignUpData): Promise<AuthResponse> {
     try {
-      console.log('🆕 AuthService: Starting signup for:', signUpData.email);
-
-      // Clean up any existing auth state
-      await this.cleanupAuthState();
-
       const { data, error } = await supabase.auth.signUp({
         email: signUpData.email.trim(),
         password: signUpData.password,
@@ -54,7 +49,6 @@ export class AuthService {
       });
 
       if (error) {
-        console.error('AuthService: Signup error:', error);
         return {
           success: false,
           error: this.formatErrorMessage(error.message)
@@ -62,18 +56,6 @@ export class AuthService {
       }
 
       if (data.user) {
-        console.log('✅ AuthService: User created:', data.user.id);
-
-        // Create user profile in background
-        this.ensureUserProfile(data.user, signUpData.email, signUpData.firstName).catch(err => {
-          console.warn('AuthService: Profile creation failed (non-blocking):', err);
-        });
-
-        // Send confirmation email via our service for better UX
-        this.sendEnhancedConfirmationEmail(signUpData.email).catch(err => {
-          console.warn('AuthService: Enhanced confirmation email failed (non-blocking):', err);
-        });
-
         return {
           success: true,
           user: data.user,
@@ -87,7 +69,6 @@ export class AuthService {
         error: 'No user data received from signup'
       };
     } catch (error: any) {
-      console.error('AuthService: Signup exception:', error);
       return {
         success: false,
         error: this.formatErrorMessage(error.message)
@@ -100,21 +81,12 @@ export class AuthService {
    */
   static async signIn(signInData: SignInData): Promise<AuthResponse> {
     try {
-      console.log('🔐 AuthService: Starting signin for:', signInData.email);
-
-      // Clean up any existing auth state
-      await this.cleanupAuthState();
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email: signInData.email.trim(),
         password: signInData.password
       });
 
       if (error) {
-        console.error('AuthService: Signin error:', {
-          message: error.message,
-          details: error
-        });
         return {
           success: false,
           error: this.formatErrorMessage(error.message)
@@ -124,24 +96,13 @@ export class AuthService {
       if (data.user && data.session) {
         // Check if email is verified
         if (!data.user.email_confirmed_at) {
-          console.warn('AuthService: User email not verified');
-          
-          // Sign out the user since email verification is required
           await supabase.auth.signOut();
-          
           return {
             success: false,
             error: 'Email verification required. Please check your email for a verification link.',
             requiresEmailVerification: true
           };
         }
-
-        console.log('✅ AuthService: Signin successful:', data.user.id);
-
-        // Ensure user profile exists in background
-        this.ensureUserProfile(data.user, signInData.email).catch(err => {
-          console.warn('AuthService: Profile check failed (non-blocking):', err);
-        });
 
         return {
           success: true,
@@ -155,7 +116,6 @@ export class AuthService {
         error: 'No user data received from signin'
       };
     } catch (error: any) {
-      console.error('AuthService: Signin exception:', error);
       return {
         success: false,
         error: this.formatErrorMessage(error.message)
@@ -182,10 +142,7 @@ export class AuthService {
         };
       }
 
-      // Send additional password reset email via our service for better UX
-      this.sendEnhancedPasswordResetEmail(email).catch(err => {
-        console.warn('AuthService: Enhanced password reset email failed (non-blocking):', err);
-      });
+
 
       console.log('✅ AuthService: Password reset email sent');
       return {
@@ -232,10 +189,7 @@ export class AuthService {
         };
       }
 
-      // Send additional confirmation email via our service for better UX
-      this.sendEnhancedConfirmationEmail(email).catch(err => {
-        console.warn('AuthService: Enhanced confirmation email failed (non-blocking):', err);
-      });
+
 
       console.log('✅ AuthService: Confirmation email resent');
       return {
@@ -303,7 +257,7 @@ export class AuthService {
         // Don't fail on signout errors, just warn
       }
 
-      await this.cleanupAuthState();
+
 
       console.log('✅ AuthService: User signed out');
       return {

@@ -8,7 +8,7 @@ import { blogService, type BlogPost } from '@/services/blogService';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Footer } from '@/components/Footer';
-import { PurgeStorageButton } from '@/components/PurgeStorageButton';
+
 import { PricingModal } from '@/components/PricingModal';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -212,12 +212,7 @@ export function Blog() {
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
             </div>
             <div className="flex items-center gap-4">
-              <PurgeStorageButton
-                variant="ghost"
-                size="sm"
-                showIcon={true}
-                className="text-muted-foreground hover:text-foreground"
-              />
+
               {user ? (
                 <>
                   <Button

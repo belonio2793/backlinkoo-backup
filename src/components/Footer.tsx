@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { PurgeStorageButton } from "@/components/PurgeStorageButton";
+
 
 export const Footer = () => {
   return (
@@ -104,13 +104,7 @@ export const Footer = () => {
         <div className="border-t border-gray-200 pt-8">
           <div className="flex flex-col items-center gap-4">
             <div className="flex items-center gap-4">
-              <PurgeStorageButton
-                variant="outline"
-                size="sm"
-                showIcon={true}
-                showText={true}
-                className="text-xs"
-              />
+
             </div>
             <div className="text-center text-gray-600 text-sm">
               Copyright © Backlink ∞ - All rights reserved.

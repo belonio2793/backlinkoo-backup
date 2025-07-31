@@ -17,7 +17,7 @@ import { WordCountProgress } from './WordCountProgress';
 import { contentModerationService } from '@/services/contentModerationService';
 import { adminSyncService } from '@/services/adminSyncService';
 import { useAuth } from '@/hooks/useAuth';
-import { trackBlogGeneration } from '@/hooks/useGuestTracking';
+
 import { SlugPreview } from './SlugPreview';
 
 import {
@@ -99,7 +99,7 @@ export function GlobalBlogGenerator({
   useEffect(() => {
     loadGlobalStats();
     updateRemainingRequests();
-    trackBlogGeneration();
+
   }, []);
 
   const loadGlobalStats = () => {

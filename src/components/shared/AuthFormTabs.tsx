@@ -47,8 +47,6 @@ export function AuthFormTabs({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [retryAttempts, setRetryAttempts] = useState(0);
-  const [timeoutCountdown, setTimeoutCountdown] = useState(0);
-  const [isTestingConnection, setIsTestingConnection] = useState(false);
 
   const { toast } = useToast();
 
@@ -69,44 +67,7 @@ export function AuthFormTabs({
     return { isValid: true, message: "Password is valid" };
   };
 
-  const testConnection = async () => {
-    if (isTestingConnection) return;
 
-    setIsTestingConnection(true);
-    toast({
-      title: "Testing Connection",
-      description: "Checking authentication service connectivity...",
-    });
-
-    try {
-      const { runAuthHealthCheck } = await import('@/utils/authHealthCheck');
-      const healthResult = await runAuthHealthCheck();
-
-      if (healthResult.overallHealth === 'good') {
-        toast({
-          title: "Connection Test Passed",
-          description: "All authentication services are working properly.",
-        });
-      } else {
-        toast({
-          title: "Connection Issues Detected",
-          description: healthResult.recommendations[0] || "Some authentication services may be slow or unavailable.",
-          variant: "destructive"
-        });
-      }
-
-      console.log('🔧 Connection test results:', healthResult);
-    } catch (error) {
-      console.error('Connection test failed:', error);
-      toast({
-        title: "Connection Test Failed",
-        description: "Unable to run connectivity diagnostics.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsTestingConnection(false);
-    }
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,160 +95,15 @@ export function AuthFormTabs({
 
     setIsLoading(true);
 
-    // Show loading notification
-    toast({
-      title: "Signing you in...",
-      description: "Please wait while we verify your credentials.",
-    });
 
-    // Start countdown timer (reduced for better UX)
-    setTimeoutCountdown(35); // Increased to account for longer timeouts
-    const countdownInterval = setInterval(() => {
-      setTimeoutCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(countdownInterval);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
 
     try {
-      // Test connection first (non-blocking)
-      try {
-        console.log('🔗 Testing connection...');
-        const { supabase } = await import('@/integrations/supabase/client');
-        const connectionTest = await Promise.race([
-          supabase.auth.getSession(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Connection test timeout')), 8000)) // Increased timeout
-        ]);
-        console.log('✅ Connection test successful');
-      } catch (connectionError: any) {
-        console.warn('⚠️ Connection test failed, but continuing with login attempt:', connectionError.message);
-        // Don't throw error here - let the actual login attempt handle connection issues
-        // The connection test is just informative, not a hard requirement
-      }
+      const result = await AuthService.signIn({
+        email: loginEmail,
+        password: loginPassword,
+      });
 
-      // Try multiple authentication methods with shorter timeouts
-      let result;
-      let authError;
-
-      // Method 1: Quick AuthService attempt (15 seconds)
-      try {
-        console.log('🔐 Attempting quick AuthService login...');
-        const quickSignInPromise = AuthService.signIn({
-          email: loginEmail,
-          password: loginPassword,
-        });
-
-        const quickTimeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Quick auth timeout')), 15000)
-        );
-
-        result = await Promise.race([quickSignInPromise, quickTimeoutPromise]) as any;
-        console.log('✅ Quick auth successful');
-      } catch (quickError: any) {
-        console.warn('⚠️ Quick auth failed, trying direct Supabase...', {
-          message: quickError.message,
-          code: quickError.code,
-          name: quickError.name
-        });
-        authError = quickError;
-
-        // Method 2: Direct Supabase authentication (fallback)
-        try {
-          console.log('🔐 Attempting direct Supabase login...');
-          const { supabase } = await import('@/integrations/supabase/client');
-
-          const directAuthPromise = supabase.auth.signInWithPassword({
-            email: loginEmail.trim(),
-            password: loginPassword
-          });
-
-          const directTimeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Direct auth timeout')), 20000) // Increased to 20 seconds
-          );
-
-          const directResult = await Promise.race([directAuthPromise, directTimeoutPromise]) as any;
-
-          if (directResult.error) {
-            throw new Error(directResult.error.message);
-          }
-
-          if (directResult.data?.user) {
-            // Check email verification
-            if (!directResult.data.user.email_confirmed_at) {
-              throw new Error('Email verification required. Please check your email for a verification link.');
-            }
-
-            result = {
-              success: true,
-              user: directResult.data.user,
-              session: directResult.data.session
-            };
-            console.log('✅ Direct Supabase auth successful');
-          } else {
-            throw new Error('No user data received');
-          }
-        } catch (directError: any) {
-          console.error('❌ Direct Supabase auth failed:', {
-            message: directError.message,
-            code: directError.code,
-            status: directError.status,
-            name: directError.name,
-            authError: authError?.message
-          });
-
-          // Provide specific error messages based on the error type
-          if (directError.message.includes('timeout') && authError?.message?.includes('timeout')) {
-            throw new Error('Connection timeout. Please check your internet connection and try again later.');
-          } else if (directError.message.includes('Invalid login credentials')) {
-            throw new Error('Invalid email or password. Please check your credentials.');
-          } else if (directError.message.includes('Email verification required')) {
-            throw new Error('Email verification required. Please check your email for a verification link.');
-          } else if (directError.message.includes('timeout')) {
-            // Method 3: Last resort - simple auth without timeout racing
-            try {
-              console.log('🔐 Attempting final auth without timeout racing...');
-              const { supabase } = await import('@/integrations/supabase/client');
-
-              const finalResult = await supabase.auth.signInWithPassword({
-                email: loginEmail.trim(),
-                password: loginPassword
-              });
-
-              if (finalResult.error) {
-                throw new Error(finalResult.error.message);
-              }
-
-              if (finalResult.data?.user) {
-                if (!finalResult.data.user.email_confirmed_at) {
-                  throw new Error('Email verification required. Please check your email for a verification link.');
-                }
-
-                result = {
-                  success: true,
-                  user: finalResult.data.user,
-                  session: finalResult.data.session
-                };
-                console.log('✅ Final auth successful');
-              } else {
-                throw new Error('No user data received');
-              }
-            } catch (finalError: any) {
-              console.error('❌ Final auth also failed:', finalError.message);
-              throw new Error('Authentication is taking longer than expected. Please try again.');
-            }
-          } else {
-            // Use the more specific error message
-            throw new Error(directError.message || 'Authentication failed. Please try again.');
-          }
-        }
-      }
-
-      // Clear countdown on success
       clearInterval(countdownInterval);
-      setTimeoutCountdown(0);
 
       if (result.success && result.user) {
         toast({

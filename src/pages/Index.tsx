@@ -31,20 +31,20 @@ import type { User } from '@supabase/supabase-js';
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/services/authService";
-import { PurgeStorageButton } from "@/components/PurgeStorageButton";
+
 import { LoginModal } from "@/components/LoginModal";
 import { InlineAuthForm } from "@/components/InlineAuthForm";
 import { TrialConversionBanner } from "@/components/TrialConversionBanner";
 import { QuickTrialUpgrade } from "@/components/QuickTrialUpgrade";
 import { TrialConversionService } from "@/services/trialConversionService";
 import { GuestSessionReminder } from "@/components/GuestSessionReminder";
-import { useGuestTracking } from "@/hooks/useGuestTracking";
+
 
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { trackInteraction, trackPageView, shouldShowConversionPrompt } = useGuestTracking();
+
   const [pricingModalOpen, setPricingModalOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -64,48 +64,18 @@ const Index = () => {
       setShowTrialUpgrade(true);
       setShowInlineAuth(true);
     }
-
-    // Track homepage visit
-    trackPageView('homepage');
-  }, [trackPageView]);
+  }, []);
 
   // Check for authenticated user on component mount
   useEffect(() => {
     // Get initial session with faster timeout
     const getInitialSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        console.log('Index page - Initial session check:', { session: !!session, user: !!session?.user, error });
-
-        if (error || !session || !session.user) {
-          console.log('Index page - No valid session, clearing user state');
-          setUser(null);
-          setAuthChecked(true);
-          return;
-        }
-
-        // Quick validation - if session exists, trust it initially
-        console.log('Index page - Valid user session found');
-        setUser(session.user);
-        setAuthChecked(true);
-
-        // Async validation in background - don't block UI
-        setTimeout(async () => {
-          try {
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
-            if (userError || !user) {
-              console.log('Index page - Background validation failed, clearing auth state');
-              await supabase.auth.signOut({ scope: 'global' });
-              setUser(null);
-            }
-          } catch (err) {
-            console.warn('Background auth validation failed:', err);
-          }
-        }, 100);
-
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
       } catch (error) {
-        console.error('Error in getSession:', error);
         setUser(null);
+      } finally {
         setAuthChecked(true);
       }
     };
@@ -227,8 +197,7 @@ const Index = () => {
   ];
 
   const handleGetStarted = (planId: 'starter_100' | 'starter_200' | 'starter_300' | 'custom') => {
-    // Track interaction
-    trackInteraction(`get_started_${planId}`);
+
 
     if (planId === 'custom') {
       setIsCustomPackage(true);
@@ -279,12 +248,7 @@ const Index = () => {
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
             </div>
             <div className="flex items-center gap-4">
-              <PurgeStorageButton
-                variant="ghost"
-                size="sm"
-                showIcon={true}
-                className="text-muted-foreground hover:text-foreground"
-              />
+
               {!authChecked ? (
                 <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
               ) : user ? (
@@ -1076,10 +1040,9 @@ const Index = () => {
       />
 
       {/* Guest Session Reminder - Show for non-authenticated users */}
-      {!user && authChecked && shouldShowConversionPrompt() && (
+      {!user && authChecked && (
         <GuestSessionReminder
           onSignUp={() => {
-            trackInteraction('guest_reminder_signup');
             setLoginModalTab("signup");
             setShowLoginModal(true);
           }}

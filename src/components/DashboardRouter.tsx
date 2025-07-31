@@ -15,8 +15,8 @@ export function DashboardRouter() {
     const checkUserAndTrialPosts = async () => {
       try {
         // Check authentication
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user || null);
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
 
         // Check for trial posts in localStorage
         const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
