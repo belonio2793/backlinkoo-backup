@@ -23,6 +23,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { permanentAPIConfig } from '@/services/permanentAPIConfigService';
 import { globalOpenAI } from '@/services/globalOpenAIConfig';
+import { autoConfigSaver } from '@/services/autoConfigSaver';
 
 export function PermanentConfigManager() {
   const { toast } = useToast();
