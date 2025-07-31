@@ -426,7 +426,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
             <div>
               <div className="text-yellow-400 mb-2">System Status:</div>
               <div>• Status: {debugInfo.loadingStatus}</div>
-              <div>• Online: {debugInfo.connectionOnline ? '✅' : '❌'}</div>
+              <div>• Online: {debugInfo.connectionOnline ? '✅' : '���'}</div>
               <div>• Last Update: {debugInfo.timestamp}</div>
               <div>• User Auth: {debugInfo.userAuthenticated ? '✅' : '❌'}</div>
               <div>• User ID: {debugInfo.userId || 'None'}</div>
@@ -1023,6 +1023,15 @@ const Dashboard = () => {
               <h1 className="text-xl font-semibold hidden sm:block">Backlink</h1>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/')}
+                className="flex items-center gap-1 px-2 sm:px-3 text-muted-foreground hover:text-foreground"
+              >
+                <Home className="h-4 w-4" />
+                <span className="hidden sm:inline">Home</span>
+              </Button>
               {(activeSection === "dashboard" || activeSection === "seo-tools" || activeSection === "trial") && (
                 <>
                   <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
