@@ -253,14 +253,14 @@ Email System Manager`
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {systemHealth ? (
+              {systemHealth && systemHealth.providers ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
                     <Badge className={getStatusColor(systemHealth.status)}>
-                      {systemHealth.status.toUpperCase()}
+                      {(systemHealth.status || 'unknown').toUpperCase()}
                     </Badge>
                     <span className="text-sm text-muted-foreground">
-                      {systemHealth.recentFailures} failures in last hour
+                      {systemHealth.recentFailures || 0} failures in last hour
                     </span>
                   </div>
                   
