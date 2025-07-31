@@ -775,6 +775,11 @@ function BlogPostListItem({ post, navigate, formatDate }: any) {
                 <div className="flex items-center gap-1">
                   <User className="h-4 w-4" />
                   <span>{post.author_name || 'Backlink ∞'}</span>
+                  {isOwnedByUser && (
+                    <Badge className="bg-green-50 text-green-700 border-green-200 text-xs ml-2">
+                      Yours
+                    </Badge>
+                  )}
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
@@ -793,8 +798,30 @@ function BlogPostListItem({ post, navigate, formatDate }: any) {
                   <span>{post.seo_score || 75}/100</span>
                 </div>
               </div>
-              
-              <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+
+              <div className="flex items-center gap-3">
+                {canClaim && (
+                  <Button
+                    onClick={handleClaimPost}
+                    disabled={claiming}
+                    size="sm"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  >
+                    {claiming ? (
+                      <>
+                        <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                        Claiming...
+                      </>
+                    ) : (
+                      <>
+                        <Star className="mr-2 h-3 w-3" />
+                        Claim
+                      </>
+                    )}
+                  </Button>
+                )}
+                <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+              </div>
             </div>
           </div>
         </div>
