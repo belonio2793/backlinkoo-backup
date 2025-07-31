@@ -52,7 +52,11 @@ Email System Manager`
 
   const [isLoading, setIsLoading] = useState(false);
   const [testResults, setTestResults] = useState<ResendEmailResponse | null>(null);
-  const [systemHealth, setSystemHealth] = useState<any>(null);
+  const [systemHealth, setSystemHealth] = useState<any>({
+    status: 'unknown',
+    recentFailures: 0,
+    providers: []
+  });
   const [failureLog, setFailureLog] = useState<any[]>([]);
   const [adminConfig, setAdminConfig] = useState({
     smtp_host: 'smtp.resend.com',
