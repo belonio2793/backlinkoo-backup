@@ -17,7 +17,7 @@ export function ApiKeyStatusFix() {
 
   const checkCurrentKey = () => {
     // Check various sources for the current key
-    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
+    const envKey = import.meta.env.OPENAI_API_KEY;
     const adminConfig = localStorage.getItem('admin_api_configurations');
     const permanentConfig = localStorage.getItem('permanent_api_configs');
     const envVars = localStorage.getItem('admin_env_vars');
@@ -26,7 +26,7 @@ export function ApiKeyStatusFix() {
 
     if (envKey) {
       detectedKey = envKey;
-      console.log('🔍 Environment key found:', envKey.slice(-4));
+      console.log('🔍 Netlify environment key found:', envKey.slice(-4));
     } else if (adminConfig) {
       try {
         const configs = JSON.parse(adminConfig);
