@@ -145,18 +145,38 @@ export function EnvironmentVariablesManager() {
 
       if (error) {
         const errorMessage = getErrorMessage(error);
-        const solution = getErrorSolution(error);
         console.error('Error loading environment variables:', errorMessage);
-        toast({
-          title: 'Error loading environment variables',
-          description: `${errorMessage}. ${solution}`,
-          variant: 'destructive'
-        });
-        
+
+        // Check if it's a table missing error
+        if (errorMessage.includes('does not exist') || errorMessage.includes('42P01')) {
+          toast({
+            title: 'Database Table Missing',
+            description: 'Admin environment variables table not found. Using local storage fallback. Check Database Status tab.',
+            variant: 'destructive'
+          });
+        } else {
+          toast({
+            title: 'Database Error',
+            description: `${errorMessage}. Using local storage fallback.`,
+            variant: 'destructive'
+          });
+        }
+
         // Fallback to localStorage
         const stored = localStorage.getItem('admin_env_vars');
         if (stored) {
-          setEnvVars(JSON.parse(stored));
+          try {
+            setEnvVars(JSON.parse(stored));
+            toast({
+              title: 'Loaded from Local Storage',
+              description: 'Environment variables loaded from local backup'
+            });
+          } catch (parseError) {
+            console.error('Failed to parse localStorage data:', parseError);
+            setEnvVars([]);
+          }
+        } else {
+          setEnvVars([]);
         }
       } else {
         setEnvVars(data || []);
