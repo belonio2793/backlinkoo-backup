@@ -3,26 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { blogService, type BlogPost } from '@/services/blogService';
 import { useAuth } from '@/hooks/useAuth';
-import { BlogEditor } from './BlogEditor';
+import { BlogClaimService } from '@/services/blogClaimService';
 import {
   Plus,
-  Edit3,
   Eye,
-  Trash2,
-  Search,
   Calendar,
   Clock,
-  Target,
   TrendingUp,
   FileText,
-  Archive,
-  BarChart3,
-  RefreshCw
+  ExternalLink,
+  Crown,
+  Loader2,
+  RefreshCw,
+  Globe
 } from 'lucide-react';
 
 export function UserBlogManagement() {
