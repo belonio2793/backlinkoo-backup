@@ -280,11 +280,12 @@ export function BlogPost() {
         blogPostId: blogPost.id,
         blogPostIdType: typeof blogPost.id,
         blogPostSlug: blogPost.slug,
-        blogPostKeys: Object.keys(blogPost)
+        blogPostKeys: Object.keys(blogPost),
+        isTrialPost: blogPost.is_trial_post
       });
 
-      // Ensure we have a valid string ID - use slug as fallback for localStorage posts
-      const postIdentifier = typeof blogPost.id === 'string' ? blogPost.id : blogPost.slug;
+      // For localStorage posts, use slug as identifier since they might not have a database ID yet
+      const postIdentifier = blogPost.slug;
 
       const claimResult = await BlogClaimService.claimPost(postIdentifier, user);
 
