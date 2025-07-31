@@ -252,12 +252,20 @@ export function NetlifyEnvironmentManager() {
         </Button>
       </div>
 
-      {/* OpenAI API Key Priority Section */}
-      <Card className="bg-blue-50 border-blue-200">
+      {/* OpenAI API Key Connection Status */}
+      <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-blue-800">
-            <Brain className="h-5 w-5" />
-            OpenAI API Key Configuration
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-blue-800">
+              <Brain className="h-5 w-5" />
+              OpenAI API Key Connected
+            </div>
+            {variables.find(v => v.key === 'OPENAI_API_KEY')?.configured && (
+              <Badge className="bg-green-100 text-green-800 border-green-300 text-sm">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Active
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
