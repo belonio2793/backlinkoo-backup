@@ -30,16 +30,16 @@ export function ErrorDebugger() {
     const env = {
       hasSupabaseUrl: !!import.meta.env.VITE_SUPABASE_URL,
       hasSupabaseKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
-      hasOpenAIKey: !!import.meta.env.VITE_OPENAI_API_KEY,
+      hasOpenAIKey: !!import.meta.env.OPENAI_API_KEY,
       supabaseUrlLength: import.meta.env.VITE_SUPABASE_URL?.length || 0,
       supabaseKeyLength: import.meta.env.VITE_SUPABASE_ANON_KEY?.length || 0,
-      openaiKeyLength: import.meta.env.VITE_OPENAI_API_KEY?.length || 0,
+      openaiKeyLength: import.meta.env.OPENAI_API_KEY?.length || 0,
       supabaseUrlPreview: import.meta.env.VITE_SUPABASE_URL ? 
         `${import.meta.env.VITE_SUPABASE_URL.substring(0, 30)}...` : 'Not set',
       supabaseKeyPreview: import.meta.env.VITE_SUPABASE_ANON_KEY ? 
         `${import.meta.env.VITE_SUPABASE_ANON_KEY.substring(0, 20)}...` : 'Not set',
-      openaiKeyPreview: import.meta.env.VITE_OPENAI_API_KEY ? 
-        `${import.meta.env.VITE_OPENAI_API_KEY.substring(0, 20)}...` : 'Not set'
+      openaiKeyPreview: import.meta.env.OPENAI_API_KEY ?
+        `${import.meta.env.OPENAI_API_KEY.substring(0, 20)}...` : 'Not set'
     };
     setEnvVars(env);
   };
