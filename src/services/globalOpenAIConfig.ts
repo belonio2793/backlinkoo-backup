@@ -108,15 +108,27 @@ export class GlobalOpenAIConfig {
    */
   static async testConnection(): Promise<boolean> {
     try {
+      // Skip testing if no API key is configured
+      if (!this.isConfigured()) {
+        console.log('⚠️ OpenAI not configured - skipping connection test');
+        return false;
+      }
+
       const apiKey = this.getAPIKey();
+
+      // Use a timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
       const response = await fetch('https://api.openai.com/v1/models', {
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
-        }
+        },
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
       const isValid = response.ok;
 
       // If test fails, mark key as invalid and enable fallback mode
