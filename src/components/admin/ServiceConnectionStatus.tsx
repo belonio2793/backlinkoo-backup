@@ -251,6 +251,14 @@ export function ServiceConnectionStatus() {
 
       // Run tests in parallel for faster results with individual error handling
       const results = await Promise.allSettled([
+        checkOpenAI().catch(err => {
+          console.warn('OpenAI check failed:', err);
+          updateServiceStatus('OpenAI API', {
+            status: 'error',
+            message: 'OpenAI API test failed',
+            responseTime: 0
+          });
+        }),
         checkNetlifyFunctions().catch(err => {
           console.warn('Netlify functions check failed:', err);
           updateServiceStatus('Netlify Functions', {
