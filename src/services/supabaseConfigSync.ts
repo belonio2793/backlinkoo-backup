@@ -58,29 +58,35 @@ export class SupabaseConfigSync {
     try {
       console.log('🔄 Initializing real-time config sync...');
 
-      // Create or ensure table exists
-      await this.ensureConfigTable();
+      // Check table existence and set mode accordingly
+      const tableExists = await this.checkTableExists();
 
-      // Load initial configurations
-      await this.loadAllConfigurations();
-
-      // Set up real-time subscription
-      this.setupRealtimeSubscription();
+      if (tableExists) {
+        // Load from database and set up real-time subscription
+        await this.loadAllConfigurations();
+        this.setupRealtimeSubscription();
+        console.log('✅ Real-time config sync initialized with database');
+      } else {
+        // Use localStorage mode
+        await this.loadAllConfigurations(); // This will load from localStorage
+        console.log('⚠️ Real-time config sync initialized in localStorage mode (table not found)');
+      }
 
       this.isInitialized = true;
-      console.log('✅ Real-time config sync initialized');
 
     } catch (error) {
       console.error('❌ Failed to initialize real-time sync:', error);
-      // Fall back to periodic sync
-      this.setupPeriodicSync();
+      // Fall back to localStorage-only mode
+      await this.loadFromLocalStorageOnly();
+      this.isInitialized = true;
+      console.log('🔄 Fallback: Using localStorage-only mode');
     }
   }
 
   /**
-   * Ensure the configuration table exists and is properly set up
+   * Check if the configuration table exists
    */
-  private async ensureConfigTable(): Promise<void> {
+  private async checkTableExists(): Promise<boolean> {
     try {
       // Test if table exists by attempting a simple query
       const { error } = await supabase
@@ -89,16 +95,20 @@ export class SupabaseConfigSync {
         .limit(1);
 
       if (error && error.code === '42P01') {
-        console.log('📝 Configuration table missing, creating fallback...');
-        // Table doesn't exist, we'll use localStorage as primary store
-        // and create the table structure in memory
-        throw new Error('Table needs to be created manually in Supabase');
+        console.log('📝 Configuration table not found, will use localStorage mode');
+        return false;
+      }
+
+      if (error) {
+        console.warn('⚠️ Database access error:', error.message);
+        return false;
       }
 
       console.log('✅ Configuration table is accessible');
+      return true;
     } catch (error) {
-      console.warn('⚠️ Database table not accessible, using localStorage mode');
-      throw error;
+      console.warn('⚠️ Database table check failed, using localStorage mode');
+      return false;
     }
   }
 
@@ -125,7 +135,7 @@ export class SupabaseConfigSync {
         }
       )
       .subscribe((status) => {
-        console.log('📡 Real-time subscription status:', status);
+        console.log('��� Real-time subscription status:', status);
       });
   }
 
@@ -199,6 +209,14 @@ export class SupabaseConfigSync {
    */
   public async loadAllConfigurations(): Promise<DatabaseConfig[]> {
     try {
+      // Check if table exists first
+      const tableExists = await this.checkTableExists();
+
+      if (!tableExists) {
+        console.log('📦 Loading from localStorage (table not available)');
+        return this.loadFromLocalStorage();
+      }
+
       const { data, error } = await supabase
         .from('admin_environment_variables')
         .select('*')
@@ -279,6 +297,15 @@ export class SupabaseConfigSync {
         health_score: healthScore,
         updated_at: new Date().toISOString()
       };
+
+      // Check if table exists before attempting to save
+      const tableExists = await this.checkTableExists();
+
+      if (!tableExists) {
+        console.log('📦 Saving to localStorage (table not available)');
+        await this.saveToLocalStorageFallback(configData);
+        return { success: true, error: 'Saved to localStorage (database table not found)' };
+      }
 
       // Save to database
       const { data, error } = await supabase
@@ -530,12 +557,40 @@ export class SupabaseConfigSync {
   }
 
   /**
+   * Load configurations from localStorage only
+   */
+  private async loadFromLocalStorageOnly(): Promise<void> {
+    try {
+      const configs = this.loadFromLocalStorage();
+
+      // Update cache
+      this.configCache.clear();
+      configs.forEach(config => {
+        this.configCache.set(config.key, config);
+      });
+
+      // Sync active API keys to global services
+      await this.syncAllToGlobalServices();
+
+      console.log(`✅ Loaded ${configs.length} configurations from localStorage`);
+    } catch (error) {
+      console.error('Failed to load from localStorage:', error);
+    }
+  }
+
+  /**
    * Set up periodic sync as fallback
    */
   private setupPeriodicSync(): void {
     setInterval(async () => {
       try {
-        await this.loadAllConfigurations();
+        // Check if table exists now
+        const tableExists = await this.checkTableExists();
+        if (tableExists) {
+          await this.loadAllConfigurations();
+        } else {
+          await this.loadFromLocalStorageOnly();
+        }
       } catch (error) {
         console.error('Periodic sync failed:', error);
       }
