@@ -132,12 +132,22 @@ export function APIConfigurationManager() {
     }));
   };
 
-  const updateConfig = (key: string, value: string) => {
-    setConfigs(prev => prev.map(config => 
-      config.key === key 
+  const updateConfig = async (key: string, value: string) => {
+    setConfigs(prev => prev.map(config =>
+      config.key === key
         ? { ...config, value, status: value ? 'configured' : 'unconfigured' }
         : config
     ));
+
+    // Auto-save and sync to global services when value is set
+    if (value && value.length > 10) {
+      try {
+        await adminGlobalSync.saveAdminConfig(key, value);
+        console.log(`✅ Auto-saved and synced ${key} to global services`);
+      } catch (error) {
+        console.warn(`⚠️ Failed to sync ${key}:`, error);
+      }
+    }
   };
 
   const toggleKeyVisibility = (key: string) => {
