@@ -209,7 +209,7 @@ export function PermanentConfigManager() {
               <>
                 {/* Health Score Display */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card className="p-4">
+                  <Card key="overall-health" className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-gray-600">Overall Health</p>
@@ -221,7 +221,7 @@ export function PermanentConfigManager() {
                     </div>
                   </Card>
 
-                  <Card className="p-4">
+                  <Card key="configurations-count" className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-gray-600">Configurations</p>
@@ -231,12 +231,12 @@ export function PermanentConfigManager() {
                     </div>
                   </Card>
 
-                  <Card className="p-4">
+                  <Card key="last-backup" className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-gray-600">Last Backup</p>
                         <p className="text-sm text-gray-700">
-                          {healthSummary.lastBackup 
+                          {healthSummary.lastBackup
                             ? new Date(healthSummary.lastBackup).toLocaleString()
                             : 'Never'
                           }
