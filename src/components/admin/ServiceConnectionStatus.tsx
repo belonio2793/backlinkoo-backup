@@ -227,28 +227,63 @@ export function ServiceConnectionStatus() {
 
   const checkResend = async (): Promise<void> => {
     const startTime = Date.now();
-    const resendKey = SecureConfig.RESEND_API_KEY || import.meta.env.RESEND_API_KEY;
+
+    // Check if we can access the configured Resend key (either from SecureConfig or production)
+    const resendKey = SecureConfig.RESEND_API_KEY;
     const responseTime = Date.now() - startTime;
 
-    if (!resendKey || !resendKey.startsWith('re_')) {
+    if (resendKey && resendKey.startsWith('re_')) {
+      // We have a valid Resend key in SecureConfig (production fallback)
       updateServiceStatus('Resend Email', {
-        status: 'not_configured',
-        message: 'Resend API key not configured',
-        responseTime
+        status: 'connected',
+        message: 'Resend API key configured in production',
+        responseTime,
+        details: {
+          keyPresent: true,
+          keyPreview: resendKey.substring(0, 6) + '...',
+          source: 'production-config',
+          environment: 'production'
+        }
       });
-      return;
-    }
+    } else {
+      // Check if we can verify via Netlify functions
+      try {
+        const result = await safeNetlifyFetch('send-email', {
+          method: 'POST',
+          body: JSON.stringify({
+            test: true,
+            to: 'test@example.com',
+            subject: 'Test',
+            html: 'Test'
+          })
+        });
 
-    updateServiceStatus('Resend Email', {
-      status: 'connected',
-      message: 'Resend API key configured',
-      responseTime,
-      details: {
-        keyPresent: true,
-        keyPreview: resendKey.substring(0, 6) + '...',
-        testStatus: 'configured'
+        if (result.success) {
+          updateServiceStatus('Resend Email', {
+            status: 'connected',
+            message: 'Resend email service available via Netlify functions',
+            responseTime: Date.now() - startTime,
+            details: {
+              available: true,
+              source: 'netlify-functions',
+              environment: 'production'
+            }
+          });
+        } else {
+          updateServiceStatus('Resend Email', {
+            status: 'not_configured',
+            message: 'Resend API key not configured in production',
+            responseTime: Date.now() - startTime
+          });
+        }
+      } catch (error) {
+        updateServiceStatus('Resend Email', {
+          status: 'not_configured',
+          message: 'Resend API key not configured',
+          responseTime: Date.now() - startTime
+        });
       }
-    });
+    }
   };
 
   const runConnectionTests = async () => {
