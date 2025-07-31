@@ -24,42 +24,32 @@ class EnvironmentVariablesService {
    * Get environment variable value by key
    */
   async getVariable(key: string): Promise<string | null> {
-    // Force refresh from database for API keys to get latest from Supabase
-    if (key.includes('API_KEY')) {
-      console.log('🔄 Force refreshing API key from Supabase database...');
-      await this.refreshCache();
-      const dbValue = this.cache.get(key);
-      if (dbValue) {
-        console.log('✅ API key found in Supabase database:', dbValue.substring(0, 15) + '...');
-        return dbValue;
-      }
-    }
-
-    // First check runtime environment variables
+    // Priority: Environment variables (Edge Function Secrets) first
     const envValue = import.meta.env[key];
     if (envValue) {
-      console.log('✅ API key found in environment variables:', envValue.substring(0, 15) + '...');
+      console.log('✅ Environment variable found:', envValue.substring(0, 15) + '...');
       return envValue;
     }
 
-    // Then check cache
-    if (this.cache.has(key) && Date.now() - this.lastFetch < this.CACHE_DURATION) {
+    // Fallback to localStorage cache for backwards compatibility
+    if (this.cache.has(key)) {
       const cached = this.cache.get(key);
       if (cached) {
-        console.log('✅ API key found in cache:', cached.substring(0, 15) + '...');
+        console.log('✅ Variable found in cache:', cached.substring(0, 15) + '...');
         return cached;
       }
     }
 
-    // Fetch from database
-    await this.refreshCache();
-    const dbValue = this.cache.get(key);
-    if (dbValue) {
-      console.log('✅ API key found after refresh:', dbValue.substring(0, 15) + '...');
-    } else {
-      console.log('❌ No API key found in any source');
+    // Load from localStorage if not in memory cache
+    this.loadFromLocalStorage();
+    const localValue = this.cache.get(key);
+    if (localValue) {
+      console.log('✅ Variable found in localStorage:', localValue.substring(0, 15) + '...');
+      return localValue;
     }
-    return dbValue || null;
+
+    console.log('❌ No variable found for key:', key);
+    return null;
   }
 
   /**
