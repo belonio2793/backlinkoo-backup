@@ -60,14 +60,15 @@ export function DirectOpenAITest() {
 
             setResult({
               success: true,
-              message: 'OpenAI API fully operational - ChatGPT-style function working',
+              message: 'OpenAI API fully operational - TypeScript ChatGPT function working',
               details: {
                 statusCheck: '✅ Connected',
                 contentGeneration: '✅ Working',
                 modelCount: modelCount || 'Unknown',
                 keyPreview: keyPreview || 'Hidden',
                 generatedContent: content,
-                method: 'ChatGPT-style Netlify Function'
+                method: 'TypeScript ChatGPT Function',
+                functionType: generateResult.data.function_type || 'typescript'
               },
               responseTime,
               timestamp: new Date()
