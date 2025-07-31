@@ -306,11 +306,57 @@ export function PermanentConfigManager() {
 
                 {/* Success Message for 100% Health */}
                 {healthSummary.overallHealth === 100 && (
-                  <Alert className="border-green-200 bg-green-50">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-800">
-                      🎉 <strong>Perfect Health Score!</strong> All API configurations are working optimally. 
-                      Your settings have been automatically saved and backed up for permanent persistence.
+                  <Alert className="border-green-200 bg-green-50 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-100 to-emerald-100 opacity-50"></div>
+                    <CheckCircle2 className="h-4 w-4 text-green-600 relative z-10" />
+                    <AlertDescription className="text-green-800 relative z-10">
+                      🎉 <strong>PERFECT HEALTH SCORE ACHIEVED!</strong>
+                      <br />
+                      🚀 All API configurations are working optimally at 100% health!
+                      <br />
+                      💾 Your settings have been automatically saved and backed up for permanent persistence.
+                      <br />
+                      🔒 Multiple backup layers ensure your configuration will never be lost.
+                      <div className="mt-3 flex gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700"
+                          onClick={handlePerfectHealth}
+                        >
+                          🎯 Confirm & Save Perfect Config
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={exportConfiguration}
+                        >
+                          📥 Download Backup
+                        </Button>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Auto-Save Status */}
+                {autoSaveStatus && (
+                  <Alert className={`border-${autoSaveStatus.success ? 'blue' : 'red'}-200 bg-${autoSaveStatus.success ? 'blue' : 'red'}-50`}>
+                    <Database className={`h-4 w-4 text-${autoSaveStatus.success ? 'blue' : 'red'}-600`} />
+                    <AlertDescription className={`text-${autoSaveStatus.success ? 'blue' : 'red'}-800`}>
+                      {autoSaveStatus.success ? (
+                        <>
+                          ✅ <strong>Auto-Save Successful!</strong> Configuration saved at{' '}
+                          {new Date(autoSaveStatus.timestamp).toLocaleString()}
+                          {autoSaveStatus.healthScore && ` with ${autoSaveStatus.healthScore}% health`}
+                        </>
+                      ) : (
+                        <>
+                          ❌ <strong>Auto-Save Failed:</strong> {autoSaveStatus.error}
+                          <br />
+                          <Button size="sm" onClick={saveCurrentConfiguration} className="mt-2">
+                            Retry Manual Save
+                          </Button>
+                        </>
+                      )}
                     </AlertDescription>
                   </Alert>
                 )}
