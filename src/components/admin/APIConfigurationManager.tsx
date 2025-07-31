@@ -197,7 +197,8 @@ export function APIConfigurationManager() {
       const responseTime = Date.now() - startTime;
 
       if (error) {
-        return { success: false, message: `Database error: ${error.message}`, responseTime };
+        const errorMessage = error?.message || error?.details || error?.hint || String(error) || 'Unknown database error';
+        return { success: false, message: `Database error: ${errorMessage}`, responseTime };
       } else {
         return { success: true, message: 'Supabase connection successful', responseTime };
       }
