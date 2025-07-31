@@ -292,15 +292,15 @@ export function APIConfigurationManager() {
       };
     }
 
-    setConfigs(prev => prev.map(c => 
-      c.key === config.key 
-        ? { 
-            ...c, 
+    setConfigs(prev => prev.map(c =>
+      c.key === config.key
+        ? {
+            ...c,
             status: result.success ? 'valid' : 'invalid',
             lastTested: new Date(),
             responseTime: result.responseTime,
             errorMessage: result.success ? undefined : result.message
-          } 
+          }
         : c
     ));
 
@@ -308,6 +308,16 @@ export function APIConfigurationManager() {
       ...prev,
       [config.key]: result
     }));
+
+    // If test passed, ensure it's synced to global services
+    if (result.success && config.value) {
+      try {
+        await adminGlobalSync.saveAdminConfig(config.key, config.value);
+        console.log(`✅ Test passed - synced ${config.key} to global services`);
+      } catch (error) {
+        console.warn(`⚠️ Test passed but sync failed for ${config.key}:`, error);
+      }
+    }
   };
 
   const testAllConfigurations = async () => {
