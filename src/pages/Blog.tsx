@@ -215,7 +215,7 @@ export function Blog() {
             <Sparkles className="absolute inset-0 m-auto h-6 w-6 text-blue-600 animate-pulse" />
           </div>
           <div className="space-y-2">
-            <p className="text-xl font-medium text-gray-900">Loading Expert Content</p>
+            <p className="text-xl font-medium text-gray-900">Loading ∞ Content</p>
             <p className="text-gray-600">Fetching the latest high-quality blog posts...</p>
           </div>
         </div>
