@@ -23,9 +23,9 @@ export async function testBlogGeneration() {
 
     // Test with sample data
     const testRequest = {
-      keyword: 'test SEO optimization',
-      anchorText: 'learn more about SEO',
-      targetUrl: 'https://example.com/seo-guide'
+      keyword: 'AI content generation',
+      anchorText: 'advanced AI tools',
+      targetUrl: 'https://example.com/ai-tools'
     };
 
     console.log('📝 Testing with sample data:', testRequest);
