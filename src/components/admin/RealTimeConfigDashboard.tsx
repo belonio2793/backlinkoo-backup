@@ -32,6 +32,7 @@ import {
   Zap
 } from 'lucide-react';
 import { ModernEnvironmentVariablesManager } from './ModernEnvironmentVariablesManager';
+import { TableSetupInstructions } from './TableSetupInstructions';
 import { globalOpenAI } from '@/services/globalOpenAIConfig';
 
 interface ServiceStatus {
@@ -318,8 +319,13 @@ export function RealTimeConfigDashboard() {
         </Card>
       </div>
 
+      {/* Table Setup Instructions */}
+      {error && error.includes('Table needs to be created') && (
+        <TableSetupInstructions />
+      )}
+
       {/* Connection Status */}
-      {error && (
+      {error && !error.includes('Table needs to be created') && (
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription className="text-red-800">
