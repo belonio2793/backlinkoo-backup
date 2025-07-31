@@ -274,5 +274,84 @@ Please write the complete blog post now:`;
     }
   }
 
+  /**
+   * Generate blog post using local development API
+   */
+  private static async generateWithLocalAPI(request: BlogRequest): Promise<BlogResponse> {
+    try {
+      const { LocalDevAPI } = await import('@/services/localDevAPI');
+
+      const result = await LocalDevAPI.generateBlogPost({
+        keyword: request.keyword,
+        anchorText: request.anchorText,
+        targetUrl: request.targetUrl,
+        wordCount: 1000,
+        contentType: 'blog-post',
+        tone: 'professional'
+      });
+
+      if (!result.success || !result.content) {
+        throw new Error(result.error || 'Failed to generate mock content');
+      }
+
+      const content = result.content;
+
+      // Process the generated content
+      const title = this.extractTitle(content, request.keyword);
+      const slug = this.generateSlug(title);
+      const excerpt = this.extractExcerpt(content);
+
+      // Save to blog posts
+      const blogData = {
+        title,
+        content,
+        keywords: [request.keyword],
+        targetUrl: request.targetUrl,
+        anchorText: request.anchorText,
+        wordCount: content.replace(/<[^>]*>/g, '').split(/\s+/).length,
+        readingTime: this.calculateReadingTime(content),
+        seoScore: 85,
+        metaDescription: excerpt,
+        customSlug: slug
+      };
+
+      // Save the blog post
+      const savedPost = await this.saveBlogPostData(blogData);
+      const blogUrl = savedPost.published_url || `/blog/${savedPost.slug}`;
+
+      console.log('✅ Mock blog post generated successfully');
+
+      return {
+        success: true,
+        title,
+        content,
+        slug,
+        excerpt,
+        blogUrl,
+        metadata: savedPost
+      };
+
+    } catch (error) {
+      console.error('❌ Mock blog generation failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Mock generation failed'
+      };
+    }
+  }
+
+  /**
+   * Save blog post data using the blog service
+   */
+  private static async saveBlogPostData(blogData: any) {
+    const { blogService } = await import('@/services/blogService');
+
+    return await blogService.createBlogPost(
+      blogData,
+      null, // no user_id for trial posts
+      true  // is_trial_post = true
+    );
+  }
+
 
 }
