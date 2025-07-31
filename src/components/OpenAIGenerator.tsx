@@ -63,6 +63,29 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
     checkAPIStatus();
   }, []);
 
+  // Function to select and format prompt
+  const selectAndFormatPrompt = () => {
+    const index = Math.floor(Math.random() * promptTemplates.length);
+    const template = promptTemplates[index];
+    const formatted = template
+      .replace('{{keyword}}', keyword.trim())
+      .replace('{{anchor_text}}', anchorText.trim())
+      .replace('{{url}}', targetUrl.trim());
+
+    setPromptIndex(index);
+    setSelectedPrompt(formatted);
+    return { template, formatted, index };
+  };
+
+  // Update prompt display when inputs change
+  useEffect(() => {
+    if (keyword.trim() && anchorText.trim() && targetUrl.trim()) {
+      selectAndFormatPrompt();
+    } else {
+      setSelectedPrompt('');
+    }
+  }, [keyword, anchorText, targetUrl]);
+
   const checkAPIStatus = async () => {
     setIsCheckingAPI(true);
     try {
