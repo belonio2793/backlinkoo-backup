@@ -107,7 +107,7 @@ export function EnvironmentVariablesManager() {
         const initialVars = [
           {
             id: crypto.randomUUID(),
-            key: 'VITE_OPENAI_API_KEY',
+            key: 'OPENAI_API_KEY',
             value: openAIKey,
             description: 'OpenAI API key for AI content generation and backlink creation',
             is_secret: true,
