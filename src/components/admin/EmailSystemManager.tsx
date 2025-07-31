@@ -76,9 +76,21 @@ Email System Manager`
   const loadSystemHealth = async () => {
     try {
       const health = await ResendEmailService.healthCheck();
-      setSystemHealth(health);
+      // Ensure health has the required structure
+      const safeHealth = {
+        status: health?.status || 'unknown',
+        recentFailures: health?.recentFailures || 0,
+        providers: Array.isArray(health?.providers) ? health.providers : []
+      };
+      setSystemHealth(safeHealth);
     } catch (error) {
       console.error('Failed to load system health:', error);
+      // Set a safe default structure on error
+      setSystemHealth({
+        status: 'error',
+        recentFailures: 0,
+        providers: []
+      });
     }
   };
 
