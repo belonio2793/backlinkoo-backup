@@ -173,12 +173,6 @@ export class GlobalOpenAIConfig {
     usage?: { tokens: number; cost: number };
   }> {
     try {
-      // Check if we're in fallback mode first
-      if (localStorage.getItem('openai_fallback_mode') === 'true') {
-        console.log('📝 Using fallback content generation (API unavailable)');
-        return this.generateFallbackContent(params);
-      }
-
       const apiKey = this.getAPIKey();
 
       const systemPrompt = params.systemPrompt || `You are an expert SEO content writer specializing in creating high-quality, engaging blog posts. Write in a ${params.tone || 'professional'} tone. Create original, valuable content that helps readers and includes natural backlink integration when provided.`;
