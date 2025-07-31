@@ -177,15 +177,15 @@ export class BlogClaimService {
 
       if (fetchError || !existingPost) {
         console.error('❌ BlogClaimService: Post not found in database:', {
-          postId,
+          postId: typeof postId === 'string' ? postId : JSON.stringify(postId),
+          postIdType: typeof postId,
           error: fetchError?.message,
-          hint: 'This might be a localStorage-only post'
+          hint: 'This might be a localStorage-only post that needs to be created in the database first'
         });
-        return {
-          success: false,
-          message: 'Blog post not found or unavailable for claiming',
-          error: fetchError?.message
-        };
+
+        // For localStorage posts, try to create them in the database first
+        console.log('🔄 BlogClaimService: Attempting to create localStorage post in database...');
+        return await this.claimLocalStoragePost(postId, user);
       }
 
       // Check if already claimed by another user
