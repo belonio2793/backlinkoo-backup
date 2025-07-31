@@ -185,19 +185,21 @@ export class TemplateBlogGenerator {
       const slug = this.generateSlug(title);
       const publishedUrl = `${window.location.origin}/blog/${slug}`;
 
-      // Create blog post data
+      // Create blog post data using enhanced metadata when available
+      const enhancedMetadata = contentResult.metadata;
+
       const blogPostData = {
         id: this.generateId(),
         title,
         content: contentResult.content,
         slug,
-        meta_description: this.generateMetaDescription(contentResult.content, templateQuery.keyword),
+        meta_description: enhancedMetadata?.metaDescription || this.generateMetaDescription(contentResult.content, templateQuery.keyword),
         keywords: this.extractKeywords(templateQuery),
         target_url: templateQuery.url,
         anchor_text: templateQuery.anchorText,
-        word_count: this.countWords(contentResult.content),
-        seo_score: this.calculateSeoScore(contentResult.content, templateQuery),
-        reading_time: Math.ceil(this.countWords(contentResult.content) / 200),
+        word_count: enhancedMetadata?.wordCount || this.countWords(contentResult.content),
+        seo_score: enhancedMetadata?.seoScore || this.calculateSeoScore(contentResult.content, templateQuery),
+        reading_time: enhancedMetadata?.readingTime || Math.ceil(this.countWords(contentResult.content) / 200),
         is_trial_post: true,
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         created_at: new Date().toISOString(),
@@ -207,7 +209,11 @@ export class TemplateBlogGenerator {
         tags: this.generateTags(templateQuery),
         published_url: publishedUrl,
         // Store template metadata
-        template_metadata: metadata
+        template_metadata: {
+          ...metadata,
+          enhancedGeneration: !!enhancedMetadata,
+          generationSource: enhancedMetadata ? 'template-netlify-function' : 'fallback-openai'
+        }
       };
 
       // Save to localStorage for immediate availability
