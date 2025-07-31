@@ -17,7 +17,13 @@ import {
   AlertCircle,
   TestTube,
   Terminal,
-  Code
+  Code,
+  ChevronDown,
+  ChevronUp,
+  Wifi,
+  Database,
+  Key,
+  Activity
 } from 'lucide-react';
 
 interface ProgressUpdate {
@@ -49,6 +55,12 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
   const [isTesting, setIsTesting] = useState(false);
   const [selectedPrompt, setSelectedPrompt] = useState<string>('');
   const [promptIndex, setPromptIndex] = useState<number>(0);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+  const [systemStatus, setSystemStatus] = useState({
+    apiKey: { status: 'checking', message: 'Checking API key...' },
+    chatGPT: { status: 'checking', message: 'Checking ChatGPT connection...' },
+    database: { status: 'checking', message: 'Checking database connection...' }
+  });
   const { toast } = useToast();
   const navigate = useNavigate();
 
