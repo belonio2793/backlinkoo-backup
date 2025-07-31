@@ -247,39 +247,86 @@ export class TemplateBlogGenerator {
     success: boolean;
     content: string;
     error?: string;
+    metadata?: any;
   }> {
     try {
-      // Create a sophisticated prompt that integrates the template requirements
-      const enhancedPrompt = this.buildEnhancedPrompt(templateQuery);
-      
-      const result = await this.openAIService.generateContent(enhancedPrompt, {
-        maxTokens: Math.min(4000, templateQuery.wordCount * 3),
-        temperature: 0.7,
-        systemPrompt: this.getSystemPrompt()
+      console.log('🚀 Calling template blog generation Netlify function...');
+
+      // Use dedicated template blog generation function
+      const response = await fetch('/.netlify/functions/generate-template-blog', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          keyword: templateQuery.keyword,
+          anchorText: templateQuery.anchorText,
+          targetUrl: templateQuery.url,
+          wordCount: templateQuery.wordCount || 1000,
+          template: templateQuery.rawQuery,
+          userQuery: templateQuery.rawQuery
+        })
       });
+
+      if (!response.ok) {
+        throw new Error(`Template generation failed: ${response.status}`);
+      }
+
+      const result = await response.json();
 
       if (!result.success || !result.content) {
         return {
           success: false,
           content: '',
-          error: result.error || 'Content generation failed'
+          error: result.error || 'Template generation failed'
         };
       }
 
-      // Post-process the content to ensure proper formatting
-      const processedContent = this.postProcessContent(result.content, templateQuery);
+      console.log('✅ Template blog generation successful');
 
       return {
         success: true,
-        content: processedContent
+        content: result.content,
+        metadata: result.metadata
       };
 
     } catch (error: any) {
-      return {
-        success: false,
-        content: '',
-        error: error.message || 'Content generation error'
-      };
+      console.error('❌ Template generation error:', error);
+
+      // Fallback to the original OpenAI service if template function fails
+      console.log('🔄 Falling back to original OpenAI service...');
+
+      try {
+        const enhancedPrompt = this.buildEnhancedPrompt(templateQuery);
+
+        const result = await this.openAIService.generateContent(enhancedPrompt, {
+          maxTokens: Math.min(4000, templateQuery.wordCount * 3),
+          temperature: 0.7,
+          systemPrompt: this.getSystemPrompt()
+        });
+
+        if (!result.success || !result.content) {
+          return {
+            success: false,
+            content: '',
+            error: result.error || 'Content generation failed'
+          };
+        }
+
+        // Post-process the content to ensure proper formatting
+        const processedContent = this.postProcessContent(result.content, templateQuery);
+
+        return {
+          success: true,
+          content: processedContent
+        };
+      } catch (fallbackError: any) {
+        return {
+          success: false,
+          content: '',
+          error: fallbackError.message || 'Content generation error'
+        };
+      }
     }
   }
 
