@@ -97,7 +97,10 @@ const Login = () => {
       // Only redirect if user is signed in AND email is verified
       if (event === 'SIGNED_IN' && session && session.user && session.user.email_confirmed_at) {
         console.log('🔐 Auth state change: user verified, redirecting to dashboard');
-        setTimeout(() => navigate('/dashboard'), 100);
+        // Prevent redirect loops and ensure we're not already on dashboard
+        if (window.location.pathname !== '/dashboard') {
+          setTimeout(() => navigate('/dashboard'), 100);
+        }
       } else if (event === 'SIGNED_IN' && session && session.user && !session.user.email_confirmed_at) {
         console.log('📬 Auth state change: user signed in but email not verified');
       }
