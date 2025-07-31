@@ -383,29 +383,7 @@ export function ServiceConnectionStatus() {
         </Button>
       </div>
 
-      {/* Overall Status */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Overall Service Health</span>
-            {lastChecked && (
-              <span className="text-sm text-muted-foreground font-normal">
-                Last checked: {lastChecked.toLocaleTimeString()}
-              </span>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-medium">Connected Services</span>
-              <span className={`font-bold ${healthPercentage === 100 ? 'text-green-600' : healthPercentage >= 50 ? 'text-orange-600' : 'text-red-600'}`}>
-                {connectedCount}/{totalCount} ({Math.round(healthPercentage)}%)
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
 
       {/* Service Status Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
