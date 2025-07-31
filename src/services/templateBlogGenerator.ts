@@ -168,7 +168,7 @@ export class TemplateBlogGenerator {
 
       // Generate content using OpenAI
       const contentResult = await this.generateContentWithTemplate(templateQuery);
-      
+
       if (!contentResult.success) {
         return {
           success: false,
@@ -176,8 +176,10 @@ export class TemplateBlogGenerator {
         };
       }
 
-      // Extract title from generated content
-      const title = this.extractTitle(contentResult.content) || this.generateFallbackTitle(templateQuery.keyword);
+      // Extract title from generated content or use enhanced metadata
+      const title = contentResult.metadata?.title ||
+                   this.extractTitle(contentResult.content) ||
+                   this.generateFallbackTitle(templateQuery.keyword);
       
       // Create blog post
       const slug = this.generateSlug(title);
