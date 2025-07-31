@@ -243,6 +243,38 @@ export function ConsolidatedOpenAIConfig() {
     }
   };
 
+  const handleUpdateAPIKey = async () => {
+    setIsUpdating(true);
+    try {
+      toast({
+        title: "Updating API Key...",
+        description: "Syncing new OpenAI API key to all services...",
+      });
+
+      const result = await updateOpenAIKeyEverywhere();
+
+      if (result.success) {
+        toast({
+          title: "✅ API Key Updated!",
+          description: result.message,
+        });
+
+        await loadCurrentStatus();
+        setActiveTab('status');
+      } else {
+        throw new Error(result.error || 'Update failed');
+      }
+    } catch (error) {
+      toast({
+        title: "❌ Update Failed",
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <Card className="w-full border-2 border-blue-200">
       <CardHeader>
