@@ -648,7 +648,7 @@ export class SupabaseConfigSync {
    */
   private async checkGlobalServiceSync(key: string): Promise<boolean> {
     try {
-      if (key === 'VITE_OPENAI_API_KEY') {
+      if (key === 'OPENAI_API_KEY') {
         return globalOpenAI.isConfigured();
       }
       return true;
