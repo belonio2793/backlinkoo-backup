@@ -115,9 +115,11 @@ export function UnifiedOpenAIConfig() {
         throw new Error('Failed to save API key');
       }
     } catch (error) {
+      console.error('Error saving OpenAI API key:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       toast({
         title: 'Save Failed',
-        description: 'Failed to save OpenAI API key. Please try again.',
+        description: `Failed to save OpenAI API key: ${errorMessage}`,
         variant: 'destructive'
       });
     } finally {
