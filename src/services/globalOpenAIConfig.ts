@@ -209,6 +209,86 @@ Focus on creating valuable, informative content with proper HTML structure using
       return 'Not configured';
     }
   }
+
+  /**
+   * Permanently save the current configuration
+   */
+  static async savePermanently(): Promise<{ success: boolean; error?: string }> {
+    try {
+      const apiKey = this.getAPIKey();
+      const isConnected = await this.testConnection();
+
+      // Save to permanent storage
+      const now = new Date().toISOString();
+      const config = {
+        service: 'OpenAI',
+        apiKey,
+        isActive: true,
+        lastTested: now,
+        healthScore: isConnected ? 100 : 0,
+        metadata: {
+          version: 'gpt-3.5-turbo',
+          environment: import.meta.env.MODE || 'development',
+          savedAt: now
+        }
+      };
+
+      // Save to multiple locations for redundancy
+      const permanentConfigs = JSON.parse(localStorage.getItem('permanent_api_configs') || '[]');
+      const updatedConfigs = permanentConfigs.filter((c: any) => c.service !== 'OpenAI');
+      updatedConfigs.push(config);
+      localStorage.setItem('permanent_api_configs', JSON.stringify(updatedConfigs));
+
+      // Save to environment backup
+      const envBackup = JSON.parse(localStorage.getItem('environment_backup') || '{}');
+      envBackup['VITE_OPENAI_API_KEY'] = {
+        value: apiKey,
+        service: 'OpenAI',
+        savedAt: now,
+        healthScore: config.healthScore
+      };
+      localStorage.setItem('environment_backup', JSON.stringify(envBackup));
+
+      console.log('✅ OpenAI configuration saved permanently');
+      return { success: true };
+
+    } catch (error) {
+      console.error('❌ Failed to save OpenAI configuration:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Get configuration health status
+   */
+  static async getHealthStatus(): Promise<{
+    configured: boolean;
+    connected: boolean;
+    healthScore: number;
+    lastTested?: string;
+  }> {
+    try {
+      const configured = this.isConfigured();
+      const connected = configured ? await this.testConnection() : false;
+      const healthScore = configured ? (connected ? 100 : 50) : 0;
+
+      return {
+        configured,
+        connected,
+        healthScore,
+        lastTested: new Date().toISOString()
+      };
+    } catch (error) {
+      return {
+        configured: false,
+        connected: false,
+        healthScore: 0
+      };
+    }
+  }
 }
 
 // Export singleton instance for convenience
