@@ -210,6 +210,26 @@ export function OrganizedAdminDashboard() {
       <div className="space-y-6">
         {activeCategory === "overview" && (
           <div className="space-y-6">
+            {/* Featured: OpenAI Configuration */}
+            <Alert className="border-blue-200 bg-blue-50">
+              <Brain className="h-4 w-4 text-blue-600" />
+              <AlertDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <strong>Quick Access:</strong> Configure your OpenAI API key for all AI features across the application.
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveCategory("system")}
+                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                  >
+                    Configure OpenAI
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -221,7 +241,7 @@ export function OrganizedAdminDashboard() {
                 <ServiceConnectionStatus />
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>System Health Check</CardTitle>
