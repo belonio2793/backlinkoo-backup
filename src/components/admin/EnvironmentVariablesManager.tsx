@@ -61,7 +61,7 @@ export function EnvironmentVariablesManager() {
   // Predefined environment variables with descriptions
   const predefinedVars = [
     {
-      key: 'VITE_OPENAI_API_KEY',
+      key: 'OPENAI_API_KEY',
       description: 'OpenAI API key for AI content generation (starts with sk-)',
       is_secret: true,
       placeholder: 'sk-proj-...'
