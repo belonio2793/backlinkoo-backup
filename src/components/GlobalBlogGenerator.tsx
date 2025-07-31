@@ -165,9 +165,9 @@ export function GlobalBlogGenerator({
 
 
     const promptTemplates = [
-      `Generate a 1000 word article on ${request.primaryKeyword} including the ${request.anchorText || request.primaryKeyword} hyperlinked to ${request.targetUrl}`,
+      `Generate a 1000 word blog post on ${request.primaryKeyword} including the ${request.anchorText || request.primaryKeyword} hyperlinked to ${request.targetUrl}`,
       `Write a 1000 word blog post about ${request.primaryKeyword} with a hyperlinked ${request.anchorText || request.primaryKeyword} linked to ${request.targetUrl}`,
-      `Produce a 1000-word reader friendly post on ${request.primaryKeyword} that links ${request.anchorText || request.primaryKeyword} to ${request.targetUrl}`
+      `Produce a 1000-word blog post on ${request.primaryKeyword} that links ${request.anchorText || request.primaryKeyword}`
     ];
 
     const prompt = `${promptTemplates[Math.floor(Math.random() * promptTemplates.length)]}
