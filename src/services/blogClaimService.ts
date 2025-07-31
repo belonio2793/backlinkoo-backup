@@ -183,9 +183,28 @@ export class BlogClaimService {
           hint: 'This might be a localStorage-only post that needs to be created in the database first'
         });
 
-        // For localStorage posts, try to create them in the database first
-        console.log('🔄 BlogClaimService: Attempting to create localStorage post in database...');
-        return await this.claimLocalStoragePost(postId, user);
+        // For localStorage posts, try to get the post data and create it in the database
+        if (typeof window !== 'undefined') {
+          console.log('🔄 BlogClaimService: Checking localStorage for post data...');
+          const blogStorageKey = `blog_post_${postId}`;
+          const storedBlogData = localStorage.getItem(blogStorageKey);
+
+          if (storedBlogData) {
+            try {
+              const localPost = JSON.parse(storedBlogData);
+              console.log('✅ BlogClaimService: Found localStorage post, creating in database...');
+              return await this.claimLocalStoragePost(localPost, user);
+            } catch (parseError) {
+              console.error('❌ Failed to parse localStorage post data:', parseError);
+            }
+          }
+        }
+
+        return {
+          success: false,
+          message: 'Blog post not found or unavailable for claiming',
+          error: fetchError?.message
+        };
       }
 
       // Check if already claimed by another user
