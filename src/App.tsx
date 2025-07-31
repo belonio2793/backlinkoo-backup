@@ -43,6 +43,17 @@ if (typeof window !== 'undefined') {
   // Initialize auto-config saver
   console.log('🚀 Initializing automatic configuration monitoring...');
   autoConfigSaver.startMonitoring();
+
+  // Initialize real-time configuration sync
+  import('./utils/initializeConfigSync').then(({ initializeConfigSync }) => {
+    initializeConfigSync().then(result => {
+      if (result.success) {
+        console.log('✅ Real-time configuration sync initialized:', result.message);
+      } else {
+        console.error('❌ Configuration sync initialization failed:', result.message);
+      }
+    });
+  });
 }
 
 const App = () => (
