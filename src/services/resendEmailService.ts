@@ -17,7 +17,7 @@ export interface ResendEmailData {
 export class ResendEmailService {
   private static readonly FROM_EMAIL = 'Backlink ∞ <support@backlinkoo.com>';
   private static failureLog: Array<{ timestamp: Date; error: string; email: string }> = [];
-  private static readonly NETLIFY_FUNCTION_URL = '/.netlify/functions/send-email';
+  private static readonly NETLIFY_FUNCTION_URL = '/netlify/functions/send-email';
 
   private static async sendViaNetlify(emailData: ResendEmailData): Promise<ResendEmailResponse> {
     try {
@@ -38,8 +38,32 @@ export class ResendEmailService {
 
       if (!response.ok) {
         if (response.status === 404) {
-          console.warn('Email Netlify function not available (404), email service unavailable');
-          throw new Error('Email service unavailable - function not found');
+          console.warn('Email Netlify function not available (404), trying alternative paths...');
+
+          // Try alternative function path
+          const altResponse = await fetch('/.netlify/functions/send-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: emailData.from || this.FROM_EMAIL,
+              to: emailData.to,
+              subject: emailData.subject,
+              message: emailData.message
+            }),
+          });
+
+          if (!altResponse.ok) {
+            throw new Error('Email service unavailable - Netlify function not deployed or accessible');
+          }
+
+          const altResult = await altResponse.json();
+          return {
+            success: true,
+            emailId: altResult.emailId,
+            provider: 'resend'
+          };
         }
 
         const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status} error` }));
