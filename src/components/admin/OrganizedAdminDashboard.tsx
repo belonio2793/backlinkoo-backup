@@ -230,6 +230,8 @@ export function OrganizedAdminDashboard() {
             </Card>
 
             <GlobalAPIStatus />
+
+            <ErrorDebugger />
           </div>
         )}
 
