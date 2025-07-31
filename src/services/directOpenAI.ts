@@ -28,16 +28,12 @@ export class DirectOpenAIService {
     try {
       console.log('🚀 Starting direct blog generation...');
 
-      // Check if OpenAI API key is configured
+      // Check if OpenAI API key is configured (but allow Netlify functions to handle it)
       const { environmentVariablesService } = await import('@/services/environmentVariablesService');
       const clientApiKey = await environmentVariablesService.getOpenAIKey();
 
-      if (!clientApiKey) {
-        return {
-          success: false,
-          error: 'AI content generation is currently unavailable. Please try again later or contact support.'
-        };
-      }
+      // Don't fail if no local API key - Netlify functions might have it configured
+      console.log('🔑 Local API key check:', clientApiKey ? 'Found' : 'Not found (will try Netlify function)');
 
       // Build the prompt dynamically
       const prompt = `Write a comprehensive 1000-word blog post about "${request.keyword}". 
