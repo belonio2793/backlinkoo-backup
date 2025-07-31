@@ -88,10 +88,10 @@ export class OpenAIService {
   }
 
   /**
-   * Get masked preview (not applicable for server-side)
+   * Get masked preview of global API key
    */
   getMaskedKey(): string {
-    return '[Server-side only]';
+    return globalOpenAI.getMaskedKey();
   }
 }
 
