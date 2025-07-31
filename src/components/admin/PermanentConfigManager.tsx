@@ -25,7 +25,7 @@ import { permanentAPIConfig } from '@/services/permanentAPIConfigService';
 import { globalOpenAI } from '@/services/globalOpenAIConfig';
 import { autoConfigSaver } from '@/services/autoConfigSaver';
 
-export function PermanentConfigManagerFixed() {
+export function PermanentConfigManager() {
   const { toast } = useToast();
   const [healthSummary, setHealthSummary] = useState<any>(null);
   const [configurations, setConfigurations] = useState<any[]>([]);
