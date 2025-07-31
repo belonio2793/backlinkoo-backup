@@ -329,6 +329,55 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
           </p>
         </div>
 
+        {/* Prompt Display */}
+        {selectedPrompt && (
+          <div className="space-y-3 p-4 bg-slate-50 rounded-lg border">
+            <div className="flex items-center gap-2">
+              <Terminal className="h-4 w-4 text-slate-600" />
+              <span className="font-medium text-slate-800">
+                Selected Prompt Template {promptIndex + 1} of {promptTemplates.length}
+              </span>
+            </div>
+
+            {/* Original Template */}
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-slate-600 uppercase tracking-wide">
+                Template:
+              </div>
+              <div className="bg-slate-900 text-green-400 p-3 rounded font-mono text-sm overflow-x-auto">
+                {promptTemplates[promptIndex]}
+              </div>
+            </div>
+
+            {/* User Inputs */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+              <div className="bg-white p-3 rounded border">
+                <div className="font-medium text-blue-600 mb-1">keyword:</div>
+                <div className="font-mono text-slate-800">"{keyword}"</div>
+              </div>
+              <div className="bg-white p-3 rounded border">
+                <div className="font-medium text-purple-600 mb-1">anchor_text:</div>
+                <div className="font-mono text-slate-800">"{anchorText}"</div>
+              </div>
+              <div className="bg-white p-3 rounded border">
+                <div className="font-medium text-green-600 mb-1">url:</div>
+                <div className="font-mono text-slate-800 truncate">"{targetUrl}"</div>
+              </div>
+            </div>
+
+            {/* Formatted Result */}
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-slate-600 uppercase tracking-wide">
+                Final Prompt → ChatGPT:
+              </div>
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 rounded border-l-4 border-blue-400 text-sm">
+                <Code className="h-4 w-4 inline mr-2 text-blue-500" />
+                {selectedPrompt}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* API Status Display */}
         {isCheckingAPI && (
           <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
