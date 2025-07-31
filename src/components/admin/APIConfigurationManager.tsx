@@ -408,11 +408,17 @@ export function APIConfigurationManager() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {configs.map((config) => {
               const IconComponent = config.icon;
+              const configSyncStatus = syncStatus[config.key];
               return (
                 <div key={config.key} className="flex items-center gap-2 p-2 rounded border">
                   <IconComponent className="h-4 w-4" />
                   <span className="text-sm font-medium">{config.name.split(' ')[0]}</span>
-                  {getStatusIcon(config.status)}
+                  <div className="flex items-center gap-1">
+                    {getStatusIcon(config.status)}
+                    {configSyncStatus?.success && config.status === 'valid' && (
+                      <Cloud className="h-3 w-3 text-green-500" title="Synced to global services" />
+                    )}
+                  </div>
                 </div>
               );
             })}
