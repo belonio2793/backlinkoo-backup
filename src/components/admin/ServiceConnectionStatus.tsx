@@ -43,6 +43,12 @@ interface ServiceStatus {
 export function ServiceConnectionStatus() {
   const [services, setServices] = useState<ServiceStatus[]>([
     {
+      name: 'OpenAI API',
+      status: 'checking',
+      icon: Brain,
+      message: 'Testing OpenAI API connection...',
+    },
+    {
       name: 'Netlify Functions',
       status: 'checking',
       icon: Cloud,
