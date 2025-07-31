@@ -220,8 +220,6 @@ export function OrganizedAdminDashboard() {
                 <ServiceConnectionStatus />
               </CardContent>
             </Card>
-
-            <ErrorDebugger />
           </div>
         )}
 
