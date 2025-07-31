@@ -30,8 +30,8 @@ export const AuthRedirectHandler = ({ children }: { children: React.ReactNode })
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.user && location.pathname === '/login') {
-        console.log('🔐 User signed in, redirecting to redirect page');
-        navigate('/redirect');
+        console.log('🔐 User signed in, redirecting to dashboard');
+        navigate('/dashboard');
       }
     });
 
