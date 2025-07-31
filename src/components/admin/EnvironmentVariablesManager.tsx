@@ -209,7 +209,13 @@ export function EnvironmentVariablesManager() {
       }
 
       if (result.error) {
-        console.error('Database error:', result.error);
+        const errorMessage = result.error?.message || result.error?.details || String(result.error) || 'Unknown database error';
+        console.error('Database error:', errorMessage);
+        toast({
+          title: 'Database Error',
+          description: `Failed to save to database: ${errorMessage}. Saved to local storage instead.`,
+          variant: 'destructive'
+        });
         // Fallback to localStorage
         const updated = envVar.id 
           ? envVars.map(v => v.id === envVar.id ? { ...envVar, updated_at: new Date().toISOString() } : v)
