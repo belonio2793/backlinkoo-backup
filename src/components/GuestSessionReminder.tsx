@@ -91,11 +91,7 @@ export function GuestSessionReminder({
     );
   };
 
-  const trackInteraction = () => {
-    const current = parseInt(localStorage.getItem('guest_interactions') || '0');
-    localStorage.setItem('guest_interactions', (current + 1).toString());
-    setInteractionCount(current + 1);
-  };
+
 
   const handleDismiss = () => {
     localStorage.setItem('guest_reminder_dismissed', new Date().getTime().toString());
@@ -104,7 +100,6 @@ export function GuestSessionReminder({
   };
 
   const handleSignUp = () => {
-    trackInteraction();
     onSignUp();
   };
 
