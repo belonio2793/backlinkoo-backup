@@ -48,6 +48,14 @@ if (typeof window !== 'undefined') {
     localStorage.setItem('content_cleanup_version', cleanupVersion);
   }
 
+  // Initialize demo API key for blog generation if no real key is available
+  const envApiKey = import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.OPENAI_API_KEY;
+  if (!envApiKey || !envApiKey.startsWith('sk-')) {
+    import('@/utils/setupDemoApiKey').then(({ setupDemoApiKey }) => {
+      setupDemoApiKey();
+    });
+  }
+
   // Initialize auto-config saver (disabled to prevent fetch errors)
   // console.log('🚀 Initializing automatic configuration monitoring...');
   // autoConfigSaver.startMonitoring();
