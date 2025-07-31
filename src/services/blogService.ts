@@ -200,7 +200,7 @@ export class BlogService {
 
       if (!slugError && uniqueSlugData) {
         updates.slug = uniqueSlugData as string;
-        updates.published_url = `${window.location.origin}/blog/${updates.slug}`;
+        updates.published_url = `/blog/${updates.slug}`;
       }
     }
 
