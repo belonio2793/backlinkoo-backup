@@ -318,7 +318,7 @@ export function EnvironmentVariablesManager() {
     setTestResults(prev => ({ ...prev, [key]: { key, status: 'testing', message: 'Testing...' } }));
 
     try {
-      if (key === 'VITE_OPENAI_API_KEY') {
+      if (key === 'OPENAI_API_KEY') {
         const response = await fetch('https://api.openai.com/v1/models', {
           headers: { 'Authorization': `Bearer ${value}` }
         });
