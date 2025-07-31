@@ -64,7 +64,13 @@ export function ConsolidatedOpenAIConfig() {
 
   useEffect(() => {
     loadCurrentStatus();
+    checkTableExists();
   }, []);
+
+  const checkTableExists = async () => {
+    const exists = await checkAdminTableExists();
+    setTableExists(exists);
+  };
 
   const loadCurrentStatus = () => {
     try {
