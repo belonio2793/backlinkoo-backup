@@ -286,10 +286,12 @@ export function TrialDashboard() {
                               <Calendar className="h-3 w-3" />
                               {formatDate(post.created_at)}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {getTimeUntilExpiry(post.expires_at)} left
-                            </div>
+                            {post.expires_at && (
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {getTimeUntilExpiry(post.expires_at)} left
+                              </div>
+                            )}
                           </div>
                         </CardHeader>
                         <CardContent className="pt-0">
