@@ -88,9 +88,15 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
   const checkAPIStatus = async () => {
     setIsCheckingAPI(true);
     try {
-      // OpenAI/ChatGPT is always available as it's our primary service
-      setApiStatus({ accessible: true });
-      setUserCanGenerate({ canGenerate: true });
+      const isConfigured = globalOpenAI.isConfigured();
+      const canConnect = await globalOpenAI.testConnection();
+
+      if (isConfigured && canConnect) {
+        setApiStatus({ accessible: true });
+        setUserCanGenerate({ canGenerate: true });
+      } else {
+        throw new Error('Global OpenAI configuration not available');
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setApiStatus({ accessible: false, error: errorMessage });
