@@ -674,7 +674,7 @@ export class SupabaseConfigSync {
 
   private getDefaultDescription(key: string): string {
     const descriptions: { [key: string]: string } = {
-      'VITE_OPENAI_API_KEY': 'OpenAI API key for content generation',
+      'OPENAI_API_KEY': 'OpenAI API key for content generation',
       'VITE_SUPABASE_URL': 'Supabase project URL',
       'VITE_SUPABASE_ANON_KEY': 'Supabase anonymous key',
       'RESEND_API_KEY': 'Resend email service API key'
