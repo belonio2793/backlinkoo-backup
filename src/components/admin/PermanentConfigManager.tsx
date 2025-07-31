@@ -32,6 +32,7 @@ export function PermanentConfigManager() {
   const [isLoading, setIsLoading] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [showKeys, setShowKeys] = useState<{ [id: string]: boolean }>({});
+  const [autoSaveStatus, setAutoSaveStatus] = useState<any>(null);
 
   useEffect(() => {
     loadHealthSummary();
