@@ -15,7 +15,9 @@ import {
   Globe,
   Clock,
   AlertCircle,
-  TestTube
+  TestTube,
+  Terminal,
+  Code
 } from 'lucide-react';
 
 interface ProgressUpdate {
