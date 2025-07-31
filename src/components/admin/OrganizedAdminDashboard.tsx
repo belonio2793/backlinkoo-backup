@@ -21,6 +21,7 @@ import { BlogPostClaimsManager } from "@/components/admin/BlogPostClaimsManager"
 import { EnvironmentVariablesManager } from "@/components/admin/EnvironmentVariablesManager";
 import { NetlifyEnvironmentManager } from "@/components/admin/NetlifyEnvironmentManager";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
+import { DirectOpenAITest } from "@/components/admin/DirectOpenAITest";
 
 // Testing Tools
 import { AuthEmailTest } from "@/components/AuthEmailTest";
