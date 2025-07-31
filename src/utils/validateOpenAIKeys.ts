@@ -64,7 +64,7 @@ export async function validateOpenAIKey(apiKey: string): Promise<KeyValidationRe
 }
 
 export async function validateAllOpenAIKeys(): Promise<KeyValidationResult[]> {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  const apiKey = import.meta.env.OPENAI_API_KEY;
 
   if (!apiKey || apiKey === 'your-openai-api-key-here') {
     console.log('🚨 No OpenAI API key configured');

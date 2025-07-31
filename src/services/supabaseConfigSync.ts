@@ -406,7 +406,7 @@ export class SupabaseConfigSync {
    */
   private async syncToGlobalServices(config: DatabaseConfig): Promise<void> {
     try {
-      if (config.key === 'VITE_OPENAI_API_KEY' && config.value.startsWith('sk-')) {
+      if (config.key === 'OPENAI_API_KEY' && config.value.startsWith('sk-')) {
         await adminGlobalSync.saveAdminConfig(config.key, config.value);
         console.log(`🔄 Synced ${config.key} to global OpenAI service`);
       }
@@ -556,7 +556,7 @@ export class SupabaseConfigSync {
    */
   private async testConfiguration(key: string, value: string): Promise<{ success: boolean; message: string }> {
     try {
-      if (key === 'VITE_OPENAI_API_KEY') {
+      if (key === 'OPENAI_API_KEY') {
         const response = await fetch('https://api.openai.com/v1/models', {
           headers: {
             'Authorization': `Bearer ${value}`,
@@ -648,7 +648,7 @@ export class SupabaseConfigSync {
    */
   private async checkGlobalServiceSync(key: string): Promise<boolean> {
     try {
-      if (key === 'VITE_OPENAI_API_KEY') {
+      if (key === 'OPENAI_API_KEY') {
         return globalOpenAI.isConfigured();
       }
       return true;
@@ -674,7 +674,7 @@ export class SupabaseConfigSync {
 
   private getDefaultDescription(key: string): string {
     const descriptions: { [key: string]: string } = {
-      'VITE_OPENAI_API_KEY': 'OpenAI API key for content generation',
+      'OPENAI_API_KEY': 'OpenAI API key for content generation',
       'VITE_SUPABASE_URL': 'Supabase project URL',
       'VITE_SUPABASE_ANON_KEY': 'Supabase anonymous key',
       'RESEND_API_KEY': 'Resend email service API key'

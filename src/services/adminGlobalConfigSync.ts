@@ -31,7 +31,7 @@ export class AdminGlobalConfigSync {
 
       // Sync to global services based on key type
       let syncSuccess = false;
-      if (key === 'VITE_OPENAI_API_KEY') {
+      if (key === 'OPENAI_API_KEY') {
         syncSuccess = await this.syncOpenAIToGlobal(value);
       }
 
@@ -76,7 +76,7 @@ export class AdminGlobalConfigSync {
     try {
       const startTime = Date.now();
 
-      if (key === 'VITE_OPENAI_API_KEY') {
+      if (key === 'OPENAI_API_KEY') {
         const response = await fetch('https://api.openai.com/v1/models', {
           headers: {
             'Authorization': `Bearer ${value}`,
@@ -118,7 +118,7 @@ export class AdminGlobalConfigSync {
   private static async syncOpenAIToGlobal(apiKey: string): Promise<boolean> {
     try {
       // Test the key first
-      const testResult = await this.testAdminConfig('VITE_OPENAI_API_KEY', apiKey);
+      const testResult = await this.testAdminConfig('OPENAI_API_KEY', apiKey);
       if (!testResult.valid) {
         console.warn('⚠️ Not syncing invalid OpenAI key to global service');
         return false;
@@ -126,7 +126,7 @@ export class AdminGlobalConfigSync {
 
       // Sync to environment backup
       const envBackup = JSON.parse(localStorage.getItem('environment_backup') || '{}');
-      envBackup['VITE_OPENAI_API_KEY'] = {
+      envBackup['OPENAI_API_KEY'] = {
         value: apiKey,
         service: 'OpenAI',
         savedAt: new Date().toISOString(),

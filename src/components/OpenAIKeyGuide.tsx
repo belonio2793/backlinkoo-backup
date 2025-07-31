@@ -15,7 +15,7 @@ import {
 
 export function OpenAIKeyGuide() {
   const [showApiKey, setShowApiKey] = useState(false);
-  const currentApiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
+  const currentApiKey = import.meta.env.OPENAI_API_KEY || '';
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -134,11 +134,11 @@ export function OpenAIKeyGuide() {
 
               <div className="bg-gray-900 text-gray-100 p-3 rounded-lg font-mono text-sm">
                 <div className="flex items-center justify-between">
-                  <span>VITE_OPENAI_API_KEY=sk-your-api-key-here</span>
+                  <span>OPENAI_API_KEY=sk-your-api-key-here</span>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => copyToClipboard('VITE_OPENAI_API_KEY=sk-your-api-key-here')}
+                    onClick={() => copyToClipboard('OPENAI_API_KEY=sk-your-api-key-here')}
                     className="text-gray-400 hover:text-white"
                   >
                     <Copy className="h-3 w-3" />

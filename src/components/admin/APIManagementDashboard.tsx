@@ -84,7 +84,7 @@ export function APIManagementDashboard() {
   const loadAPIKeys = async () => {
     try {
       // Load from environment variables service
-      const openaiKey = await environmentVariablesService.getVariable('VITE_OPENAI_API_KEY');
+      const openaiKey = await environmentVariablesService.getVariable('OPENAI_API_KEY');
       const keys: APIKey[] = [];
       
       if (openaiKey) {
@@ -110,7 +110,7 @@ export function APIManagementDashboard() {
     
     // Test OpenAI
     try {
-      const apiKey = await environmentVariablesService.getVariable('VITE_OPENAI_API_KEY');
+      const apiKey = await environmentVariablesService.getVariable('OPENAI_API_KEY');
       if (apiKey) {
         const response = await fetch('https://api.openai.com/v1/models', {
           headers: { 'Authorization': `Bearer ${apiKey}` }

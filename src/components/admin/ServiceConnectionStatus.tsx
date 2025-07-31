@@ -29,13 +29,13 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { getErrorMessage } from '@/utils/errorFormatter';
 import { SecureConfig } from '@/lib/secure-config';
+import { safeNetlifyFetch } from '@/utils/netlifyFunctionHelper';
 
 interface ServiceStatus {
   name: string;
   status: 'checking' | 'connected' | 'error' | 'not_configured';
   icon: React.ComponentType<any>;
   message: string;
-  hasApiKey: boolean;
   details?: Record<string, any>;
   responseTime?: number;
 }
@@ -43,25 +43,28 @@ interface ServiceStatus {
 export function ServiceConnectionStatus() {
   const [services, setServices] = useState<ServiceStatus[]>([
     {
+      name: 'OpenAI API',
+      status: 'checking',
+      icon: Brain,
+      message: 'Testing OpenAI API connection...',
+    },
+    {
       name: 'Netlify Functions',
       status: 'checking',
       icon: Cloud,
       message: 'Testing Netlify function connectivity...',
-      hasApiKey: true,
     },
     {
       name: 'Supabase Database',
       status: 'checking',
       icon: Database,
       message: 'Testing Supabase connection...',
-      hasApiKey: true,
     },
     {
       name: 'Resend Email',
       status: 'checking',
       icon: Mail,
       message: 'Testing Resend email service...',
-      hasApiKey: false,
     },
   ]);
 
@@ -78,46 +81,91 @@ export function ServiceConnectionStatus() {
 
   const checkNetlifyFunctions = async (): Promise<void> => {
     const startTime = Date.now();
+
+    const result = await safeNetlifyFetch('test-connection');
+    const responseTime = Date.now() - startTime;
+
+    if (result.success && result.data) {
+      updateServiceStatus('Netlify Functions', {
+        status: 'connected',
+        message: 'Netlify functions operational',
+        responseTime,
+        details: result.data.environment || { mode: 'production' }
+      });
+    } else if (result.isLocal) {
+      updateServiceStatus('Netlify Functions', {
+        status: 'connected',
+        message: 'Development mode - functions simulated',
+        responseTime,
+        details: {
+          mode: 'development',
+          directApiCalls: true,
+          netlifyFunctions: false
+        }
+      });
+    } else {
+      updateServiceStatus('Netlify Functions', {
+        status: 'error',
+        message: result.error || 'Function test failed',
+        responseTime
+      });
+    }
+  };
+
+  const checkOpenAI = async (): Promise<void> => {
+    const startTime = Date.now();
+    const openAIKey = import.meta.env.OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY;
+
+    if (!openAIKey || !openAIKey.startsWith('sk-')) {
+      const responseTime = Date.now() - startTime;
+      updateServiceStatus('OpenAI API', {
+        status: 'not_configured',
+        message: 'OpenAI API key not configured',
+        responseTime
+      });
+      return;
+    }
+
     try {
-      const response = await fetch('/.netlify/functions/test-connection', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
+      const response = await fetch('https://api.openai.com/v1/models', {
+        headers: {
+          'Authorization': `Bearer ${openAIKey}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       const responseTime = Date.now() - startTime;
 
       if (response.ok) {
         const data = await response.json();
-        updateServiceStatus('Netlify Functions', {
+        updateServiceStatus('OpenAI API', {
           status: 'connected',
-          message: 'Netlify functions operational',
-          responseTime,
-          details: data.environment
-        });
-      } else {
-        // Fallback: Assume functions are available in dev mode
-        updateServiceStatus('Netlify Functions', {
-          status: 'connected',
-          message: 'Functions available (dev mode - direct API calls work)',
+          message: `OpenAI API connected - ${data.data?.length || 0} models available`,
           responseTime,
           details: {
-            mode: 'development',
-            directApiCalls: true,
-            netlifyFunctions: false
+            modelsAvailable: data.data?.length || 0,
+            keyPreview: openAIKey.substring(0, 12) + '...',
+            endpoint: 'https://api.openai.com/v1/models'
+          }
+        });
+      } else {
+        const errorData = await response.text().catch(() => '');
+        updateServiceStatus('OpenAI API', {
+          status: 'error',
+          message: `OpenAI API error: ${response.status} ${response.statusText}`,
+          responseTime,
+          details: {
+            statusCode: response.status,
+            error: errorData
           }
         });
       }
     } catch (error) {
-      // In dev mode, this is expected - use direct API calls
-      updateServiceStatus('Netlify Functions', {
-        status: 'connected',
-        message: 'Dev mode - using direct API calls instead of Netlify functions',
-        responseTime: Date.now() - startTime,
-        details: {
-          mode: 'development',
-          directApiCalls: true,
-          netlifyFunctions: false
-        }
+      const responseTime = Date.now() - startTime;
+      updateServiceStatus('OpenAI API', {
+        status: 'error',
+        message: `OpenAI connection failed: ${error instanceof Error ? error.message : 'Network error'}`,
+        responseTime
       });
     }
   };
@@ -164,93 +212,28 @@ export function ServiceConnectionStatus() {
 
   const checkResend = async (): Promise<void> => {
     const startTime = Date.now();
+    const resendKey = SecureConfig.RESEND_API_KEY || import.meta.env.RESEND_API_KEY;
+    const responseTime = Date.now() - startTime;
 
-    try {
-      const resendKey = SecureConfig.RESEND_API_KEY;
-
-      if (!resendKey || !resendKey.startsWith('re_')) {
-        updateServiceStatus('Resend Email', {
-          status: 'not_configured',
-          message: 'Resend API key not configured',
-          hasApiKey: false,
-          responseTime: Date.now() - startTime
-        });
-        return;
-      }
-
-      // Use Netlify function instead of direct API call to avoid CORS
-      let response: Response;
-      let responseTime: number;
-
-      try {
-        response = await fetch('/.netlify/functions/test-connection', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            service: 'resend',
-            apiKey: resendKey
-          })
-        });
-        responseTime = Date.now() - startTime;
-      } catch (fetchError) {
-        console.warn('Netlify function test failed, checking key format only:', fetchError);
-        // If Netlify function fails, just validate the key format
-        updateServiceStatus('Resend Email', {
-          status: 'connected',
-          message: 'API key configured (unable to test connection)',
-          hasApiKey: true,
-          responseTime: Date.now() - startTime,
-          details: {
-            keyPresent: true,
-            keyPreview: resendKey.substring(0, 6) + '...',
-            testStatus: 'format_valid_connection_untested'
-          }
-        });
-        return;
-      }
-
-      if (response.ok) {
-        const data = await response.json().catch(() => ({}));
-        updateServiceStatus('Resend Email', {
-          status: 'connected',
-          message: data.message || 'Resend API responding',
-          hasApiKey: true,
-          responseTime,
-          details: {
-            keyPresent: true,
-            keyPreview: resendKey.substring(0, 6) + '...',
-            testResult: data.details || 'connection_successful'
-          }
-        });
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        updateServiceStatus('Resend Email', {
-          status: 'error',
-          message: `Connection test failed: ${errorData.error || 'Unknown error'}`,
-          hasApiKey: true,
-          responseTime
-        });
-      }
-    } catch (error) {
-      console.warn('Resend connection test error:', error);
-      // Graceful fallback: if we have the key, mark as configured but untested
-      const hasKey = !!(SecureConfig.RESEND_API_KEY);
+    if (!resendKey || !resendKey.startsWith('re_')) {
       updateServiceStatus('Resend Email', {
-        status: hasKey ? 'connected' : 'not_configured',
-        message: hasKey
-          ? 'API key configured (connection test unavailable)'
-          : 'API key not configured',
-        hasApiKey: hasKey,
-        responseTime: Date.now() - startTime,
-        details: hasKey ? {
-          keyPresent: true,
-          testStatus: 'connection_test_failed',
-          error: error instanceof Error ? error.message : 'Unknown error'
-        } : undefined
+        status: 'not_configured',
+        message: 'Resend API key not configured',
+        responseTime
       });
+      return;
     }
+
+    updateServiceStatus('Resend Email', {
+      status: 'connected',
+      message: 'Resend API key configured',
+      responseTime,
+      details: {
+        keyPresent: true,
+        keyPreview: resendKey.substring(0, 6) + '...',
+        testStatus: 'configured'
+      }
+    });
   };
 
   const runConnectionTests = async () => {
@@ -268,6 +251,14 @@ export function ServiceConnectionStatus() {
 
       // Run tests in parallel for faster results with individual error handling
       const results = await Promise.allSettled([
+        checkOpenAI().catch(err => {
+          console.warn('OpenAI check failed:', err);
+          updateServiceStatus('OpenAI API', {
+            status: 'error',
+            message: 'OpenAI API test failed',
+            responseTime: 0
+          });
+        }),
         checkNetlifyFunctions().catch(err => {
           console.warn('Netlify functions check failed:', err);
           updateServiceStatus('Netlify Functions', {
@@ -289,7 +280,6 @@ export function ServiceConnectionStatus() {
           updateServiceStatus('Resend Email', {
             status: 'error',
             message: 'Email service test failed',
-            hasApiKey: false,
             responseTime: 0
           });
         })
@@ -383,29 +373,7 @@ export function ServiceConnectionStatus() {
         </Button>
       </div>
 
-      {/* Overall Status */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Overall Service Health</span>
-            {lastChecked && (
-              <span className="text-sm text-muted-foreground font-normal">
-                Last checked: {lastChecked.toLocaleTimeString()}
-              </span>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-medium">Connected Services</span>
-              <span className={`font-bold ${healthPercentage === 100 ? 'text-green-600' : healthPercentage >= 50 ? 'text-orange-600' : 'text-red-600'}`}>
-                {connectedCount}/{totalCount} ({Math.round(healthPercentage)}%)
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
 
       {/* Service Status Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -435,15 +403,7 @@ export function ServiceConnectionStatus() {
                   )}
                 </div>
 
-                {/* API Key Status */}
-                <div className="mt-2 text-xs">
-                  <div className="flex items-center gap-1">
-                    <Key className="h-3 w-3" />
-                    <span className={service.hasApiKey ? 'text-green-600' : 'text-orange-600'}>
-                      {service.hasApiKey ? 'API Key Present' : 'API Key Missing'}
-                    </span>
-                  </div>
-                </div>
+
 
                 {/* Additional Details */}
                 {service.details && (

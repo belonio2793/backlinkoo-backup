@@ -54,7 +54,7 @@ export function APIConfigurationManager() {
   const [configs, setConfigs] = useState<APIConfig[]>([
     {
       name: 'OpenAI API',
-      key: 'VITE_OPENAI_API_KEY',
+      key: 'OPENAI_API_KEY',
       value: '',
       placeholder: 'sk-proj-...',
       description: 'OpenAI API key for content generation',
@@ -113,8 +113,8 @@ export function APIConfigurationManager() {
       let status: APIConfig['status'] = 'unconfigured';
 
       switch (config.key) {
-        case 'VITE_OPENAI_API_KEY':
-          currentValue = import.meta.env.VITE_OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY || '';
+        case 'OPENAI_API_KEY':
+          currentValue = import.meta.env.OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY || '';
           status = currentValue && currentValue.startsWith('sk-') ? 'configured' : 'unconfigured';
           break;
         case 'VITE_SUPABASE_URL':
@@ -274,7 +274,7 @@ export function APIConfigurationManager() {
 
     try {
       switch (config.key) {
-        case 'VITE_OPENAI_API_KEY':
+        case 'OPENAI_API_KEY':
           result = await testOpenAI(config.value);
           break;
         case 'VITE_SUPABASE_URL':

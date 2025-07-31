@@ -11,7 +11,7 @@ export async function refreshAndTestApiKeys() {
   await (environmentVariablesService as any).refreshCache();
   
   // Test getting the API key
-  const apiKey = await environmentVariablesService.getVariable('VITE_OPENAI_API_KEY');
+  const apiKey = await environmentVariablesService.getVariable('OPENAI_API_KEY');
   
   if (apiKey) {
     console.log('✅ API key successfully loaded from Supabase!');

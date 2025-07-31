@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react';
+import { safeNetlifyFetch } from '@/utils/netlifyFunctionHelper';
 
 interface APIStatus {
   online: boolean;
@@ -29,31 +30,41 @@ export function APIStatusChecker({ children, fallback }: APIStatusCheckerProps) 
     setLoading(true);
     try {
       console.log('Checking API status...');
-      const response = await fetch('/.netlify/functions/api-status', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const result = await safeNetlifyFetch('api-status');
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('API status response:', data);
-        setStatus(data);
+      if (result.success && result.data) {
+        console.log('API status response:', result.data);
+        setStatus(result.data);
       } else {
-        // Fallback: assume online for demo
-        console.log('API status check failed, assuming online for demo');
-        setStatus({ 
-          online: true, 
-          message: 'Demo mode - API status check unavailable',
-          providers: { OpenAI: { status: 'demo' }, Grok: { status: 'demo' } }
+        // Fallback: check for local API key
+        const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
+        console.log('Development mode detected, using local API key check');
+        setStatus({
+          online: hasApiKey,
+          message: result.isLocal
+            ? (hasApiKey ? 'Development mode (API key configured)' : 'Development mode (no API key)')
+            : (hasApiKey ? 'Local check (API key available)' : 'Local check (no API key configured)'),
+          providers: {
+            OpenAI: {
+              configured: hasApiKey,
+              status: hasApiKey ? (result.isLocal ? 'configured' : 'local') : 'not_configured'
+            }
+          }
         });
       }
     } catch (error) {
       console.error('API status check error:', error);
-      // Fallback: assume online for demo
-      setStatus({ 
-        online: true, 
-        message: 'Demo mode - API status check failed',
-        providers: { OpenAI: { status: 'demo' }, Grok: { status: 'demo' } }
+      // Fallback: check for local API key
+      const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
+      setStatus({
+        online: hasApiKey,
+        message: hasApiKey ? 'Local check (API key available)' : 'Local check (no API key configured)',
+        providers: {
+          OpenAI: {
+            configured: hasApiKey,
+            status: hasApiKey ? 'local' : 'not_configured'
+          }
+        }
       });
     } finally {
       setLoading(false);

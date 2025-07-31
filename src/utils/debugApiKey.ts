@@ -7,14 +7,14 @@ export async function debugApiKey() {
   try {
     // Get API key from all possible sources
     const sources = {
-      supabase: await environmentVariablesService.getVariable('VITE_OPENAI_API_KEY'),
-      env: import.meta.env.VITE_OPENAI_API_KEY,
+      supabase: await environmentVariablesService.getVariable('OPENAI_API_KEY'),
+      env: import.meta.env.OPENAI_API_KEY,
       localStorage: (() => {
         try {
           const stored = localStorage.getItem('admin_env_vars');
           if (stored) {
             const parsed = JSON.parse(stored);
-            const found = parsed.find((v: any) => v.key === 'VITE_OPENAI_API_KEY');
+            const found = parsed.find((v: any) => v.key === 'OPENAI_API_KEY');
             return found?.value;
           }
         } catch (e) {}

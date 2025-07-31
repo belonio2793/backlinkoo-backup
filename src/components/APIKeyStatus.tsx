@@ -7,7 +7,7 @@ interface APIKeyStatusProps {
 }
 
 export function APIKeyStatus({ showWhenConfigured = false }: APIKeyStatusProps) {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
+  const apiKey = import.meta.env.OPENAI_API_KEY || '';
   const isConfigured = apiKey && apiKey.length > 0 && !apiKey.includes('test-key');
 
   // Only show when not configured, or when explicitly requested

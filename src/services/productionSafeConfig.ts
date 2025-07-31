@@ -161,7 +161,7 @@ export class ProductionSafeConfig {
 
       // Try known good API key patterns from environment
       const backupKeys = [
-        import.meta.env.VITE_OPENAI_BACKUP_KEY,
+        import.meta.env.OPENAI_BACKUP_KEY,
         import.meta.env.OPENAI_API_KEY,
         localStorage.getItem('openai_backup_key')
       ].filter(Boolean);

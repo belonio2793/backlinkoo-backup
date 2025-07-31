@@ -19,9 +19,7 @@ import { ContentModerationQueue } from "@/components/admin/ContentModerationQueu
 import { AIPostsManager } from "@/components/admin/AIPostsManager";
 import { BlogPostClaimsManager } from "@/components/admin/BlogPostClaimsManager";
 import { EnvironmentVariablesManager } from "@/components/admin/EnvironmentVariablesManager";
-import { UnifiedOpenAIConfig } from "@/components/admin/UnifiedOpenAIConfig";
-import { ForceAPIKeyUpdate } from "@/components/admin/ForceAPIKeyUpdate";
-import { ApiKeyStatusFix } from "@/components/admin/ApiKeyStatusFix";
+import { NetlifyEnvironmentManager } from "@/components/admin/NetlifyEnvironmentManager";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 
 // Testing Tools
@@ -31,9 +29,6 @@ import { SupabaseEmailTest } from "@/components/SupabaseEmailTest";
 import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
-import { SystemStatusCheck } from "@/components/SystemStatusCheck";
-import { GlobalAPIStatus } from "@/components/GlobalAPIStatus";
-import { ErrorDebugger } from "@/components/ErrorDebugger";
 
 import {
   Users,
@@ -212,63 +207,18 @@ export function OrganizedAdminDashboard() {
       <div className="space-y-6">
         {activeCategory === "overview" && (
           <div className="space-y-6">
-            {/* API Key Status Fix - Priority Alert */}
-            <ApiKeyStatusFix />
-
-            {/* Featured: OpenAI Configuration */}
-            <Alert className="border-blue-200 bg-blue-50">
-              <Brain className="h-4 w-4 text-blue-600" />
-              <AlertDescription>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <strong>Quick Access:</strong> Configure your OpenAI API key for all AI features across the application.
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setActiveCategory("system")}
-                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                  >
-                    Configure OpenAI
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-
+            {/* Streamlined System Status */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MonitorSpeaker className="h-5 w-5" />
-                  System Status Overview
+                  System Status
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ServiceConnectionStatus />
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>System Health Check</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <SystemStatusCheck />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
-                  Global API Status
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <GlobalAPIStatus />
-              </CardContent>
-            </Card>
-
-            <ErrorDebugger />
           </div>
         )}
 
@@ -308,29 +258,15 @@ export function OrganizedAdminDashboard() {
         )}
 
         {activeCategory === "system" && (
-          <Tabs defaultValue="openai-config" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="openai-config">OpenAI API</TabsTrigger>
-              <TabsTrigger value="environment">Environment</TabsTrigger>
+          <Tabs defaultValue="environment" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="environment">Environment & API Keys</TabsTrigger>
               <TabsTrigger value="deployment">Deployment</TabsTrigger>
               <TabsTrigger value="database">Database</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="openai-config">
-              <div className="space-y-6">
-                <UnifiedOpenAIConfig />
-                <ForceAPIKeyUpdate />
-                <Alert>
-                  <Brain className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Master Configuration:</strong> This OpenAI API key setting controls all AI features across your entire application including blog generation, content creation, and more. Configure it once here and it syncs everywhere.
-                  </AlertDescription>
-                </Alert>
-              </div>
-            </TabsContent>
-
             <TabsContent value="environment">
-              <EnvironmentVariablesManager />
+              <NetlifyEnvironmentManager />
             </TabsContent>
 
             <TabsContent value="deployment">

@@ -61,7 +61,7 @@ export function EnvironmentVariablesManager() {
   // Predefined environment variables with descriptions
   const predefinedVars = [
     {
-      key: 'VITE_OPENAI_API_KEY',
+      key: 'OPENAI_API_KEY',
       description: 'OpenAI API key for AI content generation (starts with sk-)',
       is_secret: true,
       placeholder: 'sk-proj-...'
@@ -107,7 +107,7 @@ export function EnvironmentVariablesManager() {
         const initialVars = [
           {
             id: crypto.randomUUID(),
-            key: 'VITE_OPENAI_API_KEY',
+            key: 'OPENAI_API_KEY',
             value: openAIKey,
             description: 'OpenAI API key for AI content generation and backlink creation',
             is_secret: true,
@@ -318,7 +318,7 @@ export function EnvironmentVariablesManager() {
     setTestResults(prev => ({ ...prev, [key]: { key, status: 'testing', message: 'Testing...' } }));
 
     try {
-      if (key === 'VITE_OPENAI_API_KEY') {
+      if (key === 'OPENAI_API_KEY') {
         const response = await fetch('https://api.openai.com/v1/models', {
           headers: { 'Authorization': `Bearer ${value}` }
         });

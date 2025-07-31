@@ -16,14 +16,14 @@ export function APIKeyDebug() {
     try {
       // Check environment variable directly
       info.envVar = {
-        value: import.meta.env.VITE_OPENAI_API_KEY,
-        preview: import.meta.env.VITE_OPENAI_API_KEY ? `${import.meta.env.VITE_OPENAI_API_KEY.substring(0, 15)}...` : 'Not found',
-        exists: !!import.meta.env.VITE_OPENAI_API_KEY
+        value: import.meta.env.OPENAI_API_KEY,
+        preview: import.meta.env.OPENAI_API_KEY ? `${import.meta.env.OPENAI_API_KEY.substring(0, 15)}...` : 'Not found',
+        exists: !!import.meta.env.OPENAI_API_KEY
       };
 
       // Check admin environment variables service
       try {
-        const adminKey = await environmentVariablesService.getVariable('VITE_OPENAI_API_KEY');
+        const adminKey = await environmentVariablesService.getVariable('OPENAI_API_KEY');
         info.adminEnvService = {
           value: adminKey,
           preview: adminKey ? `${adminKey.substring(0, 15)}...` : 'Not found',
@@ -40,7 +40,7 @@ export function APIKeyDebug() {
       try {
         const storedVars = localStorage.getItem('admin_env_vars');
         const parsed = storedVars ? JSON.parse(storedVars) : [];
-        const openAIVar = parsed.find((v: any) => v.key === 'VITE_OPENAI_API_KEY');
+        const openAIVar = parsed.find((v: any) => v.key === 'OPENAI_API_KEY');
         info.localStorage = {
           rawData: storedVars,
           parsedCount: parsed.length,

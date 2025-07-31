@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Circle } from 'lucide-react';
+import { safeNetlifyFetch } from '@/utils/netlifyFunctionHelper';
 
 interface APIStatus {
   online: boolean;
@@ -19,12 +20,33 @@ export function APIStatusIndicator() {
 
   const checkAPIStatus = async () => {
     try {
-      const response = await fetch('/.netlify/functions/api-status');
-      const data = await response.json();
-      setStatus(data);
+      const result = await safeNetlifyFetch('api-status');
+
+      if (result.success && result.data) {
+        setStatus(result.data);
+      } else {
+        // Fallback to local check
+        const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
+        setStatus({
+          online: hasApiKey,
+          message: result.isLocal
+            ? (hasApiKey ? 'Local development (API key configured)' : 'Local development (no API key)')
+            : (hasApiKey ? 'Local check (API key available)' : 'Local check (no API key)'),
+          providers: {
+            OpenAI: {
+              configured: hasApiKey,
+              status: hasApiKey ? 'configured' : 'not_configured'
+            }
+          }
+        });
+      }
     } catch (error) {
       console.error('Failed to check API status:', error);
-      setStatus({ online: false, message: 'Connection failed' });
+      const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
+      setStatus({
+        online: hasApiKey,
+        message: hasApiKey ? 'Local check (API key available)' : 'Local check (no API key)'
+      });
     } finally {
       setIsLoading(false);
     }

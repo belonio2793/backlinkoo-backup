@@ -56,7 +56,7 @@ export function RealTimeConfigDashboard() {
     refreshConfigs 
   } = useSupabaseConfig();
 
-  const openAIKey = useAPIKey('VITE_OPENAI_API_KEY');
+  const openAIKey = useAPIKey('OPENAI_API_KEY');
   const supabaseUrl = useAPIKey('VITE_SUPABASE_URL');
   const resendKey = useAPIKey('RESEND_API_KEY');
 

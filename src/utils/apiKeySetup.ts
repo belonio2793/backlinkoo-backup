@@ -12,7 +12,7 @@ export interface ApiKeyStatus {
 
 export const API_KEY_CONFIG = {
   openai: {
-    client: 'VITE_OPENAI_API_KEY',
+    client: 'OPENAI_API_KEY',
     server: 'OPENAI_API_KEY',
     name: 'OpenAI'
   }
@@ -67,7 +67,7 @@ export function checkApiKeyStatus(): ApiKeyStatus[] {
  */
 export function generateEnvSetup(): string {
   const envVars = Object.entries(API_KEY_CONFIG)
-    .map(([key, config]) => `# ${config.name}\n${config.client}=your_${key}_api_key\n${config.server}=your_${key}_api_key`)
+    .map(([key, config]) => `# ${config.name}\nOPENAI_API_KEY=your_${key}_api_key`)
     .join('\n\n');
 
   return `# Add these to your .env file:\n\n${envVars}`;
