@@ -1,0 +1,292 @@
+/**
+ * Claimable Blog Service - Implements the end-to-end blog claiming system
+ * Handles blog generation, claiming, expiration, and user limits
+ */
+
+import { supabase } from '@/integrations/supabase/client';
+import type { User } from '@supabase/supabase-js';
+
+export interface ClaimableBlogData {
+  keyword: string;
+  anchorText: string;
+  targetUrl: string;
+  title: string;
+  content: string;
+  excerpt?: string;
+  wordCount: number;
+  readingTime: number;
+  seoScore: number;
+}
+
+export interface ClaimResult {
+  success: boolean;
+  message: string;
+  claimedCount?: number;
+  needsUpgrade?: boolean;
+}
+
+export interface BlogGenerationResult {
+  success: boolean;
+  blogPost?: any;
+  publishedUrl?: string;
+  error?: string;
+}
+
+export class ClaimableBlogService {
+  /**
+   * Generate a unique slug from title
+   */
+  private static generateSlug(title: string): string {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '')
+      .substring(0, 50) + '-' + Date.now().toString(36);
+  }
+
+  /**
+   * Generate and publish a new blog post (open to public)
+   */
+  static async generateAndPublishBlog(data: ClaimableBlogData, user?: User): Promise<BlogGenerationResult> {
+    try {
+      console.log('🚀 Generating and publishing blog post:', data.keyword);
+
+      const slug = this.generateSlug(data.title);
+      const publishedUrl = `${window.location.origin}/blog/${slug}`;
+      
+      // Set expiration to 24 hours from now for unclaimed posts
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+      const blogPostData = {
+        user_id: user?.id || null,
+        slug,
+        title: data.title,
+        content: data.content,
+        excerpt: data.excerpt || data.content.substring(0, 200) + '...',
+        anchor_text: data.anchorText,
+        target_url: data.targetUrl,
+        published_url: publishedUrl,
+        status: 'published',
+        is_claimed: false,
+        claimed_by: null,
+        claimed_at: null,
+        expires_at: expiresAt, // 24-hour expiration for unclaimed posts
+        view_count: 0,
+        seo_score: data.seoScore,
+        reading_time: data.readingTime,
+        word_count: data.wordCount,
+        author_name: user ? 'AI Generator' : 'Anonymous',
+        tags: this.generateTags(data.keyword),
+        category: this.categorizeContent(data.keyword),
+        published_at: new Date().toISOString()
+      };
+
+      // Insert into published_blog_posts table
+      const { data: blogPost, error } = await supabase
+        .from('published_blog_posts')
+        .insert(blogPostData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Failed to publish blog post:', error);
+        return {
+          success: false,
+          error: `Failed to publish blog post: ${error.message}`
+        };
+      }
+
+      console.log('✅ Blog post published successfully:', publishedUrl);
+      
+      return {
+        success: true,
+        blogPost,
+        publishedUrl
+      };
+
+    } catch (error) {
+      console.error('❌ Error generating blog post:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Claim a blog post for a user (with 3-post limit)
+   */
+  static async claimBlogPost(postId: string, user: User): Promise<ClaimResult> {
+    try {
+      console.log('🔄 Attempting to claim blog post:', postId);
+
+      // Use the database function to claim the post
+      const { data, error } = await supabase
+        .rpc('claim_blog_post', {
+          post_id: postId,
+          user_id: user.id
+        });
+
+      if (error) {
+        console.error('❌ Failed to claim blog post:', error);
+        return {
+          success: false,
+          message: `Failed to claim blog post: ${error.message}`
+        };
+      }
+
+      const result = data?.[0];
+      
+      if (!result?.success) {
+        // Check if it's a limit reached error
+        const needsUpgrade = result?.message?.includes('maximum limit') || result?.message?.includes('Pro plan');
+        
+        return {
+          success: false,
+          message: result?.message || 'Failed to claim blog post',
+          claimedCount: result?.claimed_count || 0,
+          needsUpgrade
+        };
+      }
+
+      console.log('✅ Blog post claimed successfully');
+      
+      return {
+        success: true,
+        message: result.message,
+        claimedCount: result.claimed_count
+      };
+
+    } catch (error) {
+      console.error('❌ Error claiming blog post:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Get all claimable posts (with expiration logic)
+   */
+  static async getClaimablePosts(limit: number = 20): Promise<any[]> {
+    try {
+      console.log('🔍 Fetching claimable posts...');
+
+      // Use the database function to get posts with expiration logic
+      const { data, error } = await supabase
+        .rpc('get_claimable_posts', { limit_count: limit });
+
+      if (error) {
+        console.error('❌ Failed to fetch claimable posts:', error);
+        return [];
+      }
+
+      console.log(`✅ Fetched ${data?.length || 0} claimable posts`);
+      return data || [];
+
+    } catch (error) {
+      console.error('❌ Error fetching claimable posts:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get user's claimed posts count
+   */
+  static async getUserClaimedCount(userId: string): Promise<number> {
+    try {
+      const { data, error } = await supabase
+        .rpc('get_user_claimed_count', { user_id: userId });
+
+      if (error) {
+        console.error('❌ Failed to get user claimed count:', error);
+        return 0;
+      }
+
+      return data || 0;
+    } catch (error) {
+      console.error('❌ Error getting user claimed count:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Get user's claimed posts
+   */
+  static async getUserClaimedPosts(userId: string): Promise<any[]> {
+    try {
+      const { data, error } = await supabase
+        .from('published_blog_posts')
+        .select('*')
+        .eq('claimed_by', userId)
+        .eq('is_claimed', true)
+        .order('claimed_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Failed to fetch user claimed posts:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('❌ Error fetching user claimed posts:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Clean up expired unclaimed posts (for cron job)
+   */
+  static async cleanupExpiredPosts(): Promise<number> {
+    try {
+      console.log('🧹 Cleaning up expired posts...');
+
+      const { data, error } = await supabase
+        .rpc('cleanup_expired_posts');
+
+      if (error) {
+        console.error('❌ Failed to cleanup expired posts:', error);
+        return 0;
+      }
+
+      console.log(`✅ Cleaned up ${data || 0} expired posts`);
+      return data || 0;
+    } catch (error) {
+      console.error('❌ Error cleaning up expired posts:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Generate tags from keyword
+   */
+  private static generateTags(keyword: string): string[] {
+    const words = keyword.toLowerCase().split(/\s+/);
+    return words.slice(0, 5); // Max 5 tags
+  }
+
+  /**
+   * Categorize content based on keyword
+   */
+  private static categorizeContent(keyword: string): string {
+    const categories: { [key: string]: string[] } = {
+      'Technology': ['tech', 'software', 'ai', 'digital', 'app', 'web', 'mobile'],
+      'Business': ['business', 'marketing', 'sales', 'startup', 'entrepreneur'],
+      'Health': ['health', 'wellness', 'fitness', 'medical', 'nutrition'],
+      'Finance': ['finance', 'money', 'investment', 'banking', 'crypto'],
+      'Education': ['education', 'learning', 'school', 'university', 'course'],
+      'Lifestyle': ['lifestyle', 'travel', 'food', 'fashion', 'home']
+    };
+
+    const lowerKeyword = keyword.toLowerCase();
+    
+    for (const [category, keywords] of Object.entries(categories)) {
+      if (keywords.some(kw => lowerKeyword.includes(kw))) {
+        return category;
+      }
+    }
+    
+    return 'General';
+  }
+}
