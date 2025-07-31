@@ -116,11 +116,14 @@ export function ServiceConnectionStatus() {
     const startTime = Date.now();
 
     try {
-      // First, check for API key availability directly
+      // Use improved API key checking
+      const { checkApiKeyStatus } = await import('@/utils/setupDemoApiKey');
+      const keyStatus = checkApiKeyStatus();
+
       const envApiKey = import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.OPENAI_API_KEY;
-      const demoKey = localStorage.getItem('demo_openai_key');
-      const hasRealKey = envApiKey && envApiKey.startsWith('sk-') && envApiKey.length > 20;
-      const hasDemoKey = demoKey && demoKey.includes('demo-fallback');
+      const hasRealKey = keyStatus.keyType === 'real';
+      const hasDemoKey = keyStatus.keyType === 'demo';
+      const hasInvalidKey = keyStatus.keyType === 'invalid';
 
       if (hasRealKey) {
         // Try to test the real API key with a lightweight request
