@@ -349,7 +349,7 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between mb-2">
                       <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
-                        {post.category || 'Expert Content'}
+                        {post.category || '∞'}
                       </Badge>
                       <Badge className="bg-green-100 text-green-800 border-green-300">
                         <Star className="mr-1 h-3 w-3" />
