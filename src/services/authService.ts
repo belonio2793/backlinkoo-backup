@@ -35,11 +35,6 @@ export class AuthService {
    */
   static async signUp(signUpData: SignUpData): Promise<AuthResponse> {
     try {
-      console.log('🆕 AuthService: Starting signup for:', signUpData.email);
-
-      // Clean up any existing auth state
-      await this.cleanupAuthState();
-
       const { data, error } = await supabase.auth.signUp({
         email: signUpData.email.trim(),
         password: signUpData.password,
@@ -54,7 +49,6 @@ export class AuthService {
       });
 
       if (error) {
-        console.error('AuthService: Signup error:', error);
         return {
           success: false,
           error: this.formatErrorMessage(error.message)
@@ -62,18 +56,6 @@ export class AuthService {
       }
 
       if (data.user) {
-        console.log('✅ AuthService: User created:', data.user.id);
-
-        // Create user profile in background
-        this.ensureUserProfile(data.user, signUpData.email, signUpData.firstName).catch(err => {
-          console.warn('AuthService: Profile creation failed (non-blocking):', err);
-        });
-
-        // Send confirmation email via our service for better UX
-        this.sendEnhancedConfirmationEmail(signUpData.email).catch(err => {
-          console.warn('AuthService: Enhanced confirmation email failed (non-blocking):', err);
-        });
-
         return {
           success: true,
           user: data.user,
@@ -87,7 +69,6 @@ export class AuthService {
         error: 'No user data received from signup'
       };
     } catch (error: any) {
-      console.error('AuthService: Signup exception:', error);
       return {
         success: false,
         error: this.formatErrorMessage(error.message)
