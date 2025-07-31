@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { GuestDashboard } from '@/components/GuestDashboard';
 import { UserBlogDashboard } from '@/components/UserBlogDashboard';
-import Dashboard from '@/pages/Dashboard';
+import { SafeDashboard } from '@/components/SafeDashboard';
 
 export function EnhancedDashboardRouter() {
   const [user, setUser] = useState<any>(null);
