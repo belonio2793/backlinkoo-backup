@@ -38,6 +38,10 @@ if (typeof window !== 'undefined') {
     }
     localStorage.setItem('content_cleanup_version', cleanupVersion);
   }
+
+  // Initialize auto-config saver
+  console.log('🚀 Initializing automatic configuration monitoring...');
+  autoConfigSaver.startMonitoring();
 }
 
 const App = () => (
