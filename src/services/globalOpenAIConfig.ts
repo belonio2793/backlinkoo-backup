@@ -15,10 +15,10 @@ export class GlobalOpenAIConfig {
   static getAPIKey(): string {
     console.log('🔍 Getting OpenAI API key...');
 
-    // 1. Environment variable (Edge Function Secrets - production priority)
-    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
+    // 1. Environment variable (Netlify OPENAI_API_KEY - production priority)
+    const envKey = import.meta.env.OPENAI_API_KEY;
     if (envKey && envKey.startsWith('sk-') && envKey.length > 20) {
-      console.log('✅ Using environment variable key ending with:', envKey.slice(-4));
+      console.log('✅ Using Netlify environment variable key ending with:', envKey.slice(-4));
       return envKey;
     }
 
