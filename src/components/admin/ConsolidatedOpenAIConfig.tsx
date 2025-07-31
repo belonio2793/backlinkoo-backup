@@ -206,6 +206,41 @@ export function ConsolidatedOpenAIConfig() {
     return 'text-red-600';
   };
 
+  const handleSetupTableAndAPIKey = async () => {
+    setIsSettingUp(true);
+    try {
+      toast({
+        title: "Setting up...",
+        description: "Creating admin table and configuring OpenAI API key...",
+      });
+
+      const result = await setupAdminTableAndAPIKey();
+
+      if (result.success) {
+        toast({
+          title: "✅ Setup Complete!",
+          description: result.message,
+        });
+
+        setTableExists(true);
+        await loadCurrentStatus();
+
+        // Switch to status tab to see the results
+        setActiveTab('status');
+      } else {
+        throw new Error(result.error || 'Setup failed');
+      }
+    } catch (error) {
+      toast({
+        title: "❌ Setup Failed",
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: "destructive"
+      });
+    } finally {
+      setIsSettingUp(false);
+    }
+  };
+
   return (
     <Card className="w-full border-2 border-blue-200">
       <CardHeader>
