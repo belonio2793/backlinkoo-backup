@@ -322,6 +322,7 @@ export function PermanentConfigManager() {
                       🔒 Multiple backup layers ensure your configuration will never be lost.
                       <div className="mt-3 flex gap-2">
                         <Button
+                          key="confirm-save"
                           size="sm"
                           className="bg-green-600 hover:bg-green-700"
                           onClick={handlePerfectHealth}
@@ -329,6 +330,7 @@ export function PermanentConfigManager() {
                           🎯 Confirm & Save Perfect Config
                         </Button>
                         <Button
+                          key="download-backup"
                           size="sm"
                           variant="outline"
                           onClick={exportConfiguration}
