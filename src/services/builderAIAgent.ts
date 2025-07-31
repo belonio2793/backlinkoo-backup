@@ -160,9 +160,9 @@ class BuilderAIAgent {
     const selectedTemplate = this.PROMPT_TEMPLATES[Math.floor(Math.random() * this.PROMPT_TEMPLATES.length)];
     
     let prompt = selectedTemplate
-      .replace(/<user_input_keyword>/g, request.user_input_keyword)
-      .replace(/<user_input_anchor_text>/g, request.user_input_anchor_text)
-      .replace(/<user_input_url>/g, request.user_input_url);
+      .replace(/{{keyword}}/g, request.user_input_keyword)
+      .replace(/{{anchor_text}}/g, request.user_input_anchor_text)
+      .replace(/{{url}}/g, request.user_input_url);
 
     // Add SEO and formatting requirements
     prompt += `
