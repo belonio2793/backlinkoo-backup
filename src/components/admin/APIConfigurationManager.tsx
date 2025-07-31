@@ -96,10 +96,16 @@ export function APIConfigurationManager() {
   const [testResults, setTestResults] = useState<Record<string, any>>({});
   const [syncStatus, setSyncStatus] = useState<{ [key: string]: { lastSync: string; success: boolean; attempts: number } }>({});
 
-  // Load current configurations
+  // Load current configurations and sync status
   useEffect(() => {
     loadCurrentConfigs();
+    loadSyncStatus();
   }, []);
+
+  const loadSyncStatus = () => {
+    const status = adminGlobalSync.getSyncStatus();
+    setSyncStatus(status);
+  };
 
   const loadCurrentConfigs = () => {
     setConfigs(prev => prev.map(config => {
