@@ -142,10 +142,7 @@ export class AuthService {
         };
       }
 
-      // Send additional password reset email via our service for better UX
-      this.sendEnhancedPasswordResetEmail(email).catch(err => {
-        console.warn('AuthService: Enhanced password reset email failed (non-blocking):', err);
-      });
+
 
       console.log('✅ AuthService: Password reset email sent');
       return {
@@ -192,10 +189,7 @@ export class AuthService {
         };
       }
 
-      // Send additional confirmation email via our service for better UX
-      this.sendEnhancedConfirmationEmail(email).catch(err => {
-        console.warn('AuthService: Enhanced confirmation email failed (non-blocking):', err);
-      });
+
 
       console.log('✅ AuthService: Confirmation email resent');
       return {
@@ -263,7 +257,7 @@ export class AuthService {
         // Don't fail on signout errors, just warn
       }
 
-      await this.cleanupAuthState();
+
 
       console.log('✅ AuthService: User signed out');
       return {
