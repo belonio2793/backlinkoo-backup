@@ -354,11 +354,11 @@ Ensure the anchor text placement follows SEO best practices and genuinely helps 
         const fallbackPost = {
           id: `local_${Date.now()}`,
           title: blogPostData.title,
-          slug: keyword.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          slug: slug, // Use the SEO-optimized slug
           content: blogPostData.content,
           target_url: formattedUrl,
           anchor_text: anchorText.trim(),
-          keywords: [keyword.trim()],
+          keywords: blogPostData.keywords,
           word_count: blogPostData.wordCount,
           reading_time: blogPostData.readingTime,
           seo_score: blogPostData.seoScore,
@@ -371,8 +371,8 @@ Ensure the anchor text placement follows SEO best practices and genuinely helps 
           status: 'published',
           view_count: 0,
           category: 'AI Generated',
-          tags: [keyword.trim()],
-          published_url: `/blog/${keyword.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+          tags: blogPostData.keywords,
+          published_url: `/blog/${slug}`
         };
 
         localStorage.setItem(`blog_post_${fallbackPost.slug}`, JSON.stringify(fallbackPost));
