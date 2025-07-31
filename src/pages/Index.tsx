@@ -25,6 +25,7 @@ import { HomepageBlogGenerator } from "@/components/HomepageBlogGenerator";
 import { ProductionBlogGenerator } from "@/components/ProductionBlogGenerator";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 import { OpenAIGenerator } from "@/components/OpenAIGenerator";
+import { SimpleBlogForm } from "@/components/blog/SimpleBlogForm";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
