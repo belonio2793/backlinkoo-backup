@@ -209,7 +209,8 @@ export function UnifiedOpenAIConfig() {
   const maskApiKey = (key: string) => {
     if (!key) return '';
     if (key.length <= 10) return '•'.repeat(key.length);
-    return key.substring(0, 7) + '•'.repeat(Math.max(key.length - 14, 8)) + key.slice(-7);
+    // Show first 7 and last 7 characters with fixed number of dots in between
+    return key.substring(0, 7) + '••••••••••••' + key.slice(-7);
   };
 
   return (
