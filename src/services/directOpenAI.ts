@@ -68,7 +68,8 @@ Please write the complete blog post now:`;
           anchorText: request.anchorText,
           wordCount: 1000,
           contentType: 'how-to',
-          tone: 'professional'
+          tone: 'professional',
+          apiKey: clientApiKey // Pass API key securely to server function
         })
       });
 
