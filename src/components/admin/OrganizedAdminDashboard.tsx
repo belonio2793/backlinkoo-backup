@@ -20,6 +20,8 @@ import { AIPostsManager } from "@/components/admin/AIPostsManager";
 import { BlogPostClaimsManager } from "@/components/admin/BlogPostClaimsManager";
 import { EnvironmentVariablesManager } from "@/components/admin/EnvironmentVariablesManager";
 import { UnifiedOpenAIConfig } from "@/components/admin/UnifiedOpenAIConfig";
+import { ForceAPIKeyUpdate } from "@/components/admin/ForceAPIKeyUpdate";
+import { ApiKeyStatusFix } from "@/components/admin/ApiKeyStatusFix";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 
 // Testing Tools
@@ -210,6 +212,9 @@ export function OrganizedAdminDashboard() {
       <div className="space-y-6">
         {activeCategory === "overview" && (
           <div className="space-y-6">
+            {/* API Key Status Fix - Priority Alert */}
+            <ApiKeyStatusFix />
+
             {/* Featured: OpenAI Configuration */}
             <Alert className="border-blue-200 bg-blue-50">
               <Brain className="h-4 w-4 text-blue-600" />
@@ -314,6 +319,7 @@ export function OrganizedAdminDashboard() {
             <TabsContent value="openai-config">
               <div className="space-y-6">
                 <UnifiedOpenAIConfig />
+                <ForceAPIKeyUpdate />
                 <Alert>
                   <Brain className="h-4 w-4" />
                   <AlertDescription>

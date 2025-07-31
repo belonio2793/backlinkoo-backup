@@ -24,42 +24,32 @@ class EnvironmentVariablesService {
    * Get environment variable value by key
    */
   async getVariable(key: string): Promise<string | null> {
-    // Force refresh from database for API keys to get latest from Supabase
-    if (key.includes('API_KEY')) {
-      console.log('🔄 Force refreshing API key from Supabase database...');
-      await this.refreshCache();
-      const dbValue = this.cache.get(key);
-      if (dbValue) {
-        console.log('✅ API key found in Supabase database:', dbValue.substring(0, 15) + '...');
-        return dbValue;
-      }
-    }
-
-    // First check runtime environment variables
+    // Priority: Environment variables (Edge Function Secrets) first
     const envValue = import.meta.env[key];
     if (envValue) {
-      console.log('✅ API key found in environment variables:', envValue.substring(0, 15) + '...');
+      console.log('✅ Environment variable found:', envValue.substring(0, 15) + '...');
       return envValue;
     }
 
-    // Then check cache
-    if (this.cache.has(key) && Date.now() - this.lastFetch < this.CACHE_DURATION) {
+    // Fallback to localStorage cache for backwards compatibility
+    if (this.cache.has(key)) {
       const cached = this.cache.get(key);
       if (cached) {
-        console.log('✅ API key found in cache:', cached.substring(0, 15) + '...');
+        console.log('✅ Variable found in cache:', cached.substring(0, 15) + '...');
         return cached;
       }
     }
 
-    // Fetch from database
-    await this.refreshCache();
-    const dbValue = this.cache.get(key);
-    if (dbValue) {
-      console.log('✅ API key found after refresh:', dbValue.substring(0, 15) + '...');
-    } else {
-      console.log('❌ No API key found in any source');
+    // Load from localStorage if not in memory cache
+    this.loadFromLocalStorage();
+    const localValue = this.cache.get(key);
+    if (localValue) {
+      console.log('✅ Variable found in localStorage:', localValue.substring(0, 15) + '...');
+      return localValue;
     }
-    return dbValue || null;
+
+    console.log('❌ No variable found for key:', key);
+    return null;
   }
 
   /**
@@ -76,41 +66,27 @@ class EnvironmentVariablesService {
   }
 
   /**
-   * Refresh the cache with latest values from database
+   * Refresh the cache with values from localStorage
    */
   async refreshCache(): Promise<void> {
     try {
-      console.log('🔄 Fetching environment variables from Supabase database...');
-      const { data, error } = await supabase
-        .from('admin_environment_variables')
-        .select('key, value');
-
-      if (error) {
-        console.warn('Could not fetch environment variables from database, using localStorage fallback:', error);
-        this.loadFromLocalStorage();
-        return;
-      }
-
-      // Update cache
-      this.cache.clear();
-      data?.forEach((item: any) => {
-        this.cache.set(item.key, item.value);
-      });
-
+      console.log('🔄 Refreshing environment variables cache from localStorage...');
+      this.loadFromLocalStorage();
       this.lastFetch = Date.now();
-      console.log('✅ Environment variables cache refreshed from database');
-      console.log('📊 Loaded variables:', data?.map((item: any) => item.key).join(', '));
 
-      // Log API key status specifically
-      const apiKey = this.cache.get('VITE_OPENAI_API_KEY');
+      // Log what we have
+      const keys = Array.from(this.cache.keys());
+      console.log('📊 Cached variables:', keys.join(', '));
+
+      // Check for OpenAI key specifically
+      const apiKey = this.cache.get('OPENAI_API_KEY') || import.meta.env.OPENAI_API_KEY;
       if (apiKey) {
-        console.log('🔑 OpenAI API key loaded from database:', apiKey.substring(0, 15) + '...');
+        console.log('🔑 OpenAI API key available:', apiKey.substring(0, 15) + '...');
       } else {
-        console.log('❌ No OpenAI API key found in database');
+        console.log('❌ No OpenAI API key found');
       }
     } catch (error) {
-      console.warn('Error refreshing environment variables cache, using localStorage fallback:', error);
-      this.loadFromLocalStorage();
+      console.warn('Error refreshing cache:', error);
     }
   }
 
@@ -134,21 +110,26 @@ class EnvironmentVariablesService {
   }
 
   /**
-   * Get all environment variables (admin only)
+   * Get all environment variables (from cache/localStorage)
    */
   async getAllVariables(): Promise<EnvironmentVariable[]> {
     try {
-      const { data, error } = await supabase
-        .from('admin_environment_variables')
-        .select('*')
-        .order('created_at', { ascending: false });
+      this.loadFromLocalStorage();
+      const variables: EnvironmentVariable[] = [];
 
-      if (error) {
-        console.error('Error fetching all environment variables:', error);
-        return [];
+      for (const [key, value] of this.cache.entries()) {
+        variables.push({
+          id: key,
+          key,
+          value,
+          description: `Environment variable for ${key}`,
+          is_secret: key.includes('API_KEY') || key.includes('SECRET'),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
       }
 
-      return data || [];
+      return variables;
     } catch (error) {
       console.error('Error in getAllVariables:', error);
       return [];
@@ -156,7 +137,7 @@ class EnvironmentVariablesService {
   }
 
   /**
-   * Save environment variable (admin only)
+   * Save environment variable (localStorage only)
    */
   async saveVariable(
     key: string,
@@ -165,74 +146,51 @@ class EnvironmentVariablesService {
     isSecret: boolean = true
   ): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('admin_environment_variables')
-        .upsert({
-          key,
-          value,
-          description,
-          is_secret: isSecret
-        });
-
-      if (error) {
-        console.error('Error saving environment variable:', error);
-        // Extract meaningful error message
-        let errorMessage = 'Database error occurred';
-
-        if (error.message) {
-          errorMessage = error.message;
-        } else if (error.details) {
-          errorMessage = error.details;
-        } else if (error.code) {
-          errorMessage = `Database error code: ${error.code}`;
-        }
-
-        // Check for common database issues
-        if (errorMessage.includes('does not exist') || errorMessage.includes('42P01')) {
-          errorMessage = 'Database table "admin_environment_variables" does not exist. Please check your database setup.';
-        } else if (errorMessage.includes('permission denied') || errorMessage.includes('insufficient_privilege')) {
-          errorMessage = 'Database permission denied. Please check your Supabase configuration.';
-        }
-
-        throw new Error(`Database error: ${errorMessage}`);
-      }
-
       // Update cache
       this.cache.set(key, value);
-      console.log(`✅ Environment variable ${key} saved successfully`);
+
+      // Save to localStorage
+      const stored = localStorage.getItem('admin_env_vars') || '[]';
+      const vars = JSON.parse(stored);
+
+      // Remove existing entry with same key
+      const filtered = vars.filter((v: any) => v.key !== key);
+
+      // Add new entry
+      filtered.push({
+        key,
+        value,
+        description,
+        is_secret: isSecret,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+
+      localStorage.setItem('admin_env_vars', JSON.stringify(filtered));
+      console.log(`✅ Environment variable ${key} saved to localStorage`);
       return true;
     } catch (error) {
       console.error('Error in saveVariable:', error);
-
-      // If it's already our custom error, re-throw it
-      if (error instanceof Error && error.message.includes('Failed to save to database')) {
-        throw error;
-      }
-
-      // For other errors, create a descriptive message
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       throw new Error(`Failed to save environment variable: ${errorMessage}`);
     }
   }
 
   /**
-   * Delete environment variable (admin only)
+   * Delete environment variable (localStorage only)
    */
   async deleteVariable(key: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('admin_environment_variables')
-        .delete()
-        .eq('key', key);
-
-      if (error) {
-        console.error('Error deleting environment variable:', error);
-        return false;
-      }
-
       // Remove from cache
       this.cache.delete(key);
-      console.log(`✅ Environment variable ${key} deleted successfully`);
+
+      // Remove from localStorage
+      const stored = localStorage.getItem('admin_env_vars') || '[]';
+      const vars = JSON.parse(stored);
+      const filtered = vars.filter((v: any) => v.key !== key);
+      localStorage.setItem('admin_env_vars', JSON.stringify(filtered));
+
+      console.log(`✅ Environment variable ${key} deleted from localStorage`);
       return true;
     } catch (error) {
       console.error('Error in deleteVariable:', error);
@@ -244,7 +202,7 @@ class EnvironmentVariablesService {
    * Check if OpenAI API key is configured
    */
   async isOpenAIConfigured(): Promise<boolean> {
-    const apiKey = await this.getVariable('VITE_OPENAI_API_KEY');
+    const apiKey = await this.getVariable('OPENAI_API_KEY');
     return Boolean(apiKey && apiKey.startsWith('sk-'));
   }
 
@@ -252,7 +210,7 @@ class EnvironmentVariablesService {
    * Get OpenAI API key
    */
   async getOpenAIKey(): Promise<string | null> {
-    return await this.getVariable('VITE_OPENAI_API_KEY');
+    return await this.getVariable('OPENAI_API_KEY');
   }
 
   /**

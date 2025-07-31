@@ -71,8 +71,8 @@ serve(async (req) => {
       );
     }
 
-    // Get OpenAI API key from environment
-    const apiKey = Deno.env.get('VITE_OPENAI_API_KEY') || Deno.env.get('OPENAI_API_KEY');
+    // Get OpenAI API key from environment (prioritize OPENAI_API_KEY from Netlify)
+    const apiKey = Deno.env.get('OPENAI_API_KEY') || Deno.env.get('VITE_OPENAI_API_KEY');
     if (!apiKey) {
       return new Response(
         JSON.stringify({ 

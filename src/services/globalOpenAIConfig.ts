@@ -10,40 +10,41 @@ const GLOBAL_OPENAI_API_KEY = '';
 export class GlobalOpenAIConfig {
   /**
    * Get the global OpenAI API key
-   * Available for all users visiting backlinkoo.com
-   * Now syncs directly with admin configuration
+   * Prioritizes environment variables (Edge Function Secrets)
    */
   static getAPIKey(): string {
-    // Priority order:
-    // 1. Environment variable (production)
-    // 2. Admin saved configuration (primary source)
-    // 3. Permanent storage (backup)
-    // 4. Temporary localStorage key (development)
+    console.log('🔍 Getting OpenAI API key...');
 
-    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
+    // 1. Environment variable (Netlify OPENAI_API_KEY - production priority)
+    const envKey = import.meta.env.OPENAI_API_KEY;
     if (envKey && envKey.startsWith('sk-') && envKey.length > 20) {
+      console.log('✅ Using Netlify environment variable key ending with:', envKey.slice(-4));
       return envKey;
     }
 
-    // Check admin configuration first
+    // 2. Admin configured key from localStorage
     const adminKey = this.getAdminConfiguredKey();
     if (adminKey && adminKey.startsWith('sk-') && adminKey.length > 20) {
+      console.log('✅ Using admin configured key ending with:', adminKey.slice(-4));
       return adminKey;
     }
 
-    // Check permanent storage
+    // 3. Permanent storage
     const permanentKey = this.getPermanentKey();
     if (permanentKey && permanentKey.startsWith('sk-') && permanentKey.length > 20) {
+      console.log('✅ Using permanent storage key ending with:', permanentKey.slice(-4));
       return permanentKey;
     }
 
-    // Fallback to temporary key for development
+    // 4. Temporary key for development
     const tempKey = localStorage.getItem('temp_openai_key');
     if (tempKey && tempKey.startsWith('sk-') && tempKey.length > 20) {
+      console.log('✅ Using temporary key ending with:', tempKey.slice(-4));
       return tempKey;
     }
 
-    throw new Error('Global OpenAI configuration not available - Please configure API key in admin dashboard');
+    console.log('❌ No valid OpenAI API key found');
+    throw new Error('OpenAI API key not configured - Please set OPENAI_API_KEY environment variable in Netlify');
   }
 
   /**
