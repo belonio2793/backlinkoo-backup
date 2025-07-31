@@ -153,7 +153,7 @@ export class GlobalOpenAIConfig {
       } else if (error.name === 'AbortError') {
         console.warn('⚠️ OpenAI connection test timed out');
       } else {
-        console.warn('⚠️ OpenAI connection test failed:', error.message);
+        console.warn('��️ OpenAI connection test failed:', error.message);
       }
 
       // Enable fallback mode on error but don't log as error
@@ -466,7 +466,19 @@ ${params.anchorText && params.url ? `
   }> {
     try {
       const configured = this.isConfigured();
-      const connected = configured ? await this.testConnection() : false;
+      let connected = false;
+
+      // Skip connection test to avoid fetch errors on startup
+      // Only test if explicitly needed and in a controlled manner
+      if (configured) {
+        try {
+          connected = await this.testConnection();
+        } catch (error) {
+          // Silently handle connection test failures
+          connected = false;
+        }
+      }
+
       const healthScore = configured ? (connected ? 100 : 50) : 0;
 
       return {
