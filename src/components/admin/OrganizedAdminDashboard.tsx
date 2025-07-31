@@ -207,6 +207,8 @@ export function OrganizedAdminDashboard() {
       <div className="space-y-6">
         {activeCategory === "overview" && (
           <div className="space-y-6">
+            <ConsolidatedOpenAIConfig />
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -218,7 +220,7 @@ export function OrganizedAdminDashboard() {
                 <ServiceConnectionStatus />
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>System Health Check</CardTitle>
@@ -228,11 +230,7 @@ export function OrganizedAdminDashboard() {
               </CardContent>
             </Card>
 
-            <GlobalAPIStatus />
-
             <ErrorDebugger />
-
-            <PermanentConfigManager />
           </div>
         )}
 
