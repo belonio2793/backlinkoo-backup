@@ -18,102 +18,62 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
   const [targetUrl, setTargetUrl] = useState('');
   const { toast } = useToast();
 
-  const addSecondaryKeyword = () => {
-    if (newSecondaryKeyword.trim() && !secondaryKeywords.includes(newSecondaryKeyword.trim())) {
-      setSecondaryKeywords([...secondaryKeywords, newSecondaryKeyword.trim()]);
-      setNewSecondaryKeyword('');
-    }
-  };
-
-  const removeSecondaryKeyword = (keyword: string) => {
-    setSecondaryKeywords(secondaryKeywords.filter(k => k !== keyword));
-  };
-
   const generateContent = async () => {
-    if (!targetUrl || !primaryKeyword) {
+    if (!keyword || !anchorText || !targetUrl) {
       toast({
         title: "Missing Information",
-        description: "Please provide both target URL and primary keyword",
+        description: "Please provide keyword, anchor text, and target URL",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate URL format
+    try {
+      new URL(targetUrl);
+    } catch {
+      toast({
+        title: "Invalid URL",
+        description: "Please provide a valid target URL",
         variant: "destructive"
       });
       return;
     }
 
     setIsGenerating(true);
-    setTestingProviders(true);
 
     try {
-      // Step 1: Run AI test workflow to validate providers
-      setTestWorkflowStep('Testing AI provider connectivity...');
-
-      const workflowResult = await aiTestWorkflow.processCompleteWorkflow({
-        websiteUrl: targetUrl,
-        keyword: primaryKeyword,
-        anchorText: secondaryKeywords[0] || primaryKeyword,
-        sessionId: crypto.randomUUID(),
-        enhancedOptions: {
-          wordCount: parseInt(wordCount),
-          tone,
-          contentType,
-          targetAudience,
-          keywordDensity,
-          includeCallToAction,
-          optimizeForSnippets,
-          secondaryKeywords
-        }
+      const result = await DirectOpenAIService.generateBlogPost({
+        keyword,
+        anchorText,
+        targetUrl
       });
 
-      const { testResult, blogResult } = workflowResult;
-      setProviderStatuses(testResult.providerStatuses);
-
-      if (!testResult.success) {
-        throw new Error(`AI provider validation failed: ${testResult.errors.join(', ')}`);
-      }
-
-      setTestWorkflowStep('Generating optimized blog content...');
-
-      if (blogResult.success && blogResult.blogUrl) {
-        // Success! Return the published blog URL
-        onContentGenerated({
-          ...blogResult,
-          metadata: {
-            ...blogResult.metadata,
-            targetUrl,
-            primaryKeyword,
-            secondaryKeywords,
-            contentType,
-            wordCount: parseInt(wordCount),
-            tone,
-            targetAudience,
-            keywordDensity,
-            includeCallToAction,
-            optimizeForSnippets,
-            customInstructions,
-            testResult,
-            workingProviders: testResult.workingProviders,
-            recommendedProvider: testResult.recommendedProvider
-          }
-        });
+      if (result.success) {
+        onContentGenerated(result);
 
         toast({
-          title: "Blog Generated Successfully!",
-          description: `Your blog post is now live at: ${blogResult.blogUrl}`,
+          title: "Blog Post Generated!",
+          description: `Your blog post "${result.title}" is now live at ${result.blogUrl}`,
         });
+
+        // Reset form
+        setKeyword('');
+        setAnchorText('');
+        setTargetUrl('');
       } else {
-        throw new Error(blogResult.error || 'Blog generation failed after successful provider validation');
+        throw new Error(result.error || 'Blog generation failed');
       }
 
     } catch (error) {
-      console.error('Content generation failed:', error);
+      console.error('Blog generation failed:', error);
       toast({
         title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to generate content. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate blog post. Please try again.",
         variant: "destructive"
       });
     } finally {
       setIsGenerating(false);
-      setTestingProviders(false);
-      setTestWorkflowStep('');
     }
   };
 
