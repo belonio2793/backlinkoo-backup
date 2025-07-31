@@ -40,7 +40,7 @@ export const ConnectionTest = () => {
       const { data, error } = await supabase.from('profiles').select('count').limit(1);
       if (error) {
         setDbTest('error');
-        const errorMessage = error?.message || error?.details || error?.hint || String(error) || 'Unknown database error';
+        const errorMessage = getErrorMessage(error);
         setDbMessage(`Database error: ${errorMessage}`);
       } else {
         setDbTest('success');
