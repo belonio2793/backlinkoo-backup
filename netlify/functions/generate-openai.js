@@ -32,7 +32,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { keyword, url, anchorText, wordCount = 1500, contentType = 'how-to', tone = 'professional' } = JSON.parse(event.body);
+    const { keyword, url, anchorText, wordCount = 1500, contentType = 'how-to', tone = 'professional', apiKey: requestApiKey } = JSON.parse(event.body);
 
     if (!keyword || !url) {
       return {
@@ -41,15 +41,15 @@ exports.handler = async (event, context) => {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
-          success: false, 
-          error: 'Missing required fields: keyword and url' 
+        body: JSON.stringify({
+          success: false,
+          error: 'Missing required fields: keyword and url'
         })
       };
     }
 
-    // Get OpenAI API key from environment
-    const apiKey = process.env.OPENAI_API_KEY;
+    // Get OpenAI API key from request or environment
+    const apiKey = requestApiKey || process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return {
         statusCode: 500,

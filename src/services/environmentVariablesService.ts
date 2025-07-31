@@ -159,9 +159,9 @@ class EnvironmentVariablesService {
    * Save environment variable (admin only)
    */
   async saveVariable(
-    key: string, 
-    value: string, 
-    description?: string, 
+    key: string,
+    value: string,
+    description?: string,
     isSecret: boolean = true
   ): Promise<boolean> {
     try {
@@ -176,7 +176,25 @@ class EnvironmentVariablesService {
 
       if (error) {
         console.error('Error saving environment variable:', error);
-        return false;
+        // Extract meaningful error message
+        let errorMessage = 'Database error occurred';
+
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error.details) {
+          errorMessage = error.details;
+        } else if (error.code) {
+          errorMessage = `Database error code: ${error.code}`;
+        }
+
+        // Check for common database issues
+        if (errorMessage.includes('does not exist') || errorMessage.includes('42P01')) {
+          errorMessage = 'Database table "admin_environment_variables" does not exist. Please check your database setup.';
+        } else if (errorMessage.includes('permission denied') || errorMessage.includes('insufficient_privilege')) {
+          errorMessage = 'Database permission denied. Please check your Supabase configuration.';
+        }
+
+        throw new Error(`Database error: ${errorMessage}`);
       }
 
       // Update cache
@@ -185,7 +203,15 @@ class EnvironmentVariablesService {
       return true;
     } catch (error) {
       console.error('Error in saveVariable:', error);
-      return false;
+
+      // If it's already our custom error, re-throw it
+      if (error instanceof Error && error.message.includes('Failed to save to database')) {
+        throw error;
+      }
+
+      // For other errors, create a descriptive message
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      throw new Error(`Failed to save environment variable: ${errorMessage}`);
     }
   }
 

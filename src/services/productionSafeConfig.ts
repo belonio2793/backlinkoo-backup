@@ -108,7 +108,7 @@ export class ProductionSafeConfig {
         valid: cached,
         lastValidated: new Date().toISOString(),
         responseTime: 0,
-        fallbackAvailable: this.fallbackConfigs.has('openai'),
+        fallbackAvailable: false,
         userImpact: cached ? 'none' : 'blocked',
         autoFixed: false
       };
@@ -129,7 +129,12 @@ export class ProductionSafeConfig {
       this.setCachedValidation(cacheKey, isValid);
 
     } catch (error) {
-      console.error('OpenAI validation failed:', error);
+      // Handle fetch errors gracefully without console.error spam
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.warn('⚠️ OpenAI validation skipped due to network restrictions');
+      } else {
+        console.warn('⚠️ OpenAI validation failed:', error.message);
+      }
       isValid = false;
     }
 
