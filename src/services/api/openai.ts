@@ -1,7 +1,9 @@
 /**
- * Secure OpenAI Service - Server-side only
- * All OpenAI API calls go through Netlify functions for security
+ * OpenAI Service with Global Configuration
+ * Uses global API key available for all users
  */
+
+import { globalOpenAI } from '../globalOpenAIConfig';
 
 interface OpenAIRequest {
   prompt: string;
@@ -30,7 +32,7 @@ export class OpenAIService {
   }
 
   /**
-   * Generate content using OpenAI via secure Netlify function
+   * Generate content using global OpenAI configuration
    */
   async generateContent(prompt: string, options: {
     model?: string;
@@ -39,35 +41,25 @@ export class OpenAIService {
     systemPrompt?: string;
   } = {}): Promise<OpenAIResponse> {
     try {
-      console.log('🚀 Generating content via secure Netlify function...');
+      console.log('🚀 Generating content with global OpenAI configuration...');
 
-      const response = await fetch(`${this.baseUrl}/generate-openai`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          keyword: prompt, // Use prompt as keyword for this service
-          url: 'https://example.com', // Default URL since this service doesn't specify one
-          anchorText: 'learn more', // Default anchor text
-          wordCount: options.maxTokens ? Math.floor(options.maxTokens / 2.5) : 1500,
-          contentType: 'how-to',
-          tone: 'professional'
-        })
+      const result = await globalOpenAI.generateContent({
+        keyword: prompt,
+        wordCount: options.maxTokens ? Math.floor(options.maxTokens / 2.5) : 1000,
+        systemPrompt: options.systemPrompt
       });
 
-      if (!response.ok) {
-        throw new Error(`Netlify function error: ${response.status}`);
+      if (result.success && result.content) {
+        console.log('✅ Content generation successful');
+        return {
+          content: result.content,
+          usage: result.usage || { tokens: 0, cost: 0 },
+          success: true,
+          provider: 'GlobalOpenAI'
+        };
+      } else {
+        throw new Error(result.error || 'Content generation failed');
       }
-
-      const data = await response.json();
-      
-      if (!data.success) {
-        throw new Error(data.error || 'Content generation failed');
-      }
-
-      console.log('✅ Content generation successful via Netlify function');
-      return data;
 
     } catch (error) {
       console.error('❌ OpenAI service error:', error);
@@ -76,63 +68,30 @@ export class OpenAIService {
         usage: { tokens: 0, cost: 0 },
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
-        provider: 'Netlify-OpenAI'
+        provider: 'GlobalOpenAI'
       };
     }
   }
 
   /**
-   * Test OpenAI connection via Netlify function
+   * Test OpenAI connection using global configuration
    */
   async testConnection(): Promise<boolean> {
-    try {
-      console.log('🔍 Testing OpenAI connection via Netlify function...');
-
-      const response = await fetch(`${this.baseUrl}/check-ai-provider`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          provider: 'OpenAI'
-        })
-      });
-
-      if (!response.ok) {
-        console.warn('⚠️ OpenAI connection test failed:', response.status);
-        return false;
-      }
-
-      const data = await response.json();
-      console.log('✅ OpenAI connection test successful');
-      return data.success || false;
-
-    } catch (error) {
-      console.warn('⚠️ OpenAI connection test error:', error);
-      return false;
-    }
+    return await globalOpenAI.testConnection();
   }
 
   /**
-   * Check if OpenAI is configured (server-side)
+   * Check if OpenAI is configured (uses global configuration)
    */
   async isConfigured(): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.baseUrl}/api-status`);
-      if (!response.ok) return false;
-      
-      const data = await response.json();
-      return data.providerStatus?.OpenAI?.configured || false;
-    } catch {
-      return false;
-    }
+    return globalOpenAI.isConfigured();
   }
 
   /**
-   * Get masked preview (not applicable for server-side)
+   * Get masked preview of global API key
    */
   getMaskedKey(): string {
-    return '[Server-side only]';
+    return globalOpenAI.getMaskedKey();
   }
 }
 

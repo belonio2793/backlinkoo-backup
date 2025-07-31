@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { ResendEmailService, ResendEmailResponse, ResendEmailData } from '@/services/resendEmailService';
+import { directEmailService } from '@/services/directEmailService';
 import {
   Mail,
   Send,
@@ -52,7 +53,11 @@ Email System Manager`
 
   const [isLoading, setIsLoading] = useState(false);
   const [testResults, setTestResults] = useState<ResendEmailResponse | null>(null);
-  const [systemHealth, setSystemHealth] = useState<any>(null);
+  const [systemHealth, setSystemHealth] = useState<any>({
+    status: 'unknown',
+    recentFailures: 0,
+    providers: []
+  });
   const [failureLog, setFailureLog] = useState<any[]>([]);
   const [adminConfig, setAdminConfig] = useState({
     smtp_host: 'smtp.resend.com',
@@ -72,15 +77,45 @@ Email System Manager`
   const loadSystemHealth = async () => {
     try {
       const health = await ResendEmailService.healthCheck();
-      setSystemHealth(health);
+      // Transform the actual service response to match expected structure
+      const safeHealth = {
+        status: health?.status || 'unknown',
+        recentFailures: failureLog.length || 0,
+        providers: [
+          {
+            name: 'resend',
+            status: health?.resend ? 'healthy' : 'error',
+            lastTested: new Date()
+          }
+        ]
+      };
+      setSystemHealth(safeHealth);
     } catch (error) {
       console.error('Failed to load system health:', error);
+      // Set a safe default structure on error
+      setSystemHealth({
+        status: 'error',
+        recentFailures: 0,
+        providers: [
+          {
+            name: 'resend',
+            status: 'error',
+            lastTested: new Date()
+          }
+        ]
+      });
     }
   };
 
   const loadFailureLog = () => {
-    const failures = ResendEmailService.getFailureLog();
-    setFailureLog(failures);
+    try {
+      const failures = ResendEmailService.getFailureLog();
+      // Ensure failures is an array
+      setFailureLog(Array.isArray(failures) ? failures : []);
+    } catch (error) {
+      console.error('Failed to load failure log:', error);
+      setFailureLog([]);
+    }
   };
 
   const runEmailTest = async () => {
@@ -133,8 +168,18 @@ Email System Manager`
       // This would call specific provider methods
       console.log(`Testing ${provider} provider directly...`);
       
-      // For demonstration, we'll use the main service
-      const result = await ResendEmailService.sendEmail(testData);
+      // Try main service first, then direct service as fallback
+      let result;
+      try {
+        if (provider === 'resend' || provider === 'admin') {
+          result = await directEmailService.sendEmail(testData);
+        } else {
+          result = await ResendEmailService.sendEmail(testData);
+        }
+      } catch (error) {
+        console.warn(`${provider} service failed, trying direct fallback:`, error);
+        result = await directEmailService.sendEmail(testData);
+      }
       
       toast({
         title: `${provider.toUpperCase()} Test`,
@@ -164,19 +209,22 @@ Email System Manager`
     });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  const getStatusColor = (status: string | undefined | null) => {
+    const safeStatus = status || 'unknown';
+    switch (safeStatus) {
       case 'healthy': return 'bg-green-100 text-green-800';
       case 'degraded': return 'bg-yellow-100 text-yellow-800';
       case 'critical': return 'bg-red-100 text-red-800';
       case 'fulfilled': return 'bg-green-100 text-green-800';
       case 'rejected': return 'bg-red-100 text-red-800';
+      case 'error': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getProviderIcon = (provider: string) => {
-    switch (provider) {
+  const getProviderIcon = (provider: string | undefined | null) => {
+    const safeProvider = provider || 'unknown';
+    switch (safeProvider) {
       case 'resend': return <Mail className="h-4 w-4" />;
       case 'supabase': return <Database className="h-4 w-4" />;
       case 'netlify': return <Globe className="h-4 w-4" />;
@@ -219,35 +267,55 @@ Email System Manager`
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {systemHealth ? (
+              {systemHealth && systemHealth.providers ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
                     <Badge className={getStatusColor(systemHealth.status)}>
-                      {systemHealth.status.toUpperCase()}
+                      {(systemHealth.status || 'unknown').toUpperCase()}
                     </Badge>
                     <span className="text-sm text-muted-foreground">
-                      {systemHealth.recentFailures} failures in last hour
+                      {systemHealth.recentFailures || 0} failures in last hour
                     </span>
                   </div>
                   
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {systemHealth.providers.map((provider: any, index: number) => (
-                      <div key={index} className={`p-3 rounded-lg border ${getStatusColor(provider.status)}`}>
-                        <div className="flex items-center gap-2 mb-1">
-                          {getProviderIcon(provider.name)}
-                          <span className="font-medium capitalize">{provider.name}</span>
-                        </div>
-                        <div className="text-xs opacity-70">
-                          Last tested: {provider.lastTested.toLocaleTimeString()}
-                        </div>
-                      </div>
-                    ))}
+                    {(systemHealth.providers || []).map((provider: any, index: number) => {
+                      try {
+                        return (
+                          <div key={index} className={`p-3 rounded-lg border ${getStatusColor(provider?.status || 'unknown')}`}>
+                            <div className="flex items-center gap-2 mb-1">
+                              {getProviderIcon(provider?.name || 'unknown')}
+                              <span className="font-medium capitalize">{provider?.name || 'Unknown'}</span>
+                            </div>
+                            <div className="text-xs opacity-70">
+                              Last tested: {provider?.lastTested ? provider.lastTested.toLocaleTimeString() : 'Never'}
+                            </div>
+                          </div>
+                        );
+                      } catch (error) {
+                        console.error('Error rendering provider:', error);
+                        return (
+                          <div key={index} className="p-3 rounded-lg border border-red-200 bg-red-50">
+                            <span className="text-red-600 text-sm">Error loading provider</span>
+                          </div>
+                        );
+                      }
+                    })}
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-4">
                   <RefreshCw className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p className="text-muted-foreground">Loading system health...</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={loadSystemHealth}
+                    className="mt-2"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Retry Loading
+                  </Button>
                 </div>
               )}
             </CardContent>
@@ -498,21 +566,32 @@ Email System Manager`
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {failureLog.length > 0 ? (
+              {(failureLog && failureLog.length > 0) ? (
                 <div className="space-y-2">
-                  {failureLog.map((failure, index) => (
-                    <div key={index} className="flex items-center gap-3 p-2 bg-red-50 rounded-lg">
-                      <AlertTriangle className="h-4 w-4 text-red-600" />
-                      <div className="flex-1">
-                        <div className="font-medium">{failure.provider}</div>
-                        <div className="text-sm text-muted-foreground">{failure.error}</div>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3 inline mr-1" />
-                        {new Date(failure.timestamp).toLocaleTimeString()}
-                      </div>
-                    </div>
-                  ))}
+                  {(failureLog || []).map((failure, index) => {
+                    try {
+                      return (
+                        <div key={index} className="flex items-center gap-3 p-2 bg-red-50 rounded-lg">
+                          <AlertTriangle className="h-4 w-4 text-red-600" />
+                          <div className="flex-1">
+                            <div className="font-medium">{failure?.provider || 'Unknown Provider'}</div>
+                            <div className="text-sm text-muted-foreground">{failure?.error || 'Unknown error'}</div>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3 inline mr-1" />
+                            {failure?.timestamp ? new Date(failure.timestamp).toLocaleTimeString() : 'Unknown time'}
+                          </div>
+                        </div>
+                      );
+                    } catch (error) {
+                      console.error('Error rendering failure log entry:', error);
+                      return (
+                        <div key={index} className="p-2 bg-red-100 rounded-lg text-red-600 text-sm">
+                          Error loading failure entry
+                        </div>
+                      );
+                    }
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-4">

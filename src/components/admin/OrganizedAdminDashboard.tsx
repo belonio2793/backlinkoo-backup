@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { SecurityDashboard } from "@/components/SecurityDashboard";
 import { CampaignManager } from "@/components/CampaignManager";
 import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager";
-import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
+import { EmailSystemManagerSafe } from "@/components/admin/EmailSystemManagerSafe";
 import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
 import { TrialPostCleanupManager } from "@/components/admin/TrialPostCleanupManager";
 import { BlogManagementPanel } from "@/components/admin/BlogManagementPanel";
@@ -28,6 +28,9 @@ import { SystemStatusCheck } from "@/components/SystemStatusCheck";
 import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 import { APIManagementDashboard } from "@/components/admin/APIManagementDashboard";
+import { GlobalAPIStatus } from "@/components/GlobalAPIStatus";
+import { ErrorDebugger } from "@/components/ErrorDebugger";
+import { PermanentConfigManager } from "@/components/admin/PermanentConfigManager";
 
 import {
   Users,
@@ -226,6 +229,12 @@ export function OrganizedAdminDashboard() {
                 <SystemStatusCheck />
               </CardContent>
             </Card>
+
+            <GlobalAPIStatus />
+
+            <ErrorDebugger />
+
+            <PermanentConfigManager />
           </div>
         )}
 
@@ -317,7 +326,7 @@ export function OrganizedAdminDashboard() {
             </TabsList>
 
             <TabsContent value="email-system">
-              <EmailSystemManager />
+              <EmailSystemManagerSafe />
             </TabsContent>
 
             <TabsContent value="smtp-config">

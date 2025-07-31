@@ -7,8 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { openAIContentGenerator } from '@/services/openAIContentGenerator';
-import { testAllKeys } from '@/utils/testOpenAI';
+import { globalOpenAI } from '@/services/globalOpenAIConfig';
 import {
   Zap,
   CheckCircle2,
@@ -89,9 +88,15 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
   const checkAPIStatus = async () => {
     setIsCheckingAPI(true);
     try {
-      // OpenAI/ChatGPT is always available as it's our primary service
-      setApiStatus({ accessible: true });
-      setUserCanGenerate({ canGenerate: true });
+      const isConfigured = globalOpenAI.isConfigured();
+      const canConnect = await globalOpenAI.testConnection();
+
+      if (isConfigured && canConnect) {
+        setApiStatus({ accessible: true });
+        setUserCanGenerate({ canGenerate: true });
+      } else {
+        throw new Error('Global OpenAI configuration not available');
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setApiStatus({ accessible: false, error: errorMessage });
@@ -174,24 +179,52 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
       console.log(`🎯 Selected Prompt Template ${index + 1}:`, template);
       console.log(`📝 Formatted Prompt:`, formatted);
 
-      // Set up real-time progress callback for OpenAI/ChatGPT
-      openAIContentGenerator.setProgressCallback((update) => {
-        setProgress({
-          ...update,
-          details: `${update.details} | Using Prompt ${index + 1}`
-        });
+      // Set up progress updates
+      setProgress({
+        stage: 'initializing',
+        progress: 10,
+        details: `Starting content generation with Global OpenAI | Using Prompt ${index + 1}`,
+        timestamp: new Date()
       });
 
-      // Generate content using OpenAI/ChatGPT
-      const result = await openAIContentGenerator.generateContent({
+      // Generate content using Global OpenAI Configuration
+      const result = await globalOpenAI.generateContent({
         keyword: keyword.trim(),
         anchorText: anchorText.trim(),
-        targetUrl: formattedUrl
+        url: formattedUrl,
+        wordCount: 1000,
+        contentType: 'comprehensive',
+        tone: 'professional'
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Content generation failed');
+      }
+
+      // Create blog post data
+      const blogPost = {
+        id: `post-${Date.now()}`,
+        title: `${keyword.trim()} - Complete Guide`,
+        slug: keyword.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        content: result.content || '',
+        wordCount: result.content?.split(' ').length || 0,
+        publishedUrl: `/blog/post-${Date.now()}`,
+        targetUrl: formattedUrl,
+        anchorText: anchorText.trim(),
+        keyword: keyword.trim(),
+        createdAt: new Date().toISOString()
+      };
+
+      setProgress({
+        stage: 'complete',
+        progress: 100,
+        details: 'Blog post generated successfully!',
+        timestamp: new Date()
       });
 
       toast({
         title: "Blog Post Generated & Published!",
-        description: `Your ${result.wordCount}-word blog post "${result.title}" has been published successfully!`,
+        description: `Your ${blogPost.wordCount}-word blog post "${blogPost.title}" has been generated successfully!`,
       });
 
       // Reset form
@@ -202,14 +235,14 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
       // Call success callback if provided (for homepage integration)
       if (onSuccess) {
         onSuccess({
-          id: result.id,
-          title: result.title,
-          slug: result.slug,
-          word_count: result.wordCount,
-          publishedUrl: result.publishedUrl,
-          targetUrl: result.targetUrl,
-          anchorText: result.anchorText,
-          keyword: result.keyword
+          id: blogPost.id,
+          title: blogPost.title,
+          slug: blogPost.slug,
+          word_count: blogPost.wordCount,
+          publishedUrl: blogPost.publishedUrl,
+          targetUrl: blogPost.targetUrl,
+          anchorText: blogPost.anchorText,
+          keyword: blogPost.keyword
         });
       } else {
         // Default behavior for standalone usage

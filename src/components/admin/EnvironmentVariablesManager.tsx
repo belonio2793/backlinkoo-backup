@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { getErrorMessage, getErrorSolution } from '@/utils/errorFormatter';
+import { useSupabaseConfig } from '@/hooks/useSupabaseConfig';
 import {
   Key,
   Eye,
@@ -143,17 +145,39 @@ export function EnvironmentVariablesManager() {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error loading environment variables:', error);
-        toast({
-          title: 'Error loading environment variables',
-          description: 'Using local storage as fallback',
-          variant: 'destructive'
-        });
-        
+        const errorMessage = getErrorMessage(error);
+        console.error('Error loading environment variables:', errorMessage);
+
+        // Check if it's a table missing error
+        if (errorMessage.includes('does not exist') || errorMessage.includes('42P01')) {
+          toast({
+            title: 'Database Table Missing',
+            description: 'Admin environment variables table not found. Using local storage fallback. Check Database Status tab.',
+            variant: 'destructive'
+          });
+        } else {
+          toast({
+            title: 'Database Error',
+            description: `${errorMessage}. Using local storage fallback.`,
+            variant: 'destructive'
+          });
+        }
+
         // Fallback to localStorage
         const stored = localStorage.getItem('admin_env_vars');
         if (stored) {
-          setEnvVars(JSON.parse(stored));
+          try {
+            setEnvVars(JSON.parse(stored));
+            toast({
+              title: 'Loaded from Local Storage',
+              description: 'Environment variables loaded from local backup'
+            });
+          } catch (parseError) {
+            console.error('Failed to parse localStorage data:', parseError);
+            setEnvVars([]);
+          }
+        } else {
+          setEnvVars([]);
         }
       } else {
         setEnvVars(data || []);
@@ -208,7 +232,13 @@ export function EnvironmentVariablesManager() {
       }
 
       if (result.error) {
-        console.error('Database error:', result.error);
+        const errorMessage = getErrorMessage(result.error);
+        console.error('Database error:', errorMessage);
+        toast({
+          title: 'Database Error',
+          description: `Failed to save to database: ${errorMessage}. Saved to local storage instead.`,
+          variant: 'destructive'
+        });
         // Fallback to localStorage
         const updated = envVar.id 
           ? envVars.map(v => v.id === envVar.id ? { ...envVar, updated_at: new Date().toISOString() } : v)
@@ -253,7 +283,13 @@ export function EnvironmentVariablesManager() {
         .eq('id', id);
 
       if (error) {
-        console.error('Database error:', error);
+        const errorMessage = getErrorMessage(error);
+        console.error('Database error:', errorMessage);
+        toast({
+          title: 'Database Error',
+          description: `Failed to delete from database: ${errorMessage}. Removed from local storage instead.`,
+          variant: 'destructive'
+        });
         // Fallback to localStorage
         const updated = envVars.filter(v => v.id !== id);
         setEnvVars(updated);

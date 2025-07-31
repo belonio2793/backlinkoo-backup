@@ -12,6 +12,8 @@ import { AuthRedirectHandler } from "@/components/AuthRedirectHandler";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
+import { autoConfigSaver } from "@/services/autoConfigSaver";
+import { ConfigSaveNotification } from "@/components/ConfigSaveNotification";
 
 // Import test utilities for debugging
 import '@/utils/testBlogClaiming';
@@ -37,6 +39,33 @@ if (typeof window !== 'undefined') {
     }
     localStorage.setItem('content_cleanup_version', cleanupVersion);
   }
+
+  // Initialize auto-config saver
+  console.log('🚀 Initializing automatic configuration monitoring...');
+  autoConfigSaver.startMonitoring();
+
+  // Initialize real-time configuration sync
+  import('./utils/initializeConfigSync').then(({ initializeConfigSync }) => {
+    initializeConfigSync().then(result => {
+      if (result.success) {
+        console.log('✅ Real-time configuration sync initialized:', result.message);
+      } else {
+        console.error('❌ Configuration sync initialization failed:', result.message);
+      }
+    });
+  });
+
+  // Initialize production safety system
+  import('./services/productionSafeConfig').then(({ productionSafeConfig }) => {
+    productionSafeConfig.ensureHomepageSafety().then(result => {
+      if (result.safe) {
+        console.log('🛡️ Homepage safety verified - users protected');
+      } else {
+        console.warn('⚠️ Homepage safety issues detected:', result.issues);
+        console.log('🔧 Automatic fallbacks have been enabled to protect users');
+      }
+    });
+  });
 }
 
 const App = () => (
@@ -49,6 +78,7 @@ const App = () => (
           <GlobalNotifications />
           <DatabaseHealthLogger />
           <BetaNotification />
+          <ConfigSaveNotification />
           <BrowserRouter>
             <AuthRedirectHandler>
               <AppWrapper />

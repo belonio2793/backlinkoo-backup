@@ -31,8 +31,10 @@ import {
   Cloud
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { getErrorMessage } from '@/utils/errorFormatter';
 import { openAIOnlyContentGenerator } from '@/services/openAIOnlyContentGenerator';
 import { SecureConfig } from '@/lib/secure-config';
+import { adminGlobalSync } from '@/services/adminGlobalConfigSync';
 
 interface APIConfig {
   name: string;
@@ -92,11 +94,18 @@ export function APIConfigurationManager() {
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [testResults, setTestResults] = useState<Record<string, any>>({});
+  const [syncStatus, setSyncStatus] = useState<{ [key: string]: { lastSync: string; success: boolean; attempts: number } }>({});
 
-  // Load current configurations
+  // Load current configurations and sync status
   useEffect(() => {
     loadCurrentConfigs();
+    loadSyncStatus();
   }, []);
+
+  const loadSyncStatus = () => {
+    const status = adminGlobalSync.getSyncStatus();
+    setSyncStatus(status);
+  };
 
   const loadCurrentConfigs = () => {
     setConfigs(prev => prev.map(config => {
@@ -130,12 +139,22 @@ export function APIConfigurationManager() {
     }));
   };
 
-  const updateConfig = (key: string, value: string) => {
-    setConfigs(prev => prev.map(config => 
-      config.key === key 
+  const updateConfig = async (key: string, value: string) => {
+    setConfigs(prev => prev.map(config =>
+      config.key === key
         ? { ...config, value, status: value ? 'configured' : 'unconfigured' }
         : config
     ));
+
+    // Auto-save and sync to global services when value is set
+    if (value && value.length > 10) {
+      try {
+        await adminGlobalSync.saveAdminConfig(key, value);
+        console.log(`✅ Auto-saved and synced ${key} to global services`);
+      } catch (error) {
+        console.warn(`⚠️ Failed to sync ${key}:`, error);
+      }
+    }
   };
 
   const toggleKeyVisibility = (key: string) => {
@@ -197,7 +216,8 @@ export function APIConfigurationManager() {
       const responseTime = Date.now() - startTime;
 
       if (error) {
-        return { success: false, message: `Database error: ${error.message}`, responseTime };
+        const errorMessage = getErrorMessage(error);
+        return { success: false, message: `Database error: ${errorMessage}`, responseTime };
       } else {
         return { success: true, message: 'Supabase connection successful', responseTime };
       }
@@ -279,15 +299,15 @@ export function APIConfigurationManager() {
       };
     }
 
-    setConfigs(prev => prev.map(c => 
-      c.key === config.key 
-        ? { 
-            ...c, 
+    setConfigs(prev => prev.map(c =>
+      c.key === config.key
+        ? {
+            ...c,
             status: result.success ? 'valid' : 'invalid',
             lastTested: new Date(),
             responseTime: result.responseTime,
             errorMessage: result.success ? undefined : result.message
-          } 
+          }
         : c
     ));
 
@@ -295,6 +315,16 @@ export function APIConfigurationManager() {
       ...prev,
       [config.key]: result
     }));
+
+    // If test passed, ensure it's synced to global services
+    if (result.success && config.value) {
+      try {
+        await adminGlobalSync.saveAdminConfig(config.key, config.value);
+        console.log(`✅ Test passed - synced ${config.key} to global services`);
+      } catch (error) {
+        console.warn(`⚠️ Test passed but sync failed for ${config.key}:`, error);
+      }
+    }
   };
 
   const testAllConfigurations = async () => {
@@ -378,11 +408,17 @@ export function APIConfigurationManager() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {configs.map((config) => {
               const IconComponent = config.icon;
+              const configSyncStatus = syncStatus[config.key];
               return (
                 <div key={config.key} className="flex items-center gap-2 p-2 rounded border">
                   <IconComponent className="h-4 w-4" />
                   <span className="text-sm font-medium">{config.name.split(' ')[0]}</span>
-                  {getStatusIcon(config.status)}
+                  <div className="flex items-center gap-1">
+                    {getStatusIcon(config.status)}
+                    {configSyncStatus?.success && config.status === 'valid' && (
+                      <Cloud className="h-3 w-3 text-green-500" title="Synced to global services" />
+                    )}
+                  </div>
                 </div>
               );
             })}

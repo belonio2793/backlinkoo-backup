@@ -34,7 +34,7 @@ import AdminAuthGuard from '@/components/AdminAuthGuard';
 import { EmailVerificationGuard } from '@/components/EmailVerificationGuard';
 import { TrialNotificationBanner } from '@/components/TrialNotificationBanner';
 import { GuestDashboard } from '@/components/GuestDashboard';
-import { AILive } from '@/components/AILive';
+import { EnhancedAILive } from '@/components/EnhancedAILive';
 
 import { EnhancedDashboardRouter } from '@/components/EnhancedDashboardRouter';
 import { UserBlogManagement } from '@/components/UserBlogManagement';
@@ -63,7 +63,7 @@ export const AppWrapper = () => {
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/trial-dashboard" element={<GuestDashboard />} />
         <Route path="/ai-test" element={<AIContentTest />} />
-        <Route path="/ai-live" element={<AILive />} />
+        <Route path="/ai-live" element={<EnhancedAILive />} />
 
         <Route path="*" element={<NotFound />} />
 

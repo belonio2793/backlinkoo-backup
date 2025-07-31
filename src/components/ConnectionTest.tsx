@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getErrorMessage } from '@/utils/errorFormatter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
@@ -39,14 +40,16 @@ export const ConnectionTest = () => {
       const { data, error } = await supabase.from('profiles').select('count').limit(1);
       if (error) {
         setDbTest('error');
-        setDbMessage(`Database error: ${error.message}`);
+        const errorMessage = getErrorMessage(error);
+        setDbMessage(`Database error: ${errorMessage}`);
       } else {
         setDbTest('success');
         setDbMessage('Database connection successful');
       }
     } catch (error: any) {
       setDbTest('error');
-      setDbMessage(`Database connection failed: ${error.message}`);
+      const errorMessage = getErrorMessage(error);
+      setDbMessage(`Database connection failed: ${errorMessage}`);
     }
   };
 

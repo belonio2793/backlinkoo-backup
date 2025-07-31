@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { openAIOnlyContentGenerator } from '@/services/openAIOnlyContentGenerator';
+import { getErrorMessage } from '@/utils/errorFormatter';
 import { SecureConfig } from '@/lib/secure-config';
 
 interface ServiceStatus {
@@ -140,9 +141,10 @@ export function ServiceConnectionStatus() {
       const responseTime = Date.now() - startTime;
 
       if (error) {
+        const errorMessage = getErrorMessage(error);
         updateServiceStatus('Supabase Database', {
           status: 'error',
-          message: `Database error: ${error.message}`,
+          message: `Database error: ${errorMessage}`,
           responseTime
         });
       } else {
@@ -157,9 +159,10 @@ export function ServiceConnectionStatus() {
         });
       }
     } catch (error) {
+      const errorMessage = getErrorMessage(error);
       updateServiceStatus('Supabase Database', {
         status: 'error',
-        message: 'Database connection failed',
+        message: `Database connection failed: ${errorMessage}`,
         responseTime: Date.now() - startTime
       });
     }
