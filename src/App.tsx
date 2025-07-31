@@ -65,17 +65,17 @@ if (typeof window !== 'undefined') {
       });
     });
 
-    // Initialize production safety system
-    import('./services/productionSafeConfig').then(({ productionSafeConfig }) => {
-      productionSafeConfig.ensureHomepageSafety().then(result => {
-        if (result.safe) {
-          console.log('🛡️ Homepage safety verified - users protected');
-        } else {
-          console.warn('⚠️ Homepage safety issues detected:', result.issues);
-          console.log('🔧 Automatic fallbacks have been enabled to protect users');
-        }
-      });
-    });
+    // Initialize production safety system (disabled to prevent fetch errors)
+    // import('./services/productionSafeConfig').then(({ productionSafeConfig }) => {
+    //   productionSafeConfig.ensureHomepageSafety().then(result => {
+    //     if (result.safe) {
+    //       console.log('🛡️ Homepage safety verified - users protected');
+    //     } else {
+    //       console.warn('⚠️ Homepage safety issues detected:', result.issues);
+    //       console.log('🔧 Automatic fallbacks have been enabled to protect users');
+    //     }
+    //   });
+    // });
   }, 2000); // Delay heavy initialization by 2 seconds
 }
 
