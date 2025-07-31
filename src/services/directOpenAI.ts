@@ -106,32 +106,16 @@ Please write the complete blog post now:`;
       // Process the content to include the backlink (it should already be included by the AI)
       const contentWithLink = content.includes(request.targetUrl) ? content : this.insertBacklink(content, request.anchorText, request.targetUrl);
 
-      // Save to blog posts
+      // Save to blog posts using blog service (no manual ID setting)
       const blogData = {
-        id: crypto.randomUUID(),
         title,
-        slug,
         content: contentWithLink,
-        excerpt,
-        meta_description: excerpt,
-        keywords: [request.keyword],
-        tags: request.keyword.split(' '),
-        category: 'AI Generated',
-        target_url: request.targetUrl,
-        anchor_text: request.anchorText,
-        status: 'published',
-        is_trial_post: true,
-        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
-        view_count: 0,
-        seo_score: 85,
-        reading_time: this.calculateReadingTime(contentWithLink),
-        word_count: contentWithLink.split(/\s+/).length,
-        author_name: 'Backlink ∞ AI',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        published_at: new Date().toISOString(),
-        published_url: `/blog/${slug}`,
-        user_id: null // Unclaimed initially
+        targetUrl: request.targetUrl,
+        anchorText: request.anchorText,
+        wordCount: contentWithLink.split(/\s+/).length,
+        readingTime: this.calculateReadingTime(contentWithLink),
+        seoScore: 85,
+        customSlug: slug
       };
 
       // Save the blog post
