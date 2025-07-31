@@ -20,6 +20,13 @@ export function APIStatusIndicator() {
 
   const checkAPIStatus = async () => {
     try {
+      // Check if we should use local dev API
+      const { LocalDevAPI } = await import('@/services/localDevAPI');
+      if (LocalDevAPI.shouldUseMockAPI()) {
+        setStatus(LocalDevAPI.getAPIStatus());
+        return;
+      }
+
       const result = await safeNetlifyFetch('api-status');
 
       if (result.success && result.data) {
@@ -46,6 +53,18 @@ export function APIStatusIndicator() {
       }
     } catch (error) {
       console.error('Failed to check API status:', error);
+
+      // Check if we should use local dev API as fallback
+      try {
+        const { LocalDevAPI } = await import('@/services/localDevAPI');
+        if (LocalDevAPI.shouldUseMockAPI()) {
+          setStatus(LocalDevAPI.getAPIStatus());
+          return;
+        }
+      } catch (localError) {
+        console.warn('Local dev API check failed:', localError);
+      }
+
       const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
       const isNetlifyDev = !!import.meta.env.NETLIFY_DEV ||
                           window.location.hostname.includes('localhost');
