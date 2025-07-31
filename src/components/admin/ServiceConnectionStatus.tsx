@@ -125,13 +125,55 @@ export function ServiceConnectionStatus() {
       const hasDemoKey = keyStatus.keyType === 'demo';
       const hasInvalidKey = keyStatus.keyType === 'invalid';
 
+      // Handle invalid key case first
+      if (hasInvalidKey) {
+        const responseTime = Date.now() - startTime;
+        updateServiceStatus('OpenAI API', {
+          status: 'error',
+          message: 'Invalid OpenAI API key format detected - switching to demo mode',
+          responseTime,
+          details: {
+            configured: '❌ Invalid',
+            keyPreview: keyStatus.keyPreview || 'Unknown',
+            error: 'Key format invalid (possibly project key)',
+            method: 'Key Validation',
+            action: 'Switching to demo mode...'
+          }
+        });
+
+        // Clear the invalid key and setup demo mode
+        if (envApiKey && envApiKey.includes('proj-')) {
+          console.warn('🔧 Project API key detected, setting up demo mode for compatibility');
+        }
+
+        const { setupDemoApiKey } = await import('@/utils/setupDemoApiKey');
+        setupDemoApiKey();
+
+        // Update status to demo mode
+        setTimeout(() => {
+          updateServiceStatus('OpenAI API', {
+            status: 'connected',
+            message: 'Demo mode active - template content generation available',
+            responseTime,
+            details: {
+              configured: '🔧 Demo',
+              keyType: 'Demo/Fallback',
+              method: 'Auto-switched from invalid key',
+              environment: 'Development'
+            }
+          });
+        }, 1000);
+        return;
+      }
+
       if (hasRealKey) {
         // Try to test the real API key with a lightweight request
         try {
+          const apiKey = envApiKey || localStorage.getItem('demo_openai_key');
           const testResponse = await fetch('https://api.openai.com/v1/models', {
             method: 'GET',
             headers: {
-              'Authorization': `Bearer ${envApiKey}`,
+              'Authorization': `Bearer ${apiKey}`,
               'Content-Type': 'application/json'
             }
           });
@@ -146,7 +188,7 @@ export function ServiceConnectionStatus() {
               responseTime,
               details: {
                 configured: '✅ Yes',
-                keyPreview: envApiKey.substring(0, 15) + '...',
+                keyPreview: keyStatus.keyPreview || 'Hidden',
                 modelCount: data.data?.length || 'Available',
                 method: 'Direct API Test',
                 environment: 'Real API Key'
@@ -161,7 +203,8 @@ export function ServiceConnectionStatus() {
               details: {
                 configured: '❌ No',
                 error: 'Authentication failed',
-                method: 'Direct API Test'
+                method: 'Direct API Test',
+                keyPreview: keyStatus.keyPreview || 'Hidden'
               }
             });
             return;
