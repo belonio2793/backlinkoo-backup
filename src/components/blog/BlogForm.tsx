@@ -87,7 +87,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
       const result = await DirectOpenAIService.generateBlogPost({
         keyword,
         anchorText,
-        targetUrl
+        targetUrl: formattedUrl
       });
 
       if (result.success) {
