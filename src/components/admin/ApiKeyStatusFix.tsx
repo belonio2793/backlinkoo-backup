@@ -108,11 +108,9 @@ export function ApiKeyStatusFix() {
     }
   };
 
-  // Check on mount and periodically
+  // Check on mount only
   useEffect(() => {
     checkCurrentKey();
-    const interval = setInterval(checkCurrentKey, 3000);
-    return () => clearInterval(interval);
   }, []);
 
   const keyStatus = isCorrectKey;
