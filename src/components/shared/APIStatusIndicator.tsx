@@ -47,8 +47,8 @@ export function APIStatusIndicator() {
     } catch (error) {
       console.error('Failed to check API status:', error);
       const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
-      const isNetlifyDev = window.location.hostname.includes('localhost') &&
-                          (window.location.port === '8888' || !!import.meta.env.NETLIFY_DEV);
+      const isNetlifyDev = !!import.meta.env.NETLIFY_DEV ||
+                          window.location.hostname.includes('localhost');
 
       setStatus({
         online: hasApiKey || isNetlifyDev,
