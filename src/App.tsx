@@ -54,16 +54,16 @@ if (typeof window !== 'undefined') {
 
   // Load heavy initialization modules asynchronously to improve initial load time
   setTimeout(() => {
-    // Initialize real-time configuration sync
-    import('./utils/initializeConfigSync').then(({ initializeConfigSync }) => {
-      initializeConfigSync().then(result => {
-        if (result.success) {
-          console.log('✅ Real-time configuration sync initialized:', result.message);
-        } else {
-          console.error('❌ Configuration sync initialization failed:', result.message);
-        }
-      });
-    });
+    // Initialize real-time configuration sync (disabled to prevent fetch errors)
+    // import('./utils/initializeConfigSync').then(({ initializeConfigSync }) => {
+    //   initializeConfigSync().then(result => {
+    //     if (result.success) {
+    //       console.log('✅ Real-time configuration sync initialized:', result.message);
+    //     } else {
+    //       console.error('❌ Configuration sync initialization failed:', result.message);
+    //     }
+    //   });
+    // });
 
     // Initialize production safety system (disabled to prevent fetch errors)
     // import('./services/productionSafeConfig').then(({ productionSafeConfig }) => {
