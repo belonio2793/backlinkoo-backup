@@ -296,14 +296,14 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
       // Call success callback if provided (for homepage integration)
       if (onSuccess) {
         onSuccess({
-          id: blogPost.id,
-          title: blogPost.title,
-          slug: blogPost.slug,
-          word_count: blogPost.wordCount,
-          publishedUrl: blogPost.publishedUrl,
-          targetUrl: blogPost.targetUrl,
-          anchorText: blogPost.anchorText,
-          keyword: blogPost.keyword
+          id: savedBlogPost.id,
+          title: savedBlogPost.title,
+          slug: savedBlogPost.slug,
+          word_count: savedBlogPost.word_count,
+          publishedUrl: savedBlogPost.published_url,
+          targetUrl: savedBlogPost.target_url,
+          anchorText: savedBlogPost.anchor_text,
+          keyword: keyword.trim()
         });
       } else {
         // Default behavior for standalone usage
