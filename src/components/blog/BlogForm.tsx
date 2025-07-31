@@ -186,6 +186,15 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
           </div>
         </div>
 
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-2 mb-4">
+          <h4 className="font-medium text-amber-900">⚠️ OpenAI API Configuration Required</h4>
+          <p className="text-sm text-amber-800">
+            To generate blog posts, please configure your OpenAI API key in the{' '}
+            <a href="/admin" className="underline font-medium">Admin Dashboard</a>.
+            Go to API Management → API Keys and add your OpenAI API key.
+          </p>
+        </div>
+
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
           <h4 className="font-medium text-blue-900">What happens next?</h4>
           <ul className="text-sm text-blue-800 space-y-1">
