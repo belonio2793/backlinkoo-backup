@@ -236,17 +236,10 @@ export function BlogPost() {
                 </div>
               )}
 
-              {/* Keywords */}
-              {post.keywords && post.keywords.length > 0 && (
-                <div className="mt-6">
-                  <h4 className="font-semibold mb-3">Keywords</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {post.keywords.map((keyword, index) => (
-                      <Badge key={index} variant="secondary">
-                        {keyword}
-                      </Badge>
-                    ))}
-                  </div>
+              {/* Additional Info */}
+              {post.word_count && (
+                <div className="mt-6 text-sm text-gray-600">
+                  <strong>Word Count:</strong> {post.word_count} words
                 </div>
               )}
             </CardContent>
