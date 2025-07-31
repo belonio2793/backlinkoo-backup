@@ -165,15 +165,19 @@ Please write the complete blog post now:`;
   }
 
   /**
-   * Generate URL-friendly slug
+   * Generate URL-friendly slug with timestamp for uniqueness
    */
   private static generateSlug(title: string): string {
-    return title
+    const baseSlug = title
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '')
       .trim()
       .replace(/\s+/g, '-')
-      .substring(0, 100);
+      .substring(0, 80); // Leave room for timestamp
+
+    // Add timestamp to ensure uniqueness
+    const timestamp = Date.now().toString(36);
+    return `${baseSlug}-${timestamp}`;
   }
 
   /**
