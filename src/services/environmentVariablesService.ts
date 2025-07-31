@@ -66,41 +66,27 @@ class EnvironmentVariablesService {
   }
 
   /**
-   * Refresh the cache with latest values from database
+   * Refresh the cache with values from localStorage
    */
   async refreshCache(): Promise<void> {
     try {
-      console.log('🔄 Fetching environment variables from Supabase database...');
-      const { data, error } = await supabase
-        .from('admin_environment_variables')
-        .select('key, value');
-
-      if (error) {
-        console.warn('Could not fetch environment variables from database, using localStorage fallback:', error);
-        this.loadFromLocalStorage();
-        return;
-      }
-
-      // Update cache
-      this.cache.clear();
-      data?.forEach((item: any) => {
-        this.cache.set(item.key, item.value);
-      });
-
+      console.log('🔄 Refreshing environment variables cache from localStorage...');
+      this.loadFromLocalStorage();
       this.lastFetch = Date.now();
-      console.log('✅ Environment variables cache refreshed from database');
-      console.log('📊 Loaded variables:', data?.map((item: any) => item.key).join(', '));
 
-      // Log API key status specifically
-      const apiKey = this.cache.get('VITE_OPENAI_API_KEY');
+      // Log what we have
+      const keys = Array.from(this.cache.keys());
+      console.log('📊 Cached variables:', keys.join(', '));
+
+      // Check for OpenAI key specifically
+      const apiKey = this.cache.get('VITE_OPENAI_API_KEY') || import.meta.env.VITE_OPENAI_API_KEY;
       if (apiKey) {
-        console.log('🔑 OpenAI API key loaded from database:', apiKey.substring(0, 15) + '...');
+        console.log('🔑 OpenAI API key available:', apiKey.substring(0, 15) + '...');
       } else {
-        console.log('❌ No OpenAI API key found in database');
+        console.log('❌ No OpenAI API key found');
       }
     } catch (error) {
-      console.warn('Error refreshing environment variables cache, using localStorage fallback:', error);
-      this.loadFromLocalStorage();
+      console.warn('Error refreshing cache:', error);
     }
   }
 
