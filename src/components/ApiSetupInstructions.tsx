@@ -56,12 +56,12 @@ export function ApiSetupInstructions() {
               <span className="text-sm">Set environment variable</span>
             </div>
             <div className="ml-8 bg-gray-900 text-gray-100 p-3 rounded font-mono text-sm flex items-center justify-between">
-              <span>VITE_OPENAI_API_KEY=sk-your-api-key-here</span>
+              <span>OPENAI_API_KEY=sk-your-api-key-here</span>
               <Button
                 size="sm"
                 variant="outline"
                 className="bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700"
-                onClick={() => copyToClipboard('VITE_OPENAI_API_KEY=sk-your-api-key-here')}
+                onClick={() => copyToClipboard('OPENAI_API_KEY=sk-your-api-key-here')}
               >
                 <Copy className="h-4 w-4" />
               </Button>
