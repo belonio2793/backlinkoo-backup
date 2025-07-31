@@ -11,8 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 export default function AIContentTest() {
   return (
     <div className="container mx-auto p-6">
-      <Tabs defaultValue="openai" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+      <Tabs defaultValue="internal-test" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="internal-test">Internal Test</TabsTrigger>
           <TabsTrigger value="openai">OpenAI Only Generator</TabsTrigger>
           <TabsTrigger value="minimal">Minimal AI Test</TabsTrigger>
         </TabsList>
