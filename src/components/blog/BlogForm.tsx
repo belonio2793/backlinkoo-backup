@@ -121,16 +121,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
-          Create Blog Post with Backlink
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Generate a 1000-word blog post on your topic with a natural backlink to your target URL.
-          Posts are published immediately and can be claimed within 24 hours.
-        </p>
-      </CardHeader>
+      {/* Header removed */}
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div className="space-y-2">
@@ -192,16 +183,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
           <APIStatusIndicator />
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
-          <h4 className="font-medium text-blue-900">What happens next?</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>• AI generates a 1000-word blog post on your keyword</li>
-            <li>• Your anchor text is naturally integrated with a link to your URL</li>
-            <li>• Post is published immediately on /blog with a unique URL</li>
-            <li>• You have 24 hours to claim the post (limit: 3 claimed posts)</li>
-            <li>• Unclaimed posts are automatically deleted after 24 hours</li>
-          </ul>
-        </div>
+        {/* What happens next section hidden */}
 
         <Button
           onClick={generateContent}
@@ -216,8 +198,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             </>
           ) : (
             <>
-              <Sparkles className="mr-2 h-5 w-5" />
-              Generate Blog Post with Backlink
+              Claim Now For Free
             </>
           )}
         </Button>
