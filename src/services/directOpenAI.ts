@@ -28,6 +28,17 @@ export class DirectOpenAIService {
     try {
       console.log('🚀 Starting direct blog generation...');
 
+      // Check if OpenAI API key is configured
+      const { environmentVariablesService } = await import('@/services/environmentVariablesService');
+      const clientApiKey = await environmentVariablesService.getOpenAIKey();
+
+      if (!clientApiKey) {
+        return {
+          success: false,
+          error: 'OpenAI API key not configured. Please configure your OpenAI API key in the Admin Dashboard.'
+        };
+      }
+
       // Build the prompt dynamically
       const prompt = `Write a comprehensive 1000-word blog post about "${request.keyword}". 
 
