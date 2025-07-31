@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react';
+import { safeNetlifyFetch } from '@/utils/netlifyFunctionHelper';
 
 interface APIStatus {
   online: boolean;
