@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
+import { initializeBlogSystemSafely } from '@/utils/ensureBlogTables';
 
 export interface ClaimablePost {
   id: string;
