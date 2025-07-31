@@ -58,10 +58,14 @@ export function APIStatusIndicator() {
       }
     } catch (error) {
       console.error('Failed to check API status:', error);
-      const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
+      const envApiKey = import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.OPENAI_API_KEY;
+      const demoKey = localStorage.getItem('demo_openai_key');
+      const hasRealKey = envApiKey && envApiKey.startsWith('sk-') && envApiKey.length > 20;
+      const hasDemoKey = demoKey && demoKey.includes('demo-fallback');
+
       setStatus({
-        online: hasApiKey,
-        message: hasApiKey ? 'Local check (API key available)' : 'Local check (no API key)'
+        online: hasRealKey || hasDemoKey,
+        message: hasRealKey ? 'API key available' : (hasDemoKey ? 'Demo mode active' : 'No API key')
       });
     } finally {
       setIsLoading(false);
