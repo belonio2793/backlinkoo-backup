@@ -153,20 +153,19 @@ export function AuthFormTabs({
     }, 1000);
 
     try {
-      // Test connection first
+      // Test connection first with improved timeout
       try {
         console.log('🔗 Testing connection...');
         const { supabase } = await import('@/integrations/supabase/client');
         const connectionTest = await Promise.race([
           supabase.auth.getSession(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Connection test timeout')), 5000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Connection test timeout')), 10000)) // Increased to 10 seconds
         ]);
         console.log('✅ Connection test successful');
       } catch (connectionError: any) {
-        console.warn('⚠️ Connection test failed:', connectionError.message);
-        if (connectionError.message.includes('timeout')) {
-          throw new Error('Unable to connect. Please check your internet connection and try again.');
-        }
+        console.warn('⚠️ Connection test failed, proceeding with auth attempt anyway:', connectionError.message);
+        // Don't throw here - let the actual auth methods handle the connection issues
+        // This allows for better fallback handling
       }
 
       // Try multiple authentication methods with shorter timeouts
