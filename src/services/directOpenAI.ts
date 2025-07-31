@@ -81,7 +81,6 @@ Please write the complete blog post now:`;
       }
 
       // Process the generated content
-      const content = result.content;
       const title = this.extractTitle(content, request.keyword);
       const slug = this.generateSlug(title);
       const excerpt = this.extractExcerpt(content);
