@@ -45,40 +45,31 @@ Please write the complete blog post now:`;
 
       console.log('📝 Generated prompt:', prompt);
 
-      // Try calling OpenAI via Netlify function, with fallback
-      let content = '';
+      // Call OpenAI via Netlify function
+      const response = await fetch('/.netlify/functions/generate-content-openai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: prompt,
+          maxTokens: 2500,
+          temperature: 0.7
+        })
+      });
 
-      try {
-        const response = await fetch('/.netlify/functions/generate-content-openai', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            prompt: prompt,
-            maxTokens: 2500,
-            temperature: 0.7
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error(`OpenAI API call failed: ${response.status}`);
-        }
-
-        const result = await response.json();
-
-        if (!result.success || !result.content) {
-          throw new Error(result.error || 'Failed to generate content');
-        }
-
-        content = result.content;
-
-      } catch (fetchError) {
-        console.warn('Netlify function call failed, using fallback content generation:', fetchError.message);
-
-        // Generate fallback content
-        content = this.generateFallbackContent(request);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`OpenAI API call failed: ${response.status} - ${errorText}`);
       }
+
+      const result = await response.json();
+
+      if (!result.success || !result.content) {
+        throw new Error(result.error || 'Failed to generate content');
+      }
+
+      const content = result.content;
 
       // Process the generated content
       const title = this.extractTitle(content, request.keyword);
@@ -119,7 +110,7 @@ Please write the complete blog post now:`;
       // Save the blog post
       const blogUrl = await this.saveBlogPost(blogData);
 
-      console.log('✅ Blog post generated successfully');
+      console.log('��� Blog post generated successfully');
 
       return {
         success: true,
