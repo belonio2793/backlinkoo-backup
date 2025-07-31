@@ -58,9 +58,51 @@ export const EnhancedOpenAIGenerator = ({ variant = 'standalone', onSuccess }: O
   const navigate = useNavigate();
 
   const promptTemplates = [
-    "Generate a 1000 word blog post on {{keyword}} including the {{anchor_text}} hyperlinked to {{url}}",
-    "Write a 1000 word blog post about {{keyword}} with a hyperlinked {{anchor_text}} linked to {{url}}",
-    "Produce a 1000-word blog post on {{keyword}} that links {{anchor_text}} to {{url}}"
+    `Write a comprehensive, SEO-optimized blog post about "{{keyword}}" that is approximately 1500-2000 words. Structure the content with:
+
+1. An engaging title that includes the main keyword
+2. A compelling introduction (150-200 words) that hooks the reader
+3. 5-7 main sections with H2 headings that cover different aspects of {{keyword}}
+4. Each section should be 200-300 words with valuable, actionable information
+5. Use H3 subheadings within sections when appropriate
+6. Include bullet points and numbered lists for better readability
+7. Naturally embed the anchor text "{{anchor_text}}" within the content as a contextual link to {{url}} - place it where it flows naturally and adds value to the reader
+8. Write a conclusion that summarizes key points and encourages action
+9. Use a conversational yet professional tone
+10. Include relevant examples and practical tips
+
+Make sure the anchor text link feels natural and provides genuine value to readers. Follow SEO best practices for internal linking and keyword density.`,
+
+    `Create an in-depth, expert-level blog post focused on "{{keyword}}" with 1500-2000 words. Format requirements:
+
+- Start with an attention-grabbing headline incorporating {{keyword}}
+- Write an introduction that clearly states what readers will learn
+- Organize content into logical sections with descriptive H2 headings
+- Each section should provide unique insights about {{keyword}}
+- Include practical examples, case studies, or step-by-step guides
+- Strategically place "{{anchor_text}}" as a natural link to {{url}} in a relevant context that enhances the reader's understanding
+- Use short paragraphs (2-3 sentences) for online readability
+- Add transition sentences between sections
+- Include a FAQ section if relevant
+- End with a strong conclusion and call-to-action
+
+The anchor text should be seamlessly integrated where it adds genuine value, not forced or promotional.`,
+
+    `Develop a comprehensive guide about "{{keyword}}" targeting both beginners and intermediate readers. Word count: 1500-2000 words.
+
+Content structure:
+- Compelling title with primary keyword
+- Executive summary or overview (100-150 words)
+- Main content divided into 6-8 sections with clear H2 headings
+- Each section explores different facets of {{keyword}}
+- Include real-world examples and actionable advice
+- Incorporate "{{anchor_text}}" as a helpful resource link to {{url}} where it naturally fits within the content flow
+- Use data, statistics, or research findings when relevant
+- Add visual content descriptions (charts, graphs, images) where appropriate
+- Include best practices and common mistakes to avoid
+- Conclude with key takeaways and next steps
+
+Ensure the anchor text placement follows SEO best practices and genuinely helps readers discover valuable related content.`
   ];
 
   useEffect(() => {
