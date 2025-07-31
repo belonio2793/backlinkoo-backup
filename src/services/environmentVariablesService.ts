@@ -177,8 +177,24 @@ class EnvironmentVariablesService {
       if (error) {
         console.error('Error saving environment variable:', error);
         // Extract meaningful error message
-        const errorMessage = error.message || error.details || 'Database error occurred';
-        throw new Error(`Failed to save to database: ${errorMessage}`);
+        let errorMessage = 'Database error occurred';
+
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error.details) {
+          errorMessage = error.details;
+        } else if (error.code) {
+          errorMessage = `Database error code: ${error.code}`;
+        }
+
+        // Check for common database issues
+        if (errorMessage.includes('does not exist') || errorMessage.includes('42P01')) {
+          errorMessage = 'Database table "admin_environment_variables" does not exist. Please check your database setup.';
+        } else if (errorMessage.includes('permission denied') || errorMessage.includes('insufficient_privilege')) {
+          errorMessage = 'Database permission denied. Please check your Supabase configuration.';
+        }
+
+        throw new Error(`Database error: ${errorMessage}`);
       }
 
       // Update cache
