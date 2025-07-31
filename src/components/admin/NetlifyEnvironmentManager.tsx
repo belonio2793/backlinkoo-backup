@@ -78,34 +78,59 @@ export function NetlifyEnvironmentManager() {
     checkNetlifyVariables();
   }, []);
 
-  const checkNetlifyVariables = () => {
+  const checkNetlifyVariables = async () => {
     setIsLoading(true);
     try {
-      // Check which variables are configured by looking at import.meta.env
+      // Check API status via server-side function first
+      let serverSideAPIStatus = null;
+      try {
+        const response = await fetch('/.netlify/functions/api-status');
+        if (response.ok) {
+          serverSideAPIStatus = await response.json();
+        }
+      } catch (error) {
+        console.warn('Could not fetch server-side API status:', error);
+      }
+
+      // Check which variables are configured
       const updatedVariables = variables.map(variable => {
-        const value = import.meta.env[variable.key];
+        let configured = false;
+        let value = undefined;
+
+        if (variable.key === 'OPENAI_API_KEY') {
+          // For OpenAI API key, use server-side status if available
+          if (serverSideAPIStatus?.providers?.OpenAI) {
+            configured = serverSideAPIStatus.providers.OpenAI.configured;
+            if (configured) {
+              value = 'sk-***configured***'; // Placeholder to show it's configured
+            }
+          } else {
+            // Fallback to client-side check (won't work in production due to Vite)
+            value = import.meta.env[variable.key];
+            configured = Boolean(value && value.length > 0);
+          }
+        } else {
+          // For other variables, try client-side check
+          value = import.meta.env[variable.key];
+          configured = Boolean(value && value.length > 0);
+        }
+
         return {
           ...variable,
           value: value || undefined,
-          configured: Boolean(value && value.length > 0)
+          configured
         };
       });
-      
+
       setVariables(updatedVariables);
-      
-      // Focus specifically on OpenAI API key
-      const openAIKey = import.meta.env.OPENAI_API_KEY;
-      if (openAIKey) {
+
+      // Show appropriate toast for OpenAI API key
+      const openAIVariable = updatedVariables.find(v => v.key === 'OPENAI_API_KEY');
+      if (openAIVariable?.configured) {
         toast({
           title: 'OpenAI API Key Detected',
           description: 'OpenAI API key is configured in Netlify environment',
           variant: 'default'
-        });
-      } else {
-        toast({
-          title: 'OpenAI API Key Missing',
-          description: 'Please configure OPENAI_API_KEY in your Netlify environment variables',
-          variant: 'destructive'
         });
       }
     } catch (error) {
