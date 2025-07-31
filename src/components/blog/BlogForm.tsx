@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { DirectOpenAIService } from '@/services/directOpenAI';
+import { APIStatusIndicator } from '@/components/shared/APIStatusIndicator';
 import { Loader2, Link, Target, Hash, Sparkles } from 'lucide-react';
 
 interface BlogFormProps {
@@ -186,13 +187,9 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
           </div>
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2 mb-4">
-          <h4 className="font-medium text-blue-900">🔗 API Configuration</h4>
-          <p className="text-sm text-blue-800">
-            Blog generation requires OpenAI API configuration. Set it up once in{' '}
-            <a href="/admin" className="underline font-medium">Admin Dashboard → System → OpenAI API</a>{' '}
-            and it syncs across your entire application.
-          </p>
+        <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+          <span className="text-sm font-medium text-gray-700">API Status</span>
+          <APIStatusIndicator />
         </div>
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
