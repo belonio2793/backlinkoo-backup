@@ -214,6 +214,13 @@ export function Blog() {
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
             </div>
             <div className="flex items-center gap-4">
+              <Button
+                onClick={() => navigate("/blog/create")}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium px-6 py-2 shadow-sm hover:shadow-md"
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                Create Post
+              </Button>
 
               {user ? (
                 <>
