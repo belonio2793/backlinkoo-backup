@@ -36,7 +36,6 @@ interface ServiceStatus {
   status: 'checking' | 'connected' | 'error' | 'not_configured';
   icon: React.ComponentType<any>;
   message: string;
-  hasApiKey: boolean;
   details?: Record<string, any>;
   responseTime?: number;
 }
