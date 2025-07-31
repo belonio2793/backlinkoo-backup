@@ -78,34 +78,59 @@ export function NetlifyEnvironmentManager() {
     checkNetlifyVariables();
   }, []);
 
-  const checkNetlifyVariables = () => {
+  const checkNetlifyVariables = async () => {
     setIsLoading(true);
     try {
-      // Check which variables are configured by looking at import.meta.env
+      // Check API status via server-side function first
+      let serverSideAPIStatus = null;
+      try {
+        const response = await fetch('/.netlify/functions/api-status');
+        if (response.ok) {
+          serverSideAPIStatus = await response.json();
+        }
+      } catch (error) {
+        console.warn('Could not fetch server-side API status:', error);
+      }
+
+      // Check which variables are configured
       const updatedVariables = variables.map(variable => {
-        const value = import.meta.env[variable.key];
+        let configured = false;
+        let value = undefined;
+
+        if (variable.key === 'OPENAI_API_KEY') {
+          // For OpenAI API key, use server-side status if available
+          if (serverSideAPIStatus?.providers?.OpenAI) {
+            configured = serverSideAPIStatus.providers.OpenAI.configured;
+            if (configured) {
+              value = 'sk-***configured***'; // Placeholder to show it's configured
+            }
+          } else {
+            // Fallback to client-side check (won't work in production due to Vite)
+            value = import.meta.env[variable.key];
+            configured = Boolean(value && value.length > 0);
+          }
+        } else {
+          // For other variables, try client-side check
+          value = import.meta.env[variable.key];
+          configured = Boolean(value && value.length > 0);
+        }
+
         return {
           ...variable,
           value: value || undefined,
-          configured: Boolean(value && value.length > 0)
+          configured
         };
       });
-      
+
       setVariables(updatedVariables);
-      
-      // Focus specifically on OpenAI API key
-      const openAIKey = import.meta.env.OPENAI_API_KEY;
-      if (openAIKey) {
+
+      // Show appropriate toast for OpenAI API key
+      const openAIVariable = updatedVariables.find(v => v.key === 'OPENAI_API_KEY');
+      if (openAIVariable?.configured) {
         toast({
           title: 'OpenAI API Key Detected',
           description: 'OpenAI API key is configured in Netlify environment',
           variant: 'default'
-        });
-      } else {
-        toast({
-          title: 'OpenAI API Key Missing',
-          description: 'Please configure OPENAI_API_KEY in your Netlify environment variables',
-          variant: 'destructive'
         });
       }
     } catch (error) {
@@ -116,7 +141,7 @@ export function NetlifyEnvironmentManager() {
   };
 
   const testAPIKey = async (variable: NetlifyVariable) => {
-    if (!variable.testable || !variable.value) return;
+    if (!variable.testable) return;
 
     setTestResults(prev => ({
       ...prev,
@@ -124,9 +149,66 @@ export function NetlifyEnvironmentManager() {
     }));
 
     const startTime = Date.now();
-    
+
     try {
       if (variable.key === 'OPENAI_API_KEY') {
+        // If we don't have the actual value, try using the check-ai-provider function
+        if (!variable.value || variable.value === 'sk-***configured***') {
+          try {
+            const response = await fetch('/.netlify/functions/check-ai-provider', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ provider: 'OpenAI' })
+            });
+            const responseTime = Date.now() - startTime;
+
+            if (response.ok) {
+              const data = await response.json();
+              if (data.healthy) {
+                setTestResults(prev => ({
+                  ...prev,
+                  [variable.key]: {
+                    status: 'success',
+                    message: `API key valid - Server-side test passed`,
+                    responseTime
+                  }
+                }));
+              } else {
+                setTestResults(prev => ({
+                  ...prev,
+                  [variable.key]: {
+                    status: 'error',
+                    message: `API test failed - Status: ${data.status}`,
+                    responseTime
+                  }
+                }));
+              }
+            } else {
+              const errorData = await response.json();
+              setTestResults(prev => ({
+                ...prev,
+                [variable.key]: {
+                  status: 'error',
+                  message: `Server test failed: ${errorData.error || response.status}`,
+                  responseTime
+                }
+              }));
+            }
+          } catch (error) {
+            setTestResults(prev => ({
+              ...prev,
+              [variable.key]: {
+                status: 'error',
+                message: 'Server-side test failed'
+              }
+            }));
+          }
+          return;
+        }
+
+        // Direct API test if we have the actual key value
         const response = await fetch('https://api.openai.com/v1/models', {
           headers: {
             'Authorization': `Bearer ${variable.value}`,
@@ -252,79 +334,7 @@ export function NetlifyEnvironmentManager() {
         </Button>
       </div>
 
-      {/* OpenAI API Key Connection Status */}
-      <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-blue-800">
-              <Brain className="h-5 w-5" />
-              OpenAI API Key Connected
-            </div>
-            {variables.find(v => v.key === 'OPENAI_API_KEY')?.configured && (
-              <Badge className="bg-green-100 text-green-800 border-green-300 text-sm">
-                <CheckCircle className="h-3 w-3 mr-1" />
-                Active
-              </Badge>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {variables.find(v => v.key === 'OPENAI_API_KEY')?.configured ? (
-            <Alert className="border-green-200 bg-green-50">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">
-                <div className="flex items-center justify-between">
-                  <span>OpenAI API key is configured and ready for use</span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => testAPIKey(variables.find(v => v.key === 'OPENAI_API_KEY')!)}
-                    disabled={testResults['OPENAI_API_KEY']?.status === 'testing'}
-                    className="border-green-300 text-green-700"
-                  >
-                    {testResults['OPENAI_API_KEY']?.status === 'testing' ? (
-                      <RefreshCw className="h-4 w-4 animate-spin" />
-                    ) : (
-                      'Test Connection'
-                    )}
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                <div>
-                  <strong>OpenAI API key is not configured.</strong>
-                  <br />
-                  Please set the OPENAI_API_KEY environment variable in your Netlify site settings.
-                  <br />
-                  <span className="text-sm mt-2 block">
-                    Go to: Netlify Dashboard → Site Settings → Environment Variables → Add OPENAI_API_KEY
-                  </span>
-                </div>
-              </AlertDescription>
-            </Alert>
-          )}
-          
-          {testResults['OPENAI_API_KEY'] && (
-            <div className={`mt-3 p-3 rounded ${testResults['OPENAI_API_KEY'].status === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              <div className="flex items-center gap-2">
-                {testResults['OPENAI_API_KEY'].status === 'success' ? (
-                  <CheckCircle className="h-4 w-4" />
-                ) : (
-                  <XCircle className="h-4 w-4" />
-                )}
-                <span className="text-sm">{testResults['OPENAI_API_KEY'].message}</span>
-                {testResults['OPENAI_API_KEY'].responseTime && (
-                  <span className="text-xs">({testResults['OPENAI_API_KEY'].responseTime}ms)</span>
-                )}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+
 
       {/* All Environment Variables */}
       <Card>

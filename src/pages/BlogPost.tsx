@@ -563,8 +563,8 @@ export function BlogPost() {
         title = "OpenAI API Key Required";
         description = "A valid OpenAI API key is required to regenerate content. Please configure your API key in the environment settings.";
       } else if (errorMessage.includes('OpenAI API key is not configured')) {
-        title = "OpenAI API Key Missing";
-        description = "OpenAI API key is not configured. Please set the OPENAI_API_KEY environment variable.";
+        title = "AI Service Unavailable";
+        description = "AI content generation is currently unavailable. Please try again later or contact support.";
       } else if (errorMessage.includes('rate limit') || errorMessage.includes('429')) {
         title = "Rate Limit Exceeded";
         description = "OpenAI rate limit reached. Please wait a few minutes before trying again.";

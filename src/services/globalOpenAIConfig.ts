@@ -44,7 +44,7 @@ export class GlobalOpenAIConfig {
     }
 
     console.log('❌ No valid OpenAI API key found');
-    throw new Error('OpenAI API key not configured - Please set OPENAI_API_KEY environment variable in Netlify');
+    throw new Error('AI service configuration error - Please contact support if this issue persists');
   }
 
   /**
