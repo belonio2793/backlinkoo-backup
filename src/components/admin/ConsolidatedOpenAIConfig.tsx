@@ -62,6 +62,7 @@ export function ConsolidatedOpenAIConfig() {
   const [activeTab, setActiveTab] = useState('status');
   const [isSettingUp, setIsSettingUp] = useState(false);
   const [tableExists, setTableExists] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     loadCurrentStatus();
