@@ -248,36 +248,22 @@ export function BlogPost() {
             <div className="p-8 sm:p-12">
               {/* Meta Information */}
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-6">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <time dateTime={post.created_at}>
-                    {formatDate(post.created_at)}
-                  </time>
-                </div>
-                
                 {post.reading_time && (
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
                     <span>{post.reading_time} min read</span>
                   </div>
                 )}
-                
+
                 <div className="flex items-center gap-2">
                   <Eye className="h-4 w-4" />
                   <span>{post.view_count || 0} views</span>
                 </div>
-
-                {post.author_name && (
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    <span>{post.author_name}</span>
-                  </div>
-                )}
               </div>
 
               {/* Title - SEO H1 */}
               <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-                {post.title}
+                {post.title?.replace(/<\/?h1[^>]*>/g, '') || 'Untitled Post'}
               </h1>
 
               {/* Meta Description */}
@@ -297,23 +283,45 @@ export function BlogPost() {
                   )}
 
                   {post.is_trial_post && (
-                    <Badge 
-                      variant="outline" 
-                      className={`${isExpiringSoon(post.expires_at) ? 'border-red-500 text-red-600 bg-red-50' : 'border-amber-500 text-amber-600 bg-amber-50'}`}
-                    >
-                      {isExpiringSoon(post.expires_at) ? (
-                        <>
-                          <Timer className="mr-1 h-3 w-3" />
-                          Expiring Soon
-                        </>
-                      ) : (
-                        <>
-                          <Clock className="mr-1 h-3 w-3" />
-                          Trial Post
-                        </>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={`${isExpiringSoon(post.expires_at) ? 'border-red-500 text-red-600 bg-red-50' : 'border-amber-500 text-amber-600 bg-amber-50'}`}
+                      >
+                        {isExpiringSoon(post.expires_at) ? (
+                          <>
+                            <Timer className="mr-1 h-3 w-3" />
+                            Expiring Soon
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="mr-1 h-3 w-3" />
+                            Unclaimed Post
+                          </>
+                        )}
+                        {post.expires_at && ` • Expires ${formatDate(post.expires_at)}`}
+                      </Badge>
+                      {!post.user_id && user && (
+                        <Button
+                          size="sm"
+                          onClick={claimPost}
+                          disabled={claiming}
+                          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                        >
+                          {claiming ? (
+                            <>
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                              Claiming...
+                            </>
+                          ) : (
+                            <>
+                              <Crown className="mr-1 h-3 w-3" />
+                              Claim
+                            </>
+                          )}
+                        </Button>
                       )}
-                      {post.expires_at && ` • Expires ${formatDate(post.expires_at)}`}
-                    </Badge>
+                    </div>
                   )}
 
                   {post.user_id === user?.id && (
@@ -436,20 +444,13 @@ export function BlogPost() {
                 <p className="text-blue-100 mb-6 text-lg">
                   Explore our collection of expert-written blog posts with high-quality backlinks
                 </p>
-                <div className="flex flex-wrap gap-4 justify-center">
-                  <Button 
+                <div className="flex justify-center">
+                  <Button
                     onClick={() => navigate('/blog')}
                     variant="secondary"
                     className="bg-white text-blue-600 hover:bg-gray-100"
                   >
                     Browse All Posts
-                  </Button>
-                  <Button 
-                    onClick={() => navigate('/blog-creation')}
-                    variant="outline"
-                    className="border-white text-white hover:bg-white/10"
-                  >
-                    Create Your Own
                   </Button>
                 </div>
               </CardContent>
