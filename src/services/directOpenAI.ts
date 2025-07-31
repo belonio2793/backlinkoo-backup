@@ -45,28 +45,39 @@ Please write the complete blog post now:`;
 
       console.log('📝 Generated prompt:', prompt);
 
-      // Call OpenAI via Netlify function
-      const response = await fetch('/.netlify/functions/generate-content-openai', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt: prompt,
-          maxTokens: 2500,
-          temperature: 0.7
-        })
-      });
+      // Try calling OpenAI via Netlify function, with fallback
+      let content = '';
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`OpenAI API call failed: ${response.status} - ${errorText}`);
-      }
+      try {
+        const response = await fetch('/.netlify/functions/generate-content-openai', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            prompt: prompt,
+            maxTokens: 2500,
+            temperature: 0.7
+          })
+        });
 
-      const result = await response.json();
-      
-      if (!result.success || !result.content) {
-        throw new Error(result.error || 'Failed to generate content');
+        if (!response.ok) {
+          throw new Error(`OpenAI API call failed: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.success || !result.content) {
+          throw new Error(result.error || 'Failed to generate content');
+        }
+
+        content = result.content;
+
+      } catch (fetchError) {
+        console.warn('Netlify function call failed, using fallback content generation:', fetchError.message);
+
+        // Generate fallback content
+        content = this.generateFallbackContent(request);
       }
 
       // Process the generated content
