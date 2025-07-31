@@ -305,13 +305,11 @@ Please write the complete blog post now:`;
       const blogData = {
         title,
         content,
-        keywords: [request.keyword],
         targetUrl: request.targetUrl,
         anchorText: request.anchorText,
         wordCount: content.replace(/<[^>]*>/g, '').split(/\s+/).length,
         readingTime: this.calculateReadingTime(content),
         seoScore: 85,
-        metaDescription: excerpt,
         customSlug: slug
       };
 
