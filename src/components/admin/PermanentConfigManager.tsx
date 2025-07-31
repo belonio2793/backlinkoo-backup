@@ -392,11 +392,11 @@ export function PermanentConfigManager() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">{config.service}</Badge>
-                      <Badge className={getHealthBadge(config.healthScore)}>
+                      <Badge key={`service-${config.id}`} variant="outline">{config.service}</Badge>
+                      <Badge key={`health-${config.id}`} className={getHealthBadge(config.healthScore)}>
                         {config.healthScore}% Health
                       </Badge>
-                      {config.isActive && <Badge className="bg-green-100 text-green-800">Active</Badge>}
+                      {config.isActive && <Badge key={`active-${config.id}`} className="bg-green-100 text-green-800">Active</Badge>}
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
