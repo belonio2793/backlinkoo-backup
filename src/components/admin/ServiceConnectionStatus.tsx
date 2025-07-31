@@ -27,7 +27,6 @@ import {
   Globe
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { openAIOnlyContentGenerator } from '@/services/openAIOnlyContentGenerator';
 import { getErrorMessage } from '@/utils/errorFormatter';
 import { SecureConfig } from '@/lib/secure-config';
 
