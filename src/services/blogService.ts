@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
+import { blogPersistenceService } from './blogPersistenceService';
 
 export type BlogPost = Tables<'blog_posts'>;
 export type CreateBlogPost = TablesInsert<'blog_posts'>;
@@ -32,7 +33,8 @@ export class BlogService {
   }
 
   /**
-   * Create a new blog post
+   * Create a new blog post with enhanced persistence
+   * Uses maximum persistence for claimed posts
    */
   async createBlogPost(
     data: BlogPostGenerationData,
@@ -78,6 +80,22 @@ export class BlogService {
       published_at: new Date().toISOString()
     };
 
+    // If this is a claimed post (has userId and not trial), use maximum persistence
+    if (userId && !isTrialPost) {
+      console.log('🔒 Creating claimed post with maximum persistence...');
+      const persistenceResult = await blogPersistenceService.storeWithMaxPersistence(
+        blogPostData,
+        'claim'
+      );
+
+      if (!persistenceResult.success) {
+        throw new Error(`Failed to create blog post with maximum persistence: ${persistenceResult.error}`);
+      }
+
+      return persistenceResult.data!;
+    }
+
+    // For trial posts, use regular storage
     const { data: blogPost, error } = await supabase
       .from('blog_posts')
       .insert(blogPostData)
@@ -86,6 +104,15 @@ export class BlogService {
 
     if (error) {
       throw new Error(`Failed to create blog post: ${error.message}`);
+    }
+
+    // Create backup for trial posts too
+    if (isTrialPost) {
+      try {
+        await blogPersistenceService.storeWithMaxPersistence(blogPost, 'backup');
+      } catch (backupError) {
+        console.warn('⚠️ Trial post backup failed (non-critical):', backupError);
+      }
     }
 
     return blogPost;
@@ -136,7 +163,7 @@ export class BlogService {
   }
 
   /**
-   * Update a blog post
+   * Update a blog post with persistence protection
    */
   async updateBlogPost(id: string, updates: UpdateBlogPost): Promise<BlogPost> {
     // If title is being updated, regenerate slug
@@ -160,6 +187,16 @@ export class BlogService {
 
     if (error) {
       throw new Error(`Failed to update blog post: ${error.message}`);
+    }
+
+    // If this update involves claiming (user_id added and trial status removed)
+    if (updates.user_id && updates.is_trial_post === false) {
+      console.log('🔒 Post being claimed - creating permanent backup...');
+      try {
+        await blogPersistenceService.storeWithMaxPersistence(data, 'claim');
+      } catch (backupError) {
+        console.warn('⚠️ Claim backup failed (non-critical):', backupError);
+      }
     }
 
     return data;
