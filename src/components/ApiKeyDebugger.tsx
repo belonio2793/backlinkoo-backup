@@ -24,7 +24,7 @@ export function ApiKeyDebugger() {
 
   useEffect(() => {
     // Load current key
-    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
+    const envKey = import.meta.env.OPENAI_API_KEY;
     const secureKey = SecureConfig.OPENAI_API_KEY;
     
     console.log('Environment key:', envKey ? `${envKey.substring(0, 8)}...` : 'Not set');
@@ -167,7 +167,7 @@ export function ApiKeyDebugger() {
           <div className="border-t pt-4">
             <h4 className="text-sm font-medium mb-2">Debug Information</h4>
             <div className="text-xs text-muted-foreground space-y-1">
-              <div>Environment Key: {import.meta.env.VITE_OPENAI_API_KEY ? 'Set' : 'Not set'}</div>
+              <div>Environment Key: {import.meta.env.OPENAI_API_KEY ? 'Set' : 'Not set'}</div>
               <div>Secure Config Key: {SecureConfig.OPENAI_API_KEY ? 'Set' : 'Not set'}</div>
               <div>Current Key Length: {currentKey ? currentKey.length : 0}</div>
               <div>Key Starts with sk-: {currentKey ? (currentKey.startsWith('sk-') ? 'Yes' : 'No') : 'N/A'}</div>
