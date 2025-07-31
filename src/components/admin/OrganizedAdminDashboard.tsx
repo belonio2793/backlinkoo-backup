@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { SecurityDashboard } from "@/components/SecurityDashboard";
 import { CampaignManager } from "@/components/CampaignManager";
 import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager";
-import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
+import { EmailSystemManagerSafe } from "@/components/admin/EmailSystemManagerSafe";
 import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
 import { TrialPostCleanupManager } from "@/components/admin/TrialPostCleanupManager";
 import { BlogManagementPanel } from "@/components/admin/BlogManagementPanel";
