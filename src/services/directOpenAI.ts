@@ -118,8 +118,9 @@ Please write the complete blog post now:`;
         customSlug: slug
       };
 
-      // Save the blog post
-      const blogUrl = await this.saveBlogPost(blogData);
+      // Save the blog post using blog service
+      const savedPost = await this.saveBlogPostData(blogData);
+      const blogUrl = savedPost.published_url || `/blog/${savedPost.slug}`;
 
       console.log('✅ Blog post generated successfully');
 
