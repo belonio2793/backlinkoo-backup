@@ -36,6 +36,10 @@ import {
   LazyBlogCreator,
   LazyBlogPost,
   LazyBlog,
+  LazyBlogListing,
+  LazyBlogCreation,
+  LazyBlogPostView,
+  LazyTrialDashboard,
   LazyAIContentTest,
   LazyEnhancedDashboardRouter,
   LazyUserBlogManagement,
@@ -80,12 +84,17 @@ export const OptimizedAppWrapper = () => {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/preview/:slug" element={<BlogPreview />} />
 
-          {/* Blog routes - lazy loaded for better performance */}
-          <Route path="/blog" element={<LazyBlog />} />
-          <Route path="/blog/create" element={<LazyBlogCreator />} />
-          <Route path="/blog/:slug" element={<LazyBlogPost />} />
-          
-          {/* Other public routes */}
+          {/* Blog routes - new system */}
+          <Route path="/blog" element={<LazyBlogListing />} />
+          <Route path="/blog/create" element={<LazyBlogCreation />} />
+          <Route path="/blog/:slug" element={<LazyBlogPostView />} />
+
+          {/* Legacy blog routes for backward compatibility */}
+          <Route path="/blog-old" element={<LazyBlog />} />
+          <Route path="/blog-creator" element={<LazyBlogCreator />} />
+
+          {/* Dashboard routes */}
+          <Route path="/trial" element={<LazyTrialDashboard />} />
           <Route path="/trial-dashboard" element={<LazyGuestDashboard />} />
           <Route path="/ai-test" element={<LazyAIContentTest />} />
           <Route path="/ai-live" element={<LazyEnhancedAILive />} />

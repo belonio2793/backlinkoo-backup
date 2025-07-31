@@ -11,6 +11,16 @@ requestIdleCallback(() => {
   import('./services/trialPostCleanupService').then(({ trialPostCleanupService }) => {
     trialPostCleanupService.scheduleCleanup().catch(console.error);
   });
+
+  // Import test utilities for development
+  if (import.meta.env.DEV) {
+    import('./utils/testBlogGeneration');
+    import('./services/databaseSyncService').then(({ DatabaseSyncService }) => {
+      DatabaseSyncService.scheduleCleanup();
+      // Run initial sync verification
+      DatabaseSyncService.forceSyncVerification().catch(console.error);
+    });
+  }
 }, { timeout: 5000 });
 
 // Only setup browser extension conflicts in production or when detected

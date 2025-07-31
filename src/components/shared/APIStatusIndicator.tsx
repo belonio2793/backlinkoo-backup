@@ -20,6 +20,13 @@ export function APIStatusIndicator() {
 
   const checkAPIStatus = async () => {
     try {
+      // Check if we should use local dev API
+      const { LocalDevAPI } = await import('@/services/localDevAPI');
+      if (LocalDevAPI.shouldUseMockAPI()) {
+        setStatus(LocalDevAPI.getAPIStatus());
+        return;
+      }
+
       const result = await safeNetlifyFetch('api-status');
 
       if (result.success && result.data) {
@@ -27,25 +34,45 @@ export function APIStatusIndicator() {
       } else {
         // Fallback to local check
         const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
+        const isNetlifyDev = !!import.meta.env.NETLIFY_DEV ||
+                            window.location.hostname.includes('localhost');
+
         setStatus({
-          online: hasApiKey,
+          online: hasApiKey || isNetlifyDev,
           message: result.isLocal
-            ? (hasApiKey ? 'Local development (API key configured)' : 'Local development (no API key)')
+            ? (isNetlifyDev ? 'Netlify dev mode (functions available)' :
+               hasApiKey ? 'Local development (API key configured)' : 'Local development (no API key)')
             : (hasApiKey ? 'Local check (API key available)' : 'Local check (no API key)'),
           providers: {
             OpenAI: {
-              configured: hasApiKey,
-              status: hasApiKey ? 'configured' : 'not_configured'
+              configured: hasApiKey || isNetlifyDev,
+              status: (hasApiKey || isNetlifyDev) ? 'configured' : 'not_configured'
             }
           }
         });
       }
     } catch (error) {
       console.error('Failed to check API status:', error);
+
+      // Check if we should use local dev API as fallback
+      try {
+        const { LocalDevAPI } = await import('@/services/localDevAPI');
+        if (LocalDevAPI.shouldUseMockAPI()) {
+          setStatus(LocalDevAPI.getAPIStatus());
+          return;
+        }
+      } catch (localError) {
+        console.warn('Local dev API check failed:', localError);
+      }
+
       const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
+      const isNetlifyDev = !!import.meta.env.NETLIFY_DEV ||
+                          window.location.hostname.includes('localhost');
+
       setStatus({
-        online: hasApiKey,
-        message: hasApiKey ? 'Local check (API key available)' : 'Local check (no API key)'
+        online: hasApiKey || isNetlifyDev,
+        message: isNetlifyDev ? 'Netlify dev mode (functions available)' :
+                 hasApiKey ? 'Local check (API key available)' : 'Local check (no API key)'
       });
     } finally {
       setIsLoading(false);

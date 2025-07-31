@@ -22,22 +22,25 @@ interface BlogResponse {
 
 export class DirectOpenAIService {
   /**
-   * Generate blog post using direct OpenAI API call
+   * Generate blog post using direct OpenAI API call or local dev API
    */
   static async generateBlogPost(request: BlogRequest): Promise<BlogResponse> {
     try {
       console.log('🚀 Starting direct blog generation...');
 
-      // Check if OpenAI API key is configured
+      // Check if we should use local dev API
+      const { LocalDevAPI } = await import('@/services/localDevAPI');
+      if (LocalDevAPI.shouldUseMockAPI()) {
+        console.log('🧪 Using local development API...');
+        return await this.generateWithLocalAPI(request);
+      }
+
+      // Check if OpenAI API key is configured (but allow Netlify functions to handle it)
       const { environmentVariablesService } = await import('@/services/environmentVariablesService');
       const clientApiKey = await environmentVariablesService.getOpenAIKey();
 
-      if (!clientApiKey) {
-        return {
-          success: false,
-          error: 'AI content generation is currently unavailable. Please try again later or contact support.'
-        };
-      }
+      // Don't fail if no local API key - Netlify functions might have it configured
+      console.log('🔑 Local API key check:', clientApiKey ? 'Found' : 'Not found (will try Netlify function)');
 
       // Build the prompt dynamically
       const prompt = `Write a comprehensive 1000-word blog post about "${request.keyword}". 
@@ -57,6 +60,7 @@ Please write the complete blog post now:`;
       console.log('📝 Generated prompt:', prompt);
 
       // Call OpenAI via Netlify function
+      console.log('🚀 Calling OpenAI Netlify function...');
       const response = await fetch('/.netlify/functions/generate-openai', {
         method: 'POST',
         headers: {
@@ -67,9 +71,9 @@ Please write the complete blog post now:`;
           url: request.targetUrl,
           anchorText: request.anchorText,
           wordCount: 1000,
-          contentType: 'how-to',
+          contentType: 'blog-post',
           tone: 'professional',
-          apiKey: clientApiKey // Pass API key securely to server function
+          apiKey: clientApiKey || null // Pass API key or let Netlify function use its configured key
         })
       });
 
@@ -99,39 +103,24 @@ Please write the complete blog post now:`;
       const slug = this.generateSlug(title);
       const excerpt = this.extractExcerpt(content);
       
-      // Insert the backlink naturally
-      const contentWithLink = this.insertBacklink(content, request.anchorText, request.targetUrl);
+      // Process the content to include the backlink (it should already be included by the AI)
+      const contentWithLink = content.includes(request.targetUrl) ? content : this.insertBacklink(content, request.anchorText, request.targetUrl);
 
-      // Save to blog posts
+      // Save to blog posts using blog service (no manual ID setting)
       const blogData = {
-        id: crypto.randomUUID(),
         title,
-        slug,
         content: contentWithLink,
-        excerpt,
-        meta_description: excerpt,
-        keywords: [request.keyword],
-        tags: request.keyword.split(' '),
-        category: 'AI Generated',
-        target_url: request.targetUrl,
-        anchor_text: request.anchorText,
-        status: 'published',
-        is_trial_post: true,
-        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
-        view_count: 0,
-        seo_score: 85,
-        reading_time: this.calculateReadingTime(contentWithLink),
-        word_count: contentWithLink.split(/\s+/).length,
-        author_name: 'Backlink ∞ AI',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        published_at: new Date().toISOString(),
-        published_url: `/blog/${slug}`,
-        user_id: null // Unclaimed initially
+        targetUrl: request.targetUrl,
+        anchorText: request.anchorText,
+        wordCount: contentWithLink.split(/\s+/).length,
+        readingTime: this.calculateReadingTime(contentWithLink),
+        seoScore: 85,
+        customSlug: slug
       };
 
-      // Save the blog post
-      const blogUrl = await this.saveBlogPost(blogData);
+      // Save the blog post using blog service
+      const savedPost = await this.saveBlogPostData(blogData);
+      const blogUrl = savedPost.published_url || `/blog/${savedPost.slug}`;
 
       console.log('✅ Blog post generated successfully');
 
@@ -142,7 +131,7 @@ Please write the complete blog post now:`;
         slug,
         excerpt,
         blogUrl,
-        metadata: blogData
+        metadata: savedPost
       };
 
     } catch (error) {
@@ -176,15 +165,19 @@ Please write the complete blog post now:`;
   }
 
   /**
-   * Generate URL-friendly slug
+   * Generate URL-friendly slug with timestamp for uniqueness
    */
   private static generateSlug(title: string): string {
-    return title
+    const baseSlug = title
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '')
       .trim()
       .replace(/\s+/g, '-')
-      .substring(0, 100);
+      .substring(0, 80); // Leave room for timestamp
+
+    // Add timestamp to ensure uniqueness
+    const timestamp = Date.now().toString(36);
+    return `${baseSlug}-${timestamp}`;
   }
 
   /**
@@ -236,51 +229,127 @@ Please write the complete blog post now:`;
   }
 
   /**
-   * Save blog post to storage
+   * Save blog post to storage using the blog service
    */
   private static async saveBlogPost(blogData: any): Promise<string> {
     try {
-      // Try to save to database first
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      
-      if (supabaseUrl && supabaseKey) {
-        const supabase = createClient(supabaseUrl, supabaseKey);
-        
-        const { data, error } = await supabase
-          .from('blog_posts')
-          .insert(blogData)
-          .select()
-          .single();
+      // Use the blog service for proper database handling
+      const { blogService } = await import('@/services/blogService');
 
-        if (!error) {
-          console.log('✅ Blog post saved to database');
-          return `/blog/${blogData.slug}`;
-        }
-      }
+      const blogPostData = {
+        title: blogData.title,
+        content: blogData.content,
+        keywords: blogData.keywords,
+        targetUrl: blogData.target_url,
+        anchorText: blogData.anchor_text,
+        wordCount: blogData.word_count,
+        readingTime: blogData.reading_time,
+        seoScore: blogData.seo_score,
+        metaDescription: blogData.meta_description,
+        customSlug: blogData.slug
+      };
+
+      const savedPost = await blogService.createBlogPost(
+        blogPostData,
+        null, // no user_id for trial posts
+        true  // is_trial_post = true
+      );
+
+      console.log('✅ Blog post saved to database');
+      return savedPost.published_url || `/blog/${savedPost.slug}`;
     } catch (error) {
-      console.warn('Database save failed, using localStorage fallback:', error);
+      console.error('Failed to save blog post:', error);
+      throw new Error('Failed to save blog post to database');
+    }
+  }
+
+  /**
+   * Generate blog post using local development API
+   */
+  private static async generateWithLocalAPI(request: BlogRequest): Promise<BlogResponse> {
+    try {
+      const { LocalDevAPI } = await import('@/services/localDevAPI');
+
+      const result = await LocalDevAPI.generateBlogPost({
+        keyword: request.keyword,
+        anchorText: request.anchorText,
+        targetUrl: request.targetUrl,
+        wordCount: 1000,
+        contentType: 'blog-post',
+        tone: 'professional'
+      });
+
+      if (!result.success || !result.content) {
+        throw new Error(result.error || 'Failed to generate mock content');
+      }
+
+      const content = result.content;
+
+      // Process the generated content
+      const title = this.extractTitle(content, request.keyword);
+      const slug = this.generateSlug(title);
+      const excerpt = this.extractExcerpt(content);
+
+      // Save to blog posts
+      const blogData = {
+        title,
+        content,
+        targetUrl: request.targetUrl,
+        anchorText: request.anchorText,
+        wordCount: content.replace(/<[^>]*>/g, '').split(/\s+/).length,
+        readingTime: this.calculateReadingTime(content),
+        seoScore: 85,
+        customSlug: slug
+      };
+
+      // Save the blog post to database
+      const savedPost = await this.saveBlogPostData(blogData);
+      const blogUrl = savedPost.published_url || `/blog/${savedPost.slug}`;
+
+      console.log('✅ Mock blog post generated and saved to database:', {
+        id: savedPost.id,
+        slug: savedPost.slug,
+        title: savedPost.title
+      });
+
+      return {
+        success: true,
+        title,
+        content,
+        slug,
+        excerpt,
+        blogUrl,
+        metadata: savedPost
+      };
+
+    } catch (error) {
+      console.error('❌ Mock blog generation failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Mock generation failed'
+      };
+    }
+  }
+
+  /**
+   * Save blog post data using the blog service
+   */
+  private static async saveBlogPostData(blogData: any) {
+    const { blogService } = await import('@/services/blogService');
+
+    // Clean up old posts before creating new ones
+    try {
+      const { LocalDevAPI } = await import('@/services/localDevAPI');
+      await LocalDevAPI.cleanupInvalidPosts();
+    } catch (error) {
+      console.warn('Cleanup warning:', error);
     }
 
-    // Fallback to localStorage
-    console.log('📁 Using localStorage fallback');
-    
-    // Save individual blog post
-    localStorage.setItem(`blog_post_${blogData.slug}`, JSON.stringify(blogData));
-    
-    // Update blog posts index
-    const existingPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-    const newPostMeta = {
-      slug: blogData.slug,
-      title: blogData.title,
-      created_at: blogData.created_at
-    };
-    
-    existingPosts.unshift(newPostMeta);
-    localStorage.setItem('all_blog_posts', JSON.stringify(existingPosts));
-
-    return `/blog/${blogData.slug}`;
+    return await blogService.createBlogPost(
+      blogData,
+      null, // no user_id for trial posts
+      true  // is_trial_post = true
+    );
   }
 
 

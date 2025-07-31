@@ -9,14 +9,11 @@ export type UpdateBlogPost = TablesUpdate<'blog_posts'>;
 export interface BlogPostGenerationData {
   title: string;
   content: string;
-  keywords: string[];
   targetUrl: string;
   anchorText?: string;
   wordCount: number;
   readingTime: number;
   seoScore: number;
-  metaDescription?: string;
-  contextualLinks?: any[];
   customSlug?: string; // Allow custom slug override
 }
 
@@ -44,15 +41,46 @@ export class BlogService {
     // Use custom slug if provided, otherwise generate from title
     const baseSlug = data.customSlug || this.generateSlug(data.title);
 
-    // Generate unique slug using database function
-    const { data: uniqueSlugData, error: slugError } = await supabase
-      .rpc('generate_unique_slug', { base_slug: baseSlug });
+    // Generate unique slug using database function or fallback
+    let uniqueSlug = baseSlug;
 
-    if (slugError) {
-      throw new Error(`Failed to generate unique slug: ${slugError.message}`);
+    try {
+      const { data: uniqueSlugData, error: slugError } = await supabase
+        .rpc('generate_unique_slug', { base_slug: baseSlug });
+
+      if (!slugError && uniqueSlugData) {
+        uniqueSlug = uniqueSlugData as string;
+      } else {
+        // Fallback: generate unique slug manually
+        let counter = 0;
+        let slugExists = true;
+
+        while (slugExists) {
+          const testSlug = counter === 0 ? baseSlug : `${baseSlug}-${counter}`;
+          const { data, error } = await supabase
+            .from('blog_posts')
+            .select('id')
+            .eq('slug', testSlug)
+            .single();
+
+          if (error && error.code === 'PGRST116') {
+            // No rows found, slug is available
+            uniqueSlug = testSlug;
+            slugExists = false;
+          } else if (!error) {
+            // Slug exists, try next number
+            counter++;
+          } else {
+            // Other error, use timestamp fallback
+            uniqueSlug = `${baseSlug}-${Date.now()}`;
+            slugExists = false;
+          }
+        }
+      }
+    } catch (error) {
+      // Fallback to timestamp-based slug
+      uniqueSlug = `${baseSlug}-${Date.now()}`;
     }
-
-    const uniqueSlug = uniqueSlugData as string;
     const publishedUrl = `${window.location.origin}/blog/${uniqueSlug}`;
 
     const blogPostData: CreateBlogPost = {
@@ -60,10 +88,6 @@ export class BlogService {
       title: data.title,
       slug: uniqueSlug,
       content: data.content,
-      meta_description: data.metaDescription,
-      keywords: data.keywords,
-      tags: this.generateTags(data.title, data.targetUrl),
-      category: this.categorizeContent(data.keywords.join(' ')),
       target_url: data.targetUrl,
       anchor_text: data.anchorText,
       published_url: publishedUrl,
@@ -74,10 +98,9 @@ export class BlogService {
       seo_score: data.seoScore,
       reading_time: data.readingTime,
       word_count: data.wordCount,
-      featured_image: this.generateFeaturedImage(data.keywords[0] || 'blog'),
-      author_name: 'AI Generator',
-      contextual_links: data.contextualLinks || [],
-      published_at: new Date().toISOString()
+      author_name: 'AI Writer',
+      tags: this.generateTags(data.title, data.targetUrl),
+      category: this.categorizeContent(data.keywords?.join(' ') || data.title)
     };
 
     // If this is a claimed post (has userId and not trial), use maximum persistence
@@ -174,7 +197,7 @@ export class BlogService {
 
       if (!slugError && uniqueSlugData) {
         updates.slug = uniqueSlugData as string;
-        updates.published_url = `${window.location.origin}/blog/${updates.slug}`;
+        updates.published_url = `/blog/${updates.slug}`;
       }
     }
 
@@ -224,7 +247,7 @@ export class BlogService {
       .from('blog_posts')
       .select('*')
       .eq('status', 'published')
-      .order('published_at', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(limit);
 
     if (error) {
@@ -259,8 +282,8 @@ export class BlogService {
       .from('blog_posts')
       .select('*')
       .eq('status', 'published')
-      .or(`title.ilike.%${query}%, content.ilike.%${query}%, keywords.cs.{${query}}`)
-      .order('published_at', { ascending: false })
+      .or(`title.ilike.%${query}%, content.ilike.%${query}%, tags.cs.{${query}}`)
+      .order('created_at', { ascending: false })
       .limit(limit);
 
     if (error) {
@@ -279,7 +302,7 @@ export class BlogService {
       .select('*')
       .eq('status', 'published')
       .eq('category', category)
-      .order('published_at', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(limit);
 
     if (error) {
@@ -294,7 +317,17 @@ export class BlogService {
    */
   private async incrementViewCount(slug: string): Promise<void> {
     try {
-      await supabase.rpc('increment_blog_post_views', { post_slug: slug });
+      // Try using the RPC function first
+      const { error } = await supabase.rpc('increment_blog_post_views', { post_slug: slug });
+
+      if (error) {
+        // Fallback: direct update
+        await supabase
+          .from('blog_posts')
+          .update({ view_count: supabase.sql`view_count + 1` })
+          .eq('slug', slug)
+          .eq('status', 'published');
+      }
     } catch (error) {
       console.warn('Failed to increment view count:', error);
     }
