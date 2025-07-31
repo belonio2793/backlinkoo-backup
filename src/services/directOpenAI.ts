@@ -22,11 +22,18 @@ interface BlogResponse {
 
 export class DirectOpenAIService {
   /**
-   * Generate blog post using direct OpenAI API call
+   * Generate blog post using direct OpenAI API call or local dev API
    */
   static async generateBlogPost(request: BlogRequest): Promise<BlogResponse> {
     try {
       console.log('🚀 Starting direct blog generation...');
+
+      // Check if we should use local dev API
+      const { LocalDevAPI } = await import('@/services/localDevAPI');
+      if (LocalDevAPI.shouldUseMockAPI()) {
+        console.log('🧪 Using local development API...');
+        return await this.generateWithLocalAPI(request);
+      }
 
       // Check if OpenAI API key is configured (but allow Netlify functions to handle it)
       const { environmentVariablesService } = await import('@/services/environmentVariablesService');
