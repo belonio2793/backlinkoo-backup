@@ -274,7 +274,19 @@ export function BlogPost() {
 
       // Use BlogClaimService directly since Netlify functions are not available
       const { BlogClaimService } = await import('@/services/blogClaimService');
-      const claimResult = await BlogClaimService.claimPost(blogPost.id, user);
+
+      // Debug: Check what blogPost.id looks like
+      console.log('🔍 BlogPost claim debug:', {
+        blogPostId: blogPost.id,
+        blogPostIdType: typeof blogPost.id,
+        blogPostSlug: blogPost.slug,
+        blogPostKeys: Object.keys(blogPost)
+      });
+
+      // Ensure we have a valid string ID - use slug as fallback for localStorage posts
+      const postIdentifier = typeof blogPost.id === 'string' ? blogPost.id : blogPost.slug;
+
+      const claimResult = await BlogClaimService.claimPost(postIdentifier, user);
 
       if (!claimResult.success) {
         throw new Error(claimResult.message || claimResult.error || 'Failed to claim blog post');
