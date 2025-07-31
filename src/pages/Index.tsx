@@ -64,9 +64,7 @@ const Index = () => {
       setShowTrialUpgrade(true);
       setShowInlineAuth(true);
     }
-
-
-  }, [trackPageView]);
+  }, []);
 
   // Check for authenticated user on component mount
   useEffect(() => {
