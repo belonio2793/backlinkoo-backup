@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { GlobalNotifications } from "@/components/GlobalNotifications";
 import { BetaNotification } from "@/components/BetaNotification";
-import { AppWrapper } from "@/components/AppWrapper";
+import { OptimizedAppWrapper } from "@/components/OptimizedAppWrapper";
 import { AuthProfileChecker } from "@/components/AuthProfileChecker";
 import { AuthRedirectHandler } from "@/components/AuthRedirectHandler";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -15,13 +15,16 @@ import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 import { autoConfigSaver } from "@/services/autoConfigSaver";
 
 
-// Import test utilities for debugging
-import '@/utils/testBlogClaiming';
-import '@/utils/netlifyFunctionDiagnostic';
-import '@/utils/dashboardAccessDiagnostic';
-import '@/utils/quickDashboardAccess';
-import '@/utils/blogClaimDiagnostic';
-import '@/utils/testBlogClaimFixes';
+// Debug utilities removed for better performance in production
+// Only import debug utils in development mode
+if (import.meta.env.DEV) {
+  import('@/utils/testBlogClaiming');
+  import('@/utils/netlifyFunctionDiagnostic');
+  import('@/utils/dashboardAccessDiagnostic');
+  import('@/utils/quickDashboardAccess');
+  import('@/utils/blogClaimDiagnostic');
+  import('@/utils/testBlogClaimFixes');
+}
 
 const queryClient = new QueryClient();
 
@@ -44,28 +47,31 @@ if (typeof window !== 'undefined') {
   console.log('🚀 Initializing automatic configuration monitoring...');
   autoConfigSaver.startMonitoring();
 
-  // Initialize real-time configuration sync
-  import('./utils/initializeConfigSync').then(({ initializeConfigSync }) => {
-    initializeConfigSync().then(result => {
-      if (result.success) {
-        console.log('✅ Real-time configuration sync initialized:', result.message);
-      } else {
-        console.error('❌ Configuration sync initialization failed:', result.message);
-      }
+  // Load heavy initialization modules asynchronously to improve initial load time
+  setTimeout(() => {
+    // Initialize real-time configuration sync
+    import('./utils/initializeConfigSync').then(({ initializeConfigSync }) => {
+      initializeConfigSync().then(result => {
+        if (result.success) {
+          console.log('✅ Real-time configuration sync initialized:', result.message);
+        } else {
+          console.error('❌ Configuration sync initialization failed:', result.message);
+        }
+      });
     });
-  });
 
-  // Initialize production safety system
-  import('./services/productionSafeConfig').then(({ productionSafeConfig }) => {
-    productionSafeConfig.ensureHomepageSafety().then(result => {
-      if (result.safe) {
-        console.log('🛡️ Homepage safety verified - users protected');
-      } else {
-        console.warn('⚠️ Homepage safety issues detected:', result.issues);
-        console.log('🔧 Automatic fallbacks have been enabled to protect users');
-      }
+    // Initialize production safety system
+    import('./services/productionSafeConfig').then(({ productionSafeConfig }) => {
+      productionSafeConfig.ensureHomepageSafety().then(result => {
+        if (result.safe) {
+          console.log('🛡️ Homepage safety verified - users protected');
+        } else {
+          console.warn('⚠️ Homepage safety issues detected:', result.issues);
+          console.log('🔧 Automatic fallbacks have been enabled to protect users');
+        }
+      });
     });
-  });
+  }, 2000); // Delay heavy initialization by 2 seconds
 }
 
 const App = () => (
@@ -80,7 +86,7 @@ const App = () => (
           <BetaNotification />
           <BrowserRouter>
             <AuthRedirectHandler>
-              <AppWrapper />
+              <OptimizedAppWrapper />
             </AuthRedirectHandler>
           </BrowserRouter>
         </AuthProfileChecker>
