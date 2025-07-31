@@ -223,7 +223,7 @@ export class BlogClaimService {
         };
       }
 
-      // Claim the post
+      // Claim the post using the actual database ID
       const { data: updatedPost, error: updateError } = await supabase
         .from('published_blog_posts')
         .update({
@@ -232,7 +232,7 @@ export class BlogClaimService {
           expires_at: null, // Remove expiry
           updated_at: new Date().toISOString()
         })
-        .eq('id', postId)
+        .eq('id', existingPost.id)
         .select()
         .single();
 
