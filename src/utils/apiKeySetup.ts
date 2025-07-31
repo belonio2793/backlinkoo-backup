@@ -12,7 +12,7 @@ export interface ApiKeyStatus {
 
 export const API_KEY_CONFIG = {
   openai: {
-    client: 'VITE_OPENAI_API_KEY',
+    client: 'OPENAI_API_KEY',
     server: 'OPENAI_API_KEY',
     name: 'OpenAI'
   }
