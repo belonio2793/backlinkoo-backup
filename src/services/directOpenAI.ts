@@ -58,18 +58,20 @@ Please write the complete blog post now:`;
         })
       });
 
+      let result;
       if (!response.ok) {
         let errorMessage = `OpenAI API call failed: ${response.status}`;
         try {
-          const errorText = await response.text();
-          errorMessage += ` - ${errorText}`;
+          // Try to get error details from response
+          const errorData = await response.json();
+          errorMessage += ` - ${errorData.error || 'Unknown error'}`;
         } catch {
-          // If we can't read the error text, just use the status
+          // If JSON parsing fails, use status only
         }
         throw new Error(errorMessage);
+      } else {
+        result = await response.json();
       }
-
-      const result = await response.json();
 
       if (!result.success || !result.content) {
         throw new Error(result.error || 'Failed to generate content');
