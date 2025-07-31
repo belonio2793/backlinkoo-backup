@@ -38,11 +38,21 @@ export async function initializeConfigSync(): Promise<{ success: boolean; messag
     };
 
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to initialize configuration sync';
+
+    if (errorMessage.includes('Table needs to be created')) {
+      console.warn('⚠️ Database table not found, using localStorage mode');
+      return {
+        success: true, // This is not actually a failure, just a different mode
+        message: 'Configuration sync initialized in localStorage mode (database table not found)'
+      };
+    }
+
     console.error('❌ Failed to initialize configuration sync:', error);
-    
+
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Failed to initialize configuration sync'
+      message: errorMessage
     };
   }
 }
