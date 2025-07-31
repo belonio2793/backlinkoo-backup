@@ -57,28 +57,66 @@ export function setupDemoApiKey(): boolean {
 
 export function checkApiKeyStatus(): {
   hasKey: boolean;
-  keyType: 'real' | 'demo' | 'none';
+  keyType: 'real' | 'demo' | 'invalid' | 'none';
   message: string;
+  keyPreview?: string;
 } {
   const envKey = import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.OPENAI_API_KEY;
-  const demoKey = localStorage.getItem('demo_openai_key');
-  
-  if (envKey && envKey.startsWith('sk-') && envKey.length > 20) {
-    return {
-      hasKey: true,
-      keyType: 'real',
-      message: 'Real OpenAI API key configured'
-    };
+  const localKey = localStorage.getItem('demo_openai_key');
+
+  // Improved validation function
+  const isValidKey = (key: string) => {
+    return key &&
+           key.startsWith('sk-') &&
+           key.length >= 51 &&
+           !key.includes('proj-') && // Project keys often don't work for direct API calls
+           !key.includes('demo-fallback');
+  };
+
+  // Check environment key first
+  if (envKey) {
+    if (isValidKey(envKey)) {
+      return {
+        hasKey: true,
+        keyType: 'real',
+        message: 'Valid OpenAI API key configured',
+        keyPreview: envKey.substring(0, 15) + '...'
+      };
+    } else if (envKey.startsWith('sk-')) {
+      return {
+        hasKey: false,
+        keyType: 'invalid',
+        message: 'Invalid OpenAI API key format detected',
+        keyPreview: envKey.substring(0, 15) + '...'
+      };
+    }
   }
-  
-  if (demoKey) {
-    return {
-      hasKey: true,
-      keyType: 'demo',
-      message: 'Demo mode - will generate template content'
-    };
+
+  // Check local storage key
+  if (localKey) {
+    if (localKey.includes('demo-fallback')) {
+      return {
+        hasKey: true,
+        keyType: 'demo',
+        message: 'Demo mode - will generate template content'
+      };
+    } else if (isValidKey(localKey)) {
+      return {
+        hasKey: true,
+        keyType: 'real',
+        message: 'Valid OpenAI API key configured in localStorage',
+        keyPreview: localKey.substring(0, 15) + '...'
+      };
+    } else if (localKey.startsWith('sk-')) {
+      return {
+        hasKey: false,
+        keyType: 'invalid',
+        message: 'Invalid OpenAI API key format in localStorage',
+        keyPreview: localKey.substring(0, 15) + '...'
+      };
+    }
   }
-  
+
   return {
     hasKey: false,
     keyType: 'none',
