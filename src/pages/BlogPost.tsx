@@ -287,10 +287,20 @@ export function BlogPost() {
       // For localStorage posts, use slug as identifier since they might not have a database ID yet
       const postIdentifier = blogPost.slug;
 
+      console.log('🔄 Attempting to claim post with identifier:', postIdentifier);
       const claimResult = await BlogClaimService.claimPost(postIdentifier, user);
 
+      console.log('📊 Claim result:', {
+        success: claimResult.success,
+        message: claimResult.message,
+        error: claimResult.error,
+        hasPost: !!claimResult.post
+      });
+
       if (!claimResult.success) {
-        throw new Error(claimResult.message || claimResult.error || 'Failed to claim blog post');
+        const errorMessage = claimResult.message || claimResult.error || 'Failed to claim blog post';
+        console.error('❌ Claim failed:', errorMessage);
+        throw new Error(errorMessage);
       }
 
       // Update localStorage to mark as claimed
