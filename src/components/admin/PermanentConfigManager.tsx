@@ -199,9 +199,9 @@ export function PermanentConfigManager() {
       <CardContent>
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Health Overview</TabsTrigger>
-            <TabsTrigger value="configurations">Saved Configurations</TabsTrigger>
-            <TabsTrigger value="backup">Backup & Restore</TabsTrigger>
+            <TabsTrigger key="overview-tab" value="overview">Health Overview</TabsTrigger>
+            <TabsTrigger key="configurations-tab" value="configurations">Saved Configurations</TabsTrigger>
+            <TabsTrigger key="backup-tab" value="backup">Backup & Restore</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
