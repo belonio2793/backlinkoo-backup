@@ -324,7 +324,29 @@ export function AuthFormTabs({
       let shouldRetry = false;
 
       // Categorize error types for better user feedback
-      if (error.message?.includes('timeout') || error.message?.includes('taking longer than expected')) {
+      if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError') || error.message?.includes('Unable to connect')) {
+        // Network connection errors
+        setRetryAttempts(prev => prev + 1);
+
+        if (retryAttempts < 2) {
+          shouldRetry = true;
+          errorMessage = `Network connection issue (attempt ${retryAttempts + 1}/3). Please check your internet connection. Retrying...`;
+          toast({
+            title: "Retrying sign in...",
+            description: errorMessage,
+          });
+
+          // Auto-retry with longer delay for network issues
+          setTimeout(() => {
+            if (loginEmail && loginPassword) {
+              handleLogin(e);
+            }
+          }, 5000);
+          return;
+        } else {
+          errorMessage = "Unable to connect to the authentication server. Please check your internet connection and try again later.";
+        }
+      } else if (error.message?.includes('timeout') || error.message?.includes('taking longer than expected')) {
         // Timeout errors - offer retry
         setRetryAttempts(prev => prev + 1);
 
