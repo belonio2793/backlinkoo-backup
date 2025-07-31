@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { ModernEnvironmentVariablesManager } from './ModernEnvironmentVariablesManager';
 import { TableSetupInstructions } from './TableSetupInstructions';
+import { UnifiedServiceStatus } from './UnifiedServiceStatus';
 import { globalOpenAI } from '@/services/globalOpenAIConfig';
 
 interface ServiceStatus {
@@ -447,60 +448,7 @@ export function RealTimeConfigDashboard() {
         </TabsContent>
 
         <TabsContent value="health" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>API Health Monitoring</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-medium mb-2">OpenAI API</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>Health Score:</span>
-                      <span className="font-medium">{openAIKey.healthScore}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Status:</span>
-                      <Badge variant={openAIKey.isValid ? 'default' : 'destructive'}>
-                        {openAIKey.isValid ? 'Valid' : 'Invalid'}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-medium mb-2">Supabase</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>Connection:</span>
-                      <Badge variant={isOnline ? 'default' : 'destructive'}>
-                        {isOnline ? 'Connected' : 'Offline'}
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Configured:</span>
-                      <span>{supabaseUrl.isConfigured ? 'Yes' : 'No'}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-medium mb-2">Email Service</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>Health Score:</span>
-                      <span className="font-medium">{resendKey.healthScore}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Configured:</span>
-                      <span>{resendKey.isConfigured ? 'Yes' : 'No'}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <UnifiedServiceStatus />
         </TabsContent>
       </Tabs>
     </div>
