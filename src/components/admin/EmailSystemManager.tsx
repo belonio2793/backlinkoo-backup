@@ -76,11 +76,17 @@ Email System Manager`
   const loadSystemHealth = async () => {
     try {
       const health = await ResendEmailService.healthCheck();
-      // Ensure health has the required structure
+      // Transform the actual service response to match expected structure
       const safeHealth = {
         status: health?.status || 'unknown',
-        recentFailures: health?.recentFailures || 0,
-        providers: Array.isArray(health?.providers) ? health.providers : []
+        recentFailures: failureLog.length || 0,
+        providers: [
+          {
+            name: 'resend',
+            status: health?.resend ? 'healthy' : 'error',
+            lastTested: new Date()
+          }
+        ]
       };
       setSystemHealth(safeHealth);
     } catch (error) {
@@ -89,7 +95,13 @@ Email System Manager`
       setSystemHealth({
         status: 'error',
         recentFailures: 0,
-        providers: []
+        providers: [
+          {
+            name: 'resend',
+            status: 'error',
+            lastTested: new Date()
+          }
+        ]
       });
     }
   };
