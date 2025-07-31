@@ -100,21 +100,12 @@ export class AuthService {
    */
   static async signIn(signInData: SignInData): Promise<AuthResponse> {
     try {
-      console.log('🔐 AuthService: Starting signin for:', signInData.email);
-
-      // Clean up any existing auth state
-      await this.cleanupAuthState();
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email: signInData.email.trim(),
         password: signInData.password
       });
 
       if (error) {
-        console.error('AuthService: Signin error:', {
-          message: error.message,
-          details: error
-        });
         return {
           success: false,
           error: this.formatErrorMessage(error.message)
@@ -124,24 +115,13 @@ export class AuthService {
       if (data.user && data.session) {
         // Check if email is verified
         if (!data.user.email_confirmed_at) {
-          console.warn('AuthService: User email not verified');
-          
-          // Sign out the user since email verification is required
           await supabase.auth.signOut();
-          
           return {
             success: false,
             error: 'Email verification required. Please check your email for a verification link.',
             requiresEmailVerification: true
           };
         }
-
-        console.log('✅ AuthService: Signin successful:', data.user.id);
-
-        // Ensure user profile exists in background
-        this.ensureUserProfile(data.user, signInData.email).catch(err => {
-          console.warn('AuthService: Profile check failed (non-blocking):', err);
-        });
 
         return {
           success: true,
@@ -155,7 +135,6 @@ export class AuthService {
         error: 'No user data received from signin'
       };
     } catch (error: any) {
-      console.error('AuthService: Signin exception:', error);
       return {
         success: false,
         error: this.formatErrorMessage(error.message)
