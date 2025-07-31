@@ -249,7 +249,7 @@ export function Blog() {
                     Dashboard
                   </Button>
                   <Button
-                    onClick={() => navigate("/auth")}
+                    onClick={() => navigate("/login")}
                     className="bg-transparent hover:bg-red-50/50 border border-red-200/60 text-red-600 hover:text-red-700 hover:border-red-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
                   >
                     Sign Out
@@ -257,10 +257,10 @@ export function Blog() {
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" onClick={() => navigate("/auth")} className="font-medium">
+                  <Button variant="ghost" onClick={() => navigate("/login")} className="font-medium">
                     Sign In
                   </Button>
-                  <Button onClick={() => navigate("/auth")} className="font-medium">
+                  <Button onClick={() => navigate("/login")} className="font-medium">
                     Get Started
                   </Button>
                 </>
