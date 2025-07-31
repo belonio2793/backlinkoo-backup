@@ -32,6 +32,7 @@ import { globalOpenAI } from '@/services/globalOpenAIConfig';
 import { SecureConfig } from '@/lib/secure-config';
 import { adminGlobalSync } from '@/services/adminGlobalConfigSync';
 import { setupAdminTableAndAPIKey, checkAdminTableExists } from '@/utils/setupAdminTable';
+import { updateOpenAIKeyEverywhere } from '@/utils/updateOpenAIKey';
 
 interface OpenAIStatus {
   configured: boolean;
