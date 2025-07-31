@@ -338,15 +338,7 @@ export function ServiceConnectionStatus() {
                   )}
                 </div>
 
-                {/* API Key Status */}
-                <div className="mt-2 text-xs">
-                  <div className="flex items-center gap-1">
-                    <Key className="h-3 w-3" />
-                    <span className={service.hasApiKey ? 'text-green-600' : 'text-orange-600'}>
-                      {service.hasApiKey ? 'API Key Present' : 'API Key Missing'}
-                    </span>
-                  </div>
-                </div>
+
 
                 {/* Additional Details */}
                 {service.details && (
