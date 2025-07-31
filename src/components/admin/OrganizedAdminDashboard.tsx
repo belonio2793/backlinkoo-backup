@@ -326,7 +326,7 @@ export function OrganizedAdminDashboard() {
             </TabsList>
 
             <TabsContent value="email-system">
-              <EmailSystemManager />
+              <EmailSystemManagerSafe />
             </TabsContent>
 
             <TabsContent value="smtp-config">
