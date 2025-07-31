@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { AuthService, setupAuthStateListener } from "@/services/authService";
-import { PurgeStorageButton } from "@/components/PurgeStorageButton";
+
 import { AuthFormTabs } from "@/components/shared/AuthFormTabs";
 
 import { useNavigate } from "react-router-dom";
@@ -179,12 +179,7 @@ const Login = () => {
             <ArrowLeft className="h-4 w-4" />
             Back to Home
           </Button>
-          <PurgeStorageButton
-            variant="ghost"
-            size="sm"
-            showIcon={true}
-            className="text-muted-foreground hover:text-foreground"
-          />
+
         </div>
 
         <div className="text-center mb-8">
