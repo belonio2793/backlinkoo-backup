@@ -267,20 +267,7 @@ export function OrganizedAdminDashboard() {
             </TabsList>
 
             <TabsContent value="environment">
-              <div className="space-y-6">
-                <NetlifyEnvironmentManager />
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Brain className="h-5 w-5" />
-                      Additional OpenAI Configuration
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <UnifiedOpenAIConfig />
-                  </CardContent>
-                </Card>
-              </div>
+              <NetlifyEnvironmentManager />
             </TabsContent>
 
             <TabsContent value="deployment">
