@@ -150,11 +150,7 @@ export class GlobalOpenAIConfig {
         console.warn('⚠️ OpenAI connection test failed:', error.message);
       }
 
-      // Enable fallback mode on error but don't log as error
       localStorage.setItem('openai_key_invalid', 'true');
-      localStorage.setItem('openai_fallback_mode', 'true');
-
-      // Return false for failed connections but don't break the app
       return false;
     }
   }
