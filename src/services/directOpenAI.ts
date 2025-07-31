@@ -315,11 +315,15 @@ Please write the complete blog post now:`;
         customSlug: slug
       };
 
-      // Save the blog post
+      // Save the blog post to database
       const savedPost = await this.saveBlogPostData(blogData);
       const blogUrl = savedPost.published_url || `/blog/${savedPost.slug}`;
 
-      console.log('✅ Mock blog post generated successfully');
+      console.log('✅ Mock blog post generated and saved to database:', {
+        id: savedPost.id,
+        slug: savedPost.slug,
+        title: savedPost.title
+      });
 
       return {
         success: true,
