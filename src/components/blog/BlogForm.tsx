@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { DirectOpenAIService } from '@/services/directOpenAI';
+import { APIStatusIndicator } from '@/components/shared/APIStatusIndicator';
 import { Loader2, Link, Target, Hash, Sparkles } from 'lucide-react';
 
 interface BlogFormProps {
