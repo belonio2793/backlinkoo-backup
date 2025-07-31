@@ -53,6 +53,7 @@ import { ProfileSettings } from "@/components/ProfileSettings";
 import { ApiConfigStatus } from "@/components/ApiConfigStatus";
 import { TrialBlogShowcase } from "@/components/TrialBlogShowcase";
 import { TrialBlogPostsDisplay as NewTrialBlogPostsDisplay } from "@/components/TrialBlogPostsDisplay";
+import { EnhancedTrialBlogPosts } from "@/components/EnhancedTrialBlogPosts";
 
 import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
