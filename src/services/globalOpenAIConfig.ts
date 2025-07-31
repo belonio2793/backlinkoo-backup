@@ -147,9 +147,21 @@ export class GlobalOpenAIConfig {
 
       return isValid;
     } catch (error) {
-      console.error('OpenAI connection test failed:', error);
+      // Handle different types of fetch errors gracefully
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.warn('⚠️ OpenAI connection test failed due to network/CORS - this is expected in development');
+      } else if (error.name === 'AbortError') {
+        console.warn('⚠️ OpenAI connection test timed out');
+      } else {
+        console.warn('⚠️ OpenAI connection test failed:', error.message);
+      }
+
+      // Enable fallback mode on error but don't log as error
+      localStorage.setItem('openai_key_invalid', 'true');
       localStorage.setItem('openai_fallback_mode', 'true');
-      return this.hasFallbackMode();
+
+      // Return false for failed connections but don't break the app
+      return false;
     }
   }
 
