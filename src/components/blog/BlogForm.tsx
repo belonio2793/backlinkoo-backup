@@ -201,6 +201,11 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             <li>• You have 24 hours to claim the post (limit: 3 claimed posts)</li>
             <li>• Unclaimed posts are automatically deleted after 24 hours</li>
           </ul>
+          <div className="mt-3 pt-3 border-t border-blue-200">
+            <p className="text-xs text-blue-700">
+              <strong>Note:</strong> If OpenAI is unavailable, the system will generate high-quality template content to ensure your post is still created.
+            </p>
+          </div>
         </div>
 
         <Button
