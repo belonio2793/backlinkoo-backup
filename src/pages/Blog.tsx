@@ -304,7 +304,7 @@ export function Blog() {
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <Input
-                placeholder="Search expert posts..."
+                placeholder="Search claimed and unclaimed posts..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 h-12 text-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
