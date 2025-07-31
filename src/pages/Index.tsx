@@ -31,7 +31,7 @@ import type { User } from '@supabase/supabase-js';
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/services/authService";
-import { PurgeStorageButton } from "@/components/PurgeStorageButton";
+
 import { LoginModal } from "@/components/LoginModal";
 import { InlineAuthForm } from "@/components/InlineAuthForm";
 import { TrialConversionBanner } from "@/components/TrialConversionBanner";
@@ -279,12 +279,7 @@ const Index = () => {
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
             </div>
             <div className="flex items-center gap-4">
-              <PurgeStorageButton
-                variant="ghost"
-                size="sm"
-                showIcon={true}
-                className="text-muted-foreground hover:text-foreground"
-              />
+
               {!authChecked ? (
                 <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
               ) : user ? (

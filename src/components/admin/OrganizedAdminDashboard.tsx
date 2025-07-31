@@ -25,7 +25,7 @@ import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { SystemStatusCheck } from "@/components/SystemStatusCheck";
-import { PurgeStorageButton } from "@/components/PurgeStorageButton";
+
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 import { APIManagementDashboard } from "@/components/admin/APIManagementDashboard";
 import { GlobalAPIStatus } from "@/components/GlobalAPIStatus";
@@ -307,7 +307,7 @@ export function OrganizedAdminDashboard() {
                     <div className="space-y-4">
                       <TrialPostCleanupManager />
                       <Separator />
-                      <PurgeStorageButton />
+
                     </div>
                   </CardContent>
                 </Card>
