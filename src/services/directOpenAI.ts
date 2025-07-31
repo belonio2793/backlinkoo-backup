@@ -266,7 +266,90 @@ Please write the complete blog post now:`;
     
     existingPosts.unshift(newPostMeta);
     localStorage.setItem('all_blog_posts', JSON.stringify(existingPosts));
-    
+
     return `/blog/${blogData.slug}`;
+  }
+
+  /**
+   * Generate fallback content when AI services are unavailable
+   */
+  private static generateFallbackContent(request: BlogRequest): string {
+    const { keyword, anchorText, targetUrl } = request;
+
+    return `The Complete Guide to ${keyword}
+
+Welcome to our comprehensive guide on ${keyword}. This article will provide you with valuable insights and practical information to help you understand this important topic.
+
+Introduction
+
+Understanding ${keyword} is crucial in today's digital landscape. Whether you're a beginner or looking to expand your knowledge, this guide will walk you through the essential concepts and best practices.
+
+What You Need to Know About ${keyword}
+
+${keyword} plays a vital role in many aspects of business and technology. Let's explore the key components that make this topic so important.
+
+Key Benefits:
+- Improved efficiency and productivity
+- Better decision-making capabilities
+- Enhanced user experience
+- Cost-effective solutions
+- Scalable implementation
+
+Best Practices
+
+When working with ${keyword}, it's important to follow industry best practices. Here are some essential guidelines to consider:
+
+1. Research and Planning: Always start with thorough research to understand your specific needs and goals.
+
+2. Implementation Strategy: Develop a clear implementation strategy that aligns with your objectives.
+
+3. Continuous Monitoring: Regularly monitor performance and make adjustments as needed.
+
+4. Stay Updated: Keep up with the latest trends and developments in the field.
+
+Getting Started
+
+To begin your journey with ${keyword}, consider these initial steps:
+
+Step 1: Assessment - Evaluate your current situation and identify areas for improvement.
+
+Step 2: Goal Setting - Define clear, measurable goals that align with your objectives.
+
+Step 3: Resource Planning - Determine what resources you'll need and create a realistic timeline.
+
+Advanced Techniques
+
+For those looking to take their understanding of ${keyword} to the next level, consider exploring advanced techniques and strategies. Professional guidance can be invaluable in this process.
+
+For expert assistance and additional resources, consider consulting with ${anchorText}. They offer specialized knowledge and proven solutions that can help you achieve your goals more effectively.
+
+Common Challenges and Solutions
+
+Every implementation of ${keyword} comes with its own set of challenges. Here are some common issues and their solutions:
+
+Challenge 1: Resource Constraints
+Solution: Prioritize high-impact activities and consider phased implementation.
+
+Challenge 2: Technical Complexity
+Solution: Invest in proper training and consider working with experienced professionals.
+
+Challenge 3: Change Management
+Solution: Develop a comprehensive change management strategy that includes stakeholder buy-in.
+
+Measuring Success
+
+To ensure your ${keyword} implementation is successful, establish key performance indicators (KPIs) and regularly measure progress. Important metrics to consider include performance improvements, cost savings, user satisfaction, return on investment, and long-term sustainability.
+
+Future Trends
+
+The field of ${keyword} continues to evolve rapidly. Stay ahead of the curve by keeping an eye on emerging trends and technologies that could impact your implementation.
+
+Conclusion
+
+Mastering ${keyword} requires dedication, continuous learning, and the right approach. By following the guidelines and best practices outlined in this guide, you'll be well-equipped to achieve success in your endeavors.
+
+Remember that professional guidance can make a significant difference in your results. Don't hesitate to seek expert advice when needed to ensure you're making the most of your investment in ${keyword}.
+
+Whether you're just getting started or looking to optimize your existing approach, the principles discussed in this guide will serve as a solid foundation for your success.`;
   }
 }
