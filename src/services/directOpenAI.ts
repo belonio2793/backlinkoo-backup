@@ -67,6 +67,12 @@ export class DirectOpenAIService {
 
       console.log('✅ API key found:', clientApiKey.substring(0, 15) + '...');
 
+      // Check if this is a demo key - if so, use fallback content directly
+      if (clientApiKey.includes('demo-fallback')) {
+        console.log('🔧 Demo key detected, using fallback content generation');
+        return await this.generateFallbackContent(request);
+      }
+
       // Build the prompt dynamically
       const prompt = `Write a comprehensive 1000-word blog post about "${request.keyword}". 
 
