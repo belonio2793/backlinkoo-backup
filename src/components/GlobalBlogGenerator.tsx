@@ -66,6 +66,8 @@ export function GlobalBlogGenerator({
   const [remainingRequests, setRemainingRequests] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
   const [previewMode, setPreviewMode] = useState<'content' | 'seo' | 'links'>('content');
+  const [selectedPrompt, setSelectedPrompt] = useState<string>('');
+  const [promptIndex, setPromptIndex] = useState<number>(0);
 
   const { toast } = useToast();
   const navigate = useNavigate();
