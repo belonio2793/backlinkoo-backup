@@ -115,63 +115,73 @@ export function ServiceConnectionStatus() {
   const checkOpenAI = async (): Promise<void> => {
     const startTime = Date.now();
 
-    // Check via Netlify API status function to get real production environment status
     try {
-      const result = await safeNetlifyFetch('api-status');
+      // Use dedicated OpenAI status function (ChatGPT-style approach)
+      const result = await safeNetlifyFetch('openai-status');
       const responseTime = Date.now() - startTime;
 
       if (result.success && result.data) {
-        const { online, providers } = result.data;
-        const openAIStatus = providers?.OpenAI;
+        const { configured, status, message, modelCount, keyPreview } = result.data;
 
-        if (openAIStatus?.configured && online) {
+        if (status === 'connected') {
           updateServiceStatus('OpenAI API', {
             status: 'connected',
-            message: 'OpenAI API connected and configured in production',
+            message: message || 'OpenAI API connected',
             responseTime,
             details: {
-              configured: true,
-              status: openAIStatus.status,
-              environment: 'production',
-              source: 'netlify-functions'
+              configured: '✅ Yes',
+              modelCount: modelCount || 'Unknown',
+              keyPreview: keyPreview || 'Hidden',
+              method: 'Direct API Test',
+              environment: 'Production'
             }
           });
-        } else if (openAIStatus?.configured) {
+        } else if (status === 'error') {
           updateServiceStatus('OpenAI API', {
             status: 'error',
-            message: 'OpenAI API configured but not responding',
+            message: message || 'OpenAI API error',
             responseTime,
             details: {
-              configured: true,
-              status: openAIStatus.status || 'error',
-              environment: 'production'
+              configured: configured ? '✅ Yes' : '❌ No',
+              error: result.data.error || 'API call failed',
+              method: 'Direct API Test'
             }
           });
         } else {
           updateServiceStatus('OpenAI API', {
             status: 'not_configured',
-            message: 'OpenAI API key not configured in production environment',
-            responseTime
+            message: message || 'OpenAI API key not configured',
+            responseTime,
+            details: {
+              configured: '❌ No',
+              method: 'Direct API Test'
+            }
           });
         }
       } else {
-        // Fallback: Direct API test only in development
-        const isDevelopment = window.location.hostname === 'localhost';
-        if (isDevelopment) {
+        // Fallback to old method if new function fails
+        const fallbackResult = await safeNetlifyFetch('api-status');
+        const fallbackResponseTime = Date.now() - startTime;
+
+        if (fallbackResult.success && fallbackResult.data?.providers?.OpenAI?.configured) {
           updateServiceStatus('OpenAI API', {
             status: 'connected',
-            message: 'Development mode - using fallback configuration',
-            responseTime,
+            message: 'OpenAI API configured (via fallback check)',
+            responseTime: fallbackResponseTime,
             details: {
-              mode: 'development',
-              fallback: true
+              method: 'Fallback Check',
+              configured: '✅ Yes'
             }
           });
         } else {
           updateServiceStatus('OpenAI API', {
             status: 'error',
             message: 'Unable to verify OpenAI API status',
-            responseTime
+            responseTime: fallbackResponseTime,
+            details: {
+              error: result.error || 'Status function unavailable',
+              method: 'Failed Check'
+            }
           });
         }
       }
@@ -180,7 +190,11 @@ export function ServiceConnectionStatus() {
       updateServiceStatus('OpenAI API', {
         status: 'error',
         message: `OpenAI status check failed: ${error instanceof Error ? error.message : 'Network error'}`,
-        responseTime
+        responseTime,
+        details: {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          method: 'Exception'
+        }
       });
     }
   };
