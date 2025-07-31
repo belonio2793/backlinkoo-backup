@@ -254,14 +254,15 @@ Ensure the anchor text placement follows SEO best practices and genuinely helps 
         });
       }
 
-      // Generate content using Global OpenAI Configuration
+      // Generate content using Global OpenAI Configuration with enhanced prompting
       const result = await globalOpenAI.generateContent({
         keyword: keyword.trim(),
         anchorText: anchorText.trim(),
         url: formattedUrl,
-        wordCount: 1000,
-        contentType: 'comprehensive',
-        tone: 'professional'
+        wordCount: 1500,
+        contentType: 'comprehensive_seo_optimized',
+        tone: 'professional',
+        customPrompt: formatted // Use our detailed SEO-focused prompt
       });
 
       if (!result.success) {
@@ -270,24 +271,73 @@ Ensure the anchor text placement follows SEO best practices and genuinely helps 
 
       if (showDebugPanel) {
         setProgress({
-          stage: 'saving',
-          progress: 85,
-          details: 'Saving blog post...',
+          stage: 'processing',
+          progress: 70,
+          details: 'Processing content and generating metadata...',
           timestamp: new Date()
         });
       }
 
-      // Create proper blog post data for BlogService
+      // Extract title from generated content or create SEO-optimized title
+      let extractedTitle = `${keyword.trim()} - Complete Guide`;
+      const contentLines = result.content?.split('\n') || [];
+      const firstLine = contentLines[0]?.trim();
+
+      // Check if first line looks like a title (starts with # or is short and descriptive)
+      if (firstLine && (firstLine.startsWith('#') || (firstLine.length < 100 && firstLine.includes(keyword.trim())))) {
+        extractedTitle = firstLine.replace(/^#+\s*/, '').trim();
+      }
+
+      // Generate SEO-friendly slug
+      const generateSlug = (text: string): string => {
+        return text
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+          .replace(/\s+/g, '-') // Replace spaces with hyphens
+          .replace(/-+/g, '-') // Replace multiple hyphens with single
+          .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
+          .substring(0, 60); // Limit length for SEO
+      };
+
+      const slug = generateSlug(extractedTitle);
+
+      // Generate comprehensive meta description
+      const generateMetaDescription = (content: string, keyword: string): string => {
+        const sentences = content.split('.').filter(s => s.trim().length > 0);
+        const relevantSentences = sentences.filter(s =>
+          s.toLowerCase().includes(keyword.toLowerCase()) &&
+          s.length > 50 && s.length < 150
+        );
+
+        if (relevantSentences.length > 0) {
+          return relevantSentences[0].trim() + '.';
+        }
+
+        return `Discover everything about ${keyword.trim()}. Expert insights, practical tips, and comprehensive information to help you succeed.`;
+      };
+
+      if (showDebugPanel) {
+        setProgress({
+          stage: 'saving',
+          progress: 85,
+          details: 'Saving blog post to database...',
+          timestamp: new Date()
+        });
+      }
+
+      // Create comprehensive blog post data for BlogService
+      const wordCount = result.content?.split(/\s+/).length || 1500;
       const blogPostData = {
-        title: `${keyword.trim()} - Complete Guide`,
+        title: extractedTitle,
         content: result.content || '',
-        keywords: [keyword.trim()],
+        keywords: [keyword.trim(), ...keyword.trim().split(' ')].filter(k => k.length > 2),
         targetUrl: formattedUrl,
         anchorText: anchorText.trim(),
-        wordCount: result.content?.split(' ').length || 1000,
-        readingTime: Math.ceil((result.content?.split(' ').length || 1000) / 200),
-        seoScore: 85,
-        metaDescription: `Learn everything about ${keyword.trim()}. Comprehensive guide with expert insights and practical tips.`
+        wordCount: wordCount,
+        readingTime: Math.ceil(wordCount / 200),
+        seoScore: Math.min(95, 75 + (wordCount > 1000 ? 10 : 0) + (extractedTitle.includes(keyword.trim()) ? 10 : 0)),
+        metaDescription: generateMetaDescription(result.content || '', keyword.trim()),
+        customSlug: slug
       };
 
       // Save to database/system as a trial post (publicly visible on /blog)
