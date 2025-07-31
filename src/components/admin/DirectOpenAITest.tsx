@@ -44,17 +44,12 @@ export function DirectOpenAITest() {
         const { configured, status, message, modelCount, keyPreview } = statusResult.data;
 
         if (status === 'connected') {
-          // Test 2: Try actual content generation using ChatGPT-style function
-          console.log('🚀 Testing content generation via new GPT function...');
-          const generateResult = await safeNetlifyFetch('gpt', {
+          // Test 2: Try actual content generation using TypeScript ChatGPT function
+          console.log('🚀 Testing content generation via TypeScript ChatGPT function...');
+          const generateResult = await safeNetlifyFetch('chatgpt', {
             method: 'POST',
             body: JSON.stringify({
-              messages: [{
-                role: 'user',
-                content: 'Write a one sentence test response to verify OpenAI API connectivity.'
-              }],
-              model: 'gpt-3.5-turbo',
-              max_tokens: 50
+              message: 'Write a one sentence test response to verify OpenAI API connectivity.'
             })
           });
 
