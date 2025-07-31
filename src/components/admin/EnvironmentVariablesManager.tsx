@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { getErrorMessage, getErrorSolution } from '@/utils/errorFormatter';
+import { useSupabaseConfig } from '@/hooks/useSupabaseConfig';
 import {
   Key,
   Eye,
