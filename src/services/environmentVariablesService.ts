@@ -202,7 +202,7 @@ class EnvironmentVariablesService {
    * Check if OpenAI API key is configured
    */
   async isOpenAIConfigured(): Promise<boolean> {
-    const apiKey = await this.getVariable('VITE_OPENAI_API_KEY');
+    const apiKey = await this.getVariable('OPENAI_API_KEY');
     return Boolean(apiKey && apiKey.startsWith('sk-'));
   }
 
@@ -210,7 +210,7 @@ class EnvironmentVariablesService {
    * Get OpenAI API key
    */
   async getOpenAIKey(): Promise<string | null> {
-    return await this.getVariable('VITE_OPENAI_API_KEY');
+    return await this.getVariable('OPENAI_API_KEY');
   }
 
   /**
