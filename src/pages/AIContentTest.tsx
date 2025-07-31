@@ -5,6 +5,7 @@
 
 import { MinimalAITest } from '@/components/MinimalAITest';
 import { OpenAITestComponent } from '@/components/OpenAITestComponent';
+import { OpenAITestRunner } from '@/components/OpenAITestRunner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function AIContentTest() {
