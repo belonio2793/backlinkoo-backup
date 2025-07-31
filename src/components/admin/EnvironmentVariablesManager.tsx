@@ -143,10 +143,11 @@ export function EnvironmentVariablesManager() {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error loading environment variables:', error);
+        const errorMessage = error?.message || error?.details || String(error) || 'Unknown error';
+        console.error('Error loading environment variables:', errorMessage);
         toast({
           title: 'Error loading environment variables',
-          description: 'Using local storage as fallback',
+          description: `Database error: ${errorMessage}. Using local storage as fallback.`,
           variant: 'destructive'
         });
         
