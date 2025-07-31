@@ -1,78 +1,63 @@
 /**
- * Netlify Function: Cleanup Expired AI Posts
- * Automatically deletes unclaimed AI posts after 24 hours
+ * Netlify Function - Cleanup Expired Blog Posts
+ * Runs every hour to delete unclaimed posts older than 24 hours
+ * Called by Netlify scheduled functions or cron job
  */
 
 const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY // Use service key for admin operations
-);
-
 exports.handler = async (event, context) => {
-  // CORS headers
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS'
-  };
-
-  // Handle preflight request
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
-  }
+  console.log('🧹 Starting cleanup of expired blog posts...');
 
   try {
-    console.log('Starting cleanup of expired AI posts...');
+    // Initialize Supabase client
+    const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
-    // Delete posts that are past their auto_delete_at time and not claimed
-    const { data: deletedPosts, error } = await supabase
-      .from('ai_generated_posts')
-      .delete()
-      .lt('auto_delete_at', new Date().toISOString())
-      .eq('is_claimed', false)
-      .select('id, slug, keyword');
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase configuration');
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Call the cleanup function
+    const { data, error } = await supabase
+      .rpc('cleanup_expired_posts');
 
     if (error) {
-      console.error('Cleanup error:', error);
-      throw new Error('Failed to cleanup expired posts');
+      console.error('❌ Error during cleanup:', error);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          success: false,
+          error: error.message,
+          timestamp: new Date().toISOString()
+        })
+      };
     }
 
-    const deletedCount = deletedPosts?.length || 0;
-    console.log(`Cleaned up ${deletedCount} expired AI posts`);
-
-    // Log the cleanup activity
-    if (deletedCount > 0) {
-      await supabase
-        .from('system_logs')
-        .insert([{
-          event_type: 'ai_post_cleanup',
-          message: `Auto-deleted ${deletedCount} expired unclaimed AI posts`,
-          metadata: {
-            deleted_posts: deletedPosts?.map(p => ({ id: p.id, slug: p.slug, keyword: p.keyword }))
-          }
-        }]);
-    }
+    const deletedCount = data || 0;
+    console.log(`✅ Cleanup completed: ${deletedCount} expired posts deleted`);
 
     return {
       statusCode: 200,
-      headers,
       body: JSON.stringify({
         success: true,
         deletedCount,
-        message: `Cleaned up ${deletedCount} expired posts`
+        message: `Cleanup completed: ${deletedCount} expired posts deleted`,
+        timestamp: new Date().toISOString()
       })
     };
 
   } catch (error) {
-    console.error('Cleanup function error:', error);
+    console.error('❌ Fatal error during cleanup:', error);
+    
     return {
       statusCode: 500,
-      headers,
-      body: JSON.stringify({ 
-        error: 'Cleanup failed',
-        details: error.message 
+      body: JSON.stringify({
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
       })
     };
   }
