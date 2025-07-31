@@ -211,7 +211,7 @@ export function EnvironmentVariablesManager() {
       }
 
       if (result.error) {
-        const errorMessage = result.error?.message || result.error?.details || String(result.error) || 'Unknown database error';
+        const errorMessage = getErrorMessage(result.error);
         console.error('Database error:', errorMessage);
         toast({
           title: 'Database Error',
