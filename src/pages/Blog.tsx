@@ -38,7 +38,7 @@ export function Blog() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [blogPosts, setBlogPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
