@@ -105,7 +105,7 @@ export function ClaimTrialPostDialog({
 
       if (!currentUser) {
         // Redirect to signup with claim intent
-        navigate(`/auth/callback?action=signup&redirect=/blog/${trialPostSlug}&claim=true`);
+        navigate(`/login?redirect=/blog/${trialPostSlug}&claim=true`);
         return;
       }
 
@@ -339,7 +339,7 @@ export function ClaimTrialPostDialog({
               </Button>
             ) : (
               <Button
-                onClick={() => navigate('/auth/callback?action=signup&claim=true')}
+                onClick={() => navigate('/login?claim=true')}
                 className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               >
                 Sign Up to Claim
