@@ -309,7 +309,7 @@ export function PermanentConfigManager() {
 
                 {/* Success Message for 100% Health */}
                 {healthSummary.overallHealth === 100 && (
-                  <Alert className="border-green-200 bg-green-50 relative overflow-hidden">
+                  <Alert key="perfect-health-alert" className="border-green-200 bg-green-50 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-green-100 to-emerald-100 opacity-50"></div>
                     <CheckCircle2 className="h-4 w-4 text-green-600 relative z-10" />
                     <AlertDescription className="text-green-800 relative z-10">
@@ -344,7 +344,7 @@ export function PermanentConfigManager() {
 
                 {/* Auto-Save Status */}
                 {autoSaveStatus && (
-                  <Alert className={`border-${autoSaveStatus.success ? 'blue' : 'red'}-200 bg-${autoSaveStatus.success ? 'blue' : 'red'}-50`}>
+                  <Alert key="auto-save-status-alert" className={`border-${autoSaveStatus.success ? 'blue' : 'red'}-200 bg-${autoSaveStatus.success ? 'blue' : 'red'}-50`}>
                     <Database className={`h-4 w-4 text-${autoSaveStatus.success ? 'blue' : 'red'}-600`} />
                     <AlertDescription className={`text-${autoSaveStatus.success ? 'blue' : 'red'}-800`}>
                       {autoSaveStatus.success ? (
@@ -367,7 +367,7 @@ export function PermanentConfigManager() {
                 )}
 
                 {lastSaved && (
-                  <Alert className="border-blue-200 bg-blue-50">
+                  <Alert key="last-saved-alert" className="border-blue-200 bg-blue-50">
                     <Database className="h-4 w-4 text-blue-600" />
                     <AlertDescription className="text-blue-800">
                       ✅ Configuration permanently saved at {new Date(lastSaved).toLocaleString()}
@@ -455,7 +455,7 @@ export function PermanentConfigManager() {
               </Card>
             </div>
 
-            <Alert>
+            <Alert key="backup-strategy-alert">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
                 <strong>Backup Strategy:</strong> Your API configurations are automatically saved to multiple locations:
