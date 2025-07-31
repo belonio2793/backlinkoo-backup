@@ -306,9 +306,10 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
           keyword: keyword.trim()
         });
       } else {
-        // Default behavior for standalone usage
+        // Default behavior for standalone usage - navigate to the actual blog post
         setTimeout(() => {
-          window.open(result.publishedUrl, '_blank');
+          const blogUrl = savedBlogPost.published_url || `/blog/${savedBlogPost.slug}`;
+          window.open(blogUrl, '_blank');
         }, 2000);
       }
 
