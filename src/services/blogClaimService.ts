@@ -179,7 +179,8 @@ export class BlogClaimService {
         console.error('❌ BlogClaimService: Post not found in database:', {
           postId: typeof postId === 'string' ? postId : JSON.stringify(postId),
           postIdType: typeof postId,
-          error: fetchError?.message,
+          errorMessage: fetchError?.message,
+          errorCode: fetchError?.code,
           hint: 'This might be a localStorage-only post that needs to be created in the database first'
         });
 
