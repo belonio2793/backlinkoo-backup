@@ -208,7 +208,6 @@ export function ServiceConnectionStatus() {
           updateServiceStatus('Resend Email', {
             status: 'error',
             message: 'Email service test failed',
-            hasApiKey: false,
             responseTime: 0
           });
         })
