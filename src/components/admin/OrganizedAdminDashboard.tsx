@@ -262,28 +262,28 @@ export function OrganizedAdminDashboard() {
         )}
 
         {activeCategory === "system" && (
-          <Tabs defaultValue="openai-config" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="openai-config">OpenAI API</TabsTrigger>
-              <TabsTrigger value="environment">Environment</TabsTrigger>
+          <Tabs defaultValue="environment" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="environment">Environment & API Keys</TabsTrigger>
               <TabsTrigger value="deployment">Deployment</TabsTrigger>
               <TabsTrigger value="database">Database</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="openai-config">
-              <div className="space-y-6">
-                <UnifiedOpenAIConfig />
-                <Alert>
-                  <Brain className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Master Configuration:</strong> This OpenAI API key setting controls all AI features across your entire application including blog generation, content creation, and more. Configure it once here and it syncs everywhere.
-                  </AlertDescription>
-                </Alert>
-              </div>
-            </TabsContent>
-
             <TabsContent value="environment">
-              <NetlifyEnvironmentManager />
+              <div className="space-y-6">
+                <NetlifyEnvironmentManager />
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Brain className="h-5 w-5" />
+                      Additional OpenAI Configuration
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <UnifiedOpenAIConfig />
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             <TabsContent value="deployment">
