@@ -331,7 +331,7 @@ export function OrganizedAdminDashboard() {
             </TabsContent>
 
             <TabsContent value="environment">
-              <EnvironmentVariablesManager />
+              <NetlifyEnvironmentManager />
             </TabsContent>
 
             <TabsContent value="deployment">
