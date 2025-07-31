@@ -94,9 +94,15 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
       if (result.success) {
         onContentGenerated(result);
 
+        // Determine if this was AI-generated or fallback content
+        const contentType = result.metadata?.fallback ? 'template' : 'AI-generated';
+        const description = result.metadata?.fallback
+          ? `Your ${contentType} blog post "${result.title}" is now live! The system used a professional template since OpenAI was unavailable.`
+          : `Your ${contentType} blog post "${result.title}" has been created with AI and is now live!`;
+
         toast({
-          title: "Blog Post Generated!",
-          description: `Your blog post "${result.title}" is now live at ${result.blogUrl}`,
+          title: "Blog Post Generated Successfully!",
+          description: description,
         });
 
         // Reset form
