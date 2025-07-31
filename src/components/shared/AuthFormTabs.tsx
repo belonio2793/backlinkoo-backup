@@ -368,6 +368,10 @@ export function AuthFormTabs({
         } else {
           errorMessage = "Connection keeps timing out. Please check your internet connection or try refreshing the page.";
         }
+      } else if (error.message?.includes('Authentication not available') || error.message?.includes('Please configure real Supabase credentials')) {
+        errorMessage = "Authentication service is currently unavailable. Please contact support.";
+      } else if (error.message?.includes('Mock mode') || error.message?.includes('mock-')) {
+        errorMessage = "Authentication service is in maintenance mode. Please try again later.";
       } else if (error.message?.includes('Invalid login credentials') || error.message?.includes('Invalid email or password')) {
         errorMessage = "Invalid email or password. Please check your credentials.";
         setRetryAttempts(0); // Reset retry attempts for credential errors
