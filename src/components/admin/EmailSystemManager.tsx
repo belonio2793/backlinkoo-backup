@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { ResendEmailService, ResendEmailResponse, ResendEmailData } from '@/services/resendEmailService';
+import { directEmailService } from '@/services/directEmailService';
 import {
   Mail,
   Send,
