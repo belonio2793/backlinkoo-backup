@@ -500,6 +500,8 @@ export class OpenAIContentGenerator {
   private generateSlug(keyword: string): string {
     return keyword
       .toLowerCase()
+      // Strip HTML tags first
+      .replace(/<[^>]*>/g, '')
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
