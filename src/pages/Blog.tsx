@@ -609,11 +609,40 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
           </div>
         </div>
 
+        {/* Claim Button */}
+        {canClaim && (
+          <div className="pt-3 border-t border-gray-100">
+            <Button
+              onClick={handleClaimPost}
+              disabled={claiming}
+              size="sm"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            >
+              {claiming ? (
+                <>
+                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                  Claiming...
+                </>
+              ) : (
+                <>
+                  <Star className="mr-2 h-3 w-3" />
+                  Claim This Post
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+
         {/* Action Footer */}
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <User className="h-4 w-4" />
             <span>{post.author_name || 'Backlink ∞'}</span>
+            {isOwnedByUser && (
+              <Badge className="bg-green-50 text-green-700 border-green-200 text-xs ml-2">
+                Yours
+              </Badge>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -622,9 +651,9 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
               asChild
               onClick={(e) => e.stopPropagation()}
             >
-              <a 
-                href={post.target_url} 
-                target="_blank" 
+              <a
+                href={post.target_url}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-800"
               >
