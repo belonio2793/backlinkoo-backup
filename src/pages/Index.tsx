@@ -350,6 +350,28 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Comprehensive Blog Management Section */}
+      <section className="py-24 px-6 bg-gradient-to-br from-gray-50 to-slate-100">
+        <div className="container mx-auto">
+          <div className="text-center space-y-4 mb-12">
+            <Badge variant="outline" className="mb-4 bg-purple-50 text-purple-600 border-purple-200 font-mono text-xs px-4 py-2">
+              BLOG MANAGEMENT HUB
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Complete Blog Post Management
+            </h2>
+            <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+              Manage all your blog posts with advanced features: buy backlinks, claim posts, delete content, and regenerate with AI.
+              Everything you need for successful content management in one beautiful interface.
+            </p>
+          </div>
+
+          <div className="max-w-7xl mx-auto">
+            <ComprehensiveBlogManager />
+          </div>
+        </div>
+      </section>
+
       {/* Trial Conversion Section */}
       {showTrialUpgrade && (
         <section className="py-12 px-6 bg-gradient-to-br from-amber-50 to-orange-50">
