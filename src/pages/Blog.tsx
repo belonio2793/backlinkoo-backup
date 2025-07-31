@@ -278,7 +278,7 @@ export function Blog() {
             <div className="space-y-4">
               <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-4 py-2 text-sm">
                 <Zap className="mr-2 h-4 w-4" />
-                Expert Content Hub
+                ∞
               </Badge>
               <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight">
                 Backlink ∞
