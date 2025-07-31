@@ -111,7 +111,7 @@ const Login = () => {
   };
 
   const handleAuthSuccess = (user: any) => {
-    navigate('/dashboard');
+    navigate('/redirect');
   };
 
   const handleForgotPassword = async () => {
