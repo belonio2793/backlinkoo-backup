@@ -155,12 +155,18 @@ export function NetlifyEnvironmentManager() {
         // If we don't have the actual value, try using the check-ai-provider function
         if (!variable.value || variable.value === 'sk-***configured***') {
           try {
-            const response = await fetch('/.netlify/functions/check-ai-provider');
+            const response = await fetch('/.netlify/functions/check-ai-provider', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ provider: 'OpenAI' })
+            });
             const responseTime = Date.now() - startTime;
 
             if (response.ok) {
               const data = await response.json();
-              if (data.status === 'success') {
+              if (data.healthy) {
                 setTestResults(prev => ({
                   ...prev,
                   [variable.key]: {
@@ -174,17 +180,18 @@ export function NetlifyEnvironmentManager() {
                   ...prev,
                   [variable.key]: {
                     status: 'error',
-                    message: `API test failed: ${data.error || 'Unknown error'}`,
+                    message: `API test failed - Status: ${data.status}`,
                     responseTime
                   }
                 }));
               }
             } else {
+              const errorData = await response.json();
               setTestResults(prev => ({
                 ...prev,
                 [variable.key]: {
                   status: 'error',
-                  message: `Server test failed: ${response.status}`,
+                  message: `Server test failed: ${errorData.error || response.status}`,
                   responseTime
                 }
               }));
