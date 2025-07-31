@@ -54,7 +54,7 @@ export function APIConfigurationManager() {
   const [configs, setConfigs] = useState<APIConfig[]>([
     {
       name: 'OpenAI API',
-      key: 'VITE_OPENAI_API_KEY',
+      key: 'OPENAI_API_KEY',
       value: '',
       placeholder: 'sk-proj-...',
       description: 'OpenAI API key for content generation',
