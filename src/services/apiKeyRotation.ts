@@ -61,7 +61,7 @@ export class ApiKeyRotationManager {
     const keys: string[] = [];
     
     // Primary key from environment
-    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
+    const envKey = import.meta.env.OPENAI_API_KEY;
     if (envKey && envKey.startsWith('sk-')) {
       keys.push(envKey);
     }
@@ -79,9 +79,9 @@ export class ApiKeyRotationManager {
 
     // Additional backup keys (can be added manually)
     const backupKeys = [
-      import.meta.env.VITE_OPENAI_API_KEY_BACKUP_1,
-      import.meta.env.VITE_OPENAI_API_KEY_BACKUP_2,
-      import.meta.env.VITE_OPENAI_API_KEY_BACKUP_3
+      import.meta.env.OPENAI_API_KEY_BACKUP_1,
+      import.meta.env.OPENAI_API_KEY_BACKUP_2,
+      import.meta.env.OPENAI_API_KEY_BACKUP_3
     ].filter(key => key && key.startsWith('sk-') && !keys.includes(key));
 
     keys.push(...backupKeys);
