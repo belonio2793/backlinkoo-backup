@@ -1,71 +1,45 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { BlogClaimDebugPanel } from "@/components/BlogClaimDebugPanel";
-import {
-  CreditCard,
-  Link,
-  Search,
-  TrendingUp,
-  Globe,
-  Users,
-  Infinity,
-  Plus,
-  Activity,
-  LogOut,
-  Bug,
-  Calendar,
-  Target,
-  BarChart3,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  ExternalLink,
-  Zap,
-  User,
-  Settings,
-  ChevronDown,
-  Eye,
-  Sparkles,
-  Crown,
-  RefreshCw,
-  Home
-} from "lucide-react";
-import { PricingModal } from "@/components/PricingModal";
-import { CampaignForm } from "@/components/CampaignForm";
-import { KeywordResearchTool } from "@/components/KeywordResearchTool";
-import { RankingTracker } from "@/components/RankingTracker";
-import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
-import AdminVerificationQueue from "@/components/AdminVerificationQueue";
-import SEOToolsSection from "@/components/SEOToolsSection";
-import { ProfileSettings } from "@/components/ProfileSettings";
-import { ApiConfigStatus } from "@/components/ApiConfigStatus";
-import { TrialBlogShowcase } from "@/components/TrialBlogShowcase";
-import { TrialBlogPostsDisplay as NewTrialBlogPostsDisplay } from "@/components/TrialBlogPostsDisplay";
-import { EnhancedTrialBlogPosts } from "@/components/EnhancedTrialBlogPosts";
+import { SecurityDashboard } from "@/components/SecurityDashboard";
+import { CampaignManager } from "@/components/CampaignManager";
+import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager";
+
+import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
+import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
+
+import { TrialPostCleanupManager } from "@/components/admin/TrialPostCleanupManager";
+import { BlogManagementPanel } from "@/components/admin/BlogManagementPanel";
+import { ContentFilterManager } from "@/components/admin/ContentFilterManager";
+import { ContentModerationQueue } from "@/components/admin/ContentModerationQueue";
+import { AIPostsManager } from "@/components/admin/AIPostsManager";
+import { BlogPostClaimsManager } from "@/components/admin/BlogPostClaimsManager";
+import { EnvironmentVariablesManager } from "@/components/admin/EnvironmentVariablesManager";
+import { AuthEmailTest } from "@/components/AuthEmailTest";
+
+import { EmailTest } from "@/components/EmailTest";
+import { SupabaseEmailTest } from "@/components/SupabaseEmailTest";
+import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
+import { SMTPConfigTest } from "@/components/SMTPConfigTest";
+import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { Footer } from "@/components/Footer";
 
-import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
-import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
+import { SystemStatusCheck } from "@/components/SystemStatusCheck";
 
-import { AIPostsManager } from "@/components/admin/AIPostsManager";
+import { AdminAuthService } from "@/services/adminAuthService";
+import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 import { OrganizedAdminDashboard } from "@/components/admin/OrganizedAdminDashboard";
-
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import type { User } from '@supabase/supabase-js';
+import {
+  Users,
+  Activity,
+  CreditCard,
+  Clock,
+  Infinity,
+  LogOut,
+  Brain
+} from "lucide-react";
 
 // TrialBlogPostsDisplay component for the trial tab
 const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
