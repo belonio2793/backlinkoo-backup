@@ -150,21 +150,23 @@ export function UnifiedOpenAIConfig() {
 
       toast({
         title: isValid ? 'API Key Valid' : 'API Key Invalid',
-        description: isValid 
-          ? 'Your OpenAI API key is working correctly' 
+        description: isValid
+          ? 'Your OpenAI API key is working correctly'
           : `API key test failed: ${response.status} ${response.statusText}`,
         variant: isValid ? 'default' : 'destructive'
       });
     } catch (error) {
+      console.error('Error testing API key:', error);
       setConfig(prev => ({
         ...prev,
         isValid: false,
         lastTested: new Date()
       }));
-      
+
+      const errorMessage = error instanceof Error ? error.message : 'Network error occurred';
       toast({
         title: 'Test Failed',
-        description: 'Failed to test API key. Please check your connection.',
+        description: `Failed to test API key: ${errorMessage}`,
         variant: 'destructive'
       });
     } finally {
