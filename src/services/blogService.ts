@@ -9,14 +9,11 @@ export type UpdateBlogPost = TablesUpdate<'blog_posts'>;
 export interface BlogPostGenerationData {
   title: string;
   content: string;
-  keywords: string[];
   targetUrl: string;
   anchorText?: string;
   wordCount: number;
   readingTime: number;
   seoScore: number;
-  metaDescription?: string;
-  contextualLinks?: any[];
   customSlug?: string; // Allow custom slug override
 }
 
