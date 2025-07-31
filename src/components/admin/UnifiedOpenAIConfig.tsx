@@ -58,6 +58,12 @@ export function UnifiedOpenAIConfig() {
       setTempApiKey(apiKey || '');
     } catch (error) {
       console.error('Error loading OpenAI config:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load configuration';
+      toast({
+        title: 'Load Error',
+        description: `Failed to load OpenAI configuration: ${errorMessage}`,
+        variant: 'destructive'
+      });
     } finally {
       setIsLoading(false);
     }
