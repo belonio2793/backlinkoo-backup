@@ -135,7 +135,7 @@ export class SupabaseConfigSync {
         }
       )
       .subscribe((status) => {
-        console.log('��� Real-time subscription status:', status);
+        console.log('📡 Real-time subscription status:', status);
       });
   }
 
@@ -467,7 +467,11 @@ export class SupabaseConfigSync {
   private loadFromLocalStorage(): DatabaseConfig[] {
     try {
       const stored = localStorage.getItem('admin_env_vars');
-      if (!stored) return [];
+      if (!stored) {
+        // Initialize with empty structure
+        this.initializeLocalStorage();
+        return [];
+      }
 
       const envVars = JSON.parse(stored);
       return envVars.map((item: any) => ({
@@ -476,16 +480,34 @@ export class SupabaseConfigSync {
         value: item.value,
         description: item.description,
         is_secret: item.is_secret ?? true,
-        is_active: true,
+        is_active: item.is_active ?? true,
         service_type: this.detectServiceType(item.key),
         last_tested: item.last_tested,
-        health_score: item.health_score,
+        health_score: item.health_score || 0,
         created_at: item.created_at || new Date().toISOString(),
         updated_at: item.updated_at || new Date().toISOString()
       }));
     } catch (error) {
       console.error('Failed to load from localStorage:', error);
+      this.initializeLocalStorage();
       return [];
+    }
+  }
+
+  /**
+   * Initialize localStorage structure
+   */
+  private initializeLocalStorage(): void {
+    try {
+      if (!localStorage.getItem('admin_env_vars')) {
+        localStorage.setItem('admin_env_vars', JSON.stringify([]));
+      }
+      if (!localStorage.getItem('admin_api_configs')) {
+        localStorage.setItem('admin_api_configs', JSON.stringify({}));
+      }
+      console.log('📦 Initialized localStorage structure for config sync');
+    } catch (error) {
+      console.error('Failed to initialize localStorage:', error);
     }
   }
 
