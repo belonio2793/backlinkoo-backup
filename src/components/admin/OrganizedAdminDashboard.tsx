@@ -220,6 +220,9 @@ export function OrganizedAdminDashboard() {
                 <ServiceConnectionStatus />
               </CardContent>
             </Card>
+
+            {/* Direct OpenAI Connection Test */}
+            <DirectOpenAITest />
           </div>
         )}
 
