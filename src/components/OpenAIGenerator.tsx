@@ -168,9 +168,18 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
     setIsGenerating(true);
 
     try {
+      // Select prompt for this generation
+      const { template, formatted, index } = selectAndFormatPrompt();
+
+      console.log(`🎯 Selected Prompt Template ${index + 1}:`, template);
+      console.log(`📝 Formatted Prompt:`, formatted);
+
       // Set up real-time progress callback for OpenAI/ChatGPT
       openAIContentGenerator.setProgressCallback((update) => {
-        setProgress(update);
+        setProgress({
+          ...update,
+          details: `${update.details} | Using Prompt ${index + 1}`
+        });
       });
 
       // Generate content using OpenAI/ChatGPT
