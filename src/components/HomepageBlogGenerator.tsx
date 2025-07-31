@@ -37,7 +37,7 @@ import {
 } from 'lucide-react';
 import { RotatingText } from './RotatingText';
 import { LoginModal } from './LoginModal';
-import { trackBlogGeneration, trackFeatureExploration } from '@/hooks/useGuestTracking';
+
 
 /**
  * HomepageBlogGenerator - Main component for generating high-quality blog posts with backlinks
@@ -102,7 +102,7 @@ export function HomepageBlogGenerator() {
 
     // Track blog generation attempt for guest users
     if (!isLoggedIn) {
-      trackBlogGeneration();
+
     }
     console.log('📋 Generation Parameters:', {
       targetUrl,
@@ -277,7 +277,7 @@ export function HomepageBlogGenerator() {
 
       // Verify the blog post is accessible
       if (blogPost.slug) {
-        console.log('📋 Blog post details:', {
+        console.log('��� Blog post details:', {
           slug: blogPost.slug,
           id: blogPost.id,
           title: blogPost.title,

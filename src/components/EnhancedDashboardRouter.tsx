@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useGuestTracking } from '@/hooks/useGuestTracking';
+
 import { supabase } from '@/integrations/supabase/client';
 import { AuthService } from '@/services/authService';
 import { runAuthHealthCheck } from '@/utils/authHealthCheck';
@@ -17,7 +17,7 @@ export function EnhancedDashboardRouter() {
   const [guestAnalytics, setGuestAnalytics] = useState({ sessionDuration: 0, interactions: 0 });
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { getGuestData, getSessionDuration, shouldShowConversionPrompt, trackInteraction } = useGuestTracking();
+
 
   useEffect(() => {
     const timeout = setTimeout(() => {

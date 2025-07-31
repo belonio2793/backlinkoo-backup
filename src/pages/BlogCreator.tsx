@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { GlobalBlogGenerator } from '@/components/GlobalBlogGenerator';
 import { SocialProofTestimonials, LiveUserActivity, UsageStats } from '@/components/SocialProofElements';
 import { useAuthStatus } from '@/hooks/useAuth';
-import { useGuestTracking } from '@/hooks/useGuestTracking';
+
 import { 
   ArrowLeft, 
   Sparkles, 
@@ -22,7 +22,7 @@ import {
 export function BlogCreator() {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuthStatus();
-  const { trackPageView, trackInteraction } = useGuestTracking();
+
   const [generatedPost, setGeneratedPost] = useState<any>(null);
 
   // Track page visit
@@ -68,7 +68,7 @@ export function BlogCreator() {
     "🌍 Content optimized for global audiences",
     "⚡ Generate posts in under 60 seconds",
     "🎯 Natural anchor text integration",
-    "📊 Built-in SEO score optimization",
+    "���� Built-in SEO score optimization",
     "🔗 Multi-link strategies for maximum impact"
   ];
 
