@@ -159,9 +159,9 @@ class EnvironmentVariablesService {
    * Save environment variable (admin only)
    */
   async saveVariable(
-    key: string, 
-    value: string, 
-    description?: string, 
+    key: string,
+    value: string,
+    description?: string,
     isSecret: boolean = true
   ): Promise<boolean> {
     try {
@@ -176,7 +176,9 @@ class EnvironmentVariablesService {
 
       if (error) {
         console.error('Error saving environment variable:', error);
-        return false;
+        // Extract meaningful error message
+        const errorMessage = error.message || error.details || 'Database error occurred';
+        throw new Error(`Failed to save to database: ${errorMessage}`);
       }
 
       // Update cache
@@ -185,7 +187,15 @@ class EnvironmentVariablesService {
       return true;
     } catch (error) {
       console.error('Error in saveVariable:', error);
-      return false;
+
+      // If it's already our custom error, re-throw it
+      if (error instanceof Error && error.message.includes('Failed to save to database')) {
+        throw error;
+      }
+
+      // For other errors, create a descriptive message
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      throw new Error(`Failed to save environment variable: ${errorMessage}`);
     }
   }
 
