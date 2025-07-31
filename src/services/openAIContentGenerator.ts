@@ -345,9 +345,20 @@ export class OpenAIContentGenerator {
     } catch (error) {
       console.error('❌ OpenAI Netlify function call failed:', error);
 
+      // Check if we're in development environment where functions aren't available
+      const isDevelopment = window.location.hostname === 'localhost' ||
+                           window.location.hostname.includes('127.0.0.1') ||
+                           window.location.hostname.includes('.dev') ||
+                           window.location.hostname.includes('.local');
+
       // For any function-related error, throw a consistent error that will trigger demo content
-      if (error.message.includes('404') || error.message.includes('function')) {
-        throw new Error(`Netlify function error: ${error.message}`);
+      if (error.message.includes('404') || error.message.includes('function') ||
+          error.message.includes('Failed to fetch') || isDevelopment) {
+        const friendlyMessage = isDevelopment
+          ? 'Development environment detected - using fallback content'
+          : `Netlify function error: ${error.message}`;
+        console.log('🔄 Triggering fallback to demo content:', friendlyMessage);
+        throw new Error(friendlyMessage);
       }
 
       throw new Error(`Content generation failed: ${error.message}`);
