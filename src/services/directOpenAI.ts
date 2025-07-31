@@ -350,6 +350,14 @@ Please write the complete blog post now:`;
   private static async saveBlogPostData(blogData: any) {
     const { blogService } = await import('@/services/blogService');
 
+    // Clean up old posts before creating new ones
+    try {
+      const { LocalDevAPI } = await import('@/services/localDevAPI');
+      await LocalDevAPI.cleanupInvalidPosts();
+    } catch (error) {
+      console.warn('Cleanup warning:', error);
+    }
+
     return await blogService.createBlogPost(
       blogData,
       null, // no user_id for trial posts
