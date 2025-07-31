@@ -4,42 +4,66 @@
  */
 
 // Global OpenAI API Key - Available for all users
-const GLOBAL_OPENAI_API_KEY = 'sk-proj-rP8YjC8VH1k3lAQIhjx1bWZZY3tqpwEqYkKJGz7Sw8F3xL9A4cYjHQT3BlbkFJGzPvHwmSY5tD6nD8vE3pA9qXmU2sL1rZ0tK5fN7bQ8rT4yW2v';
+// Note: Hardcoded key has been removed - now syncs with admin configuration
+const GLOBAL_OPENAI_API_KEY = '';
 
 export class GlobalOpenAIConfig {
   /**
    * Get the global OpenAI API key
    * Available for all users visiting backlinkoo.com
+   * Now syncs directly with admin configuration
    */
   static getAPIKey(): string {
     // Priority order:
     // 1. Environment variable (production)
-    // 2. Permanent storage (saved configurations)
-    // 3. Global hardcoded key (fallback)
+    // 2. Admin saved configuration (primary source)
+    // 3. Permanent storage (backup)
     // 4. Temporary localStorage key (development)
 
     const envKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (envKey && envKey.startsWith('sk-')) {
+    if (envKey && envKey.startsWith('sk-') && envKey.length > 20) {
       return envKey;
+    }
+
+    // Check admin configuration first
+    const adminKey = this.getAdminConfiguredKey();
+    if (adminKey && adminKey.startsWith('sk-') && adminKey.length > 20) {
+      return adminKey;
     }
 
     // Check permanent storage
     const permanentKey = this.getPermanentKey();
-    if (permanentKey && permanentKey.startsWith('sk-')) {
+    if (permanentKey && permanentKey.startsWith('sk-') && permanentKey.length > 20) {
       return permanentKey;
-    }
-
-    if (GLOBAL_OPENAI_API_KEY && GLOBAL_OPENAI_API_KEY.startsWith('sk-')) {
-      return GLOBAL_OPENAI_API_KEY;
     }
 
     // Fallback to temporary key for development
     const tempKey = localStorage.getItem('temp_openai_key');
-    if (tempKey && tempKey.startsWith('sk-')) {
+    if (tempKey && tempKey.startsWith('sk-') && tempKey.length > 20) {
       return tempKey;
     }
 
-    throw new Error('No OpenAI API key configured');
+    throw new Error('Global OpenAI configuration not available - Please configure API key in admin dashboard');
+  }
+
+  /**
+   * Get API key from admin configuration
+   */
+  private static getAdminConfiguredKey(): string | null {
+    try {
+      // Check admin dashboard saved configurations
+      const adminConfigs = JSON.parse(localStorage.getItem('admin_api_configs') || '{}');
+      const openaiConfig = adminConfigs['VITE_OPENAI_API_KEY'];
+
+      if (openaiConfig && openaiConfig.startsWith('sk-') && openaiConfig.length > 20) {
+        return openaiConfig;
+      }
+
+      return null;
+    } catch (error) {
+      console.warn('Failed to get admin configured key:', error);
+      return null;
+    }
   }
 
   /**
@@ -73,7 +97,7 @@ export class GlobalOpenAIConfig {
   static isConfigured(): boolean {
     try {
       const key = this.getAPIKey();
-      return key && key.startsWith('sk-');
+      return key && key.startsWith('sk-') && key.length > 20;
     } catch {
       return false;
     }
@@ -249,7 +273,10 @@ Focus on creating valuable, informative content with proper HTML structure using
       };
       localStorage.setItem('environment_backup', JSON.stringify(envBackup));
 
-      console.log('✅ OpenAI configuration saved permanently');
+      // Also sync to admin configuration for immediate access
+      this.syncToAdminConfig(apiKey);
+
+      console.log('✅ OpenAI configuration saved permanently and synced to admin');
       return { success: true };
 
     } catch (error) {
@@ -258,6 +285,20 @@ Focus on creating valuable, informative content with proper HTML structure using
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
       };
+    }
+  }
+
+  /**
+   * Sync API key to admin configuration
+   */
+  private static syncToAdminConfig(apiKey: string): void {
+    try {
+      const adminConfigs = JSON.parse(localStorage.getItem('admin_api_configs') || '{}');
+      adminConfigs['VITE_OPENAI_API_KEY'] = apiKey;
+      localStorage.setItem('admin_api_configs', JSON.stringify(adminConfigs));
+      console.log('✅ Synced to admin configuration');
+    } catch (error) {
+      console.warn('Failed to sync to admin config:', error);
     }
   }
 
