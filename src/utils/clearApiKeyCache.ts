@@ -69,14 +69,14 @@ export function setCorrectApiKey(): void {
   
   // Set in admin environment variables format
   const envVars = [{
-    key: 'VITE_OPENAI_API_KEY',
+    key: 'OPENAI_API_KEY',
     value: CORRECT_KEY,
-    description: 'OpenAI API key for AI content generation',
+    description: 'OpenAI API key for AI content generation (Netlify)',
     is_secret: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   }];
-  
+
   localStorage.setItem('admin_env_vars', JSON.stringify(envVars));
   
   console.log('✅ Correct API key set in all storage locations');
