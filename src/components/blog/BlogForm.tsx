@@ -85,11 +85,15 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
     setIsGenerating(true);
 
     try {
+      console.log('🚀 Starting blog generation process...');
+
       const result = await DirectOpenAIService.generateBlogPost({
         keyword,
         anchorText,
         targetUrl: formattedUrl
       });
+
+      console.log('📋 Blog generation result:', result);
 
       if (result.success) {
         onContentGenerated(result);
@@ -105,19 +109,28 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
           description: description,
         });
 
+        // Show the blog URL in console for easy access
+        if (result.blogUrl) {
+          console.log('🔗 Blog post URL:', window.location.origin + result.blogUrl);
+        }
+
         // Reset form
         setKeyword('');
         setAnchorText('');
         setTargetUrl('');
       } else {
+        console.error('❌ Blog generation failed:', result.error);
         throw new Error(result.error || 'Blog generation failed');
       }
 
     } catch (error) {
-      console.error('Blog generation failed:', error);
+      console.error('❌ Blog generation error:', error);
+
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate blog post. Please try again.";
+
       toast({
         title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to generate blog post. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
