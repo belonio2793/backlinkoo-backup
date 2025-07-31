@@ -180,24 +180,10 @@ export class OpenAIService {
   }
 
   /**
-   * Check if OpenAI is configured (server-side or locally)
+   * Check if OpenAI is configured (uses global configuration)
    */
   async isConfigured(): Promise<boolean> {
-    try {
-      // Check for temporary key first
-      const tempKey = localStorage.getItem('temp_openai_key');
-      if (tempKey && tempKey.startsWith('sk-')) {
-        return true;
-      }
-
-      const response = await fetch(`${this.baseUrl}/api-status`);
-      if (!response.ok) return false;
-
-      const data = await response.json();
-      return data.providerStatus?.OpenAI?.configured || false;
-    } catch {
-      return false;
-    }
+    return globalOpenAI.isConfigured();
   }
 
   /**
