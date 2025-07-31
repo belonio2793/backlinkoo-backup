@@ -82,8 +82,5 @@ export function setCorrectApiKey(): void {
   console.log('✅ Correct API key set in all storage locations');
 }
 
-// Auto-run these functions
-clearAllApiKeyCaches();
-setCorrectApiKey();
-
-console.log('🎯 API key cache reset complete. New key ending with: 1PsA');
+// Functions available for manual execution - don't auto-run to prevent side effects
+// Call clearAllApiKeyCaches() and setCorrectApiKey() manually when needed
