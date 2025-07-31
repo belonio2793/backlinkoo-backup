@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { GuestDashboard } from '@/components/GuestDashboard';
 import { UserBlogDashboard } from '@/components/UserBlogDashboard';
-import Dashboard from '@/pages/Dashboard';
+import { SafeDashboard } from '@/components/SafeDashboard';
 
 export function EnhancedDashboardRouter() {
   const [user, setUser] = useState<any>(null);
@@ -17,18 +17,46 @@ export function EnhancedDashboardRouter() {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
-        
-        if (user) {
-          // Check for trial posts in localStorage quickly
-          const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-          const validTrialPosts = allBlogs.filter((post: any) => {
-            if (!post.is_trial_post) return false;
-            const postAge = Date.now() - new Date(post.created_at).getTime();
-            return postAge < 24 * 60 * 60 * 1000; // 24 hours
-          });
-          setHasTrialPosts(validTrialPosts.length > 0);
+        // Use a timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Auth timeout')), 3000)
+        );
+
+        const authPromise = supabase.auth.getUser();
+
+        let result;
+        try {
+          result = await Promise.race([authPromise, timeoutPromise]);
+        } catch (timeoutError) {
+          console.warn('Auth check timed out, continuing as guest');
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+
+        const { data: { user }, error } = result as any;
+
+        if (error) {
+          console.warn('Auth error:', error);
+          setUser(null);
+        } else {
+          setUser(user);
+
+          if (user) {
+            // Check for trial posts in localStorage quickly
+            try {
+              const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+              const validTrialPosts = allBlogs.filter((post: any) => {
+                if (!post.is_trial_post) return false;
+                const postAge = Date.now() - new Date(post.created_at).getTime();
+                return postAge < 24 * 60 * 60 * 1000; // 24 hours
+              });
+              setHasTrialPosts(validTrialPosts.length > 0);
+            } catch (localStorageError) {
+              console.warn('Error checking trial posts:', localStorageError);
+              setHasTrialPosts(false);
+            }
+          }
         }
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -40,13 +68,27 @@ export function EnhancedDashboardRouter() {
 
     checkUser();
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user || null);
-    });
+    // Listen for auth changes with error handling
+    let subscription: any;
+    try {
+      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        try {
+          setUser(session?.user || null);
+        } catch (error) {
+          console.warn('Error in auth state change:', error);
+        }
+      });
+      subscription = authSubscription;
+    } catch (error) {
+      console.warn('Error setting up auth listener:', error);
+    }
 
     return () => {
-      subscription.unsubscribe();
+      try {
+        subscription?.unsubscribe();
+      } catch (error) {
+        console.warn('Error unsubscribing:', error);
+      }
     };
   }, []);
 
@@ -61,9 +103,15 @@ export function EnhancedDashboardRouter() {
     );
   }
 
-  // If user is authenticated, show protected dashboard
+  // If user is authenticated, show protected dashboard with error boundary
   if (user) {
-    return hasTrialPosts ? <UserBlogDashboard /> : <Dashboard />;
+    try {
+      return hasTrialPosts ? <UserBlogDashboard /> : <SafeDashboard />;
+    } catch (error) {
+      console.error('Dashboard component error:', error);
+      // Fallback to guest dashboard if user dashboard fails
+      return <GuestDashboard />;
+    }
   }
 
   // Show guest dashboard for non-authenticated users

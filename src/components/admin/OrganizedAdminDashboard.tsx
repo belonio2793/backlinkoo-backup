@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-// Import existing components
+// Admin Components
 import { SecurityDashboard } from "@/components/SecurityDashboard";
 import { CampaignManager } from "@/components/CampaignManager";
 import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager";
@@ -19,6 +19,10 @@ import { ContentModerationQueue } from "@/components/admin/ContentModerationQueu
 import { AIPostsManager } from "@/components/admin/AIPostsManager";
 import { BlogPostClaimsManager } from "@/components/admin/BlogPostClaimsManager";
 import { EnvironmentVariablesManager } from "@/components/admin/EnvironmentVariablesManager";
+import { UnifiedOpenAIConfig } from "@/components/admin/UnifiedOpenAIConfig";
+import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
+
+// Testing Tools
 import { AuthEmailTest } from "@/components/AuthEmailTest";
 import { EmailTest } from "@/components/EmailTest";
 import { SupabaseEmailTest } from "@/components/SupabaseEmailTest";
@@ -26,12 +30,8 @@ import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { SystemStatusCheck } from "@/components/SystemStatusCheck";
-
-import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
-import { UnifiedOpenAIConfig } from "@/components/admin/UnifiedOpenAIConfig";
 import { GlobalAPIStatus } from "@/components/GlobalAPIStatus";
 import { ErrorDebugger } from "@/components/ErrorDebugger";
-import { PermanentConfigManager } from "@/components/admin/PermanentConfigManager";
 
 import {
   Users,
@@ -251,11 +251,19 @@ export function OrganizedAdminDashboard() {
               </CardContent>
             </Card>
 
-            <GlobalAPIStatus />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Global API Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <GlobalAPIStatus />
+              </CardContent>
+            </Card>
 
             <ErrorDebugger />
-
-            <PermanentConfigManager />
           </div>
         )}
 
@@ -324,23 +332,18 @@ export function OrganizedAdminDashboard() {
             </TabsContent>
 
             <TabsContent value="database">
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Database className="h-5 w-5" />
-                      Database Management
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <TrialPostCleanupManager />
-                      <Separator />
-
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Database className="h-5 w-5" />
+                    Database Management
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TrialPostCleanupManager />
+                  <Separator />
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         )}

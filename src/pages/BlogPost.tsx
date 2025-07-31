@@ -272,25 +272,49 @@ export function BlogPost() {
         userEmail: user.email
       };
 
-      // Use BlogClaimService with proper method based on post type
-      const { BlogClaimService } = await import('@/services/blogClaimService');
+      // Use ClaimableBlogService for claiming
+      const { ClaimableBlogService } = await import('@/services/claimableBlogService');
 
       let claimResult;
 
       try {
-        // Check if this is a localStorage post (no database ID) or database post
-        if (!blogPost.id || typeof blogPost.id === 'string' && blogPost.id.startsWith('local_')) {
-          console.log('🔄 Claiming localStorage post:', blogPost.slug);
-          // Use claimLocalStoragePost for posts that exist only in localStorage
-          claimResult = await BlogClaimService.claimLocalStoragePost(blogPost, user);
-        } else {
+        if (blogPost.id && !blogPost.id.toString().startsWith('local_')) {
           console.log('🔄 Claiming database post:', blogPost.id);
-          // Use regular claimPost for posts that exist in database
-          claimResult = await BlogClaimService.claimPost(blogPost.id, user);
+          claimResult = await ClaimableBlogService.claimBlogPost(blogPost.id, user);
+        } else {
+          // For localStorage posts, we need to save them to database first
+          console.log('🔄 Converting localStorage post to database post for claiming');
+
+          const publishResult = await ClaimableBlogService.generateAndPublishBlog({
+            keyword: blogPost.title.split(' ')[0] || 'content',
+            anchorText: blogPost.anchor_text || 'link',
+            targetUrl: blogPost.target_url || '#',
+            title: blogPost.title,
+            content: blogPost.content,
+            excerpt: blogPost.excerpt || blogPost.content.substring(0, 200),
+            wordCount: blogPost.word_count || 1000,
+            readingTime: blogPost.reading_time || 5,
+            seoScore: blogPost.seo_score || 75
+          }, user);
+
+          if (publishResult.success && publishResult.blogPost) {
+            claimResult = await ClaimableBlogService.claimBlogPost(publishResult.blogPost.id, user);
+          } else {
+            throw new Error('Failed to convert localStorage post to database post');
+          }
         }
 
         if (!claimResult.success) {
-          throw new Error(claimResult.message || claimResult.error || 'Failed to claim blog post');
+          if (claimResult.needsUpgrade) {
+            // Show upgrade message for limit reached
+            toast({
+              title: "Upgrade Required",
+              description: claimResult.message,
+              variant: "destructive"
+            });
+            return;
+          }
+          throw new Error(claimResult.message || 'Failed to claim blog post');
         }
       } catch (serviceError: any) {
         console.warn('BlogClaimService failed, analyzing error and using fallback claiming method:', serviceError);

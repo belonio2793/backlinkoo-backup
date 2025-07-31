@@ -1,6 +1,6 @@
 /**
  * Service Connection Status - Admin Dashboard Component
- * Tests connections to Netlify, Supabase, OpenAI, and Resend services instantly
+ * Tests connections to Netlify, Supabase, and Resend services instantly
  */
 
 import { useState, useEffect } from 'react';
@@ -27,7 +27,6 @@ import {
   Globe
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { openAIOnlyContentGenerator } from '@/services/openAIOnlyContentGenerator';
 import { getErrorMessage } from '@/utils/errorFormatter';
 import { SecureConfig } from '@/lib/secure-config';
 
@@ -56,13 +55,6 @@ export function ServiceConnectionStatus() {
       icon: Database,
       message: 'Testing Supabase connection...',
       hasApiKey: true,
-    },
-    {
-      name: 'OpenAI API',
-      status: 'checking',
-      icon: Brain,
-      message: 'Testing OpenAI API connection...',
-      hasApiKey: false,
     },
     {
       name: 'Resend Email',
@@ -168,98 +160,7 @@ export function ServiceConnectionStatus() {
     }
   };
 
-  const checkOpenAI = async (): Promise<void> => {
-    const startTime = Date.now();
 
-    try {
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY || '';
-
-      if (!apiKey || !apiKey.startsWith('sk-')) {
-        updateServiceStatus('OpenAI API', {
-          status: 'not_configured',
-          message: 'API key not configured or invalid format',
-          hasApiKey: false,
-          responseTime: Date.now() - startTime
-        });
-        return;
-      }
-
-      // Use Netlify function instead of direct API call to avoid CORS
-      let response: Response;
-      let responseTime: number;
-
-      try {
-        response = await fetch('/.netlify/functions/test-connection', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            service: 'openai',
-            apiKey: apiKey
-          })
-        });
-        responseTime = Date.now() - startTime;
-      } catch (fetchError) {
-        console.warn('Netlify function test failed, checking key format only:', fetchError);
-        // If Netlify function fails, just validate the key format
-        updateServiceStatus('OpenAI API', {
-          status: 'connected',
-          message: 'API key configured (unable to test connection)',
-          hasApiKey: true,
-          responseTime: Date.now() - startTime,
-          details: {
-            configured: true,
-            keyPresent: true,
-            keyPreview: apiKey.substring(0, 10) + '...',
-            testStatus: 'format_valid_connection_untested'
-          }
-        });
-        return;
-      }
-
-      if (response.ok) {
-        const data = await response.json().catch(() => ({}));
-        updateServiceStatus('OpenAI API', {
-          status: 'connected',
-          message: data.message || 'OpenAI API responding',
-          hasApiKey: true,
-          responseTime,
-          details: {
-            configured: true,
-            keyPresent: true,
-            keyPreview: apiKey.substring(0, 10) + '...',
-            testResult: data.details || 'connection_successful'
-          }
-        });
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        updateServiceStatus('OpenAI API', {
-          status: 'error',
-          message: `Connection test failed: ${errorData.error || 'Unknown error'}`,
-          hasApiKey: true,
-          responseTime
-        });
-      }
-    } catch (error) {
-      console.warn('OpenAI connection test error:', error);
-      // Graceful fallback: if we have the key, mark as configured but untested
-      const hasKey = !!(import.meta.env.VITE_OPENAI_API_KEY || SecureConfig.OPENAI_API_KEY);
-      updateServiceStatus('OpenAI API', {
-        status: hasKey ? 'connected' : 'not_configured',
-        message: hasKey
-          ? 'API key configured (connection test unavailable)'
-          : 'API key not configured',
-        hasApiKey: hasKey,
-        responseTime: Date.now() - startTime,
-        details: hasKey ? {
-          keyPresent: true,
-          testStatus: 'connection_test_failed',
-          error: error instanceof Error ? error.message : 'Unknown error'
-        } : undefined
-      });
-    }
-  };
 
   const checkResend = async (): Promise<void> => {
     const startTime = Date.now();
@@ -383,15 +284,6 @@ export function ServiceConnectionStatus() {
             responseTime: 0
           });
         }),
-        checkOpenAI().catch(err => {
-          console.warn('OpenAI check failed:', err);
-          updateServiceStatus('OpenAI API', {
-            status: 'error',
-            message: 'API test failed',
-            hasApiKey: false,
-            responseTime: 0
-          });
-        }),
         checkResend().catch(err => {
           console.warn('Resend check failed:', err);
           updateServiceStatus('Resend Email', {
@@ -481,7 +373,7 @@ export function ServiceConnectionStatus() {
           <div>
             <h2 className="text-2xl font-bold">Service Connection Status</h2>
             <p className="text-muted-foreground">
-              Real-time status of Netlify, Supabase, OpenAI, and Resend services
+              Real-time status of Netlify, Supabase, and Resend services
             </p>
           </div>
         </div>

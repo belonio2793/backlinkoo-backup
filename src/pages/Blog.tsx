@@ -4,13 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { blogService, type BlogPost } from '@/services/blogService';
+import { ClaimableBlogService } from '@/services/claimableBlogService';
 import { useAuth } from '@/hooks/useAuth';
 import { BlogClaimService } from '@/services/blogClaimService';
 import { supabase } from '@/integrations/supabase/client';
 import { Footer } from '@/components/Footer';
 
 import { PricingModal } from '@/components/PricingModal';
+import { ClaimStatusIndicator } from '@/components/ClaimStatusIndicator';
 import { useToast } from '@/hooks/use-toast';
 import {
   Calendar,
@@ -39,7 +40,7 @@ export function Blog() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [blogPosts, setBlogPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -58,27 +59,11 @@ export function Blog() {
       }, 10000); // 10 second timeout
 
       try {
-        // Try to load from published_blog_posts table first (correct table)
-        let posts: BlogPost[] = [];
+        // Use ClaimableBlogService to get posts with expiration logic
+        let posts: any[] = [];
         try {
-          const { data, error } = await supabase
-            .from('published_blog_posts')
-            .select(`
-              id, slug, title, excerpt, published_url, target_url,
-              created_at, expires_at, seo_score, reading_time, word_count,
-              view_count, is_trial_post, user_id, author_name, tags, category,
-              meta_description, content, keywords, published_at, anchor_text
-            `)
-            .eq('status', 'published')
-            .order('created_at', { ascending: false })
-            .limit(50);
-
-          if (error) {
-            console.warn('❌ Database error:', error);
-          } else {
-            posts = data || [];
-            console.log('✅ Database posts loaded:', posts.length);
-          }
+          posts = await ClaimableBlogService.getClaimablePosts(50);
+          console.log('✅ Claimable posts loaded:', posts.length);
         } catch (dbError) {
           console.warn('❌ Database unavailable, using localStorage:', dbError);
         }
@@ -256,7 +241,7 @@ export function Blog() {
                 Expert Content Hub
               </Badge>
               <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight">
-                Backlink ∞
+                Backlink ��
                 <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
                   {" "}Blog
                 </span>
@@ -364,6 +349,11 @@ export function Blog() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Claim Status Indicator */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <ClaimStatusIndicator onUpgrade={() => setPricingModalOpen(true)} />
       </div>
 
       {/* Blog Posts Grid/List */}

@@ -1,7 +1,6 @@
-/**
- * Simple Blog Claim Service
- * Handles claiming blog posts with 3-post limit per user
- */
+import { supabase } from '@/integrations/supabase/client';
+import type { User } from '@supabase/supabase-js';
+import { initializeBlogSystemSafely } from '@/utils/ensureBlogTables';
 
 interface ClaimResult {
   success: boolean;
@@ -19,45 +18,71 @@ export class BlogClaimService {
   private static readonly MAX_CLAIMS_PER_USER = 3;
 
   /**
-   * Get user's current claim statistics
+   * Get all published blog posts from the database that can be claimed
+   */
+  static async getClaimablePosts(limit: number = 20): Promise<any[]> {
+    try {
+      console.log(`🔍 BlogClaimService: Fetching up to ${limit} claimable posts...`);
+      const initResult = await initializeBlogSystemSafely();
+
+      if (initResult.fallbackToLocalStorage) {
+        console.warn('⚠️ Using localStorage fallback due to DB issues');
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from('published_blog_posts')
+        .select(`
+          id, slug, title, excerpt, published_url, target_url,
+          created_at, expires_at, seo_score, reading_time, word_count,
+          view_count, is_trial_post, user_id, author_name, tags, category
+        `)
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        console.error('❌ Error fetching posts:', error);
+        return [];
+      }
+
+      return (data || []).filter(post => post.id && post.slug && post.title);
+    } catch (err) {
+      console.error('❌ Unexpected error fetching claimable posts:', err);
+      return [];
+    }
+  }
+
+  /**
+   * Get a user's claim statistics
    */
   static async getUserClaimStats(userId: string): Promise<UserClaimStats> {
     try {
-      // Try database first
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      
-      if (supabaseUrl && supabaseKey) {
-        const supabase = createClient(supabaseUrl, supabaseKey);
-        
-        const { count, error } = await supabase
-          .from('blog_posts')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .eq('is_trial_post', true);
+      const { count, error } = await supabase
+        .from('blog_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('is_trial_post', true);
 
-        if (!error) {
-          const claimedCount = count || 0;
-          return {
-            claimedCount,
-            maxClaims: this.MAX_CLAIMS_PER_USER,
-            canClaim: claimedCount < this.MAX_CLAIMS_PER_USER
-          };
-        }
-      }
+      const claimedCount = count || 0;
+
+      return {
+        claimedCount,
+        maxClaims: this.MAX_CLAIMS_PER_USER,
+        canClaim: claimedCount < this.MAX_CLAIMS_PER_USER
+      };
     } catch (error) {
       console.warn('Database error, using localStorage fallback:', error);
     }
 
-    // Fallback to localStorage
+    // Fallback
     const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
     let claimedCount = 0;
 
-    for (const blogMeta of allBlogPosts) {
-      const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
-      if (blogData) {
-        const blogPost = JSON.parse(blogData);
+    for (const meta of allBlogPosts) {
+      const post = localStorage.getItem(`blog_post_${meta.slug}`);
+      if (post) {
+        const blogPost = JSON.parse(post);
         if (blogPost.user_id === userId && blogPost.is_trial_post) {
           claimedCount++;
         }
@@ -72,127 +97,61 @@ export class BlogClaimService {
   }
 
   /**
-   * Claim a blog post for a user
+   * Claim a blog post
    */
   static async claimBlogPost(blogSlug: string, userId: string): Promise<ClaimResult> {
     try {
-      // Check if user can claim more posts
       const stats = await this.getUserClaimStats(userId);
-      
+
       if (!stats.canClaim) {
         return {
           success: false,
-          message: `You have reached the maximum limit of ${this.MAX_CLAIMS_PER_USER} claimed posts.`
+          message: `You’ve reached the maximum of ${this.MAX_CLAIMS_PER_USER} claimed posts.`
         };
       }
 
-      // Try database first
-      try {
-        const { createClient } = await import('@supabase/supabase-js');
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-        
-        if (supabaseUrl && supabaseKey) {
-          const supabase = createClient(supabaseUrl, supabaseKey);
-          
-          const { data: existingPost, error: fetchError } = await supabase
-            .from('blog_posts')
-            .select('*')
-            .eq('slug', blogSlug)
-            .eq('is_trial_post', true)
-            .single();
+      const { data: post, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('slug', blogSlug)
+        .eq('is_trial_post', true)
+        .single();
 
-          if (fetchError) {
-            throw fetchError;
-          }
-
-          if (!existingPost) {
-            return {
-              success: false,
-              message: 'Blog post not found.'
-            };
-          }
-
-          if (existingPost.user_id) {
-            return {
-              success: false,
-              message: 'This blog post has already been claimed by another user.'
-            };
-          }
-
-          // Check if post is expired
-          if (existingPost.expires_at && new Date() > new Date(existingPost.expires_at)) {
-            return {
-              success: false,
-              message: 'This blog post has expired and can no longer be claimed.'
-            };
-          }
-
-          // Claim the post
-          const { error: updateError } = await supabase
-            .from('blog_posts')
-            .update({ 
-              user_id: userId,
-              expires_at: null // Remove expiration when claimed
-            })
-            .eq('slug', blogSlug)
-            .eq('is_trial_post', true)
-            .is('user_id', null); // Ensure it's still unclaimed
-
-          if (!updateError) {
-            return {
-              success: true,
-              message: 'Blog post claimed successfully! It is now permanently yours.'
-            };
-          }
-        }
-      } catch (dbError) {
-        console.warn('Database error, using localStorage fallback:', dbError);
+      if (error || !post) {
+        return { success: false, message: 'Blog post not found.' };
       }
 
-      // Fallback to localStorage
-      const blogData = localStorage.getItem(`blog_post_${blogSlug}`);
-      if (!blogData) {
-        return {
-          success: false,
-          message: 'Blog post not found.'
-        };
+      if (post.user_id) {
+        return { success: false, message: 'This blog post has already been claimed.' };
       }
 
-      const blogPost = JSON.parse(blogData);
-      
-      if (blogPost.user_id) {
-        return {
-          success: false,
-          message: 'This blog post has already been claimed by another user.'
-        };
+      if (post.expires_at && new Date() > new Date(post.expires_at)) {
+        return { success: false, message: 'This blog post has expired.' };
       }
 
-      // Check if post is expired
-      if (blogPost.expires_at && new Date() > new Date(blogPost.expires_at)) {
-        return {
-          success: false,
-          message: 'This blog post has expired and can no longer be claimed.'
-        };
+      const { error: updateError } = await supabase
+        .from('blog_posts')
+        .update({
+          user_id: userId,
+          expires_at: null
+        })
+        .eq('slug', blogSlug)
+        .eq('is_trial_post', true)
+        .is('user_id', null);
+
+      if (updateError) {
+        return { success: false, message: 'Failed to claim blog post.' };
       }
 
-      // Claim the post in localStorage
-      blogPost.user_id = userId;
-      blogPost.expires_at = null; // Remove expiration when claimed
-      blogPost.updated_at = new Date().toISOString();
-      
-      localStorage.setItem(`blog_post_${blogSlug}`, JSON.stringify(blogPost));
-      
       return {
         success: true,
-        message: 'Blog post claimed successfully! It is now permanently yours.'
+        message: 'Blog post claimed successfully! It’s now permanently yours.'
       };
-
     } catch (error) {
-      console.error('Failed to claim blog post:', error);
+      console.error('❌ Failed to claim post:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }
@@ -202,43 +161,31 @@ export class BlogClaimService {
    */
   static async getUserClaimedPosts(userId: string): Promise<any[]> {
     try {
-      // Try database first
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      
-      if (supabaseUrl && supabaseKey) {
-        const supabase = createClient(supabaseUrl, supabaseKey);
-        
-        const { data, error } = await supabase
-          .from('blog_posts')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('is_trial_post', true)
-          .order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_trial_post', true)
+        .order('created_at', { ascending: false });
 
-        if (!error) {
-          return data || [];
-        }
-      }
+      return data || [];
     } catch (error) {
-      console.warn('Database error, using localStorage fallback:', error);
+      console.warn('⚠️ DB error, using fallback:', error);
     }
 
-    // Fallback to localStorage
     const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-    const claimedPosts: any[] = [];
+    const claimed = [];
 
-    for (const blogMeta of allBlogPosts) {
-      const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
-      if (blogData) {
-        const blogPost = JSON.parse(blogData);
+    for (const meta of allBlogPosts) {
+      const post = localStorage.getItem(`blog_post_${meta.slug}`);
+      if (post) {
+        const blogPost = JSON.parse(post);
         if (blogPost.user_id === userId && blogPost.is_trial_post) {
-          claimedPosts.push(blogPost);
+          claimed.push(blogPost);
         }
       }
     }
 
-    return claimedPosts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return claimed.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }
 }

@@ -295,25 +295,7 @@ export function ErrorDebugger() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Key className="h-4 w-4" />
-                    OpenAI Configuration
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>API Key:</span>
-                    <Badge variant={envVars.hasOpenAIKey ? "default" : "destructive"}>
-                      {envVars.hasOpenAIKey ? "Set" : "Missing"}
-                    </Badge>
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    <div>Key: {envVars.openaiKeyPreview}</div>
-                  </div>
-                </CardContent>
-              </Card>
+
             </div>
           </TabsContent>
         </Tabs>
