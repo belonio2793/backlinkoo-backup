@@ -122,10 +122,10 @@ export class BlogCleanupService {
   }
 }
 
-// Start automatic cleanup when the service is imported
-if (typeof window !== 'undefined') {
-  // Delay startup to avoid blocking initial app load
-  setTimeout(() => {
-    BlogCleanupService.startAutomaticCleanup();
-  }, 5000); // 5 second delay
-}
+// Start automatic cleanup when the service is imported (disabled to prevent startup errors)
+// if (typeof window !== 'undefined') {
+//   // Delay startup to avoid blocking initial app load
+//   setTimeout(() => {
+//     BlogCleanupService.startAutomaticCleanup();
+//   }, 5000); // 5 second delay
+// }
