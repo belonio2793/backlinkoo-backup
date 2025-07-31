@@ -158,9 +158,10 @@ export function ServiceConnectionStatus() {
         });
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       updateServiceStatus('Supabase Database', {
         status: 'error',
-        message: 'Database connection failed',
+        message: `Database connection failed: ${errorMessage}`,
         responseTime: Date.now() - startTime
       });
     }
