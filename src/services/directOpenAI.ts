@@ -84,7 +84,11 @@ Please write the complete blog post now:`;
 
       console.log('📝 Generated prompt:', prompt);
 
-      // Call OpenAI via Netlify function
+      // Call OpenAI via Netlify function with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+
+      console.log('📡 Making request to Netlify function...');
       const response = await fetch('/.netlify/functions/generate-openai', {
         method: 'POST',
         headers: {
@@ -98,8 +102,11 @@ Please write the complete blog post now:`;
           contentType: 'how-to',
           tone: 'professional',
           apiKey: clientApiKey // Pass API key securely to server function
-        })
+        }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       let result;
       if (!response.ok) {
