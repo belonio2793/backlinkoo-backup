@@ -12,6 +12,7 @@ import { AuthRedirectHandler } from "@/components/AuthRedirectHandler";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
+import { autoConfigSaver } from "@/services/autoConfigSaver";
 
 // Import test utilities for debugging
 import '@/utils/testBlogClaiming';
