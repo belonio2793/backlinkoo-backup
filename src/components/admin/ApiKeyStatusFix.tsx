@@ -44,10 +44,7 @@ export function ApiKeyStatusFix() {
     return detectedKey;
   };
 
-  const isCorrectKey = () => {
-    const key = checkCurrentKey();
-    return key === CORRECT_KEY;
-  };
+  const isCorrectKey = currentKey === CORRECT_KEY;
 
   const forceFixApiKey = async () => {
     setIsFixing(true);
