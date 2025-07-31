@@ -306,8 +306,8 @@ export function UnifiedOpenAIConfig() {
               </div>
             </div>
           ) : (
-            <div className="font-mono bg-gray-100 p-3 rounded border text-sm">
-              {config.apiKey 
+            <div className="font-mono bg-gray-100 p-3 rounded border text-sm break-all overflow-hidden">
+              {config.apiKey
                 ? (showKey ? config.apiKey : maskApiKey(config.apiKey))
                 : 'No API key configured'
               }
