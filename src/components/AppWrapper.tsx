@@ -51,7 +51,6 @@ export const AppWrapper = () => {
         {/* Public routes - no authentication required */}
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/redirect" element={<Redirect />} />
         <Route path="/auth/confirm" element={<EmailConfirmation />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/auth/reset-password" element={<PasswordReset />} />
