@@ -44,16 +44,16 @@ export class DirectOpenAIService {
         }
       }
 
-      // Method 3: Hardcoded fallback for testing (remove in production)
+      // Method 3: Setup demo API key for testing
       if (!clientApiKey) {
-        // For development/testing - this should be set via environment variables
-        console.warn('⚠️ No API key found in environment variables, trying fallback...');
+        console.warn('⚠️ No API key found in environment variables, setting up demo mode...');
 
-        // Check if we have a demo mode or testing key
-        const demoKey = localStorage.getItem('demo_openai_key');
-        if (demoKey) {
-          clientApiKey = demoKey;
-          console.log('🔧 Using demo/test API key from localStorage');
+        const { setupDemoApiKey } = await import('@/utils/setupDemoApiKey');
+        const demoSetup = setupDemoApiKey();
+
+        if (demoSetup) {
+          clientApiKey = localStorage.getItem('demo_openai_key');
+          console.log('🔧 Using demo mode for content generation');
         }
       }
 
@@ -212,7 +212,7 @@ Please write the complete blog post now:`;
 
       // Check if it's a timeout error
       if (error instanceof Error && error.name === 'AbortError') {
-        console.log('�� Request timed out, trying fallback generation...');
+        console.log('🔄 Request timed out, trying fallback generation...');
         return await this.generateFallbackContent(request);
       }
 
