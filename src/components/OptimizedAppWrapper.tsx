@@ -1,0 +1,179 @@
+import { Routes, Route } from 'react-router-dom';
+import { Suspense } from 'react';
+import { useReferralTracking } from '@/hooks/useReferralTracking';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Import lightweight page components directly
+import Index from '@/pages/Index';
+import Login from '@/pages/Login';
+import EmailConfirmation from '@/pages/EmailConfirmation';
+import AuthCallback from '@/pages/AuthCallback';
+import PasswordReset from '@/pages/PasswordReset';
+import TermsOfService from '@/pages/TermsOfService';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
+import BlogPreview from '@/pages/BlogPreview';
+import NotFound from '@/pages/NotFound';
+import PaymentSuccess from '@/pages/PaymentSuccess';
+import PaymentCancelled from '@/pages/PaymentCancelled';
+import SubscriptionSuccess from '@/pages/SubscriptionSuccess';
+import SubscriptionCancelled from '@/pages/SubscriptionCancelled';
+
+// Import lightweight components
+import AdminAuthGuard from '@/components/AdminAuthGuard';
+import { EmailVerificationGuard } from '@/components/EmailVerificationGuard';
+import { TrialNotificationBanner } from '@/components/TrialNotificationBanner';
+
+// Import lazy-loaded components
+import {
+  LazyAdminDashboard,
+  LazyEmailMarketing,
+  LazyBacklinkReport,
+  LazyReportViewer,
+  LazyNoHandsSEO,
+  LazyAffiliateProgram,
+  LazyPromotionMaterials,
+  LazyCampaignDeliverables,
+  LazyBlogCreator,
+  LazyBlogPost,
+  LazyBlog,
+  LazyAIContentTest,
+  LazyEnhancedDashboardRouter,
+  LazyUserBlogManagement,
+  LazyBlogEditPage,
+  LazyEnhancedAILive,
+  LazyGuestDashboard
+} from './LazyComponents';
+
+// Loading component for better UX
+const PageLoader = () => (
+  <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-8">
+    <div className="max-w-4xl mx-auto space-y-6">
+      <Skeleton className="h-8 w-64" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+      <div className="space-y-4">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-4 w-1/2" />
+      </div>
+    </div>
+  </div>
+);
+
+export const OptimizedAppWrapper = () => {
+  useReferralTracking();
+
+  return (
+    <>
+      <TrialNotificationBanner />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Public routes - no authentication required (loaded immediately) */}
+          <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/auth/confirm" element={<EmailConfirmation />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/auth/reset-password" element={<PasswordReset />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/preview/:slug" element={<BlogPreview />} />
+
+          {/* Blog routes - lazy loaded for better performance */}
+          <Route path="/blog" element={<LazyBlog />} />
+          <Route path="/blog/create" element={<LazyBlogCreator />} />
+          <Route path="/blog/:slug" element={<LazyBlogPost />} />
+          
+          {/* Other public routes */}
+          <Route path="/trial-dashboard" element={<LazyGuestDashboard />} />
+          <Route path="/ai-test" element={<LazyAIContentTest />} />
+          <Route path="/ai-live" element={<LazyEnhancedAILive />} />
+
+          {/* Protected routes - require authentication and email verification */}
+          <Route path="/dashboard" element={<LazyEnhancedDashboardRouter />} />
+          <Route path="/my-dashboard" element={<LazyEnhancedDashboardRouter />} />
+          <Route path="/my-blog" element={
+            <EmailVerificationGuard>
+              <LazyUserBlogManagement />
+            </EmailVerificationGuard>
+          } />
+          <Route path="/blog/:postId/edit" element={
+            <EmailVerificationGuard>
+              <LazyBlogEditPage />
+            </EmailVerificationGuard>
+          } />
+
+          {/* Admin route */}
+          <Route path="/admin" element={
+            <AdminAuthGuard>
+              <LazyAdminDashboard />
+            </AdminAuthGuard>
+          } />
+
+          {/* Payment routes - lightweight, immediate load */}
+          <Route path="/payment-success" element={
+            <EmailVerificationGuard>
+              <PaymentSuccess />
+            </EmailVerificationGuard>
+          } />
+          <Route path="/payment-cancelled" element={
+            <EmailVerificationGuard>
+              <PaymentCancelled />
+            </EmailVerificationGuard>
+          } />
+          <Route path="/subscription-success" element={
+            <EmailVerificationGuard>
+              <SubscriptionSuccess />
+            </EmailVerificationGuard>
+          } />
+          <Route path="/subscription-cancelled" element={
+            <EmailVerificationGuard>
+              <SubscriptionCancelled />
+            </EmailVerificationGuard>
+          } />
+
+          {/* Feature routes - lazy loaded */}
+          <Route path="/campaign/:campaignId" element={
+            <EmailVerificationGuard>
+              <LazyCampaignDeliverables />
+            </EmailVerificationGuard>
+          } />
+          <Route path="/email" element={
+            <EmailVerificationGuard>
+              <LazyEmailMarketing />
+            </EmailVerificationGuard>
+          } />
+          <Route path="/backlink-report" element={
+            <EmailVerificationGuard>
+              <LazyBacklinkReport />
+            </EmailVerificationGuard>
+          } />
+          <Route path="/report/:reportId" element={
+            <EmailVerificationGuard>
+              <LazyReportViewer />
+            </EmailVerificationGuard>
+          } />
+          <Route path="/no-hands-seo" element={
+            <EmailVerificationGuard>
+              <LazyNoHandsSEO />
+            </EmailVerificationGuard>
+          } />
+          <Route path="/affiliate" element={
+            <EmailVerificationGuard>
+              <LazyAffiliateProgram />
+            </EmailVerificationGuard>
+          } />
+          <Route path="/affiliate/promotion-materials" element={
+            <EmailVerificationGuard>
+              <LazyPromotionMaterials />
+            </EmailVerificationGuard>
+          } />
+
+          {/* 404 route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </>
+  );
+};
