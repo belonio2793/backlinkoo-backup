@@ -464,7 +464,67 @@ export function AILive() {
 
           {/* Generation Steps & Content */}
           <div className="lg:col-span-2 space-y-6">
-            
+
+            {/* Real-time Streaming Progress */}
+            {streamingProgress && (
+              <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-blue-800">
+                    <Brain className="h-5 w-5 animate-pulse" />
+                    OpenAI ChatGPT Live Generation
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Progress Bar */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="font-medium text-blue-700">{streamingProgress.message}</span>
+                        <span className="text-blue-600">{streamingProgress.progress}%</span>
+                      </div>
+                      <div className="w-full bg-blue-100 rounded-full h-3">
+                        <div
+                          className="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-500"
+                          style={{ width: `${streamingProgress.progress}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Stage Details */}
+                    <div className="text-sm text-blue-700 bg-white/70 rounded p-3">
+                      <strong>Stage:</strong> {streamingProgress.stage} <br />
+                      <strong>Details:</strong> {streamingProgress.details}
+                      {streamingProgress.wordCount && (
+                        <>
+                          <br />
+                          <strong>Words Generated:</strong> {streamingProgress.wordCount}
+                        </>
+                      )}
+                    </div>
+
+                    {/* Real-time Content Preview */}
+                    {currentContent && currentWordCount > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <h4 className="font-medium text-blue-800">Content Being Generated:</h4>
+                          <Badge variant="outline" className="text-blue-600 border-blue-300">
+                            {currentWordCount} words
+                          </Badge>
+                        </div>
+                        <div className="bg-white border border-blue-200 rounded p-3 max-h-40 overflow-y-auto">
+                          <div className="text-sm text-gray-700 leading-relaxed">
+                            {currentContent.length > 500
+                              ? currentContent.substring(0, 500) + '...'
+                              : currentContent}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Real-time Steps */}
             {steps.length > 0 && (
               <Card>
