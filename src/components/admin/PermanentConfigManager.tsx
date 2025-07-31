@@ -25,7 +25,7 @@ import { permanentAPIConfig } from '@/services/permanentAPIConfigService';
 import { globalOpenAI } from '@/services/globalOpenAIConfig';
 import { autoConfigSaver } from '@/services/autoConfigSaver';
 
-export function PermanentConfigManager() {
+export function PermanentConfigManagerFixed() {
   const { toast } = useToast();
   const [healthSummary, setHealthSummary] = useState<any>(null);
   const [configurations, setConfigurations] = useState<any[]>([]);
@@ -206,10 +206,10 @@ export function PermanentConfigManager() {
 
           <TabsContent value="overview" className="space-y-4">
             {healthSummary && (
-              <React.Fragment key="health-summary">
+              <div key="health-overview-content" className="space-y-4">
                 {/* Health Score Display */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card key="overall-health" className="p-4">
+                <div key="health-scores-grid" className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card key="overall-health-card" className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-gray-600">Overall Health</p>
@@ -221,7 +221,7 @@ export function PermanentConfigManager() {
                     </div>
                   </Card>
 
-                  <Card key="configurations-count" className="p-4">
+                  <Card key="configurations-count-card" className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-gray-600">Configurations</p>
@@ -231,12 +231,12 @@ export function PermanentConfigManager() {
                     </div>
                   </Card>
 
-                  <Card key="last-backup" className="p-4">
+                  <Card key="last-backup-card" className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-gray-600">Last Backup</p>
                         <p className="text-sm text-gray-700">
-                          {healthSummary.lastBackup
+                          {healthSummary.lastBackup 
                             ? new Date(healthSummary.lastBackup).toLocaleString()
                             : 'Never'
                           }
@@ -248,14 +248,14 @@ export function PermanentConfigManager() {
                 </div>
 
                 {/* Service Health */}
-                <Card key="service-health-scores">
+                <Card key="service-health-card">
                   <CardHeader>
                     <CardTitle className="text-lg">Service Health Scores</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
                       {Object.entries(healthSummary.services).map(([service, score]) => (
-                        <div key={service} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div key={`service-${service}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center gap-3">
                             <CheckCircle2 className={`h-5 w-5 ${getHealthColor(score as number)}`} />
                             <span className="font-medium">{service}</span>
@@ -270,10 +270,10 @@ export function PermanentConfigManager() {
                 </Card>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    key="save-config"
-                    onClick={saveCurrentConfiguration}
+                <div key="action-buttons" className="flex flex-wrap gap-3">
+                  <Button 
+                    key="save-config-btn"
+                    onClick={saveCurrentConfiguration} 
                     disabled={isLoading}
                     className="flex items-center gap-2"
                   >
@@ -285,9 +285,9 @@ export function PermanentConfigManager() {
                     Save Current Config
                   </Button>
 
-                  <Button
-                    key="validate-all"
-                    variant="outline"
+                  <Button 
+                    key="validate-all-btn"
+                    variant="outline" 
                     onClick={validateConfigurations}
                     disabled={isLoading}
                     className="flex items-center gap-2"
@@ -296,9 +296,9 @@ export function PermanentConfigManager() {
                     Validate All
                   </Button>
 
-                  <Button
-                    key="export-backup"
-                    variant="outline"
+                  <Button 
+                    key="export-backup-btn"
+                    variant="outline" 
                     onClick={exportConfiguration}
                     className="flex items-center gap-2"
                   >
@@ -307,7 +307,7 @@ export function PermanentConfigManager() {
                   </Button>
                 </div>
 
-                {/* Success Message for 100% Health */}
+                {/* Perfect Health Alert */}
                 {healthSummary.overallHealth === 100 && (
                   <Alert key="perfect-health-alert" className="border-green-200 bg-green-50 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-green-100 to-emerald-100 opacity-50"></div>
@@ -322,7 +322,7 @@ export function PermanentConfigManager() {
                       🔒 Multiple backup layers ensure your configuration will never be lost.
                       <div className="mt-3 flex gap-2">
                         <Button
-                          key="confirm-save"
+                          key="confirm-save-btn"
                           size="sm"
                           className="bg-green-600 hover:bg-green-700"
                           onClick={handlePerfectHealth}
@@ -330,7 +330,7 @@ export function PermanentConfigManager() {
                           🎯 Confirm & Save Perfect Config
                         </Button>
                         <Button
-                          key="download-backup"
+                          key="download-backup-btn"
                           size="sm"
                           variant="outline"
                           onClick={exportConfiguration}
@@ -344,28 +344,29 @@ export function PermanentConfigManager() {
 
                 {/* Auto-Save Status */}
                 {autoSaveStatus && (
-                  <Alert key="auto-save-status-alert" className={`border-${autoSaveStatus.success ? 'blue' : 'red'}-200 bg-${autoSaveStatus.success ? 'blue' : 'red'}-50`}>
+                  <Alert key="auto-save-alert" className={`border-${autoSaveStatus.success ? 'blue' : 'red'}-200 bg-${autoSaveStatus.success ? 'blue' : 'red'}-50`}>
                     <Database className={`h-4 w-4 text-${autoSaveStatus.success ? 'blue' : 'red'}-600`} />
                     <AlertDescription className={`text-${autoSaveStatus.success ? 'blue' : 'red'}-800`}>
                       {autoSaveStatus.success ? (
-                        <React.Fragment key="auto-save-success">
+                        <span key="auto-save-success">
                           ✅ <strong>Auto-Save Successful!</strong> Configuration saved at{' '}
                           {new Date(autoSaveStatus.timestamp).toLocaleString()}
                           {autoSaveStatus.healthScore && ` with ${autoSaveStatus.healthScore}% health`}
-                        </React.Fragment>
+                        </span>
                       ) : (
-                        <React.Fragment key="auto-save-failed">
+                        <span key="auto-save-failed">
                           ❌ <strong>Auto-Save Failed:</strong> {autoSaveStatus.error}
                           <br />
-                          <Button size="sm" onClick={saveCurrentConfiguration} className="mt-2">
+                          <Button key="retry-save-btn" size="sm" onClick={saveCurrentConfiguration} className="mt-2">
                             Retry Manual Save
                           </Button>
-                        </React.Fragment>
+                        </span>
                       )}
                     </AlertDescription>
                   </Alert>
                 )}
 
+                {/* Last Saved Alert */}
                 {lastSaved && (
                   <Alert key="last-saved-alert" className="border-blue-200 bg-blue-50">
                     <Database className="h-4 w-4 text-blue-600" />
@@ -374,96 +375,98 @@ export function PermanentConfigManager() {
                     </AlertDescription>
                   </Alert>
                 )}
-              </React.Fragment>
+              </div>
             )}
           </TabsContent>
 
           <TabsContent value="configurations" className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div key="configurations-header" className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Saved Configurations</h3>
-              <Button size="sm" onClick={loadConfigurations}>
+              <Button key="refresh-configs-btn" size="sm" onClick={loadConfigurations}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
             </div>
 
-            {configurations.map((config) => (
-              <Card key={config.id} className="p-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Badge key={`service-${config.id}`} variant="outline">{config.service}</Badge>
-                      <Badge key={`health-${config.id}`} className={getHealthBadge(config.healthScore)}>
-                        {config.healthScore}% Health
-                      </Badge>
-                      {config.isActive && <Badge key={`active-${config.id}`} className="bg-green-100 text-green-800">Active</Badge>}
+            <div key="configurations-list" className="space-y-4">
+              {configurations.map((config) => (
+                <Card key={`config-card-${config.id}`} className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Badge key={`service-badge-${config.id}`} variant="outline">{config.service}</Badge>
+                        <Badge key={`health-badge-${config.id}`} className={getHealthBadge(config.healthScore)}>
+                          {config.healthScore}% Health
+                        </Badge>
+                        {config.isActive && <Badge key={`active-badge-${config.id}`} className="bg-green-100 text-green-800">Active</Badge>}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          key={`toggle-key-btn-${config.id}`}
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowKeys(prev => ({ ...prev, [config.id]: !prev[config.id] }))}
+                        >
+                          {showKeys[config.id] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                        <Button
+                          key={`copy-key-btn-${config.id}`}
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(config.apiKey)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        key={`toggle-key-${config.id}`}
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowKeys(prev => ({ ...prev, [config.id]: !prev[config.id] }))}
-                      >
-                        {showKeys[config.id] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                      <Button
-                        key={`copy-key-${config.id}`}
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard(config.apiKey)}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
 
-                  <div className="text-sm text-gray-600">
-                    <div key={`api-key-${config.id}`}>API Key: {showKeys[config.id] ? config.apiKey : '***' + config.apiKey.slice(-4)}</div>
-                    <div key={`last-tested-${config.id}`}>Last Tested: {new Date(config.lastTested).toLocaleString()}</div>
-                    <div key={`updated-${config.id}`}>Updated: {new Date(config.updatedAt).toLocaleString()}</div>
-                  </div>
-
-                  {config.metadata && (
-                    <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-                      <strong>Metadata:</strong> {JSON.stringify(config.metadata, null, 2)}
+                    <div className="text-sm text-gray-600">
+                      <div key={`api-key-info-${config.id}`}>API Key: {showKeys[config.id] ? config.apiKey : '***' + config.apiKey.slice(-4)}</div>
+                      <div key={`last-tested-info-${config.id}`}>Last Tested: {new Date(config.lastTested).toLocaleString()}</div>
+                      <div key={`updated-info-${config.id}`}>Updated: {new Date(config.updatedAt).toLocaleString()}</div>
                     </div>
-                  )}
-                </div>
-              </Card>
-            ))}
+
+                    {config.metadata && (
+                      <div key={`metadata-${config.id}`} className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
+                        <strong>Metadata:</strong> {JSON.stringify(config.metadata, null, 2)}
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
           </TabsContent>
 
           <TabsContent value="backup" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card key="database-backup" className="p-4 text-center">
+            <div key="backup-methods-grid" className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card key="database-backup-card" className="p-4 text-center">
                 <Database className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                 <h4 className="font-medium">Database Backup</h4>
                 <p className="text-sm text-gray-600">Supabase persistent storage</p>
               </Card>
 
-              <Card key="local-storage" className="p-4 text-center">
+              <Card key="local-storage-card" className="p-4 text-center">
                 <HardDrive className="h-8 w-8 text-green-600 mx-auto mb-2" />
                 <h4 className="font-medium">Local Storage</h4>
                 <p className="text-sm text-gray-600">Browser localStorage backup</p>
               </Card>
 
-              <Card key="environment-variables" className="p-4 text-center">
+              <Card key="env-vars-card" className="p-4 text-center">
                 <Cloud className="h-8 w-8 text-purple-600 mx-auto mb-2" />
                 <h4 className="font-medium">Environment Variables</h4>
                 <p className="text-sm text-gray-600">Server environment persistence</p>
               </Card>
             </div>
 
-            <Alert key="backup-strategy-alert">
+            <Alert key="backup-strategy-info">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
                 <strong>Backup Strategy:</strong> Your API configurations are automatically saved to multiple locations:
                 <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li key="supabase-backup">Supabase database for persistent cloud storage</li>
-                  <li key="localStorage-backup">Browser localStorage for immediate access</li>
-                  <li key="env-vars-backup">Environment variables for server-side persistence</li>
-                  <li key="json-backup">Downloadable JSON backups for external storage</li>
+                  <li key="supabase-backup-info">Supabase database for persistent cloud storage</li>
+                  <li key="localStorage-backup-info">Browser localStorage for immediate access</li>
+                  <li key="env-vars-backup-info">Environment variables for server-side persistence</li>
+                  <li key="json-backup-info">Downloadable JSON backups for external storage</li>
                 </ul>
               </AlertDescription>
             </Alert>
