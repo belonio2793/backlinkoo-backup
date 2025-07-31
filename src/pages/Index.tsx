@@ -321,13 +321,15 @@ const Index = () => {
 
 
           {/* Header */}
-          <div className="text-center space-y-4 mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-              Create a Backlink For Free
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              a free permanent natural backlink.
-            </p>
+          <div className="text-center space-y-6 mb-16">
+            <div className="relative">
+              <h2 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 leading-tight tracking-tight">
+                Create a Free Permanent Natural Backlink
+              </h2>
+              {/* Decorative elements */}
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-60"></div>
+              <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-40"></div>
+            </div>
           </div>
 
           {/* Generator */}
