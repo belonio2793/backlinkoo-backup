@@ -31,6 +31,7 @@ import { useToast } from '@/hooks/use-toast';
 import { globalOpenAI } from '@/services/globalOpenAIConfig';
 import { SecureConfig } from '@/lib/secure-config';
 import { adminGlobalSync } from '@/services/adminGlobalConfigSync';
+import { setupAdminTableAndAPIKey, checkAdminTableExists } from '@/utils/setupAdminTable';
 
 interface OpenAIStatus {
   configured: boolean;
