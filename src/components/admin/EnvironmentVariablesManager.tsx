@@ -262,7 +262,7 @@ export function EnvironmentVariablesManager() {
         .eq('id', id);
 
       if (error) {
-        const errorMessage = error?.message || error?.details || String(error) || 'Unknown database error';
+        const errorMessage = getErrorMessage(error);
         console.error('Database error:', errorMessage);
         toast({
           title: 'Database Error',
