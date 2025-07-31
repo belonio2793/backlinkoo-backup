@@ -325,7 +325,17 @@ export class BlogService {
    */
   private async incrementViewCount(slug: string): Promise<void> {
     try {
-      await supabase.rpc('increment_blog_post_views', { post_slug: slug });
+      // Try using the RPC function first
+      const { error } = await supabase.rpc('increment_blog_post_views', { post_slug: slug });
+
+      if (error) {
+        // Fallback: direct update
+        await supabase
+          .from('blog_posts')
+          .update({ view_count: supabase.sql`view_count + 1` })
+          .eq('slug', slug)
+          .eq('status', 'published');
+      }
     } catch (error) {
       console.warn('Failed to increment view count:', error);
     }
