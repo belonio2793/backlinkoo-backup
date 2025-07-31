@@ -181,7 +181,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
               type="url"
             />
             <p className="text-xs text-muted-foreground">
-              The destination URL where the anchor text will link to
+              The destination URL where the anchor text will link to. Protocol (https://) will be added automatically if missing.
             </p>
           </div>
         </div>
