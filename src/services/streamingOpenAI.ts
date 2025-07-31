@@ -260,15 +260,28 @@ export class StreamingOpenAIService {
   }
 
   /**
-   * Publish the post to the blog system
+   * Publish the post to the blog system with enhanced metadata
    */
-  private async publishPost(content: string, slug: string, keyword: string, anchorText: string, url: string): Promise<void> {
+  private async publishPost(
+    content: string,
+    slug: string,
+    keyword: string,
+    anchorText: string,
+    url: string,
+    metadata?: {
+      provider?: string;
+      prompt?: string;
+      promptIndex?: number;
+      attempts?: number;
+      fallbackUsed?: boolean;
+    }
+  ): Promise<void> {
     try {
       // Extract title from content (first h1 or first line)
       const titleMatch = content.match(/<h1[^>]*>(.*?)<\/h1>/i) || content.match(/^(.+)$/m);
       const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : keyword;
 
-      // Store in localStorage for trial posts
+      // Store in localStorage for trial posts with enhanced metadata
       const blogPost = {
         id: Date.now().toString(),
         title,
@@ -282,18 +295,31 @@ export class StreamingOpenAIService {
         is_trial_post: true,
         word_count: content.split(' ').length,
         seo_score: Math.floor(Math.random() * 20) + 80, // Mock SEO score 80-100
-        reading_time: Math.ceil(content.split(' ').length / 200)
+        reading_time: Math.ceil(content.split(' ').length / 200),
+        // Enhanced metadata
+        ai_provider: metadata?.provider || 'unknown',
+        prompt_used: metadata?.prompt || '',
+        prompt_index: metadata?.promptIndex || 0,
+        generation_attempts: metadata?.attempts || 1,
+        fallback_used: metadata?.fallbackUsed || false,
+        generation_timestamp: new Date().toISOString()
       };
 
       // Store in localStorage
       const existingPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
       existingPosts.unshift(blogPost);
-      
+
       // Keep only latest 50 posts in localStorage
       const limitedPosts = existingPosts.slice(0, 50);
       localStorage.setItem('all_blog_posts', JSON.stringify(limitedPosts));
 
-      console.log('📝 Blog post published to localStorage:', { title, slug });
+      console.log('📝 Enhanced blog post published to localStorage:', {
+        title,
+        slug,
+        provider: metadata?.provider,
+        attempts: metadata?.attempts,
+        fallbackUsed: metadata?.fallbackUsed
+      });
     } catch (error) {
       console.error('Failed to publish post:', error);
       // Don't throw error as the content was generated successfully
