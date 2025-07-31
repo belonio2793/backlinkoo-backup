@@ -71,38 +71,11 @@ const Index = () => {
     // Get initial session with faster timeout
     const getInitialSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        console.log('Index page - Initial session check:', { session: !!session, user: !!session?.user, error });
-
-        if (error || !session || !session.user) {
-          console.log('Index page - No valid session, clearing user state');
-          setUser(null);
-          setAuthChecked(true);
-          return;
-        }
-
-        // Quick validation - if session exists, trust it initially
-        console.log('Index page - Valid user session found');
-        setUser(session.user);
-        setAuthChecked(true);
-
-        // Async validation in background - don't block UI
-        setTimeout(async () => {
-          try {
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
-            if (userError || !user) {
-              console.log('Index page - Background validation failed, clearing auth state');
-              await supabase.auth.signOut({ scope: 'global' });
-              setUser(null);
-            }
-          } catch (err) {
-            console.warn('Background auth validation failed:', err);
-          }
-        }, 100);
-
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
       } catch (error) {
-        console.error('Error in getSession:', error);
         setUser(null);
+      } finally {
         setAuthChecked(true);
       }
     };
