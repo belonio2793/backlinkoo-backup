@@ -36,84 +36,85 @@ export function DirectOpenAITest() {
     const startTime = Date.now();
 
     try {
-      // Test 1: Check API status via Netlify function
-      console.log('🔍 Testing OpenAI via Netlify function...');
-      const statusResult = await safeNetlifyFetch('api-status');
-      
-      if (statusResult.success && statusResult.data?.providers?.OpenAI?.configured) {
-        console.log('✅ OpenAI detected as configured in Netlify');
-        
-        // Test 2: Try to generate actual content to verify it works
-        console.log('🚀 Testing content generation...');
-        const generateResult = await safeNetlifyFetch('generate-openai', {
-          method: 'POST',
-          body: JSON.stringify({
-            prompt: 'Write a one sentence test response to verify OpenAI API connectivity.',
-            max_tokens: 50
-          })
-        });
+      // Test 1: Check OpenAI status via new dedicated function
+      console.log('🔍 Testing OpenAI via dedicated status function...');
+      const statusResult = await safeNetlifyFetch('openai-status');
 
-        const responseTime = Date.now() - startTime;
+      if (statusResult.success && statusResult.data) {
+        const { configured, status, message, modelCount, keyPreview } = statusResult.data;
 
-        if (generateResult.success && generateResult.data) {
-          setResult({
-            success: true,
-            message: 'OpenAI API fully operational - content generation successful',
-            details: {
-              statusCheck: '✅ Configured',
-              contentGeneration: '✅ Working', 
-              response: generateResult.data.content || generateResult.data,
-              environment: 'Production Netlify Functions'
-            },
-            responseTime,
-            timestamp: new Date()
+        if (status === 'connected') {
+          // Test 2: Try actual content generation using ChatGPT-style function
+          console.log('🚀 Testing content generation via new GPT function...');
+          const generateResult = await safeNetlifyFetch('gpt', {
+            method: 'POST',
+            body: JSON.stringify({
+              messages: [{
+                role: 'user',
+                content: 'Write a one sentence test response to verify OpenAI API connectivity.'
+              }],
+              model: 'gpt-3.5-turbo',
+              max_tokens: 50
+            })
           });
+
+          const responseTime = Date.now() - startTime;
+
+          if (generateResult.success && generateResult.data) {
+            const content = generateResult.data.choices?.[0]?.message?.content || 'Content generated successfully';
+
+            setResult({
+              success: true,
+              message: 'OpenAI API fully operational - ChatGPT-style function working',
+              details: {
+                statusCheck: '✅ Connected',
+                contentGeneration: '✅ Working',
+                modelCount: modelCount || 'Unknown',
+                keyPreview: keyPreview || 'Hidden',
+                generatedContent: content,
+                method: 'ChatGPT-style Netlify Function'
+              },
+              responseTime,
+              timestamp: new Date()
+            });
+          } else {
+            setResult({
+              success: false,
+              message: 'OpenAI connected but content generation failed',
+              details: {
+                statusCheck: '✅ Connected',
+                contentGeneration: '❌ Failed',
+                error: generateResult.error || 'Unknown error',
+                method: 'ChatGPT-style Netlify Function'
+              },
+              responseTime,
+              timestamp: new Date()
+            });
+          }
         } else {
           setResult({
             success: false,
-            message: 'OpenAI configured but content generation failed',
+            message: message || 'OpenAI API not properly configured',
             details: {
-              statusCheck: '✅ Configured',
-              contentGeneration: '❌ Failed',
-              error: generateResult.error || 'Unknown error',
-              environment: 'Production Netlify Functions'
+              configured: configured ? '✅' : '❌',
+              status,
+              method: 'Dedicated Status Check'
             },
-            responseTime,
+            responseTime: Date.now() - startTime,
             timestamp: new Date()
           });
         }
       } else {
-        // Test 3: Try check-ai-provider function as backup
-        console.log('🔄 Trying alternative AI provider check...');
-        const providerResult = await safeNetlifyFetch('check-ai-provider');
-        
-        const responseTime = Date.now() - startTime;
-        
-        if (providerResult.success) {
-          setResult({
-            success: true,
-            message: 'OpenAI API accessible via AI provider endpoint',
-            details: {
-              method: 'AI Provider Check',
-              response: providerResult.data,
-              environment: 'Production Netlify Functions'
-            },
-            responseTime,
-            timestamp: new Date()
-          });
-        } else {
-          setResult({
-            success: false,
-            message: 'OpenAI API not accessible - configuration issue',
-            details: {
-              statusResult: statusResult.data || statusResult.error,
-              providerResult: providerResult.error,
-              environment: 'Production Netlify Functions'
-            },
-            responseTime,
-            timestamp: new Date()
-          });
-        }
+        setResult({
+          success: false,
+          message: 'OpenAI status check failed',
+          details: {
+            error: statusResult.error || 'Status function unavailable',
+            method: 'Dedicated Status Check'
+          },
+          responseTime: Date.now() - startTime,
+          timestamp: new Date()
+        });
       }
     } catch (error) {
       const responseTime = Date.now() - startTime;
@@ -122,7 +123,7 @@ export function DirectOpenAITest() {
         message: `Direct connection test failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         details: {
           error: error instanceof Error ? error.message : 'Unknown error',
-          stack: error instanceof Error ? error.stack : undefined
+          method: 'Exception caught'
         },
         responseTime,
         timestamp: new Date()
