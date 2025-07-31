@@ -31,7 +31,8 @@ import {
   Star,
   CheckCircle2,
   Globe,
-  Infinity
+  Infinity,
+  Loader2
 } from 'lucide-react';
 
 export function Blog() {
