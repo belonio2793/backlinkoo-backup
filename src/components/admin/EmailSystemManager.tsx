@@ -545,19 +545,30 @@ Email System Manager`
             <CardContent>
               {(failureLog && failureLog.length > 0) ? (
                 <div className="space-y-2">
-                  {(failureLog || []).map((failure, index) => (
-                    <div key={index} className="flex items-center gap-3 p-2 bg-red-50 rounded-lg">
-                      <AlertTriangle className="h-4 w-4 text-red-600" />
-                      <div className="flex-1">
-                        <div className="font-medium">{failure.provider}</div>
-                        <div className="text-sm text-muted-foreground">{failure.error}</div>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3 inline mr-1" />
-                        {new Date(failure.timestamp).toLocaleTimeString()}
-                      </div>
-                    </div>
-                  ))}
+                  {(failureLog || []).map((failure, index) => {
+                    try {
+                      return (
+                        <div key={index} className="flex items-center gap-3 p-2 bg-red-50 rounded-lg">
+                          <AlertTriangle className="h-4 w-4 text-red-600" />
+                          <div className="flex-1">
+                            <div className="font-medium">{failure?.provider || 'Unknown Provider'}</div>
+                            <div className="text-sm text-muted-foreground">{failure?.error || 'Unknown error'}</div>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3 inline mr-1" />
+                            {failure?.timestamp ? new Date(failure.timestamp).toLocaleTimeString() : 'Unknown time'}
+                          </div>
+                        </div>
+                      );
+                    } catch (error) {
+                      console.error('Error rendering failure log entry:', error);
+                      return (
+                        <div key={index} className="p-2 bg-red-100 rounded-lg text-red-600 text-sm">
+                          Error loading failure entry
+                        </div>
+                      );
+                    }
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-4">
