@@ -1,7 +1,9 @@
 /**
- * Secure OpenAI Service - Server-side only
- * All OpenAI API calls go through Netlify functions for security
+ * OpenAI Service with Global Configuration
+ * Uses global API key available for all users
  */
+
+import { globalOpenAI } from '../globalOpenAIConfig';
 
 interface OpenAIRequest {
   prompt: string;
