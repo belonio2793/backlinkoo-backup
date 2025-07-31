@@ -31,7 +31,7 @@ if (import.meta.env.DEV) {
   import('@/utils/testBlogClaimFixes');
 }
 
-const queryClient = new QueryClient();
+import { queryClient } from "@/lib/queryClient";
 
 // Run content cleanup once on app startup
 if (typeof window !== 'undefined') {
