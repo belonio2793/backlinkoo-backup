@@ -139,7 +139,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                 <div className="p-1.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
                   <Hash className="h-4 w-4 text-white" />
                 </div>
-                Keyword/Topic
+                Keyword
               </Label>
               <div className="relative group">
                 <Input
@@ -182,16 +182,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             </div>
           </div>
 
-          {/* Separator with icon */}
-          <div className="flex items-center justify-center py-2">
-            <div className="flex items-center gap-3">
-              <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20"></div>
-              <div className="p-2 bg-gradient-to-r from-orange-400 to-red-400 rounded-full">
-                <Sparkles className="h-4 w-4 text-white" />
-              </div>
-              <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20"></div>
-            </div>
-          </div>
+
 
           {/* Bottom row: Target URL (full width for better UX) */}
           <div className="space-y-3">
