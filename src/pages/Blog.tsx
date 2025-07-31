@@ -349,6 +349,11 @@ export function Blog() {
         </div>
       </div>
 
+      {/* Claim Status Indicator */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <ClaimStatusIndicator onUpgrade={() => setPricingModalOpen(true)} />
+      </div>
+
       {/* Blog Posts Grid/List */}
       <div id="blog-grid" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {filteredPosts.length === 0 ? (
