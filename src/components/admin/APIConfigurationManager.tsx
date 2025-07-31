@@ -34,6 +34,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getErrorMessage } from '@/utils/errorFormatter';
 import { openAIOnlyContentGenerator } from '@/services/openAIOnlyContentGenerator';
 import { SecureConfig } from '@/lib/secure-config';
+import { adminGlobalSync } from '@/services/adminGlobalConfigSync';
 
 interface APIConfig {
   name: string;
