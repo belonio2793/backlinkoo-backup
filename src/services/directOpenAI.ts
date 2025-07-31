@@ -66,7 +66,7 @@ Please write the complete blog post now:`;
           wordCount: 1000,
           contentType: 'blog-post',
           tone: 'professional',
-          apiKey: clientApiKey // Pass API key securely to server function
+          apiKey: clientApiKey || null // Pass API key or let Netlify function use its configured key
         })
       });
 
