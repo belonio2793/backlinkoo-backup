@@ -153,9 +153,10 @@ export class LocalDevAPI {
       providers: {
         OpenAI: {
           configured: true,
-          status: 'mock_mode'
+          status: 'configured'
         }
-      }
+      },
+      timestamp: new Date().toISOString()
     };
   }
 }
