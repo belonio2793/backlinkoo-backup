@@ -198,19 +198,22 @@ Email System Manager`
     });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  const getStatusColor = (status: string | undefined | null) => {
+    const safeStatus = status || 'unknown';
+    switch (safeStatus) {
       case 'healthy': return 'bg-green-100 text-green-800';
       case 'degraded': return 'bg-yellow-100 text-yellow-800';
       case 'critical': return 'bg-red-100 text-red-800';
       case 'fulfilled': return 'bg-green-100 text-green-800';
       case 'rejected': return 'bg-red-100 text-red-800';
+      case 'error': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getProviderIcon = (provider: string) => {
-    switch (provider) {
+  const getProviderIcon = (provider: string | undefined | null) => {
+    const safeProvider = provider || 'unknown';
+    switch (safeProvider) {
       case 'resend': return <Mail className="h-4 w-4" />;
       case 'supabase': return <Database className="h-4 w-4" />;
       case 'netlify': return <Globe className="h-4 w-4" />;
