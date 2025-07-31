@@ -155,7 +155,6 @@ export function ServiceConnectionStatus() {
       updateServiceStatus('Resend Email', {
         status: 'not_configured',
         message: 'Resend API key not configured',
-        hasApiKey: false,
         responseTime
       });
       return;
@@ -164,7 +163,6 @@ export function ServiceConnectionStatus() {
     updateServiceStatus('Resend Email', {
       status: 'connected',
       message: 'Resend API key configured',
-      hasApiKey: true,
       responseTime,
       details: {
         keyPresent: true,
