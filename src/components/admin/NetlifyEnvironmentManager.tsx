@@ -141,7 +141,7 @@ export function NetlifyEnvironmentManager() {
   };
 
   const testAPIKey = async (variable: NetlifyVariable) => {
-    if (!variable.testable || !variable.value) return;
+    if (!variable.testable) return;
 
     setTestResults(prev => ({
       ...prev,
@@ -149,9 +149,59 @@ export function NetlifyEnvironmentManager() {
     }));
 
     const startTime = Date.now();
-    
+
     try {
       if (variable.key === 'OPENAI_API_KEY') {
+        // If we don't have the actual value, try using the check-ai-provider function
+        if (!variable.value || variable.value === 'sk-***configured***') {
+          try {
+            const response = await fetch('/.netlify/functions/check-ai-provider');
+            const responseTime = Date.now() - startTime;
+
+            if (response.ok) {
+              const data = await response.json();
+              if (data.status === 'success') {
+                setTestResults(prev => ({
+                  ...prev,
+                  [variable.key]: {
+                    status: 'success',
+                    message: `API key valid - Server-side test passed`,
+                    responseTime
+                  }
+                }));
+              } else {
+                setTestResults(prev => ({
+                  ...prev,
+                  [variable.key]: {
+                    status: 'error',
+                    message: `API test failed: ${data.error || 'Unknown error'}`,
+                    responseTime
+                  }
+                }));
+              }
+            } else {
+              setTestResults(prev => ({
+                ...prev,
+                [variable.key]: {
+                  status: 'error',
+                  message: `Server test failed: ${response.status}`,
+                  responseTime
+                }
+              }));
+            }
+          } catch (error) {
+            setTestResults(prev => ({
+              ...prev,
+              [variable.key]: {
+                status: 'error',
+                message: 'Server-side test failed'
+              }
+            }));
+          }
+          return;
+        }
+
+        // Direct API test if we have the actual key value
         const response = await fetch('https://api.openai.com/v1/models', {
           headers: {
             'Authorization': `Bearer ${variable.value}`,
