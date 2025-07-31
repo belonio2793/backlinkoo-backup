@@ -274,16 +274,24 @@ export function OrganizedAdminDashboard() {
         )}
 
         {activeCategory === "system" && (
-          <Tabs defaultValue="api-config" className="space-y-6">
+          <Tabs defaultValue="openai-config" className="space-y-6">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="api-config">API Management</TabsTrigger>
+              <TabsTrigger value="openai-config">OpenAI API</TabsTrigger>
               <TabsTrigger value="environment">Environment</TabsTrigger>
               <TabsTrigger value="deployment">Deployment</TabsTrigger>
               <TabsTrigger value="database">Database</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="api-config">
-              <APIManagementDashboard />
+            <TabsContent value="openai-config">
+              <div className="space-y-6">
+                <UnifiedOpenAIConfig />
+                <Alert>
+                  <Brain className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Master Configuration:</strong> This OpenAI API key setting controls all AI features across your entire application including blog generation, content creation, and more. Configure it once here and it syncs everywhere.
+                  </AlertDescription>
+                </Alert>
+              </div>
             </TabsContent>
 
             <TabsContent value="environment">
