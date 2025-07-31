@@ -296,6 +296,15 @@ Email System Manager`
                 <div className="text-center py-4">
                   <RefreshCw className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p className="text-muted-foreground">Loading system health...</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={loadSystemHealth}
+                    className="mt-2"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Retry Loading
+                  </Button>
                 </div>
               )}
             </CardContent>
