@@ -67,44 +67,7 @@ export function AuthFormTabs({
     return { isValid: true, message: "Password is valid" };
   };
 
-  const testConnection = async () => {
-    if (isTestingConnection) return;
 
-    setIsTestingConnection(true);
-    toast({
-      title: "Testing Connection",
-      description: "Checking authentication service connectivity...",
-    });
-
-    try {
-      const { runAuthHealthCheck } = await import('@/utils/authHealthCheck');
-      const healthResult = await runAuthHealthCheck();
-
-      if (healthResult.overallHealth === 'good') {
-        toast({
-          title: "Connection Test Passed",
-          description: "All authentication services are working properly.",
-        });
-      } else {
-        toast({
-          title: "Connection Issues Detected",
-          description: healthResult.recommendations[0] || "Some authentication services may be slow or unavailable.",
-          variant: "destructive"
-        });
-      }
-
-      console.log('🔧 Connection test results:', healthResult);
-    } catch (error) {
-      console.error('Connection test failed:', error);
-      toast({
-        title: "Connection Test Failed",
-        description: "Unable to run connectivity diagnostics.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsTestingConnection(false);
-    }
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
