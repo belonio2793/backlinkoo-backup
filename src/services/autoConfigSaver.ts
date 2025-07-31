@@ -82,7 +82,12 @@ export class AutoConfigSaver {
       }
 
     } catch (error) {
-      console.warn('Health check failed:', error);
+      // Handle fetch errors gracefully without spamming console
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        // Skip logging for expected network errors in development
+        return;
+      }
+      console.warn('Health check failed:', error.message);
     }
   }
 
