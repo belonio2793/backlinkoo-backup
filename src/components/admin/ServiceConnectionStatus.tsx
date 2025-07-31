@@ -374,7 +374,7 @@ export function ServiceConnectionStatus() {
           <div>
             <h2 className="text-2xl font-bold">Service Connection Status</h2>
             <p className="text-muted-foreground">
-              Real-time status of Netlify, Supabase, OpenAI, and Resend services
+              Real-time status of Netlify, Supabase, and Resend services
             </p>
           </div>
         </div>
