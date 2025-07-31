@@ -30,8 +30,6 @@ import { SupabaseEmailTest } from "@/components/SupabaseEmailTest";
 import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
-import { SystemStatusCheck } from "@/components/SystemStatusCheck";
-import { GlobalAPIStatus } from "@/components/GlobalAPIStatus";
 import { ErrorDebugger } from "@/components/ErrorDebugger";
 
 import {
