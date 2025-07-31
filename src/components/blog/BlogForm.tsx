@@ -173,9 +173,10 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             </Label>
             <Input
               id="targetUrl"
-              placeholder="https://your-website.com/landing-page"
+              placeholder="your-website.com/landing-page"
               value={targetUrl}
-              onChange={(e) => setTargetUrl(e.target.value)}
+              onChange={handleTargetUrlChange}
+              onBlur={handleTargetUrlBlur}
               className="h-12"
               type="url"
             />
