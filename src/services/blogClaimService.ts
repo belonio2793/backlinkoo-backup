@@ -99,7 +99,7 @@ export class BlogClaimService {
       // Validate data structure
       const validatedData = (data || []).filter(post => {
         if (!post.id || !post.slug || !post.title) {
-          console.warn('⚠��� BlogClaimService: Skipping invalid post data:', post);
+          console.warn('⚠️ BlogClaimService: Skipping invalid post data:', post);
           return false;
         }
         return true;
@@ -405,12 +405,31 @@ export class BlogClaimService {
       }
 
       // Create new database entry with user as owner
+      // Clean and validate the data before insertion
       const postToInsert = {
-        ...localPost,
+        slug: localPost.slug,
+        title: localPost.title,
+        content: localPost.content,
+        meta_description: localPost.meta_description || localPost.excerpt || '',
+        keywords: Array.isArray(localPost.keywords) ? localPost.keywords : [localPost.keyword || 'content'],
+        tags: Array.isArray(localPost.tags) ? localPost.tags : localPost.keywords || [localPost.keyword || 'content'],
+        category: localPost.category || 'General',
+        target_url: localPost.target_url || localPost.targetUrl || '',
+        anchor_text: localPost.anchor_text || localPost.anchorText || '',
+        published_url: localPost.published_url || `${window.location.origin}/blog/${localPost.slug}`,
         user_id: user.id,
         is_trial_post: false,
         expires_at: null,
         status: 'published',
+        view_count: localPost.view_count || 0,
+        seo_score: localPost.seo_score || 75,
+        reading_time: localPost.reading_time || 5,
+        word_count: localPost.word_count || 1000,
+        featured_image: localPost.featured_image || null,
+        author_name: localPost.author_name || 'Backlink ∞',
+        contextual_links: localPost.contextual_links || [],
+        published_at: localPost.published_at || localPost.created_at || new Date().toISOString(),
+        created_at: localPost.created_at || new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
 
