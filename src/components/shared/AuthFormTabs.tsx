@@ -750,7 +750,7 @@ export function AuthFormTabs({
             <Input
               id="confirm-password"
               type="password"
-              placeholder="•••���••••"
+              placeholder="••••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className={inputHeight}
