@@ -142,8 +142,8 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
     } catch (error) {
       console.error('Error loading trial posts:', error);
       toast({
-        title: "Error Loading Trial Posts",
-        description: "Unable to load trial posts. Please try again.",
+        title: "Error Loading Claimed and Unclaimed Posts",
+        description: "Unable to load claimed and unclaimed posts. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -155,7 +155,7 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
     if (!user) {
       toast({
         title: "Authentication Required",
-        description: "Please sign in to claim trial posts.",
+        description: "Please sign in to claim ∞ posts.",
         variant: "destructive",
       });
       return;
@@ -171,7 +171,7 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
       if (result.success) {
         toast({
           title: "🎉 Post Claimed Successfully!",
-          description: "Your trial post is now permanent and saved to your account.",
+          description: "Your ∞ post is now permanent and saved to your account.",
         });
         
         // Remove from trial posts and refresh
