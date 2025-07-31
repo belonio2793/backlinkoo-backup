@@ -1,0 +1,181 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, Link, Target, Hash, Sparkles } from 'lucide-react';
+import { generateBlogPost } from '@/services/blogGenerationService';
+
+interface SimpleBlogFormProps {
+  onContentGenerated?: (blogPost: any) => void;
+}
+
+export function SimpleBlogForm({ onContentGenerated }: SimpleBlogFormProps) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [keyword, setKeyword] = useState('');
+  const [anchorText, setAnchorText] = useState('');
+  const [targetUrl, setTargetUrl] = useState('');
+  const { toast } = useToast();
+
+  const handleGenerate = async () => {
+    if (!keyword || !anchorText || !targetUrl) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide keyword, anchor text, and target URL",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate URL format
+    try {
+      new URL(targetUrl);
+    } catch {
+      toast({
+        title: "Invalid URL",
+        description: "Please provide a valid target URL",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+
+    try {
+      const blogPost = await generateBlogPost({
+        keyword,
+        anchorText,
+        targetUrl
+      });
+
+      if (blogPost.success) {
+        toast({
+          title: "Blog Post Generated!",
+          description: `Your blog post "${blogPost.title}" is now live at /blog/${blogPost.slug}`,
+        });
+
+        if (onContentGenerated) {
+          onContentGenerated(blogPost);
+        }
+
+        // Reset form
+        setKeyword('');
+        setAnchorText('');
+        setTargetUrl('');
+      } else {
+        throw new Error(blogPost.error || 'Blog generation failed');
+      }
+
+    } catch (error) {
+      console.error('Blog generation failed:', error);
+      toast({
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "Failed to generate blog post. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  return (
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-primary" />
+          Create Blog Post with Backlink
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Generate a 1000-word blog post on your topic with a hyperlink to your target URL. 
+          Your post will be published immediately and can be claimed within 24 hours.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="keyword" className="flex items-center gap-2">
+              <Hash className="h-4 w-4" />
+              Keyword/Topic
+            </Label>
+            <Input
+              id="keyword"
+              placeholder="e.g., best SEO practices, digital marketing tips"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              className="h-12"
+            />
+            <p className="text-xs text-muted-foreground">
+              The main topic or keyword your blog post will focus on
+            </p>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="anchorText" className="flex items-center gap-2">
+              <Target className="h-4 w-4" />
+              Anchor Text
+            </Label>
+            <Input
+              id="anchorText"
+              placeholder="e.g., professional SEO services, learn more here"
+              value={anchorText}
+              onChange={(e) => setAnchorText(e.target.value)}
+              className="h-12"
+            />
+            <p className="text-xs text-muted-foreground">
+              The clickable text that will link to your target URL
+            </p>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="targetUrl" className="flex items-center gap-2">
+              <Link className="h-4 w-4" />
+              Target URL
+            </Label>
+            <Input
+              id="targetUrl"
+              placeholder="https://your-website.com/landing-page"
+              value={targetUrl}
+              onChange={(e) => setTargetUrl(e.target.value)}
+              className="h-12"
+              type="url"
+            />
+            <p className="text-xs text-muted-foreground">
+              The destination URL where the anchor text will link to
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
+          <h4 className="font-medium text-blue-900">What happens next?</h4>
+          <ul className="text-sm text-blue-800 space-y-1">
+            <li>• AI generates a 1000-word blog post on your keyword</li>
+            <li>• Your anchor text is naturally integrated with a link to your URL</li>
+            <li>• Post is published immediately on /blog with a unique URL</li>
+            <li>• You have 24 hours to claim the post (limit: 3 claimed posts)</li>
+            <li>• Unclaimed posts are automatically deleted after 24 hours</li>
+          </ul>
+        </div>
+
+        <Button
+          onClick={handleGenerate}
+          disabled={isGenerating || !keyword || !anchorText || !targetUrl}
+          size="lg"
+          className="w-full h-12"
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Generating Blog Post...
+            </>
+          ) : (
+            <>
+              <Sparkles className="mr-2 h-5 w-5" />
+              Generate Blog Post with Backlink
+            </>
+          )}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
