@@ -394,6 +394,18 @@ export function Blog() {
                 }
               </p>
 
+              {!searchTerm && !selectedCategory && (
+                <div className="mt-8">
+                  <Button
+                    onClick={() => navigate('/blog/create')}
+                    size="lg"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium px-8 py-4"
+                  >
+                    <Sparkles className="mr-2 h-5 w-5" />
+                    Create Your First Blog Post
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         ) : (
