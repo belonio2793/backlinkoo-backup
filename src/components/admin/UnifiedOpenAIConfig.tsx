@@ -92,7 +92,7 @@ export function UnifiedOpenAIConfig() {
     try {
       // Save to localStorage directly (no database dependency)
       await environmentVariablesService.saveVariable(
-        'VITE_OPENAI_API_KEY',
+        'OPENAI_API_KEY',
         tempApiKey.trim(),
         'OpenAI API key for AI content generation and blog creation - GLOBAL CONFIGURATION',
         true
