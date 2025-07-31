@@ -17,6 +17,9 @@ export default function AIContentTest() {
           <TabsTrigger value="openai">OpenAI Only Generator</TabsTrigger>
           <TabsTrigger value="minimal">Minimal AI Test</TabsTrigger>
         </TabsList>
+        <TabsContent value="internal-test">
+          <OpenAITestRunner />
+        </TabsContent>
         <TabsContent value="openai">
           <OpenAITestComponent />
         </TabsContent>
