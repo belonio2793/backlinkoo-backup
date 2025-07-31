@@ -22,7 +22,7 @@ import { SlugPreview } from './SlugPreview';
 
 import {
   Globe, Zap, Target, Clock, CheckCircle2, ExternalLink, Sparkles,
-  BarChart3, Link2, Settings, RefreshCw, Eye
+  BarChart3, Link2, Settings, RefreshCw, Eye, Terminal, Code
 } from 'lucide-react';
 
 interface GlobalBlogRequest {
@@ -66,10 +66,35 @@ export function GlobalBlogGenerator({
   const [remainingRequests, setRemainingRequests] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
   const [previewMode, setPreviewMode] = useState<'content' | 'seo' | 'links'>('content');
+  const [selectedPrompt, setSelectedPrompt] = useState<string>('');
+  const [promptIndex, setPromptIndex] = useState<number>(0);
 
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+
+  // Define the exact prompt templates as requested
+  const basePromptTemplates = [
+    "Generate a 1000 word blog post on {{keyword}} including the {{anchor_text}} hyperlinked to {{url}}",
+    "Write a 1000 word blog post about {{keyword}} with a hyperlinked {{anchor_text}} linked to {{url}}",
+    "Produce a 1000-word blog post on {{keyword}} that links {{anchor_text}}"
+  ];
+
+  // Function to preview prompt with current inputs
+  const getPromptPreview = () => {
+    if (!primaryKeyword.trim() || !targetUrl.trim()) return '';
+
+    const randomIndex = Math.floor(Math.random() * basePromptTemplates.length);
+    const template = basePromptTemplates[randomIndex];
+    return {
+      template,
+      index: randomIndex,
+      formatted: template
+        .replace('{{keyword}}', primaryKeyword.trim())
+        .replace('{{anchor_text}}', anchorText.trim() || primaryKeyword.trim())
+        .replace('{{url}}', targetUrl.trim())
+    };
+  };
 
   useEffect(() => {
     loadGlobalStats();
@@ -165,12 +190,20 @@ export function GlobalBlogGenerator({
 
 
     const promptTemplates = [
-      `Generate a 1000 word article on ${request.primaryKeyword} including the ${request.anchorText || request.primaryKeyword} hyperlinked to ${request.targetUrl}`,
+      `Generate a 1000 word blog post on ${request.primaryKeyword} including the ${request.anchorText || request.primaryKeyword} hyperlinked to ${request.targetUrl}`,
       `Write a 1000 word blog post about ${request.primaryKeyword} with a hyperlinked ${request.anchorText || request.primaryKeyword} linked to ${request.targetUrl}`,
-      `Produce a 1000-word reader friendly post on ${request.primaryKeyword} that links ${request.anchorText || request.primaryKeyword} to ${request.targetUrl}`
+      `Produce a 1000-word blog post on ${request.primaryKeyword} that links ${request.anchorText || request.primaryKeyword}`
     ];
 
-    const prompt = `${promptTemplates[Math.floor(Math.random() * promptTemplates.length)]}
+    // Select and track prompt
+    const selectedIndex = Math.floor(Math.random() * promptTemplates.length);
+    const selectedTemplate = promptTemplates[selectedIndex];
+    setPromptIndex(selectedIndex);
+    setSelectedPrompt(selectedTemplate);
+
+    console.log(`🎯 Selected Prompt Template ${selectedIndex + 1}:`, selectedTemplate);
+
+    const prompt = `${selectedTemplate}
 
 IMPORTANT REQUIREMENTS:
 - Write exactly 1000 words or more of high-quality, original content
@@ -362,6 +395,62 @@ Return clean HTML content optimized for SEO.`;
             disabled={isGenerating}
           />
         </div>
+
+        {/* Prompt Preview */}
+        {primaryKeyword.trim() && targetUrl.trim() && (
+          <div className="space-y-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+            <div className="flex items-center gap-2">
+              <Terminal className="h-4 w-4 text-blue-600" />
+              <span className="font-medium text-blue-800">
+                Prompt Preview (Random Selection)
+              </span>
+            </div>
+
+            {(() => {
+              const preview = getPromptPreview();
+              if (!preview) return null;
+
+              return (
+                <div className="space-y-3">
+                  {/* Template Selection */}
+                  <div className="text-xs font-medium text-blue-600 uppercase tracking-wide">
+                    Template {preview.index + 1} of {basePromptTemplates.length}:
+                  </div>
+                  <div className="bg-slate-900 text-green-400 p-3 rounded font-mono text-sm overflow-x-auto">
+                    {preview.template}
+                  </div>
+
+                  {/* User Inputs */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                    <div className="bg-white p-3 rounded border">
+                      <div className="font-medium text-blue-600 mb-1">keyword:</div>
+                      <div className="font-mono text-slate-800">"{primaryKeyword}"</div>
+                    </div>
+                    <div className="bg-white p-3 rounded border">
+                      <div className="font-medium text-purple-600 mb-1">anchor_text:</div>
+                      <div className="font-mono text-slate-800">"{anchorText || primaryKeyword}"</div>
+                    </div>
+                    <div className="bg-white p-3 rounded border">
+                      <div className="font-medium text-green-600 mb-1">url:</div>
+                      <div className="font-mono text-slate-800 truncate">"{targetUrl}"</div>
+                    </div>
+                  </div>
+
+                  {/* Final Result */}
+                  <div className="space-y-2">
+                    <div className="text-xs font-medium text-blue-600 uppercase tracking-wide">
+                      Final Prompt → ChatGPT:
+                    </div>
+                    <div className="bg-white p-3 rounded border-l-4 border-blue-400 text-sm">
+                      <Code className="h-4 w-4 inline mr-2 text-blue-500" />
+                      {preview.formatted}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
 
         {/* Advanced Options */}
         {showAdvancedOptions && (

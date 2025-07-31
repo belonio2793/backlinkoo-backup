@@ -44,9 +44,9 @@ class BuilderAIAgent {
   
   // The 3 specific prompt templates as requested
   private readonly PROMPT_TEMPLATES = [
-    "Generate a 1000 word article on <user_input_keyword> including the <user_input_anchor_text> hyperlinked to <user_input_url>",
-    "Write a 1000 word blog post about <user_input_keyword> with a hyperlinked <user_input_anchor_text> linked to <user_input_url>",
-    "Produce a 1000-word reader friendly post on <user_input_keyword> that links <user_input_anchor_text> to <user_input_url>"
+    "Generate a 1000 word blog post on {{keyword}} including the {{anchor_text}} hyperlinked to {{url}}",
+    "Write a 1000 word blog post about {{keyword}} with a hyperlinked {{anchor_text}} linked to {{url}}",
+    "Produce a 1000-word blog post on {{keyword}} that links {{anchor_text}}"
   ];
 
   constructor() {
@@ -160,9 +160,9 @@ class BuilderAIAgent {
     const selectedTemplate = this.PROMPT_TEMPLATES[Math.floor(Math.random() * this.PROMPT_TEMPLATES.length)];
     
     let prompt = selectedTemplate
-      .replace(/<user_input_keyword>/g, request.user_input_keyword)
-      .replace(/<user_input_anchor_text>/g, request.user_input_anchor_text)
-      .replace(/<user_input_url>/g, request.user_input_url);
+      .replace(/{{keyword}}/g, request.user_input_keyword)
+      .replace(/{{anchor_text}}/g, request.user_input_anchor_text)
+      .replace(/{{url}}/g, request.user_input_url);
 
     // Add SEO and formatting requirements
     prompt += `

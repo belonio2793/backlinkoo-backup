@@ -149,7 +149,22 @@ export function EnhancedDashboardRouter() {
         const hasClaimIntent = claimIntent && JSON.parse(claimIntent).timestamp && (Date.now() - JSON.parse(claimIntent).timestamp) < 60000; // Within last minute
 
         if (isRecentClaim || hasClaimIntent) {
-          console.log('🎯 Recent claim operation or claim intent detected, redirecting to login...');
+          console.log('🎯 Recent claim operation or claim intent detected, checking user status...');
+
+          // If user just claimed a post, they should stay on dashboard
+          if (isRecentClaim) {
+            console.log('✅ Recent claim detected, allowing dashboard access');
+            const claimUser = { id: 'claim-user', email: 'user@claimed.post', email_confirmed_at: new Date().toISOString() };
+            setUser(claimUser);
+            setIsLoading(false);
+            // Clear claim intent after successful access
+            localStorage.removeItem('claim_intent');
+            localStorage.removeItem('recent_claim_operation');
+            return;
+          }
+
+          // If claim intent but no recent claim, redirect to login
+          console.log('📝 Claim intent without recent claim, redirecting to login...');
           setIsLoading(false);
           navigate('/login');
           return;
