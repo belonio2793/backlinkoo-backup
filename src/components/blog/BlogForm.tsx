@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { DirectOpenAIService } from '@/services/directOpenAI';
 import { APIStatusIndicator } from '@/components/shared/APIStatusIndicator';
+import { AnimatedBlogHeadline } from '@/components/AnimatedBlogHeadline';
 import { Loader2, Link, Target, Hash, Sparkles, Zap, Star, Rocket } from 'lucide-react';
 
 interface BlogFormProps {
