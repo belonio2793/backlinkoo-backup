@@ -226,158 +226,61 @@ export function AILive() {
 
     setIsGenerating(true);
     setSteps([]);
-    stepCounterRef.current = 0; // Reset step counter for new generation
+    stepCounterRef.current = 0;
     setCurrentContent('');
     setGeneratedPost(null);
     setError(null);
+    setStreamingProgress(null);
+    setCurrentWordCount(0);
 
     try {
-      // Step 1: Check API Health
-      const providersAvailable = await checkAllProviders();
-      if (!providersAvailable) {
-        setIsGenerating(false);
-        return;
-      }
+      // Use streaming OpenAI service
+      const result = await streamingOpenAI.generateWithStreaming({
+        keyword,
+        anchorText,
+        url,
+        wordCount: 1000,
+        onProgress: (progress) => {
+          setStreamingProgress(progress);
 
-      // Step 2: Select Provider and Prompt
-      const selectedProvider = selectProviderByPriority();
-      const { prompt, index } = selectRandomPrompt();
-      
-      addStep('Selection', 'success', `Selected ${selectedProvider} with Prompt ${index + 1}`);
-
-      // Step 3: Generate Content
-      addStep('Generation', 'running', `Generating content with ${selectedProvider}...`);
-
-      let result;
-      try {
-        console.log(`Generating content with ${selectedProvider}...`);
-        let apiResult;
-
-        if (selectedProvider === 'OpenAI') {
-          apiResult = await openAIService.generateContent(prompt, {
-            model: 'gpt-3.5-turbo',
-            maxTokens: 3000,
-            temperature: 0.7
-          });
-        } else {
-          throw new Error('OpenAI is the only available provider');
+          // Convert streaming progress to steps
+          addStep(
+            progress.stage.charAt(0).toUpperCase() + progress.stage.slice(1),
+            progress.stage === 'error' ? 'error' : progress.stage === 'complete' ? 'success' : 'running',
+            progress.message
+          );
+        },
+        onContentUpdate: (content, wordCount) => {
+          setCurrentContent(content);
+          setCurrentWordCount(wordCount);
         }
-
-        if (!apiResult.success || !apiResult.content) {
-          throw new Error(apiResult.error || 'Content generation failed');
-        }
-
-        result = {
-          content: apiResult.content,
-          wordCount: apiResult.content.split(' ').length,
-          provider: selectedProvider
-        };
-
-        console.log(`Content generated successfully with ${selectedProvider}`);
-      } catch (error) {
-        throw new Error(`Content generation failed: ${error.message}. Please check your API configuration.`);
-      }
-      updateLastStep('success', `Generated ${result.wordCount} words`);
-
-      // Step 4: Validate Content
-      addStep('Validation', 'running', 'Validating content quality...');
-      
-      if (result.wordCount < 700) {
-        updateLastStep('error', `Content too short: ${result.wordCount} words (minimum 700 required)`);
-        throw new Error('Generated content does not meet minimum word count');
-      }
-
-      if (!result.content.includes(anchorText) || !result.content.includes(url)) {
-        updateLastStep('error', 'Missing required anchor text or URL');
-        throw new Error('Generated content does not include required anchor text or URL');
-      }
-
-      updateLastStep('success', 'Content validated successfully');
-
-      // Step 5: Publish
-      addStep('Publishing', 'running', 'Publishing to /blog...');
-
-      const slug = generateSlug(keyword);
-
-      try {
-        // Create blog post object
-        const blogPost = {
-          id: crypto.randomUUID(),
-          title: `${keyword.charAt(0).toUpperCase() + keyword.slice(1)}: Complete Guide for ${new Date().getFullYear()}`,
-          content: result.content,
-          excerpt: `Comprehensive guide about ${keyword} with expert insights and practical strategies.`,
-          slug,
-          keywords: [keyword, `${keyword} guide`, `best ${keyword}`],
-          meta_description: `Learn everything about ${keyword} with this comprehensive guide. Expert insights and proven strategies.`,
-          target_url: url,
-          anchor_text: anchorText,
-          seo_score: Math.floor(Math.random() * 20) + 80,
-          reading_time: Math.ceil(result.wordCount / 200),
-          word_count: result.wordCount,
-          view_count: 0,
-          author_name: 'AI Live Generator',
-          category: 'AI Generated',
-          published_url: `${window.location.origin}/blog/${slug}`,
-          published_at: new Date().toISOString(),
-          is_trial_post: true,
-          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          ai_provider: selectedProvider
-        };
-
-        // Store in localStorage
-        const blogStorageKey = `blog_post_${slug}`;
-        localStorage.setItem(blogStorageKey, JSON.stringify(blogPost));
-
-        // Update all posts list
-        const allPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-        const blogMeta = {
-          id: blogPost.id,
-          slug: blogPost.slug,
-          title: blogPost.title,
-          created_at: blogPost.created_at,
-          is_trial_post: blogPost.is_trial_post,
-          expires_at: blogPost.expires_at
-        };
-        allPosts.unshift(blogMeta);
-        localStorage.setItem('all_blog_posts', JSON.stringify(allPosts));
-
-        const publishResult = {
-          url: blogPost.published_url,
-          slug: blogPost.slug
-        };
-
-        console.log('Post published successfully to localStorage');
-      } catch (error) {
-        throw new Error(`Publishing failed: ${error.message}`);
-      }
-      updateLastStep('success', `Published to ${publishResult.url}`);
-
-      // Step 6: Set Auto-Delete Timer
-      addStep('Timer', 'success', '24-hour auto-delete timer started');
-
-      const now = new Date();
-      const autoDeleteAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-
-      setGeneratedPost({
-        content: result.content,
-        wordCount: result.wordCount,
-        slug,
-        publishedUrl: publishResult.url,
-        provider: selectedProvider,
-        promptUsed: AI_PROMPTS[index],
-        generatedAt: now.toISOString(),
-        autoDeleteAt: autoDeleteAt.toISOString()
       });
 
-      setCurrentContent(result.content);
-      setHasGenerated(true);
+      if (result.success && result.content && result.slug && result.publishedUrl) {
+        const now = new Date();
+        const autoDeleteAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+        setGeneratedPost({
+          content: result.content,
+          wordCount: result.content.split(' ').length,
+          slug: result.slug,
+          publishedUrl: result.publishedUrl,
+          provider: 'OpenAI',
+          promptUsed: AI_PROMPTS[Math.floor(Math.random() * AI_PROMPTS.length)],
+          generatedAt: now.toISOString(),
+          autoDeleteAt: autoDeleteAt.toISOString()
+        });
+
+        setCurrentContent(result.content);
+        setHasGenerated(true);
+      } else {
+        throw new Error(result.error || 'Content generation failed');
+      }
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      updateLastStep('error', errorMessage);
       setError(errorMessage);
+      addStep('Error', 'error', errorMessage);
     } finally {
       setIsGenerating(false);
     }
