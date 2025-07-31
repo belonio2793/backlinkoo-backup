@@ -256,6 +256,41 @@ export function ConsolidatedOpenAIConfig() {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Setup Button - Show if table doesn't exist */}
+        {!tableExists && (
+          <div className="mb-4">
+            <Alert className="border-blue-200 bg-blue-50">
+              <Key className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-800">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <strong>Quick Setup Required:</strong> The admin database table needs to be created.
+                    <br />
+                    Click the button to automatically create the table and configure your OpenAI API key.
+                  </div>
+                  <Button
+                    onClick={handleSetupTableAndAPIKey}
+                    disabled={isSettingUp}
+                    className="ml-4 bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isSettingUp ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Setting up...
+                      </>
+                    ) : (
+                      <>
+                        <Key className="h-4 w-4 mr-2" />
+                        Setup Now
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="status">Status & Health</TabsTrigger>
