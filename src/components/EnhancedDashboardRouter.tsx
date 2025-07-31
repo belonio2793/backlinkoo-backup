@@ -103,17 +103,13 @@ export function EnhancedDashboardRouter() {
     );
   }
 
-  // If user is authenticated, show protected dashboard with error boundary
-  if (user) {
-    try {
-      return hasTrialPosts ? <UserBlogDashboard /> : <SafeDashboard />;
-    } catch (error) {
-      console.error('Dashboard component error:', error);
-      // Fallback to guest dashboard if user dashboard fails
-      return <GuestDashboard />;
-    }
+  // Always show the full dashboard (SafeDashboard handles auth gracefully)
+  try {
+    return <SafeDashboard />;
+  } catch (error) {
+    console.error('Dashboard component error:', error);
+    // If SafeDashboard fails, show the full Dashboard directly
+    const Dashboard = require('@/pages/Dashboard').default;
+    return <Dashboard />;
   }
-
-  // Show guest dashboard for non-authenticated users
-  return <GuestDashboard />;
 }

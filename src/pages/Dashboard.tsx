@@ -1129,10 +1129,6 @@ const Dashboard = () => {
                 <span className="hidden sm:inline">Overview</span>
                 <span className="sm:hidden">Home</span>
               </TabsTrigger>
-              <TabsTrigger value="trial" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
-                <span className="hidden sm:inline">Trial Posts</span>
-                <span className="sm:hidden">Trial</span>
-              </TabsTrigger>
               <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Campaigns</span>
                 <span className="sm:hidden">Camps</span>
@@ -1466,10 +1462,6 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
               )}
-            </TabsContent>
-
-            <TabsContent value="trial" className="space-y-6">
-              <NewTrialBlogPostsDisplay user={user} />
             </TabsContent>
 
             <TabsContent value="campaigns" className="space-y-6">
