@@ -124,9 +124,8 @@ export class LocalDevAPI {
    * Check if we should use local dev API
    */
   static shouldUseMockAPI(): boolean {
-    return import.meta.env.DEV &&
-           !import.meta.env.OPENAI_API_KEY &&
-           !import.meta.env.VITE_OPENAI_API_KEY;
+    // Always use mock API in development for local testing
+    return import.meta.env.DEV;
   }
 
   /**
