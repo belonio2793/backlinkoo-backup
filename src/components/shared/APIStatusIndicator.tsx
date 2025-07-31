@@ -27,15 +27,19 @@ export function APIStatusIndicator() {
       } else {
         // Fallback to local check
         const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
+        const isNetlifyDev = window.location.hostname.includes('localhost') &&
+                            (window.location.port === '8888' || !!import.meta.env.NETLIFY_DEV);
+
         setStatus({
-          online: hasApiKey,
+          online: hasApiKey || isNetlifyDev,
           message: result.isLocal
-            ? (hasApiKey ? 'Local development (API key configured)' : 'Local development (no API key)')
+            ? (isNetlifyDev ? 'Netlify dev mode (functions available)' :
+               hasApiKey ? 'Local development (API key configured)' : 'Local development (no API key)')
             : (hasApiKey ? 'Local check (API key available)' : 'Local check (no API key)'),
           providers: {
             OpenAI: {
-              configured: hasApiKey,
-              status: hasApiKey ? 'configured' : 'not_configured'
+              configured: hasApiKey || isNetlifyDev,
+              status: (hasApiKey || isNetlifyDev) ? 'configured' : 'not_configured'
             }
           }
         });
