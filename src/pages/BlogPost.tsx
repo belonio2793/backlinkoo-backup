@@ -148,12 +148,16 @@ export function BlogPost() {
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
               <Calendar className="h-4 w-4" />
               {formatDate(post.created_at)}
-              <span className="mx-2">•</span>
-              <Clock className="h-4 w-4" />
-              {post.reading_time} min read
+              {post.reading_time && (
+                <>
+                  <span className="mx-2">•</span>
+                  <Clock className="h-4 w-4" />
+                  {post.reading_time} min read
+                </>
+              )}
               <span className="mx-2">•</span>
               <Eye className="h-4 w-4" />
-              {post.view_count} views
+              {post.view_count || 0} views
             </div>
 
             <h1 className="text-4xl font-bold text-gray-900 mb-4">{post.title}</h1>
