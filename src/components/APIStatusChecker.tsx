@@ -30,36 +30,27 @@ export function APIStatusChecker({ children, fallback }: APIStatusCheckerProps) 
     setLoading(true);
     try {
       console.log('Checking API status...');
-      const response = await fetch('/.netlify/functions/api-status', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const result = await safeNetlifyFetch('api-status');
 
-      // Check if response is HTML (likely a 404 page in dev mode)
-      const contentType = response.headers.get('content-type');
-      if (contentType?.includes('text/html')) {
-        // We're probably in dev mode without Netlify functions
+      if (result.success && result.data) {
+        console.log('API status response:', result.data);
+        setStatus(result.data);
+      } else {
+        // Fallback: check for local API key
         const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
         console.log('Development mode detected, using local API key check');
         setStatus({
           online: hasApiKey,
-          message: hasApiKey ? 'Development mode (API key configured)' : 'Development mode (no API key)',
+          message: result.isLocal
+            ? (hasApiKey ? 'Development mode (API key configured)' : 'Development mode (no API key)')
+            : (hasApiKey ? 'Local check (API key available)' : 'Local check (no API key configured)'),
           providers: {
             OpenAI: {
               configured: hasApiKey,
-              status: hasApiKey ? 'configured' : 'not_configured'
+              status: hasApiKey ? (result.isLocal ? 'configured' : 'local') : 'not_configured'
             }
           }
         });
-        return;
-      }
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('API status response:', data);
-        setStatus(data);
-      } else {
-        throw new Error(`HTTP ${response.status}`);
       }
     } catch (error) {
       console.error('API status check error:', error);
