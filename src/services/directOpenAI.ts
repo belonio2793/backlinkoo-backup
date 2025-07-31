@@ -59,8 +59,14 @@ Please write the complete blog post now:`;
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`OpenAI API call failed: ${response.status} - ${errorText}`);
+        let errorMessage = `OpenAI API call failed: ${response.status}`;
+        try {
+          const errorText = await response.text();
+          errorMessage += ` - ${errorText}`;
+        } catch {
+          // If we can't read the error text, just use the status
+        }
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();
