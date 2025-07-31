@@ -90,6 +90,7 @@ export function UnifiedOpenAIConfig() {
 
     setIsLoading(true);
     try {
+      // Save to localStorage directly (no database dependency)
       await environmentVariablesService.saveVariable(
         'VITE_OPENAI_API_KEY',
         tempApiKey.trim(),
@@ -97,9 +98,7 @@ export function UnifiedOpenAIConfig() {
         true
       );
 
-      // Force refresh the environment variables cache
-      await environmentVariablesService.refreshCache();
-
+      // Update config state
       setConfig(prev => ({
         ...prev,
         apiKey: tempApiKey.trim(),
@@ -111,7 +110,7 @@ export function UnifiedOpenAIConfig() {
 
       toast({
         title: 'OpenAI API Key Saved',
-        description: 'Your OpenAI API key has been saved and will sync across the entire application',
+        description: 'Your OpenAI API key has been saved to localStorage (Edge Function Secrets should be used for production)',
       });
 
       // Auto-test the key after saving
