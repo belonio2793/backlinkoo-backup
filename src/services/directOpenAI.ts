@@ -148,17 +148,19 @@ Please write the complete blog post now:`;
    */
   private static extractTitle(content: string, keyword: string): string {
     const lines = content.split('\n').filter(line => line.trim());
-    
+
     if (lines.length > 0) {
-      const firstLine = lines[0].trim();
+      let firstLine = lines[0].trim();
+      // Strip HTML tags from the title
+      firstLine = firstLine.replace(/<[^>]*>/g, '');
       // If first line looks like a title (not too long, doesn't end with period)
       if (firstLine.length <= 100 && !firstLine.endsWith('.') && firstLine.length > 10) {
         return firstLine;
       }
     }
-    
+
     // Generate title from keyword
-    const keywordWords = keyword.split(' ').map(word => 
+    const keywordWords = keyword.split(' ').map(word =>
       word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
     );
     return `The Complete Guide to ${keywordWords.join(' ')}`;
