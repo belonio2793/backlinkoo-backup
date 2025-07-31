@@ -84,36 +84,32 @@ export function UnifiedOpenAIConfig() {
 
     setIsLoading(true);
     try {
-      const success = await environmentVariablesService.saveVariable(
+      await environmentVariablesService.saveVariable(
         'VITE_OPENAI_API_KEY',
         tempApiKey.trim(),
         'OpenAI API key for AI content generation and blog creation - GLOBAL CONFIGURATION',
         true
       );
 
-      if (success) {
-        // Force refresh the environment variables cache
-        await environmentVariablesService.refreshCache();
-        
-        setConfig(prev => ({
-          ...prev,
-          apiKey: tempApiKey.trim(),
-          isConfigured: true,
-          isValid: null
-        }));
-        
-        setIsEditing(false);
-        
-        toast({
-          title: 'OpenAI API Key Saved',
-          description: 'Your OpenAI API key has been saved and will sync across the entire application',
-        });
+      // Force refresh the environment variables cache
+      await environmentVariablesService.refreshCache();
 
-        // Auto-test the key after saving
-        setTimeout(() => testApiKey(), 1000);
-      } else {
-        throw new Error('Failed to save API key');
-      }
+      setConfig(prev => ({
+        ...prev,
+        apiKey: tempApiKey.trim(),
+        isConfigured: true,
+        isValid: null
+      }));
+
+      setIsEditing(false);
+
+      toast({
+        title: 'OpenAI API Key Saved',
+        description: 'Your OpenAI API key has been saved and will sync across the entire application',
+      });
+
+      // Auto-test the key after saving
+      setTimeout(() => testApiKey(), 1000);
     } catch (error) {
       console.error('Error saving OpenAI API key:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
