@@ -252,7 +252,7 @@ export const TrialBlogShowcase = ({ limit = 6 }: TrialBlogShowcaseProps) => {
                   <Badge 
                     className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-sm"
                   >
-                    {post.category || 'Expert Content'}
+                    {post.category || '∞'}
                   </Badge>
                   <div className="flex items-center gap-1">
                     {post.claimed_by_user_id ? (
