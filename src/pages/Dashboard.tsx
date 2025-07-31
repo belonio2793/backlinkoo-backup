@@ -436,7 +436,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
               <div>• Displayed: {debugInfo.displayedPosts}</div>
-              <div>��� Has Errors: {debugInfo.hasError ? '⚠️' : '��'}</div>
+              <div>���� Has Errors: {debugInfo.hasError ? '⚠️' : '��'}</div>
             </div>
           </div>
           {debugInfo.errorMessage && (
@@ -1557,7 +1557,7 @@ const Dashboard = () => {
               <div className="space-y-6">
                 <SEOToolsSection user={user} />
               </div>
-            ) : activeSection === "trial" ? (
+            ) : activeSection === "trial" ? null : activeSection === "never-show-trial" ? (
               <div className="space-y-6">
                 <div className="relative overflow-hidden">
                   {/* Hero Section */}
