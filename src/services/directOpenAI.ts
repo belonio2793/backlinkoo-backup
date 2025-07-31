@@ -35,7 +35,7 @@ export class DirectOpenAIService {
       if (!clientApiKey) {
         return {
           success: false,
-          error: 'OpenAI API key not configured. Please configure your OpenAI API key in the Admin Dashboard.'
+          error: 'AI content generation is currently unavailable. Please try again later or contact support.'
         };
       }
 
