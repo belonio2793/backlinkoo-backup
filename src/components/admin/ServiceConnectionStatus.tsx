@@ -47,21 +47,18 @@ export function ServiceConnectionStatus() {
       status: 'checking',
       icon: Cloud,
       message: 'Testing Netlify function connectivity...',
-      hasApiKey: true,
     },
     {
       name: 'Supabase Database',
       status: 'checking',
       icon: Database,
       message: 'Testing Supabase connection...',
-      hasApiKey: true,
     },
     {
       name: 'Resend Email',
       status: 'checking',
       icon: Mail,
       message: 'Testing Resend email service...',
-      hasApiKey: false,
     },
   ]);
 
