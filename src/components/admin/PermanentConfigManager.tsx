@@ -271,8 +271,9 @@ export function PermanentConfigManager() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-3">
-                  <Button 
-                    onClick={saveCurrentConfiguration} 
+                  <Button
+                    key="save-config"
+                    onClick={saveCurrentConfiguration}
                     disabled={isLoading}
                     className="flex items-center gap-2"
                   >
@@ -284,8 +285,9 @@ export function PermanentConfigManager() {
                     Save Current Config
                   </Button>
 
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    key="validate-all"
+                    variant="outline"
                     onClick={validateConfigurations}
                     disabled={isLoading}
                     className="flex items-center gap-2"
@@ -294,8 +296,9 @@ export function PermanentConfigManager() {
                     Validate All
                   </Button>
 
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    key="export-backup"
+                    variant="outline"
                     onClick={exportConfiguration}
                     className="flex items-center gap-2"
                   >
