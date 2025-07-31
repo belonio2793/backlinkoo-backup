@@ -265,17 +265,28 @@ Email System Manager`
                   </div>
                   
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {(systemHealth.providers || []).map((provider: any, index: number) => (
-                      <div key={index} className={`p-3 rounded-lg border ${getStatusColor(provider.status)}`}>
-                        <div className="flex items-center gap-2 mb-1">
-                          {getProviderIcon(provider.name)}
-                          <span className="font-medium capitalize">{provider.name}</span>
-                        </div>
-                        <div className="text-xs opacity-70">
-                          Last tested: {provider.lastTested ? provider.lastTested.toLocaleTimeString() : 'Never'}
-                        </div>
-                      </div>
-                    ))}
+                    {(systemHealth.providers || []).map((provider: any, index: number) => {
+                      try {
+                        return (
+                          <div key={index} className={`p-3 rounded-lg border ${getStatusColor(provider?.status || 'unknown')}`}>
+                            <div className="flex items-center gap-2 mb-1">
+                              {getProviderIcon(provider?.name || 'unknown')}
+                              <span className="font-medium capitalize">{provider?.name || 'Unknown'}</span>
+                            </div>
+                            <div className="text-xs opacity-70">
+                              Last tested: {provider?.lastTested ? provider.lastTested.toLocaleTimeString() : 'Never'}
+                            </div>
+                          </div>
+                        );
+                      } catch (error) {
+                        console.error('Error rendering provider:', error);
+                        return (
+                          <div key={index} className="p-3 rounded-lg border border-red-200 bg-red-50">
+                            <span className="text-red-600 text-sm">Error loading provider</span>
+                          </div>
+                        );
+                      }
+                    })}
                   </div>
                 </div>
               ) : (
