@@ -48,9 +48,9 @@ if (typeof window !== 'undefined') {
     localStorage.setItem('content_cleanup_version', cleanupVersion);
   }
 
-  // Initialize auto-config saver
-  console.log('🚀 Initializing automatic configuration monitoring...');
-  autoConfigSaver.startMonitoring();
+  // Initialize auto-config saver (disabled to prevent fetch errors)
+  // console.log('🚀 Initializing automatic configuration monitoring...');
+  // autoConfigSaver.startMonitoring();
 
   // Load heavy initialization modules asynchronously to improve initial load time
   setTimeout(() => {
