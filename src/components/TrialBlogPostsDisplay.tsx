@@ -224,7 +224,7 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
         <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
           <Timer className="h-8 w-8 text-amber-600" />
         </div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading Trial Posts...</h3>
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading Claimed and Unclaimed Posts...</h3>
         <p className="text-gray-600 text-sm">Checking for posts that expire in 24 hours</p>
       </div>
     );
@@ -236,16 +236,16 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
         <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Sparkles className="h-8 w-8 text-blue-600" />
         </div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-2">No Trial Posts</h3>
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">No Claimed and Unclaimed Posts</h3>
         <p className="text-gray-600 mb-6 max-w-md mx-auto">
-          You don't have any trial posts yet. Trial posts are temporary content that expires in 24 hours unless claimed.
+          You don't have any claimed and unclaimed posts yet. These posts are temporary content that expires in 24 hours unless claimed.
         </p>
         <Button
           onClick={() => navigate('/?focus=generator')}
           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Generate Trial Post
+          Generate ∞ Post
         </Button>
       </div>
     );
@@ -256,9 +256,9 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Trial Posts</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Claimed and Unclaimed Posts</h2>
           <p className="text-gray-600 mt-1">
-            {trialPosts.length} trial post{trialPosts.length !== 1 ? 's' : ''} • Expires in 24 hours unless claimed
+            {trialPosts.length} claimed and unclaimed post{trialPosts.length !== 1 ? 's' : ''} • Expires in 24 hours unless claimed
           </p>
         </div>
         <Button
@@ -288,7 +288,7 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
                     isExpiringSoon ? 'bg-red-100 text-red-700 border-red-200' : 'bg-amber-100 text-amber-700 border-amber-200'
                   }`}>
                     <Timer className="mr-1 h-3 w-3" />
-                    Trial
+                    ∞
                   </Badge>
                   {timeRemaining && (
                     <div className={`text-xs font-medium ${
