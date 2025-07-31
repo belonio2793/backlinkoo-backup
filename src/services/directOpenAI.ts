@@ -236,51 +236,38 @@ Please write the complete blog post now:`;
   }
 
   /**
-   * Save blog post to storage
+   * Save blog post to storage using the blog service
    */
   private static async saveBlogPost(blogData: any): Promise<string> {
     try {
-      // Try to save to database first
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      
-      if (supabaseUrl && supabaseKey) {
-        const supabase = createClient(supabaseUrl, supabaseKey);
-        
-        const { data, error } = await supabase
-          .from('blog_posts')
-          .insert(blogData)
-          .select()
-          .single();
+      // Use the blog service for proper database handling
+      const { blogService } = await import('@/services/blogService');
 
-        if (!error) {
-          console.log('✅ Blog post saved to database');
-          return `/blog/${blogData.slug}`;
-        }
-      }
+      const blogPostData = {
+        title: blogData.title,
+        content: blogData.content,
+        keywords: blogData.keywords,
+        targetUrl: blogData.target_url,
+        anchorText: blogData.anchor_text,
+        wordCount: blogData.word_count,
+        readingTime: blogData.reading_time,
+        seoScore: blogData.seo_score,
+        metaDescription: blogData.meta_description,
+        customSlug: blogData.slug
+      };
+
+      const savedPost = await blogService.createBlogPost(
+        blogPostData,
+        null, // no user_id for trial posts
+        true  // is_trial_post = true
+      );
+
+      console.log('✅ Blog post saved to database');
+      return savedPost.published_url || `/blog/${savedPost.slug}`;
     } catch (error) {
-      console.warn('Database save failed, using localStorage fallback:', error);
+      console.error('Failed to save blog post:', error);
+      throw new Error('Failed to save blog post to database');
     }
-
-    // Fallback to localStorage
-    console.log('📁 Using localStorage fallback');
-    
-    // Save individual blog post
-    localStorage.setItem(`blog_post_${blogData.slug}`, JSON.stringify(blogData));
-    
-    // Update blog posts index
-    const existingPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-    const newPostMeta = {
-      slug: blogData.slug,
-      title: blogData.title,
-      created_at: blogData.created_at
-    };
-    
-    existingPosts.unshift(newPostMeta);
-    localStorage.setItem('all_blog_posts', JSON.stringify(existingPosts));
-
-    return `/blog/${blogData.slug}`;
   }
 
 
