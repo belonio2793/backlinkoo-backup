@@ -233,9 +233,9 @@ export function BlogListing() {
                                 {post.category}
                               </Badge>
                             )}
-                            {post.keywords?.slice(0, 2).map((keyword, index) => (
+                            {post.tags?.slice(0, 2).map((tag, index) => (
                               <Badge key={index} variant="outline" className="text-xs">
-                                {keyword}
+                                {tag}
                               </Badge>
                             ))}
                           </div>
