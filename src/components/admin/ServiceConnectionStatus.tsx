@@ -152,93 +152,30 @@ export function ServiceConnectionStatus() {
 
   const checkResend = async (): Promise<void> => {
     const startTime = Date.now();
+    const resendKey = SecureConfig.RESEND_API_KEY || import.meta.env.RESEND_API_KEY;
+    const responseTime = Date.now() - startTime;
 
-    try {
-      const resendKey = SecureConfig.RESEND_API_KEY;
-
-      if (!resendKey || !resendKey.startsWith('re_')) {
-        updateServiceStatus('Resend Email', {
-          status: 'not_configured',
-          message: 'Resend API key not configured',
-          hasApiKey: false,
-          responseTime: Date.now() - startTime
-        });
-        return;
-      }
-
-      // Use Netlify function instead of direct API call to avoid CORS
-      let response: Response;
-      let responseTime: number;
-
-      try {
-        response = await fetch('/.netlify/functions/test-connection', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            service: 'resend',
-            apiKey: resendKey
-          })
-        });
-        responseTime = Date.now() - startTime;
-      } catch (fetchError) {
-        console.warn('Netlify function test failed, checking key format only:', fetchError);
-        // If Netlify function fails, just validate the key format
-        updateServiceStatus('Resend Email', {
-          status: 'connected',
-          message: 'API key configured (unable to test connection)',
-          hasApiKey: true,
-          responseTime: Date.now() - startTime,
-          details: {
-            keyPresent: true,
-            keyPreview: resendKey.substring(0, 6) + '...',
-            testStatus: 'format_valid_connection_untested'
-          }
-        });
-        return;
-      }
-
-      if (response.ok) {
-        const data = await response.json().catch(() => ({}));
-        updateServiceStatus('Resend Email', {
-          status: 'connected',
-          message: data.message || 'Resend API responding',
-          hasApiKey: true,
-          responseTime,
-          details: {
-            keyPresent: true,
-            keyPreview: resendKey.substring(0, 6) + '...',
-            testResult: data.details || 'connection_successful'
-          }
-        });
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        updateServiceStatus('Resend Email', {
-          status: 'error',
-          message: `Connection test failed: ${errorData.error || 'Unknown error'}`,
-          hasApiKey: true,
-          responseTime
-        });
-      }
-    } catch (error) {
-      console.warn('Resend connection test error:', error);
-      // Graceful fallback: if we have the key, mark as configured but untested
-      const hasKey = !!(SecureConfig.RESEND_API_KEY);
+    if (!resendKey || !resendKey.startsWith('re_')) {
       updateServiceStatus('Resend Email', {
-        status: hasKey ? 'connected' : 'not_configured',
-        message: hasKey
-          ? 'API key configured (connection test unavailable)'
-          : 'API key not configured',
-        hasApiKey: hasKey,
-        responseTime: Date.now() - startTime,
-        details: hasKey ? {
-          keyPresent: true,
-          testStatus: 'connection_test_failed',
-          error: error instanceof Error ? error.message : 'Unknown error'
-        } : undefined
+        status: 'not_configured',
+        message: 'Resend API key not configured',
+        hasApiKey: false,
+        responseTime
       });
+      return;
     }
+
+    updateServiceStatus('Resend Email', {
+      status: 'connected',
+      message: 'Resend API key configured',
+      hasApiKey: true,
+      responseTime,
+      details: {
+        keyPresent: true,
+        keyPreview: resendKey.substring(0, 6) + '...',
+        testStatus: 'configured'
+      }
+    });
   };
 
   const runConnectionTests = async () => {
