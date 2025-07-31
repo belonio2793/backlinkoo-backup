@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { globalOpenAI } from '@/services/globalOpenAIConfig';
-import { BlogService } from '@/services/blogService';
+import { ClaimableBlogService } from '@/services/claimableBlogService';
 import {
   Zap,
   CheckCircle2,
