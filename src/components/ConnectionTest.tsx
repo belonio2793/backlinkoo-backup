@@ -47,7 +47,8 @@ export const ConnectionTest = () => {
       }
     } catch (error: any) {
       setDbTest('error');
-      setDbMessage(`Database connection failed: ${error.message}`);
+      const errorMessage = error?.message || String(error) || 'Unknown connection error';
+      setDbMessage(`Database connection failed: ${errorMessage}`);
     }
   };
 
