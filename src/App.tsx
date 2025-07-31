@@ -14,6 +14,11 @@ import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 import { autoConfigSaver } from "@/services/autoConfigSaver";
 
+// Initialize performance monitoring in development
+if (import.meta.env.DEV) {
+  import('@/utils/performance');
+}
+
 
 // Debug utilities removed for better performance in production
 // Only import debug utils in development mode
