@@ -18,6 +18,41 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
   const [targetUrl, setTargetUrl] = useState('');
   const { toast } = useToast();
 
+  // Auto-format URL to add protocol if missing
+  const formatUrl = (url: string): string => {
+    if (!url) return url;
+
+    // Trim whitespace
+    const trimmedUrl = url.trim();
+
+    // If already has protocol, return as is
+    if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://')) {
+      return trimmedUrl;
+    }
+
+    // If starts with www or looks like a domain, try https first (more common)
+    if (trimmedUrl.startsWith('www.') || /^[a-zA-Z0-9][a-zA-Z0-9-]*\.[a-zA-Z]{2,}/.test(trimmedUrl)) {
+      return `https://${trimmedUrl}`;
+    }
+
+    // Default to https for other cases
+    return `https://${trimmedUrl}`;
+  };
+
+  const handleTargetUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setTargetUrl(value);
+  };
+
+  const handleTargetUrlBlur = () => {
+    if (targetUrl) {
+      const formattedUrl = formatUrl(targetUrl);
+      if (formattedUrl !== targetUrl) {
+        setTargetUrl(formattedUrl);
+      }
+    }
+  };
+
   const generateContent = async () => {
     if (!keyword || !anchorText || !targetUrl) {
       toast({
@@ -28,9 +63,15 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
       return;
     }
 
+    // Auto-format the URL before validation
+    const formattedUrl = formatUrl(targetUrl);
+    if (formattedUrl !== targetUrl) {
+      setTargetUrl(formattedUrl);
+    }
+
     // Validate URL format
     try {
-      new URL(targetUrl);
+      new URL(formattedUrl);
     } catch {
       toast({
         title: "Invalid URL",
