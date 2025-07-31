@@ -66,7 +66,10 @@ const Login = () => {
             }
           }
 
-          navigate('/dashboard');
+          // Prevent redirect loops
+          if (window.location.pathname !== '/dashboard') {
+            navigate('/dashboard');
+          }
         } else if (session && session.user && !session.user.email_confirmed_at) {
           console.log('📬 User authenticated but email not verified, staying on login page');
         } else {
