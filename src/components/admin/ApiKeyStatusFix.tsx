@@ -115,7 +115,7 @@ export function ApiKeyStatusFix() {
     return () => clearInterval(interval);
   }, []);
 
-  const keyStatus = isCorrectKey();
+  const keyStatus = isCorrectKey;
 
   return (
     <Card className="w-full border-2 border-orange-200 bg-orange-50">
