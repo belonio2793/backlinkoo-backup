@@ -453,10 +453,10 @@ export function PermanentConfigManager() {
               <AlertDescription>
                 <strong>Backup Strategy:</strong> Your API configurations are automatically saved to multiple locations:
                 <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Supabase database for persistent cloud storage</li>
-                  <li>Browser localStorage for immediate access</li>
-                  <li>Environment variables for server-side persistence</li>
-                  <li>Downloadable JSON backups for external storage</li>
+                  <li key="supabase-backup">Supabase database for persistent cloud storage</li>
+                  <li key="localStorage-backup">Browser localStorage for immediate access</li>
+                  <li key="env-vars-backup">Environment variables for server-side persistence</li>
+                  <li key="json-backup">Downloadable JSON backups for external storage</li>
                 </ul>
               </AlertDescription>
             </Alert>
