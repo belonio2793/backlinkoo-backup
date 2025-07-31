@@ -285,8 +285,8 @@ export class BlogService {
       .from('blog_posts')
       .select('*')
       .eq('status', 'published')
-      .or(`title.ilike.%${query}%, content.ilike.%${query}%, keywords.cs.{${query}}`)
-      .order('published_at', { ascending: false })
+      .or(`title.ilike.%${query}%, content.ilike.%${query}%, tags.cs.{${query}}`)
+      .order('created_at', { ascending: false })
       .limit(limit);
 
     if (error) {
