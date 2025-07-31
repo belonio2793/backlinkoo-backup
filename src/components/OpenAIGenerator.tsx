@@ -179,20 +179,41 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
       console.log(`🎯 Selected Prompt Template ${index + 1}:`, template);
       console.log(`📝 Formatted Prompt:`, formatted);
 
-      // Set up real-time progress callback for OpenAI/ChatGPT
-      openAIContentGenerator.setProgressCallback((update) => {
-        setProgress({
-          ...update,
-          details: `${update.details} | Using Prompt ${index + 1}`
-        });
+      // Set up progress updates
+      setProgress({
+        stage: 'initializing',
+        progress: 10,
+        details: `Starting content generation with Global OpenAI | Using Prompt ${index + 1}`,
+        timestamp: new Date()
       });
 
-      // Generate content using OpenAI/ChatGPT
-      const result = await openAIContentGenerator.generateContent({
+      // Generate content using Global OpenAI Configuration
+      const result = await globalOpenAI.generateContent({
         keyword: keyword.trim(),
         anchorText: anchorText.trim(),
-        targetUrl: formattedUrl
+        url: formattedUrl,
+        wordCount: 1000,
+        contentType: 'comprehensive',
+        tone: 'professional'
       });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Content generation failed');
+      }
+
+      // Create blog post data
+      const blogPost = {
+        id: `post-${Date.now()}`,
+        title: `${keyword.trim()} - Complete Guide`,
+        slug: keyword.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        content: result.content || '',
+        wordCount: result.content?.split(' ').length || 0,
+        publishedUrl: `/blog/post-${Date.now()}`,
+        targetUrl: formattedUrl,
+        anchorText: anchorText.trim(),
+        keyword: keyword.trim(),
+        createdAt: new Date().toISOString()
+      };
 
       toast({
         title: "Blog Post Generated & Published!",
