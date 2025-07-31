@@ -26,6 +26,7 @@ import { ProductionBlogGenerator } from "@/components/ProductionBlogGenerator";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 import { OpenAIGenerator } from "@/components/OpenAIGenerator";
 import { BlogForm } from "@/components/blog/BlogForm";
+import { ComprehensiveBlogManager } from "@/components/ComprehensiveBlogManager";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
