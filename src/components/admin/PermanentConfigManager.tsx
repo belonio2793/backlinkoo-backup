@@ -70,41 +70,38 @@ export function PermanentConfigManager() {
     }
   };
 
+  const handlePerfectHealth = async () => {
+    console.log('🎉 Perfect health detected in UI!');
+    toast({
+      title: "🎉 Perfect Health Achieved!",
+      description: "100% API health detected. Auto-saving configuration...",
+    });
+
+    const result = await autoConfigSaver.saveOnUserConfirmation();
+    if (result.success) {
+      setLastSaved(new Date().toISOString());
+      loadAutoSaveStatus();
+      await Promise.all([loadHealthSummary(), loadConfigurations()]);
+    }
+  };
+
   const saveCurrentConfiguration = async () => {
     setIsLoading(true);
     try {
-      // Save current OpenAI configuration
-      const openaiConfigured = globalOpenAI.isConfigured();
-      const openaiConnected = await globalOpenAI.testConnection();
-      
-      if (openaiConfigured) {
-        const result = await permanentAPIConfig.saveConfiguration({
-          service: 'OpenAI',
-          apiKey: globalOpenAI.getAPIKey(),
-          isActive: true,
-          lastTested: new Date().toISOString(),
-          healthScore: openaiConnected ? 100 : 0,
-          metadata: {
-            version: 'gpt-3.5-turbo',
-            environment: import.meta.env.MODE || 'development',
-            backupLocation: 'permanent_storage'
-          }
-        });
+      // Use auto-saver for consistent saving
+      const result = await autoConfigSaver.forceSave();
 
-        if (result.success) {
-          toast({
-            title: "✅ Configuration Saved Permanently!",
-            description: `OpenAI configuration has been saved with health score ${openaiConnected ? 100 : 0}%`,
-          });
-          setLastSaved(new Date().toISOString());
-        } else {
-          throw new Error(result.error || 'Save failed');
-        }
+      if (result.success) {
+        toast({
+          title: "✅ Configuration Saved Permanently!",
+          description: "All API configurations have been saved with multiple backup layers",
+        });
+        setLastSaved(new Date().toISOString());
+        loadAutoSaveStatus();
+      } else {
+        throw new Error(result.error || 'Save failed');
       }
 
-      // Create backup
-      await permanentAPIConfig.createBackup();
-      
       // Reload data
       await Promise.all([loadHealthSummary(), loadConfigurations()]);
 
