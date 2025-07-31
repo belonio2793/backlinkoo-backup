@@ -54,9 +54,9 @@ interface GeneratedPost {
 }
 
 const AI_PROMPTS = [
-  "Generate a comprehensive article with minimum 700 words on <user_input_keyword> including the <user_input_anchor_text> hyperlinked to <user_input_url>.",
-  "Write a detailed blog post with minimum 700 words about <user_input_keyword> with a hyperlinked <user_input_anchor_text> linked to <user_input_url>.",
-  "Produce a comprehensive reader friendly post with minimum 700 words on <user_input_keyword> that links <user_input_anchor_text> to <user_input_url>."
+  "Generate a 1000 word blog post on {{keyword}} including the {{anchor_text}} hyperlinked to {{url}}",
+  "Write a 1000 word blog post about {{keyword}} with a hyperlinked {{anchor_text}} linked to {{url}}",
+  "Produce a 1000-word blog post on {{keyword}} that links {{anchor_text}}"
 ];
 
 export function AILive() {
