@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Footer } from '@/components/Footer';
 
 import { PricingModal } from '@/components/PricingModal';
+import { ClaimStatusIndicator } from '@/components/ClaimStatusIndicator';
 import { useToast } from '@/hooks/use-toast';
 import {
   Calendar,
