@@ -58,13 +58,6 @@ export function ServiceConnectionStatus() {
       hasApiKey: true,
     },
     {
-      name: 'OpenAI API',
-      status: 'checking',
-      icon: Brain,
-      message: 'Testing OpenAI API connection...',
-      hasApiKey: false,
-    },
-    {
       name: 'Resend Email',
       status: 'checking',
       icon: Mail,
