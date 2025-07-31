@@ -76,27 +76,10 @@ export function AnimatedBlogHeadline() {
       >
         <p className="text-lg text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
           <span className="relative">
-            Generate high-quality, AI-powered blog posts with natural backlinks in seconds
+            Generate a high-quality, powerful blog post with natural backlinks in seconds
             <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-blue-300 to-purple-300 opacity-30 transform scale-x-0 animate-[scaleX_1s_ease-out_1.8s_forwards] origin-left"></span>
           </span>
         </p>
-        
-        {/* Floating feature highlights */}
-        <div className="flex justify-center gap-6 mt-4">
-          {[
-            { text: "✨ AI-Powered", delay: "2s" },
-            { text: "⚡ Instant", delay: "2.2s" },
-            { text: "🔗 Natural Links", delay: "2.4s" }
-          ].map((feature, index) => (
-            <span
-              key={index}
-              className="text-xs font-medium text-gray-500 px-3 py-1 bg-gray-50 rounded-full border border-gray-200 transform opacity-0 animate-slide-up"
-              style={{ animationDelay: feature.delay, animationFillMode: 'forwards' }}
-            >
-              {feature.text}
-            </span>
-          ))}
-        </div>
       </div>
     </div>
   );
