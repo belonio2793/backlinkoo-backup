@@ -211,6 +211,11 @@ export function AuthFormTabs({
           const directResult = await Promise.race([directAuthPromise, directTimeoutPromise]) as any;
 
           if (directResult.error) {
+            // Handle specific Supabase error types
+            if (directResult.error.message?.includes('Authentication not available') ||
+                directResult.error.message?.includes('Please configure real Supabase credentials')) {
+              throw new Error('Authentication service is temporarily unavailable. Please try again later.');
+            }
             throw new Error(directResult.error.message);
           }
 
