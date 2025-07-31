@@ -29,6 +29,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { getErrorMessage } from '@/utils/errorFormatter';
 import { SecureConfig } from '@/lib/secure-config';
+import { safeNetlifyFetch } from '@/utils/netlifyFunctionHelper';
 
 interface ServiceStatus {
   name: string;
