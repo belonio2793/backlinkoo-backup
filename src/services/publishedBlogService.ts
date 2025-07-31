@@ -278,7 +278,9 @@ export class PublishedBlogService {
 
   private generateTags(keyword: string, targetUrl: string): string[] {
     const domain = new URL(targetUrl).hostname.replace('www.', '');
-    const keywordTags = keyword.split(' ').slice(0, 2);
+    // Strip HTML tags from keyword before splitting
+    const cleanKeyword = keyword.replace(/<[^>]*>/g, '');
+    const keywordTags = cleanKeyword.split(' ').slice(0, 2);
     return [...keywordTags, domain, 'SEO', 'digital marketing'];
   }
 
