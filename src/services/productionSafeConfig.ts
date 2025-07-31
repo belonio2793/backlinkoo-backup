@@ -108,7 +108,7 @@ export class ProductionSafeConfig {
         valid: cached,
         lastValidated: new Date().toISOString(),
         responseTime: 0,
-        fallbackAvailable: this.fallbackConfigs.has('openai'),
+        fallbackAvailable: false,
         userImpact: cached ? 'none' : 'blocked',
         autoFixed: false
       };
