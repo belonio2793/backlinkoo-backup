@@ -94,6 +94,7 @@ export function APIConfigurationManager() {
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [testResults, setTestResults] = useState<Record<string, any>>({});
+  const [syncStatus, setSyncStatus] = useState<{ [key: string]: { lastSync: string; success: boolean; attempts: number } }>({});
 
   // Load current configurations
   useEffect(() => {
