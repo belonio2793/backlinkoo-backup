@@ -25,7 +25,7 @@ import {
   X,
   Check
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { environmentVariablesService } from '@/services/environmentVariablesService';
 
 interface EnvironmentVariable {
   id?: string;
