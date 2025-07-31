@@ -233,6 +233,8 @@ export function OrganizedAdminDashboard() {
             <GlobalAPIStatus />
 
             <ErrorDebugger />
+
+            <PermanentConfigManager />
           </div>
         )}
 
