@@ -340,13 +340,31 @@ Ensure the anchor text placement follows SEO best practices and genuinely helps 
         customSlug: slug
       };
 
-      // Save to database/system as a trial post (publicly visible on /blog)
-      const blogService = new BlogService();
+      // Save to database/system as a publicly claimable post
       let savedBlogPost;
-      
+
+      // Get current user if logged in
+      const { data: { user } } = await supabase.auth.getUser();
+
       try {
-        savedBlogPost = await blogService.createBlogPost(blogPostData, undefined, true);
-        console.log('✅ Blog post saved to database:', savedBlogPost);
+        const result = await ClaimableBlogService.generateAndPublishBlog({
+          keyword: keyword.trim(),
+          anchorText: anchorText.trim(),
+          targetUrl: formattedUrl,
+          title: extractedTitle,
+          content: result.content || '',
+          excerpt: generateMetaDescription(result.content || '', keyword.trim()),
+          wordCount: blogPostData.wordCount,
+          readingTime: blogPostData.readingTime,
+          seoScore: blogPostData.seoScore
+        }, user || undefined);
+
+        if (result.success) {
+          savedBlogPost = result.blogPost;
+          console.log('✅ Blog post published successfully:', result.publishedUrl);
+        } else {
+          throw new Error(result.error || 'Failed to publish blog post');
+        }
       } catch (dbError) {
         console.warn('⚠️ Database save failed, using localStorage fallback:', dbError);
         
