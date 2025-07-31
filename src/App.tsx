@@ -13,7 +13,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 import { autoConfigSaver } from "@/services/autoConfigSaver";
-import { ConfigSaveNotification } from "@/components/ConfigSaveNotification";
+
 
 // Import test utilities for debugging
 import '@/utils/testBlogClaiming';
@@ -78,7 +78,6 @@ const App = () => (
           <GlobalNotifications />
           <DatabaseHealthLogger />
           <BetaNotification />
-          <ConfigSaveNotification />
           <BrowserRouter>
             <AuthRedirectHandler>
               <AppWrapper />
