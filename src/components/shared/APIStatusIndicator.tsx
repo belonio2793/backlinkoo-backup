@@ -20,16 +20,18 @@ export function APIStatusIndicator() {
 
   const checkAPIStatus = async () => {
     try {
-      const response = await fetch('/.netlify/functions/api-status');
+      const result = await safeNetlifyFetch('api-status');
 
-      // Check if response is HTML (likely a 404 page)
-      const contentType = response.headers.get('content-type');
-      if (contentType?.includes('text/html')) {
-        // We're probably in dev mode without Netlify functions
+      if (result.success && result.data) {
+        setStatus(result.data);
+      } else {
+        // Fallback to local check
         const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
         setStatus({
           online: hasApiKey,
-          message: hasApiKey ? 'Local development (API key configured)' : 'Local development (no API key)',
+          message: result.isLocal
+            ? (hasApiKey ? 'Local development (API key configured)' : 'Local development (no API key)')
+            : (hasApiKey ? 'Local check (API key available)' : 'Local check (no API key)'),
           providers: {
             OpenAI: {
               configured: hasApiKey,
@@ -37,18 +39,9 @@ export function APIStatusIndicator() {
             }
           }
         });
-        return;
       }
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      setStatus(data);
     } catch (error) {
       console.error('Failed to check API status:', error);
-      // Fallback to local check
       const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
       setStatus({
         online: hasApiKey,
