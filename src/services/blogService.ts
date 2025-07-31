@@ -44,15 +44,46 @@ export class BlogService {
     // Use custom slug if provided, otherwise generate from title
     const baseSlug = data.customSlug || this.generateSlug(data.title);
 
-    // Generate unique slug using database function
-    const { data: uniqueSlugData, error: slugError } = await supabase
-      .rpc('generate_unique_slug', { base_slug: baseSlug });
+    // Generate unique slug using database function or fallback
+    let uniqueSlug = baseSlug;
 
-    if (slugError) {
-      throw new Error(`Failed to generate unique slug: ${slugError.message}`);
+    try {
+      const { data: uniqueSlugData, error: slugError } = await supabase
+        .rpc('generate_unique_slug', { base_slug: baseSlug });
+
+      if (!slugError && uniqueSlugData) {
+        uniqueSlug = uniqueSlugData as string;
+      } else {
+        // Fallback: generate unique slug manually
+        let counter = 0;
+        let slugExists = true;
+
+        while (slugExists) {
+          const testSlug = counter === 0 ? baseSlug : `${baseSlug}-${counter}`;
+          const { data, error } = await supabase
+            .from('blog_posts')
+            .select('id')
+            .eq('slug', testSlug)
+            .single();
+
+          if (error && error.code === 'PGRST116') {
+            // No rows found, slug is available
+            uniqueSlug = testSlug;
+            slugExists = false;
+          } else if (!error) {
+            // Slug exists, try next number
+            counter++;
+          } else {
+            // Other error, use timestamp fallback
+            uniqueSlug = `${baseSlug}-${Date.now()}`;
+            slugExists = false;
+          }
+        }
+      }
+    } catch (error) {
+      // Fallback to timestamp-based slug
+      uniqueSlug = `${baseSlug}-${Date.now()}`;
     }
-
-    const uniqueSlug = uniqueSlugData as string;
     const publishedUrl = `${window.location.origin}/blog/${uniqueSlug}`;
 
     const blogPostData: CreateBlogPost = {
