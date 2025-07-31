@@ -19,7 +19,7 @@ class AILiveContentService {
   constructor() {
     this.apiKey = import.meta.env.OPENAI_API_KEY || '';
     if (!this.apiKey) {
-      console.warn('OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.');
+      console.warn('AI service not available - configuration pending.');
     }
   }
 
