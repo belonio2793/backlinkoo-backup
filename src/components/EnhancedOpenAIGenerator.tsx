@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { globalOpenAI } from '@/services/globalOpenAIConfig';
 import { ClaimableBlogService } from '@/services/claimableBlogService';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Zap,
   CheckCircle2,
