@@ -67,7 +67,7 @@ Please write the complete blog post now:`;
           url: request.targetUrl,
           anchorText: request.anchorText,
           wordCount: 1000,
-          contentType: 'how-to',
+          contentType: 'blog-post',
           tone: 'professional',
           apiKey: clientApiKey // Pass API key securely to server function
         })
