@@ -34,26 +34,45 @@ export function APIStatusChecker({ children, fallback }: APIStatusCheckerProps) 
         headers: { 'Content-Type': 'application/json' }
       });
 
+      // Check if response is HTML (likely a 404 page in dev mode)
+      const contentType = response.headers.get('content-type');
+      if (contentType?.includes('text/html')) {
+        // We're probably in dev mode without Netlify functions
+        const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
+        console.log('Development mode detected, using local API key check');
+        setStatus({
+          online: hasApiKey,
+          message: hasApiKey ? 'Development mode (API key configured)' : 'Development mode (no API key)',
+          providers: {
+            OpenAI: {
+              configured: hasApiKey,
+              status: hasApiKey ? 'configured' : 'not_configured'
+            }
+          }
+        });
+        return;
+      }
+
       if (response.ok) {
         const data = await response.json();
         console.log('API status response:', data);
         setStatus(data);
       } else {
-        // Fallback: assume online for demo
-        console.log('API status check failed, assuming online for demo');
-        setStatus({ 
-          online: true, 
-          message: 'Demo mode - API status check unavailable',
-          providers: { OpenAI: { status: 'demo' }, Grok: { status: 'demo' } }
-        });
+        throw new Error(`HTTP ${response.status}`);
       }
     } catch (error) {
       console.error('API status check error:', error);
-      // Fallback: assume online for demo
-      setStatus({ 
-        online: true, 
-        message: 'Demo mode - API status check failed',
-        providers: { OpenAI: { status: 'demo' }, Grok: { status: 'demo' } }
+      // Fallback: check for local API key
+      const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
+      setStatus({
+        online: hasApiKey,
+        message: hasApiKey ? 'Local check (API key available)' : 'Local check (no API key configured)',
+        providers: {
+          OpenAI: {
+            configured: hasApiKey,
+            status: hasApiKey ? 'local' : 'not_configured'
+          }
+        }
       });
     } finally {
       setLoading(false);
