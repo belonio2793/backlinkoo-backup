@@ -5,14 +5,37 @@
 
 export function setupDemoApiKey(): boolean {
   try {
-    // Check if we already have an API key configured
-    const existingKey = import.meta.env.VITE_OPENAI_API_KEY || 
-                       import.meta.env.OPENAI_API_KEY || 
-                       localStorage.getItem('demo_openai_key');
-    
-    if (existingKey && existingKey.startsWith('sk-')) {
-      console.log('✅ OpenAI API key already configured');
+    // Check if we already have a VALID API key configured
+    const envKey = import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.OPENAI_API_KEY;
+    const localKey = localStorage.getItem('demo_openai_key');
+
+    // Validate the key format - OpenAI keys should be sk- followed by 48+ characters
+    const isValidKey = (key: string) => {
+      return key &&
+             key.startsWith('sk-') &&
+             key.length >= 51 && // sk- + 48 characters minimum
+             !key.includes('proj-') && // Project keys are different format and may not work
+             !key.includes('demo-fallback'); // Not our demo key
+    };
+
+    if (envKey && isValidKey(envKey)) {
+      console.log('✅ Valid OpenAI API key found in environment');
       return true;
+    }
+
+    if (localKey && isValidKey(localKey)) {
+      console.log('✅ Valid OpenAI API key found in localStorage');
+      return true;
+    }
+
+    // Clear any invalid keys
+    if (envKey && envKey.startsWith('sk-') && !isValidKey(envKey)) {
+      console.warn('⚠️ Invalid OpenAI API key format detected in environment, switching to demo mode');
+    }
+
+    if (localKey && localKey.startsWith('sk-') && !isValidKey(localKey)) {
+      console.warn('⚠️ Invalid OpenAI API key format detected in localStorage, clearing it');
+      localStorage.removeItem('demo_openai_key');
     }
 
     // For demo purposes, we'll use a placeholder that triggers fallback content
