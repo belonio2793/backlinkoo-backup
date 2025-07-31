@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import { openAIService } from '@/services/api/openai';
 import { useToast } from '@/hooks/use-toast';
+import { OpenAISetupGuide } from './OpenAISetupGuide';
 
 interface GenerationStats {
   totalGenerated: number;
