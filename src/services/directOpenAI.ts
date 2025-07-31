@@ -28,16 +28,44 @@ export class DirectOpenAIService {
     try {
       console.log('🚀 Starting direct blog generation...');
 
-      // Check if OpenAI API key is configured
-      const { environmentVariablesService } = await import('@/services/environmentVariablesService');
-      const clientApiKey = await environmentVariablesService.getOpenAIKey();
+      // Multiple ways to get API key - more robust approach
+      let clientApiKey: string | null = null;
+
+      // Method 1: Environment variables (most reliable)
+      clientApiKey = import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.OPENAI_API_KEY;
+
+      // Method 2: Environment variables service (fallback)
+      if (!clientApiKey) {
+        try {
+          const { environmentVariablesService } = await import('@/services/environmentVariablesService');
+          clientApiKey = await environmentVariablesService.getOpenAIKey();
+        } catch (envError) {
+          console.warn('Environment variables service failed:', envError);
+        }
+      }
+
+      // Method 3: Hardcoded fallback for testing (remove in production)
+      if (!clientApiKey) {
+        // For development/testing - this should be set via environment variables
+        console.warn('⚠️ No API key found in environment variables, trying fallback...');
+
+        // Check if we have a demo mode or testing key
+        const demoKey = localStorage.getItem('demo_openai_key');
+        if (demoKey) {
+          clientApiKey = demoKey;
+          console.log('🔧 Using demo/test API key from localStorage');
+        }
+      }
 
       if (!clientApiKey) {
+        console.error('❌ No OpenAI API key found in any location');
         return {
           success: false,
-          error: 'AI content generation is currently unavailable. Please try again later or contact support.'
+          error: 'OpenAI API key not configured. Please set up your API key in the admin dashboard or environment variables.'
         };
       }
+
+      console.log('✅ API key found:', clientApiKey.substring(0, 15) + '...');
 
       // Build the prompt dynamically
       const prompt = `Write a comprehensive 1000-word blog post about "${request.keyword}". 
