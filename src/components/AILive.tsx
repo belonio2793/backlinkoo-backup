@@ -24,6 +24,7 @@ import {
   Brain
 } from 'lucide-react';
 import { OpenAIService } from '@/services/api/openai';
+import { streamingOpenAI, StreamingProgress } from '@/services/streamingOpenAI';
 
 const openAIService = new OpenAIService();
 
@@ -73,6 +74,8 @@ export function AILive() {
   const [currentContent, setCurrentContent] = useState('');
   const [hasGenerated, setHasGenerated] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [streamingProgress, setStreamingProgress] = useState<StreamingProgress | null>(null);
+  const [currentWordCount, setCurrentWordCount] = useState(0);
 
   const stepsEndRef = useRef<HTMLDivElement>(null);
   const stepCounterRef = useRef(0);
