@@ -215,9 +215,16 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
         createdAt: new Date().toISOString()
       };
 
+      setProgress({
+        stage: 'complete',
+        progress: 100,
+        details: 'Blog post generated successfully!',
+        timestamp: new Date()
+      });
+
       toast({
         title: "Blog Post Generated & Published!",
-        description: `Your ${result.wordCount}-word blog post "${result.title}" has been published successfully!`,
+        description: `Your ${blogPost.wordCount}-word blog post "${blogPost.title}" has been generated successfully!`,
       });
 
       // Reset form
@@ -228,14 +235,14 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
       // Call success callback if provided (for homepage integration)
       if (onSuccess) {
         onSuccess({
-          id: result.id,
-          title: result.title,
-          slug: result.slug,
-          word_count: result.wordCount,
-          publishedUrl: result.publishedUrl,
-          targetUrl: result.targetUrl,
-          anchorText: result.anchorText,
-          keyword: result.keyword
+          id: blogPost.id,
+          title: blogPost.title,
+          slug: blogPost.slug,
+          word_count: blogPost.wordCount,
+          publishedUrl: blogPost.publishedUrl,
+          targetUrl: blogPost.targetUrl,
+          anchorText: blogPost.anchorText,
+          keyword: blogPost.keyword
         });
       } else {
         // Default behavior for standalone usage
