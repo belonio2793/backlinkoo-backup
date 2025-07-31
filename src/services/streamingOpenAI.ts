@@ -53,27 +53,31 @@ export class StreamingOpenAIService {
   }
 
   /**
-   * Generate content with real-time streaming updates
+   * Generate content with real-time streaming updates using enhanced OpenAI service
    */
   async generateWithStreaming(options: GenerationOptions): Promise<GenerationResult> {
     const { keyword, anchorText, url, wordCount = 1000, onProgress, onContentUpdate } = options;
 
-    // Randomly select a prompt template
-    const prompts = [
-      `Generate a ${wordCount} word blog post on ${keyword} including the ${anchorText} hyperlinked to ${url}`,
-      `Write a ${wordCount} word blog post about ${keyword} with a hyperlinked ${anchorText} linked to ${url}`,
-      `Produce a ${wordCount}-word blog post on ${keyword} that links ${anchorText}`
-    ];
-    
-    const selectedPrompt = prompts[Math.floor(Math.random() * prompts.length)];
-
     try {
+      // Get available prompts
+      const availablePrompts = enhancedOpenAI.getPromptTemplates();
+      const promptIndex = Math.floor(Math.random() * availablePrompts.length);
+      const selectedPrompt = enhancedOpenAI.formatPrompt(
+        availablePrompts[promptIndex],
+        keyword,
+        anchorText || keyword,
+        url
+      );
+
       // Stage 1: Preparing
       onProgress?.({
         stage: 'preparing',
         message: 'Preparing content generation request...',
         progress: 10,
-        details: `Selected prompt template and processing: "${keyword}"`,
+        details: `Selected prompt template ${promptIndex + 1} of ${availablePrompts.length}`,
+        selectedPrompt,
+        promptIndex,
+        userInputs: { keyword, anchorText: anchorText || keyword, url },
         timestamp: new Date()
       });
 
@@ -82,9 +86,12 @@ export class StreamingOpenAIService {
       // Stage 2: Connecting
       onProgress?.({
         stage: 'connecting',
-        message: 'Connecting to OpenAI ChatGPT...',
+        message: 'Connecting to Supabase + OpenAI ChatGPT...',
         progress: 20,
-        details: 'Establishing secure connection to AI service',
+        details: 'Establishing secure connection through Supabase Edge Functions',
+        selectedPrompt,
+        promptIndex,
+        userInputs: { keyword, anchorText: anchorText || keyword, url },
         timestamp: new Date()
       });
 
@@ -95,38 +102,31 @@ export class StreamingOpenAIService {
         stage: 'generating',
         message: 'ChatGPT is composing your blog post...',
         progress: 30,
-        details: `Using prompt: "${selectedPrompt}"`,
+        details: `Using enhanced retry mechanisms with fallbacks`,
+        selectedPrompt,
+        promptIndex,
+        userInputs: { keyword, anchorText: anchorText || keyword, url },
         timestamp: new Date()
       });
 
-      // Start the actual generation
-      const response = await fetch(`${this.baseUrl}/generate-openai`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          keyword,
-          url,
-          anchorText,
-          wordCount,
-          contentType: 'comprehensive',
-          tone: 'professional'
-        })
+      // Use enhanced OpenAI service with retry mechanisms
+      const result = await enhancedOpenAI.generateContent({
+        keyword,
+        anchorText: anchorText || keyword,
+        url,
+        wordCount,
+        contentType: 'comprehensive',
+        tone: 'professional',
+        selectedPrompt,
+        promptIndex
       });
 
-      if (!response.ok) {
-        throw new Error(`Generation failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.error || 'Content generation failed');
+      if (!result.success || !result.content) {
+        throw new Error(result.error || 'Content generation failed');
       }
 
       // Simulate progressive content building for better UX
-      const content = data.content;
+      const content = result.content;
       const words = content.split(' ');
       const targetWords = Math.min(words.length, wordCount);
 
@@ -140,9 +140,14 @@ export class StreamingOpenAIService {
           stage: 'generating',
           message: `Writing content... ${wordsBuilt}/${targetWords} words`,
           progress: progressPercent,
-          details: 'AI is crafting sentences and structuring content',
+          details: `${result.provider} generating content with ${result.attempts || 1} attempts`,
           wordCount: wordsBuilt,
           currentContent: partialContent,
+          selectedPrompt,
+          promptIndex,
+          userInputs: { keyword, anchorText: anchorText || keyword, url },
+          attempts: result.attempts,
+          fallbackUsed: result.fallbackUsed,
           timestamp: new Date()
         });
 
@@ -155,8 +160,13 @@ export class StreamingOpenAIService {
         stage: 'formatting',
         message: 'Formatting and optimizing content...',
         progress: 85,
-        details: 'Adding SEO structure, headings, and anchor link integration',
+        details: `Content from ${result.provider} - Adding SEO structure and anchor links`,
         wordCount: targetWords,
+        selectedPrompt,
+        promptIndex,
+        userInputs: { keyword, anchorText: anchorText || keyword, url },
+        attempts: result.attempts,
+        fallbackUsed: result.fallbackUsed,
         timestamp: new Date()
       });
 
@@ -168,6 +178,9 @@ export class StreamingOpenAIService {
         message: 'Publishing to blog system...',
         progress: 95,
         details: 'Creating slug, storing in database, and making live',
+        selectedPrompt,
+        promptIndex,
+        userInputs: { keyword, anchorText: anchorText || keyword, url },
         timestamp: new Date()
       });
 
@@ -175,8 +188,14 @@ export class StreamingOpenAIService {
       const slug = this.generateSlug(keyword);
       const publishedUrl = `/blog/${slug}`;
 
-      // Store the post (in real implementation, this would save to database)
-      await this.publishPost(content, slug, keyword, anchorText, url);
+      // Store the post with additional metadata
+      await this.publishPost(content, slug, keyword, anchorText || keyword, url, {
+        provider: result.provider,
+        prompt: selectedPrompt,
+        promptIndex,
+        attempts: result.attempts,
+        fallbackUsed: result.fallbackUsed
+      });
 
       await this.delay(800);
 
@@ -185,8 +204,13 @@ export class StreamingOpenAIService {
         stage: 'complete',
         message: 'Blog post published successfully!',
         progress: 100,
-        details: `Live at: ${publishedUrl}`,
+        details: `Live at: ${publishedUrl} | Provider: ${result.provider}`,
         wordCount: targetWords,
+        selectedPrompt,
+        promptIndex,
+        userInputs: { keyword, anchorText: anchorText || keyword, url },
+        attempts: result.attempts,
+        fallbackUsed: result.fallbackUsed,
         timestamp: new Date()
       });
 
@@ -195,12 +219,12 @@ export class StreamingOpenAIService {
         content,
         slug,
         publishedUrl,
-        usage: data.usage
+        usage: result.usage
       };
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      
+
       onProgress?.({
         stage: 'error',
         message: 'Generation failed',
