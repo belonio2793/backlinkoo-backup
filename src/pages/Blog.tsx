@@ -671,6 +671,63 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
 
 // Blog Post List Item Component
 function BlogPostListItem({ post, navigate, formatDate }: any) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [claiming, setClaiming] = useState(false);
+
+  const handleClaimPost = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!user) {
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in to claim blog posts.",
+        variant: "destructive"
+      });
+      navigate('/auth');
+      return;
+    }
+
+    if (!post.is_trial_post || post.user_id) {
+      return;
+    }
+
+    setClaiming(true);
+
+    try {
+      const result = await BlogClaimService.claimBlogPost(post.slug, user.id);
+
+      if (result.success) {
+        toast({
+          title: "Post Claimed!",
+          description: result.message,
+        });
+
+        // Refresh the page to show updated status
+        window.location.reload();
+
+      } else {
+        toast({
+          title: "Claim Failed",
+          description: result.message,
+          variant: "destructive"
+        });
+      }
+
+    } catch (error) {
+      console.error('Failed to claim post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to claim post. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setClaiming(false);
+    }
+  };
+
+  const canClaim = post.is_trial_post && !post.user_id && (!post.expires_at || new Date() <= new Date(post.expires_at));
+  const isOwnedByUser = post.user_id === user?.id;
   return (
     <Card 
       className="group hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-200 hover:border-blue-300"
