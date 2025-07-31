@@ -212,6 +212,9 @@ export function OrganizedAdminDashboard() {
       <div className="space-y-6">
         {activeCategory === "overview" && (
           <div className="space-y-6">
+            {/* API Key Status Fix - Priority Alert */}
+            <ApiKeyStatusFix />
+
             {/* Featured: OpenAI Configuration */}
             <Alert className="border-blue-200 bg-blue-50">
               <Brain className="h-4 w-4 text-blue-600" />
