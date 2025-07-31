@@ -131,18 +131,12 @@ export class GlobalOpenAIConfig {
       clearTimeout(timeoutId);
       const isValid = response.ok;
 
-      // If test fails, mark key as invalid and enable fallback mode
-      if (!isValid) {
-        console.warn('⚠️ OpenAI API key test failed - enabling fallback mode');
-        localStorage.setItem('openai_key_invalid', 'true');
-        localStorage.setItem('openai_fallback_mode', 'true');
-
-        // Don't break production - return true if fallback is available
-        return this.hasFallbackMode();
-      } else {
-        // Clear invalid flag if test passes
+      if (isValid) {
+        console.log('✅ OpenAI API connection successful');
         localStorage.removeItem('openai_key_invalid');
-        localStorage.removeItem('openai_fallback_mode');
+      } else {
+        console.warn('⚠️ OpenAI API key test failed');
+        localStorage.setItem('openai_key_invalid', 'true');
       }
 
       return isValid;
@@ -153,7 +147,7 @@ export class GlobalOpenAIConfig {
       } else if (error.name === 'AbortError') {
         console.warn('⚠️ OpenAI connection test timed out');
       } else {
-        console.warn('��️ OpenAI connection test failed:', error.message);
+        console.warn('⚠️ OpenAI connection test failed:', error.message);
       }
 
       // Enable fallback mode on error but don't log as error
