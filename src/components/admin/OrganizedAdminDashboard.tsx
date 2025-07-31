@@ -29,6 +29,7 @@ import { PurgeStorageButton } from "@/components/PurgeStorageButton";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 import { APIManagementDashboard } from "@/components/admin/APIManagementDashboard";
 import { GlobalAPIStatus } from "@/components/GlobalAPIStatus";
+import { ErrorDebugger } from "@/components/ErrorDebugger";
 
 import {
   Users,
