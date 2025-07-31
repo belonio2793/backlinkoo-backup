@@ -15,10 +15,10 @@ export const AuthRedirectHandler = ({ children }: { children: React.ReactNode })
       try {
         const { data: { session } } = await supabase.auth.getSession();
         
-        // If user is authenticated and on login page, redirect to dashboard
+        // If user is authenticated and on login page, redirect to redirect page
         if (session?.user && location.pathname === '/login') {
-          console.log('🔐 User already authenticated, redirecting from login to dashboard');
-          navigate('/dashboard');
+          console.log('🔐 User already authenticated, redirecting from login to redirect page');
+          navigate('/redirect');
         }
       } catch (error) {
         console.error('Auth redirect check error:', error);
