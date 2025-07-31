@@ -54,37 +54,39 @@ export class BlogClaimService {
   }
 
   /**
-   * Get a user's claim statistics
+   * Get a user's claim statistics from all sources
    */
   static async getUserClaimStats(userId: string): Promise<UserClaimStats> {
+    let claimedCount = 0;
+
     try {
-      const { count, error } = await supabase
+      // Count from blog_posts table
+      const { count: blogCount } = await supabase
         .from('blog_posts')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
         .eq('is_trial_post', true);
 
-      const claimedCount = count || 0;
+      // Count from published_blog_posts table
+      const { count: publishedCount } = await supabase
+        .from('published_blog_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('is_trial_post', true);
 
-      return {
-        claimedCount,
-        maxClaims: this.MAX_CLAIMS_PER_USER,
-        canClaim: claimedCount < this.MAX_CLAIMS_PER_USER
-      };
+      claimedCount = (blogCount || 0) + (publishedCount || 0);
     } catch (error) {
       console.warn('Database error, using localStorage fallback:', error);
-    }
 
-    // Fallback
-    const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-    let claimedCount = 0;
-
-    for (const meta of allBlogPosts) {
-      const post = localStorage.getItem(`blog_post_${meta.slug}`);
-      if (post) {
-        const blogPost = JSON.parse(post);
-        if (blogPost.user_id === userId && blogPost.is_trial_post) {
-          claimedCount++;
+      // Fallback to localStorage
+      const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+      for (const meta of allBlogPosts) {
+        const postData = localStorage.getItem(`blog_post_${meta.slug}`);
+        if (postData) {
+          const post = JSON.parse(postData);
+          if (post.user_id === userId && post.is_trial_post) {
+            claimedCount++;
+          }
         }
       }
     }
