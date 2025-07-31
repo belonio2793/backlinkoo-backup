@@ -27,10 +27,8 @@ import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { SystemStatusCheck } from "@/components/SystemStatusCheck";
 
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
-import { APIManagementDashboard } from "@/components/admin/APIManagementDashboard";
-import { GlobalAPIStatus } from "@/components/GlobalAPIStatus";
+import { ConsolidatedOpenAIConfig } from "@/components/admin/ConsolidatedOpenAIConfig";
 import { ErrorDebugger } from "@/components/ErrorDebugger";
-import { PermanentConfigManager } from "@/components/admin/PermanentConfigManager";
 
 import {
   Users,
