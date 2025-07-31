@@ -13,7 +13,7 @@ export async function setDefaultOpenAIKey(): Promise<boolean> {
     console.log('🔄 Setting OpenAI API key in database...');
     
     const success = await environmentVariablesService.saveVariable(
-      'VITE_OPENAI_API_KEY',
+      'OPENAI_API_KEY',
       NEW_OPENAI_API_KEY,
       'OpenAI API key for AI content generation and blog creation - GLOBAL CONFIGURATION',
       true
