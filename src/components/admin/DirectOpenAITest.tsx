@@ -36,8 +36,8 @@ export function DirectOpenAITest() {
     const startTime = Date.now();
 
     try {
-      // Test 1: Check OpenAI status via new dedicated function
-      console.log('🔍 Testing OpenAI via dedicated status function...');
+      // Test 1: Check OpenAI status via TypeScript function
+      console.log('🔍 Testing OpenAI via TypeScript status function...');
       const statusResult = await safeNetlifyFetch('openai-status');
 
       if (statusResult.success && statusResult.data) {
