@@ -111,20 +111,47 @@ Please write the complete blog post now:`;
       let result;
       if (!response.ok) {
         let errorMessage = `OpenAI API call failed: ${response.status}`;
+        let errorData = null;
+
         try {
           // Try to get error details from response
-          const errorData = await response.json();
-          errorMessage += ` - ${errorData.error || 'Unknown error'}`;
-        } catch {
+          errorData = await response.json();
+          errorMessage += ` - ${errorData.error || errorData.message || 'Unknown error'}`;
+        } catch (jsonError) {
           // If JSON parsing fails, use status only
+          console.warn('Failed to parse error response JSON:', jsonError);
         }
+
+        console.error('❌ Netlify function error:', errorMessage, errorData);
+
+        // Try fallback generation for certain errors
+        if (response.status === 401 || response.status === 403) {
+          return {
+            success: false,
+            error: 'Invalid OpenAI API key. Please check your API key configuration.'
+          };
+        } else if (response.status === 429) {
+          return {
+            success: false,
+            error: 'OpenAI rate limit exceeded. Please try again in a moment.'
+          };
+        } else if (response.status >= 500) {
+          // Try direct fallback for server errors
+          console.log('🔄 Trying fallback generation due to server error...');
+          return await this.generateFallbackContent(request);
+        }
+
         throw new Error(errorMessage);
       } else {
         result = await response.json();
       }
 
       if (!result.success || !result.content) {
-        throw new Error(result.error || 'Failed to generate content');
+        console.error('❌ Invalid response from OpenAI function:', result);
+
+        // Try fallback if OpenAI response is invalid
+        console.log('🔄 Trying fallback generation due to invalid response...');
+        return await this.generateFallbackContent(request);
       }
 
       const content = result.content;
