@@ -122,6 +122,8 @@ export class SlugGenerationService {
     return input
       .toLowerCase()
       .trim()
+      // Strip HTML tags first
+      .replace(/<[^>]*>/g, '')
       // Replace spaces and special characters with separator
       .replace(/[^a-z0-9]+/g, separator)
       // Remove consecutive separators
@@ -136,17 +138,20 @@ export class SlugGenerationService {
    * Generate slug from title
    */
   private generateFromTitle(title: string, separator: string = '-'): string {
+    // Strip HTML tags first
+    const cleanTitle = title.replace(/<[^>]*>/g, '');
+
     // Remove common stop words for better SEO
     const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'up', 'about', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'among', 'throughout', 'despite', 'towards', 'upon', 'concerning', 'to', 'in', 'for', 'on', 'by', 'about', 'like', 'through', 'over', 'before', 'between', 'after', 'since', 'without', 'under', 'within', 'along', 'following', 'across', 'behind', 'beyond', 'plus', 'except', 'but', 'up', 'out', 'around', 'down', 'off', 'above', 'near'];
-    
-    const words = title.toLowerCase().split(/\s+/);
-    const meaningfulWords = words.filter(word => 
+
+    const words = cleanTitle.toLowerCase().split(/\s+/);
+    const meaningfulWords = words.filter(word =>
       word.length > 2 && !stopWords.includes(word)
     );
-    
+
     // Use meaningful words if available, otherwise use all words
     const wordsToUse = meaningfulWords.length > 0 ? meaningfulWords : words;
-    
+
     return this.cleanSlug(wordsToUse.join(' '), separator);
   }
 
@@ -154,12 +159,16 @@ export class SlugGenerationService {
    * Generate slug with keywords included
    */
   private generateWithKeywords(title: string, keywords: string[], separator: string = '-'): string {
-    const titleWords = title.toLowerCase().split(/\s+/);
-    const keywordWords = keywords.map(k => k.toLowerCase()).slice(0, 2); // Limit to 2 keywords
-    
+    // Strip HTML tags from title and keywords
+    const cleanTitle = title.replace(/<[^>]*>/g, '');
+    const cleanKeywords = keywords.map(k => k.replace(/<[^>]*>/g, ''));
+
+    const titleWords = cleanTitle.toLowerCase().split(/\s+/);
+    const keywordWords = cleanKeywords.map(k => k.toLowerCase()).slice(0, 2); // Limit to 2 keywords
+
     // Combine title words with keywords, removing duplicates
     const allWords = [...new Set([...titleWords.slice(0, 4), ...keywordWords])];
-    
+
     return this.cleanSlug(allWords.join(' '), separator);
   }
 

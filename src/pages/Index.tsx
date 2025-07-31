@@ -26,6 +26,7 @@ import { ProductionBlogGenerator } from "@/components/ProductionBlogGenerator";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 import { OpenAIGenerator } from "@/components/OpenAIGenerator";
 import { BlogForm } from "@/components/blog/BlogForm";
+import { ComprehensiveBlogManager } from "@/components/ComprehensiveBlogManager";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
@@ -320,14 +321,15 @@ const Index = () => {
 
 
           {/* Header */}
-          <div className="text-center space-y-4 mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-              Create Blog Posts with Backlinks
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Generate high-quality, SEO-optimized blog posts with natural backlinks.
-              Your post will be published immediately and can be claimed within 24 hours.
-            </p>
+          <div className="text-center space-y-6 mb-16">
+            <div className="relative">
+              <h2 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 leading-tight tracking-tight">
+                Create a Free Permanent Natural Backlink
+              </h2>
+              {/* Decorative elements */}
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-60"></div>
+              <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-40"></div>
+            </div>
           </div>
 
           {/* Generator */}
@@ -345,6 +347,28 @@ const Index = () => {
                 }, 2000);
               }}
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Comprehensive Blog Management Section */}
+      <section className="py-24 px-6 bg-gradient-to-br from-gray-50 to-slate-100">
+        <div className="container mx-auto">
+          <div className="text-center space-y-4 mb-12">
+            <Badge variant="outline" className="mb-4 bg-purple-50 text-purple-600 border-purple-200 font-mono text-xs px-4 py-2">
+              BLOG MANAGEMENT HUB
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Complete Blog Post Management
+            </h2>
+            <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+              Manage all your blog posts with advanced features: buy backlinks, claim posts, delete content, and regenerate with AI.
+              Everything you need for successful content management in one beautiful interface.
+            </p>
+          </div>
+
+          <div className="max-w-7xl mx-auto">
+            <ComprehensiveBlogManager />
           </div>
         </div>
       </section>

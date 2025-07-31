@@ -1,12 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { blogService } from '@/services/blogService';
 import { useAuth } from '@/hooks/useAuth';
-import { Clock, Eye, User, Calendar, ExternalLink } from 'lucide-react';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
+import { 
+  Clock, 
+  Eye, 
+  User, 
+  Calendar, 
+  ExternalLink, 
+  ArrowLeft,
+  Share2,
+  BookmarkPlus,
+  Star,
+  Crown,
+  Timer
+} from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
 type BlogPost = Tables<'blog_posts'>;
@@ -31,6 +45,16 @@ export function BlogPost() {
 
   const loadPost = async () => {
     try {
+      // First try to get from localStorage
+      const localPost = localStorage.getItem(`blog_post_${slug}`);
+      if (localPost) {
+        const parsedPost = JSON.parse(localPost);
+        setPost(parsedPost);
+        setLoading(false);
+        return;
+      }
+
+      // Fallback to service
       const blogPost = await blogService.getBlogPostBySlug(slug!);
       if (!blogPost) {
         toast({
@@ -69,7 +93,7 @@ export function BlogPost() {
       await blogService.updateBlogPost(post.id, {
         user_id: user.id,
         is_trial_post: false,
-        expires_at: null // Remove expiration
+        expires_at: null
       });
 
       toast({
@@ -77,7 +101,6 @@ export function BlogPost() {
         description: "This blog post has been claimed and added to your dashboard.",
       });
 
-      // Reload the post to show updated ownership
       await loadPost();
     } catch (error) {
       console.error('Failed to claim post:', error);
@@ -102,157 +125,341 @@ export function BlogPost() {
   const isExpiringSoon = (expiresAt: string | null) => {
     if (!expiresAt) return false;
     const hoursLeft = (new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60);
-    return hoursLeft < 2; // Less than 2 hours
+    return hoursLeft < 2;
+  };
+
+  const sharePost = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: post?.title,
+          text: post?.meta_description || post?.title,
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.log('Error sharing:', err);
+      }
+    } else {
+      // Fallback to copying URL
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link Copied!",
+        description: "Blog post URL has been copied to your clipboard.",
+      });
+    }
+  };
+
+  // Clean and format content for better SEO structure
+  const formatContent = (content: string) => {
+    if (!content) return '';
+    
+    // Remove any existing HTML entities and fix common issues
+    let cleanContent = content
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+    
+    // Ensure proper heading structure for SEO
+    cleanContent = cleanContent
+      .replace(/<h1[^>]*>/gi, '<h2 class="text-2xl font-bold text-gray-900 mt-8 mb-4 leading-tight">')
+      .replace(/<h2[^>]*>/gi, '<h3 class="text-xl font-semibold text-gray-800 mt-6 mb-3 leading-tight">')
+      .replace(/<h3[^>]*>/gi, '<h4 class="text-lg font-medium text-gray-800 mt-5 mb-2 leading-tight">')
+      .replace(/<p[^>]*>/gi, '<p class="text-gray-700 leading-relaxed mb-4 text-base">')
+      .replace(/<ul[^>]*>/gi, '<ul class="list-disc list-inside mb-4 space-y-2 text-gray-700 ml-4">')
+      .replace(/<ol[^>]*>/gi, '<ol class="list-decimal list-inside mb-4 space-y-2 text-gray-700 ml-4">')
+      .replace(/<li[^>]*>/gi, '<li class="leading-relaxed">')
+      .replace(/<a[^>]*href="([^"]*)"[^>]*>/gi, '<a href="$1" class="text-blue-600 hover:text-blue-800 underline font-medium" target="_blank" rel="noopener noreferrer">')
+      .replace(/<strong[^>]*>/gi, '<strong class="font-semibold text-gray-900">')
+      .replace(/<em[^>]*>/gi, '<em class="italic text-gray-800">')
+      .replace(/<blockquote[^>]*>/gi, '<blockquote class="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-6 bg-blue-50 py-2">');
+    
+    return cleanContent;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="container mx-auto px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+        <Header />
+        <main className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto">
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-300 rounded w-3/4 mb-4"></div>
-              <div className="h-4 bg-gray-300 rounded w-1/2 mb-8"></div>
-              <div className="space-y-4">
-                <div className="h-4 bg-gray-300 rounded"></div>
-                <div className="h-4 bg-gray-300 rounded"></div>
-                <div className="h-4 bg-gray-300 rounded w-5/6"></div>
+            <div className="animate-pulse space-y-6">
+              <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+              <div className="h-12 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              <div className="space-y-3 mt-8">
+                <div className="h-4 bg-gray-200 rounded"></div>
+                <div className="h-4 bg-gray-200 rounded"></div>
+                <div className="h-4 bg-gray-200 rounded w-5/6"></div>
               </div>
             </div>
           </div>
-        </div>
+        </main>
+        <Footer />
       </div>
     );
   }
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="container mx-auto px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+        <Header />
+        <main className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Post Not Found</h1>
-            <p className="text-gray-600 mb-8">The blog post you're looking for doesn't exist.</p>
-            <Button onClick={() => navigate('/blog')}>Back to Blog</Button>
+            <div className="bg-white rounded-2xl shadow-xl p-12">
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">Post Not Found</h1>
+              <p className="text-gray-600 mb-8 text-lg">The blog post you're looking for doesn't exist or may have been removed.</p>
+              <Button 
+                onClick={() => navigate('/blog')}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Blog
+              </Button>
+            </div>
           </div>
-        </div>
+        </main>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      <Header />
+      
+      <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-              <Calendar className="h-4 w-4" />
-              {formatDate(post.created_at)}
-              {post.reading_time && (
-                <>
-                  <span className="mx-2">•</span>
-                  <Clock className="h-4 w-4" />
-                  {post.reading_time} min read
-                </>
-              )}
-              <span className="mx-2">•</span>
-              <Eye className="h-4 w-4" />
-              {post.view_count || 0} views
-            </div>
+          {/* Breadcrumb */}
+          <nav className="mb-8">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/blog')}
+              className="text-gray-600 hover:text-gray-900 p-0 h-auto font-normal"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Blog
+            </Button>
+          </nav>
 
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">{post.title}</h1>
+          {/* Article Header */}
+          <article className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="p-8 sm:p-12">
+              {/* Meta Information */}
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-6">
+                {post.reading_time && (
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    <span>{post.reading_time} min read</span>
+                  </div>
+                )}
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-gray-600" />
-                  <span className="text-gray-600">{post.author_name}</span>
+                  <Eye className="h-4 w-4" />
+                  <span>{post.view_count || 0} views</span>
                 </div>
-                
-                {post.category && (
-                  <Badge variant="secondary">{post.category}</Badge>
-                )}
-
-                {post.is_trial_post && (
-                  <Badge variant="outline" className={isExpiringSoon(post.expires_at) ? 'border-red-500 text-red-600' : ''}>
-                    Trial Post {post.expires_at && `• Expires ${formatDate(post.expires_at)}`}
-                  </Badge>
-                )}
               </div>
 
-              {post.target_url && (
-                <Button variant="outline" size="sm" asChild>
-                  <a href={post.target_url} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Visit Link
-                  </a>
-                </Button>
+              {/* Title - SEO H1 */}
+              <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                {post.title?.replace(/<\/?h1[^>]*>/g, '') || 'Untitled Post'}
+              </h1>
+
+              {/* Meta Description */}
+              {post.meta_description && (
+                <p className="text-xl text-gray-600 leading-relaxed mb-8 font-light">
+                  {post.meta_description}
+                </p>
               )}
-            </div>
-          </div>
 
-          {/* Claiming Section */}
-          {post.is_trial_post && !post.user_id && user && (
-            <Card className="mb-8 border-blue-200 bg-blue-50">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-blue-900">Claim This Post</h3>
-                    <p className="text-sm text-blue-700">
-                      This is an unclaimed trial post. Claim it to make it permanently yours!
-                    </p>
-                  </div>
-                  <Button 
-                    onClick={claimPost} 
-                    disabled={claiming}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    {claiming ? 'Claiming...' : 'Claim Post'}
-                  </Button>
+              {/* Status Badges and Actions */}
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-8 border-b border-gray-200">
+                <div className="flex flex-wrap items-center gap-3">
+                  {post.category && (
+                    <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0">
+                      {post.category}
+                    </Badge>
+                  )}
+
+                  {post.is_trial_post && (
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={`${isExpiringSoon(post.expires_at) ? 'border-red-500 text-red-600 bg-red-50' : 'border-amber-500 text-amber-600 bg-amber-50'}`}
+                      >
+                        {isExpiringSoon(post.expires_at) ? (
+                          <>
+                            <Timer className="mr-1 h-3 w-3" />
+                            Expiring Soon
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="mr-1 h-3 w-3" />
+                            Unclaimed Post
+                          </>
+                        )}
+                        {post.expires_at && ` • Expires ${formatDate(post.expires_at)}`}
+                      </Badge>
+                      {!post.user_id && user && (
+                        <Button
+                          size="sm"
+                          onClick={claimPost}
+                          disabled={claiming}
+                          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                        >
+                          {claiming ? (
+                            <>
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                              Claiming...
+                            </>
+                          ) : (
+                            <>
+                              <Crown className="mr-1 h-3 w-3" />
+                              Claim
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
+                  {post.user_id === user?.id && (
+                    <Badge className="bg-green-50 text-green-700 border-green-200">
+                      <Crown className="mr-1 h-3 w-3" />
+                      Your Post
+                    </Badge>
+                  )}
                 </div>
-              </CardHeader>
-            </Card>
-          )}
 
-          {/* Content */}
-          <Card>
-            <CardContent className="pt-6">
-              <div 
-                className="prose prose-lg max-w-none"
-                dangerouslySetInnerHTML={{ __html: post.content }}
-              />
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={sharePost}>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share
+                  </Button>
+                  
+                  {post.target_url && (
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={post.target_url} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Visit Link
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              </div>
 
-              {/* Tags */}
+              {/* Claiming Section */}
+              {post.is_trial_post && !post.user_id && user && (
+                <Card className="mb-8 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 bg-blue-100 rounded-lg">
+                          <Star className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-blue-900 text-lg mb-1">Claim This Post</h3>
+                          <p className="text-blue-700 mb-2">
+                            This is an unclaimed trial post. Claim it to make it permanently yours!
+                          </p>
+                          <p className="text-sm text-blue-600">
+                            • Remove expiration date • Add to your dashboard • Full ownership rights
+                          </p>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={claimPost} 
+                        disabled={claiming}
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3"
+                      >
+                        {claiming ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Claiming...
+                          </>
+                        ) : (
+                          <>
+                            <Crown className="mr-2 h-4 w-4" />
+                            Claim Post
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Article Content - SEO Optimized */}
+              <div className="prose prose-lg prose-gray max-w-none">
+                <div 
+                  className="blog-content"
+                  dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
+                />
+              </div>
+
+              {/* Tags Section */}
               {post.tags && post.tags.length > 0 && (
-                <div className="mt-8 pt-6 border-t">
-                  <h4 className="font-semibold mb-3">Tags</h4>
+                <div className="mt-12 pt-8 border-t border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-4 text-lg">Related Topics</h4>
                   <div className="flex flex-wrap gap-2">
                     {post.tags.map((tag, index) => (
-                      <Badge key={index} variant="outline">
-                        {tag}
+                      <Badge key={index} variant="outline" className="hover:bg-gray-100 transition-colors cursor-pointer">
+                        #{tag}
                       </Badge>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Additional Info */}
-              {post.word_count && (
-                <div className="mt-6 text-sm text-gray-600">
-                  <strong>Word Count:</strong> {post.word_count} words
+              {/* Article Footer */}
+              <div className="mt-12 pt-8 border-t border-gray-200">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="text-sm text-gray-600">
+                    {post.word_count && (
+                      <span><strong>Word Count:</strong> {post.word_count} words</span>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <Button variant="outline" size="sm" onClick={sharePost}>
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Share Article
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <BookmarkPlus className="h-4 w-4 mr-2" />
+                      Bookmark
+                    </Button>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </div>
+            </div>
+          </article>
 
-          {/* Back to Blog */}
-          <div className="mt-8 text-center">
-            <Button variant="outline" onClick={() => navigate('/blog')}>
-              ← Back to All Posts
-            </Button>
+          {/* Related Posts / Call to Action */}
+          <div className="mt-12 text-center">
+            <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold mb-4">Discover More Quality Content</h3>
+                <p className="text-blue-100 mb-6 text-lg">
+                  Explore our collection of expert-written blog posts with high-quality backlinks
+                </p>
+                <div className="flex justify-center">
+                  <Button
+                    onClick={() => navigate('/blog')}
+                    variant="secondary"
+                    className="bg-white text-blue-600 hover:bg-gray-100"
+                  >
+                    Browse All Posts
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }

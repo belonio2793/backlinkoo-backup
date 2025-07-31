@@ -336,8 +336,10 @@ Return only the title text, no quotes or additional formatting.
   private generateSlug(keyword: string, title: string): string {
     // Use title for more descriptive slug, fallback to keyword
     const baseText = title || keyword;
-    
+
     return baseText
+      // Strip HTML tags first
+      .replace(/<[^>]*>/g, '')
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
