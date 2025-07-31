@@ -37,7 +37,20 @@ export function PermanentConfigManager() {
   useEffect(() => {
     loadHealthSummary();
     loadConfigurations();
+    loadAutoSaveStatus();
+
+    // Set up auto-save monitoring
+    autoConfigSaver.onHealthChange((score) => {
+      if (score === 100) {
+        handlePerfectHealth();
+      }
+    });
   }, []);
+
+  const loadAutoSaveStatus = () => {
+    const status = autoConfigSaver.getLastSaveStatus();
+    setAutoSaveStatus(status);
+  };
 
   const loadHealthSummary = async () => {
     try {
