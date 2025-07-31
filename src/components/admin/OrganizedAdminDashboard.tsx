@@ -227,6 +227,8 @@ export function OrganizedAdminDashboard() {
                 <SystemStatusCheck />
               </CardContent>
             </Card>
+
+            <GlobalAPIStatus />
           </div>
         )}
 
