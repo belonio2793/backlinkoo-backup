@@ -73,6 +73,29 @@ export function GlobalBlogGenerator({
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
 
+  // Define the exact prompt templates as requested
+  const basePromptTemplates = [
+    "Generate a 1000 word blog post on {{keyword}} including the {{anchor_text}} hyperlinked to {{url}}",
+    "Write a 1000 word blog post about {{keyword}} with a hyperlinked {{anchor_text}} linked to {{url}}",
+    "Produce a 1000-word blog post on {{keyword}} that links {{anchor_text}}"
+  ];
+
+  // Function to preview prompt with current inputs
+  const getPromptPreview = () => {
+    if (!primaryKeyword.trim() || !targetUrl.trim()) return '';
+
+    const randomIndex = Math.floor(Math.random() * basePromptTemplates.length);
+    const template = basePromptTemplates[randomIndex];
+    return {
+      template,
+      index: randomIndex,
+      formatted: template
+        .replace('{{keyword}}', primaryKeyword.trim())
+        .replace('{{anchor_text}}', anchorText.trim() || primaryKeyword.trim())
+        .replace('{{url}}', targetUrl.trim())
+    };
+  };
+
   useEffect(() => {
     loadGlobalStats();
     updateRemainingRequests();
