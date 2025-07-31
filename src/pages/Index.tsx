@@ -38,13 +38,13 @@ import { TrialConversionBanner } from "@/components/TrialConversionBanner";
 import { QuickTrialUpgrade } from "@/components/QuickTrialUpgrade";
 import { TrialConversionService } from "@/services/trialConversionService";
 import { GuestSessionReminder } from "@/components/GuestSessionReminder";
-import { useGuestTracking } from "@/hooks/useGuestTracking";
+
 
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { trackInteraction, trackPageView, shouldShowConversionPrompt } = useGuestTracking();
+
   const [pricingModalOpen, setPricingModalOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
