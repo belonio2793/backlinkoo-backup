@@ -209,11 +209,181 @@ Please write the complete blog post now:`;
 
     } catch (error) {
       console.error('❌ Blog generation failed:', error);
+
+      // Check if it's a timeout error
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('�� Request timed out, trying fallback generation...');
+        return await this.generateFallbackContent(request);
+      }
+
+      // Check if it's a network error
+      if (error instanceof Error && (error.message.includes('fetch') || error.message.includes('network'))) {
+        console.log('🔄 Network error, trying fallback generation...');
+        return await this.generateFallbackContent(request);
+      }
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred during blog generation'
       };
     }
+  }
+
+  /**
+   * Generate fallback content when OpenAI is unavailable
+   */
+  private static async generateFallbackContent(request: BlogRequest): Promise<BlogResponse> {
+    try {
+      console.log('🔄 Generating fallback content...');
+
+      const title = this.generateFallbackTitle(request.keyword);
+      const content = this.generateFallbackBlogContent(request);
+      const slug = this.generateSlug(title);
+      const excerpt = this.extractExcerpt(content);
+
+      console.log('✅ Fallback content generated successfully');
+
+      // Save the blog post
+      const blogUrl = await this.saveBlogPost({
+        id: crypto.randomUUID(),
+        title,
+        slug,
+        content,
+        excerpt,
+        meta_description: excerpt,
+        keywords: [request.keyword],
+        tags: request.keyword.split(' '),
+        category: 'AI Generated',
+        target_url: request.targetUrl,
+        anchor_text: request.anchorText,
+        status: 'published',
+        is_trial_post: true,
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        view_count: 0,
+        seo_score: 75, // Lower score for fallback content
+        reading_time: this.calculateReadingTime(content),
+        word_count: content.split(/\s+/).length,
+        author_name: 'Backlink ∞ Generator',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        published_at: new Date().toISOString(),
+        published_url: `/blog/${slug}`,
+        user_id: null
+      });
+
+      return {
+        success: true,
+        title,
+        content,
+        slug,
+        excerpt,
+        blogUrl,
+        metadata: { fallback: true }
+      };
+    } catch (error) {
+      console.error('❌ Fallback generation failed:', error);
+      return {
+        success: false,
+        error: 'Failed to generate content. Please try again later.'
+      };
+    }
+  }
+
+  /**
+   * Generate fallback title from keyword
+   */
+  private static generateFallbackTitle(keyword: string): string {
+    const templates = [
+      `The Ultimate Guide to ${keyword}`,
+      `Everything You Need to Know About ${keyword}`,
+      `A Complete Introduction to ${keyword}`,
+      `Mastering ${keyword}: A Comprehensive Guide`,
+      `${keyword}: Best Practices and Tips`
+    ];
+
+    const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
+    return randomTemplate.replace(keyword, keyword.toLowerCase());
+  }
+
+  /**
+   * Generate fallback blog content
+   */
+  private static generateFallbackBlogContent(request: BlogRequest): string {
+    const { keyword, anchorText, targetUrl } = request;
+
+    const content = `
+<h1>The Ultimate Guide to ${keyword}</h1>
+
+<p>Welcome to our comprehensive guide on ${keyword}. In today's digital landscape, understanding ${keyword} is crucial for success. This article will provide you with everything you need to know to get started and excel in this area.</p>
+
+<h2>What is ${keyword}?</h2>
+
+<p>${keyword} has become an essential component of modern business and digital strategies. Whether you're a beginner or looking to enhance your existing knowledge, this guide will help you understand the fundamentals and advanced concepts.</p>
+
+<p>To get the most out of ${keyword}, it's important to work with experienced professionals. For expert guidance and services, we recommend checking out <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchorText}</a> for comprehensive solutions.</p>
+
+<h2>Key Benefits of ${keyword}</h2>
+
+<p>Understanding and implementing ${keyword} can provide numerous advantages:</p>
+
+<ul>
+<li>Improved efficiency and productivity</li>
+<li>Better results and outcomes</li>
+<li>Enhanced competitive advantage</li>
+<li>Cost-effective solutions</li>
+<li>Scalable growth opportunities</li>
+</ul>
+
+<h2>Getting Started with ${keyword}</h2>
+
+<p>If you're new to ${keyword}, here are the essential steps to begin your journey:</p>
+
+<ol>
+<li><strong>Research and Planning:</strong> Start by understanding your specific needs and goals related to ${keyword}.</li>
+<li><strong>Choose the Right Approach:</strong> Select the methodology that best fits your situation and resources.</li>
+<li><strong>Implementation:</strong> Begin with small, manageable steps and gradually expand your efforts.</li>
+<li><strong>Monitor and Optimize:</strong> Continuously track your progress and make improvements as needed.</li>
+</ol>
+
+<h2>Best Practices for ${keyword}</h2>
+
+<p>To maximize your success with ${keyword}, consider these proven strategies:</p>
+
+<h3>Strategy 1: Focus on Quality</h3>
+<p>Quality should always be your top priority when working with ${keyword}. This ensures better long-term results and sustainable growth.</p>
+
+<h3>Strategy 2: Stay Updated</h3>
+<p>The field of ${keyword} is constantly evolving. Stay informed about the latest trends, tools, and techniques to maintain your competitive edge.</p>
+
+<h3>Strategy 3: Measure Performance</h3>
+<p>Regular monitoring and analysis are crucial for understanding what works and what doesn't in your ${keyword} efforts.</p>
+
+<h2>Common Mistakes to Avoid</h2>
+
+<p>Learning from common pitfalls can save you time and resources:</p>
+
+<ul>
+<li>Rushing the implementation process</li>
+<li>Neglecting proper planning and strategy</li>
+<li>Ignoring important metrics and KPIs</li>
+<li>Failing to adapt to changes in the industry</li>
+<li>Not seeking professional guidance when needed</li>
+</ul>
+
+<h2>Tools and Resources</h2>
+
+<p>Having the right tools can significantly improve your ${keyword} results. Consider investing in quality software, training, and expert consultation to enhance your capabilities.</p>
+
+<h2>Conclusion</h2>
+
+<p>Mastering ${keyword} requires dedication, continuous learning, and the right strategies. By following the guidelines outlined in this comprehensive guide, you'll be well-equipped to achieve your goals and drive meaningful results.</p>
+
+<p>Remember that success with ${keyword} often comes from consistent effort and staying informed about industry developments. Start implementing these strategies today, and you'll see improvements in your outcomes over time.</p>
+
+<p>For additional resources and professional support, don't hesitate to explore specialized services that can accelerate your progress and help you achieve better results faster.</p>
+    `.trim();
+
+    return content;
   }
 
   /**
