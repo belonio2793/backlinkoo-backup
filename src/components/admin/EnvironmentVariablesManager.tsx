@@ -260,7 +260,13 @@ export function EnvironmentVariablesManager() {
         .eq('id', id);
 
       if (error) {
-        console.error('Database error:', error);
+        const errorMessage = error?.message || error?.details || String(error) || 'Unknown database error';
+        console.error('Database error:', errorMessage);
+        toast({
+          title: 'Database Error',
+          description: `Failed to delete from database: ${errorMessage}. Removed from local storage instead.`,
+          variant: 'destructive'
+        });
         // Fallback to localStorage
         const updated = envVars.filter(v => v.id !== id);
         setEnvVars(updated);
