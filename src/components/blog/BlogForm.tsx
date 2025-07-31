@@ -66,19 +66,10 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
       }
 
     } catch (error) {
-      // Handle different types of errors gracefully
-      let errorMessage = "Failed to generate blog post. Please try again.";
-
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        errorMessage = "Unable to connect to AI service. Please check your connection and try again.";
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-
-      console.warn('Blog generation failed:', error);
+      console.error('Blog generation failed:', error);
       toast({
         title: "Generation Failed",
-        description: errorMessage,
+        description: error instanceof Error ? error.message : "Failed to generate blog post. Please try again.",
         variant: "destructive"
       });
     } finally {

@@ -51,15 +51,18 @@ export class GlobalOpenAIConfig {
    */
   private static getAdminConfiguredKey(): string | null {
     try {
-      // Check admin dashboard saved configurations
-      const adminConfigs = JSON.parse(localStorage.getItem('admin_api_configs') || '{}');
-      const openaiConfig = adminConfigs['VITE_OPENAI_API_KEY'];
+      const adminConfig = localStorage.getItem('admin_api_configurations');
+      if (!adminConfig) return null;
 
-      if (openaiConfig && openaiConfig.startsWith('sk-') && openaiConfig.length > 20) {
-        return openaiConfig;
-      }
+      const configs = JSON.parse(adminConfig);
+      const openaiConfig = configs.find((config: any) => 
+        config.service === 'OpenAI' && 
+        config.isActive && 
+        config.apiKey && 
+        config.apiKey.startsWith('sk-')
+      );
 
-      return null;
+      return openaiConfig ? openaiConfig.apiKey : null;
     } catch (error) {
       console.warn('Failed to get admin configured key:', error);
       return null;
@@ -71,13 +74,6 @@ export class GlobalOpenAIConfig {
    */
   private static getPermanentKey(): string | null {
     try {
-      const envBackup = JSON.parse(localStorage.getItem('environment_backup') || '{}');
-      const openaiBackup = envBackup['VITE_OPENAI_API_KEY'];
-
-      if (openaiBackup && openaiBackup.value && openaiBackup.value.startsWith('sk-')) {
-        return openaiBackup.value;
-      }
-
       // Check permanent configurations
       const permanentConfigs = JSON.parse(localStorage.getItem('permanent_api_configs') || '[]');
       const openaiConfig = permanentConfigs.find((config: any) =>
@@ -149,14 +145,14 @@ export class GlobalOpenAIConfig {
       } else {
         console.warn('⚠️ OpenAI connection test failed:', error.message);
       }
-
+      
       localStorage.setItem('openai_key_invalid', 'true');
       return false;
     }
   }
 
   /**
-   * Generate content using OpenAI API with production-safe fallbacks
+   * Generate content using OpenAI API
    */
   static async generateContent(params: {
     keyword: string;
@@ -169,8 +165,8 @@ export class GlobalOpenAIConfig {
   }): Promise<{
     success: boolean;
     content?: string;
-    error?: string;
     usage?: { tokens: number; cost: number };
+    error?: string;
   }> {
     try {
       const apiKey = this.getAPIKey();
@@ -188,20 +184,12 @@ CONTENT REQUIREMENTS:
 
       if (params.anchorText && params.url) {
         userPrompt += `
-- Natural integration of anchor text "${params.anchorText}" linking to ${params.url}
-
-BACKLINK INTEGRATION:
-- Place the backlink "${params.anchorText}" naturally within the content
-- Make the link contextually relevant to the surrounding text
-- Ensure it adds value to the reader
-
-OUTPUT FORMAT:
-Use <a href="${params.url}" target="_blank" rel="noopener noreferrer">${params.anchorText}</a> for the backlink.`;
+- Naturally incorporate "${params.anchorText}" as a hyperlink to ${params.url} within the content`;
       }
 
       userPrompt += `
 
-Focus on creating valuable, informative content with proper HTML structure using <h1>, <h2>, <h3>, <p>, <ul>, <li>, and <strong> tags.`;
+Please provide only the HTML content without any markdown formatting or code blocks.`;
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -215,19 +203,15 @@ Focus on creating valuable, informative content with proper HTML structure using
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
           ],
-          max_tokens: Math.min(4000, Math.floor((params.wordCount || 1000) * 2.5)),
-          temperature: 0.7,
-          top_p: 1,
-          frequency_penalty: 0,
-          presence_penalty: 0
+          max_tokens: 3000,
+          temperature: 0.7
         })
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-
-        // If API key is invalid, enable fallback mode
-        if (response.status === 401) {
+        
+        if (response.status === 401 || response.status === 403) {
           throw new Error('OpenAI API key is invalid');
         }
 
@@ -260,105 +244,6 @@ Focus on creating valuable, informative content with proper HTML structure using
   }
 
   /**
-   * Generate high-quality fallback content when OpenAI API is unavailable
-   */
-  private static generateFallbackContent(params: {
-    keyword: string;
-    anchorText?: string;
-    url?: string;
-    wordCount?: number;
-    contentType?: string;
-    tone?: string;
-  }): Promise<{
-    success: boolean;
-    content: string;
-    usage: { tokens: number; cost: number };
-  }> {
-    return new Promise((resolve) => {
-      // Simulate API delay for consistent UX
-      setTimeout(() => {
-        const wordCount = params.wordCount || 1000;
-        const content = `
-<h1>${params.keyword}: A Comprehensive Guide</h1>
-
-<p>Welcome to our in-depth exploration of <strong>${params.keyword}</strong>. While our AI content generation service is temporarily optimizing for better performance, we've prepared this comprehensive guide to ensure you get the information you need.</p>
-
-<h2>Understanding ${params.keyword}</h2>
-<p>In today's digital landscape, ${params.keyword} plays a crucial role in achieving success. Whether you're a beginner or an experienced professional, understanding the fundamentals is essential for making informed decisions.</p>
-
-<h3>Key Benefits and Applications</h3>
-<ul>
-  <li><strong>Enhanced Performance:</strong> Implementing ${params.keyword} strategies can significantly improve your results</li>
-  <li><strong>Industry Standards:</strong> Stay aligned with current best practices and industry standards</li>
-  <li><strong>Scalable Solutions:</strong> Build systems that grow with your needs</li>
-  <li><strong>Cost-Effective Approach:</strong> Maximize ROI through strategic implementation</li>
-</ul>
-
-<h2>Best Practices for ${params.keyword}</h2>
-<p>Success with ${params.keyword} requires a strategic approach. Here are the essential practices that industry leaders recommend:</p>
-
-<h3>Planning and Strategy</h3>
-<p>Before diving into implementation, it's crucial to develop a comprehensive plan. Consider your objectives, available resources, and timeline for achieving your goals.</p>
-
-<h3>Implementation Guidelines</h3>
-<p>When implementing ${params.keyword} solutions, focus on quality over quantity. Start with a solid foundation and gradually build upon your initial success.</p>
-
-${params.anchorText && params.url ? `
-<h2>Expert Resources and Tools</h2>
-<p>To further enhance your understanding and implementation of ${params.keyword}, we recommend exploring additional resources. For comprehensive guidance and expert insights, check out <a href="${params.url}" target="_blank" rel="noopener noreferrer">${params.anchorText}</a>, which provides valuable information for both beginners and advanced practitioners.</p>
-` : ''}
-
-<h2>Common Challenges and Solutions</h2>
-<p>Every journey with ${params.keyword} comes with its unique challenges. Understanding these common obstacles and their solutions can help you navigate more effectively:</p>
-
-<ul>
-  <li><strong>Technical Complexity:</strong> Break down complex concepts into manageable components</li>
-  <li><strong>Resource Constraints:</strong> Prioritize high-impact activities that deliver maximum value</li>
-  <li><strong>Changing Requirements:</strong> Build flexible systems that can adapt to evolving needs</li>
-</ul>
-
-<h2>Future Trends and Considerations</h2>
-<p>The landscape of ${params.keyword} continues to evolve rapidly. Staying informed about emerging trends and technologies will help you maintain a competitive advantage and make strategic decisions for the future.</p>
-
-<h3>Innovation and Technology</h3>
-<p>Technological advancements are reshaping how we approach ${params.keyword}. Embracing innovation while maintaining proven practices is key to long-term success.</p>
-
-<h2>Getting Started: Your Next Steps</h2>
-<p>Ready to begin your journey with ${params.keyword}? Here's a practical roadmap to help you get started:</p>
-
-<ol>
-  <li><strong>Assessment:</strong> Evaluate your current situation and identify areas for improvement</li>
-  <li><strong>Goal Setting:</strong> Define clear, measurable objectives for your ${params.keyword} initiatives</li>
-  <li><strong>Resource Planning:</strong> Identify the tools, skills, and resources you'll need</li>
-  <li><strong>Implementation:</strong> Start with small, manageable projects and scale up gradually</li>
-  <li><strong>Monitoring:</strong> Track progress and adjust your approach based on results</li>
-</ol>
-
-<h2>Conclusion</h2>
-<p>Mastering ${params.keyword} is an ongoing journey that requires dedication, continuous learning, and strategic thinking. By following the guidelines and best practices outlined in this comprehensive guide, you'll be well-equipped to achieve your objectives and drive meaningful results.</p>
-
-<p>Remember, success with ${params.keyword} is not just about having the right tools or techniques—it's about understanding how to apply them effectively in your specific context. Stay curious, keep learning, and don't hesitate to seek expert guidance when needed.</p>
-
-<p><em>Note: Our AI content generation service is currently optimizing for enhanced performance. This high-quality content ensures you receive valuable information while we enhance our systems for even better future experiences.</em></p>
-        `.trim();
-
-        resolve({
-          success: true,
-          content,
-          usage: { tokens: Math.floor(wordCount * 0.75), cost: 0 }
-        });
-      }, 1500); // Simulate realistic response time
-    });
-  }
-
-  /**
-   * Check if fallback mode is available
-   */
-  private static hasFallbackMode(): boolean {
-    return true; // Fallback content generation is always available
-  }
-
-  /**
    * Get masked API key for display purposes
    */
   static getMaskedKey(): string {
@@ -371,75 +256,7 @@ ${params.anchorText && params.url ? `
   }
 
   /**
-   * Permanently save the current configuration
-   */
-  static async savePermanently(): Promise<{ success: boolean; error?: string }> {
-    try {
-      const apiKey = this.getAPIKey();
-      const isConnected = await this.testConnection();
-
-      // Save to permanent storage
-      const now = new Date().toISOString();
-      const config = {
-        service: 'OpenAI',
-        apiKey,
-        isActive: true,
-        lastTested: now,
-        healthScore: isConnected ? 100 : 0,
-        metadata: {
-          version: 'gpt-3.5-turbo',
-          environment: import.meta.env.MODE || 'development',
-          savedAt: now
-        }
-      };
-
-      // Save to multiple locations for redundancy
-      const permanentConfigs = JSON.parse(localStorage.getItem('permanent_api_configs') || '[]');
-      const updatedConfigs = permanentConfigs.filter((c: any) => c.service !== 'OpenAI');
-      updatedConfigs.push(config);
-      localStorage.setItem('permanent_api_configs', JSON.stringify(updatedConfigs));
-
-      // Save to environment backup
-      const envBackup = JSON.parse(localStorage.getItem('environment_backup') || '{}');
-      envBackup['VITE_OPENAI_API_KEY'] = {
-        value: apiKey,
-        service: 'OpenAI',
-        savedAt: now,
-        healthScore: config.healthScore
-      };
-      localStorage.setItem('environment_backup', JSON.stringify(envBackup));
-
-      // Also sync to admin configuration for immediate access
-      this.syncToAdminConfig(apiKey);
-
-      console.log('✅ OpenAI configuration saved permanently and synced to admin');
-      return { success: true };
-
-    } catch (error) {
-      console.error('❌ Failed to save OpenAI configuration:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
-    }
-  }
-
-  /**
-   * Sync API key to admin configuration
-   */
-  private static syncToAdminConfig(apiKey: string): void {
-    try {
-      const adminConfigs = JSON.parse(localStorage.getItem('admin_api_configs') || '{}');
-      adminConfigs['VITE_OPENAI_API_KEY'] = apiKey;
-      localStorage.setItem('admin_api_configs', JSON.stringify(adminConfigs));
-      console.log('✅ Synced to admin configuration');
-    } catch (error) {
-      console.warn('Failed to sync to admin config:', error);
-    }
-  }
-
-  /**
-   * Get configuration health status
+   * Get health status without testing connection to avoid fetch errors
    */
   static async getHealthStatus(): Promise<{
     configured: boolean;
@@ -449,19 +266,8 @@ ${params.anchorText && params.url ? `
   }> {
     try {
       const configured = this.isConfigured();
-      let connected = false;
-
-      // Skip connection test to avoid fetch errors on startup
-      // Only test if explicitly needed and in a controlled manner
-      if (configured) {
-        try {
-          connected = await this.testConnection();
-        } catch (error) {
-          // Silently handle connection test failures
-          connected = false;
-        }
-      }
-
+      // Return status without actually testing connection to avoid fetch errors
+      const connected = configured && localStorage.getItem('openai_key_invalid') !== 'true';
       const healthScore = configured ? (connected ? 100 : 50) : 0;
 
       return {
