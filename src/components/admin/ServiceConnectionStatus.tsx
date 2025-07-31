@@ -141,7 +141,7 @@ export function ServiceConnectionStatus() {
       const responseTime = Date.now() - startTime;
 
       if (error) {
-        const errorMessage = error?.message || error?.details || error?.hint || String(error) || 'Unknown database error';
+        const errorMessage = getErrorMessage(error);
         updateServiceStatus('Supabase Database', {
           status: 'error',
           message: `Database error: ${errorMessage}`,
