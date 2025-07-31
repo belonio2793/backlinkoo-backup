@@ -172,7 +172,15 @@ export function GlobalBlogGenerator({
       `Produce a 1000-word blog post on ${request.primaryKeyword} that links ${request.anchorText || request.primaryKeyword}`
     ];
 
-    const prompt = `${promptTemplates[Math.floor(Math.random() * promptTemplates.length)]}
+    // Select and track prompt
+    const selectedIndex = Math.floor(Math.random() * promptTemplates.length);
+    const selectedTemplate = promptTemplates[selectedIndex];
+    setPromptIndex(selectedIndex);
+    setSelectedPrompt(selectedTemplate);
+
+    console.log(`🎯 Selected Prompt Template ${selectedIndex + 1}:`, selectedTemplate);
+
+    const prompt = `${selectedTemplate}
 
 IMPORTANT REQUIREMENTS:
 - Write exactly 1000 words or more of high-quality, original content
