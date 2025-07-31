@@ -251,16 +251,19 @@ export class PublishedBlogService {
 
   private extractKeywordsFromContent(content: string): string[] {
     // Simple keyword extraction - can be enhanced
-    const words = content.toLowerCase()
+    const words = content
+      // Strip HTML tags first
+      .replace(/<[^>]*>/g, ' ')
+      .toLowerCase()
       .replace(/[^\w\s]/g, '')
       .split(/\s+/)
       .filter(word => word.length > 3);
-    
+
     const frequency: { [key: string]: number } = {};
     words.forEach(word => {
       frequency[word] = (frequency[word] || 0) + 1;
     });
-    
+
     return Object.entries(frequency)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 5)
