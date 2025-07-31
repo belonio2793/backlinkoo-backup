@@ -54,6 +54,18 @@ if (typeof window !== 'undefined') {
       }
     });
   });
+
+  // Initialize production safety system
+  import('./services/productionSafeConfig').then(({ productionSafeConfig }) => {
+    productionSafeConfig.ensureHomepageSafety().then(result => {
+      if (result.safe) {
+        console.log('🛡️ Homepage safety verified - users protected');
+      } else {
+        console.warn('⚠️ Homepage safety issues detected:', result.issues);
+        console.log('🔧 Automatic fallbacks have been enabled to protect users');
+      }
+    });
+  });
 }
 
 const App = () => (
