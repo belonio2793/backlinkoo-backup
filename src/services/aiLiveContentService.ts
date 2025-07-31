@@ -117,12 +117,19 @@ Please create a comprehensive, well-structured blog post that naturally incorpor
         body: JSON.stringify(requestBody)
       });
 
+      let data;
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`API request failed: ${response.status} - ${errorText}`);
+        let errorMessage = `API request failed: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage += ` - ${errorData.error || 'Unknown error'}`;
+        } catch {
+          // If JSON parsing fails, use status only
+        }
+        throw new Error(errorMessage);
+      } else {
+        data = await response.json();
       }
-
-      const data = await response.json();
       
       if (!data.choices || !data.choices[0] || !data.choices[0].message) {
         throw new Error('Invalid response format from API');
