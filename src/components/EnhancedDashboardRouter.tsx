@@ -14,7 +14,7 @@ export function EnhancedDashboardRouter() {
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasTrialPosts, setHasTrialPosts] = useState(false);
-  const [guestAnalytics, setGuestAnalytics] = useState({ sessionDuration: 0, interactions: 0 });
+
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -238,7 +238,7 @@ export function EnhancedDashboardRouter() {
     }
   }, [isLoading, user, navigate]);
 
-  console.log('📊 Dashboard Router State:', { isLoading, user: !!user, hasTrialPosts, guestAnalytics });
+  console.log('📊 Dashboard Router State:', { isLoading, user: !!user, hasTrialPosts });
 
   if (isLoading) {
     console.log('⏳ Showing loading screen');
