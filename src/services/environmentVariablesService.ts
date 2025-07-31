@@ -110,21 +110,26 @@ class EnvironmentVariablesService {
   }
 
   /**
-   * Get all environment variables (admin only)
+   * Get all environment variables (from cache/localStorage)
    */
   async getAllVariables(): Promise<EnvironmentVariable[]> {
     try {
-      const { data, error } = await supabase
-        .from('admin_environment_variables')
-        .select('*')
-        .order('created_at', { ascending: false });
+      this.loadFromLocalStorage();
+      const variables: EnvironmentVariable[] = [];
 
-      if (error) {
-        console.error('Error fetching all environment variables:', error);
-        return [];
+      for (const [key, value] of this.cache.entries()) {
+        variables.push({
+          id: key,
+          key,
+          value,
+          description: `Environment variable for ${key}`,
+          is_secret: key.includes('API_KEY') || key.includes('SECRET'),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
       }
 
-      return data || [];
+      return variables;
     } catch (error) {
       console.error('Error in getAllVariables:', error);
       return [];
@@ -132,7 +137,7 @@ class EnvironmentVariablesService {
   }
 
   /**
-   * Save environment variable (admin only)
+   * Save environment variable (localStorage only)
    */
   async saveVariable(
     key: string,
@@ -141,74 +146,51 @@ class EnvironmentVariablesService {
     isSecret: boolean = true
   ): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('admin_environment_variables')
-        .upsert({
-          key,
-          value,
-          description,
-          is_secret: isSecret
-        });
-
-      if (error) {
-        console.error('Error saving environment variable:', error);
-        // Extract meaningful error message
-        let errorMessage = 'Database error occurred';
-
-        if (error.message) {
-          errorMessage = error.message;
-        } else if (error.details) {
-          errorMessage = error.details;
-        } else if (error.code) {
-          errorMessage = `Database error code: ${error.code}`;
-        }
-
-        // Check for common database issues
-        if (errorMessage.includes('does not exist') || errorMessage.includes('42P01')) {
-          errorMessage = 'Database table "admin_environment_variables" does not exist. Please check your database setup.';
-        } else if (errorMessage.includes('permission denied') || errorMessage.includes('insufficient_privilege')) {
-          errorMessage = 'Database permission denied. Please check your Supabase configuration.';
-        }
-
-        throw new Error(`Database error: ${errorMessage}`);
-      }
-
       // Update cache
       this.cache.set(key, value);
-      console.log(`✅ Environment variable ${key} saved successfully`);
+
+      // Save to localStorage
+      const stored = localStorage.getItem('admin_env_vars') || '[]';
+      const vars = JSON.parse(stored);
+
+      // Remove existing entry with same key
+      const filtered = vars.filter((v: any) => v.key !== key);
+
+      // Add new entry
+      filtered.push({
+        key,
+        value,
+        description,
+        is_secret: isSecret,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+
+      localStorage.setItem('admin_env_vars', JSON.stringify(filtered));
+      console.log(`✅ Environment variable ${key} saved to localStorage`);
       return true;
     } catch (error) {
       console.error('Error in saveVariable:', error);
-
-      // If it's already our custom error, re-throw it
-      if (error instanceof Error && error.message.includes('Failed to save to database')) {
-        throw error;
-      }
-
-      // For other errors, create a descriptive message
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       throw new Error(`Failed to save environment variable: ${errorMessage}`);
     }
   }
 
   /**
-   * Delete environment variable (admin only)
+   * Delete environment variable (localStorage only)
    */
   async deleteVariable(key: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('admin_environment_variables')
-        .delete()
-        .eq('key', key);
-
-      if (error) {
-        console.error('Error deleting environment variable:', error);
-        return false;
-      }
-
       // Remove from cache
       this.cache.delete(key);
-      console.log(`✅ Environment variable ${key} deleted successfully`);
+
+      // Remove from localStorage
+      const stored = localStorage.getItem('admin_env_vars') || '[]';
+      const vars = JSON.parse(stored);
+      const filtered = vars.filter((v: any) => v.key !== key);
+      localStorage.setItem('admin_env_vars', JSON.stringify(filtered));
+
+      console.log(`✅ Environment variable ${key} deleted from localStorage`);
       return true;
     } catch (error) {
       console.error('Error in deleteVariable:', error);
