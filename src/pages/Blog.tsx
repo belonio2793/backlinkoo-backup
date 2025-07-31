@@ -523,7 +523,7 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
             {post.is_trial_post ? (
               <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
                 <Clock className="mr-1 h-3 w-3" />
-                Trial
+                Unclaimed
               </Badge>
             ) : (
               <Badge className={`${
