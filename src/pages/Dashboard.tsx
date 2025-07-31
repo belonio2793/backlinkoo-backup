@@ -436,7 +436,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
               <div>• Displayed: {debugInfo.displayedPosts}</div>
-              <div>���� Has Errors: {debugInfo.hasError ? '⚠️' : '��'}</div>
+              <div>��� Has Errors: {debugInfo.hasError ? '⚠️' : '��'}</div>
             </div>
           </div>
           {debugInfo.errorMessage && (
@@ -1022,7 +1022,7 @@ const Dashboard = () => {
               <h1 className="text-xl font-semibold hidden sm:block">Backlink</h1>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
-              {(activeSection === "dashboard" || activeSection === "seo-tools" || activeSection === "trial") && (
+              {(activeSection === "dashboard" || activeSection === "seo-tools") && (
                 <>
                   <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
                     <CreditCard className="h-3 w-3" />
