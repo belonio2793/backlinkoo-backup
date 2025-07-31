@@ -116,7 +116,7 @@ export function ServiceConnectionStatus() {
     const startTime = Date.now();
 
     try {
-      // Use dedicated OpenAI status function (ChatGPT-style approach)
+      // Use TypeScript OpenAI status function (ChatGPT-style approach)
       const result = await safeNetlifyFetch('openai-status');
       const responseTime = Date.now() - startTime;
 
