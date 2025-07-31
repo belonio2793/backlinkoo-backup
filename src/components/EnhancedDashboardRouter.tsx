@@ -106,7 +106,7 @@ export function EnhancedDashboardRouter() {
   // If user is authenticated, show protected dashboard with error boundary
   if (user) {
     try {
-      return hasTrialPosts ? <UserBlogDashboard /> : <Dashboard />;
+      return hasTrialPosts ? <UserBlogDashboard /> : <SafeDashboard />;
     } catch (error) {
       console.error('Dashboard component error:', error);
       // Fallback to guest dashboard if user dashboard fails
