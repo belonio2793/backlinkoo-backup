@@ -251,10 +251,11 @@ Focus on creating valuable, informative content with proper HTML structure using
       };
 
     } catch (error) {
-      console.error('OpenAI generation failed, using fallback:', error);
-
-      // Always provide fallback content to ensure users aren't blocked
-      return this.generateFallbackContent(params);
+      console.error('OpenAI generation failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Content generation failed'
+      };
     }
   }
 
