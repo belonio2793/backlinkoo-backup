@@ -305,7 +305,7 @@ export class BlogService {
       .select('*')
       .eq('status', 'published')
       .eq('category', category)
-      .order('published_at', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(limit);
 
     if (error) {
