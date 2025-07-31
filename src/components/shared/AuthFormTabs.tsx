@@ -47,8 +47,6 @@ export function AuthFormTabs({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [retryAttempts, setRetryAttempts] = useState(0);
-  const [timeoutCountdown, setTimeoutCountdown] = useState(0);
-  const [isTestingConnection, setIsTestingConnection] = useState(false);
 
   const { toast } = useToast();
 
@@ -134,23 +132,7 @@ export function AuthFormTabs({
 
     setIsLoading(true);
 
-    // Show loading notification
-    toast({
-      title: "Signing you in...",
-      description: "Please wait while we verify your credentials.",
-    });
 
-    // Start countdown timer (reduced for better UX)
-    setTimeoutCountdown(35); // Increased to account for longer timeouts
-    const countdownInterval = setInterval(() => {
-      setTimeoutCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(countdownInterval);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
 
     try {
       const result = await AuthService.signIn({
