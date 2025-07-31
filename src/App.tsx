@@ -19,6 +19,7 @@ import '@/utils/dashboardAccessDiagnostic';
 import '@/utils/quickDashboardAccess';
 import '@/utils/blogClaimDiagnostic';
 import '@/utils/testBlogClaimFixes';
+import { setupNetlifyFunctionErrorSuppression } from '@/utils/netlifyFunctionUtils';
 
 const queryClient = new QueryClient();
 
