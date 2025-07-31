@@ -79,46 +79,33 @@ export function ServiceConnectionStatus() {
 
   const checkNetlifyFunctions = async (): Promise<void> => {
     const startTime = Date.now();
-    try {
-      const response = await fetch('/.netlify/functions/test-connection', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
 
-      const responseTime = Date.now() - startTime;
+    const result = await safeNetlifyFetch('test-connection');
+    const responseTime = Date.now() - startTime;
 
-      if (response.ok) {
-        const data = await response.json();
-        updateServiceStatus('Netlify Functions', {
-          status: 'connected',
-          message: 'Netlify functions operational',
-          responseTime,
-          details: data.environment
-        });
-      } else {
-        // Fallback: Assume functions are available in dev mode
-        updateServiceStatus('Netlify Functions', {
-          status: 'connected',
-          message: 'Functions available (dev mode - direct API calls work)',
-          responseTime,
-          details: {
-            mode: 'development',
-            directApiCalls: true,
-            netlifyFunctions: false
-          }
-        });
-      }
-    } catch (error) {
-      // In dev mode, this is expected - use direct API calls
+    if (result.success && result.data) {
       updateServiceStatus('Netlify Functions', {
         status: 'connected',
-        message: 'Dev mode - using direct API calls instead of Netlify functions',
-        responseTime: Date.now() - startTime,
+        message: 'Netlify functions operational',
+        responseTime,
+        details: result.data.environment || { mode: 'production' }
+      });
+    } else if (result.isLocal) {
+      updateServiceStatus('Netlify Functions', {
+        status: 'connected',
+        message: 'Development mode - functions simulated',
+        responseTime,
         details: {
           mode: 'development',
           directApiCalls: true,
           netlifyFunctions: false
         }
+      });
+    } else {
+      updateServiceStatus('Netlify Functions', {
+        status: 'error',
+        message: result.error || 'Function test failed',
+        responseTime
       });
     }
   };
