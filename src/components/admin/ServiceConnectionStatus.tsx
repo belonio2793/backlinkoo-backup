@@ -581,10 +581,26 @@ export function ServiceConnectionStatus() {
             </p>
           </div>
         </div>
-        <Button onClick={runConnectionTests} variant="outline" disabled={isChecking}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${isChecking ? 'animate-spin' : ''}`} />
-          {isChecking ? 'Testing...' : 'Test All'}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={async () => {
+              const { clearInvalidApiKeys } = await import('@/utils/clearInvalidApiKeys');
+              const result = clearInvalidApiKeys();
+              console.log('Manual API key reset:', result);
+              // Refresh the status after clearing
+              setTimeout(() => runConnectionTests(), 500);
+            }}
+            variant="outline"
+            size="sm"
+          >
+            <Key className="h-4 w-4 mr-2" />
+            Reset API Keys
+          </Button>
+          <Button onClick={runConnectionTests} variant="outline" disabled={isChecking}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isChecking ? 'animate-spin' : ''}`} />
+            {isChecking ? 'Testing...' : 'Test All'}
+          </Button>
+        </div>
       </div>
 
 
