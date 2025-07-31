@@ -99,8 +99,8 @@ Please write the complete blog post now:`;
       const slug = this.generateSlug(title);
       const excerpt = this.extractExcerpt(content);
       
-      // Insert the backlink naturally
-      const contentWithLink = this.insertBacklink(content, request.anchorText, request.targetUrl);
+      // Process the content to include the backlink (it should already be included by the AI)
+      const contentWithLink = content.includes(request.targetUrl) ? content : this.insertBacklink(content, request.anchorText, request.targetUrl);
 
       // Save to blog posts
       const blogData = {
