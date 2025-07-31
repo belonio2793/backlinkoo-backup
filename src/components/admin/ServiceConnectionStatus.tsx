@@ -1,6 +1,6 @@
 /**
  * Service Connection Status - Admin Dashboard Component
- * Tests connections to Netlify, Supabase, OpenAI, and Resend services instantly
+ * Tests connections to Netlify, Supabase, and Resend services instantly
  */
 
 import { useState, useEffect } from 'react';
