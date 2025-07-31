@@ -1,4 +1,5 @@
-import { Routes, Route, Suspense } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
+import { Suspense } from 'react';
 import { useReferralTracking } from '@/hooks/useReferralTracking';
 import { Skeleton } from '@/components/ui/skeleton';
 
