@@ -13,22 +13,9 @@ interface BlogFormProps {
 
 export function BlogForm({ onContentGenerated }: BlogFormProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [keyword, setKeyword] = useState('');
+  const [anchorText, setAnchorText] = useState('');
   const [targetUrl, setTargetUrl] = useState('');
-  const [primaryKeyword, setPrimaryKeyword] = useState('');
-  const [secondaryKeywords, setSecondaryKeywords] = useState<string[]>([]);
-  const [newSecondaryKeyword, setNewSecondaryKeyword] = useState('');
-  const [contentType, setContentType] = useState('how-to');
-  const [wordCount, setWordCount] = useState('1500');
-  const [tone, setTone] = useState('professional');
-  const [targetAudience, setTargetAudience] = useState('general');
-  const [keywordDensity, setKeywordDensity] = useState('medium');
-  const [includeCallToAction, setIncludeCallToAction] = useState(true);
-  const [optimizeForSnippets, setOptimizeForSnippets] = useState(true);
-  const [customInstructions, setCustomInstructions] = useState('');
-  const [promptOverlayVisible, setPromptOverlayVisible] = useState(false);
-  const [testingProviders, setTestingProviders] = useState(false);
-  const [testWorkflowStep, setTestWorkflowStep] = useState('');
-  const [providerStatuses, setProviderStatuses] = useState<any[]>([]);
   const { toast } = useToast();
 
   const addSecondaryKeyword = () => {
