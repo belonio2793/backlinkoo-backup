@@ -47,8 +47,17 @@ export const OpenAIGenerator = ({ variant = 'standalone', onSuccess }: OpenAIGen
   const [apiStatus, setApiStatus] = useState<{ accessible: boolean; error?: string } | null>(null);
   const [isCheckingAPI, setIsCheckingAPI] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [selectedPrompt, setSelectedPrompt] = useState<string>('');
+  const [promptIndex, setPromptIndex] = useState<number>(0);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // The exact prompt templates as requested
+  const promptTemplates = [
+    "Generate a 1000 word blog post on {{keyword}} including the {{anchor_text}} hyperlinked to {{url}}",
+    "Write a 1000 word blog post about {{keyword}} with a hyperlinked {{anchor_text}} linked to {{url}}",
+    "Produce a 1000-word blog post on {{keyword}} that links {{anchor_text}}"
+  ];
 
   useEffect(() => {
     checkAPIStatus();
