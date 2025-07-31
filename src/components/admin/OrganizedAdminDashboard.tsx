@@ -315,6 +315,7 @@ export function OrganizedAdminDashboard() {
             <TabsContent value="openai-config">
               <div className="space-y-6">
                 <UnifiedOpenAIConfig />
+                <ForceAPIKeyUpdate />
                 <Alert>
                   <Brain className="h-4 w-4" />
                   <AlertDescription>
