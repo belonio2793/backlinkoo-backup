@@ -110,7 +110,7 @@ export function UnifiedOpenAIConfig() {
 
       toast({
         title: 'OpenAI API Key Saved',
-        description: 'Your OpenAI API key has been saved to localStorage (Edge Function Secrets should be used for production)',
+        description: 'Your OpenAI API key has been saved to localStorage (Netlify environment variables used for production)',
       });
 
       // Auto-test the key after saving
