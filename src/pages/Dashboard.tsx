@@ -1110,7 +1110,6 @@ const Dashboard = () => {
                 <span className="hidden sm:inline">Overview</span>
                 <span className="sm:hidden">Home</span>
               </TabsTrigger>
-
               <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Campaigns</span>
                 <span className="sm:hidden">Camps</span>
