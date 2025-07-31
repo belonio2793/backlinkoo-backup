@@ -517,7 +517,7 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
               ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
               : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
           }`}>
-            {post.category || 'Expert Content'}
+            {post.category || '∞'}
           </Badge>
           <div className="flex items-center gap-2">
             {post.is_trial_post ? (
@@ -639,7 +639,7 @@ function BlogPostListItem({ post, navigate, formatDate }: any) {
                   ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
                   : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
               }`}>
-                {post.category || 'Expert Content'}
+                {post.category || '∞'}
               </Badge>
               {post.is_trial_post ? (
                 <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
