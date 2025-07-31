@@ -429,19 +429,19 @@ export function PermanentConfigManager() {
 
           <TabsContent value="backup" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="p-4 text-center">
+              <Card key="database-backup" className="p-4 text-center">
                 <Database className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                 <h4 className="font-medium">Database Backup</h4>
                 <p className="text-sm text-gray-600">Supabase persistent storage</p>
               </Card>
 
-              <Card className="p-4 text-center">
+              <Card key="local-storage" className="p-4 text-center">
                 <HardDrive className="h-8 w-8 text-green-600 mx-auto mb-2" />
                 <h4 className="font-medium">Local Storage</h4>
                 <p className="text-sm text-gray-600">Browser localStorage backup</p>
               </Card>
 
-              <Card className="p-4 text-center">
+              <Card key="environment-variables" className="p-4 text-center">
                 <Cloud className="h-8 w-8 text-purple-600 mx-auto mb-2" />
                 <h4 className="font-medium">Environment Variables</h4>
                 <p className="text-sm text-gray-600">Server environment persistence</p>
