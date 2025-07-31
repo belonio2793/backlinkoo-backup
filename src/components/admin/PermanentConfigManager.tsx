@@ -400,6 +400,7 @@ export function PermanentConfigManager() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
+                        key={`toggle-key-${config.id}`}
                         variant="ghost"
                         size="sm"
                         onClick={() => setShowKeys(prev => ({ ...prev, [config.id]: !prev[config.id] }))}
@@ -407,6 +408,7 @@ export function PermanentConfigManager() {
                         {showKeys[config.id] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
                       <Button
+                        key={`copy-key-${config.id}`}
                         variant="ghost"
                         size="sm"
                         onClick={() => copyToClipboard(config.apiKey)}
