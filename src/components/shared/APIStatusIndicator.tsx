@@ -25,17 +25,33 @@ export function APIStatusIndicator() {
       if (result.success && result.data) {
         setStatus(result.data);
       } else {
-        // Fallback to local check
-        const hasApiKey = !!import.meta.env.OPENAI_API_KEY;
+        // Fallback to local check with demo key detection
+        const envApiKey = import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.OPENAI_API_KEY;
+        const demoKey = localStorage.getItem('demo_openai_key');
+        const hasRealKey = envApiKey && envApiKey.startsWith('sk-') && envApiKey.length > 20;
+        const hasDemoKey = demoKey && demoKey.includes('demo-fallback');
+
+        let message = '';
+        let online = false;
+
+        if (hasRealKey) {
+          message = 'API key configured (AI generation)';
+          online = true;
+        } else if (hasDemoKey) {
+          message = 'Demo mode (template generation)';
+          online = true;
+        } else {
+          message = 'No API key configured';
+          online = false;
+        }
+
         setStatus({
-          online: hasApiKey,
-          message: result.isLocal
-            ? (hasApiKey ? 'Local development (API key configured)' : 'Local development (no API key)')
-            : (hasApiKey ? 'Local check (API key available)' : 'Local check (no API key)'),
+          online,
+          message,
           providers: {
             OpenAI: {
-              configured: hasApiKey,
-              status: hasApiKey ? 'configured' : 'not_configured'
+              configured: hasRealKey || hasDemoKey,
+              status: hasRealKey ? 'configured' : (hasDemoKey ? 'demo' : 'not_configured')
             }
           }
         });
