@@ -154,17 +154,33 @@ export function AuthFormTabs({
 
     try {
       // Test connection first with improved timeout
+      let isConnectionWorking = false;
       try {
         console.log('🔗 Testing connection...');
         const { supabase } = await import('@/integrations/supabase/client');
+
         const connectionTest = await Promise.race([
           supabase.auth.getSession(),
           new Promise((_, reject) => setTimeout(() => reject(new Error('Connection test timeout')), 10000)) // Increased to 10 seconds
         ]);
+
+        // Check if we got a mock response
+        if (connectionTest?.error?.message?.includes('Mock mode') ||
+            connectionTest?.error?.message?.includes('Please configure real Supabase credentials')) {
+          throw new Error('Authentication service is currently in maintenance mode. Please try again later.');
+        }
+
         console.log('✅ Connection test successful');
+        isConnectionWorking = true;
       } catch (connectionError: any) {
-        console.warn('⚠️ Connection test failed, proceeding with auth attempt anyway:', connectionError.message);
-        // Don't throw here - let the actual auth methods handle the connection issues
+        console.warn('⚠️ Connection test failed:', connectionError.message);
+
+        // Handle specific connection errors
+        if (connectionError.message?.includes('Authentication service is currently in maintenance mode')) {
+          throw connectionError; // Re-throw maintenance mode errors
+        }
+
+        // For other connection issues, proceed with auth attempt anyway
         // This allows for better fallback handling
       }
 
