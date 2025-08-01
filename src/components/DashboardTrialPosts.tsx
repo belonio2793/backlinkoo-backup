@@ -99,7 +99,6 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
 
   const loadPosts = async () => {
     try {
-      setLoading(true);
       const allPosts = await blogService.getAllBlogPosts();
       setPosts(allPosts || []);
     } catch (error) {
@@ -109,8 +108,6 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
         description: "Failed to load blog posts",
         variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
   };
 
