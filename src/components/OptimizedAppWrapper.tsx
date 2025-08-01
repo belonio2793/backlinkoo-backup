@@ -13,6 +13,7 @@ import TermsOfService from '@/pages/TermsOfService';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import BlogPreview from '@/pages/BlogPreview';
 import NotFound from '@/pages/NotFound';
+import Dashboard from '@/pages/Dashboard';
 import PaymentSuccess from '@/pages/PaymentSuccess';
 import PaymentCancelled from '@/pages/PaymentCancelled';
 import SubscriptionSuccess from '@/pages/SubscriptionSuccess';
