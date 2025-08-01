@@ -131,7 +131,7 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
         console.log('EmailVerificationGuard: Auth state change:', { event, hasUser: !!session?.user });
 
         if (event === 'SIGNED_OUT' || !session) {
-          navigate('/login');
+          navigate('/');
         } else if (session?.user) {
           setUser(session.user);
 
@@ -200,10 +200,10 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
   const handleSignOut = async () => {
     try {
       await AuthService.signOut();
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       console.error('Sign out error:', error);
-      navigate('/login');
+      navigate('/');
     }
   };
 
