@@ -20,7 +20,7 @@ import { format } from 'date-fns';
 
 export function UserClaimedPosts() {
   const [claimedPosts, setClaimedPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
