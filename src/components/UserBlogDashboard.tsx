@@ -331,6 +331,10 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
           )}
         </TabsContent>
 
+        <TabsContent value="claimed-posts" className="space-y-4">
+          <UserClaimedPosts />
+        </TabsContent>
+
         <TabsContent value="campaigns" className="space-y-4">
           {campaigns.length === 0 ? (
             <Card>
