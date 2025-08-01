@@ -115,8 +115,12 @@ export function AuthFormTabs({
     e.preventDefault();
     if (isLoading) return;
 
-    // Validate email format
-    if (!validateEmailFormat(signupEmail)) {
+    // Validate all fields
+    const emailValidation = validateEmail(signupEmail);
+    const passwordValidation = validatePassword(signupPassword);
+    const nameValidation = validateRequired(firstName, "First name");
+
+    if (!emailValidation) {
       toast({
         title: "Invalid email format",
         description: "Please enter a valid email address.",
@@ -125,8 +129,6 @@ export function AuthFormTabs({
       return;
     }
 
-    // Validate password strength
-    const passwordValidation = validatePasswordStrength(signupPassword);
     if (!passwordValidation.isValid) {
       toast({
         title: "Password requirements not met",
@@ -145,10 +147,10 @@ export function AuthFormTabs({
       return;
     }
 
-    if (!firstName.trim()) {
+    if (!nameValidation.isValid) {
       toast({
-        title: "First name required",
-        description: "Please enter your first name.",
+        title: "Required field missing",
+        description: nameValidation.message,
         variant: "destructive",
       });
       return;
