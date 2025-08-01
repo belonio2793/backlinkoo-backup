@@ -82,6 +82,39 @@ export function BlogSystemAdmin() {
     }
   };
 
+  const removeAllSecurity = async () => {
+    setRemovingSecurity(true);
+    try {
+      const result = await SecurityProtocolRemoval.disableAllSecurityProtocols();
+
+      if (result.success) {
+        toast({
+          title: "Security Protocols Removed ✅",
+          description: "All security restrictions have been disabled for blog posts",
+        });
+      } else {
+        toast({
+          title: "Security Removal Failed",
+          description: result.error || "Failed to remove security protocols",
+          variant: "destructive"
+        });
+      }
+
+      // Test unrestricted access after removal
+      const testResult = await SecurityProtocolRemoval.testUnrestrictedAccess();
+      setSecurityStats(testResult);
+
+    } catch (error: any) {
+      toast({
+        title: "Security Removal Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setRemovingSecurity(false);
+    }
+  };
+
   const runCleanup = async () => {
     setCleaning(true);
     try {
