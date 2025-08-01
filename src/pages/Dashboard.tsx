@@ -237,9 +237,9 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
 
     try {
       setClaimingPostId(postId);
-      const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
+      const { SimplifiedClaimService } = await import('@/services/simplifiedClaimService');
 
-      const result = await UnifiedClaimService.removeSavedPost(user.id, postId);
+      const result = await SimplifiedClaimService.removeSavedPost(user.id, postId);
 
       if (result.success) {
         toast({
