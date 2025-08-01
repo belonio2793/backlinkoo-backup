@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { blogService } from '@/services/blogService';
-import { UnifiedClaimService } from '@/services/unifiedClaimService';
+import { SimplifiedClaimService } from '@/services/simplifiedClaimService';
 import { ClaimErrorHandler } from '@/utils/claimErrorHandler';
 import { useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/Header';
