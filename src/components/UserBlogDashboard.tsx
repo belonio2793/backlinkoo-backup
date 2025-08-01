@@ -31,7 +31,7 @@ interface UserBlogDashboardProps {
 export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
   const [blogPosts, setBlogPosts] = useState<LiveBlogPost[]>([]);
   const [campaigns, setCampaigns] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({
     totalPosts: 0,
     totalViews: 0,
