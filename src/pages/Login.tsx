@@ -14,7 +14,6 @@ const Login = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const { toast } = useToast();
-  const { broadcastNewUser } = useGlobalNotifications();
   const navigate = useNavigate();
 
   useEffect(() => {
