@@ -203,6 +203,53 @@ export function BlogSystemAdmin() {
         </CardContent>
       </Card>
 
+      {/* RLS Policy Fix */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5" />
+            Row Level Security (RLS) Policy Fix
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Fix restrictive RLS policies that may be blocking blog post creation.
+          </p>
+
+          <Button
+            onClick={fixRLSPolicies}
+            disabled={fixingRLS}
+            variant="outline"
+            className="w-full"
+          >
+            {fixingRLS ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                Fixing RLS Policies...
+              </>
+            ) : (
+              <>
+                <AlertCircle className="mr-2 h-4 w-4" />
+                Fix RLS Policies
+              </>
+            )}
+          </Button>
+
+          {rlsStats && (
+            <div className="space-y-2 mt-4 p-3 bg-gray-50 rounded">
+              <h4 className="font-medium">RLS Policy Test Results:</h4>
+              <div className="text-sm space-y-1">
+                <div>Can Read Posts: {rlsStats.canRead ? '✅' : '❌'}</div>
+                <div>Can Create Posts: {rlsStats.canCreate ? '✅' : '❌'}</div>
+                {rlsStats.error && (
+                  <div className="text-red-600">Error: {rlsStats.error}</div>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Cleanup Management */}
       <Card>
         <CardHeader>
