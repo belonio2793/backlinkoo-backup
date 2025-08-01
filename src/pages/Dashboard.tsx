@@ -574,7 +574,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
                       ) : (
                         <>
                           <Plus className="h-3 w-3 mr-1" />
-                          Claim
+                          Save to Dashboard
                         </>
                       )}
                     </Button>
