@@ -164,9 +164,12 @@ export class BlogPersistenceService {
    */
   private async storePrimary(blogData: CreateBlogPost): Promise<BlogPersistenceResult> {
     try {
+      // Remove any custom id field to let database auto-generate UUID
+      const { id: _, ...cleanBlogData } = blogData as any;
+
       const { data, error } = await supabase
         .from(this.PRIMARY_TABLE)
-        .insert(blogData)
+        .insert(cleanBlogData)
         .select()
         .single();
 
