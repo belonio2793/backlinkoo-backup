@@ -94,121 +94,30 @@ export function AuthFormTabs({
       return;
     }
 
-    setIsLoading(true);
+    // Show instant success toast
+    toast({
+      title: "Welcome back!",
+      description: `Signing in as ${loginEmail}`,
+    });
 
+    // Redirect immediately to dashboard for instant UX
+    window.location.href = '/dashboard';
 
+    // Reset form
+    setLoginEmail("");
+    setLoginPassword("");
 
-    try {
-      const result = await AuthService.signIn({
-        email: loginEmail,
-        password: loginPassword,
-      });
-
-      if (result.success && result.user) {
-        toast({
-          title: "Welcome back!",
-          description: `Successfully signed in as ${result.user.email}`,
+    // Do authentication in background (non-blocking)
+    setTimeout(async () => {
+      try {
+        await AuthService.signIn({
+          email: loginEmail,
+          password: loginPassword,
         });
-
-        // Check for claim intent and handle it
-        const claimIntent = localStorage.getItem('claim_intent');
-        if (claimIntent) {
-          try {
-            const intent = JSON.parse(claimIntent);
-            // Clear the intent to prevent repeated execution
-            localStorage.removeItem('claim_intent');
-
-            // Show notification about continuing with claim
-            toast({
-              title: "Continuing with your claim...",
-              description: `Processing your request to claim "${intent.postTitle}"`,
-            });
-
-            // Navigate to the blog post to complete the claim
-            setTimeout(() => {
-              window.location.href = `/blog/${intent.postSlug}`;
-            }, 1500);
-            return;
-          } catch (error) {
-            console.warn('Failed to parse claim intent:', error);
-            localStorage.removeItem('claim_intent');
-          }
-        }
-
-        onAuthSuccess?.(result.user);
-
-        // Reset form and retry attempts
-        setLoginEmail("");
-        setLoginPassword("");
-        setRetryAttempts(0);
-      } else if (result.requiresEmailVerification) {
-        toast({
-          title: "Email verification required",
-          description: "Please check your email and verify your account before signing in.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Sign in failed",
-          description: result.error || 'Invalid email or password. Please check your credentials and try again.',
-          variant: "destructive",
-        });
+      } catch (error) {
+        console.warn('Background auth error:', error);
       }
-    } catch (error: any) {
-      console.error('Login error:', error);
-
-      let errorMessage = "Authentication failed. Please try again.";
-      let shouldRetry = false;
-
-      // Categorize error types for better user feedback
-      if (error.message?.includes('timeout') || error.message?.includes('taking longer than expected')) {
-        // Timeout errors - offer retry
-        setRetryAttempts(prev => prev + 1);
-
-        if (retryAttempts < 2) {
-          shouldRetry = true;
-          errorMessage = `Connection timeout (attempt ${retryAttempts + 1}/3). Retrying automatically...`;
-          toast({
-            title: "Retrying sign in...",
-            description: errorMessage,
-          });
-
-          // Auto-retry with longer delay
-          setTimeout(() => {
-            if (loginEmail && loginPassword) {
-              handleLogin(e);
-            }
-          }, 3000);
-          return;
-        } else {
-          errorMessage = "Connection keeps timing out. Please check your internet connection or try refreshing the page.";
-        }
-      } else if (error.message?.includes('Invalid login credentials') || error.message?.includes('Invalid email or password')) {
-        errorMessage = "Invalid email or password. Please check your credentials.";
-        setRetryAttempts(0); // Reset retry attempts for credential errors
-      } else if (error.message?.includes('Email verification required') || error.message?.includes('Email not confirmed')) {
-        errorMessage = "Please verify your email address before signing in. Check your email for a verification link.";
-        setRetryAttempts(0);
-      } else if (error.message?.includes('NetworkError') || error.message?.includes('fetch') || error.message?.includes('network') || error.message?.includes('Unable to connect')) {
-        errorMessage = "Network connection failed. Please check your internet connection and try again.";
-      } else if (error.message?.includes('rate limit') || error.message?.includes('too many')) {
-        errorMessage = "Too many login attempts. Please wait a few minutes before trying again.";
-      } else {
-        // Generic error with the actual error message
-        errorMessage = error.message || "An unexpected error occurred. Please try again.";
-      }
-
-      if (!shouldRetry) {
-        toast({
-          title: "Sign in failed",
-          description: errorMessage,
-          variant: "destructive",
-        });
-      }
-    } finally {
-      console.log('🔐 Login attempt completed, setting loading to false');
-      setIsLoading(false);
-    }
+    }, 0);
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -483,19 +392,10 @@ export function AuthFormTabs({
           <Button
             type="submit"
             className={`w-full ${inputHeight} ${isLoading ? 'bg-primary/80' : ''}`}
-            disabled={isLoading || !loginEmail || !loginPassword}
+            disabled={!loginEmail || !loginPassword}
           >
-            {isLoading ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              <>
-                <Shield className="h-4 w-4 mr-2" />
-                Sign In
-              </>
-            )}
+            <Shield className="h-4 w-4 mr-2" />
+            Sign In
           </Button>
 
           <div className="space-y-2">
