@@ -519,17 +519,8 @@ export function AuthFormTabs({
             className={`w-full ${inputHeight} ${isLoading ? 'bg-primary/80' : ''}`}
             disabled={isLoading || !signupEmail || !signupPassword || !confirmPassword || !firstName}
           >
-            {isLoading ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                {showTrialUpgrade ? "Upgrading trial..." : "Creating account..."}
-              </>
-            ) : (
-              <>
-                <CheckCircle className="h-4 w-4 mr-2" />
-                {showTrialUpgrade ? "Upgrade Trial" : "Create Account"}
-              </>
-            )}
+            <CheckCircle className="h-4 w-4 mr-2" />
+            {showTrialUpgrade ? "Upgrade Trial" : "Create Account"}
           </Button>
         </form>
       </TabsContent>
