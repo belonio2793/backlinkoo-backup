@@ -583,9 +583,7 @@ export function AdminBlogManager() {
                             asChild
                           >
                             <a
-                              href={post.published_url?.includes('fly.dev')
-                                ? post.published_url
-                                : `/blog/${post.slug}`
+                              href={post.published_url || `/blog/${post.slug}`
                               }
                               target="_blank"
                               rel="noopener noreferrer"
