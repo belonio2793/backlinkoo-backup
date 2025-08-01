@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { PricingModal } from '@/components/PricingModal';
 import { LoginModal } from '@/components/LoginModal';
+import { DatabaseChecker } from '@/components/DatabaseChecker';
 import { Clock, Eye, Calendar, Plus, Search, Crown, Loader2, CheckCircle } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
