@@ -1043,17 +1043,7 @@ const Index = () => {
         }}
       />
 
-      {/* Guest Session Reminder - Show for non-authenticated users */}
-      {!user && authChecked && (
-        <GuestSessionReminder
-          onSignUp={() => {
-            setLoginModalTab("signup");
-            setShowLoginModal(true);
-          }}
-          variant="floating"
-          position="bottom"
-        />
-      )}
+
 
       {/* Footer */}
       <Footer />
