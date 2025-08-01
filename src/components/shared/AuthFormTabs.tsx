@@ -47,13 +47,9 @@ export function AuthFormTabs({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [retryAttempts, setRetryAttempts] = useState(0);
-  const [timeoutCountdown, setTimeoutCountdown] = useState(0);
   const [isTestingConnection, setIsTestingConnection] = useState(false);
 
   const { toast } = useToast();
-
-  // Countdown interval ref
-  let countdownInterval: NodeJS.Timeout | null = null;
 
   // Reset retry attempts when switching tabs
   useEffect(() => {
@@ -642,7 +638,7 @@ export function AuthFormTabs({
               <Input
                 id="signup-password"
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder="••••••���•"
                 value={signupPassword}
                 onChange={(e) => setSignupPassword(e.target.value)}
                 className={inputHeight}
