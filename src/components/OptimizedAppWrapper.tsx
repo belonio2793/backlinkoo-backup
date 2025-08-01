@@ -89,7 +89,7 @@ export const OptimizedAppWrapper = () => {
           <Route path="/preview/:slug" element={<BlogPreview />} />
 
           {/* Blog routes - new system */}
-          <Route path="/blog" element={<LazyBlogListing />} />
+          <Route path="/blog" element={<LazyBlog />} />
           <Route path="/blog/create" element={<LazyBlogCreation />} />
           <Route path="/blog/:slug" element={<LazyBlogPostView />} />
 
