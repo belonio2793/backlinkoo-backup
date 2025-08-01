@@ -174,9 +174,12 @@ export class BlogPersistenceService {
         .single();
 
       if (error) {
-        // Add more context for slug collision errors
+        // Enhanced slug collision error context
         if (error.message.includes('blog_posts_slug_key') || error.message.includes('duplicate key value violates unique constraint')) {
-          throw new Error(`Primary storage failed: Slug collision detected - ${error.message}`);
+          throw new Error(`Primary storage failed: Slug collision detected - duplicate key value violates unique constraint "blog_posts_slug_key". This indicates the database trigger may not be working or multiple services are generating the same slug simultaneously. Error details: ${error.message}`);
+        }
+        if (error.message.includes('null value in column "slug"')) {
+          throw new Error(`Primary storage failed: Database expects slug value but received null. This indicates the database trigger for automatic slug generation may not be installed or enabled. Error details: ${error.message}`);
         }
         throw new Error(`Primary storage failed: ${error.message}`);
       }
