@@ -12,7 +12,7 @@ import {
   Activity,
   Settings,
   Table,
-  Function,
+  Code,
   Shield
 } from 'lucide-react';
 import { blogSystemDiagnostic, type DatabaseDiagnostic } from '@/utils/blogSystemDiagnostic';
