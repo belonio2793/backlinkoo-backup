@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { blogService } from '@/services/blogService';
+import { UnifiedClaimService } from '@/services/unifiedClaimService';
 import { useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
