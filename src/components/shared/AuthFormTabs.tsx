@@ -44,20 +44,6 @@ export function AuthFormTabs({
 
 
 
-  const validateEmailFormat = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const validatePasswordStrength = (password: string): { isValid: boolean; message: string } => {
-    if (password.length < 6) {
-      return { isValid: false, message: "Password must be at least 6 characters long" };
-    }
-    return { isValid: true, message: "Password is valid" };
-  };
-
-
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoading) return;
