@@ -6,8 +6,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/services/authService";
 import { AuthFormTabs } from "@/components/shared/AuthFormTabs";
+import { validateEmail } from "@/utils/authValidation";
 import { Mail, RefreshCw, Infinity } from "lucide-react";
-import { LiveUserActivity, SocialProofTestimonials, TrustBadges, MoneyBackGuarantee } from "./SocialProofElements";
+import { LiveUserActivity } from "./SocialProofElements";
 
 interface LoginModalProps {
   isOpen: boolean;
