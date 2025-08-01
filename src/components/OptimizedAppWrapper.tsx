@@ -147,6 +147,11 @@ export const OptimizedAppWrapper = () => {
               <BlogSystemDiagnostic />
             </Suspense>
           } />
+          <Route path="/diagnostic/blog-post/:slug" element={
+            <div className="min-h-screen bg-gray-50">
+              <BlogPostDiagnostic />
+            </div>
+          } />
 
           {/* Payment routes - lightweight, immediate load */}
           <Route path="/payment-success" element={
