@@ -1,4 +1,4 @@
-import { BlogPost } from '@/types/blogTypes';
+import type { BlogPost } from '@/types/blogTypes';
 
 interface ExternalBlogPost {
   id: string;
