@@ -321,9 +321,10 @@ const Index = () => {
 
                       <Button onClick={() => {
                         console.log('Get Started button clicked');
-                        navigate("/login");
+                        setLoginModalTab("signup");
+                        setShowLoginModal(true);
                       }} className="font-medium">
-                        Get Started
+                        Create Account
                       </Button>
                     </>
                   )}
