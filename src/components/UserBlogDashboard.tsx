@@ -166,6 +166,7 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
       <Tabs defaultValue="blog-posts" className="space-y-4">
         <TabsList>
           <TabsTrigger value="blog-posts">Live Blog Posts</TabsTrigger>
+          <TabsTrigger value="claimed-posts">Claimed Posts</TabsTrigger>
           <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
         </TabsList>
 
