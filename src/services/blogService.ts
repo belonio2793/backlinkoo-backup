@@ -39,9 +39,9 @@ export class BlogService {
     isTrialPost: boolean = false
   ): Promise<BlogPost> {
     try {
-      // Let database trigger generate unique slug from title
-      // Custom slug support: pass as slug if provided, otherwise let trigger generate from title
-      const customSlug = data.customSlug || null;
+      // Generate fallback slug for NOT NULL constraint compatibility
+      // Once migration is applied, database trigger will handle uniqueness
+      const customSlug = data.customSlug || this.generateSlug(data.title);
 
     const blogPostData: CreateBlogPost = {
       user_id: userId || null,
