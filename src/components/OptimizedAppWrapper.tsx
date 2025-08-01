@@ -122,6 +122,13 @@ export const OptimizedAppWrapper = () => {
               <LazyUserBlogManagement />
             </EmailVerificationGuard>
           } />
+          <Route path="/my-posts" element={
+            <EmailVerificationGuard>
+              <Suspense fallback={<PageLoader />}>
+                <MyPosts />
+              </Suspense>
+            </EmailVerificationGuard>
+          } />
           <Route path="/blog/:postId/edit" element={
             <EmailVerificationGuard>
               <LazyBlogEditPage />
