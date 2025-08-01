@@ -38,15 +38,16 @@ export class BlogService {
     userId?: string,
     isTrialPost: boolean = false
   ): Promise<BlogPost> {
-    // Use custom slug if provided, otherwise generate from title
-    const baseSlug = data.customSlug || this.generateSlug(data.title);
-
-    // Generate unique slug using database function or fallback
-    let uniqueSlug = baseSlug;
-
     try {
-      const { data: uniqueSlugData, error: slugError } = await supabase
-        .rpc('generate_unique_slug', { base_slug: baseSlug });
+      // Use custom slug if provided, otherwise generate from title
+      const baseSlug = data.customSlug || this.generateSlug(data.title);
+
+      // Generate unique slug using database function or fallback
+      let uniqueSlug = baseSlug;
+
+      try {
+        const { data: uniqueSlugData, error: slugError } = await supabase
+          .rpc('generate_unique_slug', { base_slug: baseSlug });
 
       if (!slugError && uniqueSlugData) {
         uniqueSlug = uniqueSlugData as string;
@@ -138,7 +139,11 @@ export class BlogService {
       }
     }
 
-    return blogPost;
+      return blogPost;
+    } catch (error: any) {
+      console.error('Blog post creation failed:', error);
+      throw new Error(`Failed to create blog post: ${error.message || 'Unknown error'}`);
+    }
   }
 
   /**
