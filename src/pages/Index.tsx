@@ -320,17 +320,7 @@ const Index = () => {
           {/* Optional: Advanced Generator Toggle (Hidden by default) */}
 
 
-          {/* Header */}
-          <div className="text-center space-y-6 mb-16">
-            <div className="relative">
-              <h2 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 leading-tight tracking-tight">
-                Create a Free Permanent Natural Backlink
-              </h2>
-              {/* Decorative elements */}
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-60"></div>
-              <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-40"></div>
-            </div>
-          </div>
+
 
           {/* Generator */}
           <div className="max-w-4xl mx-auto">

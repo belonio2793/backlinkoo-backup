@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { DirectOpenAIService } from '@/services/directOpenAI';
 import { APIStatusIndicator } from '@/components/shared/APIStatusIndicator';
+import { AnimatedBlogHeadline } from '@/components/AnimatedBlogHeadline';
 import { Loader2, Link, Target, Hash, Sparkles, Zap, Star, Rocket } from 'lucide-react';
 
 interface BlogFormProps {
@@ -131,6 +132,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
         </div>
 
         <CardContent className="relative z-10 p-8 space-y-8">
+          {/* Animated headline */}
+          <AnimatedBlogHeadline />
           {/* Top row: Keyword and Anchor Text side by side */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Keyword Field */}
@@ -206,7 +209,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             </div>
             <p className="text-xs text-gray-500 flex items-center gap-1">
               <Link className="h-3 w-3 text-green-500" />
-              The destination URL where the anchor text will link to. Protocol (https://) will be added automatically if missing.
+              The destination URL where the anchor text will link to.
             </p>
           </div>
 
