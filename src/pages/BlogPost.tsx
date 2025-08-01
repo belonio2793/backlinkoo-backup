@@ -79,13 +79,31 @@ export function BlogPost() {
     }
   };
 
+  const handleClaimRedirect = () => {
+    if (!post) return;
+
+    // Store claim intent for after login
+    const claimIntent = {
+      postSlug: post.slug,
+      postTitle: post.title,
+      postId: post.id,
+      timestamp: Date.now()
+    };
+
+    localStorage.setItem('claim_intent', JSON.stringify(claimIntent));
+
+    toast({
+      title: "Redirecting to sign in...",
+      description: "We'll bring you back here to complete your claim.",
+    });
+
+    // Navigate to login page
+    navigate('/auth');
+  };
+
   const claimPost = async () => {
     if (!user || !post) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to claim this post.",
-        variant: "destructive"
-      });
+      handleClaimRedirect();
       return;
     }
 
