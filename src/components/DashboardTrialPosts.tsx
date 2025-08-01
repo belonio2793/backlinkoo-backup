@@ -421,7 +421,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Trial Blog Posts</h2>
-          <p className="text-gray-600">Manage your claimed posts and discover new opportunities</p>
+          <p className="text-gray-600">Manage your claimed posts (max 3) and discover new opportunities</p>
         </div>
         <div className="flex items-center gap-2">
           <Button onClick={loadPosts} variant="outline" size="sm">
