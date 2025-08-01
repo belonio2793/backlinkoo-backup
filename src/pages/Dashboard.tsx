@@ -190,9 +190,6 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
         });
       }
     } finally {
-      if (!silentRefresh) {
-        setLoading(false);
-      }
       setLoadingStatus('Ready');
     }
   };
