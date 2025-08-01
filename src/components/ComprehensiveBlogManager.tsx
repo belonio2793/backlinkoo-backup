@@ -95,10 +95,23 @@ export function ComprehensiveBlogManager() {
       // Load from multiple sources
       let allPosts: BlogPost[] = [];
 
-      // Load from database (claimable posts)
+      // Load from external blog first (primary source)
       try {
-        const claimablePosts = await ClaimableBlogService.getClaimablePosts(50);
-        allPosts = [...claimablePosts];
+        console.log('🌐 Fetching real blog posts from https://backlinkoo.com/blog/');
+        const externalPosts = await ExternalBlogService.fetchExternalBlogPosts();
+        console.log(`✅ Loaded ${externalPosts.length} external blog posts`);
+        allPosts = [...externalPosts];
+      } catch (error) {
+        console.warn('Failed to load external blog posts:', error);
+      }
+
+      // Load from database (claimable posts) as additional source
+      try {
+        const claimablePosts = await ClaimableBlogService.getClaimablePosts(20);
+        // Add claimable posts that aren't already in external posts
+        const existingSlugs = new Set(allPosts.map(p => p.slug));
+        const uniqueClaimablePosts = claimablePosts.filter(p => !existingSlugs.has(p.slug));
+        allPosts = [...allPosts, ...uniqueClaimablePosts];
       } catch (error) {
         console.warn('Database unavailable, using localStorage:', error);
       }
