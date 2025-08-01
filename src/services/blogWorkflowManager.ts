@@ -86,7 +86,7 @@ export class BlogWorkflowManager {
       // Step 4: Create blog post object
       const now = new Date();
       const post: BlogPost = {
-        id: contentResult.id || this.generateId(),
+        id: '', // Will be set by database after insertion
         title: contentResult.title || this.extractTitle(contentResult.content),
         content: contentResult.content,
         targetUrl: request.targetUrl,
