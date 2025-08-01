@@ -31,7 +31,7 @@ export class BlogClaimService {
       }
 
       const { data, error } = await supabase
-        .from('published_blog_posts')
+        .from('blog_posts')
         .select(`
           id, slug, title, excerpt, published_url, target_url,
           created_at, expires_at, seo_score, reading_time, word_count,
