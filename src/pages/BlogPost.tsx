@@ -259,6 +259,54 @@ export function BlogPost() {
     return cleanContent;
   };
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+        <Header />
+        <main className="container mx-auto px-4 py-16">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="bg-white rounded-2xl shadow-xl p-12">
+              <h1 className="text-3xl font-bold text-red-600 mb-4">Error Loading Post</h1>
+              <p className="text-gray-600 mb-8 text-lg">
+                {error}
+              </p>
+              <div className="space-y-4">
+                <Button
+                  onClick={() => window.location.reload()}
+                  className="bg-blue-600 hover:bg-blue-700 mr-4"
+                >
+                  Try Again
+                </Button>
+                <Button
+                  onClick={() => navigate('/blog')}
+                  variant="outline"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Blog
+                </Button>
+              </div>
+              {slug && (
+                <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-2">
+                    For debugging, visit:
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/diagnostic/blog-post/${slug}`)}
+                  >
+                    Diagnostic Tool
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
