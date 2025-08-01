@@ -148,7 +148,7 @@ export function BlogPost() {
     try {
       console.log('🎯 Attempting to claim post:', post.slug);
 
-      const result = await UnifiedClaimService.claimBlogPost(post.slug, user);
+      const result = await SimplifiedClaimService.claimBlogPost(post.slug, user);
 
       if (result.success) {
         toast({
