@@ -43,8 +43,6 @@ export function AuthFormTabs({
   const [signupPassword, setSignupPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
-  const [retryAttempts, setRetryAttempts] = useState(0);
-  const [isTestingConnection, setIsTestingConnection] = useState(false);
 
   const { toast } = useToast();
 
