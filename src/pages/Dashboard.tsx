@@ -93,11 +93,11 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
       }
       setLoadingStatus('Connecting to database...');
 
-      // Load from database using the unified claim service
-      const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
+      // Load from database using the simplified claim service
+      const { SimplifiedClaimService } = await import('@/services/simplifiedClaimService');
 
       setLoadingStatus('Fetching published blog posts...');
-      const dbPosts = await UnifiedClaimService.getClaimablePosts(20);
+      const dbPosts = await SimplifiedClaimService.getClaimablePosts(20);
 
       setLoadingStatus('Checking local storage...');
       // Also load from localStorage for backwards compatibility
