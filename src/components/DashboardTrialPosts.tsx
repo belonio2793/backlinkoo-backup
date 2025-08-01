@@ -48,7 +48,6 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
   const { toast } = useToast();
 
   const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('unclaimed');
   const [claiming, setClaiming] = useState<string | null>(null);
