@@ -400,17 +400,6 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="text-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading trial posts...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
