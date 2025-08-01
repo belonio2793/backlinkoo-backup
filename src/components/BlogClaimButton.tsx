@@ -163,7 +163,7 @@ export function BlogClaimButton({
     return (
       <div className={`flex items-center gap-2 ${className}`}>
         <Button variant="outline" disabled>
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          <Loader2 className="h-4 w-4 mr-2" />
           Checking...
         </Button>
       </div>
