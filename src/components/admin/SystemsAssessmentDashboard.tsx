@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { SystemsAssessmentTool } from '@/utils/systemsAssessment';
 import { BlogSystemTest } from '@/utils/blogSystemTest';
+import { SlugDiagnosticRunner } from '@/components/SlugDiagnosticRunner';
 import type { SystemAssessment, ComponentStatus } from '@/utils/systemsAssessment';
 
 export function SystemsAssessmentDashboard() {
