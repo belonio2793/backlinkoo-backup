@@ -102,10 +102,7 @@ const Login = () => {
     };
   }, [navigate]);
 
-  const validateEmailFormat = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+
 
   const handleAuthSuccess = (user: any) => {
     navigate('/dashboard');
