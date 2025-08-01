@@ -53,8 +53,8 @@ export function BlogListing() {
   const checkUserClaimStatus = async () => {
     if (user) {
       try {
-        const canClaim = await BlogClaimService.canUserClaimMore(user);
-        setCanClaimMore(canClaim);
+        const stats = await SimplifiedClaimService.getUserSavedStats(user.id);
+        setCanClaimMore(stats.canSave);
       } catch (error) {
         console.warn('Failed to check claim status:', error);
       }
