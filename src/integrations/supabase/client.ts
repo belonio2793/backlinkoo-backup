@@ -223,6 +223,16 @@ export const supabase = hasValidCredentials ?
       headers: {
         'X-Client-Info': 'backlink-infinity@1.0.0',
       },
+      fetch: (url, options = {}) => {
+        return fetch(url, {
+          ...options,
+          // Add retry logic and better error handling for network issues
+        }).catch(error => {
+          console.warn('Supabase fetch error (possibly due to network/third-party interference):', error);
+          // Re-throw but with context
+          throw new Error(`Network request failed: ${error.message}`);
+        });
+      },
     },
   }) :
   createMockSupabaseClient() as any;
