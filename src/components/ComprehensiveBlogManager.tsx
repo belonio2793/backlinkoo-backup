@@ -568,185 +568,225 @@ export function ComprehensiveBlogManager() {
             </div>
           </div>
 
-          {/* Posts Table */}
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Target URL</TableHead>
-                  <TableHead className="text-center">Views</TableHead>
-                  <TableHead className="text-center">Backlinks</TableHead>
-                  <TableHead className="text-center">SEO Score</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredPosts.map((post) => (
-                  <TableRow key={post.id} className="hover:bg-gray-50">
-                    <TableCell>
-                      <div>
-                        <p className="font-medium hover:text-blue-600 cursor-pointer" 
-                           onClick={() => navigate(`/blog/${post.slug}`)}>
+          {/* Beautiful Blog Posts Grid */}
+          {filteredPosts.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="mx-auto w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-4">
+                <FileText className="h-12 w-12 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No blog posts found</h3>
+              <p className="text-gray-600 mb-6">
+                {searchTerm ? 'Try adjusting your search terms.' : 'Create your first blog post to get started.'}
+              </p>
+              <Button
+                onClick={() => navigate('/blog-creation')}
+                className="bg-gradient-to-r from-blue-600 to-purple-600"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create First Post
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredPosts.map((post) => (
+                <Card
+                  key={post.id}
+                  className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white via-gray-50 to-blue-50/30 hover:from-blue-50 hover:via-purple-50 hover:to-indigo-50 cursor-pointer"
+                  onClick={() => navigate(`/blog/${post.slug}`)}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg font-semibold group-hover:text-blue-600 transition-colors line-clamp-2 min-h-[3.5rem]">
                           {post.title}
-                        </p>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {(post.keywords || []).slice(0, 3).map((keyword, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {keyword}
-                            </Badge>
-                          ))}
-                          {(post.keywords || []).length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{(post.keywords || []).length - 3}
+                        </CardTitle>
+                        <div className="flex items-center gap-2 mt-2">
+                          {getStatusBadge(post.status)}
+                          {isOwnedByUser(post) && (
+                            <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs">
+                              <Crown className="mr-1 h-3 w-3" />
+                              Yours
                             </Badge>
                           )}
                         </div>
-                        {isOwnedByUser(post) && (
-                          <Badge className="bg-green-50 text-green-700 border-green-200 text-xs mt-1">
-                            <Crown className="mr-1 h-2 w-2" />
-                            Yours
-                          </Badge>
-                        )}
                       </div>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(post.status)}</TableCell>
-                    <TableCell>
-                      <a 
-                        href={post.target_url} 
-                        target="_blank" 
+                      <div className="ml-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                          {post.seo_score || 75}
+                        </div>
+                        <p className="text-xs text-gray-500 text-center mt-1">SEO Score</p>
+                      </div>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="pt-0">
+                    {/* Meta Description Preview */}
+                    {post.meta_description && (
+                      <p className="text-sm text-gray-600 line-clamp-2 mb-4">
+                        {post.meta_description}
+                      </p>
+                    )}
+
+                    {/* Keywords */}
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {(post.keywords || []).slice(0, 4).map((keyword, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200">
+                          {keyword}
+                        </Badge>
+                      ))}
+                      {(post.keywords || []).length > 4 && (
+                        <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
+                          +{(post.keywords || []).length - 4} more
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Statistics Grid */}
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      <div className="text-center p-2 bg-white/50 rounded-lg border">
+                        <div className="flex items-center justify-center mb-1">
+                          <Eye className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <p className="text-lg font-bold text-gray-900">{(post.views || post.view_count || 0).toLocaleString()}</p>
+                        <p className="text-xs text-gray-500">Views</p>
+                      </div>
+                      <div className="text-center p-2 bg-white/50 rounded-lg border">
+                        <div className="flex items-center justify-center mb-1">
+                          <ExternalLink className="h-4 w-4 text-green-600" />
+                        </div>
+                        <p className="text-lg font-bold text-gray-900">{post.backlinks || 0}</p>
+                        <p className="text-xs text-gray-500">Backlinks</p>
+                      </div>
+                      <div className="text-center p-2 bg-white/50 rounded-lg border">
+                        <div className="flex items-center justify-center mb-1">
+                          <Clock className="h-4 w-4 text-purple-600" />
+                        </div>
+                        <p className="text-lg font-bold text-gray-900">{post.reading_time || 5}</p>
+                        <p className="text-xs text-gray-500">Min read</p>
+                      </div>
+                    </div>
+
+                    {/* Target URL */}
+                    <div className="mb-4">
+                      <p className="text-xs text-gray-500 mb-1">Target URL:</p>
+                      <a
+                        href={post.target_url}
+                        target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-sm truncate block max-w-[200px]"
+                        className="text-blue-600 hover:underline text-sm truncate block"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         {post.target_url}
                       </a>
-                    </TableCell>
-                    <TableCell className="text-center">{(post.views || post.view_count || 0).toLocaleString()}</TableCell>
-                    <TableCell className="text-center">{post.backlinks || 0}</TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex items-center justify-center">
-                        <Badge 
-                          variant="outline"
-                          className={`${(post.seo_score || 0) >= 80 ? 'border-green-300 text-green-700' : 
-                                       (post.seo_score || 0) >= 60 ? 'border-yellow-300 text-yellow-700' : 
-                                       'border-red-300 text-red-700'}`}
-                        >
-                          {post.seo_score || 75}/100
-                        </Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
+                    </div>
+
+                    {/* Footer with Date and Actions */}
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Calendar className="h-3 w-3 mr-1" />
                         {formatDate(post.created_at)}
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56">
-                          <DropdownMenuItem 
-                            onClick={() => window.open(generateBacklinkUrl(post.slug), '_blank')}
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Post
-                          </DropdownMenuItem>
-                          
-                          {canClaim(post) && (
-                            <DropdownMenuItem 
-                              onClick={() => handleClaimPost(post)}
-                              disabled={claiming === post.id}
+                      <div className="flex gap-1">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-blue-100">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(generateBacklinkUrl(post.slug), '_blank');
+                            }}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              View Post
+                            </DropdownMenuItem>
+                            {canClaim(post) && (
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleClaimPost(post);
+                                }}
+                                disabled={claiming === post.id}
+                              >
+                                {claiming === post.id ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Crown className="mr-2 h-4 w-4" />
+                                )}
+                                Claim Post
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPricingModalOpen(true);
+                              }}
                             >
-                              {claiming === post.id ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              <ShoppingCart className="mr-2 h-4 w-4" />
+                              Buy Backlinks
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRegenerateContent(post.id);
+                              }}
+                              disabled={regenerating === post.id}
+                            >
+                              {regenerating === post.id ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                               ) : (
-                                <Crown className="h-4 w-4 mr-2" />
+                                <Wand2 className="mr-2 h-4 w-4" />
                               )}
-                              Claim Post
+                              Regenerate
                             </DropdownMenuItem>
-                          )}
-
-                          <DropdownMenuItem 
-                            onClick={() => setPricingModalOpen(true)}
-                          >
-                            <ShoppingCart className="h-4 w-4 mr-2" />
-                            Buy Backlinks
-                          </DropdownMenuItem>
-
-                          <DropdownMenuItem
-                            onClick={() => handleRegenerateContent(post.id)}
-                            disabled={regenerating === post.id}
-                          >
-                            {regenerating === post.id ? (
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                              <Wand2 className="h-4 w-4 mr-2" />
+                            {post.status === 'draft' && (
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleStatusChange(post.id, 'published');
+                                }}
+                              >
+                                <Globe className="mr-2 h-4 w-4" />
+                                Publish
+                              </DropdownMenuItem>
                             )}
-                            Regenerate Content
-                          </DropdownMenuItem>
-
-                          <DropdownMenuItem>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-
-                          {post.status === 'draft' && (
-                            <DropdownMenuItem 
-                              onClick={() => handleStatusChange(post.id, 'published')}
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(post.id);
+                              }}
+                              disabled={deleting === post.id}
+                              className="text-red-600 focus:text-red-600"
                             >
-                              <Globe className="h-4 w-4 mr-2" />
-                              Publish
+                              {deleting === post.id ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="mr-2 h-4 w-4" />
+                              )}
+                              Delete
                             </DropdownMenuItem>
-                          )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
-                          {post.status === 'published' && (
-                            <DropdownMenuItem 
-                              onClick={() => handleStatusChange(post.id, 'archived')}
-                            >
-                              Archive
-                            </DropdownMenuItem>
-                          )}
-
-                          <DropdownMenuItem 
-                            onClick={() => handleDelete(post.id)}
-                            disabled={deleting === post.id}
-                            className="text-red-600 focus:text-red-600"
-                          >
-                            {deleting === post.id ? (
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4 mr-2" />
-                            )}
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {filteredPosts.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-lg font-semibold mb-2">No blog posts found</h3>
-              <p className="mb-4">
-                {searchTerm ? 'No posts match your search criteria.' : 'You haven\'t created any blog posts yet.'}
-              </p>
-              {!searchTerm && (
-                <Button onClick={() => navigate('/blog-creation')} className="bg-gradient-to-r from-blue-600 to-purple-600">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Your First Post
-                </Button>
-              )}
+          {/* Load More Button */}
+          {filteredPosts.length > 0 && filteredPosts.length >= 20 && (
+            <div className="text-center mt-8">
+              <Button
+                onClick={refreshPosts}
+                variant="outline"
+                className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 hover:from-blue-100 hover:to-purple-100"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Load More Posts
+              </Button>
             </div>
           )}
         </CardContent>
