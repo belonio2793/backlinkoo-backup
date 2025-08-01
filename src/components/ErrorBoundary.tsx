@@ -55,6 +55,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
     if (isExtensionError || isAuthError || isDashboardError || isDatabaseTableError) {
       console.warn('Non-critical error filtered:', error.message);
+      if (isDatabaseTableError) {
+        console.warn('Database table error filtered - app will continue with fallback data');
+      }
       // Reset error state to prevent app crash
       this.setState({ hasError: false, error: undefined });
       return;
