@@ -375,7 +375,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
                 className="border-red-200 text-red-600 hover:bg-red-50"
               >
                 {deleting === post.id ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <div className="w-3 h-3 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <Trash2 className="h-3 w-3" />
                 )}
