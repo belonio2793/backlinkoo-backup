@@ -573,7 +573,7 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
 
       if (result.success) {
         toast({
-          title: "Post Claimed Successfully! 🎉",
+          title: "Post Saved Successfully! 🎉",
           description: result.message,
         });
 
