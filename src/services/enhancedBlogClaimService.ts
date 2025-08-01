@@ -233,13 +233,43 @@ export class EnhancedBlogClaimService {
    */
   static async cleanupExpiredPosts(): Promise<{ deletedCount: number; error?: string }> {
     try {
+      // Try the RPC function first
       const { data, error } = await supabase.rpc('cleanup_expired_posts');
 
-      if (error) {
-        return { deletedCount: 0, error: error.message };
+      if (!error && data !== null) {
+        return { deletedCount: data || 0 };
       }
 
-      return { deletedCount: data || 0 };
+      // If RPC function doesn't exist, use manual cleanup
+      console.warn('RPC function not available, using manual cleanup');
+      const { data: expiredPosts, error: selectError } = await supabase
+        .from('blog_posts')
+        .select('id')
+        .eq('claimed', false)
+        .not('expires_at', 'is', null)
+        .lte('expires_at', new Date().toISOString());
+
+      if (selectError) {
+        return { deletedCount: 0, error: selectError.message };
+      }
+
+      if (!expiredPosts || expiredPosts.length === 0) {
+        return { deletedCount: 0 };
+      }
+
+      // Delete expired posts manually
+      const { error: deleteError } = await supabase
+        .from('blog_posts')
+        .delete()
+        .eq('claimed', false)
+        .not('expires_at', 'is', null)
+        .lte('expires_at', new Date().toISOString());
+
+      if (deleteError) {
+        return { deletedCount: 0, error: deleteError.message };
+      }
+
+      return { deletedCount: expiredPosts.length };
     } catch (error: any) {
       return { deletedCount: 0, error: error.message };
     }
