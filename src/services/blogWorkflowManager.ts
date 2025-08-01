@@ -368,9 +368,7 @@ export class BlogWorkflowManager {
     };
   }
 
-  private static generateId(): string {
-    return `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
+
 
   private static extractTitle(content: string): string {
     const lines = content.split('\n');
