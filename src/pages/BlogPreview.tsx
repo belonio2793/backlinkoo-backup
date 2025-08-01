@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
+import {
   ArrowLeft,
   ExternalLink,
   Calendar,
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { liveBlogPublisher } from '@/services/liveBlogPublisher';
+import { BlogClaimButton } from '@/components/BlogClaimButton';
 import { format } from 'date-fns';
 
 export function BlogPreview() {
