@@ -250,16 +250,8 @@ export class BlogClaimService {
         post = blogPost;
         tableName = 'blog_posts';
       } else {
-        const { data: publishedPost } = await supabase
-          .from('published_blog_posts')
-          .select('*')
-          .eq('id', postId)
-          .maybeSingle();
-
-        if (publishedPost) {
-          post = publishedPost;
-          tableName = 'published_blog_posts';
-        }
+        // Only use blog_posts table now (unified approach)
+        // This section removed as we now only check blog_posts table above
       }
 
       if (!post) {
