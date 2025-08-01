@@ -1032,7 +1032,7 @@ const Dashboard = () => {
               >
                 <Sparkles className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Trial</span>
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
               </Button>
             </nav>
           </div>
