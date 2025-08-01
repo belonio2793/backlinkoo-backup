@@ -629,7 +629,7 @@ const Dashboard = () => {
     const maxLoadingTime = setTimeout(() => {
       console.warn('🏠 Dashboard - Maximum loading time reached, forcing loading to false');
       setLoading(false);
-    }, 15000); // 15 seconds maximum
+    }, 3000); // 3 seconds maximum
 
     return () => clearTimeout(maxLoadingTime);
   }, []);
