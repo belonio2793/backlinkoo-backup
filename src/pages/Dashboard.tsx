@@ -662,8 +662,7 @@ const Dashboard = () => {
         console.error('🏠 Dashboard - Initialization error:', error);
       } finally {
         if (isMounted) {
-          console.log('🏠 Dashboard - Initialization complete, stopping loading');
-          setLoading(false);
+          console.log('🏠 Dashboard - Initialization complete');
         }
       }
     };
