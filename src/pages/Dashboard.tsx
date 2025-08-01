@@ -202,10 +202,10 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
 
     try {
       setClaimingPostId(post.id);
-      const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
+      const { SimplifiedClaimService } = await import('@/services/simplifiedClaimService');
 
-      // Use unified claim service with slug
-      const result = await UnifiedClaimService.claimBlogPost(post.slug, user);
+      // Use simplified claim service with slug
+      const result = await SimplifiedClaimService.claimBlogPost(post.slug, user);
 
       if (result.success) {
         toast({
