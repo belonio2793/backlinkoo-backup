@@ -119,47 +119,60 @@ export class BlogService {
       return persistenceResult.data!;
     }
 
-    // For trial posts, use bypass methods to avoid RLS
-    console.log('🔓 Attempting blog post creation with ultimate bypass methods...');
+    // For trial posts, attempt normal creation
+    console.log('🔓 Attempting blog post creation...');
 
-    try {
-      // Import the bypass service dynamically
-      const { BlogServiceBypass } = await import('./blogServiceBypass');
+    const { data: blogPost, error } = await supabase
+      .from('blog_posts')
+      .insert(blogPostData)
+      .select()
+      .single();
 
-      console.log('🚨 USING ULTIMATE BYPASS SERVICE...');
-      const bypassResult = await BlogServiceBypass.createBlogPostUltimateBypass({
-        title: blogPostData.title,
-        content: blogPostData.content,
-        targetUrl: blogPostData.target_url
-      });
+    if (error) {
+      if (error.message.includes('duplicate key') || error.message.includes('unique constraint')) {
+        // If duplicate, try with a timestamp suffix
+        const timestampSlug = `${uniqueSlug}-${Date.now()}`;
+        const retryData = { ...blogPostData, slug: timestampSlug };
 
-      console.log('✅ ULTIMATE BYPASS SUCCESS!');
-      return bypassResult;
+        const { data: retryPost, error: retryError } = await supabase
+          .from('blog_posts')
+          .insert(retryData)
+          .select()
+          .single();
 
-    } catch (bypassError) {
-      console.warn('🔄 Bypass failed, trying normal creation as fallback...');
+        if (retryError) {
+          if (retryError.message.includes('row-level security') || retryError.message.includes('policy')) {
+            console.error('🚨 RLS POLICY IS BLOCKING BLOG POST CREATION');
+            console.error('');
+            console.error('📋 MANUAL FIX REQUIRED:');
+            console.error('1. Go to your Supabase Dashboard');
+            console.error('2. Open SQL Editor');
+            console.error('3. Execute: ALTER TABLE blog_posts DISABLE ROW LEVEL SECURITY;');
+            console.error('4. Execute: GRANT ALL ON blog_posts TO PUBLIC;');
+            console.error('5. Refresh this page');
 
-      // Fallback to normal creation (might still fail)
-      const { data: blogPost, error } = await supabase
-        .from('blog_posts')
-        .insert(blogPostData)
-        .select()
-        .single();
-
-      if (error) {
-        if (error.message.includes('row-level security') || error.message.includes('policy')) {
-          console.error('🚨 CRITICAL: RLS is still blocking all creation methods!');
-          console.error('Manual intervention required: Execute this SQL in Supabase:');
-          console.error('ALTER TABLE blog_posts DISABLE ROW LEVEL SECURITY;');
-          console.error('GRANT ALL ON blog_posts TO PUBLIC;');
-
-          throw new Error(`COMPLETE RLS BYPASS FAILURE: ${error.message}. Manual SQL execution required in Supabase database.`);
+            throw new Error('RLS policy blocking blog creation. Manual SQL execution required in Supabase: ALTER TABLE blog_posts DISABLE ROW LEVEL SECURITY; GRANT ALL ON blog_posts TO PUBLIC;');
+          }
+          throw new Error(`Failed to create blog post after retry: ${retryError.message}`);
         }
 
-        throw new Error(`Failed to create blog post: ${error.message}`);
+        return retryPost;
       }
 
-      return blogPost;
+      if (error.message.includes('row-level security') || error.message.includes('policy')) {
+        console.error('🚨 RLS POLICY IS BLOCKING BLOG POST CREATION');
+        console.error('');
+        console.error('📋 MANUAL FIX REQUIRED:');
+        console.error('1. Go to your Supabase Dashboard');
+        console.error('2. Open SQL Editor');
+        console.error('3. Execute: ALTER TABLE blog_posts DISABLE ROW LEVEL SECURITY;');
+        console.error('4. Execute: GRANT ALL ON blog_posts TO PUBLIC;');
+        console.error('5. Refresh this page');
+
+        throw new Error('RLS policy blocking blog creation. Manual SQL execution required in Supabase: ALTER TABLE blog_posts DISABLE ROW LEVEL SECURITY; GRANT ALL ON blog_posts TO PUBLIC;');
+      }
+
+      throw new Error(`Failed to create blog post: ${error.message}`);
     }
 
     if (error) {
