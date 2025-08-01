@@ -90,13 +90,7 @@ CREATE POLICY "Users can delete their own saved posts" ON user_saved_posts
   }
 }
 
-// Auto-run when imported in development
-if (import.meta.env.DEV && typeof window !== 'undefined') {
-  // Run after a short delay to let everything load
-  setTimeout(() => {
-    runImmediateDiagnostic();
-  }, 2000);
-  
-  // Also make it available globally
+// Make diagnostic available globally but don't auto-run to prevent errors
+if (typeof window !== 'undefined') {
   (window as any).runBlogSystemDiagnostic = runImmediateDiagnostic;
 }
