@@ -32,8 +32,8 @@ export class BlogService {
     // Add high-entropy suffix for guaranteed uniqueness
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substring(2, 11); // 9 chars
-    const pid = process.pid ? process.pid.toString(36) : ''; // Process ID for extra uniqueness
-    return `${baseSlug}-${timestamp}-${random}${pid ? '-' + pid : ''}`;
+    const extra = Math.random().toString(36).substring(2, 6); // Additional entropy for browser
+    return `${baseSlug}-${timestamp}-${random}-${extra}`;
   }
 
   /**
