@@ -67,9 +67,9 @@ export class BlogClaimService {
         .eq('user_id', userId)
         .eq('is_trial_post', true);
 
-      // Count from published_blog_posts table
+      // Count from both blog_posts locations (old code kept for compatibility)
       const { count: publishedCount } = await supabase
-        .from('published_blog_posts')
+        .from('blog_posts')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
         .eq('is_trial_post', true);
@@ -204,7 +204,7 @@ export class BlogClaimService {
         }
       }
     } catch (storageError) {
-      console.warn('⚠️ localStorage error:', storageError);
+      console.warn('���️ localStorage error:', storageError);
     }
 
     // Remove duplicates and sort
