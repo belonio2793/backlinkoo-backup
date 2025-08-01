@@ -558,7 +558,7 @@ export function AdminBlogManager() {
                       {/* Published URL */}
                       <div className="text-xs">
                         <div className="text-gray-500 mb-1">
-                          {post.published_url?.includes('fly.dev') ? 'External URL:' : 'Published URL:'}
+                          Published URL:
                         </div>
                         <div className="flex items-center gap-1 bg-gray-50 p-2 rounded border">
                           <code className="text-xs text-blue-600 truncate max-w-[150px]">
