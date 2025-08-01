@@ -129,6 +129,11 @@ export const OptimizedAppWrapper = () => {
             </AdminAuthGuard>
           } />
 
+          {/* Debug routes - only in development */}
+          {import.meta.env.DEV && (
+            <Route path="/debug/claim-system" element={<LazyClaimSystemDebug />} />
+          )}
+
           {/* Payment routes - lightweight, immediate load */}
           <Route path="/payment-success" element={
             <EmailVerificationGuard>
