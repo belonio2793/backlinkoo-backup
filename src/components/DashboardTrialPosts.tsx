@@ -497,7 +497,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
             </TabsTrigger>
             <TabsTrigger value="claimed" className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4" />
-              Claimed ({claimedPosts.length})
+              Claimed ({claimedPosts.length}/3)
             </TabsTrigger>
           </TabsList>
 
