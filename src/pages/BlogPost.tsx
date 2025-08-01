@@ -57,8 +57,8 @@ export function BlogPost() {
       console.log('🔄 Loading blog post:', slug);
       setError(null);
 
-      // First try to get from database using unified service
-      const blogPost = await UnifiedClaimService.getBlogPostBySlug(slug!);
+      // First try to get from database using simplified service
+      const blogPost = await SimplifiedClaimService.getBlogPostBySlug(slug!);
       if (blogPost) {
         console.log('✅ Found blog post in database:', blogPost.title);
         setPost(blogPost);
