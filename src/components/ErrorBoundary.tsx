@@ -51,6 +51,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                                 error.message.includes('relation') ||
                                 error.message.includes('does not exist') ||
                                 error.stack?.includes('published_blog_posts') ||
+                                error.message.includes('PGRST') ||
+                                error.message.includes('422') ||
+                                error.message.includes('schema') ||
                                 (error.message.includes('404') && error.message.includes('blog'));
 
     if (isExtensionError || isAuthError || isDashboardError || isDatabaseTableError) {
