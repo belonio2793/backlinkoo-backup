@@ -24,6 +24,7 @@ import { PricingModal } from '@/components/PricingModal';
 import { BlogClaimService } from '@/services/blogClaimService';
 import { ClaimableBlogService } from '@/services/claimableBlogService';
 import { ExternalBlogService } from '@/services/externalBlogService';
+import type { BlogPost as BlogPostType } from '@/types/blogTypes';
 import {
   Search,
   MoreHorizontal,
