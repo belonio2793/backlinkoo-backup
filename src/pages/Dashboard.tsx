@@ -633,13 +633,11 @@ const Dashboard = () => {
 
         if (error && !session) {
           console.log('🏠 Dashboard - Auth error, continuing in demo mode:', error);
-          setLoading(false);
           return;
         }
 
         if (!session?.user) {
           console.log('🏠 Dashboard - No valid session, continuing in demo mode');
-          setLoading(false);
           return;
         }
 
