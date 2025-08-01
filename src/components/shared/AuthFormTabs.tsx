@@ -118,6 +118,18 @@ export function AuthFormTabs({
             clearInterval(countdownInterval);
             countdownInterval = null;
           }
+
+          // Auto-recovery if stuck at timeout
+          if (isLoading) {
+            console.warn('🚨 Authentication timeout reached, auto-recovering...');
+            setIsLoading(false);
+            toast({
+              title: "Connection timeout",
+              description: "Please try signing in again. Check your internet connection.",
+              variant: "destructive",
+            });
+          }
+
           return 0;
         }
         return prev - 1;
