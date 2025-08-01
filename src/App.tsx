@@ -16,6 +16,7 @@ import { autoConfigSaver } from "@/services/autoConfigSaver";
 import "@/services/blogCleanupService"; // Initialize blog cleanup service
 import "@/utils/systemsAssessment"; // Initialize systems assessment
 import "@/utils/blogSystemTest"; // Initialize blog system test
+import "@/utils/runSecurityFix"; // AUTO-FIX RLS SECURITY ERRORS
 
 // Initialize performance monitoring in development
 if (import.meta.env.DEV) {
