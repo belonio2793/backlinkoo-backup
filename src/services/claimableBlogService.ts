@@ -67,7 +67,7 @@ export class ClaimableBlogService {
         excerpt: data.excerpt || data.content.substring(0, 200) + '...',
         anchor_text: data.anchorText,
         target_url: data.targetUrl,
-        published_url: publishedUrl,
+        // published_url will be set after we get the generated slug
         status: 'published',
         is_claimed: false,
         claimed_by: null,
