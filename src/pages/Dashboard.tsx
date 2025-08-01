@@ -240,41 +240,33 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
     }
   };
 
-  const handleUnclaimPost = async (post: any) => {
+  const handleRemoveSavedPost = async (postId: string) => {
     if (!user) return;
 
     try {
-      setClaimingPostId(post.id);
+      setClaimingPostId(postId);
       const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
 
-      // Note: Unclaim functionality would need to be implemented in UnifiedClaimService if needed
-      // For now, show a message that unclaiming is not available
-      toast({
-        title: "Unclaim Not Available",
-        description: "Unclaiming is not available in the new system. Contact support if needed.",
-        variant: "default",
-      });
-      setClaimingPostId(null);
-      return;
+      const result = await UnifiedClaimService.removeSavedPost(user.id, postId);
 
       if (result.success) {
         toast({
-          title: "Post Unclaimed",
+          title: "Post Removed",
           description: result.message,
         });
-        await loadAllPosts(); // Refresh the list
+        await loadUserSavedPosts(); // Refresh saved posts list
       } else {
         toast({
-          title: "Unclaim Failed",
+          title: "Remove Failed",
           description: result.message,
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Error unclaiming post:', error);
+      console.error('Error removing saved post:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred while unclaiming the post.",
+        description: "An unexpected error occurred while removing the post.",
         variant: "destructive",
       });
     } finally {
@@ -689,7 +681,7 @@ const Dashboard = () => {
           session = result.data?.session;
           error = result.error;
         } catch (timeoutError) {
-          console.warn('🏠 Dashboard - Auth check timed out, trying fallback...');
+          console.warn('�� Dashboard - Auth check timed out, trying fallback...');
 
           // If auth times out, continue with demo mode
           console.log('🏠 Dashboard - Auth timeout, continuing in demo mode');
