@@ -45,7 +45,6 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
   }, [userId]);
 
   const loadUserData = async () => {
-    setLoading(true);
     try {
       // Load user's blog posts
       const posts = await liveBlogPublisher.getUserBlogPosts(userId);
