@@ -562,10 +562,7 @@ export function AdminBlogManager() {
                         </div>
                         <div className="flex items-center gap-1 bg-gray-50 p-2 rounded border">
                           <code className="text-xs text-blue-600 truncate max-w-[150px]">
-                            {post.published_url?.includes('fly.dev')
-                              ? post.published_url
-                              : `${window.location.origin}/blog/${post.slug}`
-                            }
+                            {post.published_url || `${window.location.origin}/blog/${post.slug}`}
                           </code>
                           <Button
                             variant="ghost"
