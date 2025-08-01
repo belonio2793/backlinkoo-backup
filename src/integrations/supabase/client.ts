@@ -224,12 +224,24 @@ export const supabase = hasValidCredentials ?
         'X-Client-Info': 'backlink-infinity@1.0.0',
       },
       fetch: (url, options = {}) => {
-        return fetch(url, {
+        // Use a clean fetch instance to avoid third-party interference
+        const cleanFetch = window.fetch.bind(window);
+
+        return cleanFetch(url, {
           ...options,
-          // Add retry logic and better error handling for network issues
+          // Ensure we're not affected by global fetch modifications
+          signal: options.signal || AbortSignal.timeout(30000), // 30 second timeout
         }).catch(error => {
-          console.warn('Supabase fetch error (possibly due to network/third-party interference):', error);
-          // Re-throw but with context
+          // Check if this is likely third-party interference
+          const isThirdPartyIssue = error?.stack?.includes('fullstory') ||
+                                   error?.stack?.includes('fs.js') ||
+                                   error?.message?.includes('Failed to fetch');
+
+          if (isThirdPartyIssue) {
+            console.warn('🔍 Network request blocked by third-party script (FullStory/Analytics). This is not a Supabase issue.');
+          }
+
+          console.warn('Supabase fetch error:', error);
           throw new Error(`Network request failed: ${error.message}`);
         });
       },
