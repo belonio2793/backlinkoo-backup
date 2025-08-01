@@ -656,18 +656,7 @@ const Dashboard = () => {
           })
         ];
 
-        // Add timeout for data fetching
-        const dataTimeout = new Promise((resolve) =>
-          setTimeout(() => {
-            console.warn('🏠 Dashboard - Data fetching timed out, continuing anyway');
-            resolve(null);
-          }, 5000)
-        );
-
-        await Promise.race([
-          Promise.all(dataPromises),
-          dataTimeout
-        ]);
+        await Promise.all(dataPromises);
 
       } catch (error) {
         console.error('🏠 Dashboard - Initialization error:', error);
