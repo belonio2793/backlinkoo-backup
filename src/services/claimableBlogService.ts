@@ -53,8 +53,9 @@ export class ClaimableBlogService {
     try {
       console.log('🚀 Generating and publishing blog post:', data.keyword);
 
-      // Let database trigger generate unique slug from title
-      // const slug = this.generateSlug(data.title); // Remove manual slug generation
+      // Generate fallback slug for NOT NULL constraint compatibility
+      // Once migration is applied, database trigger will handle uniqueness
+      const slug = this.generateSlug(data.title);
 
       // Set expiration to 24 hours from now for unclaimed posts
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
