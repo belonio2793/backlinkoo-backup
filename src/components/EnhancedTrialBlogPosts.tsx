@@ -459,8 +459,8 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
       {/* Header with Stats */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Free Generated Blog Posts</h2>
-          <p className="text-gray-600">Your trial content library</p>
+          <h2 className="text-2xl font-bold text-gray-900">Access Claimed Posts</h2>
+          <p className="text-gray-600">Our free blog posts are offered for educational purposes, showcasing how keyword-relevant content, targeted anchor texts, and strategic backlinks from high-authority websites can boost search engine rankings—all powered by a private network and multiple domains built on top-tier SEO standards and security.</p>
         </div>
         <div className="flex items-center gap-2">
           <Button onClick={() => loadAllPosts(false)} variant="outline" size="sm" disabled={isRefreshing}>
