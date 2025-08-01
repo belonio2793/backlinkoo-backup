@@ -392,8 +392,8 @@ export function BlogPost() {
                             onClick={handleClaimRedirect}
                             className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white animate-pulse"
                           >
-                            <Crown className="mr-1 h-3 w-3" />
-                            Sign In to Claim
+                            <Plus className="mr-1 h-3 w-3" />
+                            Sign In to Save
                           </Button>
                         )
                       )}
