@@ -96,6 +96,28 @@ export class BlogService {
       .single();
 
     if (error) {
+      // Handle slug collision specifically
+      if (error.message.includes('blog_posts_slug_key') || error.message.includes('duplicate key value violates unique constraint')) {
+        console.warn('⚠️ Slug collision detected, retrying with new slug...');
+
+        // Generate a completely new slug with additional randomness
+        const newSlug = this.generateSlug(data.title);
+        const retryData = { ...cleanBlogPostData, slug: newSlug };
+
+        const { data: retryPost, error: retryError } = await supabase
+          .from('blog_posts')
+          .insert(retryData)
+          .select()
+          .single();
+
+        if (retryError) {
+          throw new Error(`Failed to create blog post after slug retry: ${retryError.message}`);
+        }
+
+        console.log('✅ Blog post created successfully after slug retry');
+        return retryPost;
+      }
+
       if (error.message.includes('row-level security') || error.message.includes('policy')) {
         console.error('🚨 RLS POLICY IS BLOCKING BLOG POST CREATION');
         console.error('');
