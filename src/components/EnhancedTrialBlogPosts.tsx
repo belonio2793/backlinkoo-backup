@@ -205,7 +205,6 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
 
     try {
       setClaimingPostId(post.id);
-      const { BlogClaimService } = await import('@/services/blogClaimService');
 
       const { canClaim, reason } = await BlogClaimService.canUserClaimMore(user);
       if (!canClaim) {
@@ -224,7 +223,7 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
           title: "Post Claimed Successfully",
           description: result.message,
         });
-        await loadAllPosts();
+        await loadAllPosts(false); // Force refresh UI
       } else {
         toast({
           title: "Claim Failed",
@@ -249,7 +248,6 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
 
     try {
       setClaimingPostId(post.id);
-      const { BlogClaimService } = await import('@/services/blogClaimService');
 
       const result = await BlogClaimService.unclaimPost(post.id, user);
 
@@ -258,7 +256,7 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
           title: "Post Unclaimed",
           description: result.message,
         });
-        await loadAllPosts();
+        await loadAllPosts(false); // Force refresh UI
       } else {
         toast({
           title: "Unclaim Failed",
