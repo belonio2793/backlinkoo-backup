@@ -83,6 +83,7 @@ export function AuthFormTabs({
           title: "Welcome back!",
           description: `Signing in as ${currentEmail}`,
         });
+        onAuthSuccess?.(result.user);
       } else {
         toast({
           title: "Sign in failed",
