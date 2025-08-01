@@ -95,33 +95,6 @@ export function AuthFormTabs({
     }
 
     setIsLoading(true);
-    setTimeoutCountdown(30); // Start with 30 second countdown
-
-    // Start countdown timer
-    countdownInterval = setInterval(() => {
-      setTimeoutCountdown(prev => {
-        if (prev <= 1) {
-          if (countdownInterval) {
-            clearInterval(countdownInterval);
-            countdownInterval = null;
-          }
-
-          // Auto-recovery if stuck at timeout
-          if (isLoading) {
-            console.warn('🚨 Authentication timeout reached, auto-recovering...');
-            setIsLoading(false);
-            toast({
-              title: "Connection timeout",
-              description: "Please try signing in again. Check your internet connection.",
-              variant: "destructive",
-            });
-          }
-
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
 
 
 
@@ -507,7 +480,7 @@ export function AuthFormTabs({
               <Input
                 id="login-password"
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder="•••���••••"
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 className={inputHeight}
