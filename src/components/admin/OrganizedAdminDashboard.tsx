@@ -20,6 +20,7 @@ import { ContentFilterManager } from "@/components/admin/ContentFilterManager";
 import { ContentModerationQueue } from "@/components/admin/ContentModerationQueue";
 import { AIPostsManager } from "@/components/admin/AIPostsManager";
 import { BlogPostClaimsManager } from "@/components/admin/BlogPostClaimsManager";
+import { BlogSystemAdmin } from "@/components/admin/BlogSystemAdmin";
 import { EnvironmentVariablesManager } from "@/components/admin/EnvironmentVariablesManager";
 import { NetlifyEnvironmentManager } from "@/components/admin/NetlifyEnvironmentManager";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
@@ -243,10 +244,11 @@ export function OrganizedAdminDashboard() {
 
         {activeCategory === "content" && (
           <Tabs defaultValue="blog-posts" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="blog-posts">Blog Posts</TabsTrigger>
               <TabsTrigger value="ai-posts">AI Posts</TabsTrigger>
               <TabsTrigger value="blog-claims">Claims</TabsTrigger>
+              <TabsTrigger value="blog-system">System</TabsTrigger>
               <TabsTrigger value="content-filter">Content Filter</TabsTrigger>
               <TabsTrigger value="moderation">Moderation</TabsTrigger>
             </TabsList>
