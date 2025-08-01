@@ -8,18 +8,19 @@ import { blogService } from '@/services/blogService';
 import { useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { 
-  Clock, 
-  Eye, 
-  User, 
-  Calendar, 
-  ExternalLink, 
+import {
+  Clock,
+  Eye,
+  User,
+  Calendar,
+  ExternalLink,
   ArrowLeft,
   Share2,
   BookmarkPlus,
   Star,
   Crown,
-  Timer
+  Timer,
+  CheckCircle2
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
