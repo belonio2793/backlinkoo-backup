@@ -21,6 +21,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { liveBlogPublisher, type LiveBlogPost } from '@/services/liveBlogPublisher';
 import { supabase } from '@/integrations/supabase/client';
+import { UserClaimedPosts } from '@/components/UserClaimedPosts';
 import { format, formatDistanceToNow } from 'date-fns';
 
 interface UserBlogDashboardProps {
