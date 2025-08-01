@@ -6,6 +6,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import type { Tables } from '@/integrations/supabase/types';
+import { ClaimErrorHandler } from '@/utils/claimErrorHandler';
 
 type BlogPost = Tables<'blog_posts'>;
 
