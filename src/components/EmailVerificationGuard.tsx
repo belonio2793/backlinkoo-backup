@@ -31,10 +31,8 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
 
         // Check if we're in development mode first
         const isDevelopment = window.location.hostname === 'localhost' ||
-                             window.location.hostname.includes('fly.dev') ||
                              window.location.port === '8080' ||
-                             process.env.NODE_ENV === 'development' ||
-                             window.location.href.includes('fly.dev');
+                             process.env.NODE_ENV === 'development';
 
         console.log('🔍 Development mode check:', {
           hostname: window.location.hostname,
