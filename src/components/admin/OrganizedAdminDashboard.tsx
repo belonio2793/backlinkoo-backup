@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AuthService } from "@/services/authService";
+import { useToast } from "@/hooks/use-toast";
 
 // Admin Components
 import { SecurityDashboard } from "@/components/SecurityDashboard";
