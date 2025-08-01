@@ -77,7 +77,7 @@ export class ResendEmailService {
 
       return {
         success: true,
-        emailId: result.emailId,
+        emailId: responseData.emailId,
         provider: 'resend'
       };
     } catch (error: any) {
