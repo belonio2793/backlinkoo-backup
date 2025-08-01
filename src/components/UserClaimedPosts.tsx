@@ -43,7 +43,7 @@ export function UserClaimedPosts() {
       console.error('Error loading claimed posts:', err);
       setError('Failed to load claimed posts');
     } finally {
-      setLoading(false);
+      // No loading state needed
     }
   };
 
