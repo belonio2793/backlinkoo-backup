@@ -32,7 +32,7 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateEmailFormat(forgotPasswordEmail)) {
+    if (!validateEmail(forgotPasswordEmail)) {
       toast({
         title: "Invalid email",
         description: "Please enter a valid email address.",
