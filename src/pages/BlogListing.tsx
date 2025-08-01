@@ -13,7 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { PricingModal } from '@/components/PricingModal';
 import { LoginModal } from '@/components/LoginModal';
-import { DatabaseChecker } from '@/components/DatabaseChecker';
+
 import { Clock, Eye, Calendar, Plus, Search, Crown, Loader2, CheckCircle } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -316,13 +316,6 @@ export function BlogListing() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
-          {/* Database Checker - Temporary Debug Tool */}
-          {import.meta.env.DEV && (
-            <div className="mb-8">
-              <DatabaseChecker />
-            </div>
-          )}
-
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Blog Posts</h1>
