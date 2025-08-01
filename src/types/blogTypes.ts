@@ -4,6 +4,7 @@
 
 export interface BlogPost {
   id: string;
+  user_id?: string | null;
   title: string;
   slug: string;
   content: string;
@@ -16,9 +17,16 @@ export interface BlogPost {
   reading_time: number;
   published_url: string;
   is_trial_post: boolean;
+  claimed: boolean;
   expires_at: string;
   created_at: string;
   updated_at: string;
+  view_count?: number;
+  word_count?: number;
+  tags?: string[];
+  category?: string;
+  status?: string;
+  author_name?: string;
 }
 
 export interface GenerationRequest {
