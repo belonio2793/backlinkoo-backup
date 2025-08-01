@@ -569,9 +569,7 @@ export function AdminBlogManager() {
                             size="sm"
                             className="h-6 w-6 p-0"
                             onClick={() => {
-                              const url = post.published_url?.includes('fly.dev')
-                                ? post.published_url
-                                : `${window.location.origin}/blog/${post.slug}`;
+                              const url = post.published_url || `${window.location.origin}/blog/${post.slug}`;
                               navigator.clipboard.writeText(url);
                               toast({ title: "URL copied to clipboard" });
                             }}
