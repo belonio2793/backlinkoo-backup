@@ -381,8 +381,8 @@ export function BlogPost() {
                               </>
                             ) : (
                               <>
-                                <Crown className="mr-1 h-3 w-3" />
-                                Claim Now
+                                <Plus className="mr-1 h-3 w-3" />
+                                Save to Dashboard
                               </>
                             )}
                           </Button>
