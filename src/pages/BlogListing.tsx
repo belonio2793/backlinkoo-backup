@@ -237,7 +237,7 @@ export function BlogListing() {
     setClaiming(post.id);
 
     try {
-      const result = await BlogClaimService.claimPost(post.id, user);
+      const result = await SimplifiedClaimService.claimBlogPost(post.slug, user);
 
       if (result.success) {
         setClaimedPosts(prev => new Set([...prev, post.id]));
