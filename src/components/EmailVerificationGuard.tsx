@@ -95,7 +95,6 @@ export const EmailVerificationGuard = ({ children }: EmailVerificationGuardProps
 
         // Always allow development access if auth fails
         const isDevelopment = window.location.hostname === 'localhost' ||
-                             window.location.hostname.includes('fly.dev') ||
                              window.location.port === '8080';
 
         if (isDevelopment) {
