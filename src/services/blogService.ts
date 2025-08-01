@@ -127,6 +127,23 @@ export class BlogService {
       .single();
 
     if (error) {
+      if (error.message.includes('duplicate key') || error.message.includes('unique constraint')) {
+        // If duplicate, try with a timestamp suffix
+        const timestampSlug = `${uniqueSlug}-${Date.now()}`;
+        const retryData = { ...blogPostData, slug: timestampSlug };
+
+        const { data: retryPost, error: retryError } = await supabase
+          .from('blog_posts')
+          .insert(retryData)
+          .select()
+          .single();
+
+        if (retryError) {
+          throw new Error(`Failed to create blog post after retry: ${retryError.message}`);
+        }
+
+        return retryPost;
+      }
       throw new Error(`Failed to create blog post: ${error.message}`);
     }
 
