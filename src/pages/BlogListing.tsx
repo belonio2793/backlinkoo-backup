@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { blogService } from '@/services/blogService';
 import { BlogClaimService } from '@/services/blogClaimService';
 import { supabase } from '@/integrations/supabase/client';
+import { DatabaseSetup } from '@/utils/databaseSetup';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { PricingModal } from '@/components/PricingModal';
