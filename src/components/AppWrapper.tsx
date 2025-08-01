@@ -14,6 +14,7 @@ import { Blog } from '@/pages/Blog';
 import { BlogCreator } from '@/pages/BlogCreator';
 import { BlogPost } from '@/pages/BlogPost';
 import AIContentTest from '@/pages/AIContentTest';
+import TestBlogClaim from '@/pages/TestBlogClaim';
 
 import NotFound from '@/pages/NotFound';
 import AdminDashboard from '@/pages/AdminDashboard';
