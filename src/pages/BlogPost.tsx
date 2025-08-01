@@ -99,14 +99,19 @@ export function BlogPost() {
       navigate('/blog');
       return;
 
-    } catch (error) {
-      console.error('Failed to load blog post:', error);
+    } catch (error: any) {
+      console.error('❌ Failed to load blog post:', error);
+      setError(error.message || 'Unknown error occurred');
       toast({
-        title: "Error",
-        description: "Failed to load blog post. Please try again.",
+        title: "Error Loading Post",
+        description: `Failed to load blog post: ${error.message || 'Unknown error'}`,
         variant: "destructive"
       });
-      navigate('/blog');
+
+      // Don't navigate away immediately, let user see the error
+      setTimeout(() => {
+        navigate('/blog');
+      }, 3000);
     } finally {
       setLoading(false);
     }
