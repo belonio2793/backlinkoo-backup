@@ -42,6 +42,8 @@ import {
   LazyBlogListing,
   LazyBlogCreation,
   LazyBlogPostView,
+  LazyEnhancedBlogListing,
+  LazyEnhancedBlogPost,
   LazyTrialDashboard,
   LazyAIContentTest,
   LazyEnhancedDashboardRouter,
@@ -88,10 +90,10 @@ export const OptimizedAppWrapper = () => {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/preview/:slug" element={<BlogPreview />} />
 
-          {/* Blog routes - new system */}
-          <Route path="/blog" element={<LazyBlogListing />} />
+          {/* Blog routes - enhanced system */}
+          <Route path="/blog" element={<LazyEnhancedBlogListing />} />
           <Route path="/blog/create" element={<LazyBlogCreation />} />
-          <Route path="/blog/:slug" element={<LazyBlogPostView />} />
+          <Route path="/blog/:slug" element={<LazyEnhancedBlogPost />} />
 
           {/* Legacy blog routes for backward compatibility */}
           <Route path="/blog-old" element={<LazyBlog />} />
@@ -212,7 +214,8 @@ export const OptimizedAppWrapper = () => {
             </EmailVerificationGuard>
           } />
 
-          {/* 404 route */}
+          {/* 404 routes */}
+          <Route path="/404" element={<NotFound />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

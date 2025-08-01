@@ -6,12 +6,14 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { blogService } from '@/services/blogService';
 import { SimplifiedClaimService } from '@/services/simplifiedClaimService';
+import { UnifiedClaimService } from '@/services/unifiedClaimService';
 import { supabase } from '@/integrations/supabase/client';
 import { DatabaseSetup } from '@/utils/databaseSetup';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { PricingModal } from '@/components/PricingModal';
 import { LoginModal } from '@/components/LoginModal';
+
 import { Clock, Eye, Calendar, Plus, Search, Crown, Loader2, CheckCircle } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -56,7 +58,8 @@ export function BlogListing() {
         const stats = await SimplifiedClaimService.getUserSavedStats(user.id);
         setCanClaimMore(stats.canSave);
       } catch (error) {
-        console.warn('Failed to check claim status:', error);
+        console.warn('Failed to check claim status, defaulting to allow claims:', error);
+        setCanClaimMore(true); // Default to allowing claims if check fails
       }
     }
   };
@@ -67,7 +70,8 @@ export function BlogListing() {
       const claimed = await SimplifiedClaimService.getUserSavedPosts(user.id);
       setClaimedPosts(new Set(claimed.map(p => p.id)));
     } catch (error) {
-      console.warn('Failed to load claimed posts:', error);
+      console.warn('Failed to load claimed posts, continuing without claimed data:', error);
+      setClaimedPosts(new Set()); // Default to empty set if loading fails
     }
   };
 
@@ -76,8 +80,22 @@ export function BlogListing() {
       setLoading(true);
       console.log('🔄 Loading blog posts from Supabase database...');
 
-      const blogPosts = await blogService.getRecentBlogPosts(50);
-      console.log(`✅ Successfully loaded ${blogPosts.length} posts from database`);
+      // Try to load posts using the blog service
+      let blogPosts: BlogPost[] = [];
+      try {
+        blogPosts = await blogService.getRecentBlogPosts(50);
+        console.log(`✅ Successfully loaded ${blogPosts.length} posts from database`);
+      } catch (dbError: any) {
+        console.warn('Database loading failed, trying UnifiedClaimService:', dbError.message);
+        // Fallback to UnifiedClaimService if primary service fails
+        try {
+          blogPosts = await UnifiedClaimService.getClaimablePosts(50);
+          console.log(`✅ Loaded ${blogPosts.length} posts using fallback service`);
+        } catch (fallbackError: any) {
+          console.warn('Fallback also failed:', fallbackError.message);
+          throw new Error('Unable to load blog posts from any source');
+        }
+      }
 
       setPosts(blogPosts);
 
@@ -237,7 +255,14 @@ export function BlogListing() {
     setClaiming(post.id);
 
     try {
-      const result = await SimplifiedClaimService.claimBlogPost(post.slug, user);
+      // Try SimplifiedClaimService first, then UnifiedClaimService as fallback
+      let result;
+      try {
+        result = await SimplifiedClaimService.claimBlogPost(post.slug, user);
+      } catch (primaryError: any) {
+        console.warn('Primary claim service failed, trying fallback:', primaryError.message);
+        result = await UnifiedClaimService.claimBlogPost(post.slug, user);
+      }
 
       if (result.success) {
         setClaimedPosts(prev => new Set([...prev, post.id]));
@@ -256,7 +281,7 @@ export function BlogListing() {
         }, 1500);
 
       } else {
-        throw new Error(result.error || 'Failed to claim post');
+        throw new Error(result.error || result.message || 'Failed to claim post');
       }
     } catch (error: any) {
       console.error('Claim error:', error);

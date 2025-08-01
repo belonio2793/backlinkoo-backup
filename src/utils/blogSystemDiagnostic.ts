@@ -172,9 +172,11 @@ export class BlogSystemDiagnostic {
 
   private async generateTestData() {
     try {
+      console.log('🧪 Testing blog post creation permissions...');
+
       // Check if we can create a test post (helps identify write permissions)
       const testSlug = `diagnostic-test-${Date.now()}`;
-      
+
       const testPost = await blogService.createBlogPost({
         title: 'Diagnostic Test Post',
         content: '<p>This is a test post created by the diagnostic system.</p>',
@@ -194,7 +196,15 @@ export class BlogSystemDiagnostic {
       this.log('Test Cleanup', 'success', 'Test post cleaned up successfully');
 
     } catch (error: any) {
-      this.log('Test Data Generation', 'error', 'Cannot create test posts', {}, error);
+      if (error.message.includes('row-level security') || error.message.includes('policy')) {
+        this.log('Test Data Generation', 'warning', 'Blog post creation blocked by RLS policies', {
+          issue: 'Row Level Security policies are too restrictive',
+          solution: 'Run RLS policy fix or check database permissions',
+          error: error.message
+        });
+      } else {
+        this.log('Test Data Generation', 'error', 'Cannot create test posts - check database permissions', {}, error);
+      }
     }
   }
 

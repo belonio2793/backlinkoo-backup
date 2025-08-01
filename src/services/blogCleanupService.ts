@@ -1,131 +1,136 @@
-/**
- * Simple Blog Cleanup Service
- * Automatically removes expired unclaimed blog posts
- */
+import { supabase } from '@/integrations/supabase/client';
+import { EnhancedBlogClaimService } from './enhancedBlogClaimService';
 
 export class BlogCleanupService {
+  private static readonly CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour
+  private static intervalId: NodeJS.Timeout | null = null;
+  private static isRunning = false;
+
   /**
-   * Clean up expired unclaimed blog posts
+   * Start automatic cleanup of expired posts
    */
-  static async cleanupExpiredPosts(): Promise<{ cleaned: number; errors: string[] }> {
-    const results = { cleaned: 0, errors: [] as string[] };
-    
+  static startAutomaticCleanup(): void {
+    if (this.isRunning) {
+      console.log('🧹 Blog cleanup service is already running');
+      return;
+    }
+
+    console.log('🧹 Starting blog cleanup service...');
+    this.isRunning = true;
+
+    // Run cleanup immediately
+    this.performCleanup();
+
+    // Then run every hour
+    this.intervalId = setInterval(() => {
+      this.performCleanup();
+    }, this.CLEANUP_INTERVAL);
+  }
+
+  /**
+   * Stop automatic cleanup
+   */
+  static stopAutomaticCleanup(): void {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
+    this.isRunning = false;
+    console.log('🧹 Blog cleanup service stopped');
+  }
+
+  /**
+   * Perform cleanup of expired posts
+   */
+  static async performCleanup(): Promise<{ success: boolean; deletedCount: number; error?: string }> {
     try {
-      // Clean up from database first
-      try {
-        const { createClient } = await import('@supabase/supabase-js');
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-        
-        if (supabaseUrl && supabaseKey) {
-          const supabase = createClient(supabaseUrl, supabaseKey);
-          
-          const { data: expiredPosts, error: fetchError } = await supabase
-            .from('blog_posts')
-            .select('id, slug, expires_at')
-            .eq('is_trial_post', true)
-            .is('user_id', null) // Only unclaimed posts
-            .not('expires_at', 'is', null)
-            .lt('expires_at', new Date().toISOString());
-
-          if (fetchError) {
-            throw fetchError;
-          }
-
-          if (expiredPosts && expiredPosts.length > 0) {
-            const expiredIds = expiredPosts.map(post => post.id);
-            
-            const { error: deleteError } = await supabase
-              .from('blog_posts')
-              .delete()
-              .in('id', expiredIds);
-
-            if (!deleteError) {
-              results.cleaned += expiredPosts.length;
-              console.log(`🧹 Cleaned up ${expiredPosts.length} expired posts from database`);
-            }
-          }
-        }
-      } catch (dbError) {
-        console.warn('Database cleanup failed, proceeding with localStorage cleanup:', dbError);
-        results.errors.push(`Database cleanup failed: ${dbError instanceof Error ? dbError.message : 'Unknown error'}`);
+      console.log('🧹 Running blog post cleanup...');
+      
+      const result = await EnhancedBlogClaimService.cleanupExpiredPosts();
+      
+      if (result.error) {
+        console.error('🧹 Cleanup failed:', result.error);
+        return { success: false, deletedCount: 0, error: result.error };
       }
 
-      // Clean up from localStorage
-      try {
-        const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-        const currentTime = new Date();
-        const validPosts: any[] = [];
-        let localCleaned = 0;
-
-        for (const blogMeta of allBlogPosts) {
-          const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
-          if (blogData) {
-            const blogPost = JSON.parse(blogData);
-            
-            // Check if post is expired and unclaimed
-            if (blogPost.is_trial_post && 
-                !blogPost.user_id && 
-                blogPost.expires_at && 
-                currentTime > new Date(blogPost.expires_at)) {
-              
-              // Remove expired post
-              localStorage.removeItem(`blog_post_${blogMeta.slug}`);
-              localCleaned++;
-              console.log(`🗑️ Removed expired post: ${blogPost.title}`);
-            } else {
-              // Keep valid post
-              validPosts.push(blogMeta);
-            }
-          } else {
-            // Remove broken reference
-            console.log(`🔧 Removed broken blog reference: ${blogMeta.slug}`);
-          }
-        }
-
-        // Update the blog posts index
-        localStorage.setItem('all_blog_posts', JSON.stringify(validPosts));
-        
-        if (localCleaned > 0) {
-          results.cleaned += localCleaned;
-          console.log(`🧹 Cleaned up ${localCleaned} expired posts from localStorage`);
-        }
-
-      } catch (storageError) {
-        console.error('localStorage cleanup failed:', storageError);
-        results.errors.push(`localStorage cleanup failed: ${storageError instanceof Error ? storageError.message : 'Unknown error'}`);
+      if (result.deletedCount > 0) {
+        console.log(`🧹 Cleanup completed: ${result.deletedCount} expired posts deleted`);
+      } else {
+        console.log('🧹 Cleanup completed: No expired posts found');
       }
 
-      return results;
-
-    } catch (error) {
-      console.error('❌ Cleanup service failed:', error);
-      results.errors.push(error instanceof Error ? error.message : 'Unknown error');
-      return results;
+      return { success: true, deletedCount: result.deletedCount };
+    } catch (error: any) {
+      console.error('🧹 Cleanup service error:', error);
+      return { success: false, deletedCount: 0, error: error.message };
     }
   }
 
   /**
-   * Start automatic cleanup timer (runs every hour)
+   * Get cleanup service status
    */
-  static startAutomaticCleanup(): void {
-    // Run cleanup immediately on start
-    this.cleanupExpiredPosts();
+  static getStatus(): { isRunning: boolean; nextCleanup?: Date } {
+    return {
+      isRunning: this.isRunning,
+      nextCleanup: this.isRunning ? new Date(Date.now() + this.CLEANUP_INTERVAL) : undefined
+    };
+  }
 
-    // Set up interval to run every hour
-    setInterval(() => {
-      console.log('🕒 Running scheduled blog post cleanup...');
-      this.cleanupExpiredPosts();
-    }, 60 * 60 * 1000); // 1 hour
+  /**
+   * Manual cleanup trigger (for admin use)
+   */
+  static async manualCleanup(): Promise<{ success: boolean; deletedCount: number; error?: string }> {
+    console.log('🧹 Manual cleanup triggered...');
+    return await this.performCleanup();
+  }
 
-    console.log('⏰ Automatic blog post cleanup started (runs every hour)');
+  /**
+   * Get expired posts count without deleting
+   */
+  static async getExpiredPostsCount(): Promise<{ count: number; error?: string }> {
+    try {
+      const { count, error } = await supabase
+        .from('blog_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('claimed', false)
+        .not('expires_at', 'is', null)
+        .lte('expires_at', new Date().toISOString());
+
+      if (error) {
+        return { count: 0, error: error.message };
+      }
+
+      return { count: count || 0 };
+    } catch (error: any) {
+      return { count: 0, error: error.message };
+    }
+  }
+
+  /**
+   * Initialize cleanup service on app startup
+   */
+  static initialize(): void {
+    if (typeof window !== 'undefined') {
+      // Only run in browser environment
+      console.log('🧹 Initializing blog cleanup service...');
+      
+      // Start cleanup after a short delay to allow app to fully load
+      setTimeout(() => {
+        this.startAutomaticCleanup();
+      }, 5000);
+
+      // Stop cleanup when page is unloaded
+      window.addEventListener('beforeunload', () => {
+        this.stopAutomaticCleanup();
+      });
+    }
   }
 }
 
-// Start automatic cleanup when the service is imported (disabled to prevent startup errors)
-// if (typeof window !== 'undefined') {
-//   // Delay startup to avoid blocking initial app load
-//   setTimeout(() => {
-//     BlogCleanupService.startAutomaticCleanup();
-//   }, 5000); // 5 second delay
-// }
+// Auto-initialize if this module is imported
+if (typeof window !== 'undefined') {
+  // Initialize on next tick to ensure proper loading order
+  setTimeout(() => {
+    BlogCleanupService.initialize();
+  }, 0);
+}

@@ -38,15 +38,16 @@ export class BlogService {
     userId?: string,
     isTrialPost: boolean = false
   ): Promise<BlogPost> {
-    // Use custom slug if provided, otherwise generate from title
-    const baseSlug = data.customSlug || this.generateSlug(data.title);
-
-    // Generate unique slug using database function or fallback
-    let uniqueSlug = baseSlug;
-
     try {
-      const { data: uniqueSlugData, error: slugError } = await supabase
-        .rpc('generate_unique_slug', { base_slug: baseSlug });
+      // Use custom slug if provided, otherwise generate from title
+      const baseSlug = data.customSlug || this.generateSlug(data.title);
+
+      // Generate unique slug using database function or fallback
+      let uniqueSlug = baseSlug;
+
+      try {
+        const { data: uniqueSlugData, error: slugError } = await supabase
+          .rpc('generate_unique_slug', { base_slug: baseSlug });
 
       if (!slugError && uniqueSlugData) {
         uniqueSlug = uniqueSlugData as string;
@@ -118,7 +119,9 @@ export class BlogService {
       return persistenceResult.data!;
     }
 
-    // For trial posts, use regular storage
+    // For trial posts, attempt normal creation
+    console.log('🔓 Attempting blog post creation...');
+
     const { data: blogPost, error } = await supabase
       .from('blog_posts')
       .insert(blogPostData)
@@ -126,6 +129,71 @@ export class BlogService {
       .single();
 
     if (error) {
+      if (error.message.includes('duplicate key') || error.message.includes('unique constraint')) {
+        // If duplicate, try with a timestamp suffix
+        const timestampSlug = `${uniqueSlug}-${Date.now()}`;
+        const retryData = { ...blogPostData, slug: timestampSlug };
+
+        const { data: retryPost, error: retryError } = await supabase
+          .from('blog_posts')
+          .insert(retryData)
+          .select()
+          .single();
+
+        if (retryError) {
+          if (retryError.message.includes('row-level security') || retryError.message.includes('policy')) {
+            console.error('🚨 RLS POLICY IS BLOCKING BLOG POST CREATION');
+            console.error('');
+            console.error('📋 MANUAL FIX REQUIRED:');
+            console.error('1. Go to your Supabase Dashboard');
+            console.error('2. Open SQL Editor');
+            console.error('3. Execute: ALTER TABLE blog_posts DISABLE ROW LEVEL SECURITY;');
+            console.error('4. Execute: GRANT ALL ON blog_posts TO PUBLIC;');
+            console.error('5. Refresh this page');
+
+            throw new Error('RLS policy blocking blog creation. Manual SQL execution required in Supabase: ALTER TABLE blog_posts DISABLE ROW LEVEL SECURITY; GRANT ALL ON blog_posts TO PUBLIC;');
+          }
+          throw new Error(`Failed to create blog post after retry: ${retryError.message}`);
+        }
+
+        return retryPost;
+      }
+
+      if (error.message.includes('row-level security') || error.message.includes('policy')) {
+        console.error('🚨 RLS POLICY IS BLOCKING BLOG POST CREATION');
+        console.error('');
+        console.error('📋 MANUAL FIX REQUIRED:');
+        console.error('1. Go to your Supabase Dashboard');
+        console.error('2. Open SQL Editor');
+        console.error('3. Execute: ALTER TABLE blog_posts DISABLE ROW LEVEL SECURITY;');
+        console.error('4. Execute: GRANT ALL ON blog_posts TO PUBLIC;');
+        console.error('5. Refresh this page');
+
+        throw new Error('RLS policy blocking blog creation. Manual SQL execution required in Supabase: ALTER TABLE blog_posts DISABLE ROW LEVEL SECURITY; GRANT ALL ON blog_posts TO PUBLIC;');
+      }
+
+      throw new Error(`Failed to create blog post: ${error.message}`);
+    }
+
+    if (error) {
+      if (error.message.includes('duplicate key') || error.message.includes('unique constraint')) {
+        // If duplicate, try with a timestamp suffix
+        const timestampSlug = `${uniqueSlug}-${Date.now()}`;
+        const retryData = { ...blogPostData, slug: timestampSlug };
+
+        const { data: retryPost, error: retryError } = await supabase
+          .from('blog_posts')
+          .insert(retryData)
+          .select()
+          .single();
+
+        if (retryError) {
+          throw new Error(`Failed to create blog post after retry: ${retryError.message}`);
+        }
+
+        return retryPost;
+      }
+
       throw new Error(`Failed to create blog post: ${error.message}`);
     }
 
@@ -138,7 +206,11 @@ export class BlogService {
       }
     }
 
-    return blogPost;
+      return blogPost;
+    } catch (error: any) {
+      console.error('Blog post creation failed:', error);
+      throw new Error(`Failed to create blog post: ${error.message || 'Unknown error'}`);
+    }
   }
 
   /**
@@ -226,17 +298,37 @@ export class BlogService {
   }
 
   /**
+   * Get all blog posts
+   */
+  async getAllBlogPosts(): Promise<BlogPost[]> {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Failed to fetch all blog posts:', error.message);
+      return [];
+    }
+
+    return data || [];
+  }
+
+  /**
    * Delete a blog post
    */
-  async deleteBlogPost(id: string): Promise<void> {
+  async deleteBlogPost(id: string): Promise<boolean> {
     const { error } = await supabase
       .from('blog_posts')
       .delete()
       .eq('id', id);
 
     if (error) {
-      throw new Error(`Failed to delete blog post: ${error.message}`);
+      console.error('Failed to delete blog post:', error.message);
+      return false;
     }
+
+    return true;
   }
 
   /**

@@ -9,10 +9,14 @@ import { BetaNotification } from "@/components/BetaNotification";
 import { OptimizedAppWrapper } from "@/components/OptimizedAppWrapper";
 import { AuthProfileChecker } from "@/components/AuthProfileChecker";
 import { AuthRedirectHandler } from "@/components/AuthRedirectHandler";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { EnhancedErrorBoundary } from "@/components/EnhancedErrorBoundary";
 import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 import { autoConfigSaver } from "@/services/autoConfigSaver";
+import "@/services/blogCleanupService"; // Initialize blog cleanup service
+import "@/utils/systemsAssessment"; // Initialize systems assessment
+import "@/utils/blogSystemTest"; // Initialize blog system test
+import "@/services/rlsStatusService"; // RLS STATUS CHECK AND MANUAL FIX INSTRUCTIONS
 
 // Initialize performance monitoring in development
 if (import.meta.env.DEV) {
@@ -20,21 +24,8 @@ if (import.meta.env.DEV) {
 }
 
 
-// Debug utilities removed for better performance in production
-// Only import debug utils in development mode
-if (import.meta.env.DEV) {
-  import('@/utils/testBlogSystemFix'); // Auto-run blog system fix test
-  import('@/utils/testBlogClaiming');
-  import('@/utils/netlifyFunctionDiagnostic');
-  import('@/utils/dashboardAccessDiagnostic');
-  import('@/utils/quickDashboardAccess');
-  import('@/utils/blogClaimDiagnostic');
-  import('@/utils/testBlogClaimFixes');
-  import('@/utils/debugClaimSystem');
-  import('@/utils/runDiagnosticTest'); // Auto-run blog system diagnostic
-  import('@/utils/runDatabaseCheck'); // Auto-run database check
-  import('@/utils/manualDatabaseTest'); // Manual database test
-}
+// Debug utilities removed for better performance and stability
+// Diagnostic utilities are available manually via window.runBlogSystemDiagnostic()
 
 import { queryClient } from "@/lib/queryClient";
 
@@ -85,7 +76,7 @@ if (typeof window !== 'undefined') {
 }
 
 const App = () => (
-  <ErrorBoundary>
+  <EnhancedErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProfileChecker>
@@ -102,7 +93,7 @@ const App = () => (
         </AuthProfileChecker>
       </TooltipProvider>
     </QueryClientProvider>
-  </ErrorBoundary>
+  </EnhancedErrorBoundary>
 );
 
 export default App;

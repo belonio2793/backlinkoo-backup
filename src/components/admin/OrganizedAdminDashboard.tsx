@@ -20,6 +20,8 @@ import { ContentFilterManager } from "@/components/admin/ContentFilterManager";
 import { ContentModerationQueue } from "@/components/admin/ContentModerationQueue";
 import { AIPostsManager } from "@/components/admin/AIPostsManager";
 import { BlogPostClaimsManager } from "@/components/admin/BlogPostClaimsManager";
+import { BlogSystemAdmin } from "@/components/admin/BlogSystemAdmin";
+import { SystemsAssessmentDashboard } from "@/components/admin/SystemsAssessmentDashboard";
 import { EnvironmentVariablesManager } from "@/components/admin/EnvironmentVariablesManager";
 import { NetlifyEnvironmentManager } from "@/components/admin/NetlifyEnvironmentManager";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
@@ -243,10 +245,11 @@ export function OrganizedAdminDashboard() {
 
         {activeCategory === "content" && (
           <Tabs defaultValue="blog-posts" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="blog-posts">Blog Posts</TabsTrigger>
               <TabsTrigger value="ai-posts">AI Posts</TabsTrigger>
               <TabsTrigger value="blog-claims">Claims</TabsTrigger>
+              <TabsTrigger value="blog-system">System</TabsTrigger>
               <TabsTrigger value="content-filter">Content Filter</TabsTrigger>
               <TabsTrigger value="moderation">Moderation</TabsTrigger>
             </TabsList>
@@ -266,6 +269,10 @@ export function OrganizedAdminDashboard() {
               <BlogPostClaimsManager />
             </TabsContent>
 
+            <TabsContent value="blog-system">
+              <BlogSystemAdmin />
+            </TabsContent>
+
             <TabsContent value="content-filter">
               <ContentFilterManager />
             </TabsContent>
@@ -277,12 +284,17 @@ export function OrganizedAdminDashboard() {
         )}
 
         {activeCategory === "system" && (
-          <Tabs defaultValue="environment" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+          <Tabs defaultValue="assessment" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="assessment">Systems Assessment</TabsTrigger>
               <TabsTrigger value="environment">Environment & API Keys</TabsTrigger>
               <TabsTrigger value="deployment">Deployment</TabsTrigger>
               <TabsTrigger value="database">Database</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="assessment">
+              <SystemsAssessmentDashboard />
+            </TabsContent>
 
             <TabsContent value="environment">
               <NetlifyEnvironmentManager />

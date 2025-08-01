@@ -12,6 +12,7 @@ import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
 
 import { TrialPostCleanupManager } from "@/components/admin/TrialPostCleanupManager";
 import { BlogManagementPanel } from "@/components/admin/BlogManagementPanel";
+import { BlogSystemAdmin } from "@/components/admin/BlogSystemAdmin";
 import { ContentFilterManager } from "@/components/admin/ContentFilterManager";
 import { ContentModerationQueue } from "@/components/admin/ContentModerationQueue";
 import { AIPostsManager } from "@/components/admin/AIPostsManager";

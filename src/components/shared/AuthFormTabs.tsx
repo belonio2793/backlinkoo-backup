@@ -83,8 +83,6 @@ export function AuthFormTabs({
           title: "Welcome back!",
           description: `Signing in as ${currentEmail}`,
         });
-
- main
       } else {
         toast({
           title: "Sign in failed",

@@ -50,6 +50,7 @@ import { ApiConfigStatus } from "@/components/ApiConfigStatus";
 import { TrialBlogShowcase } from "@/components/TrialBlogShowcase";
 import { TrialBlogPostsDisplay as NewTrialBlogPostsDisplay } from "@/components/TrialBlogPostsDisplay";
 import { EnhancedTrialBlogPosts } from "@/components/EnhancedTrialBlogPosts";
+import { DashboardTrialPosts } from "@/components/DashboardTrialPosts";
 
 import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
@@ -1429,7 +1430,7 @@ const Dashboard = () => {
               </div>
             ) : activeSection === "trial" ? (
               <div className="space-y-6">
-                <EnhancedTrialBlogPosts user={user} />
+                <DashboardTrialPosts user={user} />
               </div>
             ) : null}
           </>

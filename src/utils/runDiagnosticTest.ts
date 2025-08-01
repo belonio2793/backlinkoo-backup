@@ -1,18 +1,20 @@
-import { blogSystemDiagnostic } from './blogSystemDiagnostic';
+import { SafeDiagnostic } from './safeDiagnostic';
 
 // Immediate diagnostic test
 export async function runImmediateDiagnostic() {
-  console.log('🔍 Running immediate blog system diagnostic...');
-  
+  console.log('🔍 Running safe blog system diagnostic...');
+
   try {
-    // Quick status first
+    // Get quick status
     console.log('\n⚡ Quick Status Check:');
-    const quickStatus = await blogSystemDiagnostic.getQuickStatus();
+    const quickStatus = await SafeDiagnostic.getQuickStatus();
     console.table(quickStatus);
-    
-    // Full diagnostic
+
+    // Run full diagnostic
     console.log('\n🔍 Full Diagnostic:');
-    const fullDiagnostic = await blogSystemDiagnostic.runFullDiagnostic();
+    const fullDiagnostic = await SafeDiagnostic.runSafeDiagnostic();
+    
+    console.table(fullDiagnostic);
     
     console.log('\n📊 Tables Status:');
     fullDiagnostic.tables.forEach(table => {
@@ -88,13 +90,7 @@ CREATE POLICY "Users can delete their own saved posts" ON user_saved_posts
   }
 }
 
-// Auto-run when imported in development
-if (import.meta.env.DEV && typeof window !== 'undefined') {
-  // Run after a short delay to let everything load
-  setTimeout(() => {
-    runImmediateDiagnostic();
-  }, 2000);
-  
-  // Also make it available globally
+// Make diagnostic available globally but don't auto-run to prevent errors
+if (typeof window !== 'undefined') {
   (window as any).runBlogSystemDiagnostic = runImmediateDiagnostic;
 }
