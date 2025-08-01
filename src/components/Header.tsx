@@ -70,11 +70,11 @@ export function Header() {
               </>
             ) : (
               <>
-                <Button variant="ghost" onClick={() => navigate("/login")} className="font-medium">
+                <Button variant="ghost" onClick={handleSignInClick} className="font-medium">
                   Sign In
                 </Button>
-                <Button onClick={() => navigate("/login")} className="font-medium">
-                  Get Started
+                <Button onClick={handleCreateAccountClick} className="font-medium">
+                  Create Account
                 </Button>
               </>
             )}
