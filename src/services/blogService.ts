@@ -22,11 +22,16 @@ export class BlogService {
    * Generate a unique slug from title
    */
   private generateSlug(title: string): string {
-    return title
+    const baseSlug = title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '')
       .substring(0, 50);
+
+    // Add timestamp + random string for guaranteed uniqueness
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substr(2, 9);
+    return `${baseSlug}-${timestamp}-${random}`;
   }
 
   /**
@@ -39,59 +44,18 @@ export class BlogService {
     isTrialPost: boolean = false
   ): Promise<BlogPost> {
     try {
-      // Use custom slug if provided, otherwise generate from title
-      const baseSlug = data.customSlug || this.generateSlug(data.title);
-
-      // Generate unique slug using database function or fallback
-      let uniqueSlug = baseSlug;
-
-      try {
-        const { data: uniqueSlugData, error: slugError } = await supabase
-          .rpc('generate_unique_slug', { base_slug: baseSlug });
-
-      if (!slugError && uniqueSlugData) {
-        uniqueSlug = uniqueSlugData as string;
-      } else {
-        // Fallback: generate unique slug manually
-        let counter = 0;
-        let slugExists = true;
-
-        while (slugExists) {
-          const testSlug = counter === 0 ? baseSlug : `${baseSlug}-${counter}`;
-          const { data, error } = await supabase
-            .from('blog_posts')
-            .select('id')
-            .eq('slug', testSlug)
-            .single();
-
-          if (error && error.code === 'PGRST116') {
-            // No rows found, slug is available
-            uniqueSlug = testSlug;
-            slugExists = false;
-          } else if (!error) {
-            // Slug exists, try next number
-            counter++;
-          } else {
-            // Other error, use timestamp fallback
-            uniqueSlug = `${baseSlug}-${Date.now()}`;
-            slugExists = false;
-          }
-        }
-      }
-    } catch (error) {
-      // Fallback to timestamp-based slug
-      uniqueSlug = `${baseSlug}-${Date.now()}`;
-    }
-    const publishedUrl = `${window.location.origin}/blog/${uniqueSlug}`;
+      // Generate fallback slug for NOT NULL constraint compatibility
+      // Once migration is applied, database trigger will handle uniqueness
+      const customSlug = data.customSlug || this.generateSlug(data.title);
 
     const blogPostData: CreateBlogPost = {
       user_id: userId || null,
       title: data.title,
-      slug: uniqueSlug,
+      slug: customSlug, // fallback slug until migration applied
       content: data.content,
       target_url: data.targetUrl,
       anchor_text: data.anchorText,
-      published_url: publishedUrl,
+      // published_url will be set after database generates slug
       status: 'published',
       is_trial_post: isTrialPost,
       expires_at: isTrialPost ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null,
@@ -122,17 +86,23 @@ export class BlogService {
     // For trial posts, attempt normal creation
     console.log('🔓 Attempting blog post creation...');
 
+    // Remove any custom id field to let database auto-generate UUID
+    const { id: _, ...cleanBlogPostData } = blogPostData as any;
+
     const { data: blogPost, error } = await supabase
       .from('blog_posts')
-      .insert(blogPostData)
+      .insert(cleanBlogPostData)
       .select()
       .single();
 
     if (error) {
-      if (error.message.includes('duplicate key') || error.message.includes('unique constraint')) {
-        // If duplicate, try with a timestamp suffix
-        const timestampSlug = `${uniqueSlug}-${Date.now()}`;
-        const retryData = { ...blogPostData, slug: timestampSlug };
+      // Handle slug collision specifically
+      if (error.message.includes('blog_posts_slug_key') || error.message.includes('duplicate key value violates unique constraint')) {
+        console.warn('⚠️ Slug collision detected, retrying with new slug...');
+
+        // Generate a completely new slug with additional randomness
+        const newSlug = this.generateSlug(data.title);
+        const retryData = { ...cleanBlogPostData, slug: newSlug };
 
         const { data: retryPost, error: retryError } = await supabase
           .from('blog_posts')
@@ -141,21 +111,10 @@ export class BlogService {
           .single();
 
         if (retryError) {
-          if (retryError.message.includes('row-level security') || retryError.message.includes('policy')) {
-            console.error('🚨 RLS POLICY IS BLOCKING BLOG POST CREATION');
-            console.error('');
-            console.error('📋 MANUAL FIX REQUIRED:');
-            console.error('1. Go to your Supabase Dashboard');
-            console.error('2. Open SQL Editor');
-            console.error('3. Execute: ALTER TABLE blog_posts DISABLE ROW LEVEL SECURITY;');
-            console.error('4. Execute: GRANT ALL ON blog_posts TO PUBLIC;');
-            console.error('5. Refresh this page');
-
-            throw new Error('RLS policy blocking blog creation. Manual SQL execution required in Supabase: ALTER TABLE blog_posts DISABLE ROW LEVEL SECURITY; GRANT ALL ON blog_posts TO PUBLIC;');
-          }
-          throw new Error(`Failed to create blog post after retry: ${retryError.message}`);
+          throw new Error(`Failed to create blog post after slug retry: ${retryError.message}`);
         }
 
+        console.log('✅ Blog post created successfully after slug retry');
         return retryPost;
       }
 
@@ -176,24 +135,6 @@ export class BlogService {
     }
 
     if (error) {
-      if (error.message.includes('duplicate key') || error.message.includes('unique constraint')) {
-        // If duplicate, try with a timestamp suffix
-        const timestampSlug = `${uniqueSlug}-${Date.now()}`;
-        const retryData = { ...blogPostData, slug: timestampSlug };
-
-        const { data: retryPost, error: retryError } = await supabase
-          .from('blog_posts')
-          .insert(retryData)
-          .select()
-          .single();
-
-        if (retryError) {
-          throw new Error(`Failed to create blog post after retry: ${retryError.message}`);
-        }
-
-        return retryPost;
-      }
-
       throw new Error(`Failed to create blog post: ${error.message}`);
     }
 
@@ -202,7 +143,7 @@ export class BlogService {
       try {
         await blogPersistenceService.storeWithMaxPersistence(blogPost, 'backup');
       } catch (backupError) {
-        console.warn('⚠️ Trial post backup failed (non-critical):', backupError);
+        console.warn('⚠��� Trial post backup failed (non-critical):', backupError);
       }
     }
 

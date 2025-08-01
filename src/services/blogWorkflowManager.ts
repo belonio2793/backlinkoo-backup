@@ -86,7 +86,7 @@ export class BlogWorkflowManager {
       // Step 4: Create blog post object
       const now = new Date();
       const post: BlogPost = {
-        id: contentResult.id || this.generateId(),
+        id: '', // Will be set by database after insertion
         title: contentResult.title || this.extractTitle(contentResult.content),
         content: contentResult.content,
         targetUrl: request.targetUrl,
@@ -298,10 +298,9 @@ export class BlogWorkflowManager {
 
   private static async storePost(post: BlogPost): Promise<{ success: boolean; error?: string }> {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('blog_posts')
-        .upsert({
-          id: post.id,
+        .insert({
           title: post.title,
           content: post.content,
           target_url: post.targetUrl,
@@ -312,7 +311,14 @@ export class BlogWorkflowManager {
           expires_at: post.expiresAt,
           word_count: post.wordCount,
           is_guest: post.isGuest
-        });
+        })
+        .select()
+        .single();
+
+      // Update the post object with the database-generated ID
+      if (data) {
+        post.id = data.id;
+      }
 
       if (error) {
         console.error('BlogWorkflow: Storage error', error);
@@ -362,9 +368,7 @@ export class BlogWorkflowManager {
     };
   }
 
-  private static generateId(): string {
-    return `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
+
 
   private static extractTitle(content: string): string {
     const lines = content.split('\n');

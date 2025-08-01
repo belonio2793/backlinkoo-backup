@@ -37,13 +37,18 @@ export class ClaimableBlogService {
    * Generate a unique slug from title
    */
   private static generateSlug(title: string): string {
-    return title
+    const baseSlug = title
       // Strip HTML tags first
       .replace(/<[^>]*>/g, '')
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '')
-      .substring(0, 50) + '-' + Date.now().toString(36);
+      .substring(0, 50);
+
+    // Add timestamp + random string for guaranteed uniqueness
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substr(2, 9);
+    return `${baseSlug}-${timestamp}-${random}`;
   }
 
   /**
@@ -53,21 +58,22 @@ export class ClaimableBlogService {
     try {
       console.log('🚀 Generating and publishing blog post:', data.keyword);
 
+      // Generate fallback slug for NOT NULL constraint compatibility
+      // Once migration is applied, database trigger will handle uniqueness
       const slug = this.generateSlug(data.title);
-      const publishedUrl = `${window.location.origin}/blog/${slug}`;
-      
+
       // Set expiration to 24 hours from now for unclaimed posts
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
       const blogPostData = {
         user_id: user?.id || null,
-        slug,
+        slug, // fallback slug until migration applied
         title: data.title,
         content: data.content,
         excerpt: data.excerpt || data.content.substring(0, 200) + '...',
         anchor_text: data.anchorText,
         target_url: data.targetUrl,
-        published_url: publishedUrl,
+        // published_url will be set after we get the generated slug
         status: 'published',
         is_claimed: false,
         claimed_by: null,
@@ -84,13 +90,50 @@ export class ClaimableBlogService {
       };
 
       // Insert into blog_posts table (unified approach)
+      // Remove any custom id field to let database auto-generate UUID
+      const { id: _, ...cleanBlogPostData } = blogPostData as any;
+
       const { data: blogPost, error } = await supabase
         .from('blog_posts')
-        .insert(blogPostData)
+        .insert(cleanBlogPostData)
         .select()
         .single();
 
       if (error) {
+        // Handle slug collision specifically
+        if (error.message.includes('blog_posts_slug_key') || error.message.includes('duplicate key value violates unique constraint')) {
+          console.warn('⚠️ Slug collision detected in claimable blog, retrying with new slug...');
+
+          // Generate a completely new slug with additional randomness
+          const newSlug = this.generateSlug(data.title);
+          const retryData = { ...cleanBlogPostData, slug: newSlug };
+
+          const { data: retryPost, error: retryError } = await supabase
+            .from('blog_posts')
+            .insert(retryData)
+            .select()
+            .single();
+
+          if (retryError) {
+            console.error('❌ Failed to publish blog post after slug retry:', retryError);
+            return {
+              success: false,
+              error: `Failed to publish blog post after retry: ${retryError.message}`
+            };
+          }
+
+          // Generate publishedUrl using the database-generated slug
+          const publishedUrl = `${window.location.origin}/blog/${retryPost.slug}`;
+
+          console.log('✅ Blog post published successfully after slug retry:', publishedUrl);
+
+          return {
+            success: true,
+            blogPost: retryPost,
+            publishedUrl
+          };
+        }
+
         console.error('❌ Failed to publish blog post:', error);
         return {
           success: false,
@@ -98,8 +141,11 @@ export class ClaimableBlogService {
         };
       }
 
+      // Generate publishedUrl using the database-generated slug
+      const publishedUrl = `${window.location.origin}/blog/${blogPost.slug}`;
+
       console.log('✅ Blog post published successfully:', publishedUrl);
-      
+
       return {
         success: true,
         blogPost,
