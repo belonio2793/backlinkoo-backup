@@ -249,8 +249,15 @@ export function AuthFormTabs({
         });
       }
     } finally {
-      console.log('��� Login attempt completed, setting loading to false');
+      console.log('🔐 Login attempt completed, setting loading to false');
       setIsLoading(false);
+      setTimeoutCountdown(0);
+
+      // Ensure countdown interval is cleared
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
     }
   };
 
