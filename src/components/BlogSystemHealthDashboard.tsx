@@ -244,7 +244,7 @@ export function BlogSystemHealthDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Function className="h-5 w-5" />
+                <Code className="h-5 w-5" />
                 Database Functions
               </CardTitle>
             </CardHeader>
