@@ -440,7 +440,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
             <div>
               <div className="text-yellow-400 mb-2">System Status:</div>
               <div>• Status: {debugInfo.loadingStatus}</div>
-              <div>• Online: {debugInfo.connectionOnline ? '✅' : '���'}</div>
+              <div>• Online: {debugInfo.connectionOnline ? '✅' : '�����'}</div>
               <div>• Last Update: {debugInfo.timestamp}</div>
               <div>• User Auth: {debugInfo.userAuthenticated ? '✅' : '❌'}</div>
               <div>• User ID: {debugInfo.userId || 'None'}</div>
@@ -470,8 +470,8 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           <div className="text-sm text-purple-600">Total Posts</div>
         </div>
         <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200">
-          <div className="text-2xl font-bold text-emerald-700">{userClaimedPosts.length}</div>
-          <div className="text-sm text-emerald-600">Your Posts</div>
+          <div className="text-2xl font-bold text-emerald-700">{userSavedPosts.length}</div>
+          <div className="text-sm text-emerald-600">Saved Posts</div>
         </div>
         <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
           <div className="text-2xl font-bold text-blue-700">{availablePosts.length}</div>
@@ -681,7 +681,7 @@ const Dashboard = () => {
           session = result.data?.session;
           error = result.error;
         } catch (timeoutError) {
-          console.warn('�� Dashboard - Auth check timed out, trying fallback...');
+          console.warn('🏠 Dashboard - Auth check timed out, trying fallback...');
 
           // If auth times out, continue with demo mode
           console.log('🏠 Dashboard - Auth timeout, continuing in demo mode');
