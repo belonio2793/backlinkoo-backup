@@ -86,30 +86,47 @@ export function AuthFormTabs({
       return;
     }
 
-    // Show instant success toast
-    toast({
-      title: "Welcome back!",
-      description: `Signing in as ${loginEmail}`,
-    });
+    setIsLoading(true);
+    const currentEmail = loginEmail;
+    const currentPassword = loginPassword;
 
-    // Redirect immediately to dashboard for instant UX
-    window.location.href = '/dashboard';
+    try {
+      const result = await AuthService.signIn({
+        email: currentEmail,
+        password: currentPassword,
+      });
 
-    // Reset form
-    setLoginEmail("");
-    setLoginPassword("");
-
-    // Do authentication in background (non-blocking)
-    setTimeout(async () => {
-      try {
-        await AuthService.signIn({
-          email: loginEmail,
-          password: loginPassword,
+      if (result.success) {
+        toast({
+          title: "Welcome back!",
+          description: `Signing in as ${currentEmail}`,
         });
-      } catch (error) {
-        console.warn('Background auth error:', error);
+
+        // Reset form on success
+        setLoginEmail("");
+        setLoginPassword("");
+
+        // Redirect to dashboard
+        window.location.href = '/dashboard';
+
+        onAuthSuccess?.(result.user);
+      } else {
+        toast({
+          title: "Sign in failed",
+          description: result.error || "Invalid email or password.",
+          variant: "destructive",
+        });
       }
-    }, 0);
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Sign in failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
