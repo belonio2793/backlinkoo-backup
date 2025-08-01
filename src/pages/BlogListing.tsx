@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { blogService } from '@/services/blogService';
 import { SimplifiedClaimService } from '@/services/simplifiedClaimService';
+import { UnifiedClaimService } from '@/services/unifiedClaimService';
 import { supabase } from '@/integrations/supabase/client';
 import { DatabaseSetup } from '@/utils/databaseSetup';
 import { useAuth } from '@/hooks/useAuth';
