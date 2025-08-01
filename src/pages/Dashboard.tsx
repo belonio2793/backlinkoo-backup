@@ -117,7 +117,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           return true;
         });
         localPosts.push(...validLocalPosts);
-        console.log(`�� Found ${validLocalPosts.length} valid local posts`);
+        console.log(`📦 Found ${validLocalPosts.length} valid local posts`);
       } catch (error) {
         console.warn('Error loading local posts:', error);
       }
@@ -871,7 +871,7 @@ const Dashboard = () => {
     try {
       const currentUser = authUser || user;
       if (!currentUser) {
-        console.log('��� No current user for fetchCampaigns');
+        console.log('📊 No current user for fetchCampaigns');
         return;
       }
 
@@ -1005,11 +1005,10 @@ const Dashboard = () => {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleSignOut}
-                    disabled={isSigningOut}
                     className="text-red-600 focus:text-red-600"
                   >
-                    <LogOut className={`mr-2 h-4 w-4 ${isSigningOut ? 'animate-spin' : ''}`} />
-                    {isSigningOut ? 'Signing Out...' : 'Sign Out'}
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
