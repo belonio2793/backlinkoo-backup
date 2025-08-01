@@ -62,6 +62,7 @@ interface AdminStats {
 }
 
 export function OrganizedAdminDashboard() {
+  const { toast } = useToast();
   const [stats] = useState<AdminStats>({
     totalUsers: 1247,
     activeUsers: 892,
@@ -70,6 +71,23 @@ export function OrganizedAdminDashboard() {
   });
 
   const [activeCategory, setActiveCategory] = useState("overview");
+
+  const handleSignOut = async () => {
+    try {
+      await AuthService.signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out.",
+      });
+      window.location.href = '/';
+    } catch (error) {
+      toast({
+        title: "Sign out failed",
+        description: "An error occurred while signing out.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const categories = [
     {
