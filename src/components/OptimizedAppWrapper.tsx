@@ -140,6 +140,13 @@ export const OptimizedAppWrapper = () => {
             <Route path="/debug/claim-system" element={<LazyClaimSystemDebug />} />
           )}
 
+          {/* Blog system diagnostic - accessible in all environments */}
+          <Route path="/diagnostic/blog-system" element={
+            <Suspense fallback={<PageLoader />}>
+              <BlogSystemDiagnostic />
+            </Suspense>
+          } />
+
           {/* Payment routes - lightweight, immediate load */}
           <Route path="/payment-success" element={
             <EmailVerificationGuard>
