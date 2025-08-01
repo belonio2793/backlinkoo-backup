@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { BlogClaimMigration } from '@/utils/blogClaimMigration';
 import { BlogCleanupService } from '@/services/blogCleanupService';
 import { RLSPolicyFix } from '@/utils/fixRLSPolicies';
+import { SecurityProtocolRemoval } from '@/utils/disableSecurityProtocols';
 
 export function BlogSystemAdmin() {
   const { toast } = useToast();
