@@ -39,55 +39,14 @@ export class BlogService {
     isTrialPost: boolean = false
   ): Promise<BlogPost> {
     try {
-      // Use custom slug if provided, otherwise generate from title
-      const baseSlug = data.customSlug || this.generateSlug(data.title);
-
-      // Generate unique slug using database function or fallback
-      let uniqueSlug = baseSlug;
-
-      try {
-        const { data: uniqueSlugData, error: slugError } = await supabase
-          .rpc('generate_unique_slug', { base_slug: baseSlug });
-
-      if (!slugError && uniqueSlugData) {
-        uniqueSlug = uniqueSlugData as string;
-      } else {
-        // Fallback: generate unique slug manually
-        let counter = 0;
-        let slugExists = true;
-
-        while (slugExists) {
-          const testSlug = counter === 0 ? baseSlug : `${baseSlug}-${counter}`;
-          const { data, error } = await supabase
-            .from('blog_posts')
-            .select('id')
-            .eq('slug', testSlug)
-            .single();
-
-          if (error && error.code === 'PGRST116') {
-            // No rows found, slug is available
-            uniqueSlug = testSlug;
-            slugExists = false;
-          } else if (!error) {
-            // Slug exists, try next number
-            counter++;
-          } else {
-            // Other error, use timestamp fallback
-            uniqueSlug = `${baseSlug}-${Date.now()}`;
-            slugExists = false;
-          }
-        }
-      }
-    } catch (error) {
-      // Fallback to timestamp-based slug
-      uniqueSlug = `${baseSlug}-${Date.now()}`;
-    }
-    const publishedUrl = `${window.location.origin}/blog/${uniqueSlug}`;
+      // Let database trigger generate unique slug from title
+      // Custom slug support: pass as slug if provided, otherwise let trigger generate from title
+      const customSlug = data.customSlug || null;
 
     const blogPostData: CreateBlogPost = {
       user_id: userId || null,
       title: data.title,
-      slug: uniqueSlug,
+      slug: customSlug, // null will trigger slug generation from title
       content: data.content,
       target_url: data.targetUrl,
       anchor_text: data.anchorText,
