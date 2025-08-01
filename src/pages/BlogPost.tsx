@@ -98,7 +98,7 @@ export function BlogPost() {
     });
 
     // Navigate to login page
-    navigate('/auth');
+    navigate('/login');
   };
 
   const claimPost = async () => {
