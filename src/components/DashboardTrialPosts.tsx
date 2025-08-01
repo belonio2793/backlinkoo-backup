@@ -370,15 +370,20 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
               <Button
                 size="sm"
                 onClick={() => handleClaimPost(post.slug)}
-                disabled={claiming === post.slug}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                disabled={claiming === post.slug || !canClaim}
+                className={`${
+                  canClaim
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700'
+                    : 'bg-gray-400 cursor-not-allowed'
+                }`}
+                title={!canClaim ? 'You have reached the maximum of 3 claimed posts' : ''}
               >
                 {claiming === post.slug ? (
                   <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
                     <Crown className="h-3 w-3 mr-1" />
-                    Claim
+                    {canClaim ? 'Claim' : 'Limit Reached'}
                   </>
                 )}
               </Button>
