@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BlogSystemDiagnostic, type DiagnosticResult } from '@/utils/blogSystemDiagnostic';
+import { BlogSystemDiagnostic as BlogDiagnosticUtility, type DiagnosticResult } from '@/utils/blogSystemDiagnostic';
 import { DatabaseSetup } from '@/utils/databaseSetup';
 import { 
   CheckCircle, 
