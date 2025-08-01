@@ -1,15 +1,41 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { useState } from 'react';
 import { Infinity } from 'lucide-react';
+import { LoginModal } from './LoginModal';
+import { AuthService } from '@/services/authService';
 
 export function Header() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [defaultTab, setDefaultTab] = useState<'login' | 'signup'>('login');
 
   const handleSignOut = async () => {
-    // Sign out logic would go here - for now just navigate to login
-    navigate('/login');
+    try {
+      await AuthService.signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Sign out error:', error);
+      navigate('/');
+    }
+  };
+
+  const handleSignInClick = () => {
+    setDefaultTab('login');
+    setShowLoginModal(true);
+  };
+
+  const handleCreateAccountClick = () => {
+    setDefaultTab('signup');
+    setShowLoginModal(true);
+  };
+
+  const handleAuthSuccess = (user: any) => {
+    setShowLoginModal(false);
+    // Navigate to dashboard after successful auth
+    navigate('/dashboard');
   };
 
   return (
@@ -44,17 +70,25 @@ export function Header() {
               </>
             ) : (
               <>
-                <Button variant="ghost" onClick={() => navigate("/login")} className="font-medium">
+                <Button variant="ghost" onClick={handleSignInClick} className="font-medium">
                   Sign In
                 </Button>
-                <Button onClick={() => navigate("/login")} className="font-medium">
-                  Get Started
+                <Button onClick={handleCreateAccountClick} className="font-medium">
+                  Create Account
                 </Button>
               </>
             )}
           </div>
         </div>
       </div>
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onAuthSuccess={handleAuthSuccess}
+        defaultTab={defaultTab}
+      />
     </header>
   );
 }

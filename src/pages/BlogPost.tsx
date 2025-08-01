@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,9 +23,12 @@ import {
   Star,
   Crown,
   Timer,
-  CheckCircle2
+  CheckCircle2,
+  Plus,
+  Trash2
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
+import { supabase } from '@/integrations/supabase/client';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -36,6 +40,9 @@ export function BlogPost() {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  console.log('🔄 BlogPost component rendered with slug:', slug);
 
   useEffect(() => {
     if (!slug) {
@@ -49,13 +56,17 @@ export function BlogPost() {
   const loadPost = async () => {
     try {
       console.log('🔄 Loading blog post:', slug);
+      setError(null);
 
       // First try to get from database using unified service
       const blogPost = await UnifiedClaimService.getBlogPostBySlug(slug!);
       if (blogPost) {
+        console.log('✅ Found blog post in database:', blogPost.title);
         setPost(blogPost);
         setLoading(false);
         return;
+      } else {
+        console.log('⚠️ Blog post not found in database, trying localStorage...');
       }
 
       // Fallback to localStorage for legacy posts
@@ -88,14 +99,19 @@ export function BlogPost() {
       navigate('/blog');
       return;
 
-    } catch (error) {
-      console.error('Failed to load blog post:', error);
+    } catch (error: any) {
+      console.error('❌ Failed to load blog post:', error);
+      setError(error.message || 'Unknown error occurred');
       toast({
-        title: "Error",
-        description: "Failed to load blog post. Please try again.",
+        title: "Error Loading Post",
+        description: `Failed to load blog post: ${error.message || 'Unknown error'}`,
         variant: "destructive"
       });
-      navigate('/blog');
+
+      // Don't navigate away immediately, let user see the error
+      setTimeout(() => {
+        navigate('/blog');
+      }, 3000);
     } finally {
       setLoading(false);
     }
@@ -243,6 +259,54 @@ export function BlogPost() {
     return cleanContent;
   };
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+        <Header />
+        <main className="container mx-auto px-4 py-16">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="bg-white rounded-2xl shadow-xl p-12">
+              <h1 className="text-3xl font-bold text-red-600 mb-4">Error Loading Post</h1>
+              <p className="text-gray-600 mb-8 text-lg">
+                {error}
+              </p>
+              <div className="space-y-4">
+                <Button
+                  onClick={() => window.location.reload()}
+                  className="bg-blue-600 hover:bg-blue-700 mr-4"
+                >
+                  Try Again
+                </Button>
+                <Button
+                  onClick={() => navigate('/blog')}
+                  variant="outline"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Blog
+                </Button>
+              </div>
+              {slug && (
+                <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-2">
+                    For debugging, visit:
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/diagnostic/blog-post/${slug}`)}
+                  >
+                    Diagnostic Tool
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
@@ -274,14 +338,26 @@ export function BlogPost() {
           <div className="max-w-4xl mx-auto text-center">
             <div className="bg-white rounded-2xl shadow-xl p-12">
               <h1 className="text-3xl font-bold text-gray-900 mb-4">Post Not Found</h1>
-              <p className="text-gray-600 mb-8 text-lg">The blog post you're looking for doesn't exist or may have been removed.</p>
-              <Button 
-                onClick={() => navigate('/blog')}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Blog
-              </Button>
+              <p className="text-gray-600 mb-8 text-lg">
+                The blog post with slug "<code className="bg-gray-100 px-2 py-1 rounded">{slug}</code>" doesn't exist or may have been removed.
+              </p>
+              <div className="space-y-4">
+                <Button
+                  onClick={() => navigate('/blog')}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 mr-4"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Blog
+                </Button>
+                {slug && (
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate(`/diagnostic/blog-post/${slug}`)}
+                  >
+                    Run Diagnostic
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </main>

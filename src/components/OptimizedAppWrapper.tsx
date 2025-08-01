@@ -18,6 +18,8 @@ import PaymentSuccess from '@/pages/PaymentSuccess';
 import PaymentCancelled from '@/pages/PaymentCancelled';
 import SubscriptionSuccess from '@/pages/SubscriptionSuccess';
 import SubscriptionCancelled from '@/pages/SubscriptionCancelled';
+import BlogSystemDiagnostic from '@/pages/BlogSystemDiagnostic';
+import { BlogPostDiagnostic } from '@/components/BlogPostDiagnostic';
 
 // Import lightweight components
 import AdminAuthGuard from '@/components/AdminAuthGuard';
@@ -138,6 +140,18 @@ export const OptimizedAppWrapper = () => {
           {import.meta.env.DEV && (
             <Route path="/debug/claim-system" element={<LazyClaimSystemDebug />} />
           )}
+
+          {/* Blog system diagnostic - accessible in all environments */}
+          <Route path="/diagnostic/blog-system" element={
+            <Suspense fallback={<PageLoader />}>
+              <BlogSystemDiagnostic />
+            </Suspense>
+          } />
+          <Route path="/diagnostic/blog-post/:slug" element={
+            <div className="min-h-screen bg-gray-50">
+              <BlogPostDiagnostic />
+            </div>
+          } />
 
           {/* Payment routes - lightweight, immediate load */}
           <Route path="/payment-success" element={
