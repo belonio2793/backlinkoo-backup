@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { BlogClaimDebugPanel } from "@/components/BlogClaimDebugPanel";
+
 import {
   CreditCard,
   Link,
@@ -24,7 +24,7 @@ import {
   Plus,
   Activity,
   LogOut,
-  Bug,
+
   Calendar,
   Target,
   BarChart3,
@@ -634,7 +634,7 @@ const Dashboard = () => {
     return () => clearTimeout(maxLoadingTime);
   }, []);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const [showDebugPanel, setShowDebugPanel] = useState(false);
+
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -1066,10 +1066,7 @@ const Dashboard = () => {
                     <Settings className="mr-2 h-4 w-4" />
                     Profile Settings
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setShowDebugPanel(true)}>
-                    <Bug className="mr-2 h-4 w-4" />
-                    Debug Claiming
-                  </DropdownMenuItem>
+
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleSignOut}
@@ -1643,18 +1640,7 @@ const Dashboard = () => {
         }}
       />
 
-      {/* Debug Panel Dialog */}
-      <Dialog open={showDebugPanel} onOpenChange={setShowDebugPanel}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Blog Claiming Debug Panel</DialogTitle>
-          </DialogHeader>
-          <BlogClaimDebugPanel
-            isOpen={true}
-            onClose={() => setShowDebugPanel(false)}
-          />
-        </DialogContent>
-      </Dialog>
+
 
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">

@@ -5,12 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Clock, 
-  ExternalLink, 
-  AlertCircle, 
-  Sparkles, 
-  TrendingUp, 
+import {
+  Clock,
+  ExternalLink,
+  AlertCircle,
+  Sparkles,
+  TrendingUp,
   FileText,
   Save,
   ArrowRight,
@@ -59,61 +59,66 @@ interface EnhancedTrialBlogPostsProps {
   user: User | null;
 }
 
+// Helper function to load initial posts from localStorage
+const getInitialPosts = (): TrialPost[] => {
+  try {
+    const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+    const posts: TrialPost[] = [];
+
+    for (const blogMeta of allBlogs) {
+      const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
+      if (blogData) {
+        const blogPost = JSON.parse(blogData);
+        // Check if not expired
+        if (!blogPost.expires_at || new Date() <= new Date(blogPost.expires_at)) {
+          posts.push(blogPost);
+        }
+      }
+    }
+
+    return posts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  } catch (error) {
+    console.warn('Error loading initial posts from localStorage:', error);
+    return [];
+  }
+};
+
 export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
-  const [allPosts, setAllPosts] = useState<TrialPost[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Pre-load data from localStorage immediately - no loading state needed
+  const [allPosts, setAllPosts] = useState<TrialPost[]>(getInitialPosts());
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'claimed' | 'available'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'newest' | 'claimed' | 'expiring'>('claimed');
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [claimingPostId, setClaimingPostId] = useState<string | null>(null);
-  
+
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadAllPosts();
-    
+    // Load fresh data in background without showing loading state
+    loadAllPosts(true);
+
     // Refresh every 30 seconds
     const interval = setInterval(() => {
       loadAllPosts(true); // Silent refresh
     }, 30000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
-  const loadAllPosts = async (silentRefresh = false) => {
+  const loadAllPosts = async (silentRefresh = true) => {
     try {
-      if (!silentRefresh) setLoading(true);
+      if (!silentRefresh) setIsRefreshing(true);
 
       // Load from database using the blog claim service
       const { BlogClaimService } = await import('@/services/blogClaimService');
       const dbPosts = await BlogClaimService.getClaimablePosts(50);
 
-      // Also load from localStorage
-      const localPosts = [];
-      try {
-        const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-        const validLocalPosts = allBlogs.filter((post: any) => {
-          if (post.expires_at) {
-            const isExpired = new Date() > new Date(post.expires_at);
-            return !isExpired;
-          }
-          return true;
-        });
-        
-        // Get full post data for each
-        for (const blogMeta of validLocalPosts) {
-          const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
-          if (blogData) {
-            const blogPost = JSON.parse(blogData);
-            localPosts.push(blogPost);
-          }
-        }
-      } catch (error) {
-        console.warn('Error loading local posts:', error);
-      }
+      // Get fresh localStorage data
+      const localPosts = getInitialPosts();
 
       // Combine and deduplicate posts
       const combinedPosts = [...dbPosts];
@@ -123,12 +128,15 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
         }
       });
 
+      // Sort by date
+      combinedPosts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
       setAllPosts(combinedPosts);
       setLastRefresh(new Date());
 
       if (!silentRefresh && combinedPosts.length > 0) {
         toast({
-          title: "Posts Loaded",
+          title: "Posts Refreshed",
           description: `Found ${combinedPosts.length} trial posts`,
         });
       }
@@ -143,7 +151,7 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
         });
       }
     } finally {
-      if (!silentRefresh) setLoading(false);
+      if (!silentRefresh) setIsRefreshing(false);
     }
   };
 
@@ -444,17 +452,7 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="text-center py-12">
-        <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
-          <BarChart3 className="h-10 w-10 text-purple-600" />
-        </div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-3">Loading Trial Posts...</h3>
-        <p className="text-gray-600">Fetching your trial content library...</p>
-      </div>
-    );
-  }
+  // No loading screen - content loads immediately from localStorage
 
   return (
     <div className="space-y-6">
@@ -465,9 +463,9 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
           <p className="text-gray-600">Your trial content library</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={() => loadAllPosts()} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
+          <Button onClick={() => loadAllPosts(false)} variant="outline" size="sm" disabled={isRefreshing}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
           </Button>
           <Button onClick={() => navigate('/?focus=generator')} size="sm">
             <Plus className="h-4 w-4 mr-2" />
