@@ -349,8 +349,8 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
 
     try {
       setLoadingSavedPosts(true);
-      const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
-      const savedPosts = await UnifiedClaimService.getUserSavedPosts(user.id);
+      const { SimplifiedClaimService } = await import('@/services/simplifiedClaimService');
+      const savedPosts = await SimplifiedClaimService.getUserSavedPosts(user.id);
       setUserSavedPosts(savedPosts);
     } catch (error) {
       console.error('Error loading saved posts:', error);
