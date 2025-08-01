@@ -46,7 +46,7 @@ export class BlogService {
     const blogPostData: CreateBlogPost = {
       user_id: userId || null,
       title: data.title,
-      slug: customSlug, // null will trigger slug generation from title
+      slug: customSlug, // fallback slug until migration applied
       content: data.content,
       target_url: data.targetUrl,
       anchor_text: data.anchorText,
