@@ -108,6 +108,21 @@ export function AuthFormTabs({
     }
 
     setIsLoading(true);
+    setTimeoutCountdown(30); // Start with 30 second countdown
+
+    // Start countdown timer
+    countdownInterval = setInterval(() => {
+      setTimeoutCountdown(prev => {
+        if (prev <= 1) {
+          if (countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
 
 
