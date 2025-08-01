@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { blogService } from '@/services/blogService';
-import { BlogClaimService } from '@/services/blogClaimService';
+import { SimplifiedClaimService } from '@/services/simplifiedClaimService';
 import { supabase } from '@/integrations/supabase/client';
 import { DatabaseSetup } from '@/utils/databaseSetup';
 import { useAuth } from '@/hooks/useAuth';
