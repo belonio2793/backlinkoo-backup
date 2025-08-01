@@ -83,9 +83,9 @@ export class ClaimableBlogService {
         published_at: new Date().toISOString()
       };
 
-      // Insert into published_blog_posts table
+      // Insert into blog_posts table (unified approach)
       const { data: blogPost, error } = await supabase
-        .from('published_blog_posts')
+        .from('blog_posts')
         .insert(blogPostData)
         .select()
         .single();
