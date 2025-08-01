@@ -687,9 +687,6 @@ const Dashboard = () => {
         } else if (event === 'SIGNED_IN' && session) {
           console.log('🏠 Dashboard - User signed in, updating user state');
           setUser(session.user);
-          if (loading) {
-            setLoading(false);
-          }
         }
       });
       subscription = authSubscription;
