@@ -109,26 +109,40 @@ const Index = () => {
 
   const handleSignOut = async () => {
     try {
-      console.log('🚪 Signing out user...');
+      console.log('🚪 Home page: Signing out user...');
+
+      // Clear user state immediately for better UX
+      setUser(null);
+
       const result = await AuthService.signOut();
 
-      if (result.success) {
-        setUser(null);
-        toast({
-          title: "Signed out successfully",
-          description: "You have been signed out of your account.",
-        });
-      } else {
-        console.warn('Sign out had issues but continuing...');
-        setUser(null); // Clear user state anyway
-      }
+      console.log('🚪 Home page: Sign out result:', result);
+
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out of your account.",
+      });
+
+      // Force page refresh to ensure clean state
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+
     } catch (error) {
-      console.error('Sign out error:', error);
-      setUser(null); // Clear user state anyway
+      console.error('Home page sign out error:', error);
+
+      // Still clear user state
+      setUser(null);
+
       toast({
         title: "Signed out",
         description: "You have been signed out.",
       });
+
+      // Force page refresh even on error
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     }
   };
 
