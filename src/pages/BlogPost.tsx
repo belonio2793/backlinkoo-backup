@@ -47,27 +47,46 @@ export function BlogPost() {
 
   const loadPost = async () => {
     try {
-      // First try to get from localStorage
-      const localPost = localStorage.getItem(`blog_post_${slug}`);
-      if (localPost) {
-        const parsedPost = JSON.parse(localPost);
-        setPost(parsedPost);
+      console.log('🔄 Loading blog post:', slug);
+
+      // First try to get from database using unified service
+      const blogPost = await UnifiedClaimService.getBlogPostBySlug(slug!);
+      if (blogPost) {
+        setPost(blogPost);
         setLoading(false);
         return;
       }
 
-      // Fallback to service
-      const blogPost = await blogService.getBlogPostBySlug(slug!);
-      if (!blogPost) {
-        toast({
-          title: "Post Not Found",
-          description: "The requested blog post could not be found.",
-          variant: "destructive"
-        });
-        navigate('/blog');
-        return;
+      // Fallback to localStorage for legacy posts
+      const localPost = localStorage.getItem(`blog_post_${slug}`);
+      if (localPost) {
+        try {
+          const parsedPost = JSON.parse(localPost);
+          // Check if it's expired
+          if (parsedPost.is_trial_post && parsedPost.expires_at &&
+              new Date() > new Date(parsedPost.expires_at)) {
+            // Remove expired post from localStorage
+            localStorage.removeItem(`blog_post_${slug}`);
+            throw new Error('Post has expired');
+          }
+          setPost(parsedPost);
+          setLoading(false);
+          return;
+        } catch (parseError) {
+          console.warn('Failed to parse localStorage post:', parseError);
+          localStorage.removeItem(`blog_post_${slug}`);
+        }
       }
-      setPost(blogPost);
+
+      // No post found
+      toast({
+        title: "Post Not Found",
+        description: "The requested blog post could not be found or has expired.",
+        variant: "destructive"
+      });
+      navigate('/blog');
+      return;
+
     } catch (error) {
       console.error('Failed to load blog post:', error);
       toast({
@@ -75,6 +94,7 @@ export function BlogPost() {
         description: "Failed to load blog post. Please try again.",
         variant: "destructive"
       });
+      navigate('/blog');
     } finally {
       setLoading(false);
     }
