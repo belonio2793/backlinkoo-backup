@@ -34,7 +34,6 @@ export function UserClaimedPosts() {
   const loadClaimedPosts = async () => {
     if (!user) return;
     
-    setLoading(true);
     setError(null);
     
     try {
