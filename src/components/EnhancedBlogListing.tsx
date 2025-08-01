@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { blogService } from '@/services/blogService';
+import { BlogDataDebugger } from '@/components/BlogDataDebugger';
 import { 
   Clock, 
   Eye, 
