@@ -100,6 +100,40 @@ export class ClaimableBlogService {
         .single();
 
       if (error) {
+        // Handle slug collision specifically
+        if (error.message.includes('blog_posts_slug_key') || error.message.includes('duplicate key value violates unique constraint')) {
+          console.warn('⚠️ Slug collision detected in claimable blog, retrying with new slug...');
+
+          // Generate a completely new slug with additional randomness
+          const newSlug = this.generateSlug(data.title);
+          const retryData = { ...cleanBlogPostData, slug: newSlug };
+
+          const { data: retryPost, error: retryError } = await supabase
+            .from('blog_posts')
+            .insert(retryData)
+            .select()
+            .single();
+
+          if (retryError) {
+            console.error('❌ Failed to publish blog post after slug retry:', retryError);
+            return {
+              success: false,
+              error: `Failed to publish blog post after retry: ${retryError.message}`
+            };
+          }
+
+          // Generate publishedUrl using the database-generated slug
+          const publishedUrl = `${window.location.origin}/blog/${retryPost.slug}`;
+
+          console.log('✅ Blog post published successfully after slug retry:', publishedUrl);
+
+          return {
+            success: true,
+            blogPost: retryPost,
+            publishedUrl
+          };
+        }
+
         console.error('❌ Failed to publish blog post:', error);
         return {
           success: false,
