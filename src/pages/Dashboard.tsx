@@ -631,7 +631,6 @@ const Dashboard = () => {
 
     return () => clearTimeout(maxLoadingTime);
   }, []);
-  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
