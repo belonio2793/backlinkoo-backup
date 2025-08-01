@@ -62,7 +62,7 @@ export class ClaimableBlogService {
 
       const blogPostData = {
         user_id: user?.id || null,
-        // slug removed - let database trigger generate it from title
+        slug, // fallback slug until migration applied
         title: data.title,
         content: data.content,
         excerpt: data.excerpt || data.content.substring(0, 200) + '...',
