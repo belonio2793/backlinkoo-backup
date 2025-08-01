@@ -64,10 +64,78 @@ export function BlogListing() {
   const loadPosts = async () => {
     try {
       setLoading(true);
+      console.log('🔄 Loading blog posts from Supabase database...');
+
       const blogPosts = await blogService.getRecentBlogPosts(50);
+      console.log(`✅ Successfully loaded ${blogPosts.length} posts from database`);
+
       setPosts(blogPosts);
-    } catch (error) {
+
+      if (blogPosts.length === 0) {
+        console.log('🔄 No posts in database, creating sample data...');
+        // Add sample data if no posts exist
+        const samplePosts = [
+          {
+            id: 'sample-1',
+            title: 'Getting Started with SEO Optimization',
+            slug: 'getting-started-seo-optimization',
+            content: 'Learn the fundamentals of SEO optimization and how to improve your website rankings.',
+            excerpt: 'Complete guide to SEO fundamentals',
+            target_url: 'https://example.com/seo-guide',
+            status: 'published',
+            created_at: new Date().toISOString(),
+            published_at: new Date().toISOString(),
+            view_count: 150,
+            reading_time: 5,
+            category: 'SEO',
+            tags: ['seo', 'optimization', 'beginners'],
+            meta_description: 'Learn the fundamentals of SEO optimization',
+            author_name: 'SEO Expert',
+            word_count: 1200,
+            seo_score: 85,
+            is_trial_post: false,
+            user_id: null
+          }
+        ];
+        setPosts(samplePosts as any);
+      }
+
+    } catch (error: any) {
       console.error('Failed to load blog posts:', error);
+
+      // Show user-friendly error message
+      toast({
+        title: "Unable to load blog posts",
+        description: error.message || "Please check your internet connection and try again.",
+        variant: "destructive"
+      });
+
+      // Provide fallback data so the page isn't empty
+      const fallbackPosts = [
+        {
+          id: 'fallback-1',
+          title: 'Sample Blog Post - Database Connection Issue',
+          slug: 'sample-blog-post-database-issue',
+          content: 'This is a sample blog post shown when the database connection is not available.',
+          excerpt: 'Sample post displayed when database is unavailable',
+          target_url: 'https://backlinkoo.com/blog',
+          status: 'published',
+          created_at: new Date().toISOString(),
+          published_at: new Date().toISOString(),
+          view_count: 0,
+          reading_time: 3,
+          category: 'System',
+          tags: ['system', 'fallback'],
+          meta_description: 'Sample post when database unavailable',
+          author_name: 'System',
+          word_count: 500,
+          seo_score: 70,
+          is_trial_post: false,
+          user_id: null
+        }
+      ];
+      setPosts(fallbackPosts as any);
+
     } finally {
       setLoading(false);
     }
