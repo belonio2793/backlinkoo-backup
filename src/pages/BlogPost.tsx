@@ -165,12 +165,15 @@ export function BlogPost() {
         }
       }
     } catch (error) {
-      console.error('Failed to claim post:', error);
-      toast({
-        title: "Claim Failed",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
-      });
+      const claimError = ClaimErrorHandler.analyzeError(error);
+      console.error('Failed to claim post:', ClaimErrorHandler.formatForLogging(claimError, {
+        postSlug: post.slug,
+        postId: post.id,
+        userId: user.id
+      }));
+
+      const toastConfig = ClaimErrorHandler.createToastConfig(claimError);
+      toast(toastConfig);
     } finally {
       setClaiming(false);
     }
