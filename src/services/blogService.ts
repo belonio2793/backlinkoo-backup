@@ -144,6 +144,12 @@ export class BlogService {
 
         return retryPost;
       }
+
+      if (error.message.includes('row-level security') || error.message.includes('policy')) {
+        // RLS policy issue - provide helpful error message
+        throw new Error(`Blog post creation blocked by security policy. This may indicate missing database permissions. Original error: ${error.message}`);
+      }
+
       throw new Error(`Failed to create blog post: ${error.message}`);
     }
 
