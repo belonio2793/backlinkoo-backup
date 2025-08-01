@@ -19,19 +19,21 @@ export interface BlogPostGenerationData {
 
 export class BlogService {
   /**
-   * Generate a unique slug from title
+   * Generate a unique slug from title with enhanced collision resistance
    */
   private generateSlug(title: string): string {
     const baseSlug = title
+      .replace(/<[^>]*>/g, '') // Strip HTML tags first
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '')
-      .substring(0, 50);
+      .substring(0, 45); // Leave room for suffix
 
-    // Add timestamp + random string for guaranteed uniqueness
+    // Add high-entropy suffix for guaranteed uniqueness
     const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substr(2, 9);
-    return `${baseSlug}-${timestamp}-${random}`;
+    const random = Math.random().toString(36).substring(2, 11); // 9 chars
+    const extra = Math.random().toString(36).substring(2, 6); // Additional entropy for browser
+    return `${baseSlug}-${timestamp}-${random}-${extra}`;
   }
 
   /**
@@ -44,14 +46,14 @@ export class BlogService {
     isTrialPost: boolean = false
   ): Promise<BlogPost> {
     try {
-      // Generate fallback slug for NOT NULL constraint compatibility
-      // Once migration is applied, database trigger will handle uniqueness
-      const customSlug = data.customSlug || this.generateSlug(data.title);
+      // Use database trigger approach: let database handle slug generation
+      // If database doesn't have trigger, fallback to service-level generation
+      const customSlug = data.customSlug || null; // Let database trigger handle it first
 
     const blogPostData: CreateBlogPost = {
       user_id: userId || null,
       title: data.title,
-      slug: customSlug, // fallback slug until migration applied
+      slug: customSlug, // null triggers database slug generation
       content: data.content,
       target_url: data.targetUrl,
       anchor_text: data.anchorText,
@@ -96,13 +98,13 @@ export class BlogService {
       .single();
 
     if (error) {
-      // Handle slug collision specifically
-      if (error.message.includes('blog_posts_slug_key') || error.message.includes('duplicate key value violates unique constraint')) {
-        console.warn('⚠️ Slug collision detected, retrying with new slug...');
+      // Handle slug collision with enhanced retry strategy
+      if (error.message.includes('blog_posts_slug_key') || error.message.includes('duplicate key value violates unique constraint') || error.message.includes('null value in column "slug"')) {
+        console.warn('⚠️ Slug issue detected, implementing fallback strategy...');
 
-        // Generate a completely new slug with additional randomness
-        const newSlug = this.generateSlug(data.title);
-        const retryData = { ...cleanBlogPostData, slug: newSlug };
+        // Fallback: Generate service-level slug with maximum uniqueness
+        const fallbackSlug = this.generateSlug(data.title);
+        const retryData = { ...cleanBlogPostData, slug: fallbackSlug };
 
         const { data: retryPost, error: retryError } = await supabase
           .from('blog_posts')
@@ -111,6 +113,24 @@ export class BlogService {
           .single();
 
         if (retryError) {
+          // Final attempt with timestamp
+          if (retryError.message.includes('blog_posts_slug_key')) {
+            const finalSlug = `${fallbackSlug}-${Date.now()}`;
+            const finalData = { ...cleanBlogPostData, slug: finalSlug };
+
+            const { data: finalPost, error: finalError } = await supabase
+              .from('blog_posts')
+              .insert(finalData)
+              .select()
+              .single();
+
+            if (finalError) {
+              throw new Error(`Failed to create blog post after multiple retries: ${finalError.message}`);
+            }
+
+            console.log('✅ Blog post created successfully after final retry');
+            return finalPost;
+          }
           throw new Error(`Failed to create blog post after slug retry: ${retryError.message}`);
         }
 

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { SystemsAssessmentTool } from '@/utils/systemsAssessment';
 import { BlogSystemTest } from '@/utils/blogSystemTest';
+import { SlugDiagnosticRunner } from '@/components/SlugDiagnosticRunner';
 import type { SystemAssessment, ComponentStatus } from '@/utils/systemsAssessment';
 
 export function SystemsAssessmentDashboard() {
@@ -143,9 +144,10 @@ export function SystemsAssessmentDashboard() {
       )}
 
       <Tabs defaultValue="systems" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="systems">System Components</TabsTrigger>
           <TabsTrigger value="blog">Blog System</TabsTrigger>
+          <TabsTrigger value="slug-diagnostic">Slug Diagnostic</TabsTrigger>
           <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
         </TabsList>
 
@@ -190,6 +192,10 @@ export function SystemsAssessmentDashboard() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="slug-diagnostic" className="space-y-4">
+          <SlugDiagnosticRunner />
         </TabsContent>
 
         <TabsContent value="recommendations" className="space-y-4">

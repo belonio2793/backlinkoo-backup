@@ -39,7 +39,6 @@ import { InlineAuthForm } from "@/components/InlineAuthForm";
 import { TrialConversionBanner } from "@/components/TrialConversionBanner";
 import { QuickTrialUpgrade } from "@/components/QuickTrialUpgrade";
 import { TrialConversionService } from "@/services/trialConversionService";
-import { GuestSessionReminder } from "@/components/GuestSessionReminder";
 
 
 
@@ -1044,17 +1043,7 @@ const Index = () => {
         }}
       />
 
-      {/* Guest Session Reminder - Show for non-authenticated users */}
-      {!user && authChecked && (
-        <GuestSessionReminder
-          onSignUp={() => {
-            setLoginModalTab("signup");
-            setShowLoginModal(true);
-          }}
-          variant="floating"
-          position="bottom"
-        />
-      )}
+
 
       {/* Footer */}
       <Footer />

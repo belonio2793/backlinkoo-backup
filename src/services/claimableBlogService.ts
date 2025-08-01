@@ -34,7 +34,7 @@ export interface BlogGenerationResult {
 
 export class ClaimableBlogService {
   /**
-   * Generate a unique slug from title
+   * Generate a unique slug from title with maximum collision resistance
    */
   private static generateSlug(title: string): string {
     const baseSlug = title
@@ -43,12 +43,15 @@ export class ClaimableBlogService {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '')
-      .substring(0, 50);
+      .substring(0, 40); // Leave more room for uniqueness suffix
 
-    // Add timestamp + random string for guaranteed uniqueness
+    // Maximum entropy approach for guaranteed uniqueness
     const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substr(2, 9);
-    return `${baseSlug}-${timestamp}-${random}`;
+    const random1 = Math.random().toString(36).substring(2, 9);
+    const random2 = Math.random().toString(36).substring(2, 7);
+    const counter = Math.floor(Math.random() * 9999).toString(36);
+
+    return `${baseSlug}-${timestamp}-${random1}-${random2}-${counter}`;
   }
 
   /**
@@ -58,16 +61,15 @@ export class ClaimableBlogService {
     try {
       console.log('🚀 Generating and publishing blog post:', data.keyword);
 
-      // Generate fallback slug for NOT NULL constraint compatibility
-      // Once migration is applied, database trigger will handle uniqueness
-      const slug = this.generateSlug(data.title);
+      // Try database trigger approach first, fallback to service generation
+      const slug = null; // Let database trigger handle slug generation
 
       // Set expiration to 24 hours from now for unclaimed posts
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
       const blogPostData = {
         user_id: user?.id || null,
-        slug, // fallback slug until migration applied
+        slug, // null triggers database slug generation
         title: data.title,
         content: data.content,
         excerpt: data.excerpt || data.content.substring(0, 200) + '...',
@@ -100,13 +102,13 @@ export class ClaimableBlogService {
         .single();
 
       if (error) {
-        // Handle slug collision specifically
-        if (error.message.includes('blog_posts_slug_key') || error.message.includes('duplicate key value violates unique constraint')) {
-          console.warn('⚠️ Slug collision detected in claimable blog, retrying with new slug...');
+        // Handle any slug-related errors with comprehensive fallback
+        if (error.message.includes('blog_posts_slug_key') || error.message.includes('duplicate key value violates unique constraint') || error.message.includes('null value in column "slug"')) {
+          console.warn('⚠️ Slug generation issue detected, implementing fallback strategy...');
 
-          // Generate a completely new slug with additional randomness
-          const newSlug = this.generateSlug(data.title);
-          const retryData = { ...cleanBlogPostData, slug: newSlug };
+          // First fallback: Generate service-level slug
+          const fallbackSlug = this.generateSlug(data.title);
+          const retryData = { ...cleanBlogPostData, slug: fallbackSlug };
 
           const { data: retryPost, error: retryError } = await supabase
             .from('blog_posts')
@@ -115,6 +117,37 @@ export class ClaimableBlogService {
             .single();
 
           if (retryError) {
+            // Second fallback: Add timestamp to ensure uniqueness
+            if (retryError.message.includes('blog_posts_slug_key')) {
+              console.warn('⚠️ Second slug collision, using timestamp fallback...');
+
+              const timestampSlug = `${fallbackSlug}-emergency-${Date.now()}`;
+              const emergencyData = { ...cleanBlogPostData, slug: timestampSlug };
+
+              const { data: emergencyPost, error: emergencyError } = await supabase
+                .from('blog_posts')
+                .insert(emergencyData)
+                .select()
+                .single();
+
+              if (emergencyError) {
+                console.error('❌ Failed to publish blog post after all retries:', emergencyError);
+                return {
+                  success: false,
+                  error: `Failed to publish blog post after all retries: ${emergencyError.message}`
+                };
+              }
+
+              const emergencyUrl = `${window.location.origin}/blog/${emergencyPost.slug}`;
+              console.log('✅ Blog post published with emergency fallback:', emergencyUrl);
+
+              return {
+                success: true,
+                blogPost: emergencyPost,
+                publishedUrl: emergencyUrl
+              };
+            }
+
             console.error('❌ Failed to publish blog post after slug retry:', retryError);
             return {
               success: false,
