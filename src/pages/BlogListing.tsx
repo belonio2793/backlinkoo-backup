@@ -430,6 +430,36 @@ export function BlogListing() {
           )}
         </div>
       </div>
+
+      {/* Pricing Modal */}
+      <PricingModal
+        isOpen={showPricingModal}
+        onClose={() => setShowPricingModal(false)}
+        onAuthSuccess={(user) => {
+          setShowPricingModal(false);
+          checkUserClaimStatus();
+          toast({
+            title: "Welcome! 🎉",
+            description: "You can now claim unlimited blog posts.",
+          });
+        }}
+      />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onAuthSuccess={(user) => {
+          setShowLoginModal(false);
+          checkUserClaimStatus();
+          loadClaimedPosts();
+          toast({
+            title: "Welcome back!",
+            description: "You can now claim blog posts.",
+          });
+        }}
+        defaultTab="login"
+      />
     </div>
   );
 }
