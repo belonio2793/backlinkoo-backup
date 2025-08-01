@@ -21,21 +21,8 @@ if (import.meta.env.DEV) {
 }
 
 
-// Debug utilities removed for better performance in production
-// Only import debug utils in development mode
-if (import.meta.env.DEV) {
-  import('@/utils/testBlogSystemFix'); // Auto-run blog system fix test
-  import('@/utils/testBlogClaiming');
-  import('@/utils/netlifyFunctionDiagnostic');
-  import('@/utils/dashboardAccessDiagnostic');
-  import('@/utils/quickDashboardAccess');
-  import('@/utils/blogClaimDiagnostic');
-  import('@/utils/testBlogClaimFixes');
-  import('@/utils/debugClaimSystem');
-  import('@/utils/runDiagnosticTest'); // Auto-run blog system diagnostic
-  import('@/utils/runDatabaseCheck'); // Auto-run database check
-  import('@/utils/manualDatabaseTest'); // Manual database test
-}
+// Debug utilities removed for better performance and stability
+// Diagnostic utilities are available manually via window.runBlogSystemDiagnostic()
 
 import { queryClient } from "@/lib/queryClient";
 
