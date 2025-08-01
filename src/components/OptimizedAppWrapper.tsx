@@ -214,7 +214,8 @@ export const OptimizedAppWrapper = () => {
             </EmailVerificationGuard>
           } />
 
-          {/* 404 route */}
+          {/* 404 routes */}
+          <Route path="/404" element={<NotFound />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
