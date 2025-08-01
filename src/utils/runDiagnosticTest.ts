@@ -1,15 +1,18 @@
-import { BlogSystemDiagnostic } from './blogSystemDiagnostic';
+import { SafeDiagnostic } from './safeDiagnostic';
 
 // Immediate diagnostic test
 export async function runImmediateDiagnostic() {
-  console.log('🔍 Running immediate blog system diagnostic...');
+  console.log('🔍 Running safe blog system diagnostic...');
 
   try {
-    const diagnostic = new BlogSystemDiagnostic();
+    // Get quick status
+    console.log('\n⚡ Quick Status Check:');
+    const quickStatus = await SafeDiagnostic.getQuickStatus();
+    console.table(quickStatus);
 
-    // Run full diagnostic (no quick status method exists)
+    // Run full diagnostic
     console.log('\n🔍 Full Diagnostic:');
-    const fullDiagnostic = await diagnostic.runFullDiagnostic();
+    const fullDiagnostic = await SafeDiagnostic.runSafeDiagnostic();
     
     console.table(fullDiagnostic);
     
