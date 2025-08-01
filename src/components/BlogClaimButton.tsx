@@ -124,7 +124,7 @@ export function BlogClaimButton({
 
   const getButtonIcon = () => {
     if (isLoading || isClaiming) {
-      return <Loader2 className="h-4 w-4 animate-spin" />;
+      return <Loader2 className="h-4 w-4" />;
     }
 
     if (!claimStatus) return <Hand className="h-4 w-4" />;
