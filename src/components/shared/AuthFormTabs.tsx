@@ -377,11 +377,15 @@ export function AuthFormTabs({
 
           <Button
             type="submit"
-            className={`w-full ${inputHeight} ${isLoading ? 'bg-primary/80' : ''}`}
-            disabled={!loginEmail || !loginPassword}
+            className={`w-full ${inputHeight}`}
+            disabled={!loginEmail || !loginPassword || isLoading}
           >
-            <Shield className="h-4 w-4 mr-2" />
-            Sign In
+            {isLoading ? (
+              <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Shield className="h-4 w-4 mr-2" />
+            )}
+            {isLoading ? "Signing In..." : "Sign In"}
           </Button>
 
           <div className="space-y-2">
