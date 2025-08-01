@@ -58,7 +58,8 @@ export function BlogListing() {
         const stats = await SimplifiedClaimService.getUserSavedStats(user.id);
         setCanClaimMore(stats.canSave);
       } catch (error) {
-        console.warn('Failed to check claim status:', error);
+        console.warn('Failed to check claim status, defaulting to allow claims:', error);
+        setCanClaimMore(true); // Default to allowing claims if check fails
       }
     }
   };
@@ -69,7 +70,8 @@ export function BlogListing() {
       const claimed = await SimplifiedClaimService.getUserSavedPosts(user.id);
       setClaimedPosts(new Set(claimed.map(p => p.id)));
     } catch (error) {
-      console.warn('Failed to load claimed posts:', error);
+      console.warn('Failed to load claimed posts, continuing without claimed data:', error);
+      setClaimedPosts(new Set()); // Default to empty set if loading fails
     }
   };
 
