@@ -9,11 +9,8 @@ import { TrialConversionService } from "@/services/trialConversionService";
 import {
   Eye,
   EyeOff,
-  RefreshCw,
   Shield,
-  CheckCircle,
-  Mail,
-  Wifi
+  CheckCircle
 } from "lucide-react";
 
 interface AuthFormTabsProps {
