@@ -181,56 +181,67 @@ export class UnifiedClaimService {
         };
       }
 
-      // Check if user already saved this post
-      const { data: existingSave, error: checkError } = await supabase
-        .from('user_saved_posts')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('post_id', post.id)
+      // Check if post is already claimed
+      if (post.user_id) {
+        if (post.user_id === user.id) {
+          return {
+            success: false,
+            message: 'You already own this post.'
+          };
+        } else {
+          return {
+            success: false,
+            message: 'This post has already been claimed by another user.'
+          };
+        }
+      }
+
+      // Check if this is a claimable post (must be unclaimed trial post)
+      if (!post.is_trial_post) {
+        return {
+          success: false,
+          message: 'This post is not available for claiming.'
+        };
+      }
+
+      // Check if post has expired
+      if (post.expires_at && new Date() > new Date(post.expires_at)) {
+        return {
+          success: false,
+          message: 'This post has expired and can no longer be claimed.'
+        };
+      }
+
+      // Assign ownership to the user
+      const { data: claimedPost, error: claimError } = await supabase
+        .from('blog_posts')
+        .update({
+          user_id: user.id,
+          is_trial_post: false,
+          expires_at: null, // Remove expiration since it's now claimed
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', post.id)
+        .eq('user_id', null) // Extra security: only claim if not already claimed
+        .select()
         .single();
 
-      if (checkError && checkError.code !== 'PGRST116') {
-        console.error('Error checking existing save:', checkError);
+      if (claimError) {
+        console.error('Failed to claim post:', claimError);
         return {
           success: false,
-          message: 'Error checking if post is already saved.'
+          message: 'Failed to claim the blog post. It may have been claimed by someone else.'
         };
       }
 
-      if (existingSave) {
-        return {
-          success: false,
-          message: 'This post is already in your dashboard.'
-        };
-      }
-
-      // Save the post to user's dashboard
-      const { data: savedPost, error: saveError } = await supabase
+      // Also add to user_saved_posts for backward compatibility with dashboard
+      await supabase
         .from('user_saved_posts')
         .insert({
           user_id: user.id,
           post_id: post.id,
           saved_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-
-      if (saveError) {
-        console.error('Failed to save post:', saveError);
-        return {
-          success: false,
-          message: 'Failed to save the blog post. Please try again.'
-        };
-      }
-
-      // Mark the post as "protected" from auto-deletion by setting a flag
-      await supabase
-        .from('blog_posts')
-        .update({
-          view_count: (post.view_count || 0) + 1,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', post.id);
+        });
 
       console.log(`✅ Successfully saved post to dashboard: ${postSlug}`);
 
