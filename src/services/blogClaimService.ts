@@ -327,10 +327,9 @@ export class BlogClaimService {
         return { success: false, message: 'This blog post has expired.' };
       }
 
-      // Update the correct table
-      const tableName = foundInBlogPosts ? 'blog_posts' : 'published_blog_posts';
+      // Update blog_posts table (unified approach)
       const { error: updateError } = await supabase
-        .from(tableName)
+        .from('blog_posts')
         .update({
           user_id: userId,
           expires_at: null,
