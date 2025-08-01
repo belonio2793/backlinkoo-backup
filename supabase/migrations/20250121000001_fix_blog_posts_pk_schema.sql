@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   content TEXT NOT NULL,
   excerpt TEXT,
   meta_description TEXT,
-  slug TEXT UNIQUE NOT NULL,
+  slug TEXT UNIQUE, -- Allow NULL for trigger to generate from title
   target_url TEXT NOT NULL,
   anchor_text TEXT,
   keywords TEXT NOT NULL,
