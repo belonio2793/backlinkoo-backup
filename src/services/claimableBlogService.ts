@@ -84,9 +84,12 @@ export class ClaimableBlogService {
       };
 
       // Insert into blog_posts table (unified approach)
+      // Remove any custom id field to let database auto-generate UUID
+      const { id: _, ...cleanBlogPostData } = blogPostData as any;
+
       const { data: blogPost, error } = await supabase
         .from('blog_posts')
-        .insert(blogPostData)
+        .insert(cleanBlogPostData)
         .select()
         .single();
 
