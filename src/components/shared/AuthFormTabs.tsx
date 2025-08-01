@@ -59,7 +59,7 @@ export function AuthFormTabs({
       return;
     }
 
-    if (!validateEmailFormat(loginEmail)) {
+    if (!validateEmail(loginEmail)) {
       toast({
         title: "Invalid email format",
         description: "Please enter a valid email address.",
