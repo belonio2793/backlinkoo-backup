@@ -223,10 +223,16 @@ export class UnifiedClaimService {
       };
 
     } catch (error) {
-      console.error('Error in claimBlogPost:', error);
+      const claimError = ClaimErrorHandler.analyzeError(error);
+      console.error('Error in claimBlogPost:', ClaimErrorHandler.formatForLogging(claimError, {
+        postSlug,
+        userId: user.id,
+        userEmail: user.email
+      }));
+
       return {
         success: false,
-        message: 'An unexpected error occurred while claiming the post. Please try again.'
+        message: claimError.userMessage + ' ' + ClaimErrorHandler.getSuggestedAction(claimError)
       };
     }
   }
