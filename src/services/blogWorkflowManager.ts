@@ -298,10 +298,9 @@ export class BlogWorkflowManager {
 
   private static async storePost(post: BlogPost): Promise<{ success: boolean; error?: string }> {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('blog_posts')
-        .upsert({
-          id: post.id,
+        .insert({
           title: post.title,
           content: post.content,
           target_url: post.targetUrl,
@@ -312,7 +311,14 @@ export class BlogWorkflowManager {
           expires_at: post.expiresAt,
           word_count: post.wordCount,
           is_guest: post.isGuest
-        });
+        })
+        .select()
+        .single();
+
+      // Update the post object with the database-generated ID
+      if (data) {
+        post.id = data.id;
+      }
 
       if (error) {
         console.error('BlogWorkflow: Storage error', error);
