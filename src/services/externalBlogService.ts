@@ -75,19 +75,19 @@ export class ExternalBlogService {
       id: post.id || `external-${index}`,
       title: post.title,
       slug: post.slug,
-      status: 'published' as const,
-      target_url: `${this.BASE_URL}/blog/${post.slug}`,
-      backlinks: Math.floor(Math.random() * 50) + 5, // Estimate backlinks
-      views: post.view_count || Math.floor(Math.random() * 1000) + 100,
-      view_count: post.view_count,
-      created_at: post.published_at,
-      published_at: post.published_at,
+      content: post.content || '',
+      excerpt: post.excerpt || post.meta_description || '',
       keywords: [...(post.categories || []), ...(post.tags || [])],
+      meta_description: post.meta_description || post.excerpt || '',
+      target_url: `${this.BASE_URL}/blog/${post.slug}`,
+      anchor_text: post.title, // Use title as default anchor text
       seo_score: Math.floor(Math.random() * 30) + 70, // Estimate SEO score 70-100
-      meta_description: post.meta_description || post.excerpt,
-      author_name: post.author || 'Backlink Team',
       reading_time: post.reading_time || Math.ceil((post.content?.length || 1000) / 200),
-      content: post.content
+      published_url: `${this.BASE_URL}/blog/${post.slug}`,
+      is_trial_post: false,
+      expires_at: '',
+      created_at: post.published_at,
+      updated_at: post.published_at
     }));
   }
 
