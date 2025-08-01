@@ -858,18 +858,22 @@ const Dashboard = () => {
   };
 
 
-  const handleSignOut = async () => {
+  const handleSignOut = () => {
     if (isSigningOut) return; // Prevent double-clicks
 
-    try {
-      console.log('Dashboard - Starting sign out process...');
-      setIsSigningOut(true);
+    console.log('Dashboard - Starting instant sign out...');
+    setIsSigningOut(true);
 
-      // Clear user state immediately
-      setUser(null);
+    // Clear user state immediately
+    setUser(null);
 
-      // Clean up all auth-related storage
+    // Navigate immediately for instant UX
+    navigate('/login');
+
+    // Do cleanup in the background (non-blocking)
+    setTimeout(() => {
       try {
+        // Clean up auth-related storage
         Object.keys(localStorage).forEach((key) => {
           if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
             localStorage.removeItem(key);
@@ -881,55 +885,18 @@ const Dashboard = () => {
             sessionStorage.removeItem(key);
           }
         });
-      } catch (storageError) {
-        console.warn('Storage cleanup error:', storageError);
+
+        // Sign out from Supabase in background
+        supabase.auth.signOut({ scope: 'global' }).catch((error) => {
+          console.warn('Background sign out error (non-critical):', error);
+        });
+
+      } catch (error) {
+        console.warn('Background cleanup error (non-critical):', error);
       }
+    }, 0);
 
-      // Sign out from Supabase
-      const { error } = await supabase.auth.signOut({ scope: 'global' });
-      if (error) {
-        console.error('Sign out error:', error);
-      } else {
-        console.log('Dashboard - Sign out successful');
-      }
-
-      // Multiple redirect mechanisms to ensure user gets redirected
-      console.log('Navigating to login page...');
-
-      // Primary navigation using React Router
-      navigate('/login');
-
-      // Fallback navigation after a short delay
-      setTimeout(() => {
-        if (window.location.pathname !== '/login') {
-          console.log('Fallback redirect to login...');
-          window.location.href = '/login';
-        }
-      }, 100);
-
-    } catch (error) {
-      console.error("Dashboard - Sign out error:", error);
-
-      // Clear user state and navigate anyway
-      setUser(null);
-
-      // Force redirect even on error
-      try {
-        navigate('/login');
-      } catch (navError) {
-        console.error('Navigation error, using window.location:', navError);
-        window.location.href = '/login';
-      }
-
-      // Additional fallback
-      setTimeout(() => {
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
-        }
-      }, 200);
-    } finally {
-      setIsSigningOut(false);
-    }
+    setIsSigningOut(false);
   };
 
 
