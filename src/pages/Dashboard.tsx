@@ -174,7 +174,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
       }
 
     } catch (error: any) {
-      console.error('�� Error loading posts:', error);
+      console.error('❌ Error loading posts:', error);
       setError('NOT_FOUND');
 
       // Don't clear posts on error, keep showing last known state
@@ -598,9 +598,6 @@ const Dashboard = () => {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
