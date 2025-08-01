@@ -712,8 +712,8 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
                 size="sm"
                 className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 animate-pulse"
               >
-                <Star className="mr-2 h-3 w-3" />
-                Sign In to Claim Post
+                <Plus className="mr-2 h-3 w-3" />
+                Sign In to Save Post
               </Button>
             )}
             {post.expires_at && (
