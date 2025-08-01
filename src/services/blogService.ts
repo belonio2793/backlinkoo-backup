@@ -22,11 +22,16 @@ export class BlogService {
    * Generate a unique slug from title
    */
   private generateSlug(title: string): string {
-    return title
+    const baseSlug = title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '')
-      .substring(0, 50) + '-' + Date.now().toString(36);
+      .substring(0, 50);
+
+    // Add timestamp + random string for guaranteed uniqueness
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substr(2, 9);
+    return `${baseSlug}-${timestamp}-${random}`;
   }
 
   /**
