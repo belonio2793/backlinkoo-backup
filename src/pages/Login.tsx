@@ -120,7 +120,7 @@ const Login = () => {
       return;
     }
 
-    if (!validateEmailFormat(forgotPasswordEmail)) {
+    if (!validateEmail(forgotPasswordEmail)) {
       toast({
         title: "Invalid email format",
         description: "Please enter a valid email address.",
