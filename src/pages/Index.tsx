@@ -503,28 +503,7 @@ const Index = () => {
             </Button>
           </div>
 
-          {/* Blog Creation CTA */}
-          <div className="mb-20">
-            <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border border-blue-200 max-w-2xl mx-auto">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                🚀 Expert Blog Creation
-              </h3>
-              <p className="text-gray-600 text-sm mb-4">
-                Generate high-quality blog posts with natural backlinks in minutes
-              </p>
-              <Button
-                variant="outline"
-                className="bg-white hover:bg-gray-50"
-                onClick={() => {
-                  // Scroll to blog creation form
-                  document.getElementById('blog-generator')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                Try Blog Generator
-              </Button>
-            </div>
-          </div>
+
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-8 max-w-2xl mx-auto">
