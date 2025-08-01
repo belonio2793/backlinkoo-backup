@@ -57,7 +57,7 @@ export function AdminBlogManager() {
         excerpt: 'Discover everything you need to know about Go High Level',
         keywords: ['go high level', 'marketing automation', 'CRM'],
         target_url: 'https://example.com/go-high-level',
-        published_url: 'https://c9ddf89a9adf4854a791dfeb1224489a-fd5229bc39d54b7ca3bffa1d9.fly.dev/blog/go-high-level-guide-1753674784638',
+        published_url: 'https://backlinkoo.com/blog/go-high-level-guide-1753674784638',
         status: 'published' as const,
         is_trial_post: true,
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
