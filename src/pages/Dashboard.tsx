@@ -932,17 +932,7 @@ const Dashboard = () => {
     }
   };
 
-  // Show loading state while checking authentication
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Infinity className="h-8 w-8 text-primary mx-auto mb-4 animate-spin" />
-          <p className="text-muted-foreground">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   // Show dashboard regardless of authentication state
 
