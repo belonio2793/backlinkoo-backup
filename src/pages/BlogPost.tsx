@@ -217,6 +217,55 @@ export function BlogPost() {
     }
   };
 
+  const deletePost = async () => {
+    if (!post || !user || post.user_id !== user.id) return;
+
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${post.title}"? This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('blog_posts')
+        .delete()
+        .eq('id', post.id)
+        .eq('user_id', user.id); // Extra security check
+
+      if (error) {
+        throw error;
+      }
+
+      // Also remove from user_saved_posts if it exists
+      await supabase
+        .from('user_saved_posts')
+        .delete()
+        .eq('post_id', post.id)
+        .eq('user_id', user.id);
+
+      toast({
+        title: "Post Deleted Successfully",
+        description: "Your blog post has been permanently deleted.",
+      });
+
+      // Navigate to dashboard
+      navigate('/dashboard');
+
+    } catch (error: any) {
+      console.error('Failed to delete post:', error);
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete the blog post. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   // Clean and format content for better SEO structure
   const formatContent = (content: string) => {
     if (!content) return '';
