@@ -53,15 +53,15 @@ export class ClaimableBlogService {
     try {
       console.log('🚀 Generating and publishing blog post:', data.keyword);
 
-      const slug = this.generateSlug(data.title);
-      const publishedUrl = `${window.location.origin}/blog/${slug}`;
-      
+      // Let database trigger generate unique slug from title
+      // const slug = this.generateSlug(data.title); // Remove manual slug generation
+
       // Set expiration to 24 hours from now for unclaimed posts
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
       const blogPostData = {
         user_id: user?.id || null,
-        slug,
+        // slug removed - let database trigger generate it from title
         title: data.title,
         content: data.content,
         excerpt: data.excerpt || data.content.substring(0, 200) + '...',
