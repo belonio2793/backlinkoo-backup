@@ -89,30 +89,6 @@ export const OptimizedAppWrapper = () => {
           <Route path="/blog/create" element={<LazyBlogCreation />} />
           <Route path="/blog/:slug" element={<LazyBlogPostView />} />
 
-          {/* Debug routes - only in development */}
-          {import.meta.env.DEV && (
-            <Route path="/debug/claim-system" element={
-              <Suspense fallback={<LoadingComponent />}>
-                <div className="min-h-screen bg-gray-50">
-                  <div dangerouslySetInnerHTML={{
-                    __html: `<script>
-                      import('@/components/ClaimSystemDebug').then(module => {
-                        const { ClaimSystemDebug } = module;
-                        const root = document.getElementById('debug-root');
-                        if (root) {
-                          const React = window.React;
-                          const ReactDOM = window.ReactDOM;
-                          ReactDOM.render(React.createElement(ClaimSystemDebug), root);
-                        }
-                      });
-                    </script>
-                    <div id="debug-root"></div>`
-                  }} />
-                </div>
-              </Suspense>
-            } />
-          )}
-
           {/* Legacy blog routes for backward compatibility */}
           <Route path="/blog-old" element={<LazyBlog />} />
           <Route path="/blog-creator" element={<LazyBlogCreator />} />
