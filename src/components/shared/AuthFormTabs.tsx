@@ -288,9 +288,7 @@ export function AuthFormTabs({
                 description: `Processing your request to claim "${intent.postTitle}"`,
               });
 
-              setTimeout(() => {
-                window.location.href = `/blog/${intent.postSlug}`;
-              }, 2000);
+              window.location.href = `/blog/${intent.postSlug}`;
               return;
             } catch (error) {
               console.warn('Failed to parse claim intent:', error);
