@@ -17,24 +17,7 @@ export function EnhancedDashboardRouter() {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        // Use a timeout to prevent hanging
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Auth timeout')), 3000)
-        );
-
-        const authPromise = supabase.auth.getUser();
-
-        let result;
-        try {
-          result = await Promise.race([authPromise, timeoutPromise]);
-        } catch (timeoutError) {
-          console.warn('Auth check timed out, continuing as guest');
-          setUser(null);
-          setIsLoading(false);
-          return;
-        }
-
-        const { data: { user }, error } = result as any;
+        const { data: { user }, error } = await supabase.auth.getUser();
 
         if (error) {
           console.warn('Auth error:', error);
