@@ -336,6 +336,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
   // Load user's saved posts separately
   const [userSavedPosts, setUserSavedPosts] = useState<any[]>([]);
   const [loadingSavedPosts, setLoadingSavedPosts] = useState(false);
+  const [otherClaimedPosts, setOtherClaimedPosts] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
