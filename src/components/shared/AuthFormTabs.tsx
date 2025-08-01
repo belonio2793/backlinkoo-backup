@@ -117,7 +117,10 @@ export function AuthFormTabs({
         password: loginPassword,
       });
 
-      clearInterval(countdownInterval);
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
 
       if (result.success && result.user) {
         toast({
