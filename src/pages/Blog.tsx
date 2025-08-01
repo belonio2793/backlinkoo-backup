@@ -701,8 +701,8 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
                   </>
                 ) : (
                   <>
-                    <Star className="mr-2 h-3 w-3" />
-                    Claim This Post Now
+                    <Plus className="mr-2 h-3 w-3" />
+                    Save to Dashboard
                   </>
                 )}
               </Button>
