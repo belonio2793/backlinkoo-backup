@@ -210,20 +210,10 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
 
     try {
       setClaimingPostId(post.id);
-      const { BlogClaimService } = await import('@/services/blogClaimService');
+      const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
 
-      // Check if user can claim more posts
-      const { canClaim, reason } = await BlogClaimService.canUserClaimMore(user);
-      if (!canClaim) {
-        toast({
-          title: "Claim Limit Reached",
-          description: reason,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const result = await BlogClaimService.claimPost(post.id, user);
+      // Use unified claim service with slug
+      const result = await UnifiedClaimService.claimBlogPost(post.slug, user);
 
       if (result.success) {
         toast({
