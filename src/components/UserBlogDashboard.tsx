@@ -91,16 +91,7 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p>Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="space-y-6">
