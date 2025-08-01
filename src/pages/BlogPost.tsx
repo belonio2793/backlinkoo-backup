@@ -130,23 +130,44 @@ export function BlogPost() {
 
     setClaiming(true);
     try {
-      await blogService.updateBlogPost(post.id, {
-        user_id: user.id,
-        is_trial_post: false,
-        expires_at: null
-      });
+      console.log('🎯 Attempting to claim post:', post.slug);
 
-      toast({
-        title: "Post Claimed!",
-        description: "This blog post has been claimed and added to your dashboard.",
-      });
+      const result = await UnifiedClaimService.claimBlogPost(post.slug, user);
 
-      await loadPost();
+      if (result.success) {
+        toast({
+          title: "Post Claimed Successfully! 🎉",
+          description: result.message,
+        });
+
+        // Update the current post state with the claimed post
+        if (result.post) {
+          setPost(result.post);
+        } else {
+          // Reload the post to get the updated state
+          await loadPost();
+        }
+
+        // Clear any localStorage version to prevent conflicts
+        localStorage.removeItem(`blog_post_${post.slug}`);
+
+      } else {
+        toast({
+          title: result.needsUpgrade ? "Upgrade Required" : "Claim Failed",
+          description: result.message,
+          variant: "destructive"
+        });
+
+        // If user needs to upgrade, you could redirect to pricing page
+        if (result.needsUpgrade) {
+          // Optional: navigate('/pricing') or show upgrade modal
+        }
+      }
     } catch (error) {
       console.error('Failed to claim post:', error);
       toast({
         title: "Claim Failed",
-        description: "Failed to claim this post. You may have reached the limit of 3 claimed posts.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
     } finally {
