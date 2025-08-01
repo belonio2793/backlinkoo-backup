@@ -37,12 +37,20 @@ export function useAuth(): AuthState {
 
     getInitialSession();
 
-    // Listen for auth state changes
+    // Listen for auth state changes with error handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        if (isMounted) {
-          setUser(session?.user || null);
-          setIsLoading(false);
+        try {
+          if (isMounted) {
+            setUser(session?.user || null);
+            setIsLoading(false);
+          }
+        } catch (error: any) {
+          console.warn('Auth state change error:', error.message);
+          if (isMounted) {
+            setUser(null);
+            setIsLoading(false);
+          }
         }
       }
     );
