@@ -35,28 +35,14 @@ export function BlogListing() {
   const [canClaimMore, setCanClaimMore] = useState(true);
 
   useEffect(() => {
-    // Debug: Test Supabase connection
-    testSupabaseConnection();
-    loadPosts();
+    initializeAndLoadPosts();
   }, []);
 
-  const testSupabaseConnection = async () => {
-    try {
-      console.log('🔍 Testing Supabase connection...');
-      // Test with a simple query first
-      const { data, error } = await supabase.from('blog_posts').select('count(*)', { count: 'exact' }).limit(1);
-
-      if (error) {
-        console.error('❌ Supabase connection failed:', error);
-        return false;
-      }
-
-      console.log('✅ Supabase connection successful!', data);
-      return true;
-    } catch (err) {
-      console.error('❌ Supabase connection error:', err);
-      return false;
-    }
+  const initializeAndLoadPosts = async () => {
+    // Initialize database with sample data if needed
+    await DatabaseSetup.initializeDatabase();
+    // Then load the posts
+    loadPosts();
   };
 
   useEffect(() => {
