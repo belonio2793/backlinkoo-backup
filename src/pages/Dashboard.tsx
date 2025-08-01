@@ -602,7 +602,7 @@ const Dashboard = () => {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // Failsafe: force loading to false after maximum time
   useEffect(() => {
