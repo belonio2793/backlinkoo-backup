@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
+import { NetworkErrorHandler } from '@/utils/networkErrorHandler';
 
 interface AuthState {
   user: User | null;
@@ -15,30 +16,39 @@ export function useAuth(): AuthState {
   useEffect(() => {
     let isMounted = true;
 
-    // Get initial session
+    // Get initial session with robust error handling
     const getInitialSession = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (isMounted) {
-          setUser(user);
-          setIsLoading(false);
-        }
-      } catch (error) {
-        if (isMounted) {
-          setUser(null);
-          setIsLoading(false);
-        }
+      const { data: user, error } = await NetworkErrorHandler.wrapSupabaseOperation(
+        () => supabase.auth.getUser(),
+        null
+      );
+
+      if (error && !NetworkErrorHandler.isThirdPartyInterference(error)) {
+        console.warn('Auth error (continuing without user):', error.message);
+      }
+
+      if (isMounted) {
+        setUser(user);
+        setIsLoading(false);
       }
     };
 
     getInitialSession();
 
-    // Listen for auth state changes
+    // Listen for auth state changes with error handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        if (isMounted) {
-          setUser(session?.user || null);
-          setIsLoading(false);
+        try {
+          if (isMounted) {
+            setUser(session?.user || null);
+            setIsLoading(false);
+          }
+        } catch (error: any) {
+          console.warn('Auth state change error:', error.message);
+          if (isMounted) {
+            setUser(null);
+            setIsLoading(false);
+          }
         }
       }
     );

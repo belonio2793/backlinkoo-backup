@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { blogService } from '@/services/blogService';
+import { BlogDataDebugger } from '@/components/BlogDataDebugger';
 import { 
   Clock, 
   Eye, 
@@ -75,36 +76,49 @@ export function EnhancedBlogListing() {
   const loadPosts = async () => {
     try {
       setLoading(true);
+      console.log(`🔄 Loading posts with filterType: ${filterType}`);
       let blogPosts: BlogPost[] = [];
 
       switch (filterType) {
         case 'claimable':
+          console.log('🔍 Fetching claimable posts...');
           blogPosts = await EnhancedBlogClaimService.getClaimablePosts(50);
+          console.log(`✅ Found ${blogPosts.length} claimable posts`);
           break;
         case 'claimed':
-          // Get all claimed posts
-          const { data } = await blogService.getBlogPostsByCategory('', 50);
-          blogPosts = data.filter(post => post.claimed);
+          console.log('🔍 Fetching claimed posts...');
+          const allPosts = await blogService.getRecentBlogPosts(50);
+          blogPosts = allPosts.filter(post => post.claimed);
+          console.log(`✅ Found ${blogPosts.length} claimed posts out of ${allPosts.length} total`);
           break;
         case 'my-posts':
           if (user) {
+            console.log(`🔍 Fetching posts for user: ${user.id}`);
             blogPosts = await EnhancedBlogClaimService.getUserClaimedPosts(user.id);
+            console.log(`✅ Found ${blogPosts.length} user posts`);
           }
           break;
         default:
+          console.log('🔍 Fetching recent blog posts...');
           blogPosts = await blogService.getRecentBlogPosts(50);
+          console.log(`✅ Found ${blogPosts.length} recent posts`);
       }
 
+      console.log('📝 Setting posts state...');
       setPosts(blogPosts);
+      console.log('✅ Posts loaded successfully');
     } catch (error: any) {
-      console.error('Failed to load posts:', error);
+      console.error('❌ Failed to load posts:', error);
       toast({
         title: "Error Loading Posts",
-        description: "Failed to load blog posts. Please try again.",
+        description: `Failed to load blog posts: ${error.message}`,
         variant: "destructive"
       });
+      // Set empty array to stop loading state
+      setPosts([]);
     } finally {
       setLoading(false);
+      console.log('🏁 Loading state set to false');
     }
   };
 
@@ -359,6 +373,13 @@ export function EnhancedBlogListing() {
               )}
             </div>
           </div>
+
+          {/* Debug Information */}
+          {import.meta.env.DEV && (
+            <div className="mb-8">
+              <BlogDataDebugger />
+            </div>
+          )}
 
           {/* Loading State */}
           {loading && (
