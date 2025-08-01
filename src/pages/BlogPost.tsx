@@ -361,76 +361,7 @@ export function BlogPost() {
                 </div>
               </div>
 
-              {/* Claiming Section - Enhanced for all users */}
-              {post.is_trial_post && !post.user_id && (
-                <Card className="mb-8 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-lg">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-blue-100 rounded-lg">
-                          <Star className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-blue-900 text-lg mb-1">🎯 Claim This Premium Post</h3>
-                          <p className="text-blue-700 mb-2">
-                            This is an unclaimed trial post. Claim it to make it permanently yours!
-                          </p>
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-blue-600 mb-3">
-                            <div className="flex items-center gap-1">
-                              <CheckCircle2 className="h-3 w-3" />
-                              Remove expiration date
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <CheckCircle2 className="h-3 w-3" />
-                              Add to your dashboard
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <CheckCircle2 className="h-3 w-3" />
-                              Full ownership rights
-                            </div>
-                          </div>
-                          {post.expires_at && (
-                            <div className="flex items-center gap-2 text-sm font-medium text-amber-600 bg-amber-50 px-3 py-1 rounded-lg">
-                              <Clock className="h-3 w-3" />
-                              Expires: {formatDate(post.expires_at)}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      {user ? (
-                        <Button
-                          onClick={claimPost}
-                          disabled={claiming}
-                          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 shadow-lg"
-                        >
-                          {claiming ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                              Claiming...
-                            </>
-                          ) : (
-                            <>
-                              <Crown className="mr-2 h-4 w-4" />
-                              Claim Post Now
-                            </>
-                          )}
-                        </Button>
-                      ) : (
-                        <div className="flex flex-col gap-2">
-                          <Button
-                            onClick={() => navigate('/auth')}
-                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 shadow-lg"
-                          >
-                            <Crown className="mr-2 h-4 w-4" />
-                            Sign In to Claim
-                          </Button>
-                          <p className="text-xs text-blue-600 text-center">Free registration required</p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+
 
               {/* Claim Banner Inside Content - For Maximum Visibility */}
               {post.is_trial_post && !post.user_id && (
