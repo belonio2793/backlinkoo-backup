@@ -563,20 +563,24 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
     setClaiming(true);
 
     try {
-      const result = await BlogClaimService.claimBlogPost(post.slug, user.id);
+      console.log('🎯 Claiming post from card:', post.slug);
+
+      const result = await UnifiedClaimService.claimBlogPost(post.slug, user);
 
       if (result.success) {
         toast({
-          title: "Post Claimed!",
+          title: "Post Claimed Successfully! 🎉",
           description: result.message,
         });
 
         // Refresh the page to show updated status
-        window.location.reload();
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
 
       } else {
         toast({
-          title: "Claim Failed",
+          title: result.needsUpgrade ? "Upgrade Required" : "Claim Failed",
           description: result.message,
           variant: "destructive"
         });
@@ -586,7 +590,7 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
       console.error('Failed to claim post:', error);
       toast({
         title: "Error",
-        description: "Failed to claim post. Please try again.",
+        description: "An unexpected error occurred while claiming the post.",
         variant: "destructive"
       });
     } finally {
