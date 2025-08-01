@@ -28,8 +28,6 @@ export function UserClaimedPosts() {
   useEffect(() => {
     if (isAuthenticated && user) {
       loadClaimedPosts();
-    } else {
-      setLoading(false);
     }
   }, [user, isAuthenticated]);
 
