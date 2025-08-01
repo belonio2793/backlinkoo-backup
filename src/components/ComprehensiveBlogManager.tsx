@@ -166,11 +166,12 @@ export function ComprehensiveBlogManager() {
 
   const refreshPosts = async () => {
     setRefreshing(true);
+    console.log('🔄 Refreshing blog posts from https://backlinkoo.com/blog/');
     await loadBlogPosts();
     setRefreshing(false);
     toast({
-      title: "Refreshed",
-      description: "Blog posts have been refreshed successfully.",
+      title: "Refreshed from Live Blog",
+      description: "Blog posts have been refreshed from https://backlinkoo.com/blog/",
     });
   };
 
