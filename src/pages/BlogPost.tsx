@@ -584,7 +584,7 @@ export function BlogPost() {
 
       <Footer />
 
-      {/* Floating Claim Button - Always visible for unclaimed posts */}
+      {/* Floating Claim Button - Only visible for unclaimed trial posts */}
       {post.is_trial_post && !post.user_id && (
         <div className="fixed bottom-6 right-6 z-50">
           <div className="bg-white rounded-2xl shadow-2xl border border-blue-200 p-4 max-w-sm">
@@ -594,7 +594,7 @@ export function BlogPost() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-900 text-sm">Claim This Post</p>
-                <p className="text-xs text-gray-600 truncate">Make it permanently yours!</p>
+                <p className="text-xs text-gray-600 truncate">Get full ownership!</p>
               </div>
               {user ? (
                 <Button
