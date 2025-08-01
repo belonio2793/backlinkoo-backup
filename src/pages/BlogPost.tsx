@@ -23,7 +23,9 @@ import {
   Star,
   Crown,
   Timer,
-  CheckCircle2
+  CheckCircle2,
+  Plus,
+  Trash2
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
