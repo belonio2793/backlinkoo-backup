@@ -172,9 +172,11 @@ export class BlogSystemDiagnostic {
 
   private async generateTestData() {
     try {
+      console.log('🧪 Testing blog post creation permissions...');
+
       // Check if we can create a test post (helps identify write permissions)
       const testSlug = `diagnostic-test-${Date.now()}`;
-      
+
       const testPost = await blogService.createBlogPost({
         title: 'Diagnostic Test Post',
         content: '<p>This is a test post created by the diagnostic system.</p>',
