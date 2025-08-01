@@ -104,14 +104,14 @@ export const OptimizedAppWrapper = () => {
           {/* Protected routes - require authentication and email verification */}
           <Route path="/dashboard" element={
             <EmailVerificationGuard>
-              <Suspense fallback={<LoadingComponent />}>
+              <Suspense fallback={<PageLoader />}>
                 <Dashboard />
               </Suspense>
             </EmailVerificationGuard>
           } />
           <Route path="/my-dashboard" element={
             <EmailVerificationGuard>
-              <Suspense fallback={<LoadingComponent />}>
+              <Suspense fallback={<PageLoader />}>
                 <Dashboard />
               </Suspense>
             </EmailVerificationGuard>
