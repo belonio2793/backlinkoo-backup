@@ -56,13 +56,17 @@ export function BlogPost() {
   const loadPost = async () => {
     try {
       console.log('🔄 Loading blog post:', slug);
+      setError(null);
 
       // First try to get from database using unified service
       const blogPost = await UnifiedClaimService.getBlogPostBySlug(slug!);
       if (blogPost) {
+        console.log('✅ Found blog post in database:', blogPost.title);
         setPost(blogPost);
         setLoading(false);
         return;
+      } else {
+        console.log('⚠️ Blog post not found in database, trying localStorage...');
       }
 
       // Fallback to localStorage for legacy posts
