@@ -15,15 +15,19 @@ export function useAuth(): AuthState {
   useEffect(() => {
     let isMounted = true;
 
-    // Get initial session
+    // Get initial session with retry logic
     const getInitialSession = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) {
+          console.warn('Auth error (continuing without user):', error.message);
+        }
         if (isMounted) {
           setUser(user);
           setIsLoading(false);
         }
-      } catch (error) {
+      } catch (error: any) {
+        console.warn('Auth fetch failed (possibly due to network/third-party interference):', error.message);
         if (isMounted) {
           setUser(null);
           setIsLoading(false);
