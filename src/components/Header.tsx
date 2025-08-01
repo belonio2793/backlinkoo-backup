@@ -44,10 +44,10 @@ export function Header() {
               </>
             ) : (
               <>
-                <Button variant="ghost" onClick={() => navigate("/auth")} className="font-medium">
+                <Button variant="ghost" onClick={() => navigate("/login")} className="font-medium">
                   Sign In
                 </Button>
-                <Button onClick={() => navigate("/auth")} className="font-medium">
+                <Button onClick={() => navigate("/login")} className="font-medium">
                   Get Started
                 </Button>
               </>
