@@ -18,6 +18,7 @@ import PaymentSuccess from '@/pages/PaymentSuccess';
 import PaymentCancelled from '@/pages/PaymentCancelled';
 import SubscriptionSuccess from '@/pages/SubscriptionSuccess';
 import SubscriptionCancelled from '@/pages/SubscriptionCancelled';
+import BlogSystemDiagnostic from '@/pages/BlogSystemDiagnostic';
 
 // Import lightweight components
 import AdminAuthGuard from '@/components/AdminAuthGuard';
