@@ -194,6 +194,10 @@ export function SystemsAssessmentDashboard() {
           )}
         </TabsContent>
 
+        <TabsContent value="slug-diagnostic" className="space-y-4">
+          <SlugDiagnosticRunner />
+        </TabsContent>
+
         <TabsContent value="recommendations" className="space-y-4">
           {assessment?.recommendations.map((recommendation, index) => (
             <Card key={index}>
