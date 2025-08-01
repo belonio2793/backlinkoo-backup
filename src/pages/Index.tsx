@@ -1111,6 +1111,8 @@ const Index = () => {
             title: "Welcome!",
             description: "You have been successfully signed in.",
           });
+          // Navigate to dashboard after successful auth
+          navigate('/dashboard');
         }}
         defaultTab={loginModalTab}
       />
