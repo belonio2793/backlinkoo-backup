@@ -619,8 +619,6 @@ const Dashboard = () => {
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
-main
-
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -640,7 +638,8 @@ main
       console.log('🏠 Dashboard: Starting initialization...');
 
       try {
- main
+        // Get current session
+        const { data: { session }, error } = await supabase.auth.getSession();
 
         if (!isMounted) return;
 
@@ -852,8 +851,19 @@ main
   };
 
 
-  const handleSignOut = () => {
- main
+  const handleSignOut = async () => {
+    try {
+      console.log('🚪 Dashboard: Signing out user...');
+      await supabase.auth.signOut();
+      navigate('/login');
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out of your account.",
+      });
+    } catch (error) {
+      console.error('Dashboard sign out error:', error);
+      navigate('/login');
+    }
   };
 
 
