@@ -45,7 +45,7 @@ export function EnhancedDashboardRouter() {
         console.error('Auth check failed:', error);
         setUser(null);
       } finally {
-        setIsLoading(false);
+        // No loading state needed
       }
     };
 
