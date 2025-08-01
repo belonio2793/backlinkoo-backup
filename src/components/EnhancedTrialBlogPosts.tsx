@@ -114,37 +114,49 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
     return () => clearInterval(interval);
   }, []);
 
-  const loadAllPosts = async (silentRefresh = false) => {
+  const getLocalStoragePosts = (): TrialPost[] => {
+    // Use cache if recent
+    const now = Date.now();
+    if (localStorageCache && (now - lastCacheTime) < CACHE_DURATION) {
+      return localStorageCache;
+    }
+
     try {
-      if (!silentRefresh) setLoading(true);
+      const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+      const posts: TrialPost[] = [];
 
-      // Load from database using the blog claim service
-      const { BlogClaimService } = await import('@/services/blogClaimService');
-      const dbPosts = await BlogClaimService.getClaimablePosts(50);
-
-      // Also load from localStorage
-      const localPosts = [];
-      try {
-        const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-        const validLocalPosts = allBlogs.filter((post: any) => {
-          if (post.expires_at) {
-            const isExpired = new Date() > new Date(post.expires_at);
-            return !isExpired;
-          }
-          return true;
-        });
-        
-        // Get full post data for each
-        for (const blogMeta of validLocalPosts) {
-          const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
-          if (blogData) {
-            const blogPost = JSON.parse(blogData);
-            localPosts.push(blogPost);
+      for (const blogMeta of allBlogs) {
+        const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
+        if (blogData) {
+          const blogPost = JSON.parse(blogData);
+          // Check if not expired
+          if (!blogPost.expires_at || new Date() <= new Date(blogPost.expires_at)) {
+            posts.push(blogPost);
           }
         }
-      } catch (error) {
-        console.warn('Error loading local posts:', error);
       }
+
+      localStorageCache = posts;
+      lastCacheTime = now;
+      return posts;
+    } catch (error) {
+      console.warn('Error loading local posts:', error);
+      return [];
+    }
+  };
+
+  const loadAllPosts = async (silentRefresh = true) => {
+    try {
+      if (!silentRefresh) setIsRefreshing(true);
+
+      // Load from both sources in parallel
+      const [dbPosts, localPosts] = await Promise.all([
+        BlogClaimService.getClaimablePosts(50).catch(err => {
+          console.warn('Database error:', err);
+          return [];
+        }),
+        Promise.resolve(getLocalStoragePosts())
+      ]);
 
       // Combine and deduplicate posts
       const combinedPosts = [...dbPosts];
@@ -154,12 +166,15 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
         }
       });
 
+      // Sort by date
+      combinedPosts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
       setAllPosts(combinedPosts);
       setLastRefresh(new Date());
 
       if (!silentRefresh && combinedPosts.length > 0) {
         toast({
-          title: "Posts Loaded",
+          title: "Posts Refreshed",
           description: `Found ${combinedPosts.length} trial posts`,
         });
       }
@@ -174,7 +189,7 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
         });
       }
     } finally {
-      if (!silentRefresh) setLoading(false);
+      if (!silentRefresh) setIsRefreshing(false);
     }
   };
 
