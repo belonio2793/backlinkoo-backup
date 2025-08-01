@@ -369,6 +369,44 @@ export function BlogListing() {
                           </span>
                         </div>
 
+                        {/* Claim Button Section */}
+                        <div className="mt-4 pt-3 border-t border-gray-100">
+                          {isClaimable(post) ? (
+                            <Button
+                              onClick={(e) => handleClaimPost(e, post)}
+                              disabled={claiming === post.id}
+                              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                              size="sm"
+                            >
+                              {claiming === post.id ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Claiming...
+                                </>
+                              ) : (
+                                <>
+                                  <Crown className="h-4 w-4 mr-2" />
+                                  Claim Post {!user && '(Login Required)'}
+                                </>
+                              )}
+                            </Button>
+                          ) : claimedPosts.has(post.id) ? (
+                            <div className="flex items-center justify-center w-full py-2 bg-green-50 border border-green-200 rounded text-green-700 text-sm">
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              Already Claimed
+                            </div>
+                          ) : isPostExpired(post) ? (
+                            <div className="flex items-center justify-center w-full py-2 bg-gray-50 border border-gray-200 rounded text-gray-500 text-sm">
+                              Expired
+                            </div>
+                          ) : !post.is_trial_post ? (
+                            <div className="flex items-center justify-center w-full py-2 bg-blue-50 border border-blue-200 rounded text-blue-700 text-sm">
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Post
+                            </div>
+                          ) : null}
+                        </div>
+
                         {isExpiringSoon(post) && (
                           <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
                             ⚠️ Expires soon - claim to keep permanently
