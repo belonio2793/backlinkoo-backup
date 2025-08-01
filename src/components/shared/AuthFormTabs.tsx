@@ -99,24 +99,10 @@ export function AuthFormTabs({
 
 
     try {
-      // Create a timeout promise to prevent infinite hanging
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Authentication timeout - taking longer than expected')), 25000)
-      );
-
-      // Race between auth and timeout
-      const result = await Promise.race([
-        AuthService.signIn({
-          email: loginEmail,
-          password: loginPassword,
-        }),
-        timeoutPromise
-      ]);
-
-      if (countdownInterval) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-      }
+      const result = await AuthService.signIn({
+        email: loginEmail,
+        password: loginPassword,
+      });
 
       if (result.success && result.user) {
         toast({
@@ -480,7 +466,7 @@ export function AuthFormTabs({
               <Input
                 id="login-password"
                 type={showPassword ? "text" : "password"}
-                placeholder="•••���••••"
+                placeholder="••••••••"
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 className={inputHeight}
