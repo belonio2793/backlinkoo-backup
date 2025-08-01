@@ -600,27 +600,43 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
           </div>
         </div>
 
-        {/* Claim Button */}
-        {canClaim && (
+        {/* Claim Button - Enhanced for all users */}
+        {post.is_trial_post && !post.user_id && (
           <div className="pt-3 border-t border-gray-100">
-            <Button
-              onClick={handleClaimPost}
-              disabled={claiming}
-              size="sm"
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            >
-              {claiming ? (
-                <>
-                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                  Claiming...
-                </>
-              ) : (
-                <>
-                  <Star className="mr-2 h-3 w-3" />
-                  Claim This Post
-                </>
-              )}
-            </Button>
+            {user ? (
+              <Button
+                onClick={handleClaimPost}
+                disabled={claiming}
+                size="sm"
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 animate-pulse"
+              >
+                {claiming ? (
+                  <>
+                    <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                    Claiming...
+                  </>
+                ) : (
+                  <>
+                    <Star className="mr-2 h-3 w-3" />
+                    Claim This Post Now
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button
+                onClick={() => navigate('/auth')}
+                size="sm"
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 animate-pulse"
+              >
+                <Star className="mr-2 h-3 w-3" />
+                Sign In to Claim Post
+              </Button>
+            )}
+            {post.expires_at && (
+              <p className="text-xs text-center text-amber-600 mt-1">
+                ⏰ Expires: {formatDate(post.published_at || post.created_at)}
+              </p>
+            )}
           </div>
         )}
 
