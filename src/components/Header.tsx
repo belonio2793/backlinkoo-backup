@@ -9,10 +9,33 @@ import { AuthService } from '@/services/authService';
 export function Header() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [defaultTab, setDefaultTab] = useState<'login' | 'signup'>('login');
 
   const handleSignOut = async () => {
-    // Sign out logic would go here - for now just navigate to login
-    navigate('/login');
+    try {
+      await AuthService.signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Sign out error:', error);
+      navigate('/');
+    }
+  };
+
+  const handleSignInClick = () => {
+    setDefaultTab('login');
+    setShowLoginModal(true);
+  };
+
+  const handleCreateAccountClick = () => {
+    setDefaultTab('signup');
+    setShowLoginModal(true);
+  };
+
+  const handleAuthSuccess = (user: any) => {
+    setShowLoginModal(false);
+    // Navigate to dashboard after successful auth
+    navigate('/dashboard');
   };
 
   return (
