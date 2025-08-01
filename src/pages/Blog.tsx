@@ -60,13 +60,20 @@ export function Blog() {
       }, 10000); // 10 second timeout
 
       try {
-        // Use ClaimableBlogService to get posts with expiration logic
+        // Use UnifiedClaimService to get posts consistently
         let posts: any[] = [];
         try {
-          posts = await ClaimableBlogService.getClaimablePosts(50);
+          posts = await UnifiedClaimService.getClaimablePosts(50);
           console.log('✅ Claimable posts loaded:', posts.length);
         } catch (dbError) {
-          console.warn('❌ Database unavailable, using localStorage:', dbError);
+          console.warn('❌ Database unavailable, trying fallback:', dbError);
+          // Fallback to old service if needed
+          try {
+            posts = await ClaimableBlogService.getClaimablePosts(50);
+            console.log('✅ Fallback posts loaded:', posts.length);
+          } catch (fallbackError) {
+            console.warn('❌ Fallback also failed, using localStorage:', fallbackError);
+          }
         }
 
         // Also load from localStorage (traditional blog posts)
