@@ -282,6 +282,65 @@ export class SystemsAssessmentTool {
     }
   }
 
+  private async testRLSPolicies(): Promise<ComponentStatus> {
+    try {
+      // Test creating a blog post to check RLS policies
+      const testSlug = `rls-test-${Date.now()}`;
+      const { data: testPost, error: createError } = await supabase
+        .from('blog_posts')
+        .insert({
+          title: 'RLS Policy Test',
+          slug: testSlug,
+          content: 'Test content',
+          target_url: 'https://example.com',
+          status: 'published',
+          is_trial_post: true,
+          claimed: false
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        if (createError.message.includes('row-level security') || createError.message.includes('policy')) {
+          return {
+            name: 'RLS Policies',
+            status: 'error',
+            details: 'Blog post creation blocked by restrictive RLS policies',
+            errors: ['RLS policies need to be fixed - run policy fix in admin dashboard']
+          };
+        } else {
+          return {
+            name: 'RLS Policies',
+            status: 'warning',
+            details: `Blog post creation failed: ${createError.message}`,
+            errors: [createError.message]
+          };
+        }
+      }
+
+      // Clean up test post
+      if (testPost) {
+        await supabase
+          .from('blog_posts')
+          .delete()
+          .eq('id', testPost.id);
+      }
+
+      return {
+        name: 'RLS Policies',
+        status: 'healthy',
+        details: 'RLS policies allow proper blog post creation and management'
+      };
+    } catch (error: any) {
+      return {
+        name: 'RLS Policies',
+        status: 'error',
+        details: `RLS policy test failed: ${error.message}`,
+        errors: [error.message]
+      };
+    }
+  }
+
   // Generate a pretty printed report
   generateReport(assessment: SystemAssessment): string {
     const statusEmojis = {
