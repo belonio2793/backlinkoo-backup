@@ -280,23 +280,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="text-center py-12">
-        <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
-          <BarChart3 className="h-10 w-10 text-purple-600" />
-        </div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-3">Loading Posts...</h3>
-        <p className="text-gray-600 mb-4">{loadingStatus}</p>
-        <div className="max-w-sm mx-auto bg-gray-200 rounded-full h-2 mb-4">
-          <div className="bg-purple-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
-        </div>
-        <p className="text-xs text-gray-500">
-          🔍 Checking database and local storage for blog posts...
-        </p>
-      </div>
-    );
-  }
+
 
   if (error && allPosts.length === 0) {
     return (
