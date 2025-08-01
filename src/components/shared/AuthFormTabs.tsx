@@ -171,12 +171,10 @@ export function AuthFormTabs({
             description: errorMessage,
           });
 
-          // Auto-retry with longer delay
-          setTimeout(() => {
-            if (loginEmail && loginPassword) {
-              handleLogin(e);
-            }
-          }, 3000);
+          // Auto-retry immediately
+          if (loginEmail && loginPassword) {
+            handleLogin(e);
+          }
           return;
         } else {
           errorMessage = "Connection keeps timing out. Please check your internet connection or try refreshing the page.";
