@@ -46,10 +46,7 @@ export function AuthFormTabs({
 
   const { toast } = useToast();
 
-  // Reset retry attempts when switching tabs
-  useEffect(() => {
-    setRetryAttempts(0);
-  }, [activeTab]);
+
 
   const validateEmailFormat = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
