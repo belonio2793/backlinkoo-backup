@@ -356,6 +356,57 @@ export function Blog() {
         <ClaimStatusIndicator onUpgrade={() => setPricingModalOpen(true)} />
       </div>
 
+      {/* Claim Feature Banner */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-8 text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-3xl font-bold mb-2">🎯 Claim Premium Blog Posts</h2>
+                <p className="text-blue-100 text-lg mb-4">
+                  Find unclaimed trial posts and make them permanently yours! Get full ownership rights and add them to your dashboard.
+                </p>
+                <div className="flex items-center gap-6 text-sm">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-300" />
+                    <span>Remove expiration dates</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-300" />
+                    <span>Personal dashboard access</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-300" />
+                    <span>Full ownership rights</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex-shrink-0">
+                {user ? (
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{filteredPosts.filter(p => p.is_trial_post && !p.user_id).length}</div>
+                    <div className="text-blue-200 text-sm">Claimable Posts</div>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={() => navigate('/auth')}
+                    size="lg"
+                    className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4"
+                  >
+                    <Crown className="mr-2 h-5 w-5" />
+                    Sign In to Start Claiming
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="absolute -top-4 -right-4 opacity-20">
+            <Crown className="h-32 w-32 text-white" />
+          </div>
+        </div>
+      </div>
+
       {/* Blog Posts Grid/List */}
       <div id="blog-grid" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {filteredPosts.length === 0 ? (
