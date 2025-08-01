@@ -50,7 +50,7 @@ export class BlogService {
       content: data.content,
       target_url: data.targetUrl,
       anchor_text: data.anchorText,
-      published_url: publishedUrl,
+      // published_url will be set after database generates slug
       status: 'published',
       is_trial_post: isTrialPost,
       expires_at: isTrialPost ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null,
