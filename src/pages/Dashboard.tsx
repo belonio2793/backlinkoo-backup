@@ -50,6 +50,7 @@ import { ApiConfigStatus } from "@/components/ApiConfigStatus";
 import { TrialBlogShowcase } from "@/components/TrialBlogShowcase";
 import { TrialBlogPostsDisplay as NewTrialBlogPostsDisplay } from "@/components/TrialBlogPostsDisplay";
 import { EnhancedTrialBlogPosts } from "@/components/EnhancedTrialBlogPosts";
+import { DashboardTrialPosts } from "@/components/DashboardTrialPosts";
 
 import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
@@ -322,7 +323,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           <div className="text-xs text-gray-600 space-y-1">
             <div>🔧 Status: {loadingStatus}</div>
             <div>⏰ Last check: {lastRefresh?.toLocaleTimeString() || 'Never'}</div>
-            <div>🔄 Auto-refresh: Every 30 seconds</div>
+            <div>��� Auto-refresh: Every 30 seconds</div>
             <div>📡 Connection: {navigator.onLine ? 'Online' : 'Offline'}</div>
           </div>
         </div>
@@ -428,7 +429,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
               <div>��� Displayed: {debugInfo.displayedPosts}</div>
-              <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '✅'}</div>
+              <div>• Has Errors: {debugInfo.hasError ? '⚠��' : '✅'}</div>
             </div>
           </div>
           {debugInfo.errorMessage && (
