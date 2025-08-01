@@ -9,7 +9,7 @@ import { SafeDashboard } from '@/components/SafeDashboard';
 
 export function EnhancedDashboardRouter() {
   const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [hasTrialPosts, setHasTrialPosts] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
