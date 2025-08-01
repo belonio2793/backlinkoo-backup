@@ -255,7 +255,14 @@ export function BlogListing() {
     setClaiming(post.id);
 
     try {
-      const result = await SimplifiedClaimService.claimBlogPost(post.slug, user);
+      // Try SimplifiedClaimService first, then UnifiedClaimService as fallback
+      let result;
+      try {
+        result = await SimplifiedClaimService.claimBlogPost(post.slug, user);
+      } catch (primaryError: any) {
+        console.warn('Primary claim service failed, trying fallback:', primaryError.message);
+        result = await UnifiedClaimService.claimBlogPost(post.slug, user);
+      }
 
       if (result.success) {
         setClaimedPosts(prev => new Set([...prev, post.id]));
@@ -274,7 +281,7 @@ export function BlogListing() {
         }, 1500);
 
       } else {
-        throw new Error(result.error || 'Failed to claim post');
+        throw new Error(result.error || result.message || 'Failed to claim post');
       }
     } catch (error: any) {
       console.error('Claim error:', error);
