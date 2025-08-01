@@ -61,9 +61,10 @@ export function BlogListing() {
     }
   };
 
-  const loadClaimedPosts = () => {
+  const loadClaimedPosts = async () => {
     try {
-      const claimed = BlogClaimService.getUserClaimedPosts(user?.id);
+      if (!user) return;
+      const claimed = await SimplifiedClaimService.getUserSavedPosts(user.id);
       setClaimedPosts(new Set(claimed.map(p => p.id)));
     } catch (error) {
       console.warn('Failed to load claimed posts:', error);
