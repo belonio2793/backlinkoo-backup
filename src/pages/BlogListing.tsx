@@ -36,6 +36,31 @@ export function BlogListing() {
     loadPosts();
   }, []);
 
+  useEffect(() => {
+    checkUserClaimStatus();
+    loadClaimedPosts();
+  }, [user]);
+
+  const checkUserClaimStatus = async () => {
+    if (user) {
+      try {
+        const canClaim = await BlogClaimService.canUserClaimMore(user);
+        setCanClaimMore(canClaim);
+      } catch (error) {
+        console.warn('Failed to check claim status:', error);
+      }
+    }
+  };
+
+  const loadClaimedPosts = () => {
+    try {
+      const claimed = BlogClaimService.getUserClaimedPosts(user?.id);
+      setClaimedPosts(new Set(claimed.map(p => p.id)));
+    } catch (error) {
+      console.warn('Failed to load claimed posts:', error);
+    }
+  };
+
   const loadPosts = async () => {
     try {
       setLoading(true);
