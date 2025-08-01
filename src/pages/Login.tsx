@@ -3,14 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { AuthService, setupAuthStateListener } from "@/services/authService";
-
 import { AuthFormTabs } from "@/components/shared/AuthFormTabs";
-
+import { validateEmail } from "@/utils/authValidation";
 import { useNavigate } from "react-router-dom";
-import { Infinity, Mail, RefreshCw, ArrowLeft } from "lucide-react";
-import { testAuthFlow } from "@/utils/testAuth";
+import { Infinity, Mail, ArrowLeft } from "lucide-react";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
