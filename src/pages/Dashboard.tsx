@@ -332,7 +332,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           <div className="text-xs text-gray-600 space-y-1">
             <div>🔧 Status: {loadingStatus}</div>
             <div>⏰ Last check: {lastRefresh?.toLocaleTimeString() || 'Never'}</div>
-            <div>🔄 Auto-refresh: Every 30 seconds</div>
+            <div>���� Auto-refresh: Every 30 seconds</div>
             <div>📡 Connection: {navigator.onLine ? 'Online' : 'Offline'}</div>
           </div>
         </div>
@@ -662,39 +662,24 @@ const Dashboard = () => {
 
     initializeDashboard();
 
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted) return;
+
+      console.log('🔄 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
+
+      if (event === 'SIGNED_OUT' || !session) {
+        console.log('🏠 Dashboard - User signed out, redirecting to login...');
+        navigate('/login');
+      } else if (event === 'SIGNED_IN' && session) {
+        console.log('🏠 Dashboard - User signed in, updating user state');
+        setUser(session.user);
+      }
+    });
+
     return () => {
       isMounted = false;
-    };
-
-    // Simplified auth state listener since EmailVerificationGuard handles the main auth flow
-    let subscription;
-    try {
-      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (!isMounted) return;
-
-        console.log('🔄 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
-
-        if (event === 'SIGNED_OUT' || !session) {
-          console.log('🏠 Dashboard - User signed out, redirecting to login...');
-          navigate('/login');
-        } else if (event === 'SIGNED_IN' && session) {
-          console.log('🏠 Dashboard - User signed in, updating user state');
-          setUser(session.user);
-        }
-      });
-      subscription = authSubscription;
-    } catch (subscriptionError) {
-      console.warn('🏠 Dashboard - Could not set up auth listener:', subscriptionError);
-    }
-
-    return () => {
-      if (subscription?.unsubscribe) {
-        try {
-          subscription.unsubscribe();
-        } catch (error) {
-          console.warn('🏠 Dashboard - Error unsubscribing:', error);
-        }
-      }
+      subscription?.unsubscribe();
     };
   }, [navigate]);
 
