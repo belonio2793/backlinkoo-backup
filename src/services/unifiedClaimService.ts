@@ -155,7 +155,7 @@ export class UnifiedClaimService {
   }
 
   /**
-   * Save a blog post to user's dashboard
+   * Claim a blog post by assigning ownership to the user
    */
   static async claimBlogPost(postSlug: string, user: User): Promise<ClaimResult> {
     try {
