@@ -626,28 +626,8 @@ const Dashboard = () => {
       console.log('🏠 Dashboard: Starting initialization...');
 
       try {
-        // Add timeout to prevent hanging
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Dashboard initialization timeout')), 8000)
-        );
-
-        const sessionPromise = supabase.auth.getSession();
-
-        let session = null;
-        let error = null;
-
-        try {
-          const result = await Promise.race([sessionPromise, timeoutPromise]) as any;
-          session = result.data?.session;
-          error = result.error;
-        } catch (timeoutError) {
-          console.warn('🏠 Dashboard - Auth check timed out, trying fallback...');
-
-          // If auth times out, continue with demo mode
-          console.log('🏠 Dashboard - Auth timeout, continuing in demo mode');
-          setLoading(false);
-          return;
-        }
+        const { data: sessionData, error } = await supabase.auth.getSession();
+        const session = sessionData?.session;
 
         if (!isMounted) return;
 
