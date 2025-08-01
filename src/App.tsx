@@ -17,6 +17,7 @@ import "@/services/blogCleanupService"; // Initialize blog cleanup service
 import "@/utils/systemsAssessment"; // Initialize systems assessment
 import "@/utils/blogSystemTest"; // Initialize blog system test
 import "@/utils/runSecurityFix"; // AUTO-FIX RLS SECURITY ERRORS
+import "@/utils/testBlogCreation"; // TEST BLOG CREATION AFTER FIX
 
 // Initialize performance monitoring in development
 if (import.meta.env.DEV) {
