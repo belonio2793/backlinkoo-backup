@@ -381,30 +381,7 @@ export function AuthFormTabs({
               </div>
             )}
 
-            {retryAttempts > 0 && (
-              <div className="text-center">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="text-xs"
-                  onClick={testConnection}
-                  disabled={isTestingConnection}
-                >
-                  {isTestingConnection ? (
-                    <>
-                      <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-                      Testing...
-                    </>
-                  ) : (
-                    <>
-                      <Wifi className="h-3 w-3 mr-1" />
-                      Test Connection
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
+
           </div>
         </form>
       </TabsContent>
