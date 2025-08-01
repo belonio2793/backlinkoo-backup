@@ -8,8 +8,8 @@ export function Header() {
   const { user } = useAuth();
 
   const handleSignOut = async () => {
-    // Sign out logic would go here - for now just navigate to auth
-    navigate('/auth');
+    // Sign out logic would go here - for now just navigate to login
+    navigate('/login');
   };
 
   return (
