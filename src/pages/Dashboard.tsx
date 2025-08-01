@@ -362,10 +362,33 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
     );
   }
 
-  // Separate posts into categories
-  const userClaimedPosts = allPosts.filter(post => post.user_id === user?.id && !post.is_trial_post);
-  const availablePosts = allPosts.filter(post => !post.user_id || post.is_trial_post);
-  const otherClaimedPosts = allPosts.filter(post => post.user_id && post.user_id !== user?.id && !post.is_trial_post);
+  // All posts are now available for saving to dashboard
+  const availablePosts = allPosts;
+
+  // Load user's saved posts separately
+  const [userSavedPosts, setUserSavedPosts] = useState<any[]>([]);
+  const [loadingSavedPosts, setLoadingSavedPosts] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      loadUserSavedPosts();
+    }
+  }, [user]);
+
+  const loadUserSavedPosts = async () => {
+    if (!user) return;
+
+    try {
+      setLoadingSavedPosts(true);
+      const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
+      const savedPosts = await UnifiedClaimService.getUserSavedPosts(user.id);
+      setUserSavedPosts(savedPosts);
+    } catch (error) {
+      console.error('Error loading saved posts:', error);
+    } finally {
+      setLoadingSavedPosts(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
