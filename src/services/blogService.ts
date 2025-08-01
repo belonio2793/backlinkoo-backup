@@ -298,17 +298,37 @@ export class BlogService {
   }
 
   /**
+   * Get all blog posts
+   */
+  async getAllBlogPosts(): Promise<BlogPost[]> {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Failed to fetch all blog posts:', error.message);
+      return [];
+    }
+
+    return data || [];
+  }
+
+  /**
    * Delete a blog post
    */
-  async deleteBlogPost(id: string): Promise<void> {
+  async deleteBlogPost(id: string): Promise<boolean> {
     const { error } = await supabase
       .from('blog_posts')
       .delete()
       .eq('id', id);
 
     if (error) {
-      throw new Error(`Failed to delete blog post: ${error.message}`);
+      console.error('Failed to delete blog post:', error.message);
+      return false;
     }
+
+    return true;
   }
 
   /**
