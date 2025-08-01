@@ -465,9 +465,9 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
           <p className="text-gray-600">Your trial content library</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={() => loadAllPosts(false)} variant="outline" size="sm" disabled={isRefreshing}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          <Button onClick={() => loadAllPosts()} variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
           </Button>
           <Button onClick={() => navigate('/?focus=generator')} size="sm">
             <Plus className="h-4 w-4 mr-2" />
