@@ -667,11 +667,9 @@ const Dashboard = () => {
       }
     };
 
-    // Delay initialization slightly to let EmailVerificationGuard finish
-    const initTimeout = setTimeout(initializeDashboard, 100);
+    initializeDashboard();
 
     return () => {
-      clearTimeout(initTimeout);
       isMounted = false;
     };
 
