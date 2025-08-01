@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AuthService } from "@/services/authService";
+import { useToast } from "@/hooks/use-toast";
 
 // Admin Components
 import { SecurityDashboard } from "@/components/SecurityDashboard";
@@ -60,6 +62,7 @@ interface AdminStats {
 }
 
 export function OrganizedAdminDashboard() {
+  const { toast } = useToast();
   const [stats] = useState<AdminStats>({
     totalUsers: 1247,
     activeUsers: 892,
@@ -68,6 +71,23 @@ export function OrganizedAdminDashboard() {
   });
 
   const [activeCategory, setActiveCategory] = useState("overview");
+
+  const handleSignOut = async () => {
+    try {
+      await AuthService.signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out.",
+      });
+      window.location.href = '/';
+    } catch (error) {
+      toast({
+        title: "Sign out failed",
+        description: "An error occurred while signing out.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const categories = [
     {
@@ -116,7 +136,7 @@ export function OrganizedAdminDashboard() {
           <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
           <p className="text-muted-foreground">Manage your backlink service platform</p>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" onClick={handleSignOut}>
           <LogOut className="h-4 w-4 mr-2" />
           Sign Out
         </Button>
