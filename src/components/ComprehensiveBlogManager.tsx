@@ -23,6 +23,7 @@ import {
 import { PricingModal } from '@/components/PricingModal';
 import { BlogClaimService } from '@/services/blogClaimService';
 import { ClaimableBlogService } from '@/services/claimableBlogService';
+import { ExternalBlogService } from '@/services/externalBlogService';
 import {
   Search,
   MoreHorizontal,
