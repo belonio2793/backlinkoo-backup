@@ -419,6 +419,31 @@ export function AuthFormTabs({
     }
   };
 
+  const testConnection = async () => {
+    setIsTestingConnection(true);
+    try {
+      // Simple connectivity test
+      const response = await fetch('/api/health', { method: 'GET', signal: AbortSignal.timeout(5000) });
+      const isHealthy = response.ok;
+
+      toast({
+        title: isHealthy ? "Connection successful" : "Connection issues detected",
+        description: isHealthy
+          ? "Your internet connection is working properly."
+          : "There may be connectivity issues. Please check your internet connection.",
+        variant: isHealthy ? "default" : "destructive",
+      });
+    } catch (error) {
+      toast({
+        title: "Connection test failed",
+        description: "Unable to connect to the server. Please check your internet connection.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTestingConnection(false);
+    }
+  };
+
   const inputHeight = isCompact ? "h-9" : "";
   const spacingClass = isCompact ? "space-y-3" : "space-y-4";
 
