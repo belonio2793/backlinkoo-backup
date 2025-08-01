@@ -348,11 +348,9 @@ export function AuthFormTabs({
 
             onAuthSuccess?.(result.user);
           } else {
-            // Auto-switch to login tab after successful signup
-            setTimeout(() => {
-              setActiveTab("login");
-              setLoginEmail(signupEmail); // Pre-fill email for easy login
-            }, 3000);
+            // Auto-switch to login tab immediately after successful signup
+            setActiveTab("login");
+            setLoginEmail(signupEmail); // Pre-fill email for easy login
           }
 
         } else {
