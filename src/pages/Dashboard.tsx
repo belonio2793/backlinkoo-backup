@@ -440,7 +440,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
             <div>
               <div className="text-yellow-400 mb-2">System Status:</div>
               <div>• Status: {debugInfo.loadingStatus}</div>
-              <div>• Online: {debugInfo.connectionOnline ? '✅' : '�����'}</div>
+              <div>• Online: {debugInfo.connectionOnline ? '✅' : '���'}</div>
               <div>• Last Update: {debugInfo.timestamp}</div>
               <div>• User Auth: {debugInfo.userAuthenticated ? '✅' : '❌'}</div>
               <div>• User ID: {debugInfo.userId || 'None'}</div>
@@ -450,7 +450,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div>• Database Posts: {debugInfo.dbPosts}</div>
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
-              <div>• Displayed: {debugInfo.displayedPosts}</div>
+              <div>��� Displayed: {debugInfo.displayedPosts}</div>
               <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '✅'}</div>
             </div>
           </div>
@@ -479,39 +479,46 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
         </div>
       </div>
 
-      {/* Claimed Posts Section */}
-      {userClaimedPosts.length > 0 && (
+      {/* Saved Posts Section */}
+      {userSavedPosts.length > 0 && (
         <div className="mb-8">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-            Your Claimed Posts ({userClaimedPosts.length})
+            Your Saved Posts ({userSavedPosts.length})
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {userClaimedPosts.map((post, index) => (
-              <Card key={post.id || index} className="group hover:shadow-lg transition-all duration-300 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <h4 className="font-medium text-gray-800 line-clamp-2 text-sm">{post.title}</h4>
-                    <Badge variant="outline" className="bg-emerald-50 border-emerald-200 text-emerald-700 text-xs">Owned</Badge>
-                  </div>
-                  <div className="flex gap-2 mb-3">
-                    <Button size="sm" className="flex-1" onClick={() => navigate(`/blog/${post.slug}`)}>
-                      <Eye className="h-3 w-3 mr-1" />View
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleUnclaimPost(post)}
-                      disabled={claimingPostId === post.id}
-                      className="border-red-200 text-red-600 hover:bg-red-50"
-                    >
-                      Unclaim
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {loadingSavedPosts ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
+              <p className="text-gray-500 mt-2">Loading your saved posts...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {userSavedPosts.map((post, index) => (
+                <Card key={post.id || index} className="group hover:shadow-lg transition-all duration-300 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <h4 className="font-medium text-gray-800 line-clamp-2 text-sm">{post.title}</h4>
+                      <Badge variant="outline" className="bg-emerald-50 border-emerald-200 text-emerald-700 text-xs">Saved</Badge>
+                    </div>
+                    <div className="flex gap-2 mb-3">
+                      <Button size="sm" className="flex-1" onClick={() => navigate(`/blog/${post.slug}`)}>
+                        <Eye className="h-3 w-3 mr-1" />View
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRemoveSavedPost(post.id)}
+                        disabled={claimingPostId === post.id}
+                        className="border-red-200 text-red-600 hover:bg-red-50"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
