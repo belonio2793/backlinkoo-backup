@@ -91,38 +91,6 @@ export class BlogService {
       .single();
 
     if (error) {
-      if (error.message.includes('duplicate key') || error.message.includes('unique constraint')) {
-        // If duplicate, try with a timestamp suffix
-        const timestampSlug = `${uniqueSlug}-${Date.now()}`;
-        const retryData = { ...blogPostData, slug: timestampSlug };
-        // Remove any custom id field for retry attempt
-        const { id: __, ...cleanRetryData } = retryData as any;
-
-        const { data: retryPost, error: retryError } = await supabase
-          .from('blog_posts')
-          .insert(cleanRetryData)
-          .select()
-          .single();
-
-        if (retryError) {
-          if (retryError.message.includes('row-level security') || retryError.message.includes('policy')) {
-            console.error('🚨 RLS POLICY IS BLOCKING BLOG POST CREATION');
-            console.error('');
-            console.error('📋 MANUAL FIX REQUIRED:');
-            console.error('1. Go to your Supabase Dashboard');
-            console.error('2. Open SQL Editor');
-            console.error('3. Execute: ALTER TABLE blog_posts DISABLE ROW LEVEL SECURITY;');
-            console.error('4. Execute: GRANT ALL ON blog_posts TO PUBLIC;');
-            console.error('5. Refresh this page');
-
-            throw new Error('RLS policy blocking blog creation. Manual SQL execution required in Supabase: ALTER TABLE blog_posts DISABLE ROW LEVEL SECURITY; GRANT ALL ON blog_posts TO PUBLIC;');
-          }
-          throw new Error(`Failed to create blog post after retry: ${retryError.message}`);
-        }
-
-        return retryPost;
-      }
-
       if (error.message.includes('row-level security') || error.message.includes('policy')) {
         console.error('🚨 RLS POLICY IS BLOCKING BLOG POST CREATION');
         console.error('');
@@ -168,7 +136,7 @@ export class BlogService {
       try {
         await blogPersistenceService.storeWithMaxPersistence(blogPost, 'backup');
       } catch (backupError) {
-        console.warn('⚠️ Trial post backup failed (non-critical):', backupError);
+        console.warn('⚠��� Trial post backup failed (non-critical):', backupError);
       }
     }
 
