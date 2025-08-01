@@ -40,6 +40,9 @@ export function BlogPost() {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  console.log('🔄 BlogPost component rendered with slug:', slug);
 
   useEffect(() => {
     if (!slug) {
