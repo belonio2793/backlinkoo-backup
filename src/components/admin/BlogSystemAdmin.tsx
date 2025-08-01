@@ -239,6 +239,56 @@ export function BlogSystemAdmin() {
         </CardContent>
       </Card>
 
+      {/* Complete Security Removal */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-red-600" />
+            Remove ALL Security Protocols
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-3 bg-red-50 border border-red-200 rounded">
+            <p className="text-sm text-red-800 font-medium">⚠️ WARNING: This will completely disable all security restrictions!</p>
+            <p className="text-xs text-red-600 mt-1">This makes the blog_posts table completely open to all operations from any user.</p>
+          </div>
+
+          <Button
+            onClick={removeAllSecurity}
+            disabled={removingSecurity}
+            variant="destructive"
+            className="w-full"
+          >
+            {removingSecurity ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Removing All Security...
+              </>
+            ) : (
+              <>
+                <AlertCircle className="mr-2 h-4 w-4" />
+                REMOVE ALL SECURITY PROTOCOLS
+              </>
+            )}
+          </Button>
+
+          {securityStats && (
+            <div className="space-y-2 mt-4 p-3 bg-gray-50 rounded">
+              <h4 className="font-medium">Unrestricted Access Test Results:</h4>
+              <div className="text-sm space-y-1">
+                <div>Can Read Posts: {securityStats.canRead ? '✅' : '❌'}</div>
+                <div>Can Create Posts: {securityStats.canCreate ? '✅' : '❌'}</div>
+                <div>Can Update Posts: {securityStats.canUpdate ? '✅' : '❌'}</div>
+                <div>Can Delete Posts: {securityStats.canDelete ? '✅' : '❌'}</div>
+                {securityStats.error && (
+                  <div className="text-red-600">Error: {securityStats.error}</div>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* RLS Policy Fix */}
       <Card>
         <CardHeader>
