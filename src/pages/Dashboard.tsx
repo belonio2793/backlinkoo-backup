@@ -217,10 +217,10 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
 
       if (result.success) {
         toast({
-          title: "Post Claimed Successfully",
+          title: "Post Saved Successfully",
           description: result.message,
         });
-        await loadAllPosts(); // Refresh the list
+        await loadUserSavedPosts(); // Refresh saved posts list
       } else {
         toast({
           title: "Claim Failed",
