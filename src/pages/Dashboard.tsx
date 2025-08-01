@@ -70,9 +70,9 @@ import type { User } from '@supabase/supabase-js';
 // TrialBlogPostsDisplay component for the trial tab
 const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
   const [allPosts, setAllPosts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loadingStatus, setLoadingStatus] = useState<string>('Initializing...');
+  const [loadingStatus, setLoadingStatus] = useState<string>('Ready');
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [claimingPostId, setClaimingPostId] = useState<string | null>(null);
   const [showDebug, setShowDebug] = useState(false);
