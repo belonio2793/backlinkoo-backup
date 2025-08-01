@@ -56,6 +56,7 @@ export type Database = {
           published_url: string | null
           status: string
           is_trial_post: boolean
+          claimed: boolean
           expires_at: string | null
           view_count: number
           seo_score: number
@@ -85,6 +86,7 @@ export type Database = {
           published_url?: string | null
           status?: string
           is_trial_post?: boolean
+          claimed?: boolean
           expires_at?: string | null
           view_count?: number
           seo_score?: number
@@ -114,6 +116,7 @@ export type Database = {
           published_url?: string | null
           status?: string
           is_trial_post?: boolean
+          claimed?: boolean
           expires_at?: string | null
           view_count?: number
           seo_score?: number
