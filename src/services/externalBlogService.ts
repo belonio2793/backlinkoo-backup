@@ -117,21 +117,26 @@ export class ExternalBlogService {
             const slug = href.split('/').pop() || `post-${index}`;
             const dateText = dateElement?.textContent?.trim() || dateElement?.getAttribute('datetime') || new Date().toISOString();
             
+            const targetUrl = href.startsWith('http') ? href : `${this.BASE_URL}${href}`;
+            const excerpt = excerptElement?.textContent?.trim().substring(0, 160) || '';
+
             posts.push({
               id: `scraped-${index}`,
               title,
               slug,
-              status: 'published',
-              target_url: href.startsWith('http') ? href : `${this.BASE_URL}${href}`,
-              backlinks: Math.floor(Math.random() * 30) + 10,
-              views: Math.floor(Math.random() * 800) + 200,
-              created_at: this.parseDate(dateText),
-              published_at: this.parseDate(dateText),
+              content: excerpt, // Use excerpt as content for scraped posts
+              excerpt,
               keywords: this.extractKeywords(title),
+              meta_description: excerpt,
+              target_url: targetUrl,
+              anchor_text: title,
               seo_score: Math.floor(Math.random() * 25) + 75,
-              meta_description: excerptElement?.textContent?.trim().substring(0, 160),
-              author_name: 'Backlink Team',
-              reading_time: Math.floor(Math.random() * 8) + 3
+              reading_time: Math.floor(Math.random() * 8) + 3,
+              published_url: targetUrl,
+              is_trial_post: false,
+              expires_at: '',
+              created_at: this.parseDate(dateText),
+              updated_at: this.parseDate(dateText)
             });
           }
         } catch (parseError) {
