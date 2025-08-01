@@ -58,7 +58,7 @@ export class DirectEmailService {
       
       return {
         success: true,
-        emailId: result.id,
+        emailId: responseData.id,
         provider: 'direct-resend'
       };
 
