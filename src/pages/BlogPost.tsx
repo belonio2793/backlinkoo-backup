@@ -10,7 +10,6 @@ import { ClaimErrorHandler } from '@/utils/claimErrorHandler';
 import { useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { supabase } from '@/integrations/supabase/client';
 import {
   Clock,
   Eye,
@@ -23,9 +22,7 @@ import {
   Star,
   Crown,
   Timer,
-  CheckCircle2,
-  Plus,
-  Trash2
+  CheckCircle2
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -39,7 +36,6 @@ export function BlogPost() {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!slug) {
@@ -218,55 +214,6 @@ export function BlogPost() {
     }
   };
 
-  const deletePost = async () => {
-    if (!post || !user || post.user_id !== user.id) return;
-
-    // Show confirmation dialog
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${post.title}"? This action cannot be undone.`
-    );
-
-    if (!confirmed) return;
-
-    setDeleting(true);
-    try {
-      const { error } = await supabase
-        .from('blog_posts')
-        .delete()
-        .eq('id', post.id)
-        .eq('user_id', user.id); // Extra security check
-
-      if (error) {
-        throw error;
-      }
-
-      // Also remove from user_saved_posts if it exists
-      await supabase
-        .from('user_saved_posts')
-        .delete()
-        .eq('post_id', post.id)
-        .eq('user_id', user.id);
-
-      toast({
-        title: "Post Deleted Successfully",
-        description: "Your blog post has been permanently deleted.",
-      });
-
-      // Navigate to dashboard
-      navigate('/dashboard');
-
-    } catch (error: any) {
-      console.error('Failed to delete post:', error);
-      toast({
-        title: "Delete Failed",
-        description: error.message || "Failed to delete the blog post. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setDeleting(false);
-    }
-  };
-
   // Clean and format content for better SEO structure
   const formatContent = (content: string) => {
     if (!content) return '';
@@ -400,8 +347,7 @@ export function BlogPost() {
                     </Badge>
                   )}
 
-                  {/* Show claim button for unclaimed trial posts */}
-                  {post.is_trial_post && !post.user_id && (
+                  {post.is_trial_post && (
                     <div className="flex items-center gap-2">
                       <Badge
                         variant="outline"
@@ -420,45 +366,38 @@ export function BlogPost() {
                         )}
                         {post.expires_at && ` • Expires ${formatDate(post.expires_at)}`}
                       </Badge>
-
-                      {user ? (
-                        <Button
-                          size="sm"
-                          onClick={claimPost}
-                          disabled={claiming}
-                          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white animate-pulse"
-                        >
-                          {claiming ? (
-                            <>
-                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                              Claiming...
-                            </>
-                          ) : (
-                            <>
-                              <Plus className="mr-1 h-3 w-3" />
-                              Claim This Post
-                            </>
-                          )}
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          onClick={handleClaimRedirect}
-                          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white animate-pulse"
-                        >
-                          <Plus className="mr-1 h-3 w-3" />
-                          Sign In to Claim
-                        </Button>
+                      {!post.user_id && (
+                        user ? (
+                          <Button
+                            size="sm"
+                            onClick={claimPost}
+                            disabled={claiming}
+                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white animate-pulse"
+                          >
+                            {claiming ? (
+                              <>
+                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                                Claiming...
+                              </>
+                            ) : (
+                              <>
+                                <Plus className="mr-1 h-3 w-3" />
+                                Save to Dashboard
+                              </>
+                            )}
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            onClick={handleClaimRedirect}
+                            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white animate-pulse"
+                          >
+                            <Plus className="mr-1 h-3 w-3" />
+                            Sign In to Save
+                          </Button>
+                        )
                       )}
                     </div>
-                  )}
-
-                  {/* Show claimed status for claimed posts */}
-                  {post.is_trial_post && post.user_id && (
-                    <Badge className="bg-green-50 text-green-700 border-green-200">
-                      <CheckCircle2 className="mr-1 h-3 w-3" />
-                      Claimed Post
-                    </Badge>
                   )}
 
                   {post.user_id === user?.id && (
@@ -474,36 +413,13 @@ export function BlogPost() {
                     <Share2 className="h-4 w-4 mr-2" />
                     Share
                   </Button>
-
+                  
                   {post.target_url && (
                     <Button variant="outline" size="sm" asChild>
                       <a href={post.target_url} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="h-4 w-4 mr-2" />
                         Visit Link
                       </a>
-                    </Button>
-                  )}
-
-                  {/* Delete button - only show if user owns the post */}
-                  {post.user_id === user?.id && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={deletePost}
-                      disabled={deleting}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      {deleting ? (
-                        <>
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-600 mr-1"></div>
-                          Deleting...
-                        </>
-                      ) : (
-                        <>
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </>
-                      )}
                     </Button>
                   )}
                 </div>
@@ -584,7 +500,7 @@ export function BlogPost() {
 
       <Footer />
 
-      {/* Floating Claim Button - Only visible for unclaimed trial posts */}
+      {/* Floating Claim Button - Always visible for unclaimed posts */}
       {post.is_trial_post && !post.user_id && (
         <div className="fixed bottom-6 right-6 z-50">
           <div className="bg-white rounded-2xl shadow-2xl border border-blue-200 p-4 max-w-sm">
@@ -594,7 +510,7 @@ export function BlogPost() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-900 text-sm">Claim This Post</p>
-                <p className="text-xs text-gray-600 truncate">Get full ownership!</p>
+                <p className="text-xs text-gray-600 truncate">Make it permanently yours!</p>
               </div>
               {user ? (
                 <Button

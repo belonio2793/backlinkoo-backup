@@ -18,7 +18,6 @@ import PaymentSuccess from '@/pages/PaymentSuccess';
 import PaymentCancelled from '@/pages/PaymentCancelled';
 import SubscriptionSuccess from '@/pages/SubscriptionSuccess';
 import SubscriptionCancelled from '@/pages/SubscriptionCancelled';
-import MyPosts from '@/pages/MyPosts';
 
 // Import lightweight components
 import AdminAuthGuard from '@/components/AdminAuthGuard';
@@ -120,13 +119,6 @@ export const OptimizedAppWrapper = () => {
           <Route path="/my-blog" element={
             <EmailVerificationGuard>
               <LazyUserBlogManagement />
-            </EmailVerificationGuard>
-          } />
-          <Route path="/my-posts" element={
-            <EmailVerificationGuard>
-              <Suspense fallback={<PageLoader />}>
-                <MyPosts />
-              </Suspense>
             </EmailVerificationGuard>
           } />
           <Route path="/blog/:postId/edit" element={

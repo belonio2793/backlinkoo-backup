@@ -155,7 +155,7 @@ export class UnifiedClaimService {
   }
 
   /**
-   * Claim a blog post by assigning ownership to the user
+   * Save a blog post to user's dashboard
    */
   static async claimBlogPost(postSlug: string, user: User): Promise<ClaimResult> {
     try {
@@ -181,74 +181,66 @@ export class UnifiedClaimService {
         };
       }
 
-      // Check if post is already claimed
-      if (post.user_id) {
-        if (post.user_id === user.id) {
-          return {
-            success: false,
-            message: 'You already own this post.'
-          };
-        } else {
-          return {
-            success: false,
-            message: 'This post has already been claimed by another user.'
-          };
-        }
-      }
-
-      // Check if this is a claimable post (must be unclaimed trial post)
-      if (!post.is_trial_post) {
-        return {
-          success: false,
-          message: 'This post is not available for claiming.'
-        };
-      }
-
-      // Check if post has expired
-      if (post.expires_at && new Date() > new Date(post.expires_at)) {
-        return {
-          success: false,
-          message: 'This post has expired and can no longer be claimed.'
-        };
-      }
-
-      // Assign ownership to the user
-      const { data: claimedPost, error: claimError } = await supabase
-        .from('blog_posts')
-        .update({
-          user_id: user.id,
-          is_trial_post: false,
-          expires_at: null, // Remove expiration since it's now claimed
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', post.id)
-        .eq('user_id', null) // Extra security: only claim if not already claimed
-        .select()
+      // Check if user already saved this post
+      const { data: existingSave, error: checkError } = await supabase
+        .from('user_saved_posts')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('post_id', post.id)
         .single();
 
-      if (claimError) {
-        console.error('Failed to claim post:', claimError);
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking existing save:', checkError);
         return {
           success: false,
-          message: 'Failed to claim the blog post. It may have been claimed by someone else.'
+          message: 'Error checking if post is already saved.'
         };
       }
 
-      // Also add to user_saved_posts for backward compatibility with dashboard
-      await supabase
+      if (existingSave) {
+        return {
+          success: false,
+          message: 'This post is already in your dashboard.'
+        };
+      }
+
+      // Save the post to user's dashboard
+      const { data: savedPost, error: saveError } = await supabase
         .from('user_saved_posts')
         .insert({
           user_id: user.id,
           post_id: post.id,
           saved_at: new Date().toISOString()
-        });
+        })
+        .select()
+        .single();
 
-      console.log(`✅ Successfully claimed post: ${postSlug}`);
+      if (saveError) {
+        console.error('Failed to save post:', saveError);
+        return {
+          success: false,
+          message: 'Failed to save the blog post. Please try again.'
+        };
+      }
+
+      // Mark the post as "protected" from auto-deletion by setting a flag
+      await supabase
+        .from('blog_posts')
+        .update({
+          view_count: (post.view_count || 0) + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', post.id);
+
+      console.log(`✅ Successfully saved post to dashboard: ${postSlug}`);
+
+      const newStats = await this.getUserSavedStats(user.id);
 
       return {
         success: true,
-        message: `"${post.title}" is now yours! You have full ownership of this blog post.`,
-        post: claimedPost
+        message: `"${post.title}" added to your dashboard! ${stats.isSubscriber ? 'Unlimited saves available.' : `${this.MAX_SAVED_PER_FREE_USER - newStats.savedCount} saves remaining.`}`,
+        post,
+        savedCount: newStats.savedCount
       };
 
     } catch (error) {
@@ -379,7 +371,7 @@ export class UnifiedClaimService {
   }
 
   /**
-   * Check if a specific post can be claimed by a user
+   * Check if a specific post can be saved by a user
    */
   static async isPostSaveable(postSlug: string, userId?: string): Promise<{
     saveable: boolean;
@@ -394,46 +386,39 @@ export class UnifiedClaimService {
         return { saveable: false, reason: 'Post not found' };
       }
 
-      // Check if post is already claimed
-      if (post.user_id) {
-        if (userId && post.user_id === userId) {
+      if (userId) {
+        // Check if user already saved this post
+        const { data: existingSave } = await supabase
+          .from('user_saved_posts')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('post_id', post.id)
+          .single();
+
+        if (existingSave) {
           return {
             saveable: false,
-            reason: 'You already own this post',
+            reason: 'Already in your dashboard',
             post,
             alreadySaved: true
           };
-        } else {
+        }
+
+        // Check user's save limit
+        const stats = await this.getUserSavedStats(userId);
+        if (!stats.canSave) {
           return {
             saveable: false,
-            reason: 'This post has already been claimed',
+            reason: `You've reached the maximum of ${this.MAX_SAVED_PER_FREE_USER} saved posts. Upgrade for unlimited!`,
             post
           };
         }
       }
 
-      // Check if this is a claimable post (must be unclaimed trial post)
-      if (!post.is_trial_post) {
-        return {
-          saveable: false,
-          reason: 'This post is not available for claiming',
-          post
-        };
-      }
-
-      // Check if post has expired
-      if (post.expires_at && new Date() > new Date(post.expires_at)) {
-        return {
-          saveable: false,
-          reason: 'This post has expired and can no longer be claimed',
-          post
-        };
-      }
-
       return { saveable: true, post };
 
     } catch (error) {
-      console.error('Error checking if post is claimable:', error);
+      console.error('Error checking if post is saveable:', error);
       return { saveable: false, reason: 'Error checking post status' };
     }
   }
