@@ -14,52 +14,89 @@ export interface ClaimResult {
   success: boolean;
   message: string;
   post?: BlogPost;
-  claimedCount?: number;
+  savedCount?: number;
   needsUpgrade?: boolean;
 }
 
 export interface ClaimStats {
-  claimedCount: number;
-  maxClaims: number;
-  canClaim: boolean;
+  savedCount: number;
+  maxSaved: number;
+  canSave: boolean;
+  isSubscriber: boolean;
 }
 
 export class UnifiedClaimService {
-  private static readonly MAX_CLAIMS_PER_USER = 3;
+  private static readonly MAX_SAVED_PER_FREE_USER = 3;
 
   /**
-   * Check if user can claim more posts
+   * Check user's subscription status
    */
-  static async getUserClaimStats(userId: string): Promise<ClaimStats> {
+  static async getUserSubscriptionStatus(userId: string): Promise<{
+    isSubscriber: boolean;
+    subscriptionTier: string | null;
+  }> {
     try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('subscription_tier')
+        .eq('id', userId)
+        .single();
+
+      if (error || !data) {
+        return { isSubscriber: false, subscriptionTier: null };
+      }
+
+      const isSubscriber = data.subscription_tier === 'monthly' || data.subscription_tier === 'premium';
+      return {
+        isSubscriber,
+        subscriptionTier: data.subscription_tier
+      };
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+      return { isSubscriber: false, subscriptionTier: null };
+    }
+  }
+
+  /**
+   * Check how many posts user has saved to dashboard
+   */
+  static async getUserSavedStats(userId: string): Promise<ClaimStats> {
+    try {
+      // Check subscription status
+      const { isSubscriber } = await this.getUserSubscriptionStatus(userId);
+
+      // Count saved posts in user's dashboard
       const { count, error } = await supabase
-        .from('blog_posts')
+        .from('user_saved_posts')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .eq('is_trial_post', true);
+        .eq('user_id', userId);
 
       if (error) {
-        console.error('Failed to get user claim stats:', error);
+        console.error('Failed to get user saved stats:', error);
         return {
-          claimedCount: 0,
-          maxClaims: this.MAX_CLAIMS_PER_USER,
-          canClaim: true
+          savedCount: 0,
+          maxSaved: isSubscriber ? -1 : this.MAX_SAVED_PER_FREE_USER,
+          canSave: true,
+          isSubscriber
         };
       }
 
-      const claimedCount = count || 0;
-      
+      const savedCount = count || 0;
+      const maxSaved = isSubscriber ? -1 : this.MAX_SAVED_PER_FREE_USER; // -1 means unlimited
+
       return {
-        claimedCount,
-        maxClaims: this.MAX_CLAIMS_PER_USER,
-        canClaim: claimedCount < this.MAX_CLAIMS_PER_USER
+        savedCount,
+        maxSaved,
+        canSave: isSubscriber || savedCount < this.MAX_SAVED_PER_FREE_USER,
+        isSubscriber
       };
     } catch (error) {
-      console.error('Error getting user claim stats:', error);
+      console.error('Error getting user saved stats:', error);
       return {
-        claimedCount: 0,
-        maxClaims: this.MAX_CLAIMS_PER_USER,
-        canClaim: true
+        savedCount: 0,
+        maxSaved: this.MAX_SAVED_PER_FREE_USER,
+        canSave: true,
+        isSubscriber: false
       };
     }
   }
@@ -118,19 +155,19 @@ export class UnifiedClaimService {
   }
 
   /**
-   * Claim a blog post - main functionality
+   * Save a blog post to user's dashboard
    */
   static async claimBlogPost(postSlug: string, user: User): Promise<ClaimResult> {
     try {
-      console.log(`🎯 Starting claim process for post: ${postSlug}, user: ${user.id}`);
+      console.log(`📌 Starting save process for post: ${postSlug}, user: ${user.id}`);
 
-      // Check user's claim limit
-      const stats = await this.getUserClaimStats(user.id);
-      if (!stats.canClaim) {
+      // Check user's save limit
+      const stats = await this.getUserSavedStats(user.id);
+      if (!stats.canSave) {
         return {
           success: false,
-          message: `You've reached the maximum of ${this.MAX_CLAIMS_PER_USER} claimed posts. Upgrade to claim more!`,
-          claimedCount: stats.claimedCount,
+          message: `You've reached the maximum of ${this.MAX_SAVED_PER_FREE_USER} saved posts. Upgrade to save unlimited posts!`,
+          savedCount: stats.savedCount,
           needsUpgrade: true
         };
       }
@@ -140,86 +177,70 @@ export class UnifiedClaimService {
       if (!post) {
         return {
           success: false,
-          message: 'Blog post not found or not available for claiming.'
+          message: 'Blog post not found.'
         };
       }
 
-      // Validate post can be claimed
-      if (!post.is_trial_post) {
+      // Check if user already saved this post
+      const { data: existingSave, error: checkError } = await supabase
+        .from('user_saved_posts')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('post_id', post.id)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking existing save:', checkError);
         return {
           success: false,
-          message: 'This post is not available for claiming.'
+          message: 'Error checking if post is already saved.'
         };
       }
 
-      if (post.user_id) {
+      if (existingSave) {
         return {
           success: false,
-          message: 'This blog post has already been claimed by another user.'
+          message: 'This post is already in your dashboard.'
         };
       }
 
-      if (post.expires_at && new Date() > new Date(post.expires_at)) {
-        return {
-          success: false,
-          message: 'This blog post has expired and is no longer available for claiming.'
-        };
-      }
-
-      // Perform the claim - update post with user ownership
-      const { data: updatedPost, error: updateError } = await supabase
-        .from('blog_posts')
-        .update({
+      // Save the post to user's dashboard
+      const { data: savedPost, error: saveError } = await supabase
+        .from('user_saved_posts')
+        .insert({
           user_id: user.id,
-          expires_at: null, // Remove expiration
-          is_trial_post: false, // Convert from trial to permanent
-          updated_at: new Date().toISOString()
+          post_id: post.id,
+          saved_at: new Date().toISOString()
         })
-        .eq('id', post.id)
-        .eq('is_trial_post', true) // Safety check
-        .is('user_id', null) // Safety check - ensure not already claimed
         .select()
         .single();
 
-      if (updateError) {
-        console.error('Failed to claim post:', updateError);
-        
-        // Check if it was a race condition (someone else claimed it)
-        if (updateError.code === 'PGRST116') {
-          return {
-            success: false,
-            message: 'This post was just claimed by another user. Please try a different post.'
-          };
-        }
-        
+      if (saveError) {
+        console.error('Failed to save post:', saveError);
         return {
           success: false,
-          message: 'Failed to claim the blog post. Please try again.'
+          message: 'Failed to save the blog post. Please try again.'
         };
       }
 
-      if (!updatedPost) {
-        return {
-          success: false,
-          message: 'This post was just claimed by another user or is no longer available.'
-        };
-      }
-
-      // Also increment view count for the newly claimed post
+      // Mark the post as "protected" from auto-deletion by setting a flag
       await supabase
         .from('blog_posts')
-        .update({ view_count: (post.view_count || 0) + 1 })
+        .update({
+          view_count: (post.view_count || 0) + 1,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', post.id);
 
-      console.log(`✅ Successfully claimed post: ${postSlug}`);
-      
-      const newStats = await this.getUserClaimStats(user.id);
-      
+      console.log(`✅ Successfully saved post to dashboard: ${postSlug}`);
+
+      const newStats = await this.getUserSavedStats(user.id);
+
       return {
         success: true,
-        message: `Blog post claimed successfully! You now own "${post.title}" permanently.`,
-        post: updatedPost,
-        claimedCount: newStats.claimedCount
+        message: `"${post.title}" added to your dashboard! ${stats.isSubscriber ? 'Unlimited saves available.' : `${this.MAX_SAVED_PER_FREE_USER - newStats.savedCount} saves remaining.`}`,
+        post,
+        savedCount: newStats.savedCount
       };
 
     } catch (error) {
@@ -238,127 +259,221 @@ export class UnifiedClaimService {
   }
 
   /**
-   * Get user's claimed posts
+   * Get user's saved posts from dashboard
    */
-  static async getUserClaimedPosts(userId: string): Promise<BlogPost[]> {
+  static async getUserSavedPosts(userId: string): Promise<BlogPost[]> {
     try {
       const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
+        .from('user_saved_posts')
+        .select(`
+          *,
+          blog_posts(*)
+        `)
         .eq('user_id', userId)
-        .eq('is_trial_post', false) // Only get permanently claimed posts
-        .order('updated_at', { ascending: false });
+        .order('saved_at', { ascending: false });
 
       if (error) {
-        console.error('Failed to get user claimed posts:', error);
+        console.error('Failed to get user saved posts:', error);
         return [];
       }
 
-      return data || [];
+      // Extract blog posts from the joined data
+      return (data || []).map(item => (item as any).blog_posts).filter(Boolean);
     } catch (error) {
-      console.error('Error getting user claimed posts:', error);
+      console.error('Error getting user saved posts:', error);
       return [];
     }
   }
 
   /**
-   * Get all claimable posts (trial posts that haven't expired)
+   * Remove a post from user's dashboard
    */
-  static async getClaimablePosts(limit: number = 20): Promise<BlogPost[]> {
+  static async removeSavedPost(userId: string, postId: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const { error } = await supabase
+        .from('user_saved_posts')
+        .delete()
+        .eq('user_id', userId)
+        .eq('post_id', postId);
+
+      if (error) {
+        console.error('Failed to remove saved post:', error);
+        return {
+          success: false,
+          message: 'Failed to remove post from dashboard.'
+        };
+      }
+
+      return {
+        success: true,
+        message: 'Post removed from dashboard.'
+      };
+    } catch (error) {
+      console.error('Error removing saved post:', error);
+      return {
+        success: false,
+        message: 'Error removing post from dashboard.'
+      };
+    }
+  }
+
+  /**
+   * Get all available posts for saving to dashboard
+   */
+  static async getAvailablePosts(limit: number = 20): Promise<BlogPost[]> {
     try {
       const { data, error } = await supabase
         .from('blog_posts')
         .select('*')
         .eq('status', 'published')
-        .eq('is_trial_post', true)
-        .is('user_id', null)
-        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
         .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) {
-        console.error('Failed to get claimable posts:', error);
+        console.error('Failed to get available posts:', error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error getting claimable posts:', error);
+      console.error('Error getting available posts:', error);
       return [];
     }
   }
 
   /**
-   * Check if a specific post is claimable by a user
+   * Get all claimable posts (backward compatibility)
    */
-  static async isPostClaimable(postSlug: string, userId?: string): Promise<{
-    claimable: boolean;
-    reason?: string;
-    post?: BlogPost;
-  }> {
+  static async getClaimablePosts(limit: number = 20): Promise<BlogPost[]> {
+    return this.getAvailablePosts(limit);
+  }
+
+  /**
+   * Check if any users have saved a specific post (prevents auto-deletion)
+   */
+  static async isPostSavedByAnyUser(postId: string): Promise<boolean> {
     try {
-      const post = await this.getBlogPostBySlug(postSlug);
-      
-      if (!post) {
-        return { claimable: false, reason: 'Post not found' };
+      const { count, error } = await supabase
+        .from('user_saved_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('post_id', postId);
+
+      if (error) {
+        console.error('Error checking if post is saved:', error);
+        return false;
       }
 
-      if (!post.is_trial_post) {
-        return { claimable: false, reason: 'Post is not a trial post', post };
-      }
-
-      if (post.user_id) {
-        if (post.user_id === userId) {
-          return { claimable: false, reason: 'You already own this post', post };
-        }
-        return { claimable: false, reason: 'Post already claimed by another user', post };
-      }
-
-      if (post.expires_at && new Date() > new Date(post.expires_at)) {
-        return { claimable: false, reason: 'Post has expired', post };
-      }
-
-      if (userId) {
-        const stats = await this.getUserClaimStats(userId);
-        if (!stats.canClaim) {
-          return { 
-            claimable: false, 
-            reason: `You've reached the maximum of ${this.MAX_CLAIMS_PER_USER} claimed posts`,
-            post 
-          };
-        }
-      }
-
-      return { claimable: true, post };
-      
+      return (count || 0) > 0;
     } catch (error) {
-      console.error('Error checking if post is claimable:', error);
-      return { claimable: false, reason: 'Error checking post status' };
+      console.error('Error checking if post is saved:', error);
+      return false;
     }
   }
 
   /**
-   * Cleanup expired trial posts (for maintenance)
+   * Check if a specific post can be saved by a user
+   */
+  static async isPostSaveable(postSlug: string, userId?: string): Promise<{
+    saveable: boolean;
+    reason?: string;
+    post?: BlogPost;
+    alreadySaved?: boolean;
+  }> {
+    try {
+      const post = await this.getBlogPostBySlug(postSlug);
+
+      if (!post) {
+        return { saveable: false, reason: 'Post not found' };
+      }
+
+      if (userId) {
+        // Check if user already saved this post
+        const { data: existingSave } = await supabase
+          .from('user_saved_posts')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('post_id', post.id)
+          .single();
+
+        if (existingSave) {
+          return {
+            saveable: false,
+            reason: 'Already in your dashboard',
+            post,
+            alreadySaved: true
+          };
+        }
+
+        // Check user's save limit
+        const stats = await this.getUserSavedStats(userId);
+        if (!stats.canSave) {
+          return {
+            saveable: false,
+            reason: `You've reached the maximum of ${this.MAX_SAVED_PER_FREE_USER} saved posts. Upgrade for unlimited!`,
+            post
+          };
+        }
+      }
+
+      return { saveable: true, post };
+
+    } catch (error) {
+      console.error('Error checking if post is saveable:', error);
+      return { saveable: false, reason: 'Error checking post status' };
+    }
+  }
+
+  /**
+   * Backward compatibility alias
+   */
+  static async isPostClaimable(postSlug: string, userId?: string) {
+    return this.isPostSaveable(postSlug, userId);
+  }
+
+  /**
+   * Cleanup expired posts (only delete if not saved by any user)
    */
   static async cleanupExpiredPosts(): Promise<number> {
     try {
-      const { data, error } = await supabase
+      // Get expired posts
+      const { data: expiredPosts, error: fetchError } = await supabase
         .from('blog_posts')
-        .delete()
+        .select('id')
         .eq('is_trial_post', true)
-        .is('user_id', null)
-        .lt('expires_at', new Date().toISOString())
-        .select('id');
+        .not('expires_at', 'is', null)
+        .lt('expires_at', new Date().toISOString());
 
-      if (error) {
-        console.error('Failed to cleanup expired posts:', error);
+      if (fetchError || !expiredPosts) {
+        console.error('Failed to fetch expired posts:', fetchError);
         return 0;
       }
 
-      const deletedCount = data?.length || 0;
-      console.log(`🧹 Cleaned up ${deletedCount} expired trial posts`);
+      let deletedCount = 0;
+
+      // Check each post to see if it's saved by any user
+      for (const post of expiredPosts) {
+        const isSaved = await this.isPostSavedByAnyUser(post.id);
+
+        if (!isSaved) {
+          // Safe to delete - no user has saved it
+          const { error: deleteError } = await supabase
+            .from('blog_posts')
+            .delete()
+            .eq('id', post.id);
+
+          if (!deleteError) {
+            deletedCount++;
+          } else {
+            console.error(`Failed to delete post ${post.id}:`, deleteError);
+          }
+        } else {
+          console.log(`🔒 Preserving expired post ${post.id} - saved by users`);
+        }
+      }
+
+      console.log(`🧹 Cleaned up ${deletedCount} expired posts (preserved ${expiredPosts.length - deletedCount} saved posts)`);
       return deletedCount;
-      
+
     } catch (error) {
       console.error('Error cleaning up expired posts:', error);
       return 0;
