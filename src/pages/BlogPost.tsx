@@ -465,13 +465,36 @@ export function BlogPost() {
                     <Share2 className="h-4 w-4 mr-2" />
                     Share
                   </Button>
-                  
+
                   {post.target_url && (
                     <Button variant="outline" size="sm" asChild>
                       <a href={post.target_url} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="h-4 w-4 mr-2" />
                         Visit Link
                       </a>
+                    </Button>
+                  )}
+
+                  {/* Delete button - only show if user owns the post */}
+                  {post.user_id === user?.id && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={deletePost}
+                      disabled={deleting}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      {deleting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-600 mr-1"></div>
+                          Deleting...
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </>
+                      )}
                     </Button>
                   )}
                 </div>
