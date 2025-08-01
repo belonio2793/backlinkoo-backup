@@ -292,6 +292,13 @@ export function BlogListing() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
+          {/* Database Checker - Temporary Debug Tool */}
+          {import.meta.env.DEV && (
+            <div className="mb-8">
+              <DatabaseChecker />
+            </div>
+          )}
+
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Blog Posts</h1>
