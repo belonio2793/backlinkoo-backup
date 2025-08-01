@@ -491,6 +491,50 @@ export function BlogPost() {
       </main>
 
       <Footer />
+
+      {/* Floating Claim Button - Always visible for unclaimed posts */}
+      {post.is_trial_post && !post.user_id && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl border border-blue-200 p-4 max-w-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                <Crown className="h-5 w-5 text-blue-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-gray-900 text-sm">Claim This Post</p>
+                <p className="text-xs text-gray-600 truncate">Make it permanently yours!</p>
+              </div>
+              {user ? (
+                <Button
+                  onClick={claimPost}
+                  disabled={claiming}
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg flex-shrink-0"
+                >
+                  {claiming ? (
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                  ) : (
+                    "Claim"
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => navigate('/auth')}
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg flex-shrink-0"
+                >
+                  Sign In
+                </Button>
+              )}
+            </div>
+            {post.expires_at && (
+              <div className="mt-2 text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
+                ⏰ Expires: {formatDate(post.expires_at)}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
