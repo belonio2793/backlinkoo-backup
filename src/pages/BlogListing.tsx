@@ -216,11 +216,33 @@ export function BlogListing() {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Blog Posts</h1>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-gray-600 mb-6">
               Boost your search rankings with high-quality backlinks and SEO-optimized content
             </p>
-            
-            <Button 
+
+            {/* Claim Status for Authenticated Users */}
+            {user && (
+              <div className="mb-6">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-blue-700 text-sm">
+                  <Crown className="h-4 w-4" />
+                  {canClaimMore ? (
+                    `You can claim ${3 - claimedPosts.size} more posts`
+                  ) : (
+                    <>
+                      Claim limit reached -
+                      <button
+                        onClick={() => setShowPricingModal(true)}
+                        className="underline hover:no-underline ml-1"
+                      >
+                        upgrade for unlimited
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <Button
               onClick={() => navigate('/blog/create')}
               size="lg"
               className="mb-8"
