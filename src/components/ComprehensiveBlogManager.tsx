@@ -144,61 +144,12 @@ export function ComprehensiveBlogManager() {
         console.warn('Failed to load from localStorage:', error);
       }
 
-      // Add some mock data if no posts exist
-      if (allPosts.length === 0) {
-        const mockPosts: BlogPost[] = [
-          {
-            id: '1',
-            title: 'The Complete Guide to SEO Optimization',
-            slug: 'complete-guide-seo-optimization',
-            status: 'published',
-            target_url: 'https://example.com/seo-guide',
-            backlinks: 15,
-            views: 1250,
-            created_at: '2024-01-15T10:30:00Z',
-            published_at: '2024-01-16T09:00:00Z',
-            keywords: ['SEO', 'optimization', 'search engine'],
-            seo_score: 85,
-            meta_description: 'Learn the essential SEO strategies to boost your website rankings',
-            author_name: 'SEO Expert',
-            reading_time: 8
-          },
-          {
-            id: '2',
-            title: 'Best Link Building Strategies for 2024',
-            slug: 'best-link-building-strategies-2024',
-            status: 'published',
-            target_url: 'https://example.com/link-building',
-            backlinks: 8,
-            views: 890,
-            created_at: '2024-01-10T14:20:00Z',
-            published_at: '2024-01-11T11:30:00Z',
-            keywords: ['link building', 'backlinks', 'SEO strategy'],
-            seo_score: 78,
-            meta_description: 'Discover the most effective link building techniques',
-            author_name: 'Marketing Pro',
-            reading_time: 6
-          },
-          {
-            id: '3',
-            title: 'Content Marketing Automation Tools',
-            slug: 'content-marketing-automation-tools',
-            status: 'unclaimed',
-            target_url: 'https://example.com/automation',
-            backlinks: 0,
-            views: 0,
-            created_at: '2024-01-20T16:45:00Z',
-            keywords: ['content marketing', 'automation', 'tools'],
-            is_trial_post: true,
-            seo_score: 72,
-            meta_description: 'Streamline your content marketing with these automation tools',
-            author_name: 'Tech Specialist',
-            reading_time: 5,
-            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours from now
-          }
-        ];
-        allPosts = mockPosts;
-      }
+      // Log final data source stats
+      console.log(`📊 Loaded total posts: ${allPosts.length}`, {
+        external: allPosts.filter(p => p.id.startsWith('external-') || p.id.startsWith('scraped-') || p.id.startsWith('fallback-')).length,
+        database: allPosts.filter(p => !p.id.startsWith('external-') && !p.id.startsWith('scraped-') && !p.id.startsWith('fallback-')).length,
+        localStorage: allPosts.filter(p => p.is_trial_post).length
+      });
 
       setPosts(allPosts);
     } catch (error) {
