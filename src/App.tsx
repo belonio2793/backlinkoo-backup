@@ -23,6 +23,7 @@ if (import.meta.env.DEV) {
 // Debug utilities removed for better performance in production
 // Only import debug utils in development mode
 if (import.meta.env.DEV) {
+  import('@/utils/testBlogSystemFix'); // Auto-run blog system fix test
   import('@/utils/testBlogClaiming');
   import('@/utils/netlifyFunctionDiagnostic');
   import('@/utils/dashboardAccessDiagnostic');

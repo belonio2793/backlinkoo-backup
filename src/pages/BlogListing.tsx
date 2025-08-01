@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { blogService } from '@/services/blogService';
-import { BlogClaimService } from '@/services/blogClaimService';
+import { SimplifiedClaimService } from '@/services/simplifiedClaimService';
 import { supabase } from '@/integrations/supabase/client';
 import { DatabaseSetup } from '@/utils/databaseSetup';
 import { useAuth } from '@/hooks/useAuth';
@@ -53,17 +53,18 @@ export function BlogListing() {
   const checkUserClaimStatus = async () => {
     if (user) {
       try {
-        const canClaim = await BlogClaimService.canUserClaimMore(user);
-        setCanClaimMore(canClaim);
+        const stats = await SimplifiedClaimService.getUserSavedStats(user.id);
+        setCanClaimMore(stats.canSave);
       } catch (error) {
         console.warn('Failed to check claim status:', error);
       }
     }
   };
 
-  const loadClaimedPosts = () => {
+  const loadClaimedPosts = async () => {
     try {
-      const claimed = BlogClaimService.getUserClaimedPosts(user?.id);
+      if (!user) return;
+      const claimed = await SimplifiedClaimService.getUserSavedPosts(user.id);
       setClaimedPosts(new Set(claimed.map(p => p.id)));
     } catch (error) {
       console.warn('Failed to load claimed posts:', error);
@@ -236,7 +237,7 @@ export function BlogListing() {
     setClaiming(post.id);
 
     try {
-      const result = await BlogClaimService.claimPost(post.id, user);
+      const result = await SimplifiedClaimService.claimBlogPost(post.slug, user);
 
       if (result.success) {
         setClaimedPosts(prev => new Set([...prev, post.id]));

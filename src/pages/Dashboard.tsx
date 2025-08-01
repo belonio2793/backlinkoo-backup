@@ -93,11 +93,11 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
       }
       setLoadingStatus('Connecting to database...');
 
-      // Load from database using the unified claim service
-      const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
+      // Load from database using the simplified claim service
+      const { SimplifiedClaimService } = await import('@/services/simplifiedClaimService');
 
       setLoadingStatus('Fetching published blog posts...');
-      const dbPosts = await UnifiedClaimService.getClaimablePosts(20);
+      const dbPosts = await SimplifiedClaimService.getClaimablePosts(20);
 
       setLoadingStatus('Checking local storage...');
       // Also load from localStorage for backwards compatibility
@@ -202,10 +202,10 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
 
     try {
       setClaimingPostId(post.id);
-      const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
+      const { SimplifiedClaimService } = await import('@/services/simplifiedClaimService');
 
-      // Use unified claim service with slug
-      const result = await UnifiedClaimService.claimBlogPost(post.slug, user);
+      // Use simplified claim service with slug
+      const result = await SimplifiedClaimService.claimBlogPost(post.slug, user);
 
       if (result.success) {
         toast({
@@ -237,9 +237,9 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
 
     try {
       setClaimingPostId(postId);
-      const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
+      const { SimplifiedClaimService } = await import('@/services/simplifiedClaimService');
 
-      const result = await UnifiedClaimService.removeSavedPost(user.id, postId);
+      const result = await SimplifiedClaimService.removeSavedPost(user.id, postId);
 
       if (result.success) {
         toast({
@@ -336,6 +336,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
   // Load user's saved posts separately
   const [userSavedPosts, setUserSavedPosts] = useState<any[]>([]);
   const [loadingSavedPosts, setLoadingSavedPosts] = useState(false);
+  const [otherClaimedPosts, setOtherClaimedPosts] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -348,8 +349,8 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
 
     try {
       setLoadingSavedPosts(true);
-      const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
-      const savedPosts = await UnifiedClaimService.getUserSavedPosts(user.id);
+      const { SimplifiedClaimService } = await import('@/services/simplifiedClaimService');
+      const savedPosts = await SimplifiedClaimService.getUserSavedPosts(user.id);
       setUserSavedPosts(savedPosts);
     } catch (error) {
       console.error('Error loading saved posts:', error);
@@ -619,8 +620,6 @@ const Dashboard = () => {
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
-main
-
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -640,7 +639,8 @@ main
       console.log('🏠 Dashboard: Starting initialization...');
 
       try {
- main
+        // Get current session
+        const { data: { session }, error } = await supabase.auth.getSession();
 
         if (!isMounted) return;
 
@@ -852,8 +852,19 @@ main
   };
 
 
-  const handleSignOut = () => {
- main
+  const handleSignOut = async () => {
+    try {
+      console.log('🚪 Dashboard: Signing out user...');
+      await supabase.auth.signOut();
+      navigate('/login');
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out of your account.",
+      });
+    } catch (error) {
+      console.error('Dashboard sign out error:', error);
+      navigate('/login');
+    }
   };
 
 

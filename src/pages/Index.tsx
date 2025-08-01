@@ -26,7 +26,7 @@ import { ProductionBlogGenerator } from "@/components/ProductionBlogGenerator";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 import { OpenAIGenerator } from "@/components/OpenAIGenerator";
 import { BlogForm } from "@/components/blog/BlogForm";
-import { ComprehensiveBlogManager } from "@/components/ComprehensiveBlogManager";
+
 
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
@@ -362,27 +362,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Comprehensive Blog Management Section */}
-      <section className="py-24 px-6 bg-gradient-to-br from-gray-50 to-slate-100">
-        <div className="container mx-auto">
-          <div className="text-center space-y-4 mb-12">
-            <Badge variant="outline" className="mb-4 bg-purple-50 text-purple-600 border-purple-200 font-mono text-xs px-4 py-2">
-              BLOG MANAGEMENT HUB
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Complete Blog Post Management
-            </h2>
-            <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-              Manage all your blog posts with advanced features: buy backlinks, claim posts, delete content, and regenerate with AI.
-              Everything you need for successful content management in one beautiful interface.
-            </p>
-          </div>
 
-          <div className="max-w-7xl mx-auto">
-            <ComprehensiveBlogManager />
-          </div>
-        </div>
-      </section>
 
       {/* Trial Conversion Section */}
       {showTrialUpgrade && (
@@ -523,28 +503,7 @@ const Index = () => {
             </Button>
           </div>
 
-          {/* Blog Creation CTA */}
-          <div className="mb-20">
-            <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border border-blue-200 max-w-2xl mx-auto">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                🚀 Expert Blog Creation
-              </h3>
-              <p className="text-gray-600 text-sm mb-4">
-                Generate high-quality blog posts with natural backlinks in minutes
-              </p>
-              <Button
-                variant="outline"
-                className="bg-white hover:bg-gray-50"
-                onClick={() => {
-                  // Scroll to blog creation form
-                  document.getElementById('blog-generator')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                Try Blog Generator
-              </Button>
-            </div>
-          </div>
+
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-8 max-w-2xl mx-auto">
