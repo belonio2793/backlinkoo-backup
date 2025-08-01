@@ -515,9 +515,14 @@ export function StreamlinedBlogGenerator() {
 
       {/* Login Modal */}
       {showLoginModal && (
-        <LoginModal 
+        <LoginModal
           isOpen={showLoginModal}
           onClose={() => setShowLoginModal(false)}
+          onAuthSuccess={(user) => {
+            setShowLoginModal(false);
+            // Navigate to dashboard after successful auth
+            window.location.href = '/dashboard';
+          }}
         />
       )}
     </div>
