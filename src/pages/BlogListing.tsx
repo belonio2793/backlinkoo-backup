@@ -78,8 +78,22 @@ export function BlogListing() {
       setLoading(true);
       console.log('🔄 Loading blog posts from Supabase database...');
 
-      const blogPosts = await blogService.getRecentBlogPosts(50);
-      console.log(`✅ Successfully loaded ${blogPosts.length} posts from database`);
+      // Try to load posts using the blog service
+      let blogPosts: BlogPost[] = [];
+      try {
+        blogPosts = await blogService.getRecentBlogPosts(50);
+        console.log(`✅ Successfully loaded ${blogPosts.length} posts from database`);
+      } catch (dbError: any) {
+        console.warn('Database loading failed, trying UnifiedClaimService:', dbError.message);
+        // Fallback to UnifiedClaimService if primary service fails
+        try {
+          blogPosts = await UnifiedClaimService.getClaimablePosts(50);
+          console.log(`✅ Loaded ${blogPosts.length} posts using fallback service`);
+        } catch (fallbackError: any) {
+          console.warn('Fallback also failed:', fallbackError.message);
+          throw new Error('Unable to load blog posts from any source');
+        }
+      }
 
       setPosts(blogPosts);
 
