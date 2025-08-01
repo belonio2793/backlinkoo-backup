@@ -9,7 +9,7 @@ import { BetaNotification } from "@/components/BetaNotification";
 import { OptimizedAppWrapper } from "@/components/OptimizedAppWrapper";
 import { AuthProfileChecker } from "@/components/AuthProfileChecker";
 import { AuthRedirectHandler } from "@/components/AuthRedirectHandler";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { EnhancedErrorBoundary } from "@/components/EnhancedErrorBoundary";
 import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 import { autoConfigSaver } from "@/services/autoConfigSaver";
@@ -86,7 +86,7 @@ if (typeof window !== 'undefined') {
 }
 
 const App = () => (
-  <ErrorBoundary>
+  <EnhancedErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProfileChecker>
@@ -103,7 +103,7 @@ const App = () => (
         </AuthProfileChecker>
       </TooltipProvider>
     </QueryClientProvider>
-  </ErrorBoundary>
+  </EnhancedErrorBoundary>
 );
 
 export default App;
