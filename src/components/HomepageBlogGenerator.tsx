@@ -823,7 +823,8 @@ export function HomepageBlogGenerator() {
         onClose={() => setShowLoginModal(false)}
         onAuthSuccess={(user) => {
           setShowLoginModal(false);
-          window.location.reload();
+          // Navigate to dashboard after successful auth
+          window.location.href = '/dashboard';
         }}
         defaultTab="login"
       />
