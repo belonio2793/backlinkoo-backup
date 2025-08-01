@@ -245,9 +245,17 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
 
     try {
       setClaimingPostId(post.id);
-      const { BlogClaimService } = await import('@/services/blogClaimService');
+      const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
 
-      const result = await BlogClaimService.unclaimPost(post.id, user);
+      // Note: Unclaim functionality would need to be implemented in UnifiedClaimService if needed
+      // For now, show a message that unclaiming is not available
+      toast({
+        title: "Unclaim Not Available",
+        description: "Unclaiming is not available in the new system. Contact support if needed.",
+        variant: "default",
+      });
+      setClaimingPostId(null);
+      return;
 
       if (result.success) {
         toast({
