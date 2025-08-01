@@ -343,7 +343,7 @@ export function BlogPost() {
                         ) : (
                           <Button
                             size="sm"
-                            onClick={() => navigate('/auth')}
+                            onClick={handleClaimRedirect}
                             className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white animate-pulse"
                           >
                             <Crown className="mr-1 h-3 w-3" />
