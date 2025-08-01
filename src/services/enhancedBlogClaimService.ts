@@ -41,12 +41,13 @@ export class EnhancedBlogClaimService {
         return { canDelete: false, reason: 'Must be logged in to delete claimed posts' };
       }
 
+      // Allow post owner to delete their own claimed posts
       if (post.user_id === user.id) {
-        return { canDelete: false, reason: 'Claimed posts cannot be deleted by users. Contact admin if needed.' };
+        return { canDelete: true };
       }
 
       // Check if user is admin (this would need to be implemented based on your admin logic)
-      return { canDelete: false, reason: 'Only admins can delete claimed posts' };
+      return { canDelete: false, reason: 'Only post owners and admins can delete claimed posts' };
     }
 
     return { canDelete: false, reason: 'Unknown post state' };
