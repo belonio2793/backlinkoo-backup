@@ -444,7 +444,17 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
     );
   };
 
-  // Show content immediately - no loading state needed
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+          <BarChart3 className="h-10 w-10 text-purple-600" />
+        </div>
+        <h3 className="text-xl font-semibold text-gray-800 mb-3">Loading Trial Posts...</h3>
+        <p className="text-gray-600">Fetching your trial content library...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
