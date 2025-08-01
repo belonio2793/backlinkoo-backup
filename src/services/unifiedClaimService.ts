@@ -243,15 +243,12 @@ export class UnifiedClaimService {
           saved_at: new Date().toISOString()
         });
 
-      console.log(`✅ Successfully saved post to dashboard: ${postSlug}`);
-
-      const newStats = await this.getUserSavedStats(user.id);
+      console.log(`✅ Successfully claimed post: ${postSlug}`);
 
       return {
         success: true,
-        message: `"${post.title}" added to your dashboard! ${stats.isSubscriber ? 'Unlimited saves available.' : `${this.MAX_SAVED_PER_FREE_USER - newStats.savedCount} saves remaining.`}`,
-        post,
-        savedCount: newStats.savedCount
+        message: `"${post.title}" is now yours! You have full ownership of this blog post.`,
+        post: claimedPost
       };
 
     } catch (error) {
