@@ -16,15 +16,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import {
   CreditCard,
   Link,
-  Search,
   TrendingUp,
-  Globe,
   Users,
   Infinity,
   Plus,
   Activity,
   LogOut,
-
   Calendar,
   Target,
   BarChart3,
@@ -38,7 +35,6 @@ import {
   ChevronDown,
   Eye,
   Sparkles,
-  Crown,
   RefreshCw,
   Home
 } from "lucide-react";
@@ -178,7 +174,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
       }
 
     } catch (error: any) {
-      console.error('❌ Error loading posts:', error);
+      console.error('�� Error loading posts:', error);
       setError('NOT_FOUND');
 
       // Don't clear posts on error, keep showing last known state
