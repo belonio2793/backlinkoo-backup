@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { BlogSystemFixUtility } from '@/utils/fixBlogSystem';
+import { ManualMigration } from '@/utils/manualMigration';
 import { CheckCircle, AlertCircle, Loader2, RefreshCw } from 'lucide-react';
 
 interface TableCheck {
@@ -84,20 +84,24 @@ export function DatabaseChecker() {
   const runFixes = async () => {
     setFixing(true);
     try {
-      const fixer = new BlogSystemFixUtility();
-      const results = await fixer.fixBlogSystem();
-      setFixes(results);
-      
+      const result = await ManualMigration.runAllMigrations();
+      const formattedResults = result.results.map(r => ({
+        component: r.step,
+        status: r.success ? 'success' : 'error',
+        message: r.success ? 'Completed successfully' : r.error || 'Failed'
+      }));
+      setFixes(formattedResults);
+
       // Re-check tables after fixes
       setTimeout(() => {
         checkTables();
       }, 2000);
     } catch (error: any) {
       console.error('Fix failed:', error);
-      setFixes([{ 
-        component: 'General', 
-        status: 'error', 
-        message: `Fix failed: ${error.message}` 
+      setFixes([{
+        component: 'General',
+        status: 'error',
+        message: `Fix failed: ${error.message}`
       }]);
     }
     setFixing(false);
