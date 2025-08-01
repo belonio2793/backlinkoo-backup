@@ -14,6 +14,7 @@ import { Blog } from '@/pages/Blog';
 import { BlogCreator } from '@/pages/BlogCreator';
 import { BlogPost } from '@/pages/BlogPost';
 import AIContentTest from '@/pages/AIContentTest';
+import TestBlogClaim from '@/pages/TestBlogClaim';
 
 import NotFound from '@/pages/NotFound';
 import AdminDashboard from '@/pages/AdminDashboard';
@@ -63,6 +64,7 @@ export const AppWrapper = () => {
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/trial-dashboard" element={<GuestDashboard />} />
         <Route path="/ai-test" element={<AIContentTest />} />
+        <Route path="/test-blog-claim" element={<TestBlogClaim />} />
         <Route path="/ai-live" element={<EnhancedAILive />} />
 
         <Route path="*" element={<NotFound />} />

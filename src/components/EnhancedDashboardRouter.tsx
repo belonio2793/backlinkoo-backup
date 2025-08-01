@@ -9,7 +9,7 @@ import { SafeDashboard } from '@/components/SafeDashboard';
 
 export function EnhancedDashboardRouter() {
   const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [hasTrialPosts, setHasTrialPosts] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -17,24 +17,7 @@ export function EnhancedDashboardRouter() {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        // Use a timeout to prevent hanging
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Auth timeout')), 3000)
-        );
-
-        const authPromise = supabase.auth.getUser();
-
-        let result;
-        try {
-          result = await Promise.race([authPromise, timeoutPromise]);
-        } catch (timeoutError) {
-          console.warn('Auth check timed out, continuing as guest');
-          setUser(null);
-          setIsLoading(false);
-          return;
-        }
-
-        const { data: { user }, error } = result as any;
+        const { data: { user }, error } = await supabase.auth.getUser();
 
         if (error) {
           console.warn('Auth error:', error);
@@ -62,7 +45,7 @@ export function EnhancedDashboardRouter() {
         console.error('Auth check failed:', error);
         setUser(null);
       } finally {
-        setIsLoading(false);
+        // No loading state needed
       }
     };
 
@@ -92,16 +75,7 @@ export function EnhancedDashboardRouter() {
     };
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   // Always show the full dashboard (SafeDashboard handles auth gracefully)
   try {

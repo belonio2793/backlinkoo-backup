@@ -57,7 +57,7 @@ export function AdminBlogManager() {
         excerpt: 'Discover everything you need to know about Go High Level',
         keywords: ['go high level', 'marketing automation', 'CRM'],
         target_url: 'https://example.com/go-high-level',
-        published_url: 'https://c9ddf89a9adf4854a791dfeb1224489a-fd5229bc39d54b7ca3bffa1d9.fly.dev/blog/go-high-level-guide-1753674784638',
+        published_url: 'https://backlinkoo.com/blog/go-high-level-guide-1753674784638',
         status: 'published' as const,
         is_trial_post: true,
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
@@ -487,9 +487,7 @@ export function AdminBlogManager() {
                   className={`border rounded-lg p-4 transition-all hover:shadow-md ${
                     isExpired(post)
                       ? 'bg-red-50 border-red-200'
-                      : post.published_url?.includes('fly.dev')
-                        ? 'bg-blue-50 border-blue-200 border-l-4 border-l-blue-500'
-                        : 'bg-white hover:bg-gray-50'
+                      : 'bg-white hover:bg-gray-50'
                   }`}
                 >
                   <div className="flex items-start justify-between">
@@ -507,12 +505,7 @@ export function AdminBlogManager() {
                             {info.label}
                           </Badge>
                         ))}
-                        {post.published_url?.includes('fly.dev') && (
-                          <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">
-                            <ExternalLink className="mr-1 h-3 w-3" />
-                            Built Link
-                          </Badge>
-                        )}
+
                         {isExpired(post) && (
                           <Badge variant="destructive" className="animate-pulse">
                             EXPIRED
@@ -565,23 +558,18 @@ export function AdminBlogManager() {
                       {/* Published URL */}
                       <div className="text-xs">
                         <div className="text-gray-500 mb-1">
-                          {post.published_url?.includes('fly.dev') ? 'External URL:' : 'Published URL:'}
+                          Published URL:
                         </div>
                         <div className="flex items-center gap-1 bg-gray-50 p-2 rounded border">
                           <code className="text-xs text-blue-600 truncate max-w-[150px]">
-                            {post.published_url?.includes('fly.dev')
-                              ? post.published_url
-                              : `${window.location.origin}/blog/${post.slug}`
-                            }
+                            {post.published_url || `${window.location.origin}/blog/${post.slug}`}
                           </code>
                           <Button
                             variant="ghost"
                             size="sm"
                             className="h-6 w-6 p-0"
                             onClick={() => {
-                              const url = post.published_url?.includes('fly.dev')
-                                ? post.published_url
-                                : `${window.location.origin}/blog/${post.slug}`;
+                              const url = post.published_url || `${window.location.origin}/blog/${post.slug}`;
                               navigator.clipboard.writeText(url);
                               toast({ title: "URL copied to clipboard" });
                             }}
@@ -595,9 +583,7 @@ export function AdminBlogManager() {
                             asChild
                           >
                             <a
-                              href={post.published_url?.includes('fly.dev')
-                                ? post.published_url
-                                : `/blog/${post.slug}`
+                              href={post.published_url || `/blog/${post.slug}`
                               }
                               target="_blank"
                               rel="noopener noreferrer"

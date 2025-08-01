@@ -6,8 +6,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/services/authService";
 import { AuthFormTabs } from "@/components/shared/AuthFormTabs";
+import { validateEmail } from "@/utils/authValidation";
 import { Mail, RefreshCw, Infinity } from "lucide-react";
-import { LiveUserActivity, SocialProofTestimonials, TrustBadges, MoneyBackGuarantee } from "./SocialProofElements";
+import { LiveUserActivity } from "./SocialProofElements";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -23,11 +24,6 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
 
   const { toast } = useToast();
 
-  const validateEmailFormat = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
   const handleAuthSuccess = (user: any) => {
     onAuthSuccess?.(user);
     onClose();
@@ -36,7 +32,7 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateEmailFormat(forgotPasswordEmail)) {
+    if (!validateEmail(forgotPasswordEmail)) {
       toast({
         title: "Invalid email",
         description: "Please enter a valid email address.",

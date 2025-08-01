@@ -3,21 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
 import { AuthService, setupAuthStateListener } from "@/services/authService";
-
 import { AuthFormTabs } from "@/components/shared/AuthFormTabs";
-
+import { validateEmail } from "@/utils/authValidation";
 import { useNavigate } from "react-router-dom";
-import { Infinity, Mail, RefreshCw, ArrowLeft } from "lucide-react";
-import { testAuthFlow } from "@/utils/testAuth";
+import { Infinity, Mail, ArrowLeft } from "lucide-react";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const { toast } = useToast();
-  const { broadcastNewUser } = useGlobalNotifications();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -82,11 +78,6 @@ const Login = () => {
 
     checkAuth();
 
-    // Add debug test to window for console access
-    if (typeof window !== 'undefined') {
-      (window as any).debugAuth = testAuthFlow;
-    }
-
     const { data: { subscription } } = setupAuthStateListener((event, session) => {
       console.log('🔐 Auth state changed:', event, {
         hasSession: !!session,
@@ -111,10 +102,7 @@ const Login = () => {
     };
   }, [navigate]);
 
-  const validateEmailFormat = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+
 
   const handleAuthSuccess = (user: any) => {
     navigate('/dashboard');
@@ -132,7 +120,7 @@ const Login = () => {
       return;
     }
 
-    if (!validateEmailFormat(forgotPasswordEmail)) {
+    if (!validateEmail(forgotPasswordEmail)) {
       toast({
         title: "Invalid email format",
         description: "Please enter a valid email address.",

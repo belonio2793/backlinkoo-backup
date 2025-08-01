@@ -72,21 +72,16 @@ export function OrganizedAdminDashboard() {
 
   const [activeCategory, setActiveCategory] = useState("overview");
 
-  const handleSignOut = async () => {
-    try {
-      await AuthService.signOut();
-      toast({
-        title: "Signed out",
-        description: "You have been successfully signed out.",
+  const handleSignOut = () => {
+    // Navigate immediately for instant UX
+    window.location.href = '/';
+
+    // Do sign out in background
+    setTimeout(() => {
+      AuthService.signOut().catch((error) => {
+        console.warn('Background admin sign out error (non-critical):', error);
       });
-      window.location.href = '/';
-    } catch (error) {
-      toast({
-        title: "Sign out failed",
-        description: "An error occurred while signing out.",
-        variant: "destructive",
-      });
-    }
+    }, 0);
   };
 
   const categories = [

@@ -16,15 +16,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import {
   CreditCard,
   Link,
-  Search,
   TrendingUp,
-  Globe,
   Users,
   Infinity,
   Plus,
   Activity,
   LogOut,
-
   Calendar,
   Target,
   BarChart3,
@@ -38,7 +35,6 @@ import {
   ChevronDown,
   Eye,
   Sparkles,
-  Crown,
   RefreshCw,
   Home
 } from "lucide-react";
@@ -70,9 +66,9 @@ import type { User } from '@supabase/supabase-js';
 // TrialBlogPostsDisplay component for the trial tab
 const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
   const [allPosts, setAllPosts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loadingStatus, setLoadingStatus] = useState<string>('Initializing...');
+  const [loadingStatus, setLoadingStatus] = useState<string>('Ready');
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [claimingPostId, setClaimingPostId] = useState<string | null>(null);
   const [showDebug, setShowDebug] = useState(false);
@@ -93,7 +89,6 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
   const loadAllPosts = async (silentRefresh = false) => {
     try {
       if (!silentRefresh) {
-        setLoading(true);
         setError(null);
       }
       setLoadingStatus('Connecting to database...');
@@ -191,9 +186,6 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
         });
       }
     } finally {
-      if (!silentRefresh) {
-        setLoading(false);
-      }
       setLoadingStatus('Ready');
     }
   };
@@ -274,23 +266,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="text-center py-12">
-        <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
-          <BarChart3 className="h-10 w-10 text-purple-600" />
-        </div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-3">Loading Posts...</h3>
-        <p className="text-gray-600 mb-4">{loadingStatus}</p>
-        <div className="max-w-sm mx-auto bg-gray-200 rounded-full h-2 mb-4">
-          <div className="bg-purple-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
-        </div>
-        <p className="text-xs text-gray-500">
-          🔍 Checking database and local storage for blog posts...
-        </p>
-      </div>
-    );
-  }
+
 
   if (error && allPosts.length === 0) {
     return (
@@ -388,7 +364,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
       <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             <span className="text-sm font-medium text-gray-700">Live</span>
           </div>
           <div className="text-sm text-gray-600">
@@ -570,7 +546,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
                       className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                     >
                       {claimingPostId === post.id ? (
-                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full" />
                       ) : (
                         <>
                           <Plus className="h-3 w-3 mr-1" />
@@ -642,17 +618,8 @@ const Dashboard = () => {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
-  const [loading, setLoading] = useState(false); // Start with UI visible, load data in background
 
-  // Failsafe: force loading to false after maximum time
-  useEffect(() => {
-    const maxLoadingTime = setTimeout(() => {
-      console.warn('🏠 Dashboard - Maximum loading time reached, forcing loading to false');
-      setLoading(false);
-    }, 3000); // 3 seconds maximum
-
-    return () => clearTimeout(maxLoadingTime);
-  }, []);
+main
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
@@ -673,40 +640,17 @@ const Dashboard = () => {
       console.log('🏠 Dashboard: Starting initialization...');
 
       try {
-        // Add timeout to prevent hanging
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Dashboard initialization timeout')), 2000)
-        );
-
-        const sessionPromise = supabase.auth.getSession();
-
-        let session = null;
-        let error = null;
-
-        try {
-          const result = await Promise.race([sessionPromise, timeoutPromise]) as any;
-          session = result.data?.session;
-          error = result.error;
-        } catch (timeoutError) {
-          console.warn('🏠 Dashboard - Auth check timed out, trying fallback...');
-
-          // If auth times out, continue with demo mode
-          console.log('🏠 Dashboard - Auth timeout, continuing in demo mode');
-          setLoading(false);
-          return;
-        }
+ main
 
         if (!isMounted) return;
 
         if (error && !session) {
           console.log('🏠 Dashboard - Auth error, continuing in demo mode:', error);
-          setLoading(false);
           return;
         }
 
         if (!session?.user) {
           console.log('🏠 Dashboard - No valid session, continuing in demo mode');
-          setLoading(false);
           return;
         }
 
@@ -725,69 +669,37 @@ const Dashboard = () => {
           })
         ];
 
-        // Add timeout for data fetching
-        const dataTimeout = new Promise((resolve) =>
-          setTimeout(() => {
-            console.warn('🏠 Dashboard - Data fetching timed out, continuing anyway');
-            resolve(null);
-          }, 5000)
-        );
-
-        await Promise.race([
-          Promise.all(dataPromises),
-          dataTimeout
-        ]);
+        await Promise.all(dataPromises);
 
       } catch (error) {
         console.error('🏠 Dashboard - Initialization error:', error);
       } finally {
         if (isMounted) {
-          console.log('🏠 Dashboard - Initialization complete, stopping loading');
-          setLoading(false);
+          console.log('🏠 Dashboard - Initialization complete');
         }
       }
     };
 
-    // Delay initialization slightly to let EmailVerificationGuard finish
-    const initTimeout = setTimeout(initializeDashboard, 100);
+    initializeDashboard();
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted) return;
+
+      console.log('🔄 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
+
+      if (event === 'SIGNED_OUT' || !session) {
+        console.log('🏠 Dashboard - User signed out, redirecting to login...');
+        navigate('/login');
+      } else if (event === 'SIGNED_IN' && session) {
+        console.log('🏠 Dashboard - User signed in, updating user state');
+        setUser(session.user);
+      }
+    });
 
     return () => {
-      clearTimeout(initTimeout);
       isMounted = false;
-    };
-
-    // Simplified auth state listener since EmailVerificationGuard handles the main auth flow
-    let subscription;
-    try {
-      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (!isMounted) return;
-
-        console.log('🔄 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
-
-        if (event === 'SIGNED_OUT' || !session) {
-          console.log('🏠 Dashboard - User signed out, redirecting to login...');
-          navigate('/login');
-        } else if (event === 'SIGNED_IN' && session) {
-          console.log('🏠 Dashboard - User signed in, updating user state');
-          setUser(session.user);
-          if (loading) {
-            setLoading(false);
-          }
-        }
-      });
-      subscription = authSubscription;
-    } catch (subscriptionError) {
-      console.warn('🏠 Dashboard - Could not set up auth listener:', subscriptionError);
-    }
-
-    return () => {
-      if (subscription?.unsubscribe) {
-        try {
-          subscription.unsubscribe();
-        } catch (error) {
-          console.warn('🏠 Dashboard - Error unsubscribing:', error);
-        }
-      }
+      subscription?.unsubscribe();
     };
   }, [navigate]);
 
@@ -802,8 +714,6 @@ const Dashboard = () => {
       }
 
       console.log('🔍 Fetching user data for:', currentUser.id);
-
-
 
       // Try database calls with very short timeout
       let profile = null;
@@ -898,8 +808,6 @@ const Dashboard = () => {
 
       console.log('📊 Fetching campaigns for:', currentUser.id);
 
-
-
       // Try database call with very short timeout
       let campaignsData = null;
       let error = null;
@@ -945,27 +853,10 @@ const Dashboard = () => {
 
 
   const handleSignOut = () => {
-    // Clear user state immediately
-    setUser(null);
-
-    // Simple Supabase sign out (don't wait for it)
-    supabase.auth.signOut().catch(console.warn);
-
-    // Instant redirect
-    window.location.href = '/login';
+ main
   };
 
-  // Show loading state while checking authentication
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Infinity className="h-8 w-8 text-primary mx-auto mb-4 animate-spin" />
-          <p className="text-muted-foreground">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   // Show dashboard regardless of authentication state
 
@@ -1064,7 +955,7 @@ const Dashboard = () => {
               >
                 <Sparkles className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Trial</span>
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
               </Button>
             </nav>
           </div>

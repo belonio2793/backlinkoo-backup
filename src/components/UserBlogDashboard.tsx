@@ -21,6 +21,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { liveBlogPublisher, type LiveBlogPost } from '@/services/liveBlogPublisher';
 import { supabase } from '@/integrations/supabase/client';
+import { UserClaimedPosts } from '@/components/UserClaimedPosts';
 import { format, formatDistanceToNow } from 'date-fns';
 
 interface UserBlogDashboardProps {
@@ -30,7 +31,7 @@ interface UserBlogDashboardProps {
 export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
   const [blogPosts, setBlogPosts] = useState<LiveBlogPost[]>([]);
   const [campaigns, setCampaigns] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({
     totalPosts: 0,
     totalViews: 0,
@@ -44,7 +45,6 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
   }, [userId]);
 
   const loadUserData = async () => {
-    setLoading(true);
     try {
       // Load user's blog posts
       const posts = await liveBlogPublisher.getUserBlogPosts(userId);
@@ -70,7 +70,7 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
         variant: 'destructive'
       });
     } finally {
-      setLoading(false);
+      // No loading state
     }
   };
 
@@ -91,16 +91,7 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p>Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="space-y-6">
@@ -165,6 +156,7 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
       <Tabs defaultValue="blog-posts" className="space-y-4">
         <TabsList>
           <TabsTrigger value="blog-posts">Live Blog Posts</TabsTrigger>
+          <TabsTrigger value="claimed-posts">Claimed Posts</TabsTrigger>
           <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
         </TabsList>
 
@@ -327,6 +319,10 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="claimed-posts" className="space-y-4">
+          <UserClaimedPosts />
         </TabsContent>
 
         <TabsContent value="campaigns" className="space-y-4">

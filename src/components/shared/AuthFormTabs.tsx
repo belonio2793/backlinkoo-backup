@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,15 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/services/authService";
 import { TrialConversionService } from "@/services/trialConversionService";
-import {
-  Eye,
-  EyeOff,
-  RefreshCw,
-  Shield,
-  CheckCircle,
-  Mail,
-  Wifi
-} from "lucide-react";
+import { validateEmail, validatePassword, validateRequired } from "@/utils/authValidation";
+import { Eye, EyeOff, Shield, CheckCircle } from "lucide-react";
 
 interface AuthFormTabsProps {
   onAuthSuccess?: (user: any) => void;
@@ -36,7 +29,7 @@ export function AuthFormTabs({
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"login" | "signup">(
-    defaultTab || (showTrialUpgrade ? "signup" : "login")
+    defaultTab || "login"
   );
 
   // Form states
@@ -46,27 +39,8 @@ export function AuthFormTabs({
   const [signupPassword, setSignupPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
-  const [retryAttempts, setRetryAttempts] = useState(0);
-  const [isTestingConnection, setIsTestingConnection] = useState(false);
 
   const { toast } = useToast();
-
-  // Reset retry attempts when switching tabs
-  useEffect(() => {
-    setRetryAttempts(0);
-  }, [activeTab]);
-
-  const validateEmailFormat = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const validatePasswordStrength = (password: string): { isValid: boolean; message: string } => {
-    if (password.length < 6) {
-      return { isValid: false, message: "Password must be at least 6 characters long" };
-    }
-    return { isValid: true, message: "Password is valid" };
-  };
 
 
 
@@ -85,7 +59,7 @@ export function AuthFormTabs({
       return;
     }
 
-    if (!validateEmailFormat(loginEmail)) {
+    if (!validateEmail(loginEmail)) {
       toast({
         title: "Invalid email format",
         description: "Please enter a valid email address.",
@@ -95,110 +69,37 @@ export function AuthFormTabs({
     }
 
     setIsLoading(true);
-
-
+    const currentEmail = loginEmail;
+    const currentPassword = loginPassword;
 
     try {
       const result = await AuthService.signIn({
-        email: loginEmail,
-        password: loginPassword,
+        email: currentEmail,
+        password: currentPassword,
       });
 
-      if (result.success && result.user) {
+      if (result.success) {
         toast({
           title: "Welcome back!",
-          description: `Successfully signed in as ${result.user.email}`,
+          description: `Signing in as ${currentEmail}`,
         });
 
-        // Check for claim intent and handle it
-        const claimIntent = localStorage.getItem('claim_intent');
-        if (claimIntent) {
-          try {
-            const intent = JSON.parse(claimIntent);
-            // Clear the intent to prevent repeated execution
-            localStorage.removeItem('claim_intent');
-
-            // Show notification about continuing with claim
-            toast({
-              title: "Continuing with your claim...",
-              description: `Processing your request to claim "${intent.postTitle}"`,
-            });
-
-            // Navigate to the blog post immediately to complete the claim
-            window.location.href = `/blog/${intent.postSlug}`;
-            return;
-          } catch (error) {
-            console.warn('Failed to parse claim intent:', error);
-            localStorage.removeItem('claim_intent');
-          }
-        }
-
-        onAuthSuccess?.(result.user);
-
-        // Reset form and retry attempts
-        setLoginEmail("");
-        setLoginPassword("");
-        setRetryAttempts(0);
-      } else if (result.requiresEmailVerification) {
-        toast({
-          title: "Email verification required",
-          description: "Please check your email and verify your account before signing in.",
-          variant: "destructive",
-        });
+ main
       } else {
         toast({
           title: "Sign in failed",
-          description: result.error || 'Invalid email or password. Please check your credentials and try again.',
+          description: result.error || "Invalid email or password.",
           variant: "destructive",
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Login error:', error);
-
-      let errorMessage = "Authentication failed. Please try again.";
-      let shouldRetry = false;
-
-      // Categorize error types for better user feedback
-      if (error.message?.includes('timeout') || error.message?.includes('taking longer than expected')) {
-        // Timeout errors - only retry once for faster feedback
-        setRetryAttempts(prev => prev + 1);
-
-        if (retryAttempts < 1) {
-          shouldRetry = true;
-          errorMessage = `Connection timeout. Retrying...`;
-
-          // Auto-retry immediately
-          if (loginEmail && loginPassword) {
-            handleLogin(e);
-          }
-          return;
-        } else {
-          errorMessage = "Connection timeout. Please check your internet connection or try refreshing the page.";
-        }
-      } else if (error.message?.includes('Invalid login credentials') || error.message?.includes('Invalid email or password')) {
-        errorMessage = "Invalid email or password. Please check your credentials.";
-        setRetryAttempts(0); // Reset retry attempts for credential errors
-      } else if (error.message?.includes('Email verification required') || error.message?.includes('Email not confirmed')) {
-        errorMessage = "Please verify your email address before signing in. Check your email for a verification link.";
-        setRetryAttempts(0);
-      } else if (error.message?.includes('NetworkError') || error.message?.includes('fetch') || error.message?.includes('network') || error.message?.includes('Unable to connect')) {
-        errorMessage = "Network connection failed. Please check your internet connection and try again.";
-      } else if (error.message?.includes('rate limit') || error.message?.includes('too many')) {
-        errorMessage = "Too many login attempts. Please wait a few minutes before trying again.";
-      } else {
-        // Generic error with the actual error message
-        errorMessage = error.message || "An unexpected error occurred. Please try again.";
-      }
-
-      if (!shouldRetry) {
-        toast({
-          title: "Sign in failed",
-          description: errorMessage,
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Sign in failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      console.log('🔐 Login attempt completed, setting loading to false');
       setIsLoading(false);
     }
   };
@@ -207,8 +108,12 @@ export function AuthFormTabs({
     e.preventDefault();
     if (isLoading) return;
 
-    // Validate email format
-    if (!validateEmailFormat(signupEmail)) {
+    // Validate all fields
+    const emailValidation = validateEmail(signupEmail);
+    const passwordValidation = validatePassword(signupPassword);
+    const nameValidation = validateRequired(firstName, "First name");
+
+    if (!emailValidation) {
       toast({
         title: "Invalid email format",
         description: "Please enter a valid email address.",
@@ -217,8 +122,6 @@ export function AuthFormTabs({
       return;
     }
 
-    // Validate password strength
-    const passwordValidation = validatePasswordStrength(signupPassword);
     if (!passwordValidation.isValid) {
       toast({
         title: "Password requirements not met",
@@ -237,10 +140,10 @@ export function AuthFormTabs({
       return;
     }
 
-    if (!firstName.trim()) {
+    if (!nameValidation.isValid) {
       toast({
-        title: "First name required",
-        description: "Please enter your first name.",
+        title: "Required field missing",
+        description: nameValidation.message,
         variant: "destructive",
       });
       return;
@@ -386,30 +289,7 @@ export function AuthFormTabs({
     }
   };
 
-  const testConnection = async () => {
-    setIsTestingConnection(true);
-    try {
-      // Simple connectivity test
-      const response = await fetch('/api/health', { method: 'GET', signal: AbortSignal.timeout(5000) });
-      const isHealthy = response.ok;
 
-      toast({
-        title: isHealthy ? "Connection successful" : "Connection issues detected",
-        description: isHealthy
-          ? "Your internet connection is working properly."
-          : "There may be connectivity issues. Please check your internet connection.",
-        variant: isHealthy ? "default" : "destructive",
-      });
-    } catch (error) {
-      toast({
-        title: "Connection test failed",
-        description: "Unable to connect to the server. Please check your internet connection.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsTestingConnection(false);
-    }
-  };
 
   const inputHeight = isCompact ? "h-9" : "";
   const spacingClass = isCompact ? "space-y-3" : "space-y-4";
@@ -468,20 +348,15 @@ export function AuthFormTabs({
 
           <Button
             type="submit"
-            className={`w-full ${inputHeight} ${isLoading ? 'bg-primary/80' : ''}`}
-            disabled={isLoading || !loginEmail || !loginPassword}
+            className={`w-full ${inputHeight}`}
+            disabled={!loginEmail || !loginPassword || isLoading}
           >
             {isLoading ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Signing in...
-              </>
+              <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <>
-                <Shield className="h-4 w-4 mr-2" />
-                Sign In
-              </>
+              <Shield className="h-4 w-4 mr-2" />
             )}
+            {isLoading ? "Signing In..." : "Sign In"}
           </Button>
 
           <div className="space-y-2">
@@ -498,30 +373,7 @@ export function AuthFormTabs({
               </div>
             )}
 
-            {retryAttempts > 0 && (
-              <div className="text-center">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="text-xs"
-                  onClick={testConnection}
-                  disabled={isTestingConnection}
-                >
-                  {isTestingConnection ? (
-                    <>
-                      <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-                      Testing...
-                    </>
-                  ) : (
-                    <>
-                      <Wifi className="h-3 w-3 mr-1" />
-                      Test Connection
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
+
           </div>
         </form>
       </TabsContent>
@@ -603,19 +455,10 @@ export function AuthFormTabs({
           <Button
             type="submit"
             className={`w-full ${inputHeight} ${isLoading ? 'bg-primary/80' : ''}`}
-            disabled={isLoading || !signupEmail || !signupPassword || !confirmPassword || !firstName}
+            disabled={!signupEmail || !signupPassword || !confirmPassword || !firstName}
           >
-            {isLoading ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                {showTrialUpgrade ? "Upgrading trial..." : "Creating account..."}
-              </>
-            ) : (
-              <>
-                <CheckCircle className="h-4 w-4 mr-2" />
-                {showTrialUpgrade ? "Upgrade Trial" : "Create Account"}
-              </>
-            )}
+            <CheckCircle className="h-4 w-4 mr-2" />
+            {showTrialUpgrade ? "Upgrade Trial" : "Create Account"}
           </Button>
         </form>
       </TabsContent>
