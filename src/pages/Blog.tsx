@@ -518,16 +518,33 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
   const { toast } = useToast();
   const [claiming, setClaiming] = useState(false);
 
+  const handleClaimRedirect = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    // Store claim intent for after login
+    const claimIntent = {
+      postSlug: post.slug,
+      postTitle: post.title,
+      postId: post.id,
+      timestamp: Date.now()
+    };
+
+    localStorage.setItem('claim_intent', JSON.stringify(claimIntent));
+
+    toast({
+      title: "Redirecting to sign in...",
+      description: "We'll bring you back to complete your claim.",
+    });
+
+    // Navigate to login page
+    navigate('/auth');
+  };
+
   const handleClaimPost = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
     if (!user) {
-      toast({
-        title: "Sign In Required",
-        description: "Please sign in to claim blog posts.",
-        variant: "destructive"
-      });
-      navigate('/auth');
+      handleClaimRedirect(e);
       return;
     }
 
