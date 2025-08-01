@@ -175,12 +175,12 @@ export class BlogClaimService {
 
       if (blogPosts) claimedPosts.push(...blogPosts);
 
-      // Get from published_blog_posts table
+      // Get additional posts from blog_posts table (unified approach)
       const { data: publishedPosts, error: publishedError } = await supabase
-        .from('published_blog_posts')
+        .from('blog_posts')
         .select('*')
         .eq('user_id', userId)
-        .eq('is_trial_post', true)
+        .eq('is_trial_post', false) // Get permanently claimed posts
         .order('created_at', { ascending: false });
 
       if (publishedPosts) claimedPosts.push(...publishedPosts);
@@ -204,7 +204,7 @@ export class BlogClaimService {
         }
       }
     } catch (storageError) {
-      console.warn('���️ localStorage error:', storageError);
+      console.warn('⚠️ localStorage error:', storageError);
     }
 
     // Remove duplicates and sort
