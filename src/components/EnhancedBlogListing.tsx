@@ -361,6 +361,13 @@ export function EnhancedBlogListing() {
             </div>
           </div>
 
+          {/* Debug Information */}
+          {import.meta.env.DEV && (
+            <div className="mb-8">
+              <BlogDataDebugger />
+            </div>
+          )}
+
           {/* Loading State */}
           {loading && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
