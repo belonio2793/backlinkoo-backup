@@ -93,7 +93,6 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
   const loadAllPosts = async (silentRefresh = false) => {
     try {
       if (!silentRefresh) {
-        setLoading(true);
         setError(null);
       }
       setLoadingStatus('Connecting to database...');
