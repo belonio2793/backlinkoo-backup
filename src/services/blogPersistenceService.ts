@@ -174,6 +174,10 @@ export class BlogPersistenceService {
         .single();
 
       if (error) {
+        // Add more context for slug collision errors
+        if (error.message.includes('blog_posts_slug_key') || error.message.includes('duplicate key value violates unique constraint')) {
+          throw new Error(`Primary storage failed: Slug collision detected - ${error.message}`);
+        }
         throw new Error(`Primary storage failed: ${error.message}`);
       }
 
