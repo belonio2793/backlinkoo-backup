@@ -156,7 +156,6 @@ export function AuthFormTabs({
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      setTimeoutCountdown(0); // Clear countdown on error
 
       let errorMessage = "Authentication failed. Please try again.";
       let shouldRetry = false;
