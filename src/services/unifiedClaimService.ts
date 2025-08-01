@@ -379,7 +379,7 @@ export class UnifiedClaimService {
   }
 
   /**
-   * Check if a specific post can be saved by a user
+   * Check if a specific post can be claimed by a user
    */
   static async isPostSaveable(postSlug: string, userId?: string): Promise<{
     saveable: boolean;
@@ -394,39 +394,46 @@ export class UnifiedClaimService {
         return { saveable: false, reason: 'Post not found' };
       }
 
-      if (userId) {
-        // Check if user already saved this post
-        const { data: existingSave } = await supabase
-          .from('user_saved_posts')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('post_id', post.id)
-          .single();
-
-        if (existingSave) {
+      // Check if post is already claimed
+      if (post.user_id) {
+        if (userId && post.user_id === userId) {
           return {
             saveable: false,
-            reason: 'Already in your dashboard',
+            reason: 'You already own this post',
             post,
             alreadySaved: true
           };
-        }
-
-        // Check user's save limit
-        const stats = await this.getUserSavedStats(userId);
-        if (!stats.canSave) {
+        } else {
           return {
             saveable: false,
-            reason: `You've reached the maximum of ${this.MAX_SAVED_PER_FREE_USER} saved posts. Upgrade for unlimited!`,
+            reason: 'This post has already been claimed',
             post
           };
         }
       }
 
+      // Check if this is a claimable post (must be unclaimed trial post)
+      if (!post.is_trial_post) {
+        return {
+          saveable: false,
+          reason: 'This post is not available for claiming',
+          post
+        };
+      }
+
+      // Check if post has expired
+      if (post.expires_at && new Date() > new Date(post.expires_at)) {
+        return {
+          saveable: false,
+          reason: 'This post has expired and can no longer be claimed',
+          post
+        };
+      }
+
       return { saveable: true, post };
 
     } catch (error) {
-      console.error('Error checking if post is saveable:', error);
+      console.error('Error checking if post is claimable:', error);
       return { saveable: false, reason: 'Error checking post status' };
     }
   }
