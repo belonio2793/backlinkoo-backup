@@ -356,7 +356,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
                 className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
               >
                 {claiming === post.slug ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
                     <Crown className="h-3 w-3 mr-1" />
