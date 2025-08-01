@@ -81,6 +81,14 @@ export function Header() {
           </div>
         </div>
       </div>
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onAuthSuccess={handleAuthSuccess}
+        defaultTab={defaultTab}
+      />
     </header>
   );
 }
