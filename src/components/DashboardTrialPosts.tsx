@@ -220,26 +220,31 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
     return hoursLeft < 2;
   };
 
-  // Filter posts based on search query and active tab
-  const filteredPosts = posts.filter(post => {
+  // Get all unclaimed posts for Available tab
+  const unclaimedPosts = posts.filter(post => !post.claimed || post.user_id === null);
+
+  // Get user's claimed posts (limited to 3) for Claimed tab
+  const claimedPosts = posts
+    .filter(post => post.claimed && post.user_id === user?.id)
+    .slice(0, 3); // Maximum of 3 claimed posts
+
+  // Apply filtering based on active tab and search query
+  const getFilteredPosts = () => {
+    let postsToFilter = activeTab === 'claimed' ? claimedPosts : unclaimedPosts;
+
     // Apply search filter
-    const matchesSearch = !searchQuery || 
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (post.content && post.content.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (post.target_url && post.target_url.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    if (!matchesSearch) return false;
-
-    // Apply tab filter
-    if (activeTab === 'claimed') {
-      return post.claimed && post.user_id === user?.id;
-    } else {
-      return !post.claimed || !post.user_id;
+    if (searchQuery) {
+      postsToFilter = postsToFilter.filter(post =>
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (post.content && post.content.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (post.target_url && post.target_url.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
     }
-  });
 
-  const claimedPosts = posts.filter(post => post.claimed && post.user_id === user?.id);
-  const unclaimedPosts = posts.filter(post => !post.claimed || !post.user_id);
+    return postsToFilter;
+  };
+
+  const filteredPosts = getFilteredPosts();
 
   const renderPostCard = (post: BlogPost) => {
     const isUserPost = post.user_id === user?.id && post.claimed;
