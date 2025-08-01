@@ -656,7 +656,7 @@ const Dashboard = () => {
       try {
         // Add timeout to prevent hanging
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Dashboard initialization timeout')), 8000)
+          setTimeout(() => reject(new Error('Dashboard initialization timeout')), 2000)
         );
 
         const sessionPromise = supabase.auth.getSession();
