@@ -310,15 +310,8 @@ export class BlogClaimService {
         .eq('is_trial_post', true)
         .maybeSingle();
 
-      // Try published_blog_posts table if not found
-      const { data: publishedPost, error: publishedError } = await supabase
-        .from('published_blog_posts')
-        .select('*')
-        .eq('slug', blogSlug)
-        .eq('is_trial_post', true)
-        .maybeSingle();
-
-      const post = blogPost || publishedPost;
+      // Only use blog_posts table (unified approach)
+      const post = blogPost;
       const foundInBlogPosts = !!blogPost;
 
       if (!post) {
