@@ -20,6 +20,9 @@ export const LazyBlogPostView = lazy(() => import('@/pages/BlogPost').then(modul
 export const LazyTrialDashboard = lazy(() => import('@/pages/TrialDashboard').then(module => ({ default: module.TrialDashboard })));
 export const LazyAIContentTest = lazy(() => import('@/pages/AIContentTest'));
 
+// Debug components (only in development)
+export const LazyClaimSystemDebug = lazy(() => import('@/components/ClaimSystemDebug').then(module => ({ default: module.ClaimSystemDebug })));
+
 // Lazy load heavy components
 export const LazyEnhancedDashboardRouter = lazy(() => import('@/components/EnhancedDashboardRouter').then(module => ({ default: module.EnhancedDashboardRouter })));
 export const LazyUserBlogManagement = lazy(() => import('@/components/UserBlogManagement').then(module => ({ default: module.UserBlogManagement })));

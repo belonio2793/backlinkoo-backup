@@ -124,10 +124,8 @@ export function AuthFormTabs({
               description: `Processing your request to claim "${intent.postTitle}"`,
             });
 
-            // Navigate to the blog post to complete the claim
-            setTimeout(() => {
-              window.location.href = `/blog/${intent.postSlug}`;
-            }, 1500);
+            // Navigate to the blog post immediately to complete the claim
+            window.location.href = `/blog/${intent.postSlug}`;
             return;
           } catch (error) {
             console.warn('Failed to parse claim intent:', error);
@@ -162,26 +160,20 @@ export function AuthFormTabs({
 
       // Categorize error types for better user feedback
       if (error.message?.includes('timeout') || error.message?.includes('taking longer than expected')) {
-        // Timeout errors - offer retry
+        // Timeout errors - only retry once for faster feedback
         setRetryAttempts(prev => prev + 1);
 
-        if (retryAttempts < 2) {
+        if (retryAttempts < 1) {
           shouldRetry = true;
-          errorMessage = `Connection timeout (attempt ${retryAttempts + 1}/3). Retrying automatically...`;
-          toast({
-            title: "Retrying sign in...",
-            description: errorMessage,
-          });
+          errorMessage = `Connection timeout. Retrying...`;
 
-          // Auto-retry with longer delay
-          setTimeout(() => {
-            if (loginEmail && loginPassword) {
-              handleLogin(e);
-            }
-          }, 3000);
+          // Auto-retry immediately
+          if (loginEmail && loginPassword) {
+            handleLogin(e);
+          }
           return;
         } else {
-          errorMessage = "Connection keeps timing out. Please check your internet connection or try refreshing the page.";
+          errorMessage = "Connection timeout. Please check your internet connection or try refreshing the page.";
         }
       } else if (error.message?.includes('Invalid login credentials') || error.message?.includes('Invalid email or password')) {
         errorMessage = "Invalid email or password. Please check your credentials.";
@@ -292,9 +284,7 @@ export function AuthFormTabs({
                 description: `Processing your request to claim "${intent.postTitle}"`,
               });
 
-              setTimeout(() => {
-                window.location.href = `/blog/${intent.postSlug}`;
-              }, 2000);
+              window.location.href = `/blog/${intent.postSlug}`;
               return;
             } catch (error) {
               console.warn('Failed to parse claim intent:', error);
@@ -344,9 +334,7 @@ export function AuthFormTabs({
                   description: `Processing your request to claim "${intent.postTitle}"`,
                 });
 
-                setTimeout(() => {
-                  window.location.href = `/blog/${intent.postSlug}`;
-                }, 1500);
+                window.location.href = `/blog/${intent.postSlug}`;
                 return;
               } catch (error) {
                 console.warn('Failed to parse claim intent:', error);
@@ -356,11 +344,9 @@ export function AuthFormTabs({
 
             onAuthSuccess?.(result.user);
           } else {
-            // Auto-switch to login tab after successful signup
-            setTimeout(() => {
-              setActiveTab("login");
-              setLoginEmail(signupEmail); // Pre-fill email for easy login
-            }, 3000);
+            // Auto-switch to login tab immediately after successful signup
+            setActiveTab("login");
+            setLoginEmail(signupEmail); // Pre-fill email for easy login
           }
 
         } else {
