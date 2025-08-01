@@ -122,6 +122,17 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
       return;
     }
 
+    // Check if user already has 3 claimed posts
+    const userClaimedCount = posts.filter(post => post.claimed && post.user_id === user.id).length;
+    if (userClaimedCount >= 3) {
+      toast({
+        title: "Claim Limit Reached",
+        description: "You can only claim a maximum of 3 posts. Please unclaim a post first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       setClaiming(slug);
       const result = await EnhancedBlogClaimService.claimPost(slug, user);
