@@ -17,10 +17,20 @@ type BlogPost = Tables<'blog_posts'>;
 
 export function BlogListing() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
+
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+
+  // Claiming states
+  const [claiming, setClaiming] = useState<string | null>(null);
+  const [claimedPosts, setClaimedPosts] = useState<Set<string>>(new Set());
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [canClaimMore, setCanClaimMore] = useState(true);
 
   useEffect(() => {
     loadPosts();
