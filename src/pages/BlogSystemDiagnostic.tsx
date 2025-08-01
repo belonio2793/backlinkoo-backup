@@ -28,7 +28,7 @@ export default function BlogSystemDiagnostic() {
   const runDiagnostic = async () => {
     setIsRunning(true);
     try {
-      const diagnostic = new BlogSystemDiagnostic();
+      const diagnostic = new BlogDiagnosticUtility();
       const results = await diagnostic.runFullDiagnostic();
       setDiagnosticResults(results);
       setSummary(diagnostic.getSummary());
