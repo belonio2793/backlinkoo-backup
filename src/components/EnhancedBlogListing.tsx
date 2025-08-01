@@ -84,8 +84,8 @@ export function EnhancedBlogListing() {
           break;
         case 'claimed':
           // Get all claimed posts
-          const { data } = await blogService.getBlogPostsByCategory('', 50);
-          blogPosts = data.filter(post => post.claimed);
+          const allPosts = await blogService.getRecentBlogPosts(50);
+          blogPosts = allPosts.filter(post => post.claimed);
           break;
         case 'my-posts':
           if (user) {
