@@ -270,15 +270,9 @@ export class BlogClaimService {
    */
   static async unclaimPost(postId: string, user: any): Promise<ClaimResult> {
     try {
-      // Try both tables
+      // Only use blog_posts table (unified approach)
       const { error: blogError } = await supabase
         .from('blog_posts')
-        .update({ user_id: null, claimed_at: null })
-        .eq('id', postId)
-        .eq('user_id', user.id);
-
-      const { error: publishedError } = await supabase
-        .from('published_blog_posts')
         .update({ user_id: null, claimed_at: null })
         .eq('id', postId)
         .eq('user_id', user.id);
