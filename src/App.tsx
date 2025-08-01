@@ -29,6 +29,7 @@ if (import.meta.env.DEV) {
   import('@/utils/quickDashboardAccess');
   import('@/utils/blogClaimDiagnostic');
   import('@/utils/testBlogClaimFixes');
+  import('@/utils/debugClaimSystem');
 }
 
 import { queryClient } from "@/lib/queryClient";
@@ -72,7 +73,7 @@ if (typeof window !== 'undefined') {
     //       console.log('🛡️ Homepage safety verified - users protected');
     //     } else {
     //       console.warn('⚠️ Homepage safety issues detected:', result.issues);
-    //       console.log('🔧 Automatic fallbacks have been enabled to protect users');
+    //       console.log('��� Automatic fallbacks have been enabled to protect users');
     //     }
     //   });
     // });
