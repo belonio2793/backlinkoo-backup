@@ -55,6 +55,10 @@ export class SystemsAssessmentTool {
     console.log('💾 Testing user saved posts...');
     components.push(await this.testUserSavedPosts());
 
+    // Test 9: RLS Policies
+    console.log('🔒 Testing RLS policies...');
+    components.push(await this.testRLSPolicies());
+
     // Determine overall status
     const hasErrors = components.some(c => c.status === 'error');
     const hasWarnings = components.some(c => c.status === 'warning');
@@ -288,7 +292,7 @@ export class SystemsAssessmentTool {
 
     let report = `
 🔍 SYSTEMS ASSESSMENT REPORT
-═════════════════════════════���═════════
+═══════════════════════════════════════
 
 📅 Timestamp: ${new Date(assessment.timestamp).toLocaleString()}
 🎯 Overall Status: ${statusEmojis[assessment.overall]} ${assessment.overall.toUpperCase()}
