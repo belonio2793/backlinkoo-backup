@@ -788,8 +788,6 @@ const Dashboard = () => {
 
       console.log('📊 Fetching campaigns for:', currentUser.id);
 
-
-
       // Try database call with very short timeout
       let campaignsData = null;
       let error = null;
