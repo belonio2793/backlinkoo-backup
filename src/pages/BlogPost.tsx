@@ -28,6 +28,7 @@ import {
   Trash2
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
+import { supabase } from '@/integrations/supabase/client';
 
 type BlogPost = Tables<'blog_posts'>;
 
