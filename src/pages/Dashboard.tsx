@@ -428,7 +428,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div>• Database Posts: {debugInfo.dbPosts}</div>
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
-              <div>��� Displayed: {debugInfo.displayedPosts}</div>
+              <div>���� Displayed: {debugInfo.displayedPosts}</div>
               <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '✅'}</div>
             </div>
           </div>
@@ -857,14 +857,14 @@ const Dashboard = () => {
     try {
       console.log('🚪 Dashboard: Signing out user...');
       await supabase.auth.signOut();
-      navigate('/login');
+      navigate('/');
       toast({
         title: "Signed out successfully",
         description: "You have been signed out of your account.",
       });
     } catch (error) {
       console.error('Dashboard sign out error:', error);
-      navigate('/login');
+      navigate('/');
     }
   };
 
