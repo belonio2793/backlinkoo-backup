@@ -537,7 +537,7 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
     });
 
     // Navigate to login page
-    navigate('/auth');
+    navigate('/login');
   };
 
   const handleClaimPost = async (e: React.MouseEvent) => {
