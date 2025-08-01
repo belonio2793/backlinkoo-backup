@@ -13,6 +13,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 import { autoConfigSaver } from "@/services/autoConfigSaver";
+import "@/services/blogCleanupService"; // Initialize blog cleanup service
 
 // Initialize performance monitoring in development
 if (import.meta.env.DEV) {
