@@ -47,6 +47,7 @@ export function AuthFormTabs({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [retryAttempts, setRetryAttempts] = useState(0);
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
 
   const { toast } = useToast();
 
@@ -103,8 +104,6 @@ export function AuthFormTabs({
         password: loginPassword,
       });
 
-      clearInterval(countdownInterval);
-
       if (result.success && result.user) {
         toast({
           title: "Welcome back!",
@@ -157,7 +156,6 @@ export function AuthFormTabs({
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      setTimeoutCountdown(0); // Clear countdown on error
 
       let errorMessage = "Authentication failed. Please try again.";
       let shouldRetry = false;
@@ -402,6 +400,31 @@ export function AuthFormTabs({
     }
   };
 
+  const testConnection = async () => {
+    setIsTestingConnection(true);
+    try {
+      // Simple connectivity test
+      const response = await fetch('/api/health', { method: 'GET', signal: AbortSignal.timeout(5000) });
+      const isHealthy = response.ok;
+
+      toast({
+        title: isHealthy ? "Connection successful" : "Connection issues detected",
+        description: isHealthy
+          ? "Your internet connection is working properly."
+          : "There may be connectivity issues. Please check your internet connection.",
+        variant: isHealthy ? "default" : "destructive",
+      });
+    } catch (error) {
+      toast({
+        title: "Connection test failed",
+        description: "Unable to connect to the server. Please check your internet connection.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTestingConnection(false);
+    }
+  };
+
   const inputHeight = isCompact ? "h-9" : "";
   const spacingClass = isCompact ? "space-y-3" : "space-y-4";
 
@@ -465,11 +488,7 @@ export function AuthFormTabs({
             {isLoading ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                {timeoutCountdown > 15 ?
-                  `Signing in... (${timeoutCountdown}s)` :
-                  timeoutCountdown > 5 ?
-                    `Trying backup method... (${timeoutCountdown}s)` :
-                    'Almost there...'}
+                Signing in...
               </>
             ) : (
               <>

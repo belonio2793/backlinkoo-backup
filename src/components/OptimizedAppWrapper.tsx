@@ -100,8 +100,16 @@ export const OptimizedAppWrapper = () => {
           <Route path="/ai-live" element={<LazyEnhancedAILive />} />
 
           {/* Protected routes - require authentication and email verification */}
-          <Route path="/dashboard" element={<LazyEnhancedDashboardRouter />} />
-          <Route path="/my-dashboard" element={<LazyEnhancedDashboardRouter />} />
+          <Route path="/dashboard" element={
+            <EmailVerificationGuard>
+              <LazyEnhancedDashboardRouter />
+            </EmailVerificationGuard>
+          } />
+          <Route path="/my-dashboard" element={
+            <EmailVerificationGuard>
+              <LazyEnhancedDashboardRouter />
+            </EmailVerificationGuard>
+          } />
           <Route path="/my-blog" element={
             <EmailVerificationGuard>
               <LazyUserBlogManagement />

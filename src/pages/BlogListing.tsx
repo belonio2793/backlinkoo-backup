@@ -5,29 +5,146 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { blogService } from '@/services/blogService';
-import { Clock, Eye, Calendar, Plus, Search } from 'lucide-react';
+import { BlogClaimService } from '@/services/blogClaimService';
+import { supabase } from '@/integrations/supabase/client';
+import { DatabaseSetup } from '@/utils/databaseSetup';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { PricingModal } from '@/components/PricingModal';
+import { LoginModal } from '@/components/LoginModal';
+import { Clock, Eye, Calendar, Plus, Search, Crown, Loader2, CheckCircle } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
 type BlogPost = Tables<'blog_posts'>;
 
 export function BlogListing() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
+
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
 
+  // Claiming states
+  const [claiming, setClaiming] = useState<string | null>(null);
+  const [claimedPosts, setClaimedPosts] = useState<Set<string>>(new Set());
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [canClaimMore, setCanClaimMore] = useState(true);
+
   useEffect(() => {
-    loadPosts();
+    initializeAndLoadPosts();
   }, []);
+
+  const initializeAndLoadPosts = async () => {
+    // Initialize database with sample data if needed
+    await DatabaseSetup.initializeDatabase();
+    // Then load the posts
+    loadPosts();
+  };
+
+  useEffect(() => {
+    checkUserClaimStatus();
+    loadClaimedPosts();
+  }, [user]);
+
+  const checkUserClaimStatus = async () => {
+    if (user) {
+      try {
+        const canClaim = await BlogClaimService.canUserClaimMore(user);
+        setCanClaimMore(canClaim);
+      } catch (error) {
+        console.warn('Failed to check claim status:', error);
+      }
+    }
+  };
+
+  const loadClaimedPosts = () => {
+    try {
+      const claimed = BlogClaimService.getUserClaimedPosts(user?.id);
+      setClaimedPosts(new Set(claimed.map(p => p.id)));
+    } catch (error) {
+      console.warn('Failed to load claimed posts:', error);
+    }
+  };
 
   const loadPosts = async () => {
     try {
       setLoading(true);
+      console.log('🔄 Loading blog posts from Supabase database...');
+
       const blogPosts = await blogService.getRecentBlogPosts(50);
+      console.log(`✅ Successfully loaded ${blogPosts.length} posts from database`);
+
       setPosts(blogPosts);
-    } catch (error) {
+
+      if (blogPosts.length === 0) {
+        console.log('🔄 No posts in database, creating sample data...');
+        // Add sample data if no posts exist
+        const samplePosts = [
+          {
+            id: 'sample-1',
+            title: 'Getting Started with SEO Optimization',
+            slug: 'getting-started-seo-optimization',
+            content: 'Learn the fundamentals of SEO optimization and how to improve your website rankings.',
+            excerpt: 'Complete guide to SEO fundamentals',
+            target_url: 'https://example.com/seo-guide',
+            status: 'published',
+            created_at: new Date().toISOString(),
+            published_at: new Date().toISOString(),
+            view_count: 150,
+            reading_time: 5,
+            category: 'SEO',
+            tags: ['seo', 'optimization', 'beginners'],
+            meta_description: 'Learn the fundamentals of SEO optimization',
+            author_name: 'SEO Expert',
+            word_count: 1200,
+            seo_score: 85,
+            is_trial_post: false,
+            user_id: null
+          }
+        ];
+        setPosts(samplePosts as any);
+      }
+
+    } catch (error: any) {
       console.error('Failed to load blog posts:', error);
+
+      // Show user-friendly error message
+      toast({
+        title: "Unable to load blog posts",
+        description: error.message || "Please check your internet connection and try again.",
+        variant: "destructive"
+      });
+
+      // Provide fallback data so the page isn't empty
+      const fallbackPosts = [
+        {
+          id: 'fallback-1',
+          title: 'Sample Blog Post - Database Connection Issue',
+          slug: 'sample-blog-post-database-issue',
+          content: 'This is a sample blog post shown when the database connection is not available.',
+          excerpt: 'Sample post displayed when database is unavailable',
+          target_url: 'https://backlinkoo.com/blog',
+          status: 'published',
+          created_at: new Date().toISOString(),
+          published_at: new Date().toISOString(),
+          view_count: 0,
+          reading_time: 3,
+          category: 'System',
+          tags: ['system', 'fallback'],
+          meta_description: 'Sample post when database unavailable',
+          author_name: 'System',
+          word_count: 500,
+          seo_score: 70,
+          is_trial_post: false,
+          user_id: null
+        }
+      ];
+      setPosts(fallbackPosts as any);
+
     } finally {
       setLoading(false);
     }
@@ -85,6 +202,90 @@ export function BlogListing() {
     return hoursLeft < 2;
   };
 
+  const isClaimable = (post: BlogPost) => {
+    return post.is_trial_post && !claimedPosts.has(post.id) && !isPostExpired(post);
+  };
+
+  const isPostExpired = (post: BlogPost) => {
+    if (!post.is_trial_post || !post.expires_at) return false;
+    return new Date() > new Date(post.expires_at);
+  };
+
+  const handleClaimPost = async (e: React.MouseEvent, post: BlogPost) => {
+    e.stopPropagation(); // Prevent card navigation
+
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    if (!canClaimMore) {
+      setShowPricingModal(true);
+      return;
+    }
+
+    if (!isClaimable(post)) {
+      toast({
+        title: "Cannot claim post",
+        description: "This post is not available for claiming.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setClaiming(post.id);
+
+    try {
+      const result = await BlogClaimService.claimPost(post.id, user);
+
+      if (result.success) {
+        setClaimedPosts(prev => new Set([...prev, post.id]));
+
+        toast({
+          title: "Post claimed successfully! 🎉",
+          description: `"${post.title}" is now permanently yours.`
+        });
+
+        // Refresh claim status
+        checkUserClaimStatus();
+
+        // Optionally navigate to the claimed post
+        setTimeout(() => {
+          navigate(`/blog/${post.slug}`);
+        }, 1500);
+
+      } else {
+        throw new Error(result.error || 'Failed to claim post');
+      }
+    } catch (error: any) {
+      console.error('Claim error:', error);
+
+      // Handle specific error cases
+      if (error.message?.includes('limit')) {
+        setShowPricingModal(true);
+        toast({
+          title: "Claim limit reached",
+          description: "Upgrade to claim unlimited posts.",
+          variant: "destructive"
+        });
+      } else if (error.message?.includes('expired')) {
+        toast({
+          title: "Post expired",
+          description: "This post is no longer available for claiming.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Claim failed",
+          description: error.message || "Please try again.",
+          variant: "destructive"
+        });
+      }
+    } finally {
+      setClaiming(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
@@ -92,11 +293,33 @@ export function BlogListing() {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Blog Posts</h1>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-gray-600 mb-6">
               Boost your search rankings with high-quality backlinks and SEO-optimized content
             </p>
-            
-            <Button 
+
+            {/* Claim Status for Authenticated Users */}
+            {user && (
+              <div className="mb-6">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-blue-700 text-sm">
+                  <Crown className="h-4 w-4" />
+                  {canClaimMore ? (
+                    `You can claim ${3 - claimedPosts.size} more posts`
+                  ) : (
+                    <>
+                      Claim limit reached -
+                      <button
+                        onClick={() => setShowPricingModal(true)}
+                        className="underline hover:no-underline ml-1"
+                      >
+                        upgrade for unlimited
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <Button
               onClick={() => navigate('/blog/create')}
               size="lg"
               className="mb-8"
@@ -245,6 +468,44 @@ export function BlogListing() {
                           </span>
                         </div>
 
+                        {/* Claim Button Section */}
+                        <div className="mt-4 pt-3 border-t border-gray-100">
+                          {isClaimable(post) ? (
+                            <Button
+                              onClick={(e) => handleClaimPost(e, post)}
+                              disabled={claiming === post.id}
+                              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                              size="sm"
+                            >
+                              {claiming === post.id ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Claiming...
+                                </>
+                              ) : (
+                                <>
+                                  <Crown className="h-4 w-4 mr-2" />
+                                  Claim Post {!user && '(Login Required)'}
+                                </>
+                              )}
+                            </Button>
+                          ) : claimedPosts.has(post.id) ? (
+                            <div className="flex items-center justify-center w-full py-2 bg-green-50 border border-green-200 rounded text-green-700 text-sm">
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              Already Claimed
+                            </div>
+                          ) : isPostExpired(post) ? (
+                            <div className="flex items-center justify-center w-full py-2 bg-gray-50 border border-gray-200 rounded text-gray-500 text-sm">
+                              Expired
+                            </div>
+                          ) : !post.is_trial_post ? (
+                            <div className="flex items-center justify-center w-full py-2 bg-blue-50 border border-blue-200 rounded text-blue-700 text-sm">
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Post
+                            </div>
+                          ) : null}
+                        </div>
+
                         {isExpiringSoon(post) && (
                           <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
                             ⚠️ Expires soon - claim to keep permanently
@@ -268,6 +529,36 @@ export function BlogListing() {
           )}
         </div>
       </div>
+
+      {/* Pricing Modal */}
+      <PricingModal
+        isOpen={showPricingModal}
+        onClose={() => setShowPricingModal(false)}
+        onAuthSuccess={(user) => {
+          setShowPricingModal(false);
+          checkUserClaimStatus();
+          toast({
+            title: "Welcome! 🎉",
+            description: "You can now claim unlimited blog posts.",
+          });
+        }}
+      />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onAuthSuccess={(user) => {
+          setShowLoginModal(false);
+          checkUserClaimStatus();
+          loadClaimedPosts();
+          toast({
+            title: "Welcome back!",
+            description: "You can now claim blog posts.",
+          });
+        }}
+        defaultTab="login"
+      />
     </div>
   );
 }
