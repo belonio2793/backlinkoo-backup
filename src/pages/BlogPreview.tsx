@@ -223,15 +223,37 @@ export function BlogPreview() {
               <div className="flex items-center gap-2 text-sm">
                 <Target className="h-4 w-4 text-blue-600" />
                 <span className="text-muted-foreground">Target URL:</span>
-                <a 
-                  href={blogPost.targetUrl} 
-                  target="_blank" 
+                <a
+                  href={blogPost.targetUrl}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline flex items-center gap-1"
                 >
                   {blogPost.targetUrl}
                   <ExternalLink className="h-3 w-3" />
                 </a>
+              </div>
+            </div>
+
+            {/* Claim Button Section */}
+            <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">
+                    Claim This Blog Post
+                  </h3>
+                  <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                    Make this post permanently yours and remove the expiration timer.
+                  </p>
+                </div>
+                <BlogClaimButton
+                  slug={blogPost.slug || slug || ''}
+                  postTitle={blogPost.title}
+                  onClaimSuccess={(claimedCount) => {
+                    // Optionally update UI to reflect the post is now claimed
+                    setBlogPost(prev => prev ? { ...prev, isTrialPost: false, user_id: 'claimed' } : prev);
+                  }}
+                />
               </div>
             </div>
 
