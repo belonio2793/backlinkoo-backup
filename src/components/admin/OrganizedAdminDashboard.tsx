@@ -268,6 +268,10 @@ export function OrganizedAdminDashboard() {
               <BlogPostClaimsManager />
             </TabsContent>
 
+            <TabsContent value="blog-system">
+              <BlogSystemAdmin />
+            </TabsContent>
+
             <TabsContent value="content-filter">
               <ContentFilterManager />
             </TabsContent>
