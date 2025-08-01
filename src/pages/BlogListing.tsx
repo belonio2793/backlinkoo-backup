@@ -93,7 +93,7 @@ export function BlogListing() {
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Blog Posts</h1>
             <p className="text-xl text-gray-600 mb-8">
-              Discover AI-generated content and insights
+              Boost your search rankings with high-quality backlinks and SEO-optimized content
             </p>
             
             <Button 
