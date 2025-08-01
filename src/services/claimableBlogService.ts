@@ -101,8 +101,11 @@ export class ClaimableBlogService {
         };
       }
 
+      // Generate publishedUrl using the database-generated slug
+      const publishedUrl = `${window.location.origin}/blog/${blogPost.slug}`;
+
       console.log('✅ Blog post published successfully:', publishedUrl);
-      
+
       return {
         success: true,
         blogPost,
