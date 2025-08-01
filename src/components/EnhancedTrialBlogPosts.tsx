@@ -59,9 +59,34 @@ interface EnhancedTrialBlogPostsProps {
   user: User | null;
 }
 
+// Helper function to load initial posts from localStorage
+const getInitialPosts = (): TrialPost[] => {
+  try {
+    const allBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+    const posts: TrialPost[] = [];
+
+    for (const blogMeta of allBlogs) {
+      const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
+      if (blogData) {
+        const blogPost = JSON.parse(blogData);
+        // Check if not expired
+        if (!blogPost.expires_at || new Date() <= new Date(blogPost.expires_at)) {
+          posts.push(blogPost);
+        }
+      }
+    }
+
+    return posts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  } catch (error) {
+    console.warn('Error loading initial posts from localStorage:', error);
+    return [];
+  }
+};
+
 export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
-  const [allPosts, setAllPosts] = useState<TrialPost[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Pre-load data from localStorage immediately - no loading state needed
+  const [allPosts, setAllPosts] = useState<TrialPost[]>(getInitialPosts());
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'claimed' | 'available'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -73,7 +98,8 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadAllPosts();
+    // Load fresh data in background without showing loading state
+    loadAllPosts(true);
 
     // Refresh every 30 seconds
     const interval = setInterval(() => {
