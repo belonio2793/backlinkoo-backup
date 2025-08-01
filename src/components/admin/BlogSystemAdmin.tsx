@@ -6,13 +6,16 @@ import { AlertCircle, CheckCircle, Database, Trash2, Settings, RefreshCw } from 
 import { useToast } from '@/hooks/use-toast';
 import { BlogClaimMigration } from '@/utils/blogClaimMigration';
 import { BlogCleanupService } from '@/services/blogCleanupService';
+import { RLSPolicyFix } from '@/utils/fixRLSPolicies';
 
 export function BlogSystemAdmin() {
   const { toast } = useToast();
   const [migrating, setMigrating] = useState(false);
   const [cleaning, setCleaning] = useState(false);
+  const [fixingRLS, setFixingRLS] = useState(false);
   const [migrationResults, setMigrationResults] = useState<any[]>([]);
   const [cleanupStats, setCleanupStats] = useState<{ count: number; deletedCount?: number } | null>(null);
+  const [rlsStats, setRlsStats] = useState<any>(null);
 
   const runMigrations = async () => {
     setMigrating(true);
@@ -40,6 +43,39 @@ export function BlogSystemAdmin() {
       });
     } finally {
       setMigrating(false);
+    }
+  };
+
+  const fixRLSPolicies = async () => {
+    setFixingRLS(true);
+    try {
+      const result = await RLSPolicyFix.fixBlogPostsPolicies();
+
+      if (result.success) {
+        toast({
+          title: "RLS Policies Fixed ✅",
+          description: "Blog post security policies have been updated",
+        });
+      } else {
+        toast({
+          title: "RLS Fix Failed",
+          description: result.error || "Failed to update security policies",
+          variant: "destructive"
+        });
+      }
+
+      // Test the policies after fixing
+      const testResult = await RLSPolicyFix.testPolicyFix();
+      setRlsStats(testResult);
+
+    } catch (error: any) {
+      toast({
+        title: "RLS Fix Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setFixingRLS(false);
     }
   };
 
