@@ -70,7 +70,7 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
         variant: 'destructive'
       });
     } finally {
-      setLoading(false);
+      // No loading state
     }
   };
 
