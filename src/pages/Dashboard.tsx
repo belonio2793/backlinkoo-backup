@@ -530,7 +530,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
                       className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                     >
                       {claimingPostId === post.id ? (
-                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full" />
                       ) : (
                         <>
                           <Plus className="h-3 w-3 mr-1" />
