@@ -45,7 +45,8 @@ import {
   LazyUserBlogManagement,
   LazyBlogEditPage,
   LazyEnhancedAILive,
-  LazyGuestDashboard
+  LazyGuestDashboard,
+  LazyClaimSystemDebug
 } from './LazyComponents';
 
 // Loading component for better UX
