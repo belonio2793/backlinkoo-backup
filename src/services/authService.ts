@@ -336,8 +336,7 @@ export class AuthService {
         });
       }
 
-      // Shorter wait time
-      await new Promise(resolve => setTimeout(resolve, 50));
+      // No delay needed for cleanup
 
     } catch (error) {
       console.warn('AuthService: Cleanup failed:', error);

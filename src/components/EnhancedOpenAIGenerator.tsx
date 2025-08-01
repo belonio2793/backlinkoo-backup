@@ -162,7 +162,7 @@ Ensure the anchor text placement follows SEO best practices and genuinely helps 
     // Check Database Connection
     try {
       const { supabase } = await import('@/integrations/supabase/client');
-      const { error } = await supabase.from('published_blog_posts').select('id').limit(1);
+      const { error } = await supabase.from('blog_posts').select('id').limit(1);
       
       if (!error) {
         setSystemStatus(prev => ({

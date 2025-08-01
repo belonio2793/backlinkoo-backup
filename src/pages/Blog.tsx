@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ClaimableBlogService } from '@/services/claimableBlogService';
+import { UnifiedClaimService } from '@/services/unifiedClaimService';
 import { useAuth } from '@/hooks/useAuth';
 import { BlogClaimService } from '@/services/blogClaimService';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +13,7 @@ import { Footer } from '@/components/Footer';
 
 import { PricingModal } from '@/components/PricingModal';
 import { ClaimStatusIndicator } from '@/components/ClaimStatusIndicator';
+import { ClaimSystemStatus } from '@/components/ClaimSystemStatus';
 import { useToast } from '@/hooks/use-toast';
 import {
   Calendar,
@@ -59,13 +61,20 @@ export function Blog() {
       }, 10000); // 10 second timeout
 
       try {
-        // Use ClaimableBlogService to get posts with expiration logic
+        // Use UnifiedClaimService to get posts consistently
         let posts: any[] = [];
         try {
-          posts = await ClaimableBlogService.getClaimablePosts(50);
+          posts = await UnifiedClaimService.getClaimablePosts(50);
           console.log('✅ Claimable posts loaded:', posts.length);
         } catch (dbError) {
-          console.warn('❌ Database unavailable, using localStorage:', dbError);
+          console.warn('❌ Database unavailable, trying fallback:', dbError);
+          // Fallback to old service if needed
+          try {
+            posts = await ClaimableBlogService.getClaimablePosts(50);
+            console.log('✅ Fallback posts loaded:', posts.length);
+          } catch (fallbackError) {
+            console.warn('❌ Fallback also failed, using localStorage:', fallbackError);
+          }
         }
 
         // Also load from localStorage (traditional blog posts)
@@ -209,7 +218,7 @@ export function Blog() {
                     Dashboard
                   </Button>
                   <Button
-                    onClick={() => navigate("/auth")}
+                    onClick={() => navigate("/login")}
                     className="bg-transparent hover:bg-red-50/50 border border-red-200/60 text-red-600 hover:text-red-700 hover:border-red-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
                   >
                     Sign Out
@@ -217,10 +226,10 @@ export function Blog() {
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" onClick={() => navigate("/auth")} className="font-medium">
+                  <Button variant="ghost" onClick={() => navigate("/login")} className="font-medium">
                     Sign In
                   </Button>
-                  <Button onClick={() => navigate("/auth")} className="font-medium">
+                  <Button onClick={() => navigate("/login")} className="font-medium">
                     Get Started
                   </Button>
                 </>
@@ -353,7 +362,61 @@ export function Blog() {
 
       {/* Claim Status Indicator */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <ClaimStatusIndicator onUpgrade={() => setPricingModalOpen(true)} />
+        <div className="flex items-center justify-between">
+          <ClaimStatusIndicator onUpgrade={() => setPricingModalOpen(true)} />
+          {import.meta.env.DEV && <ClaimSystemStatus />}
+        </div>
+      </div>
+
+      {/* Claim Feature Banner */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-8 text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-3xl font-bold mb-2">💾 Save Blog Posts to Dashboard</h2>
+                <p className="text-blue-100 text-lg mb-4">
+                  Save your favorite blog posts to your personal dashboard! Access them anytime and prevent auto-deletion.
+                </p>
+                <div className="flex items-center gap-6 text-sm">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-300" />
+                    <span>Personal dashboard access</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-300" />
+                    <span>Protection from deletion</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-300" />
+                    <span>Up to 3 free (unlimited with subscription)</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex-shrink-0">
+                {user ? (
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{filteredPosts.filter(p => p.is_trial_post && !p.user_id).length}</div>
+                    <div className="text-blue-200 text-sm">Claimable Posts</div>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={() => navigate('/login')}
+                    size="lg"
+                    className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4"
+                  >
+                    <Crown className="mr-2 h-5 w-5" />
+                    Sign In to Start Claiming
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="absolute -top-4 -right-4 opacity-20">
+            <Crown className="h-32 w-32 text-white" />
+          </div>
+        </div>
       </div>
 
       {/* Blog Posts Grid/List */}
@@ -467,16 +530,33 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
   const { toast } = useToast();
   const [claiming, setClaiming] = useState(false);
 
+  const handleClaimRedirect = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    // Store claim intent for after login
+    const claimIntent = {
+      postSlug: post.slug,
+      postTitle: post.title,
+      postId: post.id,
+      timestamp: Date.now()
+    };
+
+    localStorage.setItem('claim_intent', JSON.stringify(claimIntent));
+
+    toast({
+      title: "Redirecting to sign in...",
+      description: "We'll bring you back to complete your claim.",
+    });
+
+    // Navigate to login page
+    navigate('/login');
+  };
+
   const handleClaimPost = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
     if (!user) {
-      toast({
-        title: "Sign In Required",
-        description: "Please sign in to claim blog posts.",
-        variant: "destructive"
-      });
-      navigate('/auth');
+      handleClaimRedirect(e);
       return;
     }
 
@@ -487,20 +567,24 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
     setClaiming(true);
 
     try {
-      const result = await BlogClaimService.claimBlogPost(post.slug, user.id);
+      console.log('🎯 Claiming post from card:', post.slug);
+
+      const result = await UnifiedClaimService.claimBlogPost(post.slug, user);
 
       if (result.success) {
         toast({
-          title: "Post Claimed!",
+          title: "Post Saved Successfully! 🎉",
           description: result.message,
         });
 
         // Refresh the page to show updated status
-        window.location.reload();
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
 
       } else {
         toast({
-          title: "Claim Failed",
+          title: result.needsUpgrade ? "Upgrade Required" : "Claim Failed",
           description: result.message,
           variant: "destructive"
         });
@@ -510,7 +594,7 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
       console.error('Failed to claim post:', error);
       toast({
         title: "Error",
-        description: "Failed to claim post. Please try again.",
+        description: "An unexpected error occurred while claiming the post.",
         variant: "destructive"
       });
     } finally {
@@ -600,27 +684,43 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
           </div>
         </div>
 
-        {/* Claim Button */}
-        {canClaim && (
+        {/* Claim Button - Enhanced for all users */}
+        {post.is_trial_post && !post.user_id && (
           <div className="pt-3 border-t border-gray-100">
-            <Button
-              onClick={handleClaimPost}
-              disabled={claiming}
-              size="sm"
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            >
-              {claiming ? (
-                <>
-                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                  Claiming...
-                </>
-              ) : (
-                <>
-                  <Star className="mr-2 h-3 w-3" />
-                  Claim This Post
-                </>
-              )}
-            </Button>
+            {user ? (
+              <Button
+                onClick={handleClaimPost}
+                disabled={claiming}
+                size="sm"
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 animate-pulse"
+              >
+                {claiming ? (
+                  <>
+                    <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                    Claiming...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="mr-2 h-3 w-3" />
+                    Save to Dashboard
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleClaimRedirect}
+                size="sm"
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 animate-pulse"
+              >
+                <Plus className="mr-2 h-3 w-3" />
+                Sign In to Save Post
+              </Button>
+            )}
+            {post.expires_at && (
+              <p className="text-xs text-center text-amber-600 mt-1">
+                ⏰ Expires: {formatDate(post.published_at || post.created_at)}
+              </p>
+            )}
           </div>
         )}
 
@@ -628,7 +728,7 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <User className="h-4 w-4" />
-            <span>{post.author_name || 'Backlink ∞'}</span>
+            <span>{post.author_name || 'Backlink ��'}</span>
             {isOwnedByUser && (
               <Badge className="bg-green-50 text-green-700 border-green-200 text-xs ml-2">
                 Yours

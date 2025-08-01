@@ -93,11 +93,11 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
       }
       setLoadingStatus('Connecting to database...');
 
-      // Load from database using the blog claim service
-      const { BlogClaimService } = await import('@/services/blogClaimService');
+      // Load from database using the unified claim service
+      const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
 
       setLoadingStatus('Fetching published blog posts...');
-      const dbPosts = await BlogClaimService.getClaimablePosts(20);
+      const dbPosts = await UnifiedClaimService.getClaimablePosts(20);
 
       setLoadingStatus('Checking local storage...');
       // Also load from localStorage for backwards compatibility
@@ -202,27 +202,17 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
 
     try {
       setClaimingPostId(post.id);
-      const { BlogClaimService } = await import('@/services/blogClaimService');
+      const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
 
-      // Check if user can claim more posts
-      const { canClaim, reason } = await BlogClaimService.canUserClaimMore(user);
-      if (!canClaim) {
-        toast({
-          title: "Claim Limit Reached",
-          description: reason,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const result = await BlogClaimService.claimPost(post.id, user);
+      // Use unified claim service with slug
+      const result = await UnifiedClaimService.claimBlogPost(post.slug, user);
 
       if (result.success) {
         toast({
-          title: "Post Claimed Successfully",
+          title: "Post Saved Successfully",
           description: result.message,
         });
-        await loadAllPosts(); // Refresh the list
+        await loadUserSavedPosts(); // Refresh saved posts list
       } else {
         toast({
           title: "Claim Failed",
@@ -242,33 +232,33 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
     }
   };
 
-  const handleUnclaimPost = async (post: any) => {
+  const handleRemoveSavedPost = async (postId: string) => {
     if (!user) return;
 
     try {
-      setClaimingPostId(post.id);
-      const { BlogClaimService } = await import('@/services/blogClaimService');
+      setClaimingPostId(postId);
+      const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
 
-      const result = await BlogClaimService.unclaimPost(post.id, user);
+      const result = await UnifiedClaimService.removeSavedPost(user.id, postId);
 
       if (result.success) {
         toast({
-          title: "Post Unclaimed",
+          title: "Post Removed",
           description: result.message,
         });
-        await loadAllPosts(); // Refresh the list
+        await loadUserSavedPosts(); // Refresh saved posts list
       } else {
         toast({
-          title: "Unclaim Failed",
+          title: "Remove Failed",
           description: result.message,
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Error unclaiming post:', error);
+      console.error('Error removing saved post:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred while unclaiming the post.",
+        description: "An unexpected error occurred while removing the post.",
         variant: "destructive",
       });
     } finally {
@@ -340,10 +330,33 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
     );
   }
 
-  // Separate posts into categories
-  const userClaimedPosts = allPosts.filter(post => post.user_id === user?.id && !post.is_trial_post);
-  const availablePosts = allPosts.filter(post => !post.user_id || post.is_trial_post);
-  const otherClaimedPosts = allPosts.filter(post => post.user_id && post.user_id !== user?.id && !post.is_trial_post);
+  // All posts are now available for saving to dashboard
+  const availablePosts = allPosts;
+
+  // Load user's saved posts separately
+  const [userSavedPosts, setUserSavedPosts] = useState<any[]>([]);
+  const [loadingSavedPosts, setLoadingSavedPosts] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      loadUserSavedPosts();
+    }
+  }, [user]);
+
+  const loadUserSavedPosts = async () => {
+    if (!user) return;
+
+    try {
+      setLoadingSavedPosts(true);
+      const { UnifiedClaimService } = await import('@/services/unifiedClaimService');
+      const savedPosts = await UnifiedClaimService.getUserSavedPosts(user.id);
+      setUserSavedPosts(savedPosts);
+    } catch (error) {
+      console.error('Error loading saved posts:', error);
+    } finally {
+      setLoadingSavedPosts(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -413,7 +426,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div>• Database Posts: {debugInfo.dbPosts}</div>
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
-              <div>• Displayed: {debugInfo.displayedPosts}</div>
+              <div>��� Displayed: {debugInfo.displayedPosts}</div>
               <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '✅'}</div>
             </div>
           </div>
@@ -433,8 +446,8 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           <div className="text-sm text-purple-600">Total Posts</div>
         </div>
         <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200">
-          <div className="text-2xl font-bold text-emerald-700">{userClaimedPosts.length}</div>
-          <div className="text-sm text-emerald-600">Your Posts</div>
+          <div className="text-2xl font-bold text-emerald-700">{userSavedPosts.length}</div>
+          <div className="text-sm text-emerald-600">Saved Posts</div>
         </div>
         <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
           <div className="text-2xl font-bold text-blue-700">{availablePosts.length}</div>
@@ -442,39 +455,46 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
         </div>
       </div>
 
-      {/* Claimed Posts Section */}
-      {userClaimedPosts.length > 0 && (
+      {/* Saved Posts Section */}
+      {userSavedPosts.length > 0 && (
         <div className="mb-8">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-            Your Claimed Posts ({userClaimedPosts.length})
+            Your Saved Posts ({userSavedPosts.length})
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {userClaimedPosts.map((post, index) => (
-              <Card key={post.id || index} className="group hover:shadow-lg transition-all duration-300 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <h4 className="font-medium text-gray-800 line-clamp-2 text-sm">{post.title}</h4>
-                    <Badge variant="outline" className="bg-emerald-50 border-emerald-200 text-emerald-700 text-xs">Owned</Badge>
-                  </div>
-                  <div className="flex gap-2 mb-3">
-                    <Button size="sm" className="flex-1" onClick={() => navigate(`/blog/${post.slug}`)}>
-                      <Eye className="h-3 w-3 mr-1" />View
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleUnclaimPost(post)}
-                      disabled={claimingPostId === post.id}
-                      className="border-red-200 text-red-600 hover:bg-red-50"
-                    >
-                      Unclaim
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {loadingSavedPosts ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
+              <p className="text-gray-500 mt-2">Loading your saved posts...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {userSavedPosts.map((post, index) => (
+                <Card key={post.id || index} className="group hover:shadow-lg transition-all duration-300 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <h4 className="font-medium text-gray-800 line-clamp-2 text-sm">{post.title}</h4>
+                      <Badge variant="outline" className="bg-emerald-50 border-emerald-200 text-emerald-700 text-xs">Saved</Badge>
+                    </div>
+                    <div className="flex gap-2 mb-3">
+                      <Button size="sm" className="flex-1" onClick={() => navigate(`/blog/${post.slug}`)}>
+                        <Eye className="h-3 w-3 mr-1" />View
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRemoveSavedPost(post.id)}
+                        disabled={claimingPostId === post.id}
+                        className="border-red-200 text-red-600 hover:bg-red-50"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -530,7 +550,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
                       ) : (
                         <>
                           <Plus className="h-3 w-3 mr-1" />
-                          Claim
+                          Save to Dashboard
                         </>
                       )}
                     </Button>
@@ -598,7 +618,8 @@ const Dashboard = () => {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
-  const [isSigningOut, setIsSigningOut] = useState(false);
+
+main
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
@@ -619,8 +640,7 @@ const Dashboard = () => {
       console.log('🏠 Dashboard: Starting initialization...');
 
       try {
-        const { data: sessionData, error } = await supabase.auth.getSession();
-        const session = sessionData?.session;
+ main
 
         if (!isMounted) return;
 
@@ -833,44 +853,7 @@ const Dashboard = () => {
 
 
   const handleSignOut = () => {
-    if (isSigningOut) return; // Prevent double-clicks
-
-    console.log('Dashboard - Starting instant sign out...');
-    setIsSigningOut(true);
-
-    // Clear user state immediately
-    setUser(null);
-
-    // Navigate immediately for instant UX
-    navigate('/login');
-
-    // Do cleanup in the background (non-blocking)
-    setTimeout(() => {
-      try {
-        // Clean up auth-related storage
-        Object.keys(localStorage).forEach((key) => {
-          if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-            localStorage.removeItem(key);
-          }
-        });
-
-        Object.keys(sessionStorage || {}).forEach((key) => {
-          if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-            sessionStorage.removeItem(key);
-          }
-        });
-
-        // Sign out from Supabase in background
-        supabase.auth.signOut({ scope: 'global' }).catch((error) => {
-          console.warn('Background sign out error (non-critical):', error);
-        });
-
-      } catch (error) {
-        console.warn('Background cleanup error (non-critical):', error);
-      }
-    }, 0);
-
-    setIsSigningOut(false);
+ main
   };
 
 

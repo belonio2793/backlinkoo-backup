@@ -83,9 +83,9 @@ export class ClaimableBlogService {
         published_at: new Date().toISOString()
       };
 
-      // Insert into published_blog_posts table
+      // Insert into blog_posts table (unified approach)
       const { data: blogPost, error } = await supabase
-        .from('published_blog_posts')
+        .from('blog_posts')
         .insert(blogPostData)
         .select()
         .single();
@@ -219,11 +219,11 @@ export class ClaimableBlogService {
   static async getUserClaimedPosts(userId: string): Promise<any[]> {
     try {
       const { data, error } = await supabase
-        .from('published_blog_posts')
+        .from('blog_posts')
         .select('*')
-        .eq('claimed_by', userId)
-        .eq('is_claimed', true)
-        .order('claimed_at', { ascending: false });
+        .eq('user_id', userId)
+        .eq('is_trial_post', false) // Get permanently claimed posts
+        .order('updated_at', { ascending: false });
 
       if (error) {
         console.error('❌ Failed to fetch user claimed posts:', error);

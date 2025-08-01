@@ -46,8 +46,21 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                              error.message.includes('router') ||
                              error.message.includes('redirect'));
 
-    if (isExtensionError || isAuthError || isDashboardError) {
+    // Filter out database table errors (non-existent tables)
+    const isDatabaseTableError = error.message.includes('published_blog_posts') ||
+                                error.message.includes('relation') ||
+                                error.message.includes('does not exist') ||
+                                error.stack?.includes('published_blog_posts') ||
+                                error.message.includes('PGRST') ||
+                                error.message.includes('422') ||
+                                error.message.includes('schema') ||
+                                (error.message.includes('404') && error.message.includes('blog'));
+
+    if (isExtensionError || isAuthError || isDashboardError || isDatabaseTableError) {
       console.warn('Non-critical error filtered:', error.message);
+      if (isDatabaseTableError) {
+        console.warn('Database table error filtered - app will continue with fallback data');
+      }
       // Reset error state to prevent app crash
       this.setState({ hasError: false, error: undefined });
       return;

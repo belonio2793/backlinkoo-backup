@@ -84,14 +84,7 @@ export function AuthFormTabs({
           description: `Signing in as ${currentEmail}`,
         });
 
-        // Reset form on success
-        setLoginEmail("");
-        setLoginPassword("");
-
-        // Redirect to dashboard
-        window.location.href = '/dashboard';
-
-        onAuthSuccess?.(result.user);
+ main
       } else {
         toast({
           title: "Sign in failed",
@@ -194,9 +187,7 @@ export function AuthFormTabs({
                 description: `Processing your request to claim "${intent.postTitle}"`,
               });
 
-              setTimeout(() => {
-                window.location.href = `/blog/${intent.postSlug}`;
-              }, 2000);
+              window.location.href = `/blog/${intent.postSlug}`;
               return;
             } catch (error) {
               console.warn('Failed to parse claim intent:', error);
@@ -246,9 +237,7 @@ export function AuthFormTabs({
                   description: `Processing your request to claim "${intent.postTitle}"`,
                 });
 
-                setTimeout(() => {
-                  window.location.href = `/blog/${intent.postSlug}`;
-                }, 1500);
+                window.location.href = `/blog/${intent.postSlug}`;
                 return;
               } catch (error) {
                 console.warn('Failed to parse claim intent:', error);
@@ -258,11 +247,9 @@ export function AuthFormTabs({
 
             onAuthSuccess?.(result.user);
           } else {
-            // Auto-switch to login tab after successful signup
-            setTimeout(() => {
-              setActiveTab("login");
-              setLoginEmail(signupEmail); // Pre-fill email for easy login
-            }, 3000);
+            // Auto-switch to login tab immediately after successful signup
+            setActiveTab("login");
+            setLoginEmail(signupEmail); // Pre-fill email for easy login
           }
 
         } else {

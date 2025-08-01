@@ -13,6 +13,7 @@ import TermsOfService from '@/pages/TermsOfService';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import BlogPreview from '@/pages/BlogPreview';
 import NotFound from '@/pages/NotFound';
+import Dashboard from '@/pages/Dashboard';
 import PaymentSuccess from '@/pages/PaymentSuccess';
 import PaymentCancelled from '@/pages/PaymentCancelled';
 import SubscriptionSuccess from '@/pages/SubscriptionSuccess';
@@ -45,7 +46,8 @@ import {
   LazyUserBlogManagement,
   LazyBlogEditPage,
   LazyEnhancedAILive,
-  LazyGuestDashboard
+  LazyGuestDashboard,
+  LazyClaimSystemDebug
 } from './LazyComponents';
 
 // Loading component for better UX
@@ -102,12 +104,16 @@ export const OptimizedAppWrapper = () => {
           {/* Protected routes - require authentication and email verification */}
           <Route path="/dashboard" element={
             <EmailVerificationGuard>
-              <LazyEnhancedDashboardRouter />
+              <Suspense fallback={<PageLoader />}>
+                <Dashboard />
+              </Suspense>
             </EmailVerificationGuard>
           } />
           <Route path="/my-dashboard" element={
             <EmailVerificationGuard>
-              <LazyEnhancedDashboardRouter />
+              <Suspense fallback={<PageLoader />}>
+                <Dashboard />
+              </Suspense>
             </EmailVerificationGuard>
           } />
           <Route path="/my-blog" element={
@@ -127,6 +133,11 @@ export const OptimizedAppWrapper = () => {
               <LazyAdminDashboard />
             </AdminAuthGuard>
           } />
+
+          {/* Debug routes - only in development */}
+          {import.meta.env.DEV && (
+            <Route path="/debug/claim-system" element={<LazyClaimSystemDebug />} />
+          )}
 
           {/* Payment routes - lightweight, immediate load */}
           <Route path="/payment-success" element={

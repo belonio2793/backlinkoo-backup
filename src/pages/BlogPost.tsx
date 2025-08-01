@@ -5,21 +5,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { blogService } from '@/services/blogService';
+import { UnifiedClaimService } from '@/services/unifiedClaimService';
+import { ClaimErrorHandler } from '@/utils/claimErrorHandler';
 import { useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { 
-  Clock, 
-  Eye, 
-  User, 
-  Calendar, 
-  ExternalLink, 
+import {
+  Clock,
+  Eye,
+  User,
+  Calendar,
+  ExternalLink,
   ArrowLeft,
   Share2,
   BookmarkPlus,
   Star,
   Crown,
-  Timer
+  Timer,
+  CheckCircle2
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -45,27 +48,46 @@ export function BlogPost() {
 
   const loadPost = async () => {
     try {
-      // First try to get from localStorage
-      const localPost = localStorage.getItem(`blog_post_${slug}`);
-      if (localPost) {
-        const parsedPost = JSON.parse(localPost);
-        setPost(parsedPost);
+      console.log('🔄 Loading blog post:', slug);
+
+      // First try to get from database using unified service
+      const blogPost = await UnifiedClaimService.getBlogPostBySlug(slug!);
+      if (blogPost) {
+        setPost(blogPost);
         setLoading(false);
         return;
       }
 
-      // Fallback to service
-      const blogPost = await blogService.getBlogPostBySlug(slug!);
-      if (!blogPost) {
-        toast({
-          title: "Post Not Found",
-          description: "The requested blog post could not be found.",
-          variant: "destructive"
-        });
-        navigate('/blog');
-        return;
+      // Fallback to localStorage for legacy posts
+      const localPost = localStorage.getItem(`blog_post_${slug}`);
+      if (localPost) {
+        try {
+          const parsedPost = JSON.parse(localPost);
+          // Check if it's expired
+          if (parsedPost.is_trial_post && parsedPost.expires_at &&
+              new Date() > new Date(parsedPost.expires_at)) {
+            // Remove expired post from localStorage
+            localStorage.removeItem(`blog_post_${slug}`);
+            throw new Error('Post has expired');
+          }
+          setPost(parsedPost);
+          setLoading(false);
+          return;
+        } catch (parseError) {
+          console.warn('Failed to parse localStorage post:', parseError);
+          localStorage.removeItem(`blog_post_${slug}`);
+        }
       }
-      setPost(blogPost);
+
+      // No post found
+      toast({
+        title: "Post Not Found",
+        description: "The requested blog post could not be found or has expired.",
+        variant: "destructive"
+      });
+      navigate('/blog');
+      return;
+
     } catch (error) {
       console.error('Failed to load blog post:', error);
       toast({
@@ -73,42 +95,85 @@ export function BlogPost() {
         description: "Failed to load blog post. Please try again.",
         variant: "destructive"
       });
+      navigate('/blog');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleClaimRedirect = () => {
+    if (!post) return;
+
+    // Store claim intent for after login
+    const claimIntent = {
+      postSlug: post.slug,
+      postTitle: post.title,
+      postId: post.id,
+      timestamp: Date.now()
+    };
+
+    localStorage.setItem('claim_intent', JSON.stringify(claimIntent));
+
+    toast({
+      title: "Redirecting to sign in...",
+      description: "We'll bring you back here to complete your claim.",
+    });
+
+    // Navigate to login page
+    navigate('/login');
+  };
+
   const claimPost = async () => {
     if (!user || !post) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to claim this post.",
-        variant: "destructive"
-      });
+      handleClaimRedirect();
       return;
     }
 
     setClaiming(true);
     try {
-      await blogService.updateBlogPost(post.id, {
-        user_id: user.id,
-        is_trial_post: false,
-        expires_at: null
-      });
+      console.log('🎯 Attempting to claim post:', post.slug);
 
-      toast({
-        title: "Post Claimed!",
-        description: "This blog post has been claimed and added to your dashboard.",
-      });
+      const result = await UnifiedClaimService.claimBlogPost(post.slug, user);
 
-      await loadPost();
+      if (result.success) {
+        toast({
+          title: "Post Claimed Successfully! 🎉",
+          description: result.message,
+        });
+
+        // Update the current post state with the claimed post
+        if (result.post) {
+          setPost(result.post);
+        } else {
+          // Reload the post to get the updated state
+          await loadPost();
+        }
+
+        // Clear any localStorage version to prevent conflicts
+        localStorage.removeItem(`blog_post_${post.slug}`);
+
+      } else {
+        toast({
+          title: result.needsUpgrade ? "Upgrade Required" : "Claim Failed",
+          description: result.message,
+          variant: "destructive"
+        });
+
+        // If user needs to upgrade, you could redirect to pricing page
+        if (result.needsUpgrade) {
+          // Optional: navigate('/pricing') or show upgrade modal
+        }
+      }
     } catch (error) {
-      console.error('Failed to claim post:', error);
-      toast({
-        title: "Claim Failed",
-        description: "Failed to claim this post. You may have reached the limit of 3 claimed posts.",
-        variant: "destructive"
-      });
+      const claimError = ClaimErrorHandler.analyzeError(error);
+      console.error('Failed to claim post:', ClaimErrorHandler.formatForLogging(claimError, {
+        postSlug: post.slug,
+        postId: post.id,
+        userId: user.id
+      }));
+
+      const toastConfig = ClaimErrorHandler.createToastConfig(claimError);
+      toast(toastConfig);
     } finally {
       setClaiming(false);
     }
@@ -301,25 +366,36 @@ export function BlogPost() {
                         )}
                         {post.expires_at && ` • Expires ${formatDate(post.expires_at)}`}
                       </Badge>
-                      {!post.user_id && user && (
-                        <Button
-                          size="sm"
-                          onClick={claimPost}
-                          disabled={claiming}
-                          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
-                        >
-                          {claiming ? (
-                            <>
-                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                              Claiming...
-                            </>
-                          ) : (
-                            <>
-                              <Crown className="mr-1 h-3 w-3" />
-                              Claim
-                            </>
-                          )}
-                        </Button>
+                      {!post.user_id && (
+                        user ? (
+                          <Button
+                            size="sm"
+                            onClick={claimPost}
+                            disabled={claiming}
+                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white animate-pulse"
+                          >
+                            {claiming ? (
+                              <>
+                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                                Claiming...
+                              </>
+                            ) : (
+                              <>
+                                <Plus className="mr-1 h-3 w-3" />
+                                Save to Dashboard
+                              </>
+                            )}
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            onClick={handleClaimRedirect}
+                            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white animate-pulse"
+                          >
+                            <Plus className="mr-1 h-3 w-3" />
+                            Sign In to Save
+                          </Button>
+                        )
                       )}
                     </div>
                   )}
@@ -349,50 +425,13 @@ export function BlogPost() {
                 </div>
               </div>
 
-              {/* Claiming Section */}
-              {post.is_trial_post && !post.user_id && user && (
-                <Card className="mb-8 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-blue-100 rounded-lg">
-                          <Star className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-blue-900 text-lg mb-1">Claim This Post</h3>
-                          <p className="text-blue-700 mb-2">
-                            This is an unclaimed trial post. Claim it to make it permanently yours!
-                          </p>
-                          <p className="text-sm text-blue-600">
-                            • Remove expiration date • Add to your dashboard • Full ownership rights
-                          </p>
-                        </div>
-                      </div>
-                      <Button 
-                        onClick={claimPost} 
-                        disabled={claiming}
-                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3"
-                      >
-                        {claiming ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Claiming...
-                          </>
-                        ) : (
-                          <>
-                            <Crown className="mr-2 h-4 w-4" />
-                            Claim Post
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+
+
+
 
               {/* Article Content - SEO Optimized */}
               <div className="prose prose-lg prose-gray max-w-none">
-                <div 
+                <div
                   className="blog-content"
                   dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
                 />
@@ -460,6 +499,50 @@ export function BlogPost() {
       </main>
 
       <Footer />
+
+      {/* Floating Claim Button - Always visible for unclaimed posts */}
+      {post.is_trial_post && !post.user_id && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl border border-blue-200 p-4 max-w-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                <Crown className="h-5 w-5 text-blue-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-gray-900 text-sm">Claim This Post</p>
+                <p className="text-xs text-gray-600 truncate">Make it permanently yours!</p>
+              </div>
+              {user ? (
+                <Button
+                  onClick={claimPost}
+                  disabled={claiming}
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg flex-shrink-0"
+                >
+                  {claiming ? (
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                  ) : (
+                    "Claim"
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleClaimRedirect}
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg flex-shrink-0"
+                >
+                  Sign In
+                </Button>
+              )}
+            </div>
+            {post.expires_at && (
+              <div className="mt-2 text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
+                ⏰ Expires: {formatDate(post.expires_at)}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
