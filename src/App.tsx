@@ -32,6 +32,7 @@ if (import.meta.env.DEV) {
   import('@/utils/debugClaimSystem');
   import('@/utils/runDiagnosticTest'); // Auto-run blog system diagnostic
   import('@/utils/runDatabaseCheck'); // Auto-run database check
+  import('@/utils/manualDatabaseTest'); // Manual database test
 }
 
 import { queryClient } from "@/lib/queryClient";
