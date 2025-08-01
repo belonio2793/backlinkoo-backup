@@ -125,6 +125,90 @@ export function BlogListing() {
     return hoursLeft < 2;
   };
 
+  const isClaimable = (post: BlogPost) => {
+    return post.is_trial_post && !claimedPosts.has(post.id) && !isPostExpired(post);
+  };
+
+  const isPostExpired = (post: BlogPost) => {
+    if (!post.is_trial_post || !post.expires_at) return false;
+    return new Date() > new Date(post.expires_at);
+  };
+
+  const handleClaimPost = async (e: React.MouseEvent, post: BlogPost) => {
+    e.stopPropagation(); // Prevent card navigation
+
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    if (!canClaimMore) {
+      setShowPricingModal(true);
+      return;
+    }
+
+    if (!isClaimable(post)) {
+      toast({
+        title: "Cannot claim post",
+        description: "This post is not available for claiming.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setClaiming(post.id);
+
+    try {
+      const result = await BlogClaimService.claimPost(post.id, user);
+
+      if (result.success) {
+        setClaimedPosts(prev => new Set([...prev, post.id]));
+
+        toast({
+          title: "Post claimed successfully! 🎉",
+          description: `"${post.title}" is now permanently yours.`
+        });
+
+        // Refresh claim status
+        checkUserClaimStatus();
+
+        // Optionally navigate to the claimed post
+        setTimeout(() => {
+          navigate(`/blog/${post.slug}`);
+        }, 1500);
+
+      } else {
+        throw new Error(result.error || 'Failed to claim post');
+      }
+    } catch (error: any) {
+      console.error('Claim error:', error);
+
+      // Handle specific error cases
+      if (error.message?.includes('limit')) {
+        setShowPricingModal(true);
+        toast({
+          title: "Claim limit reached",
+          description: "Upgrade to claim unlimited posts.",
+          variant: "destructive"
+        });
+      } else if (error.message?.includes('expired')) {
+        toast({
+          title: "Post expired",
+          description: "This post is no longer available for claiming.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Claim failed",
+          description: error.message || "Please try again.",
+          variant: "destructive"
+        });
+      }
+    } finally {
+      setClaiming(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
