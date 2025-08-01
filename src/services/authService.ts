@@ -244,32 +244,22 @@ export class AuthService {
 
 
   /**
-   * Sign out user
+   * Sign out user (instant)
    */
   static async signOut(): Promise<AuthResponse> {
-    try {
-      console.log('🚪 AuthService: Signing out user');
+    console.log('🚪 AuthService: Starting instant sign out');
 
-      const { error } = await supabase.auth.signOut({ scope: 'global' });
+    // Do sign out in background for instant UX
+    setTimeout(() => {
+      supabase.auth.signOut({ scope: 'global' }).catch((error) => {
+        console.warn('Background sign out error (non-critical):', error);
+      });
+    }, 0);
 
-      if (error) {
-        console.error('AuthService: Signout error:', error);
-        // Don't fail on signout errors, just warn
-      }
-
-
-
-      console.log('✅ AuthService: User signed out');
-      return {
-        success: true
-      };
-    } catch (error: any) {
-      console.error('AuthService: Signout exception:', error);
-      // Still return success for signout to avoid blocking user
-      return {
-        success: true
-      };
-    }
+    console.log('✅ AuthService: Instant sign out completed');
+    return {
+      success: true
+    };
   }
 
   /**
