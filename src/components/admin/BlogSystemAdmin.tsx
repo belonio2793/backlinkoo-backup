@@ -14,9 +14,11 @@ export function BlogSystemAdmin() {
   const [migrating, setMigrating] = useState(false);
   const [cleaning, setCleaning] = useState(false);
   const [fixingRLS, setFixingRLS] = useState(false);
+  const [removingSecurity, setRemovingSecurity] = useState(false);
   const [migrationResults, setMigrationResults] = useState<any[]>([]);
   const [cleanupStats, setCleanupStats] = useState<{ count: number; deletedCount?: number } | null>(null);
   const [rlsStats, setRlsStats] = useState<any>(null);
+  const [securityStats, setSecurityStats] = useState<any>(null);
 
   const runMigrations = async () => {
     setMigrating(true);
