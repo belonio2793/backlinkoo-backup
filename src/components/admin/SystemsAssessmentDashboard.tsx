@@ -144,9 +144,10 @@ export function SystemsAssessmentDashboard() {
       )}
 
       <Tabs defaultValue="systems" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="systems">System Components</TabsTrigger>
           <TabsTrigger value="blog">Blog System</TabsTrigger>
+          <TabsTrigger value="slug-diagnostic">Slug Diagnostic</TabsTrigger>
           <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
         </TabsList>
 
