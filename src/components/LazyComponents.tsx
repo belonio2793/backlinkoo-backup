@@ -17,6 +17,10 @@ export const LazyBlog = lazy(() => import('@/pages/Blog').then(module => ({ defa
 export const LazyBlogListing = lazy(() => import('@/pages/BlogListing').then(module => ({ default: module.BlogListing })));
 export const LazyBlogCreation = lazy(() => import('@/pages/BlogCreation').then(module => ({ default: module.BlogCreation })));
 export const LazyBlogPostView = lazy(() => import('@/pages/BlogPost').then(module => ({ default: module.BlogPost })));
+
+// Enhanced blog system components
+export const LazyEnhancedBlogListing = lazy(() => import('@/components/EnhancedBlogListing').then(module => ({ default: module.EnhancedBlogListing })));
+export const LazyEnhancedBlogPost = lazy(() => import('@/components/EnhancedBlogPost').then(module => ({ default: module.EnhancedBlogPost })));
 export const LazyTrialDashboard = lazy(() => import('@/pages/TrialDashboard').then(module => ({ default: module.TrialDashboard })));
 export const LazyAIContentTest = lazy(() => import('@/pages/AIContentTest'));
 

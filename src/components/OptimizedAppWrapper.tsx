@@ -88,10 +88,10 @@ export const OptimizedAppWrapper = () => {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/preview/:slug" element={<BlogPreview />} />
 
-          {/* Blog routes - new system */}
-          <Route path="/blog" element={<LazyBlog />} />
+          {/* Blog routes - enhanced system */}
+          <Route path="/blog" element={<LazyEnhancedBlogListing />} />
           <Route path="/blog/create" element={<LazyBlogCreation />} />
-          <Route path="/blog/:slug" element={<LazyBlogPostView />} />
+          <Route path="/blog/:slug" element={<LazyEnhancedBlogPost />} />
 
           {/* Legacy blog routes for backward compatibility */}
           <Route path="/blog-old" element={<LazyBlog />} />
