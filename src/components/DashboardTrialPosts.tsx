@@ -539,7 +539,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900">No claimed posts found</h3>
                     <p className="text-gray-600">
-                      {searchQuery ? 'Try adjusting your search criteria.' : 'Claim some posts from the available tab to see them here.'}
+                      {searchQuery ? 'Try adjusting your search criteria.' : 'Claim some posts from the available tab to see them here (maximum 3 posts).'}
                     </p>
                   </div>
                   <Button onClick={() => setActiveTab('unclaimed')} variant="outline">
