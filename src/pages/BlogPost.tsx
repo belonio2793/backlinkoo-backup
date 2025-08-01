@@ -432,9 +432,71 @@ export function BlogPost() {
                 </Card>
               )}
 
+              {/* Claim Banner Inside Content - For Maximum Visibility */}
+              {post.is_trial_post && !post.user_id && (
+                <div className="my-8 p-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-400 rounded-r-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-shrink-0 p-3 bg-yellow-100 rounded-full">
+                        <Star className="h-6 w-6 text-yellow-600" />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-bold text-gray-900 mb-1">
+                          🔥 This Premium Content is Available for Claiming!
+                        </h4>
+                        <p className="text-gray-700 mb-2">
+                          Be the permanent owner of this high-quality blog post with built-in SEO optimization.
+                        </p>
+                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <span className="flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3 text-green-500" />
+                            Remove expiration
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3 text-green-500" />
+                            Personal dashboard
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3 text-green-500" />
+                            Full ownership
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {user ? (
+                      <Button
+                        onClick={claimPost}
+                        disabled={claiming}
+                        className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-6 py-3 shadow-lg"
+                      >
+                        {claiming ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Claiming...
+                          </>
+                        ) : (
+                          <>
+                            <Crown className="mr-2 h-4 w-4" />
+                            Claim This Post
+                          </>
+                        )}
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => navigate('/auth')}
+                        className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-6 py-3 shadow-lg"
+                      >
+                        <Crown className="mr-2 h-4 w-4" />
+                        Sign In to Claim
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Article Content - SEO Optimized */}
               <div className="prose prose-lg prose-gray max-w-none">
-                <div 
+                <div
                   className="blog-content"
                   dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
                 />
