@@ -24,11 +24,6 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
 
   const { toast } = useToast();
 
-  const validateEmailFormat = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
   const handleAuthSuccess = (user: any) => {
     onAuthSuccess?.(user);
     onClose();
