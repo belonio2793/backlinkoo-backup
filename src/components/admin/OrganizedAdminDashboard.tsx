@@ -136,7 +136,7 @@ export function OrganizedAdminDashboard() {
           <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
           <p className="text-muted-foreground">Manage your backlink service platform</p>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" onClick={handleSignOut}>
           <LogOut className="h-4 w-4 mr-2" />
           Sign Out
         </Button>
