@@ -5,7 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { blogService } from '@/services/blogService';
-import { Clock, Eye, Calendar, Plus, Search } from 'lucide-react';
+import { BlogClaimService } from '@/services/blogClaimService';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { PricingModal } from '@/components/PricingModal';
+import { LoginModal } from '@/components/LoginModal';
+import { Clock, Eye, Calendar, Plus, Search, Crown, Loader2, CheckCircle } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
 type BlogPost = Tables<'blog_posts'>;
