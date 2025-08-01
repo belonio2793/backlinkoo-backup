@@ -338,14 +338,26 @@ export function BlogPost() {
           <div className="max-w-4xl mx-auto text-center">
             <div className="bg-white rounded-2xl shadow-xl p-12">
               <h1 className="text-3xl font-bold text-gray-900 mb-4">Post Not Found</h1>
-              <p className="text-gray-600 mb-8 text-lg">The blog post you're looking for doesn't exist or may have been removed.</p>
-              <Button 
-                onClick={() => navigate('/blog')}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Blog
-              </Button>
+              <p className="text-gray-600 mb-8 text-lg">
+                The blog post with slug "<code className="bg-gray-100 px-2 py-1 rounded">{slug}</code>" doesn't exist or may have been removed.
+              </p>
+              <div className="space-y-4">
+                <Button
+                  onClick={() => navigate('/blog')}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 mr-4"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Blog
+                </Button>
+                {slug && (
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate(`/diagnostic/blog-post/${slug}`)}
+                  >
+                    Run Diagnostic
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </main>
