@@ -963,7 +963,7 @@ const Dashboard = () => {
                     disabled={isSigningOut}
                     className="text-red-600 focus:text-red-600"
                   >
-                    <LogOut className={`mr-2 h-4 w-4 ${isSigningOut ? 'animate-spin' : ''}`} />
+                    <LogOut className="mr-2 h-4 w-4" />
                     {isSigningOut ? 'Signing Out...' : 'Sign Out'}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
