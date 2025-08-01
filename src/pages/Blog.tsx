@@ -13,6 +13,7 @@ import { Footer } from '@/components/Footer';
 
 import { PricingModal } from '@/components/PricingModal';
 import { ClaimStatusIndicator } from '@/components/ClaimStatusIndicator';
+import { ClaimSystemStatus } from '@/components/ClaimSystemStatus';
 import { useToast } from '@/hooks/use-toast';
 import {
   Calendar,
