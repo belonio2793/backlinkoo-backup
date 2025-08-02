@@ -264,6 +264,17 @@ export function SimpleAdminPage() {
                   </>
                 )}
               </Button>
+
+              {error?.includes('Invalid login credentials') && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="w-full h-11"
+                  onClick={() => window.open('https://supabase.com/dashboard/project/dfhanacsmsvvkpunurnp/sql/new', '_blank')}
+                >
+                  🚀 Open Supabase SQL Editor
+                </Button>
+              )}
             </div>
           </form>
 
