@@ -23,6 +23,7 @@ import { BlogPostDiagnostic } from '@/components/BlogPostDiagnostic';
 
 // Import lightweight components
 import AdminAuthGuard from '@/components/AdminAuthGuard';
+import { EmergencyAdminBypass } from '@/components/EmergencyAdminBypass';
 import { EmailVerificationGuard } from '@/components/EmailVerificationGuard';
 import { TrialNotificationBanner } from '@/components/TrialNotificationBanner';
 import { AdminSetup } from '@/components/AdminSetup';
