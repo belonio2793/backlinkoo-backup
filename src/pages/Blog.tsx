@@ -605,13 +605,16 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
   const canClaim = post.is_trial_post && !post.user_id && (!post.expires_at || new Date() <= new Date(post.expires_at));
   const isOwnedByUser = post.user_id === user?.id;
   return (
-    <Card 
-      className="group hover:shadow-2xl transition-all duration-300 cursor-pointer border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:bg-white transform hover:-translate-y-2"
+    <Card
+      className="group hover:shadow-2xl transition-all duration-500 cursor-pointer border-0 shadow-lg bg-white/95 backdrop-blur-sm hover:bg-white transform hover:-translate-y-3 hover:rotate-1 rounded-2xl overflow-hidden"
       onClick={() => navigate(`/blog/${post.slug}`)}
     >
-      <CardHeader className="pb-4 space-y-4">
+      {/* Card Gradient Header */}
+      <div className="h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500"></div>
+
+      <CardHeader className="pb-4 space-y-4 p-6">
         <div className="flex items-start justify-between">
-          <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-md">
+          <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 shadow-sm px-3 py-1.5 font-medium tracking-wide">
             {post.category || 'Expert Content'}
           </Badge>
           <div className="flex items-center gap-2">
@@ -642,46 +645,32 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
           </div>
         </div>
         
-        <CardTitle className="text-xl font-bold line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">
+        <CardTitle className="text-xl font-bold line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors duration-300 mb-3">
           {post.title}
         </CardTitle>
-        
+
         {post.meta_description && (
-          <p className="text-gray-600 line-clamp-3 leading-relaxed">
+          <p className="text-gray-600 line-clamp-3 leading-relaxed text-sm font-light">
             {post.meta_description}
           </p>
         )}
       </CardHeader>
       
-      <CardContent className="pt-0 space-y-4">
+      <CardContent className="pt-0 space-y-4 p-6">
         {/* Keywords */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 mb-4">
           {(post.tags || post.keywords || []).slice(0, 3).map((tag: string, index: number) => (
-            <Badge key={index} variant="outline" className="text-xs bg-gray-50 hover:bg-gray-100 transition-colors">
+            <Badge key={index} variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 transition-colors duration-200 px-2 py-1">
               <Tag className="mr-1 h-2 w-2" />
               {tag}
             </Badge>
           ))}
         </div>
         
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-4 text-sm text-gray-500">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-blue-500" />
-            <span>{formatDate(post.published_at || post.created_at)}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-green-500" />
-            <span>{post.reading_time || 5}m read</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Eye className="h-4 w-4 text-purple-500" />
-            <span>{post.view_count || 0} views</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-orange-500" />
-            <span>{post.seo_score || 75}/100 SEO</span>
-          </div>
+        {/* Publish Date */}
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Calendar className="h-4 w-4 text-blue-500" />
+          <span>{formatDate(post.published_at || post.created_at)}</span>
         </div>
 
         {/* Claim Button - Enhanced for all users */}
@@ -806,27 +795,17 @@ function BlogPostListItem({ post, navigate, formatDate }: any) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
-                  <User className="h-4 w-4" />
-                  <span>{post.author_name || 'Backlink ∞'}</span>
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+              <User className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-medium">{post.author_name || 'Backlink ∞'}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
                   <span>{formatDate(post.published_at || post.created_at)}</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  <span>{post.reading_time || 5}m</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Eye className="h-4 w-4" />
-                  <span>{post.view_count || 0}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <TrendingUp className="h-4 w-4" />
-                  <span>{post.seo_score || 75}/100</span>
-                </div>
               </div>
-              
+
               <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
             </div>
           </div>

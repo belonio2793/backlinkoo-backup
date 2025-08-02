@@ -4,6 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { PremiumPlanTab } from "@/components/PremiumPlanTab";
+import { SEOAcademyTab } from "@/components/SEOAcademyTab";
+import { PremiumService } from "@/services/premiumService";
+import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +40,10 @@ import {
   Eye,
   Sparkles,
   RefreshCw,
-  Home
+  Home,
+  Crown,
+  BookOpen,
+  Star
 } from "lucide-react";
 import { PricingModal } from "@/components/PricingModal";
 import { CampaignForm } from "@/components/CampaignForm";
@@ -56,6 +63,7 @@ import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 
 import { AIPostsManager } from "@/components/admin/AIPostsManager";
+import { PremiumUserAdmin } from "@/components/admin/PremiumUserAdmin";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -630,6 +638,9 @@ const Dashboard = () => {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('section') || "dashboard";
   });
+  const [isPremiumSubscriber, setIsPremiumSubscriber] = useState(false);
+  const [userProgress, setUserProgress] = useState<{ [key: string]: boolean }>({});
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -667,6 +678,22 @@ const Dashboard = () => {
           fetchCampaigns(session.user).catch(err => {
             console.warn('🏠 Dashboard - fetchCampaigns failed:', err);
             return null;
+          }),
+          // Check premium status
+          PremiumService.checkPremiumStatus(session.user.id).then(isPremium => {
+            setIsPremiumSubscriber(isPremium);
+            return isPremium;
+          }).catch(err => {
+            console.warn('🏠 Dashboard - premium status check failed:', err);
+            return false;
+          }),
+          // Fetch user progress if premium
+          PremiumService.getUserProgress(session.user.id).then(progress => {
+            setUserProgress(progress);
+            return progress;
+          }).catch(err => {
+            console.warn('🏠 Dashboard - progress fetch failed:', err);
+            return {};
           })
         ];
 
@@ -969,6 +996,18 @@ const Dashboard = () => {
                 <span className="hidden sm:inline">Trial</span>
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
               </Button>
+              <Button
+                variant={activeSection === "premium-plan" ? "secondary" : "ghost"}
+                onClick={() => setActiveSection("premium-plan")}
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3 relative"
+              >
+                <Crown className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Premium Plan</span>
+                {!isPremiumSubscriber && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full"></div>
+                )}
+              </Button>
+
             </nav>
           </div>
         </div>
@@ -1432,6 +1471,14 @@ const Dashboard = () => {
               <div className="space-y-6">
                 <DashboardTrialPosts user={user} />
               </div>
+            ) : activeSection === "premium-plan" ? (
+              <PremiumPlanTab
+                isSubscribed={isPremiumSubscriber}
+                onUpgrade={() => {
+                  // Refresh premium status after successful upgrade
+                  PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
+                }}
+              />
             ) : null}
           </>
         ) : (
@@ -1448,10 +1495,11 @@ const Dashboard = () => {
               </Badge>
             </div>
 
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="verification">Verification Queue</TabsTrigger>
               <TabsTrigger value="ai-posts">AI Posts</TabsTrigger>
               <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
+              <TabsTrigger value="premium-users">Premium Users</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
 
@@ -1473,6 +1521,10 @@ const Dashboard = () => {
                   {/* TODO: Implement admin campaign management */}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="premium-users" className="space-y-6">
+              <PremiumUserAdmin />
             </TabsContent>
 
             <TabsContent value="analytics" className="space-y-6">

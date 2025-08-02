@@ -3,6 +3,11 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { SecureConfig } from '../../lib/secure-config';
 
+// Store original fetch before third-party scripts can modify it
+if (typeof window !== 'undefined' && !(globalThis as any).__originalFetch__) {
+  (globalThis as any).__originalFetch__ = window.fetch.bind(window);
+}
+
 // Get Supabase configuration with proper fallback
 const getSupabaseConfig = () => {
   const envUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -77,7 +82,7 @@ const createMockSupabaseClient = () => {
       });
     },
     signOut: () => {
-      console.log('⚠️ Mock auth signOut called');
+      console.log('��️ Mock auth signOut called');
       return Promise.resolve({ error: null });
     },
     resend: () => {
@@ -119,7 +124,13 @@ const createMockSupabaseClient = () => {
       ilike: (column: string, pattern: string) => mockMethods,
       like: (column: string, pattern: string) => mockMethods,
       range: (from: number, to: number) => mockMethods,
-      single: () => Promise.resolve({ data: { id: 'mock-id', ...mockUser }, error: null }),
+      single: () => {
+        console.warn(`⚠️ Mock database query on table '${table}' - no real data available`);
+        return Promise.resolve({
+          data: null,
+          error: { message: `Database not available: Please configure real Supabase credentials. Attempted to query table: ${table}` }
+        });
+      },
       then: (callback: any) => {
         console.warn(`⚠️ Mock database query on table '${table}' - no real data available`);
         // Return mock error to indicate database is not available
@@ -209,6 +220,11 @@ console.log('🔧 Supabase client configuration:', {
   keyPrefix: SUPABASE_PUBLISHABLE_KEY ? SUPABASE_PUBLISHABLE_KEY.substring(0, 10) + '...' : 'missing'
 });
 
+// Test basic connectivity if using real client
+if (hasValidCredentials) {
+  console.log('🔗 Testing Supabase connectivity...');
+}
+
 // Use mock client if credentials are missing or invalid
 export const supabase = hasValidCredentials ?
   createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
@@ -224,25 +240,102 @@ export const supabase = hasValidCredentials ?
         'X-Client-Info': 'backlink-infinity@1.0.0',
       },
       fetch: (url, options = {}) => {
-        // Use a clean fetch instance to avoid third-party interference
-        const cleanFetch = window.fetch.bind(window);
+        // Store original fetch before any third-party scripts modify it
+        const originalFetch = (globalThis as any).__originalFetch__ || window.fetch;
 
-        return cleanFetch(url, {
+        // If we detect FullStory interference, use a workaround
+        const isFullStoryPresent = !!(window as any).FS || document.querySelector('script[src*="fullstory"]');
+
+        let fetchFunction = originalFetch;
+
+        if (isFullStoryPresent) {
+          console.log('🔍 FullStory detected - using workaround fetch');
+          // Create a new fetch function that bypasses FullStory
+          fetchFunction = async (url: string, init?: RequestInit) => {
+            try {
+              // Use XMLHttpRequest as fallback when FullStory interferes
+              return await new Promise<Response>((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+
+                xhr.open(init?.method || 'GET', url);
+
+                // Set headers
+                if (init?.headers) {
+                  const headers = new Headers(init.headers);
+                  headers.forEach((value, key) => {
+                    xhr.setRequestHeader(key, value);
+                  });
+                }
+
+                xhr.onload = () => {
+                  // Create Response object
+                  const response = new Response(xhr.responseText, {
+                    status: xhr.status,
+                    statusText: xhr.statusText,
+                    headers: new Headers(xhr.getAllResponseHeaders().split('\r\n').reduce((acc, line) => {
+                      const [key, value] = line.split(': ');
+                      if (key && value) acc[key] = value;
+                      return acc;
+                    }, {} as Record<string, string>))
+                  });
+                  resolve(response);
+                };
+
+                xhr.onerror = () => reject(new Error('Network request failed'));
+                xhr.ontimeout = () => reject(new Error('Request timeout'));
+
+                // Set timeout
+                xhr.timeout = 30000;
+
+                // Send request
+                xhr.send(init?.body as any);
+              });
+            } catch (error) {
+              // Fallback to original fetch if XMLHttpRequest fails
+              return originalFetch(url, init);
+            }
+          };
+        }
+
+        // Create a timeout that won't interfere with existing signals
+        const timeoutMs = 30000;
+        const timeoutController = new AbortController();
+
+        let timeoutId;
+        if (!options.signal) {
+          timeoutId = setTimeout(() => timeoutController.abort(), timeoutMs);
+        }
+
+        const finalSignal = options.signal || timeoutController.signal;
+
+        return fetchFunction(url, {
           ...options,
-          // Ensure we're not affected by global fetch modifications
-          signal: options.signal || AbortSignal.timeout(30000), // 30 second timeout
+          signal: finalSignal,
+        }).then(response => {
+          if (timeoutId) clearTimeout(timeoutId);
+          return response;
         }).catch(error => {
+          if (timeoutId) clearTimeout(timeoutId);
+
+          // Handle specific error types
+          if (error.name === 'AbortError') {
+            console.warn('🔍 Request aborted (likely timeout):', url);
+            throw new Error('Request timeout - please try again');
+          }
+
           // Check if this is likely third-party interference
           const isThirdPartyIssue = error?.stack?.includes('fullstory') ||
                                    error?.stack?.includes('fs.js') ||
                                    error?.message?.includes('Failed to fetch');
 
           if (isThirdPartyIssue) {
-            console.warn('🔍 Network request blocked by third-party script (FullStory/Analytics). This is not a Supabase issue.');
+            console.warn('🔍 Network request blocked by FullStory/Analytics - using workaround');
+            // Return a more specific error for third-party interference
+            throw new Error('Third-party script interference detected - request blocked');
           }
 
           console.warn('Supabase fetch error:', error);
-          throw new Error(`Network request failed: ${error.message}`);
+          throw new Error(`Network request failed: ${error.message || 'Unknown network error'}`);
         });
       },
     },
@@ -252,6 +345,23 @@ export const supabase = hasValidCredentials ?
 // Log the final client type
 if (hasValidCredentials) {
   console.log('✅ Using real Supabase client');
+
+  // Test connection in development
+  if (import.meta.env.DEV) {
+    setTimeout(async () => {
+      try {
+        console.log('🔍 Testing Supabase connection...');
+        const { data, error } = await supabase.from('blog_posts').select('id').limit(1);
+        if (error) {
+          console.warn('⚠️ Supabase connection test failed:', error.message);
+        } else {
+          console.log('✅ Supabase connection test successful');
+        }
+      } catch (testError: any) {
+        console.warn('⚠️ Supabase connection test error:', testError.message);
+      }
+    }, 1000);
+  }
 } else {
   console.warn('⚠️ Using mock Supabase client - authentication will not work!');
   console.log('Fix: Set proper VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables');

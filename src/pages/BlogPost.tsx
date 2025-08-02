@@ -384,49 +384,60 @@ export function BlogPost() {
           </nav>
 
           {/* Article Header */}
-          <article className="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <div className="p-8 sm:p-12">
-              {/* Meta Information */}
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-6">
-                {post.reading_time && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    <span>{post.reading_time} min read</span>
+          <article className="bg-white/95 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-sm border border-gray-100">
+            {/* Hero Section */}
+            <div className="relative bg-gradient-to-br from-slate-50 via-blue-50/50 to-purple-50/30 p-8 sm:p-12 border-b border-gray-100">
+              <div className={"absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%239C92AC\" fill-opacity=\"0.03\"%3E%3Ccircle cx=\"30\" cy=\"30\" r=\"2\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40"}></div>
+
+              <div className="relative z-10">
+                {/* Category Badge */}
+                {post.category && (
+                  <div className="mb-6">
+                    <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 px-4 py-2 text-sm font-medium tracking-wide">
+                      {post.category}
+                    </Badge>
                   </div>
                 )}
 
-                <div className="flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  <span>{post.view_count || 0} views</span>
+                {/* Title - SEO H1 */}
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
+                  {post.title?.replace(/<\/?h1[^>]*>/g, '') || 'Untitled Post'}
+                </h1>
+
+                {/* Meta Description */}
+                {post.meta_description && (
+                  <p className="text-xl sm:text-2xl text-gray-600 leading-relaxed mb-8 font-light max-w-4xl">
+                    {post.meta_description}
+                  </p>
+                )}
+
+                {/* Author and Date */}
+                <div className="flex items-center gap-4 text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <User className="h-5 w-5 text-white" />
+                    </div>
+                    <span className="font-medium">{post.author_name || 'Backlink ∞'}</span>
+                  </div>
+                  <div className="text-gray-400">•</div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>{formatDate(post.published_at || post.created_at)}</span>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              {/* Title - SEO H1 */}
-              <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-                {post.title?.replace(/<\/?h1[^>]*>/g, '') || 'Untitled Post'}
-              </h1>
+            {/* Article Content */}
+            <div className="p-8 sm:p-12">
 
-              {/* Meta Description */}
-              {post.meta_description && (
-                <p className="text-xl text-gray-600 leading-relaxed mb-8 font-light">
-                  {post.meta_description}
-                </p>
-              )}
-
-              {/* Status Badges and Actions */}
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-8 border-b border-gray-200">
-                <div className="flex flex-wrap items-center gap-3">
-                  {post.category && (
-                    <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0">
-                      {post.category}
-                    </Badge>
-                  )}
-
-                  {post.is_trial_post && (
-                    <div className="flex items-center gap-2">
+              {/* Trial Post Status */}
+              {post.is_trial_post && (
+                <div className="mb-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
                       <Badge
-                        variant="outline"
-                        className={`${isExpiringSoon(post.expires_at) ? 'border-red-500 text-red-600 bg-red-50' : 'border-amber-500 text-amber-600 bg-amber-50'}`}
+                        className={`${isExpiringSoon(post.expires_at) ? 'bg-red-100 text-red-700 border-red-300' : 'bg-amber-100 text-amber-700 border-amber-300'} border px-3 py-1`}
                       >
                         {isExpiringSoon(post.expires_at) ? (
                           <>
@@ -439,42 +450,51 @@ export function BlogPost() {
                             Unclaimed Post
                           </>
                         )}
-                        {post.expires_at && ` • Expires ${formatDate(post.expires_at)}`}
                       </Badge>
-                      {!post.user_id && (
-                        user ? (
-                          <Button
-                            size="sm"
-                            onClick={claimPost}
-                            disabled={claiming}
-                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white animate-pulse"
-                          >
-                            {claiming ? (
-                              <>
-                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                                Claiming...
-                              </>
-                            ) : (
-                              <>
-                                <Plus className="mr-1 h-3 w-3" />
-                                Save to Dashboard
-                              </>
-                            )}
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            onClick={handleClaimRedirect}
-                            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white animate-pulse"
-                          >
-                            <Plus className="mr-1 h-3 w-3" />
-                            Sign In to Save
-                          </Button>
-                        )
+                      {post.expires_at && (
+                        <span className="text-sm text-amber-700">
+                          Expires on {formatDate(post.expires_at)}
+                        </span>
                       )}
                     </div>
-                  )}
+                    {!post.user_id && (
+                      user ? (
+                        <Button
+                          size="sm"
+                          onClick={claimPost}
+                          disabled={claiming}
+                          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                        >
+                          {claiming ? (
+                            <>
+                              <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                              Claiming...
+                            </>
+                          ) : (
+                            <>
+                              <Star className="mr-2 h-3 w-3" />
+                              Save to Dashboard
+                            </>
+                          )}
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() => navigate('/login')}
+                          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                        >
+                          <User className="mr-2 h-3 w-3" />
+                          Sign in to Save
+                        </Button>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
 
+              {/* Actions Section */}
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-8 border-b border-gray-100">
+                <div className="flex items-center gap-3">
                   {post.user_id === user?.id && (
                     <Badge className="bg-green-50 text-green-700 border-green-200">
                       <Crown className="mr-1 h-3 w-3" />
@@ -505,9 +525,9 @@ export function BlogPost() {
 
 
               {/* Article Content - SEO Optimized */}
-              <div className="prose prose-lg prose-gray max-w-none">
+              <div className="prose prose-lg prose-gray max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-strong:text-gray-900 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:pl-6 prose-blockquote:py-4 prose-blockquote:rounded-r-lg prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-gray-800">
                 <div
-                  className="blog-content"
+                  className="blog-content leading-relaxed text-lg"
                   dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
                 />
               </div>

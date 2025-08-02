@@ -52,7 +52,7 @@ export class UnifiedClaimService {
         subscriptionTier: data.subscription_tier
       };
     } catch (error) {
-      console.error('Error checking subscription status:', error);
+      console.error('Error checking subscription status:', error.message || error);
       return { isSubscriber: false, subscriptionTier: null };
     }
   }
@@ -72,7 +72,7 @@ export class UnifiedClaimService {
         .eq('user_id', userId);
 
       if (error) {
-        console.error('Failed to get user saved stats:', error);
+        console.error('Failed to get user saved stats:', error.message || error);
         return {
           savedCount: 0,
           maxSaved: isSubscriber ? -1 : this.MAX_SAVED_PER_FREE_USER,
@@ -91,7 +91,7 @@ export class UnifiedClaimService {
         isSubscriber
       };
     } catch (error) {
-      console.error('Error getting user saved stats:', error);
+      console.error('Error getting user saved stats:', error.message || error);
       return {
         savedCount: 0,
         maxSaved: this.MAX_SAVED_PER_FREE_USER,
@@ -117,13 +117,13 @@ export class UnifiedClaimService {
         if (error.code === 'PGRST116') {
           return null; // No rows found
         }
-        console.error('Error fetching blog post:', error);
+        console.error('Error fetching blog post:', error.message || error);
         return null;
       }
 
       return data;
     } catch (error) {
-      console.error('Error in getBlogPostBySlug:', error);
+      console.error('Error in getBlogPostBySlug:', error.message || error);
       return null;
     }
   }
@@ -143,13 +143,13 @@ export class UnifiedClaimService {
         if (error.code === 'PGRST116') {
           return null;
         }
-        console.error('Error fetching blog post by ID:', error);
+        console.error('Error fetching blog post by ID:', error.message || error);
         return null;
       }
 
       return data;
     } catch (error) {
-      console.error('Error in getBlogPostById:', error);
+      console.error('Error in getBlogPostById:', error.message || error);
       return null;
     }
   }
@@ -190,7 +190,7 @@ export class UnifiedClaimService {
         .single();
 
       if (checkError && checkError.code !== 'PGRST116') {
-        console.error('Error checking existing save:', checkError);
+        console.error('Error checking existing save:', checkError.message || checkError);
         return {
           success: false,
           message: 'Error checking if post is already saved.'
@@ -216,7 +216,7 @@ export class UnifiedClaimService {
         .single();
 
       if (saveError) {
-        console.error('Failed to save post:', saveError);
+        console.error('Failed to save post:', saveError.message || saveError);
         return {
           success: false,
           message: 'Failed to save the blog post. Please try again.'
@@ -273,14 +273,14 @@ export class UnifiedClaimService {
         .order('saved_at', { ascending: false });
 
       if (error) {
-        console.error('Failed to get user saved posts:', error);
+        console.error('Failed to get user saved posts:', error.message || error);
         return [];
       }
 
       // Extract blog posts from the joined data
       return (data || []).map(item => (item as any).blog_posts).filter(Boolean);
     } catch (error) {
-      console.error('Error getting user saved posts:', error);
+      console.error('Error getting user saved posts:', error.message || error);
       return [];
     }
   }
@@ -297,7 +297,7 @@ export class UnifiedClaimService {
         .eq('post_id', postId);
 
       if (error) {
-        console.error('Failed to remove saved post:', error);
+        console.error('Failed to remove saved post:', error.message || error);
         return {
           success: false,
           message: 'Failed to remove post from dashboard.'
@@ -309,7 +309,7 @@ export class UnifiedClaimService {
         message: 'Post removed from dashboard.'
       };
     } catch (error) {
-      console.error('Error removing saved post:', error);
+      console.error('Error removing saved post:', error.message || error);
       return {
         success: false,
         message: 'Error removing post from dashboard.'
@@ -330,13 +330,13 @@ export class UnifiedClaimService {
         .limit(limit);
 
       if (error) {
-        console.error('Failed to get available posts:', error);
+        console.error('Failed to get available posts:', error.message || error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error getting available posts:', error);
+      console.error('Error getting available posts:', error.message || error);
       return [];
     }
   }
@@ -359,13 +359,13 @@ export class UnifiedClaimService {
         .eq('post_id', postId);
 
       if (error) {
-        console.error('Error checking if post is saved:', error);
+        console.error('Error checking if post is saved:', error.message || error);
         return false;
       }
 
       return (count || 0) > 0;
     } catch (error) {
-      console.error('Error checking if post is saved:', error);
+      console.error('Error checking if post is saved:', error.message || error);
       return false;
     }
   }
@@ -418,7 +418,7 @@ export class UnifiedClaimService {
       return { saveable: true, post };
 
     } catch (error) {
-      console.error('Error checking if post is saveable:', error);
+      console.error('Error checking if post is saveable:', error.message || error);
       return { saveable: false, reason: 'Error checking post status' };
     }
   }
@@ -444,7 +444,7 @@ export class UnifiedClaimService {
         .lt('expires_at', new Date().toISOString());
 
       if (fetchError || !expiredPosts) {
-        console.error('Failed to fetch expired posts:', fetchError);
+        console.error('Failed to fetch expired posts:', fetchError.message || fetchError);
         return 0;
       }
 
@@ -464,7 +464,7 @@ export class UnifiedClaimService {
           if (!deleteError) {
             deletedCount++;
           } else {
-            console.error(`Failed to delete post ${post.id}:`, deleteError);
+            console.error(`Failed to delete post ${post.id}:`, deleteError.message || deleteError);
           }
         } else {
           console.log(`🔒 Preserving expired post ${post.id} - saved by users`);
@@ -475,7 +475,7 @@ export class UnifiedClaimService {
       return deletedCount;
 
     } catch (error) {
-      console.error('Error cleaning up expired posts:', error);
+      console.error('Error cleaning up expired posts:', error.message || error);
       return 0;
     }
   }

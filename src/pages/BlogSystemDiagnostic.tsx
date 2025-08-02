@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BlogSystemDiagnostic as BlogDiagnosticUtility, type DiagnosticResult } from '@/utils/blogSystemDiagnostic';
 import { DatabaseSetup } from '@/utils/databaseSetup';
+import { NetworkTester } from '@/components/NetworkTester';
 import { 
   CheckCircle, 
   AlertTriangle, 
@@ -207,11 +208,12 @@ export default function BlogSystemDiagnostic() {
 
         {/* Diagnostic Results */}
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="all">All Results ({summary.total})</TabsTrigger>
             <TabsTrigger value="errors">Errors ({summary.error})</TabsTrigger>
             <TabsTrigger value="warnings">Warnings ({summary.warning})</TabsTrigger>
             <TabsTrigger value="success">Success ({summary.success})</TabsTrigger>
+            <TabsTrigger value="network">Network Test</TabsTrigger>
           </TabsList>
           
           <TabsContent value="all" className="space-y-4">
@@ -314,6 +316,23 @@ export default function BlogSystemDiagnostic() {
                   </CardHeader>
                 </Card>
               ))}
+          </TabsContent>
+
+          <TabsContent value="network" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Network Connectivity Test
+                </CardTitle>
+                <p className="text-sm text-gray-600">
+                  Test network connectivity and Supabase access to diagnose FullStory interference and other network issues.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <NetworkTester />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 

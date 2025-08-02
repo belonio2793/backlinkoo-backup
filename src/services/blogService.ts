@@ -67,7 +67,7 @@ export class BlogService {
       word_count: data.wordCount,
       author_name: 'AI Writer',
       tags: this.generateTags(data.title, data.targetUrl),
-      category: this.categorizeContent(data.keywords?.join(' ') || data.title)
+      category: this.categorizeContent(data.title)
     };
 
     // If this is a claimed post (has userId and not trial), use maximum persistence
@@ -91,41 +91,67 @@ export class BlogService {
     // Remove any custom id field to let database auto-generate UUID
     const { id: _, ...cleanBlogPostData } = blogPostData as any;
 
-    const { data: blogPost, error } = await supabase
-      .from('blog_posts')
-      .insert(cleanBlogPostData)
-      .select()
-      .single();
+    let result;
+    try {
+      result = await supabase
+        .from('blog_posts')
+        .insert(cleanBlogPostData)
+        .select();
+    } catch (networkError: any) {
+      console.error('❌ Network error during blog post creation:', networkError);
+      throw new Error(`Network error: ${networkError.message || 'Failed to connect to database'}`);
+    }
 
-    if (error) {
+    const { data: blogPostArray, error } = result;
+    const blogPost = blogPostArray?.[0] || null;
+
+    if (error || !blogPost) {
       // Handle slug collision with enhanced retry strategy
-      if (error.message.includes('blog_posts_slug_key') || error.message.includes('duplicate key value violates unique constraint') || error.message.includes('null value in column "slug"')) {
+      if (error && (error.message.includes('blog_posts_slug_key') || error.message.includes('duplicate key value violates unique constraint') || error.message.includes('null value in column "slug"'))) {
         console.warn('⚠️ Slug issue detected, implementing fallback strategy...');
 
         // Fallback: Generate service-level slug with maximum uniqueness
         const fallbackSlug = this.generateSlug(data.title);
         const retryData = { ...cleanBlogPostData, slug: fallbackSlug };
 
-        const { data: retryPost, error: retryError } = await supabase
-          .from('blog_posts')
-          .insert(retryData)
-          .select()
-          .single();
+        let retryResult;
+        try {
+          retryResult = await supabase
+            .from('blog_posts')
+            .insert(retryData)
+            .select();
+        } catch (networkError: any) {
+          console.error('❌ Network error during retry:', networkError);
+          throw new Error(`Network error on retry: ${networkError.message || 'Failed to connect to database'}`);
+        }
 
-        if (retryError) {
+        const { data: retryPostArray, error: retryError } = retryResult;
+
+        const retryPost = retryPostArray?.[0] || null;
+
+        if (retryError || !retryPost) {
           // Final attempt with timestamp
-          if (retryError.message.includes('blog_posts_slug_key')) {
+          if (retryError && retryError.message && retryError.message.includes('blog_posts_slug_key')) {
             const finalSlug = `${fallbackSlug}-${Date.now()}`;
             const finalData = { ...cleanBlogPostData, slug: finalSlug };
 
-            const { data: finalPost, error: finalError } = await supabase
-              .from('blog_posts')
-              .insert(finalData)
-              .select()
-              .single();
+            let finalResult;
+            try {
+              finalResult = await supabase
+                .from('blog_posts')
+                .insert(finalData)
+                .select();
+            } catch (networkError: any) {
+              console.error('❌ Network error during final retry:', networkError);
+              throw new Error(`Network error on final retry: ${networkError.message || 'Failed to connect to database'}`);
+            }
 
-            if (finalError) {
-              throw new Error(`Failed to create blog post after multiple retries: ${finalError.message}`);
+            const { data: finalPostArray, error: finalError } = finalResult;
+
+            const finalPost = finalPostArray?.[0] || null;
+
+            if (finalError || !finalPost) {
+              throw new Error(`Failed to create blog post after multiple retries: ${finalError?.message || 'No data returned'}`);
             }
 
             console.log('✅ Blog post created successfully after final retry');
@@ -138,7 +164,7 @@ export class BlogService {
         return retryPost;
       }
 
-      if (error.message.includes('row-level security') || error.message.includes('policy')) {
+      if (error && (error.message.includes('row-level security') || error.message.includes('policy'))) {
         console.error('🚨 RLS POLICY IS BLOCKING BLOG POST CREATION');
         console.error('');
         console.error('📋 MANUAL FIX REQUIRED:');
@@ -151,23 +177,19 @@ export class BlogService {
         throw new Error('RLS policy blocking blog creation. Manual SQL execution required in Supabase: ALTER TABLE blog_posts DISABLE ROW LEVEL SECURITY; GRANT ALL ON blog_posts TO PUBLIC;');
       }
 
-      throw new Error(`Failed to create blog post: ${error.message}`);
-    }
-
-    if (error) {
-      throw new Error(`Failed to create blog post: ${error.message}`);
-    }
-
-    // Create backup for trial posts too
-    if (isTrialPost) {
-      try {
-        await blogPersistenceService.storeWithMaxPersistence(blogPost, 'backup');
-      } catch (backupError) {
-        console.warn('⚠��� Trial post backup failed (non-critical):', backupError);
+      if (error) {
+        throw new Error(`Failed to create blog post: ${error.message}`);
+      } else {
+        throw new Error('Failed to create blog post: No data returned from database');
       }
     }
 
-      return blogPost;
+    console.log('✅ Blog post created successfully');
+
+    // Create backup for trial posts too
+    // Trial posts are created directly - no additional backup needed since they expire
+
+    return blogPost;
     } catch (error: any) {
       console.error('Blog post creation failed:', error);
       throw new Error(`Failed to create blog post: ${error.message || 'Unknown error'}`);
@@ -296,18 +318,29 @@ export class BlogService {
    * Get recent published blog posts
    */
   async getRecentBlogPosts(limit: number = 10): Promise<BlogPost[]> {
-    const { data, error } = await supabase
-      .from('blog_posts')
-      .select('*')
-      .eq('status', 'published')
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+        .limit(limit);
 
-    if (error) {
-      throw new Error(`Failed to fetch recent blog posts: ${error.message}`);
+      if (error) {
+        // Handle third-party interference gracefully
+        if (error.message?.includes('Third-party script interference')) {
+          console.warn('⚠️ Third-party interference detected in getRecentBlogPosts, returning empty array');
+          return [];
+        }
+        throw new Error(`Failed to fetch recent blog posts: ${error.message}`);
+      }
+
+      return data || [];
+    } catch (networkError: any) {
+      console.warn('⚠️ Network error in getRecentBlogPosts:', networkError.message);
+      // Return empty array instead of throwing to prevent cascade failures
+      return [];
     }
-
-    return data || [];
   }
 
   /**
@@ -460,27 +493,38 @@ export class BlogService {
     totalViews: number;
     trialPosts: number;
   }> {
-    let query = supabase.from('blog_posts').select('status, view_count, is_trial_post');
-    
-    if (userId) {
-      query = query.eq('user_id', userId);
+    try {
+      let query = supabase.from('blog_posts').select('status, view_count, is_trial_post');
+
+      if (userId) {
+        query = query.eq('user_id', userId);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        // Handle third-party interference gracefully
+        if (error.message?.includes('Third-party script interference')) {
+          console.warn('⚠️ Third-party interference detected in getBlogPostStats, returning default stats');
+          return { total: 0, published: 0, drafts: 0, totalViews: 0, trialPosts: 0 };
+        }
+        throw new Error(`Failed to fetch blog post stats: ${error.message}`);
+      }
+
+      const stats = {
+        total: data?.length || 0,
+        published: data?.filter(p => p.status === 'published').length || 0,
+        drafts: data?.filter(p => p.status === 'draft').length || 0,
+        totalViews: data?.reduce((sum, p) => sum + (p.view_count || 0), 0) || 0,
+        trialPosts: data?.filter(p => p.is_trial_post).length || 0
+      };
+
+      return stats;
+    } catch (networkError: any) {
+      console.warn('⚠️ Network error in getBlogPostStats:', networkError.message);
+      // Return default stats instead of throwing to prevent cascade failures
+      return { total: 0, published: 0, drafts: 0, totalViews: 0, trialPosts: 0 };
     }
-
-    const { data, error } = await query;
-
-    if (error) {
-      throw new Error(`Failed to fetch blog post stats: ${error.message}`);
-    }
-
-    const stats = {
-      total: data?.length || 0,
-      published: data?.filter(p => p.status === 'published').length || 0,
-      drafts: data?.filter(p => p.status === 'draft').length || 0,
-      totalViews: data?.reduce((sum, p) => sum + (p.view_count || 0), 0) || 0,
-      trialPosts: data?.filter(p => p.is_trial_post).length || 0
-    };
-
-    return stats;
   }
 
   /**
