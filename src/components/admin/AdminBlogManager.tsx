@@ -448,7 +448,7 @@ export function AdminBlogManager() {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredPosts.map((post) => (
+              {(Array.isArray(filteredPosts) ? filteredPosts : []).map((post) => (
                 <div
                   key={post.id}
                   className={`border rounded-lg p-4 transition-all hover:shadow-md ${
