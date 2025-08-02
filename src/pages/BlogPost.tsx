@@ -494,59 +494,7 @@ export function BlogPost() {
 
               {/* Actions Section */}
               <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-8 border-b border-gray-100">
-                <div className="flex items-center gap-3">{post.is_trial_post && (
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant="outline"
-                        className={`${isExpiringSoon(post.expires_at) ? 'border-red-500 text-red-600 bg-red-50' : 'border-amber-500 text-amber-600 bg-amber-50'}`}
-                      >
-                        {isExpiringSoon(post.expires_at) ? (
-                          <>
-                            <Timer className="mr-1 h-3 w-3" />
-                            Expiring Soon
-                          </>
-                        ) : (
-                          <>
-                            <Clock className="mr-1 h-3 w-3" />
-                            Unclaimed Post
-                          </>
-                        )}
-                        {post.expires_at && ` • Expires ${formatDate(post.expires_at)}`}
-                      </Badge>
-                      {!post.user_id && (
-                        user ? (
-                          <Button
-                            size="sm"
-                            onClick={claimPost}
-                            disabled={claiming}
-                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white animate-pulse"
-                          >
-                            {claiming ? (
-                              <>
-                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                                Claiming...
-                              </>
-                            ) : (
-                              <>
-                                <Plus className="mr-1 h-3 w-3" />
-                                Save to Dashboard
-                              </>
-                            )}
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            onClick={handleClaimRedirect}
-                            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white animate-pulse"
-                          >
-                            <Plus className="mr-1 h-3 w-3" />
-                            Sign In to Save
-                          </Button>
-                        )
-                      )}
-                    </div>
-                  )}
-
+                <div className="flex items-center gap-3">
                   {post.user_id === user?.id && (
                     <Badge className="bg-green-50 text-green-700 border-green-200">
                       <Crown className="mr-1 h-3 w-3" />
