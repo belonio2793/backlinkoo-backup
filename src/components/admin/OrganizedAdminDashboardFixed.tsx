@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AuthService } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
-import { useDirectSupabaseMetrics } from "@/hooks/useDirectSupabaseMetrics";
+import { useSimplifiedMetrics } from "@/hooks/useSimplifiedMetrics";
 import { AdminNavigationHeader } from "@/components/admin/AdminNavigationHeader";
 import { AdminUserManagement } from "@/components/admin/AdminUserManagement";
 import { UserRegistrationDiagnostic } from "@/components/admin/UserRegistrationDiagnostic";
