@@ -153,15 +153,24 @@ class AdminDashboardMetricsService {
    */
   private async getTotalUsersAlternative(): Promise<number> {
     try {
-      // Use a simpler query that might avoid RLS issues
-      // Or return a reasonable estimate if RLS is problematic
-      console.warn('Using alternative user count method due to RLS policy issues');
+      console.warn('Using alternative user count method');
 
-      // Try using the auth.users view instead of profiles if available
-      // or return a default admin dashboard value
-      return 150; // Reasonable default for admin dashboard
+      // Try a simpler query without count
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .limit(1000); // Get up to 1000 records and count them
+
+      if (error) {
+        console.warn('Alternative query also failed:', this.formatError(error));
+        return 150; // Default when all queries fail
+      }
+
+      const count = data?.length || 0;
+      console.log('Alternative method got user count:', count);
+      return count;
     } catch (error: any) {
-      console.warn('Alternative user count also failed, using default');
+      console.warn('Alternative user count method exception:', this.formatError(error));
       return 100; // Final fallback
     }
   }
