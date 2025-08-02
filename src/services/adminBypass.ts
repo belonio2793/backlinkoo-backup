@@ -33,13 +33,17 @@ export class AdminBypass {
           return data;
         },
         
-        // Approach 2: Use postgres function to get profiles
+        // Approach 2: Use the new RPC function we just created
         async () => {
-          console.log('Approach 2: Postgres function...');
+          console.log('Approach 2: Using get_all_user_profiles RPC...');
           const { data, error } = await supabase
             .rpc('get_all_user_profiles');
-          
-          if (error) throw error;
+
+          if (error) {
+            console.error('RPC error:', error);
+            throw error;
+          }
+          console.log('RPC returned:', data?.length, 'profiles');
           return data;
         },
         
