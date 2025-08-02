@@ -123,40 +123,40 @@ export function AdminSignIn() {
               <p>Password: Admin123!@#</p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full h-11"
                 disabled={loading}
               >
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Signing In...
+                    Authenticating...
                   </>
                 ) : (
                   <>
                     <Shield className="h-4 w-4 mr-2" />
-                    Sign In as Admin
+                    Access Admin Dashboard
                   </>
                 )}
               </Button>
-              
+
               <Button
                 type="button"
                 variant="outline"
-                className="w-full"
+                className="w-full h-11"
                 onClick={handleGoBack}
                 disabled={loading}
               >
-                Go Back to Main Site
+                ← Return to Main Site
               </Button>
             </div>
           </form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>Don't have admin access?</p>
-            <p>Contact your system administrator for access.</p>
+          <div className="mt-6 pt-4 border-t text-center text-xs text-muted-foreground">
+            <p>🔒 Secure admin authentication</p>
+            <p>Need access? Contact the development team.</p>
           </div>
         </CardContent>
       </Card>
