@@ -135,10 +135,18 @@ export class BlogService {
             const finalSlug = `${fallbackSlug}-${Date.now()}`;
             const finalData = { ...cleanBlogPostData, slug: finalSlug };
 
-            const { data: finalPostArray, error: finalError } = await supabase
-              .from('blog_posts')
-              .insert(finalData)
-              .select();
+            let finalResult;
+            try {
+              finalResult = await supabase
+                .from('blog_posts')
+                .insert(finalData)
+                .select();
+            } catch (networkError: any) {
+              console.error('❌ Network error during final retry:', networkError);
+              throw new Error(`Network error on final retry: ${networkError.message || 'Failed to connect to database'}`);
+            }
+
+            const { data: finalPostArray, error: finalError } = finalResult;
 
             const finalPost = finalPostArray?.[0] || null;
 
