@@ -605,13 +605,16 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
   const canClaim = post.is_trial_post && !post.user_id && (!post.expires_at || new Date() <= new Date(post.expires_at));
   const isOwnedByUser = post.user_id === user?.id;
   return (
-    <Card 
-      className="group hover:shadow-2xl transition-all duration-300 cursor-pointer border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:bg-white transform hover:-translate-y-2"
+    <Card
+      className="group hover:shadow-2xl transition-all duration-500 cursor-pointer border-0 shadow-lg bg-white/95 backdrop-blur-sm hover:bg-white transform hover:-translate-y-3 hover:rotate-1 rounded-2xl overflow-hidden"
       onClick={() => navigate(`/blog/${post.slug}`)}
     >
-      <CardHeader className="pb-4 space-y-4">
+      {/* Card Gradient Header */}
+      <div className="h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500"></div>
+
+      <CardHeader className="pb-4 space-y-4 p-6">
         <div className="flex items-start justify-between">
-          <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-md">
+          <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 shadow-sm px-3 py-1.5 font-medium tracking-wide">
             {post.category || 'Expert Content'}
           </Badge>
           <div className="flex items-center gap-2">
@@ -793,7 +796,7 @@ function BlogPostListItem({ post, navigate, formatDate }: any) {
               <div className="flex items-center gap-6 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <User className="h-4 w-4" />
-                  <span>{post.author_name || 'Backlink ��'}</span>
+                  <span>{post.author_name || 'Backlink ∞'}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
