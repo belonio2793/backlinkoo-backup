@@ -31,10 +31,10 @@ export function AdminActivityMonitor() {
   const [logs, setLogs] = useState<AdminAuditLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [actionFilter, setActionFilter] = useState('');
-  const [resourceFilter, setResourceFilter] = useState('');
+  const [actionFilter, setActionFilter] = useState('all');
+  const [resourceFilter, setResourceFilter] = useState('all');
   const [adminFilter, setAdminFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [autoRefresh, setAutoRefresh] = useState(false);
 
   useEffect(() => {
