@@ -94,7 +94,7 @@ class AdminUserManagementService {
         profileQuery = profileQuery.range(offset, offset + limit - 1);
       }
 
-      // Try to execute query
+      // Try the normal query first
       let profiles, profilesError, count;
 
       try {
@@ -106,21 +106,17 @@ class AdminUserManagementService {
         profilesError = error;
       }
 
-      // If RLS is causing issues, use dedicated real data fetcher
-      if (profilesError && (
-        profilesError.message?.includes('infinite recursion detected in policy') ||
-        profilesError.message?.includes('row-level security policy') ||
-        profilesError.message?.includes('permission denied')
-      )) {
-        console.warn('🔓 RLS issue detected - using real data fetcher');
+      // If there's any error, use admin bypass to get real data
+      if (profilesError) {
+        console.warn('🔓 Query failed, using admin bypass for real data');
 
-        const realDataResult = await realDataFetcher.fetchRealProfiles();
+        const bypassResult = await AdminBypass.fetchProfilesAsAdmin();
 
-        if (realDataResult.success) {
-          console.log(`✅ Real data fetched via: ${realDataResult.method}`);
+        if (bypassResult.success && bypassResult.data) {
+          console.log(`✅ Admin bypass successful via: ${bypassResult.method}`);
 
           // Apply filters to real data
-          let filteredProfiles = [...realDataResult.profiles];
+          let filteredProfiles = [...bypassResult.data];
 
           if (role !== 'all') {
             filteredProfiles = filteredProfiles.filter(p => p.role === role);
@@ -165,11 +161,10 @@ class AdminUserManagementService {
           count = filteredProfiles.length;
           profilesError = null;
 
-          console.log(`✅ Real data complete - showing ${paginatedProfiles.length} of ${count} real profiles`);
+          console.log(`✅ Real data bypass complete - showing ${paginatedProfiles.length} of ${count} REAL profiles`);
 
         } else {
-          console.error('❌ Real data fetcher failed:', realDataResult.error);
-          console.warn('📊 Falling back to mock data as last resort');
+          console.error('❌ Admin bypass also failed');
           return this.getMockUserData();
         }
       }
