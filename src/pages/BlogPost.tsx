@@ -525,9 +525,9 @@ export function BlogPost() {
 
 
               {/* Article Content - SEO Optimized */}
-              <div className="prose prose-lg prose-gray max-w-none">
+              <div className="prose prose-lg prose-gray max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-strong:text-gray-900 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:pl-6 prose-blockquote:py-4 prose-blockquote:rounded-r-lg prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-gray-800">
                 <div
-                  className="blog-content"
+                  className="blog-content leading-relaxed text-lg"
                   dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
                 />
               </div>
