@@ -47,11 +47,15 @@ class AdminDashboardMetricsService {
       const monthlyRevenue = monthlyRevenueResult.status === 'fulfilled' ? monthlyRevenueResult.value : 0;
       const runningCampaigns = runningCampaignsResult.status === 'fulfilled' ? runningCampaignsResult.value : 0;
 
-      // Log any failures for debugging
-      [totalUsersResult, activeUsersResult, monthlyRevenueResult, runningCampaignsResult].forEach((result, index) => {
+      // Log any failures for debugging with better error formatting
+      const metricNames = ['Total Users', 'Active Users', 'Monthly Revenue', 'Running Campaigns'];
+      const results = [totalUsersResult, activeUsersResult, monthlyRevenueResult, runningCampaignsResult];
+
+      results.forEach((result, index) => {
         if (result.status === 'rejected') {
-          const metricNames = ['Total Users', 'Active Users', 'Monthly Revenue', 'Running Campaigns'];
-          console.warn(`Failed to fetch ${metricNames[index]}:`, result.reason);
+          const formattedError = this.formatError(result.reason);
+          console.warn(`Failed to fetch ${metricNames[index]}:`, formattedError);
+          console.debug(`Raw error for ${metricNames[index]}:`, result.reason);
         }
       });
 
