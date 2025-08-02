@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useSystemConfig } from "@/hooks/useSystemConfig";
-import { 
-  Settings, 
-  RefreshCw, 
-  CheckCircle, 
-  AlertCircle, 
-  Clock, 
+import { NetlifyFunctionTester } from "@/components/admin/NetlifyFunctionTester";
+import {
+  Settings,
+  RefreshCw,
+  CheckCircle,
+  AlertCircle,
+  Clock,
   Key,
   Brain,
   TestTube
