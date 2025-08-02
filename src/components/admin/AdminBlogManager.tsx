@@ -7,10 +7,11 @@ import { useToast } from '@/hooks/use-toast';
 import { publishedBlogService, type PublishedBlogPost } from '@/services/publishedBlogService';
 import { contentFilterService } from '@/services/contentFilterService';
 import { contentModerationService } from '@/services/contentModerationService';
-import { 
-  Calendar, 
-  Clock, 
-  Eye, 
+import { adminAuditLogger } from '@/services/adminAuditLogger';
+import {
+  Calendar,
+  Clock,
+  Eye,
   ExternalLink,
   Search,
   Trash2,
