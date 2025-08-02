@@ -49,7 +49,8 @@ export function AdminBlogManager() {
       const posts = await publishedBlogService.getRecentBlogPosts(100);
 
       console.log('📖 AdminBlogManager: Loaded posts:', posts);
-      setBlogPosts(posts);
+      // Ensure posts is always an array to prevent undefined errors
+      setBlogPosts(Array.isArray(posts) ? posts : []);
     } catch (error) {
       console.error('Failed to load blog posts:', error);
       toast({
