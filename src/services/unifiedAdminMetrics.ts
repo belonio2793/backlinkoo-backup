@@ -138,59 +138,105 @@ class UnifiedAdminMetricsService {
     console.log('👥 Fetching user metrics...');
 
     try {
-      // Use the working admin service that handles RLS properly
-      const { realAdminUserService } = await import('@/services/realAdminUserService');
+      console.log('👥 Attempting to fetch user metrics for admin dashboard...');
 
-      // Since we're already on the admin dashboard, bypass the auth check
-      // by using the getAllProfiles method directly which has better error handling
-      const profiles = await realAdminUserService.getAllProfiles(true);
+      // Method 1: Try direct Supabase queries first (most reliable)
+      try {
+        // Get profile count
+        const { count: profileCount, error: profileError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
 
-      // Get subscription data for premium status
-      const { data: subscribers } = await supabase
-        .from('subscribers')
-        .select('user_id, subscribed, subscription_tier')
-        .eq('subscribed', true)
-        .limit(1000);
+        if (profileError) {
+          console.warn('Profiles table query failed:', profileError.message);
+          throw profileError;
+        }
 
-      // Map subscription data
-      const subscriberMap = new Map();
-      subscribers?.forEach(sub => {
-        subscriberMap.set(sub.user_id, sub);
-      });
+        // Get subscriber count
+        const { count: subscriberCount, error: subscriberError } = await supabase
+          .from('subscribers')
+          .select('*', { count: 'exact', head: true })
+          .eq('subscribed', true);
 
-      // Create enhanced user details
-      const users = profiles.map(profile => ({
-        ...profile,
-        isPremium: subscriberMap.has(profile.user_id),
-        isGifted: false, // We'll determine this later if needed
-      }));
+        if (subscriberError) {
+          console.warn('Subscribers table query failed:', subscriberError.message);
+        }
 
-      const result = {
-        users,
-        totalCount: profiles.length,
-        hasMore: false
-      };
+        // Get recent signups using a date filter
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-      const users = result.users;
-      const totalUsers = result.totalCount;
-      const activeUsers = users.filter(u => u.isPremium).length;
-      const adminUsers = users.filter(u => u.role === 'admin').length;
+        const { count: recentCount, error: recentError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', sevenDaysAgo.toISOString());
 
-      // Recent signups (last 7 days)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const recentSignups = users.filter(u =>
-        new Date(u.created_at) > sevenDaysAgo
-      ).length;
+        if (recentError) {
+          console.warn('Recent signups query failed:', recentError.message);
+        }
 
-      console.log(`✅ User metrics: ${totalUsers} total, ${activeUsers} premium, ${adminUsers} admin, ${recentSignups} recent`);
+        // Get admin count
+        const { count: adminCount, error: adminError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('role', 'admin');
 
-      return {
-        totalUsers,
-        activeUsers,
-        recentSignups,
-        adminUsers
-      };
+        if (adminError) {
+          console.warn('Admin count query failed:', adminError.message);
+        }
+
+        console.log('✅ Direct queries successful');
+
+        return {
+          totalUsers: profileCount || 0,
+          activeUsers: subscriberCount || 0,
+          recentSignups: recentCount || 0,
+          adminUsers: adminCount || 0
+        };
+
+      } catch (directError) {
+        console.warn('⚠️ Direct queries failed, trying admin service...', directError);
+
+        // Method 2: Try the admin service as fallback
+        try {
+          const { realAdminUserService } = await import('@/services/realAdminUserService');
+          const profiles = await realAdminUserService.getAllProfiles(true);
+
+          // Get subscription data
+          const { data: subscribers } = await supabase
+            .from('subscribers')
+            .select('user_id, subscribed')
+            .eq('subscribed', true);
+
+          const subscriberIds = new Set(subscribers?.map(s => s.user_id) || []);
+
+          const totalUsers = profiles.length;
+          const activeUsers = profiles.filter(p => subscriberIds.has(p.user_id)).length;
+          const adminUsers = profiles.filter(p => p.role === 'admin').length;
+
+          // Recent signups
+          const sevenDaysAgo = new Date();
+          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+          const recentSignups = profiles.filter(p =>
+            new Date(p.created_at) > sevenDaysAgo
+          ).length;
+
+          console.log('✅ Admin service fallback successful');
+
+          return {
+            totalUsers,
+            activeUsers,
+            recentSignups,
+            adminUsers
+          };
+
+        } catch (serviceError) {
+          console.error('❌ Admin service also failed:', serviceError);
+          throw serviceError;
+        }
+      }
+
+
 
     } catch (serviceError) {
       console.warn('⚠️ Admin service failed, trying direct queries...', serviceError);
