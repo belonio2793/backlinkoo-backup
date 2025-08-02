@@ -59,10 +59,22 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
       if (!user) {
         console.warn('🔧 ProfileSettings: No user provided, setting loading to false');
         setIsLoading(false);
+        setPremiumLoading(false);
         return;
       }
 
       console.log('🔧 ProfileSettings: Starting profile fetch for user:', user.id);
+
+      // Fetch premium status in parallel
+      PremiumService.checkPremiumStatus(user.id)
+        .then(status => {
+          setIsPremium(status);
+          setPremiumLoading(false);
+        })
+        .catch(() => {
+          setIsPremium(false);
+          setPremiumLoading(false);
+        });
 
       try {
         // Try to fetch from database with longer timeout
