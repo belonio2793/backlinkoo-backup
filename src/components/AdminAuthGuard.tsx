@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { AdminAuthService } from '@/services/adminAuthService';
-import { AdminLogin } from '@/components/AdminLogin';
+import { supabase } from '@/integrations/supabase/client';
+import { AdminSignIn } from '@/components/AdminSignIn';
 import { Loader2 } from 'lucide-react';
 
 interface AdminAuthGuardProps {
@@ -9,55 +9,74 @@ interface AdminAuthGuardProps {
 
 export const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check admin authentication status
-    const checkAdminAuth = () => {
-      const authenticated = AdminAuthService.isAdminAuthenticated();
-      setIsAuthenticated(authenticated);
+    checkAuthStatus();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔄 Admin auth state changed:', event);
+      checkAuthStatus();
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const checkAuthStatus = async () => {
+    setIsLoading(true);
+
+    // Set a hard timeout - if this takes more than 3 seconds, something is wrong
+    const timeoutId = setTimeout(() => {
+      console.warn('Auth check timed out - showing sign in form');
       setIsLoading(false);
-      
-      if (authenticated) {
-        // Extend session to keep it active
-        AdminAuthService.extendAdminSession();
-      }
-    };
+      setIsAuthenticated(false);
+      setIsAdmin(false);
+    }, 3000);
 
-    checkAdminAuth();
+    try {
+      // Quick auth check
+      const { data: { user }, error } = await supabase.auth.getUser();
 
-    // Set up periodic session check (every 5 minutes)
-    const interval = setInterval(() => {
-      const authenticated = AdminAuthService.isAdminAuthenticated();
-      if (!authenticated && isAuthenticated) {
-        // Session expired
+      if (error || !user) {
+        clearTimeout(timeoutId);
         setIsAuthenticated(false);
-      } else if (authenticated) {
-        // Extend session
-        AdminAuthService.extendAdminSession();
+        setIsAdmin(false);
+        setIsLoading(false);
+        return;
       }
-    }, 5 * 60 * 1000); // 5 minutes
 
-    return () => clearInterval(interval);
-  }, [isAuthenticated]);
+      setIsAuthenticated(true);
 
-  const handleAuthenticated = () => {
-    setIsAuthenticated(true);
+      // Skip profile check entirely if it's problematic
+      // Just allow sign-in and let the actual sign-in process handle admin check
+      clearTimeout(timeoutId);
+      setIsAdmin(false); // Will show sign-in form
+      setIsLoading(false);
+
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      clearTimeout(timeoutId);
+      setIsAuthenticated(false);
+      setIsAdmin(false);
+      setIsLoading(false);
+    }
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span>Checking admin access...</span>
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="text-muted-foreground">Verifying admin credentials...</span>
         </div>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return <AdminLogin onAuthenticated={handleAuthenticated} />;
+  if (!isAuthenticated || !isAdmin) {
+    return <AdminSignIn />;
   }
 
   return <>{children}</>;

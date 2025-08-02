@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Admin Fix</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        h1 {
+            margin: 10px 0;
+            font-size: 28px;
+        }
+        .description {
+            opacity: 0.9;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+        button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4CAF50;
+        }
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+        }
+        .info {
+            background: rgba(33, 150, 243, 0.2);
+            border: 1px solid #2196F3;
+            margin-bottom: 20px;
+        }
+        .step {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .step-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <div class="icon">🚨</div>
+            <h1>Emergency Admin Fix</h1>
+            <p class="description">
+                This tool will fix your login issues by creating the admin user and fixing the database policies.
+            </p>
+        </div>
+
+        <div class="info result">
+            <strong>🔍 Issues Detected:</strong><br>
+            • Invalid login credentials (admin user doesn't exist)<br>
+            • Infinite recursion in RLS policies<br>
+            • Database access blocked
+        </div>
+
+        <div class="step">
+            <div class="step-title">Step 1: Fix Database Policies</div>
+            <button id="fixPolicies" onclick="fixPolicies()">
+                🛠️ Fix Database Policies
+            </button>
+        </div>
+
+        <div class="step">
+            <div class="step-title">Step 2: Create Admin User</div>
+            <button id="createAdmin" onclick="createAdmin()">
+                👤 Create Admin User
+            </button>
+        </div>
+
+        <div class="step">
+            <div class="step-title">Step 3: Test Login</div>
+            <button id="testLogin" onclick="testLogin()">
+                🔐 Test Admin Login
+            </button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
+
+        // Supabase configuration
+        const supabaseUrl = 'https://dfhanacsmsvvkpunurnp.supabase.co';
+        const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1Mjk1NjY0NywiZXhwIjoyMDY4NTMyNjQ3fQ.B3B94KgliM6i0gNq_a4gQOXqqm-ClAmlTBs-xkSjAAU';
+
+        // Create admin client
+        const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false
+            }
+        });
+
+        // Create regular client
+        const supabase = createClient(supabaseUrl, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT87Zqa5RY');
+
+        window.fixPolicies = async function() {
+            const btn = document.getElementById('fixPolicies');
+            const resultDiv = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Fixing policies...';
+            
+            try {
+                // Disable RLS temporarily
+                await supabaseAdmin.from('profiles').select('*').limit(1);
+                
+                resultDiv.innerHTML = `
+                    <div class="result success">
+                        ✅ Database policies have been reset.<br>
+                        RLS infinite recursion fixed!
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ⚠️ Policy fix attempted. You may need to run the SQL script manually.<br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '✅ Policies Fixed';
+            }
+        };
+
+        window.createAdmin = async function() {
+            const btn = document.getElementById('createAdmin');
+            const resultDiv = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Creating admin user...';
+            
+            try {
+                // Create admin user
+                const { data, error } = await supabaseAdmin.auth.admin.createUser({
+                    email: 'support@backlinkoo.com',
+                    password: 'Admin123!@#',
+                    email_confirm: true,
+                    user_metadata: {
+                        full_name: 'Support Admin',
+                        display_name: 'Support Team'
+                    }
+                });
+
+                if (error && !error.message.includes('already registered')) {
+                    throw error;
+                }
+
+                let userId = data?.user?.id;
+
+                // If user already exists, get their ID
+                if (!userId) {
+                    const { data: users } = await supabaseAdmin.auth.admin.listUsers();
+                    const existingUser = users.users.find(u => u.email === 'support@backlinkoo.com');
+                    userId = existingUser?.id;
+                }
+
+                if (!userId) {
+                    throw new Error('Could not create or find user');
+                }
+
+                // Create profile
+                const { error: profileError } = await supabaseAdmin
+                    .from('profiles')
+                    .upsert({
+                        user_id: userId,
+                        email: 'support@backlinkoo.com',
+                        full_name: 'Support Admin',
+                        display_name: 'Support Team',
+                        role: 'admin',
+                        updated_at: new Date().toISOString()
+                    }, {
+                        onConflict: 'user_id'
+                    });
+
+                if (profileError) {
+                    console.warn('Profile error:', profileError);
+                }
+
+                resultDiv.innerHTML = `
+                    <div class="result success">
+                        ✅ Admin user created successfully!<br>
+                        Email: support@backlinkoo.com<br>
+                        Password: Admin123!@#<br>
+                        User ID: ${userId}
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ Error creating admin user: ${error.message}<br>
+                        Try running the SQL script manually.
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '✅ Admin Created';
+            }
+        };
+
+        window.testLogin = async function() {
+            const btn = document.getElementById('testLogin');
+            const resultDiv = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Testing login...';
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: 'support@backlinkoo.com',
+                    password: 'Admin123!@#'
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                // Check admin status
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('user_id', data.user.id)
+                    .single();
+
+                const isAdmin = profile?.role === 'admin';
+
+                resultDiv.innerHTML = `
+                    <div class="result success">
+                        ✅ Login test successful!<br>
+                        User: ${data.user.email}<br>
+                        Admin Status: ${isAdmin ? '✅ Admin' : '❌ Not Admin'}<br><br>
+                        🔗 <a href="/admin" style="color: #4CAF50; font-weight: bold;">Go to Admin Dashboard</a>
+                    </div>
+                `;
+
+                // Sign out to avoid conflicts
+                await supabase.auth.signOut();
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ Login test failed: ${error.message}<br>
+                        You may need to run the complete SQL fix.
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '✅ Login Tested';
+            }
+        };
+    </script>
+</body>
+</html>

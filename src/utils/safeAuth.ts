@@ -45,28 +45,36 @@ export class SafeAuth {
   static async isAdmin(): Promise<{ isAdmin: boolean; needsAuth: boolean; error?: string }> {
     try {
       const userResult = await this.getCurrentUser();
-      
+
       if (userResult.needsAuth || !userResult.user) {
         return { isAdmin: false, needsAuth: true };
       }
-      
+
+      // Check user role normally
+
       // Check user role in profiles table
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
         .eq('user_id', userResult.user.id)
         .single();
-      
+
       if (profileError) {
         console.error('❌ Profile check error:', profileError);
+
+        // Return error for failed profile check
+
         return { isAdmin: false, needsAuth: false, error: profileError.message };
       }
-      
+
       const isAdmin = profile?.role === 'admin';
       return { isAdmin, needsAuth: false };
-      
+
     } catch (error: any) {
       console.error('❌ Admin check failed:', error);
+
+      // Return the error without emergency bypass
+
       return { isAdmin: false, needsAuth: true, error: error.message };
     }
   }

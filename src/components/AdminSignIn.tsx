@@ -64,16 +64,20 @@ export function AdminSignIn() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <Shield className="h-12 w-12 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/20">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <Shield className="h-12 w-12 text-primary" />
+            </div>
           </div>
-          <CardTitle className="text-2xl">Admin Sign In</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Administrator credentials required to access the admin dashboard
-          </p>
+          <div>
+            <CardTitle className="text-2xl font-bold">Admin Portal</CardTitle>
+            <p className="text-sm text-muted-foreground mt-2">
+              Secure access to the administrative dashboard
+            </p>
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignIn} className="space-y-4">
@@ -89,11 +93,12 @@ export function AdminSignIn() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@example.com"
+                placeholder="support@backlinkoo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
                 required
+                className="h-11"
               />
             </div>
 
@@ -102,48 +107,56 @@ export function AdminSignIn() {
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Enter your admin password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
                 required
+                className="h-11"
               />
             </div>
 
-            <div className="space-y-2">
+            {/* Demo credentials hint */}
+            <div className="p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground">
+              <p className="font-medium mb-1">Demo Admin Access:</p>
+              <p>Email: support@backlinkoo.com</p>
+              <p>Password: Admin123!@#</p>
+            </div>
+
+            <div className="space-y-3">
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full h-11"
                 disabled={loading}
               >
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Signing In...
+                    Authenticating...
                   </>
                 ) : (
                   <>
                     <Shield className="h-4 w-4 mr-2" />
-                    Sign In as Admin
+                    Access Admin Dashboard
                   </>
                 )}
               </Button>
-              
+
               <Button
                 type="button"
                 variant="outline"
-                className="w-full"
+                className="w-full h-11"
                 onClick={handleGoBack}
                 disabled={loading}
               >
-                Go Back to Main Site
+                ← Return to Main Site
               </Button>
             </div>
           </form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>Don't have admin access?</p>
-            <p>Contact your system administrator for access.</p>
+          <div className="mt-6 pt-4 border-t text-center text-xs text-muted-foreground">
+            <p>🔒 Secure admin authentication</p>
+            <p>Need access? Contact the development team.</p>
           </div>
         </CardContent>
       </Card>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Login</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; text-align: center; }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover { background: #1d4ed8; }
+        button:disabled { background: #9ca3af; cursor: not-allowed; }
+        .result {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .success { background: #dcfce7; border: 1px solid #22c55e; color: #15803d; }
+        .error { background: #fef2f2; border: 1px solid #ef4444; color: #dc2626; }
+        .info { background: #dbeafe; border: 1px solid #3b82f6; color: #1d4ed8; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🧪 Test Admin Login</h1>
+        <p>Use this to test if the infinite recursion is fixed and admin login works.</p>
+
+        <button onclick="testProfilesQuery()">Test 1: Check Profiles Query</button>
+        <button onclick="testAdminLogin()">Test 2: Test Admin Login</button>
+        <button onclick="goToAdminPage()">Test 3: Go to Admin Page</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
+
+        const supabase = createClient(
+            'https://dfhanacsmsvvkpunurnp.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT87Zqa5RY'
+        );
+
+        window.testProfilesQuery = async function() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="info">🔄 Testing profiles query for infinite recursion...</div>';
+
+            try {
+                // Set a timeout to catch infinite recursion
+                const queryPromise = supabase.from('profiles').select('count(*)', { count: 'exact' });
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Query timed out - likely infinite recursion')), 5000)
+                );
+
+                const result = await Promise.race([queryPromise, timeoutPromise]);
+
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ SUCCESS: Profiles query completed without infinite recursion!<br>
+                        Query result: ${JSON.stringify(result.count)} profiles found
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ FAILED: ${error.message}<br>
+                        ${error.message.includes('timeout') ? 'Still experiencing infinite recursion.' : 'Other database error.'}
+                    </div>
+                `;
+            }
+        };
+
+        window.testAdminLogin = async function() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="info">🔐 Testing admin login...</div>';
+
+            try {
+                // Test admin login
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: 'support@backlinkoo.com',
+                    password: 'Admin123!@#'
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                // Check admin role
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('user_id', data.user.id)
+                    .single();
+
+                if (profileError) {
+                    throw new Error(`Profile check failed: ${profileError.message}`);
+                }
+
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ SUCCESS: Admin login works!<br>
+                        User: ${data.user.email}<br>
+                        Role: ${profile.role}<br>
+                        Ready for admin dashboard access!
+                    </div>
+                `;
+
+                // Sign out to avoid conflicts
+                await supabase.auth.signOut();
+
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ FAILED: ${error.message}
+                    </div>
+                `;
+            }
+        };
+
+        window.goToAdminPage = function() {
+            window.location.href = '/admin';
+        };
+    </script>
+</body>
+</html>
