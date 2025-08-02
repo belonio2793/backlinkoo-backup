@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,10 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AuthService } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminDashboardMetrics } from "@/hooks/useAdminDashboardMetrics";
+import { AdminNavigationHeader } from "@/components/admin/AdminNavigationHeader";
+import { AdminUserManagement } from "@/components/admin/AdminUserManagement";
+import { supabase } from '@/integrations/supabase/client';
 
 // Admin Components
 import { SecurityDashboard } from "@/components/SecurityDashboard";
@@ -54,26 +58,41 @@ import {
   Globe,
   Code,
   BarChart3,
-  MonitorSpeaker
+  MonitorSpeaker,
+  RefreshCw,
+  AlertCircle,
+  Target
 } from "lucide-react";
-
-interface AdminStats {
-  totalUsers: number;
-  activeUsers: number;
-  monthlyRevenue: number;
-  pendingClaims: number;
-}
 
 export function OrganizedAdminDashboard() {
   const { toast } = useToast();
-  const [stats] = useState<AdminStats>({
-    totalUsers: 1247,
-    activeUsers: 892,
-    monthlyRevenue: 12450,
-    pendingClaims: 23
-  });
+  const { metrics, loading, error, refetch } = useAdminDashboardMetrics();
+  const [activeSection, setActiveSection] = useState("overview");
+  const [adminEmail, setAdminEmail] = useState<string | undefined>();
 
-  const [activeCategory, setActiveCategory] = useState("overview");
+  // Get admin user info
+  useEffect(() => {
+    const getAdminInfo = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email) {
+          setAdminEmail(user.email);
+        }
+      } catch (error) {
+        console.warn('Could not get admin user info:', error);
+      }
+    };
+    
+    getAdminInfo();
+  }, []);
+
+  const handleRefreshMetrics = async () => {
+    await refetch();
+    toast({
+      title: "Metrics Refreshed",
+      description: "Dashboard metrics have been updated with the latest data."
+    });
+  };
 
   const handleSignOut = () => {
     // Navigate immediately for instant UX
@@ -87,145 +106,133 @@ export function OrganizedAdminDashboard() {
     }, 0);
   };
 
-  const categories = [
-    {
-      id: "overview",
-      name: "Overview",
-      icon: BarChart3,
-      description: "System status & health"
-    },
-    {
-      id: "content",
-      name: "Content",
-      icon: FileText,
-      description: "Posts, AI content & moderation"
-    },
-    {
-      id: "system",
-      name: "System",
-      icon: Server,
-      description: "APIs, deployment & infrastructure"
-    },
-    {
-      id: "communications",
-      name: "Communications",
-      icon: Mail,
-      description: "Email systems & campaigns"
-    },
-    {
-      id: "business",
-      name: "Business",
-      icon: Users,
-      description: "Affiliates & user management"
-    },
-    {
-      id: "security",
-      name: "Security",
-      icon: Shield,
-      description: "Security settings & monitoring"
-    }
-  ];
-
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage your backlink service platform</p>
-        </div>
-        <Button variant="outline" onClick={handleSignOut}>
-          <LogOut className="h-4 w-4 mr-2" />
-          Sign Out
-        </Button>
-      </div>
-
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers}</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.activeUsers}</div>
-            <p className="text-xs text-muted-foreground">+15.3% from last month</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
-            <CreditCard className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-success">${stats.monthlyRevenue}</div>
-            <p className="text-xs text-muted-foreground">+8.2% from last month</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Claims</CardTitle>
-            <Clock className="h-4 w-4 text-warning" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-warning">{stats.pendingClaims}</div>
-            <p className="text-xs text-muted-foreground">Requires attention</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Category Navigation */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Administration Categories
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {categories.map((category) => {
-              const IconComponent = category.icon;
-              return (
-                <Button
-                  key={category.id}
-                  variant={activeCategory === category.id ? "default" : "outline"}
-                  className="h-auto p-3 flex flex-col items-center gap-2 min-h-[80px] relative group"
-                  onClick={() => setActiveCategory(category.id)}
-                >
-                  <IconComponent className="h-5 w-5 shrink-0" />
-                  <div className="text-center w-full">
-                    <div className="font-medium text-sm leading-tight">{category.name}</div>
-                  </div>
-
-                  {/* Tooltip for description on hover */}
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10 whitespace-nowrap hidden lg:block">
-                    {category.description}
-                  </div>
-                </Button>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Category Content */}
-      <div className="space-y-6">
-        {activeCategory === "overview" && (
+    <div className="min-h-screen bg-background">
+      {/* Navigation Header */}
+      <AdminNavigationHeader 
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        adminEmail={adminEmail}
+      />
+      
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        {/* Section Content */}
+        {activeSection === "overview" && (
           <div className="space-y-6">
+            {/* Stats Overview */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Key Metrics</h2>
+                <div className="flex items-center gap-2">
+                  {error && (
+                    <Alert className="max-w-md">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{error.message}</AlertDescription>
+                    </Alert>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRefreshMetrics}
+                    disabled={loading}
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {loading ? (
+                        <div className="h-8 bg-muted animate-pulse rounded" />
+                      ) : (
+                        metrics?.totalUsers || 0
+                      )}
+                    </div>
+                    {loading ? (
+                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
+                    ) : (
+                      <p className="text-xs text-muted-foreground">All registered users</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Active Subscribers</CardTitle>
+                    <Activity className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {loading ? (
+                        <div className="h-8 bg-muted animate-pulse rounded" />
+                      ) : (
+                        metrics?.activeUsers || 0
+                      )}
+                    </div>
+                    {loading ? (
+                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Currently subscribed</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
+                    <CreditCard className="h-4 w-4 text-success" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-success">
+                      {loading ? (
+                        <div className="h-8 bg-muted animate-pulse rounded" />
+                      ) : (
+                        `$${metrics?.monthlyRevenue?.toFixed(2) || '0.00'}`
+                      )}
+                    </div>
+                    {loading ? (
+                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        {metrics?.monthlyRevenueChange !== undefined
+                          ? `${metrics.monthlyRevenueChange >= 0 ? '+' : ''}${metrics.monthlyRevenueChange.toFixed(1)}% from last month`
+                          : "Current month total"}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Running Campaigns</CardTitle>
+                    <Target className="h-4 w-4 text-blue-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-blue-600">
+                      {loading ? (
+                        <div className="h-8 bg-muted animate-pulse rounded" />
+                      ) : (
+                        metrics?.runningCampaigns || 0
+                      )}
+                    </div>
+                    {loading ? (
+                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Active credit campaigns</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
             {/* Streamlined System Status */}
             <Card>
               <CardHeader>
@@ -244,7 +251,11 @@ export function OrganizedAdminDashboard() {
           </div>
         )}
 
-        {activeCategory === "content" && (
+        {activeSection === "users" && (
+          <AdminUserManagement />
+        )}
+
+        {activeSection === "content" && (
           <Tabs defaultValue="blog-posts" className="space-y-6">
             <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="blog-posts">Blog Posts</TabsTrigger>
@@ -284,7 +295,7 @@ export function OrganizedAdminDashboard() {
           </Tabs>
         )}
 
-        {activeCategory === "system" && (
+        {activeSection === "system" && (
           <Tabs defaultValue="assessment" className="space-y-6">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="assessment">Systems Assessment</TabsTrigger>
@@ -322,7 +333,7 @@ export function OrganizedAdminDashboard() {
           </Tabs>
         )}
 
-        {activeCategory === "communications" && (
+        {activeSection === "communications" && (
           <Tabs defaultValue="email-system" className="space-y-6">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="email-system">Email System</TabsTrigger>
@@ -354,10 +365,7 @@ export function OrganizedAdminDashboard() {
           </Tabs>
         )}
 
-        {activeCategory === "business" && (
-          <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="users">User Management</TabsTrigger>
+main
               <TabsTrigger value="affiliates">Affiliate Program</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
@@ -386,7 +394,7 @@ export function OrganizedAdminDashboard() {
           </Tabs>
         )}
 
-        {activeCategory === "security" && (
+        {activeSection === "security" && (
           <div className="space-y-6">
             <SecurityDashboard />
           </div>

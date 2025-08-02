@@ -102,7 +102,7 @@ export function NetlifyEnvironmentManager() {
           if (serverSideAPIStatus?.providers?.OpenAI) {
             configured = serverSideAPIStatus.providers.OpenAI.configured;
             if (configured) {
-              value = 'sk-***configured***'; // Placeholder to show it's configured
+              value = 'sk-***CONFIGURED***'; // Masked for security
             }
           } else {
             // Fallback to client-side check (won't work in production due to Vite)

@@ -152,12 +152,28 @@ export function APIManagementDashboard() {
       });
     }
 
-    // Mock other services for demo
-    setTimeout(() => {
-      updateServiceStatus('Database', { status: 'connected', message: 'Database operational', responseTime: 45 });
-      updateServiceStatus('Email', { status: 'connected', message: 'Email service ready', responseTime: 120 });
-      updateServiceStatus('Functions', { status: 'connected', message: 'Functions deployed', responseTime: 80 });
-    }, 1000);
+    // Test database connection
+    try {
+      const startTime = Date.now();
+      const { error: dbError } = await supabase.from('blog_posts').select('id').limit(1);
+      const responseTime = Date.now() - startTime;
+
+      updateServiceStatus('Database', {
+        status: dbError ? 'error' : 'connected',
+        message: dbError ? `Database error: ${dbError.message}` : 'Database operational',
+        responseTime
+      });
+    } catch (error) {
+      updateServiceStatus('Database', {
+        status: 'error',
+        message: 'Database connection failed',
+        responseTime: 0
+      });
+    }
+
+    // Note: Email and Functions status should be checked by their respective services
+    updateServiceStatus('Email', { status: 'pending', message: 'Email service status check not implemented' });
+    updateServiceStatus('Functions', { status: 'pending', message: 'Functions status check not implemented' });
   };
 
   const updateServiceStatus = (serviceName: string, updates: Partial<ServiceConnection>) => {
