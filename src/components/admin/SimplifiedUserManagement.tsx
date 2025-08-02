@@ -400,22 +400,37 @@ export function SimplifiedUserManagement() {
                       <TableCell>
                         <div>
                           <div className="font-medium">
-                            {user.display_name || user.email || 'Unknown User'}
+                            {user.display_name || user.email?.split('@')[0] || 'Unknown User'}
                           </div>
-                          {user.email && user.display_name && (
-                            <div className="text-sm text-muted-foreground">
-                              {user.email}
+                          <div className="text-sm text-muted-foreground">
+                            {user.email}
+                          </div>
+                          {user.subscription_status && (
+                            <div className="text-xs text-blue-600 mt-1">
+                              Tier: {user.subscription_status}
                             </div>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        {getRoleBadge(user)}
+                        <div className="space-y-1">
+                          {getRoleBadge(user)}
+                          <div>
+                            <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'} className="text-xs">
+                              {user.role.toUpperCase()}
+                            </Badge>
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'}>
-                          {user.role}
-                        </Badge>
+                        <div className="space-y-1">
+                          <Badge variant={user.is_premium ? 'default' : 'outline'} className="text-xs">
+                            {user.subscription_status || 'Unknown'}
+                          </Badge>
+                          <div className="text-xs text-muted-foreground">
+                            {user.is_premium ? 'Premium User' : 'Free/Basic User'}
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
