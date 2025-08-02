@@ -132,7 +132,22 @@ export function SimpleAdminPage() {
 
     } catch (error: any) {
       console.error('❌ Sign in failed:', error);
-      setError(error.message || 'Sign in failed');
+
+      // If it's invalid credentials, automatically try to create the admin user
+      if (error.message?.includes('Invalid login credentials') && email === 'support@backlinkoo.com') {
+        console.log('🔧 Invalid credentials - attempting to create admin user automatically...');
+        setError('Admin user not found. Creating admin user automatically...');
+
+        try {
+          await createAdminUser();
+          // After creating, try to sign in again
+          setError('Admin user created! Please try signing in again.');
+        } catch (createError) {
+          setError('Failed to create admin user. Please use the "Create Admin User" button below.');
+        }
+      } else {
+        setError(error.message || 'Sign in failed');
+      }
     } finally {
       setLoading(false);
     }
