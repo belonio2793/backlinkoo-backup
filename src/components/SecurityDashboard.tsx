@@ -42,8 +42,8 @@ export function SecurityDashboard() {
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [selectedRole, setSelectedRole] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [actionFilter, setActionFilter] = useState<string>('');
-  const [resourceFilter, setResourceFilter] = useState<string>('');
+  const [actionFilter, setActionFilter] = useState<string>('all');
+  const [resourceFilter, setResourceFilter] = useState<string>('all');
   const [activeTab, setActiveTab] = useState('overview');
   const { toast } = useToast();
 
