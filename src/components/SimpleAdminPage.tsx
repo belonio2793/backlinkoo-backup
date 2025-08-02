@@ -22,7 +22,7 @@ export function SimpleAdminPage() {
 
     try {
       // Instant admin bypass - no database calls needed
-      if (email.trim() === 'support@backlinkoo.com' && password === 'Admin123!@#') {
+      if (email.trim() === 'support@backlinkoo.com' && password === 'password') {
         setIsLoggedIn(true);
         setLoading(false);
         return;
