@@ -63,74 +63,47 @@ class AdminUserCreationService {
         };
       }
       
-      console.log('✅ Email validation passed, creating auth user...');
-      
-      // Create the auth user
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: payload.email.toLowerCase().trim(),
-        password: payload.password,
-        email_confirm: payload.auto_confirm || true,
-        user_metadata: {
-          display_name: payload.display_name || null
-        }
+      console.log('✅ Email validation passed, creating user via admin function...');
+
+      // Use Netlify function for user creation (requires service role key)
+      const response = await fetch('/.netlify/functions/create-admin-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: payload.email.toLowerCase().trim(),
+          password: payload.password,
+          display_name: payload.display_name || null,
+          role: payload.role || 'user',
+          auto_confirm: payload.auto_confirm || true
+        })
       });
-      
-      if (authError) {
-        console.error('❌ Auth user creation failed:', authError);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('❌ Admin function failed:', errorData);
         return {
           success: false,
-          error: `Failed to create auth user: ${authError.message}`
+          error: errorData.error || `HTTP ${response.status}: ${response.statusText}`
         };
       }
-      
-      if (!authData.user) {
+
+      const result = await response.json();
+
+      if (!result.success) {
         return {
           success: false,
-          error: 'Auth user creation returned no user data'
+          error: result.error || 'User creation failed'
         };
       }
-      
-      console.log('✅ Auth user created:', authData.user.id);
-      
-      // Create the profile
-      const profileData = {
-        user_id: authData.user.id,
-        email: payload.email.toLowerCase().trim(),
-        display_name: payload.display_name || null,
-        role: payload.role || 'user',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .insert(profileData)
-        .select()
-        .single();
-      
-      if (profileError) {
-        console.error('❌ Profile creation failed:', profileError);
-        
-        // Try to clean up the auth user if profile creation failed
-        try {
-          await supabase.auth.admin.deleteUser(authData.user.id);
-          console.log('🧹 Cleaned up auth user after profile creation failure');
-        } catch (cleanupError) {
-          console.warn('⚠️ Could not clean up auth user:', cleanupError);
-        }
-        
-        return {
-          success: false,
-          error: `Failed to create user profile: ${profileError.message}`
-        };
-      }
-      
-      console.log('✅ User profile created successfully');
-      
+
+      console.log('✅ User created successfully via admin function');
+
       return {
         success: true,
-        user: authData.user,
-        profile: profile
+        user: result.user,
+        profile: result.profile
       };
       
     } catch (error: any) {
