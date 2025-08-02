@@ -70,7 +70,7 @@ import {
 
 export function OrganizedAdminDashboard() {
   const { toast } = useToast();
-  const { metrics, loading, error, connected, tableInfo, refetch } = useDirectSupabaseMetrics();
+  const { metrics, loading, refetch } = useSimplifiedMetrics();
   const [activeSection, setActiveSection] = useState("overview");
   const [adminEmail, setAdminEmail] = useState<string | undefined>();
 
