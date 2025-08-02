@@ -116,6 +116,15 @@ class AdminDashboardMetricsService {
 
       return count || 0;
     } catch (error: any) {
+      // Detailed debugging for catch block errors
+      console.log('=== DEBUGGING CATCH BLOCK ERROR ===');
+      console.log('Caught error:', error);
+      console.log('Caught error type:', typeof error);
+      console.log('Caught error constructor:', error?.constructor?.name);
+      console.log('Caught error message:', JSON.stringify(error?.message));
+      console.log('Caught error stack:', error?.stack);
+      console.log('=== END CATCH DEBUGGING ===');
+
       // Handle RLS infinite recursion error at catch level too
       if (error.message?.includes('infinite recursion detected in policy')) {
         console.warn('RLS policy infinite recursion in catch block - using alternative method');
