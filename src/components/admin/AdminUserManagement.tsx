@@ -70,6 +70,7 @@ import {
 } from "@/services/adminUserManagementService";
 import { testDatabaseConnection } from "@/utils/testDatabaseConnection";
 import { testProfileAccess } from "@/utils/testProfileAccess";
+import { AdminBypass } from "@/services/adminBypass";
 
 export function AdminUserManagement() {
   const [users, setUsers] = useState<UserDetails[]>([]);
