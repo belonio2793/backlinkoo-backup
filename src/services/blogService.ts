@@ -67,7 +67,7 @@ export class BlogService {
       word_count: data.wordCount,
       author_name: 'AI Writer',
       tags: this.generateTags(data.title, data.targetUrl),
-      category: this.categorizeContent(data.keywords?.join(' ') || data.title)
+      category: this.categorizeContent(data.title)
     };
 
     // If this is a claimed post (has userId and not trial), use maximum persistence
