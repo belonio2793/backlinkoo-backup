@@ -274,12 +274,51 @@ export function SimpleAdminPage() {
             </div>
 
             {error?.includes('Invalid login credentials') && (
-              <div className="bg-muted/50 p-3 rounded-lg text-xs">
-                <p className="font-medium mb-2">🛠️ Manual Fix (if button doesn't work):</p>
-                <p className="mb-1">Go to Supabase Dashboard → SQL Editor and run:</p>
-                <code className="block bg-black/20 p-2 rounded text-xs font-mono">
-                  {`INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, is_super_admin) VALUES ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated', 'support@backlinkoo.com', crypt('Admin123!@#', gen_salt('bf')), NOW(), NOW(), NOW(), '{"provider": "email", "providers": ["email"]}', FALSE) ON CONFLICT (email) DO NOTHING;`}
-                </code>
+              <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
+                <h3 className="font-bold text-red-800 mb-2">⚠️ Admin User Doesn't Exist</h3>
+                <p className="text-sm text-red-700 mb-3">
+                  The admin user hasn't been created yet. Follow these steps:
+                </p>
+
+                <div className="space-y-2 text-sm">
+                  <div className="bg-red-100 p-2 rounded">
+                    <p className="font-medium">Step 1: Go to Supabase Dashboard</p>
+                    <p>Visit: <a href="https://supabase.com/dashboard/project/dfhanacsmsvvkpunurnp" target="_blank" className="text-blue-600 underline">https://supabase.com/dashboard/project/dfhanacsmsvvkpunurnp</a></p>
+                  </div>
+
+                  <div className="bg-red-100 p-2 rounded">
+                    <p className="font-medium">Step 2: Click "SQL Editor" in sidebar</p>
+                  </div>
+
+                  <div className="bg-red-100 p-2 rounded">
+                    <p className="font-medium">Step 3: Paste this SQL command:</p>
+                    <code className="block bg-black text-green-400 p-2 rounded text-xs font-mono mt-1 overflow-x-auto">
+{`INSERT INTO auth.users (
+  instance_id, id, aud, role, email,
+  encrypted_password, email_confirmed_at,
+  created_at, updated_at, raw_app_meta_data, is_super_admin
+) VALUES (
+  '00000000-0000-0000-0000-000000000000',
+  gen_random_uuid(), 'authenticated', 'authenticated',
+  'support@backlinkoo.com',
+  crypt('Admin123!@#', gen_salt('bf')),
+  NOW(), NOW(), NOW(),
+  '{"provider": "email", "providers": ["email"]}',
+  FALSE
+);`}
+                    </code>
+                  </div>
+
+                  <div className="bg-red-100 p-2 rounded">
+                    <p className="font-medium">Step 4: Click "RUN" button</p>
+                  </div>
+
+                  <div className="bg-red-100 p-2 rounded">
+                    <p className="font-medium">Step 5: Return here and sign in</p>
+                    <p>Email: support@backlinkoo.com</p>
+                    <p>Password: Admin123!@#</p>
+                  </div>
+                </div>
               </div>
             )}
           </div>
