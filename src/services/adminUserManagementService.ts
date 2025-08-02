@@ -56,11 +56,14 @@ class AdminUserManagementService {
       } = filters;
 
       console.log('📋 Fetching users with filters:', filters);
+      console.log('🔍 Admin service attempting to fetch all profiles...');
 
-      // Build base query for profiles (bypass RLS for admin queries)
+      // Build base query for profiles - try simple query first
       let profileQuery = supabase
         .from('profiles')
         .select('*', { count: 'exact' });
+
+      console.log('📊 Profile query constructed:', profileQuery);
 
       // Apply role filter
       if (role !== 'all') {
