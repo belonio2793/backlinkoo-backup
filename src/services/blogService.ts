@@ -154,9 +154,7 @@ export class BlogService {
       throw new Error(`Failed to create blog post: ${error.message}`);
     }
 
-    if (error) {
-      throw new Error(`Failed to create blog post: ${error.message}`);
-    }
+    console.log('✅ Blog post created successfully');
 
     // Create backup for trial posts too
     if (isTrialPost) {
@@ -167,7 +165,7 @@ export class BlogService {
       }
     }
 
-      return blogPost;
+    return blogPost;
     } catch (error: any) {
       console.error('Blog post creation failed:', error);
       throw new Error(`Failed to create blog post: ${error.message || 'Unknown error'}`);
