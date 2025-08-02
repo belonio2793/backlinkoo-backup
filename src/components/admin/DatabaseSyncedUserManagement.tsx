@@ -46,83 +46,162 @@ export function DatabaseSyncedUserManagement() {
   const fetchUsersAndStats = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       console.log('🔄 Syncing user data from Supabase...');
-      
-      // Test connection first
-      const { data: connectionTest, error: connectionError } = await supabase
-        .from('profiles')
-        .select('count', { count: 'exact', head: true });
 
-      if (connectionError) {
-        throw new Error(`Database connection failed: ${connectionError.message}`);
+      // Try to use the working admin user management service first
+      try {
+        const { adminUserManagementService } = await import('@/services/adminUserManagementService');
+        const result = await adminUserManagementService.getUsers({ limit: 200, offset: 0 });
+
+        console.log(`✅ Successfully fetched ${result.users.length} users via admin service`);
+
+        // Map to our format
+        const mappedUsers: User[] = result.users.map(user => ({
+          id: user.id,
+          user_id: user.user_id,
+          email: user.email,
+          display_name: user.display_name,
+          role: user.role as 'admin' | 'user',
+          created_at: user.created_at,
+          is_premium: user.isPremium,
+          subscription_status: user.isPremium ? 'premium' : 'free'
+        }));
+
+        setUsers(mappedUsers);
+        setConnectionStatus('connected');
+
+        // Calculate stats
+        const totalUsers = mappedUsers.length;
+        const adminUsers = mappedUsers.filter(u => u.role === 'admin').length;
+        const premiumUsers = mappedUsers.filter(u => u.is_premium).length;
+
+        // Recent signups (last 7 days)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const recentSignups = mappedUsers.filter(u =>
+          new Date(u.created_at) > sevenDaysAgo
+        ).length;
+
+        setStats({ totalUsers, adminUsers, premiumUsers, recentSignups });
+        setLastSync(new Date());
+
+        console.log(`📊 User stats: ${totalUsers} total, ${adminUsers} admin, ${premiumUsers} premium, ${recentSignups} recent`);
+        return;
+
+      } catch (serviceError: any) {
+        console.warn('⚠️ Admin service failed, trying direct Supabase access...', serviceError);
+
+        // Fallback to direct Supabase access
+        const { data: connectionTest, error: connectionError } = await supabase
+          .from('profiles')
+          .select('count', { count: 'exact', head: true });
+
+        if (connectionError) {
+          // Better error message formatting
+          const errorMsg = connectionError.message || connectionError.hint || connectionError.details || 'Unknown database error';
+          console.error('Database connection test failed:', {
+            message: connectionError.message,
+            hint: connectionError.hint,
+            details: connectionError.details,
+            code: connectionError.code
+          });
+
+          // Check for specific RLS error
+          if (errorMsg.includes('infinite recursion') || errorMsg.includes('RLS')) {
+            throw new Error('Database RLS policy error - admin access may be misconfigured');
+          }
+
+          throw new Error(`Database connection failed: ${errorMsg}`);
+        }
+
+        setConnectionStatus('connected');
+
+        // Direct Supabase fallback - fetch users with comprehensive data
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select(`
+            id,
+            user_id,
+            email,
+            display_name,
+            role,
+            created_at
+          `)
+          .order('created_at', { ascending: false })
+          .limit(200);
+
+        if (profilesError) {
+          const errorMsg = profilesError.message || profilesError.hint || profilesError.details || 'Unknown profiles error';
+          throw new Error(`Failed to fetch profiles: ${errorMsg}`);
+        }
+
+        // Get subscription data for premium status
+        const { data: subscribers, error: subscribersError } = await supabase
+          .from('subscribers')
+          .select('user_id, subscribed, subscription_tier')
+          .eq('subscribed', true);
+
+        if (subscribersError) {
+          console.warn('Could not fetch subscription data:', subscribersError);
+        }
+
+        // Map users with subscription status
+        const subscriberMap = new Map();
+        subscribers?.forEach(sub => {
+          subscriberMap.set(sub.user_id, sub);
+        });
+
+        const enrichedUsers: User[] = (profiles || []).map(profile => ({
+          ...profile,
+          is_premium: subscriberMap.has(profile.user_id),
+          subscription_status: subscriberMap.get(profile.user_id)?.subscription_tier || 'free'
+        }));
+
+        setUsers(enrichedUsers);
+
+        // Calculate stats
+        const totalUsers = enrichedUsers.length;
+        const adminUsers = enrichedUsers.filter(u => u.role === 'admin').length;
+        const premiumUsers = enrichedUsers.filter(u => u.is_premium).length;
+
+        // Recent signups (last 7 days)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const recentSignups = enrichedUsers.filter(u =>
+          new Date(u.created_at) > sevenDaysAgo
+        ).length;
+
+        setStats({ totalUsers, adminUsers, premiumUsers, recentSignups });
+        setLastSync(new Date());
+
+        console.log(`✅ Successfully synced ${totalUsers} users from database (direct method)`);
       }
-
-      setConnectionStatus('connected');
-
-      // Fetch users with comprehensive data
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          user_id,
-          email,
-          display_name,
-          role,
-          created_at
-        `)
-        .order('created_at', { ascending: false })
-        .limit(200);
-
-      if (profilesError) {
-        throw profilesError;
-      }
-
-      // Get subscription data for premium status
-      const { data: subscribers, error: subscribersError } = await supabase
-        .from('subscribers')
-        .select('user_id, subscribed, subscription_tier')
-        .eq('subscribed', true);
-
-      if (subscribersError) {
-        console.warn('Could not fetch subscription data:', subscribersError);
-      }
-
-      // Map users with subscription status
-      const subscriberMap = new Map();
-      subscribers?.forEach(sub => {
-        subscriberMap.set(sub.user_id, sub);
-      });
-
-      const enrichedUsers: User[] = (profiles || []).map(profile => ({
-        ...profile,
-        is_premium: subscriberMap.has(profile.user_id),
-        subscription_status: subscriberMap.get(profile.user_id)?.subscription_tier || 'free'
-      }));
-
-      setUsers(enrichedUsers);
-
-      // Calculate stats
-      const totalUsers = enrichedUsers.length;
-      const adminUsers = enrichedUsers.filter(u => u.role === 'admin').length;
-      const premiumUsers = enrichedUsers.filter(u => u.is_premium).length;
-      
-      // Recent signups (last 7 days)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const recentSignups = enrichedUsers.filter(u => 
-        new Date(u.created_at) > sevenDaysAgo
-      ).length;
-
-      setStats({ totalUsers, adminUsers, premiumUsers, recentSignups });
-      setLastSync(new Date());
-
-      console.log(`✅ Successfully synced ${totalUsers} users from database`);
 
     } catch (error: any) {
       console.error('❌ Failed to sync user data:', error);
-      setError(error.message || 'Failed to sync user data');
+      console.error('Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
+
+      // Provide more specific error messages
+      let errorMessage = 'Failed to sync user data';
+      if (error.message) {
+        if (error.message.includes('RLS') || error.message.includes('infinite recursion')) {
+          errorMessage = 'Database access restricted - RLS policy issue';
+        } else if (error.message.includes('JWT')) {
+          errorMessage = 'Authentication issue - please refresh and try again';
+        } else if (error.message.includes('connection')) {
+          errorMessage = 'Database connection failed - check network and settings';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      setError(errorMessage);
       setConnectionStatus('disconnected');
       setUsers([]);
       setStats({ totalUsers: 0, adminUsers: 0, premiumUsers: 0, recentSignups: 0 });
