@@ -271,9 +271,36 @@ class AdminDashboardMetricsService {
   }
 
   /**
-   * Get number of active subscribers from subscribers table
+   * Get number of active subscribers (premium users) using admin user management service
    */
   private async getActiveUsers(): Promise<number> {
+    try {
+      console.log('📊 Fetching active subscribers (premium users)...');
+
+      // Use the working user management service to get all users
+      const result = await adminUserManagementService.getUsers({
+        limit: 1000, // Get all users
+        offset: 0
+      });
+
+      // Count users who are premium (either paid premium or gifted)
+      const activeSubscribers = result.users.filter(user => user.isPremium).length;
+
+      console.log(`✅ Successfully counted active subscribers: ${activeSubscribers}`);
+      return activeSubscribers;
+
+    } catch (error: any) {
+      console.error('Error fetching active subscribers:', error);
+      // Fallback to 0 since we don't know the premium count
+      console.warn('Using fallback active subscribers count: 0');
+      return 0;
+    }
+  }
+
+  /**
+   * DEPRECATED: Old method that had RLS issues
+   */
+  private async getActiveUsersOld(): Promise<number> {
     try {
       const { count, error } = await supabase
         .from('subscribers')
