@@ -91,11 +91,18 @@ export class BlogService {
     // Remove any custom id field to let database auto-generate UUID
     const { id: _, ...cleanBlogPostData } = blogPostData as any;
 
-    const { data: blogPostArray, error } = await supabase
-      .from('blog_posts')
-      .insert(cleanBlogPostData)
-      .select();
+    let result;
+    try {
+      result = await supabase
+        .from('blog_posts')
+        .insert(cleanBlogPostData)
+        .select();
+    } catch (networkError: any) {
+      console.error('❌ Network error during blog post creation:', networkError);
+      throw new Error(`Network error: ${networkError.message || 'Failed to connect to database'}`);
+    }
 
+    const { data: blogPostArray, error } = result;
     const blogPost = blogPostArray?.[0] || null;
 
     if (error || !blogPost) {
