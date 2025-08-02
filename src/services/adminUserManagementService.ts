@@ -94,21 +94,37 @@ class AdminUserManagementService {
         profileQuery = profileQuery.range(offset, offset + limit - 1);
       }
 
-      // Try the normal query first
-      let profiles, profilesError, count;
+      // Try RPC function first (should work now with our database changes)
+      console.log('🔍 Attempting RPC function to get real profiles...');
 
       try {
-        const result = await profileQuery;
-        profiles = result.data;
-        profilesError = result.error;
-        count = result.count;
-      } catch (error: any) {
-        profilesError = error;
+        const { data: rpcData, error: rpcError } = await supabase.rpc('get_all_user_profiles');
+
+        if (rpcData && !rpcError) {
+          console.log('✅ RPC function successful - got real profiles:', rpcData.length);
+          profiles = rpcData;
+          count = rpcData.length;
+          profilesError = null;
+        } else {
+          throw new Error('RPC failed: ' + rpcError?.message);
+        }
+      } catch (rpcError: any) {
+        console.warn('RPC method failed, trying standard query...', rpcError.message);
+
+        // Fall back to normal query
+        try {
+          const result = await profileQuery;
+          profiles = result.data;
+          profilesError = result.error;
+          count = result.count;
+        } catch (error: any) {
+          profilesError = error;
+        }
       }
 
-      // If there's any error, use admin bypass to get real data
+      // If still failing, use admin bypass as last resort
       if (profilesError) {
-        console.warn('🔓 Query failed, using admin bypass for real data');
+        console.warn('🔓 All queries failed, using admin bypass for real data');
 
         const bypassResult = await AdminBypass.fetchProfilesAsAdmin();
 
