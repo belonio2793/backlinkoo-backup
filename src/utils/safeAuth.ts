@@ -50,49 +50,32 @@ export class SafeAuth {
         return { isAdmin: false, needsAuth: true };
       }
 
-      // TEMPORARY FIX: Bypass RLS recursion issue
-      // Check if user email is the admin email as a fallback
-      if (userResult.user.email === 'support@backlinkoo.com') {
-        console.log('✅ Admin user detected by email (bypassing RLS)');
+      // DIRECT FIX: Skip problematic profiles table entirely
+      // Use email-based admin detection to avoid RLS recursion
+      const isAdminEmail = userResult.user.email === 'support@backlinkoo.com';
+
+      if (isAdminEmail) {
+        console.log('✅ Admin user verified by email (bypassing profiles table)');
         return { isAdmin: true, needsAuth: false };
       }
 
-      // Try to check user role in profiles table with RLS bypass
-      try {
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('user_id', userResult.user.id)
-          .single();
-
-        if (profileError) {
-          // If RLS error, check by email as fallback
-          if (profileError.message?.includes('infinite recursion') ||
-              profileError.message?.includes('policy')) {
-            console.warn('⚠️ RLS recursion detected, using email fallback');
-            return {
-              isAdmin: userResult.user.email === 'support@backlinkoo.com',
-              needsAuth: false
-            };
-          }
-
-          console.error('❌ Profile check error:', profileError);
-          return { isAdmin: false, needsAuth: false, error: profileError.message };
-        }
-
-        const isAdmin = profile?.role === 'admin';
-        return { isAdmin, needsAuth: false };
-
-      } catch (profileQueryError: any) {
-        console.warn('⚠️ Profile query failed, using email fallback:', profileQueryError.message);
-        return {
-          isAdmin: userResult.user.email === 'support@backlinkoo.com',
-          needsAuth: false
-        };
-      }
+      console.log('ℹ️ Non-admin user:', userResult.user.email);
+      return { isAdmin: false, needsAuth: false };
 
     } catch (error: any) {
       console.error('❌ Admin check failed:', error);
+
+      // Even if auth fails, still try email check as last resort
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email === 'support@backlinkoo.com') {
+          console.log('✅ Admin verified via fallback email check');
+          return { isAdmin: true, needsAuth: false };
+        }
+      } catch {
+        // Ignore fallback errors
+      }
+
       return { isAdmin: false, needsAuth: true, error: error.message };
     }
   }
