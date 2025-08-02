@@ -69,17 +69,32 @@ export function SecurityDashboard() {
       console.log('🔄 Fetching user profiles and roles...');
 
       // Try to get profiles first (RLS-safe approach)
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('user_id, email, display_name, created_at')
-        .order('created_at', { ascending: false })
-        .limit(100);
+      let profilesData = null;
+      let profilesError = null;
 
-      console.log('Profiles data:', profilesData, 'Error:', profilesError);
+      try {
+        const result = await supabase
+          .from('profiles')
+          .select('user_id, email, display_name, created_at')
+          .order('created_at', { ascending: false })
+          .limit(100);
+
+        profilesData = result.data;
+        profilesError = result.error;
+
+        console.log('Profiles query result:', {
+          data: profilesData,
+          error: profilesError,
+          success: !profilesError && profilesData
+        });
+      } catch (queryError) {
+        console.error('Profiles query exception:', queryError);
+        profilesError = queryError;
+      }
 
       if (profilesError) {
         // If profiles fails, try alternative approach with subscribers
-        console.log('❌ Profiles access failed, trying alternative sources...');
+        console.log('❌ Profiles access failed, trying alternative sources...', profilesError);
 
         const { data: subscribersData, error: subsError } = await supabase
           .from('subscribers')
