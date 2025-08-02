@@ -1,7 +1,6 @@
 import { AuthCheck } from "@/components/AuthCheck";
 import { Footer } from "@/components/Footer";
 import { OrganizedAdminDashboard } from "@/components/admin/OrganizedAdminDashboardFixed";
-import { QuickLoginHelper } from "@/components/QuickLoginHelper";
 
 const AdminDashboard = () => {
   return (
