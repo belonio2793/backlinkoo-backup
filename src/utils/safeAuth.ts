@@ -45,28 +45,51 @@ export class SafeAuth {
   static async isAdmin(): Promise<{ isAdmin: boolean; needsAuth: boolean; error?: string }> {
     try {
       const userResult = await this.getCurrentUser();
-      
+
       if (userResult.needsAuth || !userResult.user) {
         return { isAdmin: false, needsAuth: true };
       }
-      
+
+      // Emergency bypass for support admin email
+      if (userResult.user.email === 'support@backlinkoo.com') {
+        console.log('✅ Support admin email detected - granting admin access');
+        return { isAdmin: true, needsAuth: false };
+      }
+
       // Check user role in profiles table
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
         .eq('user_id', userResult.user.id)
         .single();
-      
+
       if (profileError) {
         console.error('❌ Profile check error:', profileError);
+
+        // If this is the support admin, bypass the error
+        if (userResult.user.email === 'support@backlinkoo.com') {
+          console.log('✅ Support admin - bypassing profile check error');
+          return { isAdmin: true, needsAuth: false };
+        }
+
         return { isAdmin: false, needsAuth: false, error: profileError.message };
       }
-      
+
       const isAdmin = profile?.role === 'admin';
       return { isAdmin, needsAuth: false };
-      
+
     } catch (error: any) {
       console.error('❌ Admin check failed:', error);
+
+      // Last resort: check if this is the support admin email
+      try {
+        const userResult = await this.getCurrentUser();
+        if (userResult.user?.email === 'support@backlinkoo.com') {
+          console.log('✅ Support admin - emergency access granted');
+          return { isAdmin: true, needsAuth: false };
+        }
+      } catch {}
+
       return { isAdmin: false, needsAuth: true, error: error.message };
     }
   }
