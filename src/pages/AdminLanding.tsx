@@ -23,43 +23,40 @@ export default function AdminLanding() {
   }, []);
 
   const checkAuthStatus = async () => {
+    setLoading(true);
+
+    // Set aggressive timeout
+    const timeoutId = setTimeout(() => {
+      console.warn('Auth check timed out - showing sign in');
+      setLoading(false);
+      setIsAuthenticated(false);
+      setIsAdmin(false);
+    }, 2000); // Only 2 seconds
+
     try {
-      setLoading(true);
-      
       const { data: { user }, error } = await supabase.auth.getUser();
-      
+
       if (error || !user) {
+        clearTimeout(timeoutId);
         setIsAuthenticated(false);
         setIsAdmin(false);
         setLoading(false);
         return;
       }
-      
+
       setIsAuthenticated(true);
-      
-      // Check if user is admin
-      try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('user_id', user.id)
-          .single();
-          
-        if (profile?.role === 'admin') {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
-        }
-      } catch (error) {
-        console.warn('Could not check admin status:', error);
-        setIsAdmin(false);
-      }
-      
+
+      // Skip the problematic profile check for now
+      // Just show the sign-in form and let the sign-in process handle admin verification
+      clearTimeout(timeoutId);
+      setIsAdmin(false);
+      setLoading(false);
+
     } catch (error) {
       console.error('Auth check failed:', error);
+      clearTimeout(timeoutId);
       setIsAuthenticated(false);
       setIsAdmin(false);
-    } finally {
       setLoading(false);
     }
   };
