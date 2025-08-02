@@ -26,7 +26,10 @@
     "sync:env": "node sync-configuration.js env",
     "sync:health": "node sync-configuration.js health",
     "deploy:netlify": "npx -y @netlify/mcp@latest --site-id ca6261e6-0a59-40b5-a2bc-5b5481ac8809",
-    "deploy:build": "npm run build && npm run deploy:netlify"
+    "deploy:build": "npm run build && npm run deploy:netlify",
+    "admin:create": "node scripts/create-admin-user.js create",
+    "admin:list": "node scripts/create-admin-user.js list",
+    "admin:test": "node scripts/create-admin-user.js test"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
