@@ -38,13 +38,6 @@ export function AdminSignIn() {
 
       console.log('✅ User signed in:', result.user?.email);
 
-      // Emergency bypass for support admin
-      if (result.user?.email === 'support@backlinkoo.com') {
-        console.log('✅ Support admin - bypassing profile check');
-        window.location.reload();
-        return;
-      }
-
       if (!result.isAdmin) {
         setError('This account does not have admin privileges. Please contact an administrator.');
 
