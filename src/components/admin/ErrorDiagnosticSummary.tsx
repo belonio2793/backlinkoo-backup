@@ -59,7 +59,7 @@ export function ErrorDiagnosticSummary() {
           component: 'Database Table',
           status: 'warning',
           message: 'Database connection issue',
-          solution: 'Using localStorage fallback',
+          solution: 'Check Supabase configuration and connectivity',
           details: error.message
         });
       } else {
