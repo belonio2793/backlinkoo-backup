@@ -114,10 +114,18 @@ export class BlogService {
         const fallbackSlug = this.generateSlug(data.title);
         const retryData = { ...cleanBlogPostData, slug: fallbackSlug };
 
-        const { data: retryPostArray, error: retryError } = await supabase
-          .from('blog_posts')
-          .insert(retryData)
-          .select();
+        let retryResult;
+        try {
+          retryResult = await supabase
+            .from('blog_posts')
+            .insert(retryData)
+            .select();
+        } catch (networkError: any) {
+          console.error('❌ Network error during retry:', networkError);
+          throw new Error(`Network error on retry: ${networkError.message || 'Failed to connect to database'}`);
+        }
+
+        const { data: retryPostArray, error: retryError } = retryResult;
 
         const retryPost = retryPostArray?.[0] || null;
 
