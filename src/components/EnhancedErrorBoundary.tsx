@@ -26,7 +26,7 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Application error caught by boundary:', error, errorInfo);
-    
+
     // Filter out browser extension errors and other non-critical errors
     const isExtensionError = error.message.includes('Cannot redefine property: ethereum') ||
                             error.stack?.includes('chrome-extension://') ||
@@ -71,8 +71,12 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
 
     if (isExtensionError || isAuthError || isDatabaseError || isComponentError) {
       console.warn('Non-critical error filtered and recovered:', error.message);
-      // Reset error state to prevent app crash
-      this.setState({ hasError: false, error: undefined });
+      // Use setTimeout to prevent infinite loop when resetting state
+      setTimeout(() => {
+        if (this.state.hasError) {
+          this.setState({ hasError: false, error: undefined });
+        }
+      }, 0);
       return;
     }
 
@@ -82,9 +86,8 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
       return;
     }
 
-    // For all other errors, set error state
+    // For all other errors, set error state but don't immediately redirect
     this.setState({ hasError: true, error, errorInfo });
-    this.redirectTo404();
   }
 
   componentWillUnmount() {

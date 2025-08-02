@@ -1,8 +1,7 @@
 import AdminDashboard from '@/pages/AdminDashboard';
 
 export function SimpleAdminPage() {
-
-main
+  return <AdminDashboard />;
 }
 
 export default SimpleAdminPage;
