@@ -51,7 +51,7 @@ export function ErrorDiagnosticSummary() {
           component: 'Database Table',
           status: 'error',
           message: 'admin_environment_variables table does not exist',
-          solution: 'Using localStorage fallback. Table needs manual creation in Supabase.',
+          solution: 'Table needs manual creation in Supabase or use Netlify environment variables.',
           details: 'Error Code: 42P01 - relation does not exist'
         });
       } else if (error) {
