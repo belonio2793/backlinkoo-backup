@@ -187,23 +187,54 @@ export function SimplifiedUserManagement() {
         new Date(u.created_at) > sevenDaysAgo
       ).length;
 
-      setStats({ 
-        totalUsers, 
-        adminUsers, 
-        premiumUsers: premiumUserCount, 
-        recentSignups 
+      setStats({
+        totalUsers,
+        adminUsers,
+        premiumUsers: premiumUserCount,
+        recentSignups
       });
       setLastSync(new Date());
 
       console.log(`✅ User data synced: ${totalUsers} users (${premiumUserCount} premium, ${adminUsers} admin, ${recentSignups} recent)`);
       console.log('Final user list:', userList);
 
+      // Log successful user data fetch
+      await adminAuditLogger.logUserAction(
+        'METRICS_VIEWED',
+        'bulk_view',
+        {
+          section: 'user_management',
+          action: 'fetch_user_data_success',
+          stats: {
+            total_users: totalUsers,
+            admin_users: adminUsers,
+            premium_users: premiumUserCount,
+            recent_signups: recentSignups
+          },
+          timestamp: new Date().toISOString()
+        }
+      );
+
     } catch (error: any) {
       console.error('❌ Failed to sync user data:', error);
-      
+
+      // Log the error
+      await adminAuditLogger.logUserAction(
+        'METRICS_VIEWED',
+        'bulk_view',
+        {
+          section: 'user_management',
+          action: 'fetch_user_data_failed',
+          error: error instanceof Error ? error.message : 'Unknown error',
+          timestamp: new Date().toISOString()
+        },
+        false,
+        error instanceof Error ? error.message : 'Failed to fetch user data'
+      );
+
       // Provide fallback data instead of empty state
       const fallbackUsers: User[] = [];
-      
+
       // Try to at least get the current admin user
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -222,15 +253,15 @@ export function SimplifiedUserManagement() {
       } catch (authError) {
         console.warn('Could not get current user:', authError);
       }
-      
+
       setUsers(fallbackUsers);
-      setStats({ 
-        totalUsers: fallbackUsers.length, 
-        adminUsers: fallbackUsers.filter(u => u.role === 'admin').length, 
-        premiumUsers: 0, 
-        recentSignups: 0 
+      setStats({
+        totalUsers: fallbackUsers.length,
+        adminUsers: fallbackUsers.filter(u => u.role === 'admin').length,
+        premiumUsers: 0,
+        recentSignups: 0
       });
-      
+
       setError(`Showing available data: ${error.message || 'Unknown error'}`);
       setConnectionStatus('disconnected');
     } finally {
