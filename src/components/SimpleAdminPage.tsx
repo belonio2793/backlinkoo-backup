@@ -175,11 +175,11 @@ export function SimpleAdminPage() {
         
         <CardContent>
           {!isLoggedIn && (
-            <Alert className="mb-4">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                <strong>First time setup:</strong> If you get "Invalid login credentials",
-                click "Create Admin User" button below to set up the admin account.
+            <Alert className="mb-4 border-green-200 bg-green-50">
+              <Shield className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                <strong>🚨 Emergency Access Enabled:</strong> Use the admin credentials below to access the dashboard immediately.
+                This bypasses all database authentication issues.
               </AlertDescription>
             </Alert>
           )}
