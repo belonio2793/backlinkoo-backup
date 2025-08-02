@@ -68,6 +68,7 @@ import {
   type UserListFilters,
   type UserUpdatePayload
 } from "@/services/adminUserManagementService";
+import { supabase } from "@/integrations/supabase/client";
 import { testDatabaseConnection } from "@/utils/testDatabaseConnection";
 import { testProfileAccess } from "@/utils/testProfileAccess";
 import { AdminBypass } from "@/services/adminBypass";
