@@ -48,7 +48,8 @@ import {
   CreditCard,
   FileText,
   RefreshCw,
-  MonitorSpeaker
+  MonitorSpeaker,
+  Database
 } from "lucide-react";
 
 export function OrganizedAdminDashboard() {
