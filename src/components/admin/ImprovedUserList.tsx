@@ -90,9 +90,13 @@ export function ImprovedUserList() {
             headers: { 'Content-Type': 'application/json' }
           });
 
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
           const result = await response.json();
 
-          if (result.success) {
+          if (result.success && result.profiles) {
             console.log(`✅ Retrieved users via Netlify function: ${result.profiles.length} profiles`);
             setUsers(result.profiles);
             setDbStatus({
@@ -102,7 +106,7 @@ export function ImprovedUserList() {
             setLastFetch(new Date());
             return;
           } else {
-            throw new Error(result.error || 'Netlify function failed');
+            throw new Error(result.error || 'Netlify function returned unsuccessful response');
           }
         } catch (netlifyError: any) {
           console.error('❌ Netlify function also failed:', netlifyError);
