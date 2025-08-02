@@ -77,19 +77,17 @@ Please write the complete blog post now:`;
         })
       });
 
+      // Read response body once and handle both success and error cases
       let result;
-      if (!response.ok) {
-        let errorMessage = `OpenAI API call failed: ${response.status}`;
-        try {
-          // Try to get error details from response
-          const errorData = await response.json();
-          errorMessage += ` - ${errorData.error || 'Unknown error'}`;
-        } catch {
-          // If JSON parsing fails, use status only
-        }
-        throw new Error(errorMessage);
-      } else {
+      try {
         result = await response.json();
+      } catch (jsonError) {
+        throw new Error(`OpenAI API call failed: ${response.status} - Unable to parse response`);
+      }
+
+      if (!response.ok) {
+        const errorMessage = `OpenAI API call failed: ${response.status} - ${result.error || 'Unknown error'}`;
+        throw new Error(errorMessage);
       }
 
       if (!result.success || !result.content) {

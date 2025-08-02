@@ -49,16 +49,16 @@ export class DirectEmailService {
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
-        throw new Error(`Resend API error: ${errorData.error || response.statusText}`);
-      }
+      // Read response body once and handle both success and error cases
+      const responseData = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
 
-      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(`Resend API error: ${responseData.error || response.statusText}`);
+      }
       
       return {
         success: true,
-        emailId: result.id,
+        emailId: responseData.id,
         provider: 'direct-resend'
       };
 

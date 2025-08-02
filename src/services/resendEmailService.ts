@@ -36,6 +36,9 @@ export class ResendEmailService {
         }),
       });
 
+      // Read response body once and handle both success and error cases
+      const responseData = await response.json().catch(() => ({ error: `HTTP ${response.status} error` }));
+
       if (!response.ok) {
         if (response.status === 404) {
           console.warn('Email Netlify function not available (404), trying alternative paths...');
@@ -66,17 +69,15 @@ export class ResendEmailService {
           };
         }
 
-        const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status} error` }));
-        console.error('Netlify function error:', response.status, errorData);
-        throw new Error(`Email service error: ${errorData.error || response.statusText}`);
+        console.error('Netlify function error:', response.status, responseData);
+        throw new Error(`Email service error: ${responseData.error || response.statusText}`);
       }
 
-      const result = await response.json();
-      console.log('Email sent successfully via Netlify:', result.emailId);
+      console.log('Email sent successfully via Netlify:', responseData.emailId);
 
       return {
         success: true,
-        emailId: result.emailId,
+        emailId: responseData.emailId,
         provider: 'resend'
       };
     } catch (error: any) {
