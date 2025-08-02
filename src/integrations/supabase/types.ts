@@ -609,10 +609,8 @@ export type Database = {
         }
         Returns: boolean
       }
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: Database["public"]["Enums"]["app_role"]
-      }
+      // get_current_user_role function removed due to infinite recursion
+      // Use direct role checks in RLS policies instead
       get_user_role: {
         Args: { check_user_id?: string }
         Returns: Database["public"]["Enums"]["user_role_type"]
