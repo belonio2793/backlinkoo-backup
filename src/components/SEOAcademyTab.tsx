@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { PremiumCheckoutModal } from '@/components/PremiumCheckoutModal';
 import {
   BookOpen,
   PlayCircle,
@@ -58,6 +59,7 @@ export function SEOAcademyTab({ isSubscribed, onUpgrade }: SEOAcademyTabProps) {
   const [activeModule, setActiveModule] = useState('fundamentals');
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [userProgress, setUserProgress] = useState<{ [key: string]: boolean }>({});
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   // Mock course data - in real implementation, this would come from a database
   const courseModules: Module[] = [
@@ -446,7 +448,7 @@ export function SEOAcademyTab({ isSubscribed, onUpgrade }: SEOAcademyTabProps) {
                 <div className="text-sm text-gray-600">Get help from pros</div>
               </div>
             </div>
-            <Button onClick={onUpgrade} size="lg" className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => setIsCheckoutOpen(true)} size="lg" className="bg-blue-600 hover:bg-blue-700">
               <Star className="mr-2 h-5 w-5" />
               Upgrade to Premium
             </Button>
@@ -634,6 +636,19 @@ export function SEOAcademyTab({ isSubscribed, onUpgrade }: SEOAcademyTabProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Checkout Modal */}
+      <PremiumCheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        onSuccess={() => {
+          toast({
+            title: "Welcome to Premium!",
+            description: "You now have access to the complete SEO Academy!",
+          });
+          onUpgrade();
+        }}
+      />
     </div>
   );
 }
