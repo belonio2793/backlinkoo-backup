@@ -200,7 +200,7 @@ export function OrganizedAdminDashboard() {
 
         {activeSection === "users" && (
           <div className="space-y-6">
-            <FastUserList />
+            <ImprovedUserList />
           </div>
         )}
 
