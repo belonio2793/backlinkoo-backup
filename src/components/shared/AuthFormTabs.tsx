@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { SafeAuthService } from "@/services/safeAuthService";
 import { TrialConversionService } from "@/services/trialConversionService";
-import { UserRegistrationService } from "@/services/userRegistrationService";
+
 import { validateEmail, validatePassword, validateRequired } from "@/utils/authValidation";
 import { Eye, EyeOff, Shield, CheckCircle } from "lucide-react";
 
@@ -204,8 +204,8 @@ export function AuthFormTabs({
           });
         }
       } else {
-        // Enhanced signup with manual profile creation to avoid database trigger issues
-        const result = await UserRegistrationService.registerUser({
+        // Use SafeAuthService for simple signup without complex database operations
+        const result = await SafeAuthService.signUp({
           email: signupEmail.trim(),
           password: signupPassword,
           firstName: firstName.trim(),
