@@ -15,6 +15,7 @@ import { SimplifiedUserManagement } from "@/components/admin/SimplifiedUserManag
 import { AdminConnectionDebugger } from "@/components/admin/AdminConnectionDebugger";
 import { QuickConnectionTest } from "@/components/admin/QuickConnectionTest";
 import { MetricsRefreshButton } from "@/components/admin/MetricsRefreshButton";
+import { BlogPostsDebugger } from "@/components/admin/BlogPostsDebugger";
 import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
 import { SystemStatusPanel } from "@/components/admin/SystemStatusPanel";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
@@ -275,6 +276,7 @@ export function StreamlinedAdminDashboard() {
 
         {activeSection === "content" && (
           <div className="space-y-6">
+            <BlogPostsDebugger />
             <AdminBlogManager />
           </div>
         )}
