@@ -407,21 +407,26 @@ export function AdminUserManagement() {
         </div>
       </div>
 
-      {/* Connection Status Card */}
+      {/* Enhanced Connection Diagnostics */}
       {!connectionStatus.connected && (
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-red-700">
-              <AlertTriangle className="h-5 w-5" />
-              <div>
-                <p className="font-medium">Database Connection Issue</p>
-                <p className="text-sm text-red-600">
-                  {connectionStatus.error || 'Unable to connect to database. Please check your configuration.'}
-                </p>
+        <div className="space-y-4">
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 text-red-700">
+                <AlertTriangle className="h-5 w-5" />
+                <div>
+                  <p className="font-medium">Database Connection Issue</p>
+                  <p className="text-sm text-red-600">
+                    {connectionStatus.error || 'Unable to connect to database. Please check your configuration.'}
+                  </p>
+                  <p className="text-sm text-red-600 mt-2">
+                    Use the enhanced diagnostics below to troubleshoot the issue.
+                  </p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Statistics Cards */}
