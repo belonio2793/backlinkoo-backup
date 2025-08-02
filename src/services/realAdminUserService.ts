@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { databaseConnectionService } from './databaseConnectionService';
+import { SafeAuth } from '@/utils/safeAuth';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 type Subscriber = Database['public']['Tables']['subscribers']['Row'];
@@ -62,12 +63,12 @@ class RealAdminUserService {
   }
 
   /**
-   * Check if current user has admin access
+   * Check if current user has admin access using SafeAuth
    */
   async checkAdminAccess(): Promise<boolean> {
     try {
-      const result = await databaseConnectionService.checkAdminAccess();
-      return result.isAdmin;
+      const result = await SafeAuth.isAdmin();
+      return result.isAdmin && !result.needsAuth;
     } catch (error) {
       console.error('❌ Admin access check failed:', error);
       return false;
@@ -116,7 +117,7 @@ class RealAdminUserService {
           console.log(`🧪 Trying ${method.name}...`);
           const result = await method.execute();
           if (result && result.length >= 0) {
-            console.log(`��� ${method.name} successful - got ${result.length} profiles`);
+            console.log(`✅ ${method.name} successful - got ${result.length} profiles`);
             return result;
           }
         } catch (error: any) {
