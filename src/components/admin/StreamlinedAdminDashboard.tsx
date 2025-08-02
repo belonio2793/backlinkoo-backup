@@ -11,7 +11,7 @@ import { AdminNavigationHeader } from "@/components/admin/AdminNavigationHeader"
 import { supabase } from '@/integrations/supabase/client';
 
 // Essential Components Only
-import { ImprovedUserList } from "@/components/admin/ImprovedUserList";
+import { DatabaseSyncedUserManagement } from "@/components/admin/DatabaseSyncedUserManagement";
 import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
 import { SystemStatusPanel } from "@/components/admin/SystemStatusPanel";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
@@ -260,7 +260,7 @@ export function StreamlinedAdminDashboard() {
 
         {activeSection === "users" && (
           <div className="space-y-6">
-            <ImprovedUserList />
+            <DatabaseSyncedUserManagement />
           </div>
         )}
 
