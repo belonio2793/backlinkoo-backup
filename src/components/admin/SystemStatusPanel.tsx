@@ -192,3 +192,12 @@ export function SystemStatusPanel() {
     </Card>
   );
 }
+
+export function SystemStatusPanelWithTester() {
+  return (
+    <div className="space-y-6">
+      <SystemStatusPanel />
+      <NetlifyFunctionTester />
+    </div>
+  );
+}
