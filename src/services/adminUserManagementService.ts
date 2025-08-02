@@ -203,13 +203,18 @@ class AdminUserManagementService {
 
       if (!profile) return null;
 
+      // Get subscription separately
+      const { data: subscription } = await supabase
+        .from('subscribers')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
       // Get additional stats
       const [campaignData, creditData] = await Promise.all([
         this.getUserCampaignStats(userId),
         this.getUserCreditStats(userId)
       ]);
-
-      const subscription = (profile as any).subscribers?.[0] || null;
       const isPremium = subscription?.subscribed === true;
       const isGifted = isPremium && !subscription?.stripe_subscription_id;
 
