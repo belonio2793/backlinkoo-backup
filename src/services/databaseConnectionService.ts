@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { SafeAuth } from '@/utils/safeAuth';
 
 export interface ConnectionTestResult {
   success: boolean;
@@ -21,7 +22,7 @@ export interface ConnectionTestResult {
 class DatabaseConnectionService {
   
   /**
-   * Comprehensive database connection test
+   * Comprehensive database connection test with safe auth handling
    */
   async testConnection(): Promise<ConnectionTestResult> {
     try {
@@ -34,33 +35,32 @@ class DatabaseConnectionService {
       console.log('📍 Supabase URL:', supabaseUrl);
       console.log('🔑 Has anon key:', hasAnonKey);
       
-      // Step 2: Check authentication status
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-      if (authError) {
-        console.error('❌ Auth error:', authError);
-
-        // Handle specific auth session missing error
-        if (authError.message.includes('Auth session missing')) {
-          return {
-            success: false,
-            profileCount: 0,
-            error: 'Please sign in to access admin features',
-            userInfo: {
-              authenticated: false
-            },
-            details: {
-              supabaseUrl,
-              hasAnonKey,
-              tableAccess: 'Sign in required'
-            }
-          };
-        }
-
+      // Step 2: Check authentication status using SafeAuth
+      const userResult = await SafeAuth.getCurrentUser();
+      
+      if (userResult.needsAuth) {
+        console.warn('⚠️ No authenticated user');
         return {
           success: false,
           profileCount: 0,
-          error: `Authentication error: ${authError.message}`,
+          error: 'Please sign in to access admin features',
+          userInfo: {
+            authenticated: false
+          },
+          details: {
+            supabaseUrl,
+            hasAnonKey,
+            tableAccess: 'Sign in required'
+          }
+        };
+      }
+      
+      if (userResult.error) {
+        console.error('❌ Auth error:', userResult.error);
+        return {
+          success: false,
+          profileCount: 0,
+          error: `Authentication error: ${userResult.error}`,
           userInfo: {
             authenticated: false
           },
@@ -72,12 +72,12 @@ class DatabaseConnectionService {
         };
       }
       
+      const user = userResult.user;
       if (!user) {
-        console.warn('⚠️ No authenticated user');
         return {
           success: false,
           profileCount: 0,
-          error: 'No authenticated user. Please sign in first.',
+          error: 'Authentication required',
           userInfo: {
             authenticated: false
           },
@@ -91,7 +91,7 @@ class DatabaseConnectionService {
       
       console.log('✅ User authenticated:', user.email);
       
-      // Step 3: Check user profile and role
+      // Step 3: Check user profile and role safely
       let userRole = 'unknown';
       try {
         const { data: profile, error: profileError } = await supabase
@@ -224,10 +224,16 @@ class DatabaseConnectionService {
   }
   
   /**
-   * Quick connection status check
+   * Quick connection status check with safe auth
    */
   async quickConnectionCheck(): Promise<boolean> {
     try {
+      // Check auth first
+      const isAuth = await SafeAuth.isAuthenticated();
+      if (!isAuth) {
+        return false;
+      }
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('id')
@@ -241,7 +247,7 @@ class DatabaseConnectionService {
   }
   
   /**
-   * Check if user has admin privileges
+   * Check if user has admin privileges safely
    */
   async checkAdminAccess(): Promise<{
     isAdmin: boolean;
@@ -249,27 +255,19 @@ class DatabaseConnectionService {
     error?: string;
   }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const adminResult = await SafeAuth.isAdmin();
       
-      if (!user) {
+      if (adminResult.needsAuth) {
         return { isAdmin: false, error: 'Not authenticated' };
       }
       
-      // Check via profiles table
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single();
-      
-      if (error) {
-        return { isAdmin: false, error: error.message };
+      if (adminResult.error) {
+        return { isAdmin: false, error: adminResult.error };
       }
       
-      const isAdmin = profile?.role === 'admin';
       return { 
-        isAdmin, 
-        method: isAdmin ? 'profiles.role' : 'not admin'
+        isAdmin: adminResult.isAdmin, 
+        method: adminResult.isAdmin ? 'profiles.role' : 'not admin'
       };
       
     } catch (error: any) {
