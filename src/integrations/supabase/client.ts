@@ -3,6 +3,11 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { SecureConfig } from '../../lib/secure-config';
 
+// Store original fetch before third-party scripts can modify it
+if (typeof window !== 'undefined' && !(globalThis as any).__originalFetch__) {
+  (globalThis as any).__originalFetch__ = window.fetch.bind(window);
+}
+
 // Get Supabase configuration with proper fallback
 const getSupabaseConfig = () => {
   const envUrl = import.meta.env.VITE_SUPABASE_URL;
