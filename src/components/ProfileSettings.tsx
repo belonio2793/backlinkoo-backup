@@ -289,15 +289,12 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
                     {premiumLoading ? 'Checking...' : (isPremium ? 'Premium Member' : 'Free Plan')}
                   </Badge>
                 </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">
-                    {isPremium
-                      ? 'You have access to all premium features and unlimited usage.'
-                      : 'Upgrade to premium for unlimited access and advanced features.'
-                    }
-                  </p>
-                  <PremiumDiagnosticButton />
-                </div>
+                <p className="text-xs text-muted-foreground">
+                  {isPremium
+                    ? 'You have access to all premium features and unlimited usage.'
+                    : 'Upgrade to premium for unlimited access and advanced features.'
+                  }
+                </p>
               </div>
             </div>
 
