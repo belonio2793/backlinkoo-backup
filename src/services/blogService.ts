@@ -157,13 +157,7 @@ export class BlogService {
     console.log('✅ Blog post created successfully');
 
     // Create backup for trial posts too
-    if (isTrialPost) {
-      try {
-        await blogPersistenceService.storeWithMaxPersistence(blogPost, 'backup');
-      } catch (backupError) {
-        console.warn('⚠��� Trial post backup failed (non-critical):', backupError);
-      }
-    }
+    // Trial posts are created directly - no additional backup needed since they expire
 
     return blogPost;
     } catch (error: any) {
