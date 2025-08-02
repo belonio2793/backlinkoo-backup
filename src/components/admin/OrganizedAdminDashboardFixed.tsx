@@ -33,6 +33,7 @@ import { DirectOpenAITest } from "@/components/admin/DirectOpenAITest";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { ImprovedUserList } from "@/components/admin/ImprovedUserList";
 import { SystemStatusPanel } from "@/components/admin/SystemStatusPanel";
+import { DatabaseDiagnostic } from "@/components/admin/DatabaseDiagnostic";
 
 // Testing Tools
 import { AuthEmailTest } from "@/components/AuthEmailTest";
