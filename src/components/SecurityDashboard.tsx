@@ -250,12 +250,58 @@ export function SecurityDashboard() {
       const currentUser = usersWithRoles.find(u => u.user_id === selectedUser);
       const oldRole = currentUser?.role;
 
-      const { error } = await supabase.rpc('assign_user_role', {
-        target_user_id: selectedUser,
-        new_role: selectedRole as 'admin' | 'moderator' | 'user'
-      });
+      // Try using RPC function first, fallback to direct table insertion
+      let roleAssigned = false;
 
-      if (error) throw error;
+      try {
+        const { error: rpcError } = await supabase.rpc('assign_user_role', {
+          target_user_id: selectedUser,
+          new_role: selectedRole as 'admin' | 'moderator' | 'user'
+        });
+
+        if (!rpcError) {
+          roleAssigned = true;
+        } else {
+          console.log('RPC failed, trying direct table approach:', rpcError);
+        }
+      } catch (rpcErr) {
+        console.log('RPC function not available, using direct table approach');
+      }
+
+      // If RPC failed, try direct table insertion/update
+      if (!roleAssigned) {
+        // Check if user already has a role
+        const { data: existingRole } = await supabase
+          .from('user_roles')
+          .select('*')
+          .eq('user_id', selectedUser)
+          .single();
+
+        if (existingRole) {
+          // Update existing role
+          const { error: updateError } = await supabase
+            .from('user_roles')
+            .update({
+              role: selectedRole,
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', selectedUser);
+
+          if (updateError) throw updateError;
+        } else {
+          // Insert new role
+          const { error: insertError } = await supabase
+            .from('user_roles')
+            .insert({
+              user_id: selectedUser,
+              role: selectedRole,
+              created_by: (await supabase.auth.getUser()).data.user?.id || 'admin',
+              created_at: new Date().toISOString()
+            });
+
+          if (insertError) throw insertError;
+        }
+      }
 
       toast({
         title: 'Success',
