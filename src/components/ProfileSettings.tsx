@@ -315,12 +315,40 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="role">Account Type</Label>
-                <div className="flex items-center gap-2">
-                  <Badge variant={profile.role === 'admin' ? 'default' : 'secondary'}>
-                    {profile.role || 'user'}
+                <Label htmlFor="account-status">Account Status</Label>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Role Badge */}
+                  <Badge variant={profile.role === 'admin' ? 'default' : 'secondary'} className="flex items-center gap-1">
+                    <Shield className="h-3 w-3" />
+                    {profile.role === 'admin' ? 'Administrator' : 'Standard User'}
                   </Badge>
+
+                  {/* Premium Status Badge */}
+                  {premiumLoading ? (
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Checking...
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant={isPremium ? "default" : "secondary"}
+                      className={`flex items-center gap-1 ${
+                        isPremium
+                          ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white hover:from-amber-600 hover:to-yellow-600'
+                          : ''
+                      }`}
+                    >
+                      <Crown className="h-3 w-3" />
+                      {isPremium ? 'Premium Member' : 'Free Plan'}
+                    </Badge>
+                  )}
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  {isPremium
+                    ? 'You have access to all premium features and unlimited usage.'
+                    : 'Upgrade to premium for unlimited access and advanced features.'
+                  }
+                </p>
               </div>
             </div>
 
