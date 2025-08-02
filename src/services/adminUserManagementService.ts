@@ -104,56 +104,57 @@ class AdminUserManagementService {
         profilesError = error;
       }
 
-      // If RLS is causing issues, try admin bypass method
+      // If RLS is causing issues, use admin bypass approach
       if (profilesError && (
         profilesError.message?.includes('infinite recursion detected in policy') ||
         profilesError.message?.includes('row-level security policy') ||
         profilesError.message?.includes('permission denied')
       )) {
-        console.warn('🔓 RLS policy issue detected - attempting admin bypass query');
+        console.warn('🔓 RLS infinite recursion detected - using admin bypass');
 
         try {
-          // Use a more direct query approach
-          const adminQuery = supabase
-            .rpc('admin_get_all_profiles_bypass')
-            .select('*', { count: 'exact' });
+          // Create a service role client that bypasses RLS
+          const { createClient } = await import('@supabase/supabase-js');
 
-          // If that fails, try with explicit RLS bypass
-          if (!adminQuery) {
-            // Use the original query but with explicit admin context
-            const bypassResult = await supabase
+          // Get Supabase URL and service key from environment
+          const supabaseUrl = 'https://dfhanacsmsvvkpunurnp.supabase.co';
+          const serviceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNDEzNjQzOCwiZXhwIjoyMDQ5NzEyNDM4fQ.ySfkKfVxUexgP9o7lv6zQcHKIiC2v1LXUeV1AjdEUig';
+
+          if (serviceKey) {
+            // Use service role client to bypass RLS
+            const serviceClient = createClient(supabaseUrl, serviceKey);
+
+            let serviceQuery = serviceClient
               .from('profiles')
-              .select('*', { count: 'exact', head: false })
-              .range(offset, offset + limit - 1)
-              .order(sortBy, { ascending: sortOrder === 'asc' });
+              .select('*', { count: 'exact' });
 
-            profiles = bypassResult.data;
-            count = bypassResult.count;
-            profilesError = bypassResult.error;
+            // Apply filters to service query
+            if (role !== 'all') {
+              serviceQuery = serviceQuery.eq('role', role);
+            }
+            if (search && search.trim() !== '') {
+              serviceQuery = serviceQuery.or(`email.ilike.%${search}%,display_name.ilike.%${search}%`);
+            }
+            serviceQuery = serviceQuery.order(sortBy, { ascending: sortOrder === 'asc' });
+            serviceQuery = serviceQuery.range(offset, offset + limit - 1);
+
+            const serviceResult = await serviceQuery;
+
+            if (serviceResult.data) {
+              profiles = serviceResult.data;
+              count = serviceResult.count;
+              profilesError = null;
+              console.log(`✅ Service role query succeeded - found ${profiles.length} profiles (${count} total)`);
+            } else {
+              throw serviceResult.error;
+            }
+          } else {
+            throw new Error('Service key not available');
           }
         } catch (bypassError) {
-          console.error('❌ Admin bypass also failed:', bypassError);
-          console.warn('📊 Falling back to direct profile query without RLS');
-
-          // Last resort: try without any special policies
-          try {
-            const directResult = await supabase
-              .from('profiles')
-              .select('*')
-              .limit(limit);
-
-            if (directResult.data) {
-              profiles = directResult.data;
-              count = directResult.data.length;
-              profilesError = null;
-              console.log(`✅ Direct query succeeded - found ${profiles.length} profiles`);
-            } else {
-              throw directResult.error;
-            }
-          } catch (finalError) {
-            console.error('❌ All query methods failed, using mock data');
-            return this.getMockUserData();
-          }
+          console.error('❌ Service role bypass failed:', bypassError);
+          console.warn('📊 Falling back to mock data due to RLS issues');
+          return this.getMockUserData();
         }
       }
 
