@@ -460,7 +460,7 @@ export function AdminBlogManager() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <h3 className="font-semibold text-gray-900 truncate flex-1 min-w-0">{post.title}</h3>
+                        <h3 className="font-semibold text-gray-900 truncate flex-1 min-w-0">{post.title || 'Untitled Post'}</h3>
                         <Badge className={getStatusColor(post.status)}>
                           {post.status.toUpperCase()}
                         </Badge>
