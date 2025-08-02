@@ -87,7 +87,14 @@ export function SimpleAdminPage() {
 
     } catch (error: any) {
       console.error('❌ Sign in failed:', error);
-      setError('Invalid credentials. Please check your email and password.');
+
+      // Check if this is an RLS recursion error
+      if (error.message?.includes('infinite recursion') ||
+          error.message?.includes('policy')) {
+        setError('🔧 Database policy issue detected. Click "Fix RLS Issue" to resolve this automatically.');
+      } else {
+        setError('Invalid credentials. Please check your email and password.');
+      }
     } finally {
       setLoading(false);
     }
