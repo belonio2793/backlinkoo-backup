@@ -330,13 +330,13 @@ export class UnifiedClaimService {
         .limit(limit);
 
       if (error) {
-        console.error('Failed to get available posts:', error);
+        console.error('Failed to get available posts:', error.message || error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error getting available posts:', error);
+      console.error('Error getting available posts:', error.message || error);
       return [];
     }
   }
@@ -359,13 +359,13 @@ export class UnifiedClaimService {
         .eq('post_id', postId);
 
       if (error) {
-        console.error('Error checking if post is saved:', error);
+        console.error('Error checking if post is saved:', error.message || error);
         return false;
       }
 
       return (count || 0) > 0;
     } catch (error) {
-      console.error('Error checking if post is saved:', error);
+      console.error('Error checking if post is saved:', error.message || error);
       return false;
     }
   }
@@ -418,7 +418,7 @@ export class UnifiedClaimService {
       return { saveable: true, post };
 
     } catch (error) {
-      console.error('Error checking if post is saveable:', error);
+      console.error('Error checking if post is saveable:', error.message || error);
       return { saveable: false, reason: 'Error checking post status' };
     }
   }
@@ -444,7 +444,7 @@ export class UnifiedClaimService {
         .lt('expires_at', new Date().toISOString());
 
       if (fetchError || !expiredPosts) {
-        console.error('Failed to fetch expired posts:', fetchError);
+        console.error('Failed to fetch expired posts:', fetchError.message || fetchError);
         return 0;
       }
 
