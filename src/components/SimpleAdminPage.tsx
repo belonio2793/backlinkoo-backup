@@ -88,8 +88,8 @@ export function SimpleAdminPage() {
         }
       }
 
-      setError(null);
-      alert('✅ Admin user setup attempted! Try signing in now.');
+      setError('✅ Admin user created successfully! You can now sign in.');
+      console.log('✅ Admin user setup completed');
 
     } catch (error: any) {
       console.error('❌ Admin user creation failed:', error);
