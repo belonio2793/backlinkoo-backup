@@ -708,7 +708,18 @@ export function SecurityDashboard() {
           {/* User Roles Table */}
           <Card>
             <CardHeader>
-              <CardTitle>Current User Roles ({usersWithRoles.length})</CardTitle>
+              <CardTitle className="flex items-center justify-between">
+                Current User Roles ({usersWithRoles.length})
+                <Button
+                  onClick={fetchUserRoles}
+                  variant="outline"
+                  size="sm"
+                  disabled={loading}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  Sync Profiles
+                </Button>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
