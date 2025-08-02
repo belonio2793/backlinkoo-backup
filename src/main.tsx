@@ -17,6 +17,7 @@ requestIdleCallback(() => {
   if (import.meta.env.DEV) {
     import('./utils/testBlogGeneration');
     import('./utils/quickAuthTest');
+    import('./utils/authErrorChecker');
     import('./services/databaseSyncService').then(({ DatabaseSyncService }) => {
       DatabaseSyncService.scheduleCleanup();
       // Run initial sync verification
