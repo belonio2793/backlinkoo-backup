@@ -493,27 +493,38 @@ export class BlogService {
     totalViews: number;
     trialPosts: number;
   }> {
-    let query = supabase.from('blog_posts').select('status, view_count, is_trial_post');
-    
-    if (userId) {
-      query = query.eq('user_id', userId);
+    try {
+      let query = supabase.from('blog_posts').select('status, view_count, is_trial_post');
+
+      if (userId) {
+        query = query.eq('user_id', userId);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        // Handle third-party interference gracefully
+        if (error.message?.includes('Third-party script interference')) {
+          console.warn('⚠️ Third-party interference detected in getBlogPostStats, returning default stats');
+          return { total: 0, published: 0, drafts: 0, totalViews: 0, trialPosts: 0 };
+        }
+        throw new Error(`Failed to fetch blog post stats: ${error.message}`);
+      }
+
+      const stats = {
+        total: data?.length || 0,
+        published: data?.filter(p => p.status === 'published').length || 0,
+        drafts: data?.filter(p => p.status === 'draft').length || 0,
+        totalViews: data?.reduce((sum, p) => sum + (p.view_count || 0), 0) || 0,
+        trialPosts: data?.filter(p => p.is_trial_post).length || 0
+      };
+
+      return stats;
+    } catch (networkError: any) {
+      console.warn('⚠️ Network error in getBlogPostStats:', networkError.message);
+      // Return default stats instead of throwing to prevent cascade failures
+      return { total: 0, published: 0, drafts: 0, totalViews: 0, trialPosts: 0 };
     }
-
-    const { data, error } = await query;
-
-    if (error) {
-      throw new Error(`Failed to fetch blog post stats: ${error.message}`);
-    }
-
-    const stats = {
-      total: data?.length || 0,
-      published: data?.filter(p => p.status === 'published').length || 0,
-      drafts: data?.filter(p => p.status === 'draft').length || 0,
-      totalViews: data?.reduce((sum, p) => sum + (p.view_count || 0), 0) || 0,
-      trialPosts: data?.filter(p => p.is_trial_post).length || 0
-    };
-
-    return stats;
   }
 
   /**
