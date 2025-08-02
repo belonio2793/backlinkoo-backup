@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { SafeAuth } from '@/utils/safeAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,61 +28,28 @@ export function AdminSignIn() {
       setError(null);
 
       console.log('🔐 Attempting admin sign in...');
-      
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password
-      });
 
-      if (signInError) {
-        console.error('❌ Sign in error:', signInError);
-        setError(signInError.message);
+      const result = await SafeAuth.signIn(email.trim(), password);
+
+      if (!result.success) {
+        setError(result.error || 'Sign in failed');
         return;
       }
 
-      if (!data.user) {
-        setError('Sign in failed - no user returned');
+      console.log('✅ User signed in:', result.user?.email);
+
+      if (!result.isAdmin) {
+        setError('This account does not have admin privileges. Please contact an administrator.');
+
+        // Sign out the non-admin user
+        await SafeAuth.signOut();
         return;
       }
 
-      console.log('✅ User signed in:', data.user.email);
+      console.log('✅ Admin user verified');
 
-      // Check if user has admin role
-      try {
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role, email, display_name')
-          .eq('user_id', data.user.id)
-          .single();
-
-        if (profileError) {
-          console.error('❌ Profile check error:', profileError);
-          setError('Could not verify admin status. Please contact support.');
-          return;
-        }
-
-        if (!profile) {
-          setError('No profile found for this user. Please contact support.');
-          return;
-        }
-
-        if (profile.role !== 'admin') {
-          setError('This account does not have admin privileges. Please contact an administrator.');
-          
-          // Sign out the non-admin user
-          await supabase.auth.signOut();
-          return;
-        }
-
-        console.log('✅ Admin user verified:', profile.email);
-        
-        // Success! Reload the page to trigger the admin dashboard
-        window.location.reload();
-        
-      } catch (error: any) {
-        console.error('❌ Admin verification failed:', error);
-        setError('Failed to verify admin status. Please try again.');
-      }
+      // Success! Reload the page to trigger the admin dashboard
+      window.location.reload();
 
     } catch (error: any) {
       console.error('❌ Sign in failed:', error);
