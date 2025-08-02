@@ -52,7 +52,7 @@ export class UnifiedClaimService {
         subscriptionTier: data.subscription_tier
       };
     } catch (error) {
-      console.error('Error checking subscription status:', error);
+      console.error('Error checking subscription status:', error.message || error);
       return { isSubscriber: false, subscriptionTier: null };
     }
   }
@@ -72,7 +72,7 @@ export class UnifiedClaimService {
         .eq('user_id', userId);
 
       if (error) {
-        console.error('Failed to get user saved stats:', error);
+        console.error('Failed to get user saved stats:', error.message || error);
         return {
           savedCount: 0,
           maxSaved: isSubscriber ? -1 : this.MAX_SAVED_PER_FREE_USER,
@@ -91,7 +91,7 @@ export class UnifiedClaimService {
         isSubscriber
       };
     } catch (error) {
-      console.error('Error getting user saved stats:', error);
+      console.error('Error getting user saved stats:', error.message || error);
       return {
         savedCount: 0,
         maxSaved: this.MAX_SAVED_PER_FREE_USER,
@@ -123,7 +123,7 @@ export class UnifiedClaimService {
 
       return data;
     } catch (error) {
-      console.error('Error in getBlogPostBySlug:', error);
+      console.error('Error in getBlogPostBySlug:', error.message || error);
       return null;
     }
   }
@@ -143,13 +143,13 @@ export class UnifiedClaimService {
         if (error.code === 'PGRST116') {
           return null;
         }
-        console.error('Error fetching blog post by ID:', error);
+        console.error('Error fetching blog post by ID:', error.message || error);
         return null;
       }
 
       return data;
     } catch (error) {
-      console.error('Error in getBlogPostById:', error);
+      console.error('Error in getBlogPostById:', error.message || error);
       return null;
     }
   }
