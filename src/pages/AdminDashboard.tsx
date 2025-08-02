@@ -1,7 +1,19 @@
- 0e850c3a (Remove QuickLoginHelper import and usage from AdminDashboard)
+import { AuthCheck } from "@/components/AuthCheck";
+import { Footer } from "@/components/Footer";
+import { OrganizedAdminDashboard } from "@/components/admin/OrganizedAdminDashboard";
 
 const AdminDashboard = () => {
- 3e3b9129 (Remove QuickLoginHelper component from AdminDashboard layout)
+  return (
+    <AuthCheck requireAdmin={true}>
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-8">
+          <OrganizedAdminDashboard />
+        </div>
+        
+        <Footer />
+      </div>
+    </AuthCheck>
+  );
 };
 
 export default AdminDashboard;
