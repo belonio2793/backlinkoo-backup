@@ -2,7 +2,7 @@ import AdminDashboard from '@/pages/AdminDashboard';
 
 export function SimpleAdminPage() {
 
- fa1a07bd (Clean up admin page to remove emergency access functionality)
+ 53db1bf8 (Fix admin login to use correct column name and avoid RLS issues)
 }
 
 export default SimpleAdminPage;
