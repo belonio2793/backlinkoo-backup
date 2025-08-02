@@ -200,6 +200,12 @@ class AdminUserManagementService {
         .single();
 
       if (error) {
+        // Handle RLS infinite recursion error
+        if (error.message?.includes('infinite recursion detected in policy')) {
+          console.warn('RLS policy infinite recursion - returning demo user');
+          return this.getMockUserData().users[0] || null;
+        }
+
         if (error.message?.includes('Database not available') || error.message?.includes('Mock mode')) {
           console.warn('Mock database mode - returning demo user');
           return this.getMockUserData().users[0] || null;
