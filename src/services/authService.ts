@@ -104,6 +104,14 @@ export class AuthService {
           };
         }
 
+        // Ensure user profile exists after successful auth
+        try {
+          await this.ensureUserProfile(data.user);
+        } catch (profileError) {
+          console.warn('Profile creation failed, but auth successful:', profileError);
+          // Don't fail the login if profile creation fails
+        }
+
         return {
           success: true,
           user: data.user,
