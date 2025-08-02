@@ -5,8 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, Users, Activity, AlertTriangle } from 'lucide-react';
+import { adminAuditLogger, type AdminAuditLog, type AdminAction } from '@/services/adminAuditLogger';
+import { Shield, Users, Activity, AlertTriangle, Search, Download, RefreshCw, Clock, Eye, Filter } from 'lucide-react';
 
 interface UserRole {
   id: string;
@@ -21,30 +24,42 @@ interface UserWithRole extends UserRole {
   display_name: string;
 }
 
-interface AuditLog {
-  id: string;
-  user_id: string;
-  action: string;
-  resource: string;
-  details: any;
-  ip_address: string | null;
-  user_agent: string | null;
-  created_at: string;
+interface AuditStats {
+  totalLogs: number;
+  recentLogs: number;
+  failedActions: number;
+  uniqueAdmins: number;
 }
 
 export function SecurityDashboard() {
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [usersWithRoles, setUsersWithRoles] = useState<UserWithRole[]>([]);
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AdminAuditLog[]>([]);
+  const [auditStats, setAuditStats] = useState<AuditStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [selectedRole, setSelectedRole] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [actionFilter, setActionFilter] = useState<string>('');
+  const [resourceFilter, setResourceFilter] = useState<string>('');
+  const [activeTab, setActiveTab] = useState('overview');
   const { toast } = useToast();
 
   useEffect(() => {
+    initializeAuditLogger();
     fetchUserRoles();
     fetchAuditLogs();
+    fetchAuditStats();
   }, []);
+
+  const initializeAuditLogger = async () => {
+    await adminAuditLogger.initialize();
+    // Log that admin accessed security dashboard
+    await adminAuditLogger.logSecurityAction('SECURITY_SETTINGS_UPDATED', 'security_dashboard', {
+      section: 'accessed',
+      timestamp: new Date().toISOString()
+    });
+  };
 
   const fetchUserRoles = async () => {
     try {
@@ -91,22 +106,15 @@ export function SecurityDashboard() {
 
   const fetchAuditLogs = async () => {
     try {
-      const { data, error } = await supabase
-        .from('security_audit_log')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
+      const filters: any = {
+        limit: 100
+      };
 
-      if (error) throw error;
-      setAuditLogs((data || []).map(log => ({
-        ...log,
-        ip_address: log.ip_address as string | null,
-        user_agent: log.user_agent as string | null,
-        action: log.action as string,
-        resource: log.resource as string,
-        user_id: log.user_id as string,
-        created_at: log.created_at as string
-      })));
+      if (actionFilter) filters.action = actionFilter as AdminAction;
+      if (resourceFilter) filters.resource = resourceFilter;
+
+      const logs = await adminAuditLogger.getAuditLogs(filters);
+      setAuditLogs(logs);
     } catch (error) {
       console.error('Error fetching audit logs:', error);
       toast({
@@ -116,6 +124,15 @@ export function SecurityDashboard() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAuditStats = async () => {
+    try {
+      const stats = await adminAuditLogger.getAuditStats();
+      setAuditStats(stats);
+    } catch (error) {
+      console.error('Error fetching audit stats:', error);
     }
   };
 
@@ -130,6 +147,10 @@ export function SecurityDashboard() {
     }
 
     try {
+      // Get current role for audit log
+      const currentUser = usersWithRoles.find(u => u.user_id === selectedUser);
+      const oldRole = currentUser?.role;
+
       const { error } = await supabase.rpc('assign_user_role', {
         target_user_id: selectedUser,
         new_role: selectedRole as 'admin' | 'moderator' | 'user'
@@ -142,17 +163,36 @@ export function SecurityDashboard() {
         description: 'Role assigned successfully'
       });
 
-      // Log the action
-      await logSecurityAction('ROLE_ASSIGNED', 'user_roles', {
-        target_user_id: selectedUser,
-        new_role: selectedRole
-      });
+      // Log the action with detailed information
+      await adminAuditLogger.logUserAction(
+        'USER_ROLE_ASSIGNED',
+        selectedUser,
+        {
+          target_user_email: currentUser?.email,
+          old_role: oldRole,
+          new_role: selectedRole
+        }
+      );
 
       fetchUserRoles();
+      fetchAuditLogs(); // Refresh audit logs
       setSelectedUser('');
       setSelectedRole('');
     } catch (error) {
       console.error('Error assigning role:', error);
+
+      // Log the failed action
+      await adminAuditLogger.logUserAction(
+        'USER_ROLE_ASSIGNED',
+        selectedUser,
+        {
+          attempted_role: selectedRole,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        },
+        false,
+        error instanceof Error ? error.message : 'Failed to assign role'
+      );
+
       toast({
         title: 'Error',
         description: 'Failed to assign role',
@@ -161,17 +201,64 @@ export function SecurityDashboard() {
     }
   };
 
-  const logSecurityAction = async (action: string, resource: string, details: any) => {
+  const refreshData = async () => {
+    setLoading(true);
+    await Promise.all([
+      fetchUserRoles(),
+      fetchAuditLogs(),
+      fetchAuditStats()
+    ]);
+
+    await adminAuditLogger.logSystemAction('METRICS_VIEWED', {
+      section: 'security_dashboard',
+      action: 'refresh_data'
+    });
+
+    toast({
+      title: 'Data Refreshed',
+      description: 'Security dashboard data has been updated'
+    });
+  };
+
+  const exportAuditLogs = async () => {
     try {
-      await supabase.from('security_audit_log').insert({
-        action,
-        resource,
-        details,
-        ip_address: null, // Would be populated by server in production
-        user_agent: navigator.userAgent
+      const allLogs = await adminAuditLogger.getAuditLogs({ limit: 1000 });
+      const csv = [
+        ['Timestamp', 'Admin Email', 'Action', 'Resource', 'Success', 'Details'].join(','),
+        ...allLogs.map(log => [
+          log.created_at,
+          log.admin_email,
+          log.action,
+          log.resource,
+          log.success ? 'Yes' : 'No',
+          JSON.stringify(log.details || {})
+        ].join(','))
+      ].join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `admin-audit-logs-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      await adminAuditLogger.logSystemAction('DATA_EXPORT', {
+        type: 'audit_logs',
+        record_count: allLogs.length
+      });
+
+      toast({
+        title: 'Export Complete',
+        description: `Exported ${allLogs.length} audit log records`
       });
     } catch (error) {
-      console.error('Error logging security action:', error);
+      console.error('Error exporting audit logs:', error);
+      toast({
+        title: 'Export Failed',
+        description: 'Failed to export audit logs',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -182,6 +269,22 @@ export function SecurityDashboard() {
       case 'user': return 'secondary';
       default: return 'outline';
     }
+  };
+
+  const filteredLogs = auditLogs.filter(log => {
+    const matchesSearch = !searchTerm ||
+      log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.resource.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.admin_email.toLowerCase().includes(searchTerm.toLowerCase());
+
+    return matchesSearch;
+  });
+
+  const getActionBadgeVariant = (action: string, success: boolean) => {
+    if (!success) return 'destructive';
+    if (action.includes('DELETE') || action.includes('SUSPEND')) return 'destructive';
+    if (action.includes('CREATE') || action.includes('ASSIGN')) return 'default';
+    return 'secondary';
   };
 
   if (loading) {
@@ -197,155 +300,351 @@ export function SecurityDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Shield className="h-6 w-6 text-primary" />
-        <h2 className="text-2xl font-bold">Security Dashboard</h2>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Shield className="h-6 w-6 text-primary" />
+          <h2 className="text-2xl font-bold">Security Dashboard</h2>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={refreshData} variant="outline" size="sm" disabled={loading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button onClick={exportAuditLogs} variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Export Logs
+          </Button>
+        </div>
       </div>
 
-      {/* Security Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{usersWithRoles.length}</div>
-          </CardContent>
-        </Card>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="audit">Audit Logs</TabsTrigger>
+          <TabsTrigger value="roles">Role Management</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        </TabsList>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Admin Users</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {usersWithRoles.filter(ur => ur.role === 'admin').length}
-            </div>
-          </CardContent>
-        </Card>
+        <TabsContent value="overview" className="space-y-6">
+          {/* Security Overview Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{usersWithRoles.length}</div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Security Events</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{auditLogs.length}</div>
-          </CardContent>
-        </Card>
-      </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Admin Users</CardTitle>
+                <AlertTriangle className="h-4 w-4 text-destructive" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {usersWithRoles.filter(ur => ur.role === 'admin').length}
+                </div>
+              </CardContent>
+            </Card>
 
-      {/* Role Assignment */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Assign User Role</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4 items-end">
-            <div className="flex-1">
-              <label className="text-sm font-medium">User</label>
-              <Select value={selectedUser} onValueChange={setSelectedUser}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select user" />
-                </SelectTrigger>
-                <SelectContent>
-                  {usersWithRoles.map((userRole) => (
-                    <SelectItem key={userRole.user_id} value={userRole.user_id}>
-                      {userRole.email} ({userRole.display_name})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex-1">
-              <label className="text-sm font-medium">Role</label>
-              <Select value={selectedRole} onValueChange={setSelectedRole}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">User</SelectItem>
-                  <SelectItem value="moderator">Moderator</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button onClick={assignRole} disabled={!selectedUser || !selectedRole}>
-              Assign Role
-            </Button>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Audit Events</CardTitle>
+                <Activity className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{auditStats?.totalLogs || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {auditStats?.recentLogs || 0} in last 24h
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Failed Actions</CardTitle>
+                <AlertTriangle className="h-4 w-4 text-destructive" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-destructive">{auditStats?.failedActions || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {auditStats?.uniqueAdmins || 0} unique admins
+                </p>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+        </TabsContent>
 
-      {/* User Roles Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>User Roles</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Assigned At</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {usersWithRoles.map((userRole) => (
-                <TableRow key={userRole.id}>
-                  <TableCell>{userRole.display_name || 'N/A'}</TableCell>
-                  <TableCell>{userRole.email}</TableCell>
-                  <TableCell>
-                    <Badge variant={getRoleBadgeVariant(userRole.role)}>
-                      {userRole.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(userRole.created_at).toLocaleDateString()}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+        <TabsContent value="audit" className="space-y-6">
+          {/* Audit Log Filters */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Filter className="h-5 w-5" />
+                Audit Log Filters
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Search</label>
+                  <div className="relative">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search actions, resources, emails..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-8"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Action</label>
+                  <Select value={actionFilter} onValueChange={setActionFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All actions" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All actions</SelectItem>
+                      <SelectItem value="USER_ROLE_ASSIGNED">User Role Assigned</SelectItem>
+                      <SelectItem value="BLOG_POST_CREATED">Blog Post Created</SelectItem>
+                      <SelectItem value="BLOG_POST_DELETED">Blog Post Deleted</SelectItem>
+                      <SelectItem value="SECURITY_SETTINGS_UPDATED">Security Settings</SelectItem>
+                      <SelectItem value="ADMIN_LOGIN">Admin Login</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Resource</label>
+                  <Select value={resourceFilter} onValueChange={setResourceFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All resources" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All resources</SelectItem>
+                      <SelectItem value="users">Users</SelectItem>
+                      <SelectItem value="blog_posts">Blog Posts</SelectItem>
+                      <SelectItem value="system">System</SelectItem>
+                      <SelectItem value="security_dashboard">Security</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <Button onClick={fetchAuditLogs} variant="outline" size="sm">
+                  Apply Filters
+                </Button>
+                <Button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setActionFilter('');
+                    setResourceFilter('');
+                    fetchAuditLogs();
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Audit Logs */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Security Audit Log</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Action</TableHead>
-                <TableHead>Resource</TableHead>
-                <TableHead>Details</TableHead>
-                <TableHead>Timestamp</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {auditLogs.map((log) => (
-                <TableRow key={log.id}>
-                  <TableCell className="font-medium">{log.action}</TableCell>
-                  <TableCell>{log.resource}</TableCell>
-                  <TableCell className="max-w-xs truncate">
-                    {JSON.stringify(log.details)}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(log.created_at).toLocaleString()}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+          {/* Audit Logs Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5" />
+                Recent Admin Actions ({filteredLogs.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Timestamp</TableHead>
+                    <TableHead>Admin</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Resource</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Details</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredLogs.slice(0, 50).map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell className="font-mono text-xs">
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {log.created_at ? new Date(log.created_at).toLocaleString() : 'Unknown'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {log.admin_email}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getActionBadgeVariant(log.action, log.success)}>
+                          {log.action}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-medium">{log.resource}</TableCell>
+                      <TableCell>
+                        <Badge variant={log.success ? 'default' : 'destructive'}>
+                          {log.success ? 'Success' : 'Failed'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="max-w-xs">
+                        <div className="text-xs text-muted-foreground truncate">
+                          {log.error_message || (log.details ? JSON.stringify(log.details).slice(0, 100) + '...' : 'No details')}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="roles" className="space-y-6">
+
+          {/* Role Assignment */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Assign User Role</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-4 items-end">
+                <div className="flex-1">
+                  <label className="text-sm font-medium">User</label>
+                  <Select value={selectedUser} onValueChange={setSelectedUser}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select user" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {usersWithRoles.map((userRole) => (
+                        <SelectItem key={userRole.user_id} value={userRole.user_id}>
+                          {userRole.email} ({userRole.display_name})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <label className="text-sm font-medium">Role</label>
+                  <Select value={selectedRole} onValueChange={setSelectedRole}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="moderator">Moderator</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button onClick={assignRole} disabled={!selectedUser || !selectedRole}>
+                  Assign Role
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* User Roles Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Current User Roles ({usersWithRoles.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Assigned At</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {usersWithRoles.map((userRole) => (
+                    <TableRow key={userRole.id}>
+                      <TableCell>{userRole.display_name || 'N/A'}</TableCell>
+                      <TableCell>{userRole.email}</TableCell>
+                      <TableCell>
+                        <Badge variant={getRoleBadgeVariant(userRole.role)}>
+                          {userRole.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(userRole.created_at).toLocaleDateString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Security Analytics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Recent Activity Summary</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Total Actions Today:</span>
+                      <span className="font-mono">{auditStats?.recentLogs || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Failed Actions:</span>
+                      <span className="font-mono text-destructive">{auditStats?.failedActions || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Active Admins:</span>
+                      <span className="font-mono">{auditStats?.uniqueAdmins || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Success Rate:</span>
+                      <span className="font-mono">
+                        {auditStats?.totalLogs ?
+                          Math.round(((auditStats.totalLogs - (auditStats.failedActions || 0)) / auditStats.totalLogs) * 100)
+                          : 100}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Security Status</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm">Audit Logging Active</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm">Role-Based Access Control</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm">Database Security Policies</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
