@@ -24,32 +24,10 @@ export interface MetricsResult {
 class AdminDashboardMetricsService {
   
   /**
-   * Test basic Supabase connection
-   */
-  private async testConnection(): Promise<void> {
-    try {
-      console.log('Testing Supabase connection...');
-      const { data, error } = await supabase.from('profiles').select('id').limit(1);
-
-      if (error) {
-        console.error('Connection test failed:', this.formatError(error));
-        throw new Error(`Database connection failed: ${this.formatError(error)}`);
-      }
-
-      console.log('Connection test successful');
-    } catch (error) {
-      console.error('Connection test error:', this.formatError(error));
-      throw error;
-    }
-  }
-
-  /**
    * Fetch all admin dashboard metrics
    */
   async fetchDashboardMetrics(): Promise<AdminDashboardMetrics> {
     try {
-      // Test connection first
-      await this.testConnection();
       // Fetch all metrics in parallel for better performance
       const [
         totalUsersResult,
