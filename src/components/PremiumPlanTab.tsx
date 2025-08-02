@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { SEOAcademyTab } from '@/components/SEOAcademyTab';
+import { PremiumCheckoutModal } from '@/components/PremiumCheckoutModal';
 import {
   Crown,
   Star,
@@ -35,6 +36,7 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
   const { user } = useAuth();
   const { toast } = useToast();
   const [activeFeature, setActiveFeature] = useState('overview');
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   const premiumFeatures = [
     {
@@ -87,9 +89,13 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
   ];
 
   const handleUpgrade = () => {
+    setIsCheckoutOpen(true);
+  };
+
+  const handleCheckoutSuccess = () => {
     toast({
-      title: "Redirecting to Checkout",
-      description: "Taking you to secure payment processing...",
+      title: "Welcome to Premium!",
+      description: "Your subscription is now active. Enjoy all premium features!",
     });
     onUpgrade();
   };
@@ -338,6 +344,13 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
           </CardContent>
         </Card>
       )}
+
+      {/* Checkout Modal */}
+      <PremiumCheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        onSuccess={handleCheckoutSuccess}
+      />
     </div>
   );
 }
