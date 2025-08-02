@@ -319,9 +319,10 @@ export function SecurityDashboard() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="audit">Audit Logs</TabsTrigger>
+          <TabsTrigger value="activity">Live Activity</TabsTrigger>
           <TabsTrigger value="roles">Role Management</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
