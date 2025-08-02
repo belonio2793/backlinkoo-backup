@@ -650,6 +650,8 @@ export function SecurityDashboard() {
               </div>
             </CardContent>
           </Card>
+
+          <AuditLoggingSummary />
         </TabsContent>
       </Tabs>
     </div>
