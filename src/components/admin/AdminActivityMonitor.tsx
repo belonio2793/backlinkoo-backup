@@ -79,7 +79,7 @@ export function AdminActivityMonitor() {
       (log.details && JSON.stringify(log.details).toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesAdmin = !adminFilter || log.admin_email.includes(adminFilter);
-    const matchesStatus = !statusFilter || 
+    const matchesStatus = !statusFilter || statusFilter === 'all' ||
       (statusFilter === 'success' && log.success) ||
       (statusFilter === 'failed' && !log.success);
     
