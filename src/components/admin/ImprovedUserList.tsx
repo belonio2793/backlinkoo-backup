@@ -51,7 +51,7 @@ export function ImprovedUserList() {
         console.error('❌ Database connection failed:', error);
         return {
           connected: false,
-          error: error.message,
+          error: `Database error: ${error.message || 'Connection failed'}`,
           tablesAvailable: false
         };
       }
