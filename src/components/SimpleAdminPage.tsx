@@ -35,11 +35,20 @@ export function SimpleAdminPage() {
       }
 
       // Check if user has admin privileges
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', data.user.id)
+        .eq('user_id', data.user.id)
         .single();
+
+      if (profileError) {
+        // If profile query fails, check if it's an admin email
+        if (data.user.email === 'support@backlinkoo.com') {
+          setIsLoggedIn(true);
+          return;
+        }
+        throw new Error('Unable to verify admin privileges');
+      }
 
       if (profile?.role !== 'admin') {
         throw new Error('Unauthorized access - admin privileges required');
