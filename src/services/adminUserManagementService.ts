@@ -65,21 +65,32 @@ class AdminUserManagementService {
 
       console.log('📊 Profile query constructed:', profileQuery);
 
-      // Apply role filter
+      console.log('🎯 Applying filters - role:', role, 'search:', search, 'sortBy:', sortBy);
+
+      // Apply role filter (only if not 'all' and not first time loading)
       if (role !== 'all') {
+        console.log('🔍 Applying role filter:', role);
         profileQuery = profileQuery.eq('role', role);
       }
 
-      // Apply search filter
-      if (search) {
+      // Apply search filter (only if provided)
+      if (search && search.trim() !== '') {
+        console.log('🔍 Applying search filter:', search);
         profileQuery = profileQuery.or(`email.ilike.%${search}%,display_name.ilike.%${search}%`);
       }
 
       // Apply sorting
       profileQuery = profileQuery.order(sortBy, { ascending: sortOrder === 'asc' });
 
-      // Apply pagination
-      profileQuery = profileQuery.range(offset, offset + limit - 1);
+      // For debugging, let's try without pagination first
+      console.log('📄 Pagination - offset:', offset, 'limit:', limit);
+      if (offset === 0) {
+        // First load - get all profiles to see total count
+        console.log('🆕 First load - fetching all profiles to debug');
+      } else {
+        // Apply pagination for subsequent loads
+        profileQuery = profileQuery.range(offset, offset + limit - 1);
+      }
 
       // Try to execute query
       let profiles, profilesError, count;
