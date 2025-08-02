@@ -1,4 +1,4 @@
-import { StreamlinedAdminDashboard } from "@/components/admin/StreamlinedAdminDashboard";
+ 0e850c3a (Remove QuickLoginHelper import and usage from AdminDashboard)
 
 const AdminDashboard = () => {
   return <StreamlinedAdminDashboard />;
