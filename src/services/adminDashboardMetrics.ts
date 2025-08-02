@@ -4,7 +4,7 @@ export interface AdminDashboardMetrics {
   totalUsers: number;
   activeUsers: number;
   monthlyRevenue: number;
-  pendingClaims: number;
+  runningCampaigns: number;
   totalUsersChange?: number;
   activeUsersChange?: number;
   monthlyRevenueChange?: number;
@@ -33,24 +33,24 @@ class AdminDashboardMetricsService {
         totalUsersResult,
         activeUsersResult,
         monthlyRevenueResult,
-        pendingClaimsResult
+        runningCampaignsResult
       ] = await Promise.allSettled([
         this.getTotalUsers(),
         this.getActiveUsers(),
         this.getMonthlyRevenue(),
-        this.getPendingClaims()
+        this.getRunningCampaigns()
       ]);
 
       // Extract values or use 0 as fallback
       const totalUsers = totalUsersResult.status === 'fulfilled' ? totalUsersResult.value : 0;
       const activeUsers = activeUsersResult.status === 'fulfilled' ? activeUsersResult.value : 0;
       const monthlyRevenue = monthlyRevenueResult.status === 'fulfilled' ? monthlyRevenueResult.value : 0;
-      const pendingClaims = pendingClaimsResult.status === 'fulfilled' ? pendingClaimsResult.value : 0;
+      const runningCampaigns = runningCampaignsResult.status === 'fulfilled' ? runningCampaignsResult.value : 0;
 
       // Log any failures for debugging
-      [totalUsersResult, activeUsersResult, monthlyRevenueResult, pendingClaimsResult].forEach((result, index) => {
+      [totalUsersResult, activeUsersResult, monthlyRevenueResult, runningCampaignsResult].forEach((result, index) => {
         if (result.status === 'rejected') {
-          const metricNames = ['Total Users', 'Active Users', 'Monthly Revenue', 'Pending Claims'];
+          const metricNames = ['Total Users', 'Active Users', 'Monthly Revenue', 'Running Campaigns'];
           console.warn(`Failed to fetch ${metricNames[index]}:`, result.reason);
         }
       });
@@ -59,7 +59,7 @@ class AdminDashboardMetricsService {
         totalUsers,
         activeUsers,
         monthlyRevenue,
-        pendingClaims
+        runningCampaigns
       };
     } catch (error) {
       console.error('Error fetching dashboard metrics:', error);
@@ -144,25 +144,25 @@ class AdminDashboardMetricsService {
   }
 
   /**
-   * Get number of unclaimed blog posts that require attention
+   * Get number of running campaigns that aren't completed
    */
-  private async getPendingClaims(): Promise<number> {
+  private async getRunningCampaigns(): Promise<number> {
     try {
       const { count, error } = await supabase
-        .from('blog_posts')
+        .from('campaigns')
         .select('*', { count: 'exact', head: true })
-        .eq('claimed', false)
-        .eq('status', 'published')
-        .not('user_id', 'is', null);
+        .neq('status', 'completed')
+        .neq('status', 'cancelled')
+        .gt('credits_used', 0); // Only campaigns that used credits
 
       if (error) {
-        console.error('Error fetching pending claims:', error);
+        console.error('Error fetching running campaigns:', error);
         return 0;
       }
 
       return count || 0;
     } catch (error) {
-      console.error('Error in getPendingClaims:', error);
+      console.error('Error in getRunningCampaigns:', error);
       return 0;
     }
   }
@@ -181,7 +181,7 @@ class AdminDashboardMetricsService {
         totalUsers: 0,
         activeUsers: 0,
         monthlyRevenue: 0,
-        pendingClaims: 0
+        runningCampaigns: 0
       };
 
       const previousRevenue = previousMonthRevenue.status === 'fulfilled' ? previousMonthRevenue.value : 0;
@@ -203,7 +203,7 @@ class AdminDashboardMetricsService {
         totalUsers: 0,
         activeUsers: 0,
         monthlyRevenue: 0,
-        pendingClaims: 0
+        runningCampaigns: 0
       };
     }
   }
