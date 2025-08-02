@@ -46,24 +46,9 @@ import {
   Users,
   Activity,
   CreditCard,
-  Clock,
-  Infinity,
-  LogOut,
-  Brain,
-  Settings,
-  Server,
   FileText,
-  Mail,
-  Shield,
-  Zap,
-  Database,
-  Globe,
-  Code,
-  BarChart3,
-  MonitorSpeaker,
   RefreshCw,
-  AlertCircle,
-  Target
+  MonitorSpeaker
 } from "lucide-react";
 
 export function OrganizedAdminDashboard() {
