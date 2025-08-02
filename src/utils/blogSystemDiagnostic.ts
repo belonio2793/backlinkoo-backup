@@ -209,14 +209,30 @@ export class BlogSystemDiagnostic {
       this.log('Test Cleanup', 'success', 'Test post cleaned up successfully');
 
     } catch (error: any) {
-      if (error.message.includes('row-level security') || error.message.includes('policy')) {
+      const errorMessage = error.message || 'Unknown error';
+
+      if (errorMessage.includes('Test timeout')) {
+        this.log('Test Data Generation', 'warning', 'Test post creation timed out - possible network issues', {
+          issue: 'Request timeout after 10 seconds',
+          solution: 'Check network connection and Supabase connectivity',
+          error: errorMessage
+        });
+      } else if (errorMessage.includes('row-level security') || errorMessage.includes('policy')) {
         this.log('Test Data Generation', 'warning', 'Blog post creation blocked by RLS policies', {
           issue: 'Row Level Security policies are too restrictive',
           solution: 'Run RLS policy fix or check database permissions',
-          error: error.message
+          error: errorMessage
+        });
+      } else if (errorMessage.includes('Network request failed') || errorMessage.includes('Failed to fetch')) {
+        this.log('Test Data Generation', 'error', 'Network connectivity issues detected', {
+          issue: 'Cannot connect to Supabase database',
+          solution: 'Check network connection and Supabase configuration',
+          error: errorMessage
         });
       } else {
-        this.log('Test Data Generation', 'error', 'Cannot create test posts - check database permissions', {}, error);
+        this.log('Test Data Generation', 'error', 'Cannot create test posts - check database permissions', {
+          error: errorMessage
+        }, error);
       }
     }
   }
