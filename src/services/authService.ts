@@ -92,8 +92,10 @@ export class AuthService {
           status: error.status,
           statusText: error.statusText,
           name: error.name,
-          email: signInData.email
+          email: signInData.email,
+          fullError: JSON.stringify(error, null, 2)
         });
+        console.error('🚨 Raw error object:', error);
         return {
           success: false,
           error: this.formatErrorMessage(error.message)
