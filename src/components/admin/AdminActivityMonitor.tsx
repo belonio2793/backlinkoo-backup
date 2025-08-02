@@ -53,9 +53,9 @@ export function AdminActivityMonitor() {
     setLoading(true);
     try {
       const filters: any = { limit: 100 };
-      
-      if (actionFilter) filters.action = actionFilter as AdminAction;
-      if (resourceFilter) filters.resource = resourceFilter;
+
+      if (actionFilter && actionFilter !== 'all') filters.action = actionFilter as AdminAction;
+      if (resourceFilter && resourceFilter !== 'all') filters.resource = resourceFilter;
       
       const fetchedLogs = await adminAuditLogger.getAuditLogs(filters);
       setLogs(fetchedLogs);
