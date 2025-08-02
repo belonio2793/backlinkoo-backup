@@ -116,12 +116,7 @@ export function AdminSignIn() {
               />
             </div>
 
-            {/* Demo credentials hint */}
-            <div className="p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground">
-              <p className="font-medium mb-1">Demo Admin Access:</p>
-              <p>Email: support@backlinkoo.com</p>
-              <p>Password: Admin123!@#</p>
-            </div>
+
 
             <div className="space-y-3">
               <Button
