@@ -210,8 +210,17 @@ class SystemConfigurationService {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+
+      try {
+        const errorText = await response.text();
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.error?.message || errorMessage;
+      } catch {
+        // If parsing fails, use the default error message
+      }
+
+      throw new Error(errorMessage);
     }
 
     return response.json();
