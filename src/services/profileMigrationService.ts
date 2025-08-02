@@ -19,7 +19,7 @@ export class ProfileMigrationService {
 
       if (fetchError && fetchError.code !== 'PGRST116') {
         // Real error, not just "no rows returned"
-        console.error('Error fetching profile:', fetchError);
+        console.error('Error fetching profile:', fetchError.message || fetchError);
         return { success: false, error: fetchError.message };
       }
 
@@ -37,7 +37,7 @@ export class ProfileMigrationService {
           });
 
         if (insertError) {
-          console.error('Error creating profile:', insertError);
+          console.error('Error creating profile:', insertError.message || insertError);
           return { success: false, error: insertError.message };
         }
 
@@ -54,7 +54,7 @@ export class ProfileMigrationService {
           .eq('user_id', userId);
 
         if (updateError) {
-          console.error('Error updating profile display_name:', updateError);
+          console.error('Error updating profile display_name:', updateError.message || updateError);
           return { success: false, error: updateError.message };
         }
 
@@ -66,7 +66,7 @@ export class ProfileMigrationService {
       return { success: true };
 
     } catch (error: any) {
-      console.error('Profile migration error:', error);
+      console.error('Profile migration error:', error.message || error);
       return { success: false, error: error.message || 'Unknown error' };
     }
   }
