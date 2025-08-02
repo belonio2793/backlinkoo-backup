@@ -1,10 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { realAdminUserService } from '@/services/realAdminUserService';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { databaseConnectionService, type ConnectionTestResult } from '@/services/databaseConnectionService';
 import { useToast } from '@/hooks/use-toast';
-import { Database, Users, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import {
+  Database,
+  Users,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+  AlertTriangle,
+  User,
+  Shield,
+  Settings
+} from 'lucide-react';
 
 export function DatabaseTestComponent() {
   const [testing, setTesting] = useState(false);
