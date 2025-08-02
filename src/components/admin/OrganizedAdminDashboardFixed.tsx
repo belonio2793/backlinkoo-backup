@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useWorkingAdminDashboardMetrics } from "@/hooks/useWorkingAdminDashboardMetrics";
 import { AdminNavigationHeader } from "@/components/admin/AdminNavigationHeader";
 import { AdminUserManagement } from "@/components/admin/AdminUserManagement";
+import { UserRegistrationDiagnostic } from "@/components/admin/UserRegistrationDiagnostic";
 import { supabase } from '@/integrations/supabase/client';
 
 // Admin Components
@@ -256,7 +257,10 @@ export function OrganizedAdminDashboard() {
         )}
 
         {activeSection === "users" && (
-          <AdminUserManagement />
+          <div className="space-y-6">
+            <UserRegistrationDiagnostic />
+            <AdminUserManagement />
+          </div>
         )}
 
         {activeSection === "content" && (
