@@ -76,12 +76,43 @@ export function StreamlinedAdminDashboard() {
   }, []);
 
   const handleRefreshMetrics = async () => {
-    clearCache();
-    await refetch();
-    toast({
-      title: "Metrics Refreshed",
-      description: "Dashboard metrics have been updated with the latest data from Supabase."
-    });
+    try {
+      clearCache();
+      await refetch();
+
+      // Log the metrics refresh action
+      await adminAuditLogger.logSystemAction(
+        'METRICS_VIEWED',
+        {
+          section: 'admin_dashboard',
+          action: 'refresh_metrics',
+          timestamp: new Date().toISOString()
+        }
+      );
+
+      toast({
+        title: "Metrics Refreshed",
+        description: "Dashboard metrics have been updated with the latest data from Supabase."
+      });
+    } catch (error) {
+      // Log failed metrics refresh
+      await adminAuditLogger.logSystemAction(
+        'METRICS_VIEWED',
+        {
+          section: 'admin_dashboard',
+          action: 'refresh_metrics_failed',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        },
+        false,
+        error instanceof Error ? error.message : 'Failed to refresh metrics'
+      );
+
+      toast({
+        title: "Refresh Failed",
+        description: "Failed to refresh dashboard metrics",
+        variant: "destructive"
+      });
+    }
   };
 
   const getMetricCard = (
