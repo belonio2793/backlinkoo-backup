@@ -355,11 +355,16 @@ export function OrganizedAdminDashboard() {
         )}
 
         {activeCategory === "business" && (
-          <Tabs defaultValue="affiliates" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
+          <Tabs defaultValue="users" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="users">User Management</TabsTrigger>
               <TabsTrigger value="affiliates">Affiliate Program</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="users">
+              <UserManagement />
+            </TabsContent>
 
             <TabsContent value="affiliates">
               <AdminAffiliateManager />
