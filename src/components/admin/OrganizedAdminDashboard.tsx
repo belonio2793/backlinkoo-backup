@@ -365,35 +365,6 @@ export function OrganizedAdminDashboard() {
           </Tabs>
         )}
 
-main
-              <TabsTrigger value="affiliates">Affiliate Program</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="users">
-              <UserManagement />
-            </TabsContent>
-
-            <TabsContent value="affiliates">
-              <AdminAffiliateManager />
-            </TabsContent>
-
-            <TabsContent value="analytics">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Business Analytics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Advanced analytics and reporting coming soon...</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        )}
-
         {activeSection === "security" && (
           <div className="space-y-6">
             <SecurityDashboard />
