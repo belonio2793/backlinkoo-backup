@@ -484,8 +484,11 @@ export function AdminBlogManager() {
                       </div>
                       
                       <div className="text-sm text-gray-600 mb-2">
-                        <strong>Keywords:</strong> {post.keywords.slice(0, 3).join(', ')}
-                        {post.keywords.length > 3 && ` +${post.keywords.length - 3} more`}
+                        <strong>Keywords:</strong> {(post.keywords && Array.isArray(post.keywords))
+                          ? post.keywords.slice(0, 3).join(', ')
+                          : 'No keywords'
+                        }
+                        {(post.keywords && Array.isArray(post.keywords) && post.keywords.length > 3) && ` +${post.keywords.length - 3} more`}
                       </div>
                       
                       <div className="flex items-center gap-4 text-xs text-gray-500">
