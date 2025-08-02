@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Crown, Lock, Zap } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import SubscriptionService, { type SubscriptionStatus } from '@/services/subscriptionService';
-import { PricingModal } from '@/components/PricingModal';
+import { PremiumCheckoutModal } from '@/components/PremiumCheckoutModal';
+import { useToast } from '@/hooks/use-toast';
 
 interface FeatureAccessGuardProps {
   children: ReactNode;
@@ -22,7 +23,8 @@ export const FeatureAccessGuard = ({
   const { user } = useAuth();
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -113,8 +115,8 @@ export const FeatureAccessGuard = ({
             </div>
           </div>
 
-          <Button 
-            onClick={() => setShowPricingModal(true)}
+          <Button
+            onClick={() => setShowCheckoutModal(true)}
             className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700"
             size="lg"
           >
@@ -124,12 +126,14 @@ export const FeatureAccessGuard = ({
         </CardContent>
       </Card>
 
-      <PricingModal
-        isOpen={showPricingModal}
-        onClose={() => setShowPricingModal(false)}
-        defaultTab="subscription"
-        onAuthSuccess={() => {
-          setShowPricingModal(false);
+      <PremiumCheckoutModal
+        isOpen={showCheckoutModal}
+        onClose={() => setShowCheckoutModal(false)}
+        onSuccess={() => {
+          toast({
+            title: "Welcome to Premium!",
+            description: "Your subscription is now active. Enjoy unlimited access!",
+          });
           // Refresh the page to check new subscription status
           window.location.reload();
         }}
