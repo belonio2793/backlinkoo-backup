@@ -38,22 +38,44 @@ export class PremiumService {
    */
   static async checkPremiumStatus(userId: string): Promise<boolean> {
     try {
+      console.log('🔍 Checking premium status for user:', userId);
+
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        console.warn('Premium status check timeout');
+        controller.abort();
+      }, 3000); // 3 second timeout
+
       const { data, error } = await supabase
         .from('premium_subscriptions')
         .select('*')
         .eq('user_id', userId)
         .eq('status', 'active')
         .gte('current_period_end', new Date().toISOString())
+        .abortSignal(controller.signal)
         .single();
 
+      clearTimeout(timeoutId);
+
       if (error) {
-        console.warn('Error checking premium status:', error.message);
+        if (error.code === 'PGRST116') {
+          // No rows found - user is not premium
+          console.log('✅ User is not premium (no active subscription found)');
+          return false;
+        }
+        console.warn('❌ Error checking premium status:', error.message, error.code);
         return false;
       }
 
+      console.log('✅ Premium status check result:', !!data);
       return !!data;
-    } catch (error) {
-      console.error('Premium status check failed:', error);
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.warn('⏰ Premium status check timed out');
+      } else {
+        console.error('❌ Premium status check failed:', error);
+      }
       return false;
     }
   }
