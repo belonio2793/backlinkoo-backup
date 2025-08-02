@@ -62,11 +62,7 @@ export class SafeAuth {
       if (profileError) {
         console.error('❌ Profile check error:', profileError);
 
-        // If this is the support admin, bypass the error
-        if (userResult.user.email === 'support@backlinkoo.com') {
-          console.log('✅ Support admin - bypassing profile check error');
-          return { isAdmin: true, needsAuth: false };
-        }
+        // Return error for failed profile check
 
         return { isAdmin: false, needsAuth: false, error: profileError.message };
       }
