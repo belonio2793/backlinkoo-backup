@@ -39,7 +39,7 @@ export interface UserListFilters {
 class AdminUserManagementService {
   
   /**
-   * Get paginated list of users with filtering and sorting
+   * Get paginated list of users with filtering and sorting - FIXED VERSION
    */
   async getUsers(filters: UserListFilters = {}): Promise<{
     users: UserDetails[];
@@ -47,6 +47,24 @@ class AdminUserManagementService {
     hasMore: boolean;
   }> {
     try {
+      console.log('📋 Fetching users with filters:', filters);
+      
+      // Check authentication first
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        console.warn('❌ User not authenticated');
+        return { users: [], totalCount: 0, hasMore: false };
+      }
+
+      // Try to use the working service instead
+      try {
+        const { realAdminUserService } = await import('./realAdminUserService');
+        console.log('✅ Using realAdminUserService for better reliability');
+        return await realAdminUserService.getUsers(filters);
+      } catch (importError) {
+        console.warn('⚠️ Could not import realAdminUserService, using fallback');
+      }
+
       const {
         search = '',
         role = 'all',
@@ -57,130 +75,109 @@ class AdminUserManagementService {
         offset = 0
       } = filters;
 
-      console.log('📋 Fetching users with filters:', filters);
-      console.log('🔍 Admin service attempting to fetch all profiles...');
+      // Declare variables to prevent undefined errors
+      let profiles: any[] | null = null;
+      let count: number | null = null;
+      let profilesError: any = null;
 
-      // Build base query for profiles - try simple query first
+      // Build base query for profiles
       let profileQuery = supabase
         .from('profiles')
         .select('*', { count: 'exact' });
 
-      console.log('📊 Profile query constructed:', profileQuery);
-
-      console.log('🎯 Applying filters - role:', role, 'search:', search, 'sortBy:', sortBy);
-
-      // Apply role filter (only if not 'all' and not first time loading)
+      // Apply role filter
       if (role !== 'all') {
-        console.log('🔍 Applying role filter:', role);
         profileQuery = profileQuery.eq('role', role);
       }
 
-      // Apply search filter (only if provided)
+      // Apply search filter
       if (search && search.trim() !== '') {
-        console.log('🔍 Applying search filter:', search);
         profileQuery = profileQuery.or(`email.ilike.%${search}%,display_name.ilike.%${search}%`);
       }
 
       // Apply sorting
       profileQuery = profileQuery.order(sortBy, { ascending: sortOrder === 'asc' });
 
-      // For debugging, let's try without pagination first
-      console.log('📄 Pagination - offset:', offset, 'limit:', limit);
-      if (offset === 0) {
-        // First load - get all profiles to see total count
-        console.log('🆕 First load - fetching all profiles to debug');
-      } else {
-        // Apply pagination for subsequent loads
+      // Apply pagination
+      if (offset > 0) {
         profileQuery = profileQuery.range(offset, offset + limit - 1);
       }
 
-      // Try RPC function first (should work now with our database changes)
-      console.log('🔍 Attempting RPC function to get real profiles...');
-
+      // Execute query with proper error handling
       try {
-        const { data: rpcData, error: rpcError } = await supabase.rpc('get_all_user_profiles');
-
-        if (rpcData && !rpcError) {
-          console.log('✅ RPC function successful - got real profiles:', rpcData.length);
-          profiles = rpcData;
-          count = rpcData.length;
-          profilesError = null;
-        } else {
-          throw new Error('RPC failed: ' + rpcError?.message);
-        }
-      } catch (rpcError: any) {
-        console.warn('RPC method failed, trying standard query...', rpcError.message);
-
-        // Fall back to normal query
-        try {
-          const result = await profileQuery;
-          profiles = result.data;
-          profilesError = result.error;
-          count = result.count;
-        } catch (error: any) {
-          profilesError = error;
-        }
+        const result = await profileQuery;
+        profiles = result.data;
+        profilesError = result.error;
+        count = result.count;
+      } catch (error: any) {
+        profilesError = error;
+        console.error('❌ Direct query failed:', error);
       }
 
-      // If still failing, use admin bypass as last resort
-      if (profilesError) {
-        console.warn('🔓 All queries failed, using admin bypass for real data');
+      // If query failed, try admin bypass
+      if (profilesError || !profiles) {
+        console.warn('🔓 Query failed, using admin bypass for real data');
 
-        const bypassResult = await AdminBypass.fetchProfilesAsAdmin();
+        try {
+          const bypassResult = await AdminBypass.fetchProfilesAsAdmin();
 
-        if (bypassResult.success && bypassResult.data) {
-          console.log(`✅ Admin bypass successful via: ${bypassResult.method}`);
+          if (bypassResult.success && bypassResult.data) {
+            console.log(`✅ Admin bypass successful via: ${bypassResult.method}`);
 
-          // Apply filters to real data
-          let filteredProfiles = [...bypassResult.data];
+            // Apply filters to real data
+            let filteredProfiles = [...bypassResult.data];
 
-          if (role !== 'all') {
-            filteredProfiles = filteredProfiles.filter(p => p.role === role);
-          }
-
-          if (search && search.trim() !== '') {
-            const searchLower = search.toLowerCase();
-            filteredProfiles = filteredProfiles.filter(p =>
-              p.email?.toLowerCase().includes(searchLower) ||
-              (p.display_name && p.display_name.toLowerCase().includes(searchLower))
-            );
-          }
-
-          // Apply sorting
-          filteredProfiles.sort((a, b) => {
-            let aVal, bVal;
-            switch (sortBy) {
-              case 'email':
-                aVal = a.email || '';
-                bVal = b.email || '';
-                break;
-              case 'created_at':
-              default:
-                aVal = a.created_at || '';
-                bVal = b.created_at || '';
-                break;
+            if (role !== 'all') {
+              filteredProfiles = filteredProfiles.filter(p => p.role === role);
             }
 
-            if (sortOrder === 'asc') {
-              return aVal < bVal ? -1 : 1;
-            } else {
-              return aVal > bVal ? -1 : 1;
+            if (search && search.trim() !== '') {
+              const searchLower = search.toLowerCase();
+              filteredProfiles = filteredProfiles.filter(p =>
+                p.email?.toLowerCase().includes(searchLower) ||
+                (p.display_name && p.display_name.toLowerCase().includes(searchLower))
+              );
             }
-          });
 
-          // Apply pagination
-          const startIndex = offset;
-          const endIndex = offset + limit;
-          const paginatedProfiles = filteredProfiles.slice(startIndex, endIndex);
+            // Apply sorting
+            filteredProfiles.sort((a, b) => {
+              let aVal, bVal;
+              switch (sortBy) {
+                case 'email':
+                  aVal = a.email || '';
+                  bVal = b.email || '';
+                  break;
+                case 'created_at':
+                default:
+                  aVal = a.created_at || '';
+                  bVal = b.created_at || '';
+                  break;
+              }
 
-          profiles = paginatedProfiles;
-          count = filteredProfiles.length;
-          profilesError = null;
+              if (sortOrder === 'asc') {
+                return aVal < bVal ? -1 : 1;
+              } else {
+                return aVal > bVal ? -1 : 1;
+              }
+            });
 
-          console.log(`✅ Real data bypass complete - showing ${paginatedProfiles.length} of ${count} REAL profiles`);
+            // Apply pagination
+            const startIndex = offset;
+            const endIndex = offset + limit;
+            const paginatedProfiles = filteredProfiles.slice(startIndex, endIndex);
 
-        } else {
-          console.error('❌ Admin bypass also failed');
+            profiles = paginatedProfiles;
+            count = filteredProfiles.length;
+            profilesError = null;
+
+            console.log(`✅ Real data bypass complete - showing ${paginatedProfiles.length} of ${count} REAL profiles`);
+
+          } else {
+            console.error('❌ Admin bypass also failed');
+            return this.getMockUserData();
+          }
+        } catch (bypassError) {
+          console.error('❌ Admin bypass error:', bypassError);
           return this.getMockUserData();
         }
       }
@@ -195,14 +192,14 @@ class AdminUserManagementService {
         throw profilesError;
       }
 
-      console.log('📈 Query results - profiles:', profiles?.length, 'count:', count, 'error:', profilesError);
-
       if (!profiles) {
         console.warn('⚠️ No profiles returned from query');
         return { users: [], totalCount: 0, hasMore: false };
       }
 
-      // Get all subscribers separately since there's no foreign key relationship
+      console.log('📈 Query results - profiles:', profiles?.length, 'count:', count);
+
+      // Get all subscribers separately
       const { data: subscribers } = await supabase
         .from('subscribers')
         .select('*');
@@ -303,20 +300,14 @@ class AdminUserManagementService {
         .single();
 
       if (error) {
-        // Handle RLS infinite recursion error
-        if (error.message?.includes('infinite recursion detected in policy')) {
-          console.warn('RLS policy infinite recursion - returning demo user');
-          return this.getMockUserData().users[0] || null;
-        }
-
-        if (error.message?.includes('Database not available') || error.message?.includes('Mock mode')) {
-          console.warn('Mock database mode - returning demo user');
-          return this.getMockUserData().users[0] || null;
-        }
-        throw error;
+        console.error('❌ Failed to fetch user profile:', error);
+        throw new Error(`Failed to fetch user profile: ${error.message}`);
       }
 
-      if (!profile) return null;
+      if (!profile) {
+        console.warn('⚠️ User not found:', userId);
+        return null;
+      }
 
       // Get subscription separately
       const { data: subscription } = await supabase
@@ -355,7 +346,7 @@ class AdminUserManagementService {
    */
   async updateUser(userId: string, updates: UserUpdatePayload): Promise<UserDetails> {
     try {
-      console.log('✏️ Updating user:', userId, updates);
+      console.log('✏️ Updating user in database:', userId, updates);
 
       // Handle premium/gifted status changes
       if (updates.isPremium !== undefined || updates.isGifted !== undefined) {
@@ -367,94 +358,26 @@ class AdminUserManagementService {
       if (updates.display_name !== undefined) profileUpdates.display_name = updates.display_name;
       if (updates.email !== undefined) profileUpdates.email = updates.email;
       if (updates.role !== undefined) profileUpdates.role = updates.role;
+      profileUpdates.updated_at = new Date().toISOString();
 
-      let updatedUser: UserDetails;
+      if (Object.keys(profileUpdates).length > 1) { // More than just updated_at
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update(profileUpdates)
+          .eq('user_id', userId);
 
-      if (Object.keys(profileUpdates).length > 0) {
-        try {
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .update(profileUpdates)
-            .eq('user_id', userId);
-
-          if (profileError) {
-            throw profileError;
-          }
-        } catch (error: any) {
-          // Handle RLS issues by using mock update
-          if (error.message?.includes('infinite recursion detected in policy') ||
-              error.message?.includes('Database not available') ||
-              error.message?.includes('Mock mode')) {
-            console.warn('🔧 Database update failed due to RLS - simulating premium update');
-
-            // Create updated user object based on the current mock data
-            const mockUsers = this.getMockProfileData();
-            const existingUser = mockUsers.find(u => u.user_id === userId);
-
-            if (!existingUser) {
-              throw new Error('User not found in mock data');
-            }
-
-            updatedUser = {
-              ...existingUser,
-              ...profileUpdates,
-              isPremium: updates.isPremium ?? existingUser.isPremium,
-              isGifted: updates.isGifted ?? existingUser.isGifted,
-              campaignCount: 0,
-              totalCreditsUsed: 0,
-              totalRevenue: 0,
-              lastActivity: null,
-              subscription: updates.isPremium ? {
-                id: `sub-${userId}`,
-                user_id: userId,
-                email: existingUser.email,
-                subscribed: true,
-                subscription_tier: updates.isGifted ? 'premium_gifted' : 'premium',
-                payment_method: updates.isGifted ? null : 'stripe',
-                stripe_subscription_id: updates.isGifted ? null : `sub_${Date.now()}`,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-                guest_checkout: false,
-                stripe_customer_id: updates.isGifted ? null : `cus_${Date.now()}`,
-                subscription_end: null
-              } : null
-            };
-
-            console.log('✅ Mock premium update successful for:', updatedUser.email);
-            return updatedUser;
-          } else {
-            throw error;
-          }
+        if (profileError) {
+          console.error('❌ Profile update failed:', profileError);
+          throw new Error(`Profile update failed: ${profileError.message}`);
         }
+
+        console.log('✅ Profile updated successfully in database');
       }
 
-      // If database update succeeded, try to get updated user
-      try {
-        updatedUser = await this.getUserById(userId);
-        if (!updatedUser) {
-          throw new Error('User not found after update');
-        }
-      } catch (error: any) {
-        // If getting updated user fails due to RLS, create mock updated user
-        console.warn('Failed to fetch updated user, creating mock response');
-        const mockUsers = this.getMockProfileData();
-        const existingUser = mockUsers.find(u => u.user_id === userId);
-
-        if (!existingUser) {
-          throw new Error('User not found');
-        }
-
-        updatedUser = {
-          ...existingUser,
-          ...profileUpdates,
-          isPremium: updates.isPremium ?? false,
-          isGifted: updates.isGifted ?? false,
-          campaignCount: 0,
-          totalCreditsUsed: 0,
-          totalRevenue: 0,
-          lastActivity: null,
-          subscription: null
-        };
+      // Fetch and return updated user
+      const updatedUser = await this.getUserById(userId);
+      if (!updatedUser) {
+        throw new Error('User not found after update');
       }
 
       return updatedUser;
@@ -470,12 +393,18 @@ class AdminUserManagementService {
    */
   private async updateUserPremiumStatus(userId: string, updates: UserUpdatePayload): Promise<void> {
     try {
+      console.log('💎 Updating premium status for user:', userId);
+
       // Check if user has existing subscription
-      const { data: existingSubscription } = await supabase
+      const { data: existingSubscription, error: fetchError } = await supabase
         .from('subscribers')
         .select('*')
         .eq('user_id', userId)
         .single();
+
+      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "not found"
+        console.warn('Error fetching subscription:', fetchError);
+      }
 
       if (updates.isPremium) {
         if (updates.isGifted || !existingSubscription?.stripe_subscription_id) {
@@ -488,38 +417,59 @@ class AdminUserManagementService {
             subscription_end: updates.subscriptionEnd || null,
             stripe_subscription_id: null, // No Stripe ID for gifted
             payment_method: 'gifted',
-            guest_checkout: false
+            guest_checkout: false,
+            updated_at: new Date().toISOString()
           };
 
           if (existingSubscription) {
-            await supabase
+            const { error: updateError } = await supabase
               .from('subscribers')
               .update(subscriptionData)
               .eq('user_id', userId);
+            
+            if (updateError) {
+              console.error('❌ Failed to update subscription:', updateError);
+              throw updateError;
+            }
           } else {
-            await supabase
+            const { error: insertError } = await supabase
               .from('subscribers')
-              .insert(subscriptionData);
+              .insert({ ...subscriptionData, created_at: new Date().toISOString() });
+            
+            if (insertError) {
+              console.error('❌ Failed to create subscription:', insertError);
+              throw insertError;
+            }
           }
+          
+          console.log('✅ Premium status updated successfully');
         }
       } else {
         // Remove premium status
         if (existingSubscription) {
           if (existingSubscription.stripe_subscription_id) {
-            // Has paid subscription - don't automatically cancel
-            console.warn('User has paid subscription - manual cancellation required');
+            console.warn('⚠️ User has paid subscription - manual cancellation required');
           } else {
             // Gifted subscription - can be removed
-            await supabase
+            const { error: removeError } = await supabase
               .from('subscribers')
-              .update({ subscribed: false })
+              .update({ 
+                subscribed: false,
+                updated_at: new Date().toISOString()
+              })
               .eq('user_id', userId);
+            
+            if (removeError) {
+              console.error('❌ Failed to remove premium status:', removeError);
+            } else {
+              console.log('✅ Premium status removed successfully');
+            }
           }
         }
       }
     } catch (error) {
-      console.error('Error updating premium status:', error);
-      // Don't throw - allow profile updates to continue
+      console.error('❌ Error updating premium status:', error);
+      throw error; // Now throw the error so updates can be handled properly
     }
   }
 
@@ -583,134 +533,43 @@ class AdminUserManagementService {
    */
   async deleteUser(userId: string): Promise<void> {
     try {
-      console.log('🗑️ Deactivating user:', userId);
+      console.log('🗑️ Deactivating user in database:', userId);
 
       // Instead of hard delete, deactivate the user
-      await supabase
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
           role: 'user',
-          display_name: '[DEACTIVATED] ' + Date.now()
+          display_name: '[DEACTIVATED] ' + Date.now(),
+          updated_at: new Date().toISOString()
         })
         .eq('user_id', userId);
 
+      if (profileError) {
+        console.error('❌ Failed to deactivate profile:', profileError);
+        throw new Error(`Failed to deactivate profile: ${profileError.message}`);
+      }
+
       // Cancel any active subscriptions
-      await supabase
+      const { error: subscriptionError } = await supabase
         .from('subscribers')
-        .update({ subscribed: false })
+        .update({ 
+          subscribed: false,
+          updated_at: new Date().toISOString()
+        })
         .eq('user_id', userId);
 
+      if (subscriptionError) {
+        console.warn('⚠️ Failed to cancel subscription:', subscriptionError);
+        // Don't throw here as profile deactivation succeeded
+      }
+
+      console.log('✅ User deactivated successfully');
+
     } catch (error: any) {
-      console.error('Error deactivating user:', this.formatError(error));
+      console.error('❌ Error deactivating user:', this.formatError(error));
       throw new Error(`Failed to deactivate user: ${this.formatError(error)}`);
     }
-  }
-
-  /**
-   * Get mock profile data (consistent with the bypass data)
-   */
-  private getMockProfileData(): any[] {
-    return [
-      {
-        id: 'cc795f27-bd32-4f0a-8d1e-a3c68d2db60e',
-        user_id: 'cc795f27-bd32-4f0a-8d1e-a3c68d2db60e',
-        email: 'labnidawannaryroat@gmail.com',
-        display_name: 'labni',
-        role: 'user',
-        created_at: '2024-12-24T12:00:00Z',
-        updated_at: '2024-12-24T12:00:00Z',
-        isPremium: false,
-        isGifted: false
-      },
-      {
-        id: '84bd84d7-0e89-4be5-3b7c-e68a559d55f7',
-        user_id: '84bd84d7-0e89-4be5-3b7c-e68a559d55f7',
-        email: 'blabla@gmail.com',
-        display_name: 'blabla',
-        role: 'user',
-        created_at: '2024-12-24T11:00:00Z',
-        updated_at: '2024-12-24T11:00:00Z',
-        isPremium: false,
-        isGifted: false
-      },
-      {
-        id: '5efbf54c-6af1-4584-9768-31fd58a4ddd9',
-        user_id: '5efbf54c-6af1-4584-9768-31fd58a4ddd9',
-        email: 'abj@gmail.com',
-        display_name: 'Dusan',
-        role: 'user',
-        created_at: '2024-12-24T10:00:00Z',
-        updated_at: '2024-12-24T10:00:00Z',
-        isPremium: false,
-        isGifted: false
-      },
-      {
-        id: '7c5c7da2-0208-4b3c-8f00-8d861968344f',
-        user_id: '7c5c7da2-0208-4b3c-8f00-8d861968344f',
-        email: 'hammond@gmail.com',
-        display_name: 'Hammond',
-        role: 'user',
-        created_at: '2024-12-24T09:00:00Z',
-        updated_at: '2024-12-24T09:00:00Z',
-        isPremium: false,
-        isGifted: false
-      },
-      {
-        id: 'aa624f04-f932-4fa7-a40c-0caa04489ac5',
-        user_id: 'aa624f04-f932-4fa7-a40c-0caa04489ac5',
-        email: 'chris@commondereminator.email',
-        display_name: 'chris',
-        role: 'user',
-        created_at: '2024-12-24T08:00:00Z',
-        updated_at: '2024-12-24T08:00:00Z',
-        isPremium: false,
-        isGifted: false
-      },
-      {
-        id: 'ba116600-ed77-4cd8-bd5c-2fcb3c536855',
-        user_id: 'ba116600-ed77-4cd8-bd5c-2fcb3c536855',
-        email: 'abdulla@gmail.com',
-        display_name: 'abdulla',
-        role: 'user',
-        created_at: '2024-12-24T07:00:00Z',
-        updated_at: '2024-12-24T07:00:00Z',
-        isPremium: false,
-        isGifted: false
-      },
-      {
-        id: 'cfe5ca8c-ed83-4ae8-a6c4-ea99f53bc4fd',
-        user_id: 'cfe5ca8c-ed83-4ae8-a6c4-ea99f53bc4fd',
-        email: 'victor@m.host',
-        display_name: 'Victor',
-        role: 'user',
-        created_at: '2024-12-24T06:00:00Z',
-        updated_at: '2024-12-24T06:00:00Z',
-        isPremium: false,
-        isGifted: false
-      },
-      {
-        id: 'ecfb91b3-e745-46e4-8bb6-6794a1059e85',
-        user_id: 'ecfb91b3-e745-46e4-8bb6-6794a1059e85',
-        email: 'uke+hijikai@gmail.com',
-        display_name: 'uke+',
-        role: 'user',
-        created_at: '2024-12-24T05:00:00Z',
-        updated_at: '2024-12-24T05:00:00Z',
-        isPremium: false,
-        isGifted: false
-      },
-      {
-        id: 'abcdef12-3456-7890-abcd-ef1234567890',
-        user_id: 'abcdef12-3456-7890-abcd-ef1234567890',
-        email: 'admin@backlinkoo.com',
-        display_name: 'Admin User',
-        role: 'admin',
-        created_at: '2024-12-24T04:00:00Z',
-        updated_at: '2024-12-24T04:00:00Z',
-        isPremium: true,
-        isGifted: false
-      }
-    ];
   }
 
   /**
@@ -759,40 +618,11 @@ class AdminUserManagementService {
         role: 'user',
         created_at: '2024-01-18T14:30:00Z',
         updated_at: '2024-01-18T14:30:00Z',
-        subscription: {
-          id: 'sub-2',
-          user_id: 'mock-user-2',
-          email: 'jane.smith@example.com',
-          subscribed: true,
-          subscription_tier: 'premium_gifted',
-          payment_method: 'gifted',
-          stripe_subscription_id: null,
-          created_at: '2024-01-18T14:30:00Z',
-          updated_at: '2024-01-18T14:30:00Z',
-          guest_checkout: false,
-          stripe_customer_id: null,
-          subscription_end: null
-        },
+        subscription: null,
         campaignCount: 2,
         totalCreditsUsed: 50,
         totalRevenue: 0,
         lastActivity: '2024-01-19T09:15:00Z',
-        isPremium: true,
-        isGifted: true
-      },
-      {
-        id: 'mock-3',
-        user_id: 'mock-user-3',
-        email: 'bob.wilson@example.com',
-        display_name: 'Bob Wilson',
-        role: 'admin',
-        created_at: '2024-01-10T08:00:00Z',
-        updated_at: '2024-01-10T08:00:00Z',
-        subscription: null,
-        campaignCount: 0,
-        totalCreditsUsed: 0,
-        totalRevenue: 0,
-        lastActivity: null,
         isPremium: false,
         isGifted: false
       }
