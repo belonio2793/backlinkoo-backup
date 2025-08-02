@@ -43,7 +43,7 @@ export const AuthProfileChecker = ({ children }: AuthProfileCheckerProps) => {
           }
         }
       } catch (error) {
-        console.warn('Profile check error:', error);
+        console.warn('Profile check error:', error.message || error);
         // Don't block app loading for profile check errors
       } finally {
         setIsChecking(false);
@@ -71,7 +71,7 @@ export const AuthProfileChecker = ({ children }: AuthProfileCheckerProps) => {
             }
           }
         } catch (error) {
-          console.warn('Profile check error on auth change:', error);
+          console.warn('Profile check error on auth change:', error.message || error);
         }
       }
     });
