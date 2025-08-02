@@ -95,26 +95,8 @@ export function OrganizedAdminDashboard() {
   };
 
   const handleSignOut = () => {
-    console.log('🚪 Admin dashboard sign out initiated - instant navigation');
-
-    // Provide immediate visual feedback
-    document.body.style.cursor = 'wait';
-
-    // Clear any admin session data immediately (local)
-    try {
-      localStorage.removeItem('admin_session');
-      sessionStorage.clear();
-    } catch (e) {
-      // Ignore storage errors
-    }
-
-    // Navigate instantly - replace history for clean logout
+    AuthService.signOut();
     window.location.replace('/');
-
-    // Background server cleanup (non-blocking)
-    AuthService.signOut().catch((error) => {
-      console.warn('Background admin sign out error (non-critical):', error);
-    });
   };
 
   return (
