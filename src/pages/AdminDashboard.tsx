@@ -3,9 +3,8 @@ import { OrganizedAdminDashboard } from "@/components/admin/OrganizedAdminDashbo
 
 const AdminDashboard = () => {
   return (
-   
-    main
-      </div>
+    <div>
+      <OrganizedAdminDashboard />
 
       {/* Footer */}
       <Footer />
