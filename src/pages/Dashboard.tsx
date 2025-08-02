@@ -1478,6 +1478,30 @@ const Dashboard = () => {
               <div className="space-y-6">
                 <DashboardTrialPosts user={user} />
               </div>
+            ) : activeSection === "premium-plan" ? (
+              <PremiumPlanTab
+                isSubscribed={isPremiumSubscriber}
+                onUpgrade={() => {
+                  // Handle upgrade - open pricing modal or redirect to payment
+                  toast({
+                    title: "Redirecting to Payment",
+                    description: "Taking you to secure checkout...",
+                  });
+                  // In real implementation, this would open a payment processor
+                }}
+              />
+            ) : activeSection === "seo-academy" ? (
+              <SEOAcademyTab
+                isSubscribed={isPremiumSubscriber}
+                onUpgrade={() => {
+                  // Redirect to premium plan
+                  setActiveSection("premium-plan");
+                  toast({
+                    title: "Premium Required",
+                    description: "Upgrade to Premium to access the SEO Academy",
+                  });
+                }}
+              />
             ) : null}
           </>
         ) : (
