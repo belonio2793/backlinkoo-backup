@@ -226,7 +226,13 @@ export class BlogSystemDiagnostic {
       } else if (errorMessage.includes('Network request failed') || errorMessage.includes('Failed to fetch')) {
         this.log('Test Data Generation', 'error', 'Network connectivity issues detected', {
           issue: 'Cannot connect to Supabase database',
-          solution: 'Check network connection and Supabase configuration',
+          solution: 'Check network connection and Supabase configuration. Third-party scripts (like FullStory) may be interfering.',
+          error: errorMessage
+        });
+      } else if (errorMessage.includes('Third-party script interference')) {
+        this.log('Test Data Generation', 'warning', 'Third-party script interference detected', {
+          issue: 'Analytics or monitoring scripts are blocking network requests',
+          solution: 'Using fallback mechanisms to bypass interference',
           error: errorMessage
         });
       } else {
