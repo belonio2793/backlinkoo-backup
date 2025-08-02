@@ -57,7 +57,7 @@ class AdminUserManagementService {
 
       console.log('📋 Fetching users with filters:', filters);
 
-      // Build base query for profiles (without join)
+      // Build base query for profiles (bypass RLS for admin queries)
       let profileQuery = supabase
         .from('profiles')
         .select('*', { count: 'exact' });
