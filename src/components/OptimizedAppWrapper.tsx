@@ -27,7 +27,7 @@ import { EmailVerificationGuard } from '@/components/EmailVerificationGuard';
 import { TrialNotificationBanner } from '@/components/TrialNotificationBanner';
 import { AdminSetup } from '@/components/AdminSetup';
 import { AdminDiagnostic } from '@/components/AdminDiagnostic';
-import AdminLanding from '@/pages/AdminLanding';
+import { SimpleAdminPage } from '@/components/SimpleAdminPage';
 
 // Import lazy-loaded components
 import {
