@@ -75,80 +75,25 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
           setPremiumLoading(false);
         });
 
-      try {
-        // Try to fetch from database with longer timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .abortSignal(controller.signal)
-          .single();
-
-        clearTimeout(timeoutId);
-
-        if (error && error.code !== 'PGRST116') { // PGRST116 = row not found
-          console.error('🔧 ProfileSettings: Error fetching profile:', error);
-
-          // Only show error for non-timeout issues
-          if (!error.message?.includes('aborted')) {
-            toast({
-              title: "Warning",
-              description: "Could not load profile data from database.",
-              variant: "destructive",
-            });
+      // Load detailed profile data in background (non-blocking)
+      supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+        .then(({ data, error }) => {
+          if (data && !error) {
+            // Merge database data with current state, preserving user email
+            setProfile(prev => ({
+              ...data,
+              email: user.email || data.email,
+            }));
           }
-
-          // Initialize with user data as fallback
-          setProfile(prev => ({
-            ...prev,
-            user_id: user.id,
-            email: user.email || '',
-            full_name: user.user_metadata?.full_name || '',
-            display_name: user.user_metadata?.display_name || user.user_metadata?.full_name || '',
-          }));
-        } else if (data) {
-          console.log('🔧 ProfileSettings: Successfully loaded profile from database');
-          setProfile({
-            ...data,
-            email: user.email || data.email,
-          });
-        } else {
-          // Initialize with user data if no profile exists
-          console.log('🔧 ProfileSettings: No profile found, using user metadata');
-          setProfile(prev => ({
-            ...prev,
-            user_id: user.id,
-            email: user.email || '',
-            full_name: user.user_metadata?.full_name || '',
-            display_name: user.user_metadata?.display_name || user.user_metadata?.full_name || '',
-          }));
-        }
-      } catch (error: any) {
-        console.error('🔧 ProfileSettings: Exception fetching profile:', error);
-
-        // Handle timeout gracefully
-        if (error.name === 'AbortError') {
-          console.warn('🔧 ProfileSettings: Request timeout, using fallback data');
-          toast({
-            title: "Notice",
-            description: "Profile loading timed out, using cached data.",
-          });
-        }
-
-        // Always provide fallback data
-        setProfile(prev => ({
-          ...prev,
-          user_id: user.id,
-          email: user.email || '',
-          full_name: user.user_metadata?.full_name || 'User',
-          display_name: user.user_metadata?.display_name || user.user_metadata?.full_name || 'User',
-        }));
-      } finally {
-        setIsLoading(false);
-      }
+          // Silently fail - UI already has user data from initialization
+        })
+        .catch(() => {
+          // Silently fail - UI already functional with user metadata
+        });
     };
 
     fetchProfile();
