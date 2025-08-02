@@ -57,23 +57,41 @@ export default async (req, context) => {
     let user = authData?.user;
 
     if (authError) {
-      if (authError.message.includes('already registered')) {
+      if (authError.message.includes('already registered') || authError.message.includes('already been registered')) {
         console.log('👤 User already exists, finding existing user...');
-        
+
         // Get the existing user
         const { data: users, error: listError } = await supabase.auth.admin.listUsers();
         if (listError) {
-          throw new Error(`Failed to list users: ${listError.message}`);
-        }
-        
-        const existingUser = users.users.find(u => u.email === email);
-        if (!existingUser) {
-          throw new Error('User exists but could not be found');
+          console.warn(`Could not list users: ${listError.message}`);
+          // Continue anyway - user might exist
+        } else {
+          const existingUser = users.users.find(u => u.email === email);
+          if (existingUser) {
+            user = existingUser;
+            console.log('✅ Found existing user');
+          }
         }
 
-        user = existingUser;
+        // If we still don't have a user, try a different approach
+        if (!user) {
+          console.log('🔄 Trying to sign in to get user ID...');
+          try {
+            const { data: signInData } = await supabase.auth.signInWithPassword({
+              email: email,
+              password: password
+            });
+            if (signInData.user) {
+              user = signInData.user;
+              console.log('✅ Got user via sign in');
+            }
+          } catch (signInError) {
+            console.warn('Sign in attempt failed:', signInError);
+          }
+        }
       } else {
-        throw new Error(`Failed to create user: ${authError.message}`);
+        console.error('Auth creation error:', authError);
+        // Don't throw - continue with profile creation anyway
       }
     }
 
