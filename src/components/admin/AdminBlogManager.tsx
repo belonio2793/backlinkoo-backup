@@ -499,15 +499,15 @@ export function AdminBlogManager() {
                         </div>
                         <div className="flex items-center gap-1">
                           <Eye className="h-3 w-3" />
-                          <span>{post.view_count} views</span>
+                          <span>{post.view_count || 0} views</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <TrendingUp className="h-3 w-3" />
-                          <span>SEO: {post.seo_score}/100</span>
+                          <span>SEO: {post.seo_score || 0}/100</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
-                          <span>{post.reading_time}m read</span>
+                          <span>{post.reading_time || 0}m read</span>
                         </div>
                         {post.user_id && (
                           <div className="flex items-center gap-1">
