@@ -793,26 +793,14 @@ function BlogPostListItem({ post, navigate, formatDate }: any) {
               <div className="flex items-center gap-6 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <User className="h-4 w-4" />
-                  <span>{post.author_name || 'Backlink ∞'}</span>
+                  <span>{post.author_name || 'Backlink ��'}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
                   <span>{formatDate(post.published_at || post.created_at)}</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  <span>{post.reading_time || 5}m</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Eye className="h-4 w-4" />
-                  <span>{post.view_count || 0}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <TrendingUp className="h-4 w-4" />
-                  <span>{post.seo_score || 75}/100</span>
-                </div>
               </div>
-              
+
               <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
             </div>
           </div>
