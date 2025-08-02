@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 // Essential Components Only
 import { DatabaseSyncedUserManagement } from "@/components/admin/DatabaseSyncedUserManagement";
+import { AdminConnectionDebugger } from "@/components/admin/AdminConnectionDebugger";
 import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
 import { SystemStatusPanel } from "@/components/admin/SystemStatusPanel";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
@@ -260,6 +261,7 @@ export function StreamlinedAdminDashboard() {
 
         {activeSection === "users" && (
           <div className="space-y-6">
+            {error && <AdminConnectionDebugger />}
             <DatabaseSyncedUserManagement />
           </div>
         )}
@@ -279,7 +281,10 @@ export function StreamlinedAdminDashboard() {
             </TabsList>
 
             <TabsContent value="status">
-              <SystemStatusPanel />
+              <div className="space-y-6">
+                <AdminConnectionDebugger />
+                <SystemStatusPanel />
+              </div>
             </TabsContent>
 
             <TabsContent value="environment">
