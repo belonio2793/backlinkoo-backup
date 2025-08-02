@@ -96,13 +96,28 @@ export function SecurityDashboard() {
         // If profiles fails, try alternative approach with subscribers
         console.log('❌ Profiles access failed, trying alternative sources...', profilesError);
 
-        const { data: subscribersData, error: subsError } = await supabase
-          .from('subscribers')
-          .select('user_id, email, created_at')
-          .order('created_at', { ascending: false })
-          .limit(50);
+        let subscribersData = null;
+        let subsError = null;
 
-        console.log('Subscribers data:', subscribersData, 'Error:', subsError);
+        try {
+          const result = await supabase
+            .from('subscribers')
+            .select('user_id, email, created_at')
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+          subscribersData = result.data;
+          subsError = result.error;
+
+          console.log('Subscribers query result:', {
+            data: subscribersData,
+            error: subsError,
+            success: !subsError && subscribersData
+          });
+        } catch (queryError) {
+          console.error('Subscribers query exception:', queryError);
+          subsError = queryError;
+        }
 
         if (subscribersData && subscribersData.length > 0) {
           const usersFromSubscribers = subscribersData.map((sub, index) => ({
