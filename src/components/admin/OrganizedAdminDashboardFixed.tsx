@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import { useToast } from "@/hooks/use-toast";
-import { useSimplifiedMetrics } from "@/hooks/useSimplifiedMetrics";
+main
 import { AdminNavigationHeader } from "@/components/admin/AdminNavigationHeader";
 
 import { supabase } from '@/integrations/supabase/client';
@@ -56,7 +56,7 @@ import {
 
 export function OrganizedAdminDashboard() {
   const { toast } = useToast();
-  const { metrics, loading, refetch } = useSimplifiedMetrics();
+main
   const [activeSection, setActiveSection] = useState("overview");
   const [adminEmail, setAdminEmail] = useState<string | undefined>();
 

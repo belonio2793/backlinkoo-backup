@@ -20,12 +20,34 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
   const [showSignIn, setShowSignIn] = useState(false);
 
   useEffect(() => {
+    // Check if we have instant admin access
+    const adminEmail = 'support@backlinkoo.com';
+    const currentUrl = window.location.pathname;
+
+    // For admin routes, skip all auth checks if session storage indicates admin access
+    if (currentUrl.includes('/admin') && sessionStorage.getItem('instant_admin') === 'true') {
+      setUser({ email: adminEmail });
+      setUserRole('admin');
+      setLoading(false);
+      setShowSignIn(false);
+      return;
+    }
+
     checkAuth();
-    
+
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('🔄 Auth state changed:', event, session?.user?.email);
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        // For admin email, provide instant access
+        if (session?.user?.email === adminEmail) {
+          sessionStorage.setItem('instant_admin', 'true');
+          setUser(session.user);
+          setUserRole('admin');
+          setLoading(false);
+          setShowSignIn(false);
+          return;
+        }
         checkAuth();
       }
     });
@@ -169,19 +191,9 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
     );
   }
 
-  // Show success state briefly before rendering children
+  // Render children directly for admin users
   if (user && requireAdmin && userRole === 'admin') {
-    return (
-      <div className="space-y-4">
-        <Alert className="bg-green-50 border-green-200">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-700">
-            ✅ Admin access verified for {user.email}
-          </AlertDescription>
-        </Alert>
-        {children}
-      </div>
-    );
+    return <>{children}</>;
   }
 
   return <>{children}</>;
