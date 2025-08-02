@@ -42,12 +42,18 @@ export function SimpleAdminPage() {
         .single();
 
       if (profileError) {
+        // Check for infinite recursion error
+        if (profileError.message.includes('infinite recursion')) {
+          setError('Database configuration error detected. Please contact support or use the manual fix below.');
+          return;
+        }
+
         // If profile query fails, check if it's an admin email
         if (data.user.email === 'support@backlinkoo.com') {
           setIsLoggedIn(true);
           return;
         }
-        throw new Error('Unable to verify admin privileges');
+        throw new Error(`Unable to verify admin privileges: ${profileError.message}`);
       }
 
       if (profile?.role !== 'admin') {
