@@ -105,93 +105,70 @@ class AdminUserManagementService {
         profilesError = error;
       }
 
-      // If RLS is causing issues, try alternative approaches to get real data
+      // If RLS is causing issues, use dedicated real data fetcher
       if (profilesError && (
         profilesError.message?.includes('infinite recursion detected in policy') ||
         profilesError.message?.includes('row-level security policy') ||
         profilesError.message?.includes('permission denied')
       )) {
-        console.warn('🔓 RLS issue detected - attempting real data alternatives');
+        console.warn('🔓 RLS issue detected - using real data fetcher');
 
-        try {
-          // Try to get the current user and check if they have admin privileges
-          console.log('🔍 Attempting to fetch real profiles with admin override...');
+        const realDataResult = await realDataFetcher.fetchRealProfiles();
 
-          const { data: { user: currentUser } } = await supabase.auth.getUser();
-          console.log('Current user:', currentUser?.email);
+        if (realDataResult.success) {
+          console.log(`✅ Real data fetched via: ${realDataResult.method}`);
 
-          // Method 1: Try with explicit admin context
-          const { data: realProfiles, error: realError } = await supabase
-            .from('profiles')
-            .select(`
-              id,
-              user_id,
-              email,
-              display_name,
-              role,
-              created_at,
-              updated_at
-            `)
-            .order('created_at', { ascending: false });
+          // Apply filters to real data
+          let filteredProfiles = [...realDataResult.profiles];
 
-          if (realProfiles && !realError) {
-            console.log('✅ Real data fetch successful - got profiles:', realProfiles.length);
-
-            // Apply filters to real data
-            let filteredProfiles = [...realProfiles];
-
-            if (role !== 'all') {
-              filteredProfiles = filteredProfiles.filter(p => p.role === role);
-            }
-
-            if (search && search.trim() !== '') {
-              const searchLower = search.toLowerCase();
-              filteredProfiles = filteredProfiles.filter(p =>
-                p.email?.toLowerCase().includes(searchLower) ||
-                (p.display_name && p.display_name.toLowerCase().includes(searchLower))
-              );
-            }
-
-            // Apply sorting
-            filteredProfiles.sort((a, b) => {
-              let aVal, bVal;
-              switch (sortBy) {
-                case 'email':
-                  aVal = a.email || '';
-                  bVal = b.email || '';
-                  break;
-                case 'created_at':
-                default:
-                  aVal = a.created_at || '';
-                  bVal = b.created_at || '';
-                  break;
-              }
-
-              if (sortOrder === 'asc') {
-                return aVal < bVal ? -1 : 1;
-              } else {
-                return aVal > bVal ? -1 : 1;
-              }
-            });
-
-            // Apply pagination
-            const startIndex = offset;
-            const endIndex = offset + limit;
-            const paginatedProfiles = filteredProfiles.slice(startIndex, endIndex);
-
-            profiles = paginatedProfiles;
-            count = filteredProfiles.length;
-            profilesError = null;
-
-            console.log(`✅ Real data processing complete - showing ${paginatedProfiles.length} of ${count} profiles`);
-
-          } else {
-            throw new Error('Direct profiles query failed: ' + (realError?.message || 'Unknown error'));
+          if (role !== 'all') {
+            filteredProfiles = filteredProfiles.filter(p => p.role === role);
           }
 
-        } catch (realDataError) {
-          console.error('❌ Real data fetch failed:', realDataError);
-          console.warn('📊 Falling back to mock data');
+          if (search && search.trim() !== '') {
+            const searchLower = search.toLowerCase();
+            filteredProfiles = filteredProfiles.filter(p =>
+              p.email?.toLowerCase().includes(searchLower) ||
+              (p.display_name && p.display_name.toLowerCase().includes(searchLower))
+            );
+          }
+
+          // Apply sorting
+          filteredProfiles.sort((a, b) => {
+            let aVal, bVal;
+            switch (sortBy) {
+              case 'email':
+                aVal = a.email || '';
+                bVal = b.email || '';
+                break;
+              case 'created_at':
+              default:
+                aVal = a.created_at || '';
+                bVal = b.created_at || '';
+                break;
+            }
+
+            if (sortOrder === 'asc') {
+              return aVal < bVal ? -1 : 1;
+            } else {
+              return aVal > bVal ? -1 : 1;
+            }
+          });
+
+          // Apply pagination
+          const startIndex = offset;
+          const endIndex = offset + limit;
+          const paginatedProfiles = filteredProfiles.slice(startIndex, endIndex);
+
+          profiles = paginatedProfiles;
+          count = filteredProfiles.length;
+          profilesError = null;
+
+          console.log(`✅ Real data complete - showing ${paginatedProfiles.length} of ${count} real profiles`);
+
+        } else {
+          console.error('❌ Real data fetcher failed:', realDataResult.error);
+          console.warn('📊 Falling back to mock data as last resort');
           return this.getMockUserData();
         }
       }
