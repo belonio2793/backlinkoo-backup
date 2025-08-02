@@ -145,6 +145,60 @@ export function SimpleAdminPage() {
               )}
             </Button>
           </form>
+
+          {error?.includes('infinite recursion') && (
+            <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <h3 className="font-bold text-red-800 mb-2">🚨 Database Configuration Issue</h3>
+              <p className="text-sm text-red-700 mb-3">
+                An infinite recursion error was detected in the database policies. This needs to be fixed manually.
+              </p>
+
+              <div className="bg-red-100 p-3 rounded mb-3">
+                <p className="text-xs font-medium text-red-800 mb-2">Quick Fix Instructions:</p>
+                <ol className="text-xs text-red-700 space-y-1">
+                  <li>1. Go to <a href="https://supabase.com/dashboard/project/dfhanacsmsvvkpunurnp/sql/new" target="_blank" className="text-blue-600 underline">Supabase SQL Editor</a></li>
+                  <li>2. Copy and paste the SQL below</li>
+                  <li>3. Click "RUN" to execute</li>
+                  <li>4. Return here and try logging in again</li>
+                </ol>
+              </div>
+
+              <div className="bg-black text-green-400 p-3 rounded text-xs font-mono overflow-x-auto">
+                <pre>{`-- Fix infinite recursion in RLS policies
+ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;
+
+-- Drop problematic functions
+DROP FUNCTION IF EXISTS public.get_current_user_role();
+DROP FUNCTION IF EXISTS public.get_user_role();
+DROP FUNCTION IF EXISTS public.check_admin_role();
+DROP FUNCTION IF EXISTS public.is_admin();
+
+-- Drop all existing policies
+DO $$
+BEGIN
+    FOR r IN (SELECT policyname FROM pg_policies WHERE tablename = 'profiles' AND schemaname = 'public')
+    LOOP
+        EXECUTE 'DROP POLICY IF EXISTS "' || r.policyname || '" ON public.profiles';
+    END LOOP;
+END $$;
+
+-- Re-enable RLS with simple policies
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- Simple policy for user own profile
+CREATE POLICY "users_own_profile" ON public.profiles
+FOR ALL USING (auth.uid() = user_id);
+
+-- Admin policy without recursion
+CREATE POLICY "admin_all_profiles" ON public.profiles
+FOR ALL USING (
+    auth.uid() IN (
+        SELECT id FROM auth.users WHERE email = 'support@backlinkoo.com'
+    )
+);`}</pre>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
