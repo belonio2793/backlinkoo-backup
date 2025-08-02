@@ -317,6 +317,23 @@ export default function BlogSystemDiagnostic() {
                 </Card>
               ))}
           </TabsContent>
+
+          <TabsContent value="network" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Network Connectivity Test
+                </CardTitle>
+                <p className="text-sm text-gray-600">
+                  Test network connectivity and Supabase access to diagnose FullStory interference and other network issues.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <NetworkTester />
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
 
         {/* Footer */}
