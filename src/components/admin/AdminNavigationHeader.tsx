@@ -174,13 +174,15 @@ export function AdminNavigationHeader({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={(e) => {
+                    // Prevent double clicks
+                    e.currentTarget.style.pointerEvents = 'none';
                     // Immediate visual feedback
                     e.currentTarget.style.opacity = '0.5';
                     e.currentTarget.style.transform = 'scale(0.95)';
                     // Instant sign out
                     handleSignOut();
                   }}
-                  className="text-red-600 focus:text-red-600 transition-all duration-75"
+                  className="text-red-600 focus:text-red-600 transition-all duration-75 hover:bg-red-50"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
