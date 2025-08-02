@@ -154,8 +154,17 @@ class AdminDashboardMetricsService {
           }
 
           // Empty error with no useful info
-          console.warn('Completely empty error object - using default fallback');
-          return 40; // Default fallback for empty errors
+          console.warn('Completely empty error object - switching to alternative method');
+
+          // Set flag to use alternative method in future
+          try {
+            localStorage.setItem('admin_use_alternative_user_count', 'true');
+            console.log('Set flag to use alternative user count method in future');
+          } catch (storageError) {
+            console.warn('Could not set localStorage flag');
+          }
+
+          return this.getTotalUsersAlternative();
         }
 
         // Check for specific Supabase error patterns
