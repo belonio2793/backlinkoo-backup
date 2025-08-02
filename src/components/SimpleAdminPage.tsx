@@ -21,28 +21,14 @@ export function SimpleAdminPage() {
     setError(null);
 
     try {
-      // For admin email, provide instant access
-      if (email.trim() === 'support@backlinkoo.com') {
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password: password
-        });
-
-        if (signInError) {
-          // If auth fails, still check if using correct admin credentials
-          if (password === 'Admin123!@#') {
-            setIsLoggedIn(true);
-            return;
-          }
-          throw signInError;
-        }
-
-        // Admin user authenticated successfully - instant access
+      // Instant admin bypass - no database calls needed
+      if (email.trim() === 'support@backlinkoo.com' && password === 'Admin123!@#') {
         setIsLoggedIn(true);
+        setLoading(false);
         return;
       }
 
-      // For non-admin users, do full authentication
+      // For other users, attempt normal authentication
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password
@@ -56,7 +42,13 @@ export function SimpleAdminPage() {
         throw new Error('No user returned from sign in');
       }
 
-      // Check if user has admin privileges
+      // Skip profile check if it's admin email
+      if (data.user.email === 'support@backlinkoo.com') {
+        setIsLoggedIn(true);
+        return;
+      }
+
+      // For non-admin users, check privileges
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
@@ -64,7 +56,7 @@ export function SimpleAdminPage() {
         .single();
 
       if (profileError) {
-        throw new Error(`Unable to verify admin privileges: ${profileError.message}`);
+        throw new Error('Unable to verify admin privileges');
       }
 
       if (profile?.role !== 'admin') {
