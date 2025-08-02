@@ -60,26 +60,30 @@ import {
   ChevronRight,
   UserPlus,
   Shield,
-  AlertTriangle
+  AlertTriangle,
+  Database,
+  CheckCircle,
+  XCircle
 } from "lucide-react";
 import {
-  adminUserManagementService,
-  type UserDetails,
+  realAdminUserService,
+  type RealUserDetails,
   type UserListFilters,
   type UserUpdatePayload
-} from "@/services/adminUserManagementService";
-import { supabase } from "@/integrations/supabase/client";
-import { testDatabaseConnection } from "@/utils/testDatabaseConnection";
-import { testProfileAccess } from "@/utils/testProfileAccess";
-import { AdminBypass } from "@/services/adminBypass";
+} from "@/services/realAdminUserService";
 
 export function AdminUserManagement() {
-  const [users, setUsers] = useState<UserDetails[]>([]);
+  const [users, setUsers] = useState<RealUserDetails[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [hasMore, setHasMore] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserDetails | null>(null);
+  const [selectedUser, setSelectedUser] = useState<RealUserDetails | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<{
+    connected: boolean;
+    profileCount: number;
+    error?: string;
+  }>({ connected: false, profileCount: 0 });
   const [filters, setFilters] = useState<UserListFilters>({
     search: '',
     role: 'all',
@@ -91,17 +95,67 @@ export function AdminUserManagement() {
   });
   const { toast } = useToast();
 
+  // Test connection on component mount
+  useEffect(() => {
+    testDatabaseConnection();
+  }, []);
+
   // Load users when filters change
   useEffect(() => {
-    loadUsers();
-  }, [filters]);
+    if (connectionStatus.connected) {
+      loadUsers();
+    }
+  }, [filters, connectionStatus.connected]);
+
+  const testDatabaseConnection = async () => {
+    try {
+      console.log('🔍 Testing database connection...');
+      const result = await realAdminUserService.testConnection();
+      
+      setConnectionStatus({
+        connected: result.success,
+        profileCount: result.profileCount,
+        error: result.error
+      });
+
+      if (result.success) {
+        toast({
+          title: "Database Connected",
+          description: `Successfully connected! Found ${result.profileCount} user profiles.`,
+        });
+      } else {
+        toast({
+          title: "Database Connection Failed", 
+          description: result.error || "Unable to connect to database",
+          variant: "destructive"
+        });
+      }
+    } catch (error: any) {
+      console.error('Connection test failed:', error);
+      setConnectionStatus({
+        connected: false,
+        profileCount: 0,
+        error: error.message
+      });
+      toast({
+        title: "Connection Test Failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
 
   const loadUsers = async () => {
+    if (!connectionStatus.connected) {
+      console.warn('⚠️ Database not connected, skipping user load');
+      return;
+    }
+
     try {
       setLoading(true);
-      console.log('📋 Loading users with filters:', filters);
+      console.log('📋 Loading real users from database with filters:', filters);
 
-      const result = await adminUserManagementService.getUsers(filters);
+      const result = await realAdminUserService.getUsers(filters);
 
       if (filters.offset === 0) {
         setUsers(result.users);
@@ -112,12 +166,12 @@ export function AdminUserManagement() {
       setTotalCount(result.totalCount);
       setHasMore(result.hasMore);
 
-      console.log(`✅ Loaded ${result.users.length} users (${result.totalCount} total)`);
+      console.log(`✅ Loaded ${result.users.length} users from database (${result.totalCount} total)`);
     } catch (error: any) {
-      console.error('Error loading users:', error);
+      console.error('❌ Error loading users:', error);
       toast({
         title: "Error Loading Users",
-        description: error.message || "Failed to load user data",
+        description: error.message || "Failed to load user data from database",
         variant: "destructive"
       });
     } finally {
@@ -128,194 +182,36 @@ export function AdminUserManagement() {
   const reloadAllUsers = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Reloading all profiles from database...');
+      console.log('🔄 Reloading all users from database...');
 
       // Clear current data
       setUsers([]);
 
-      // Reset filters to load all users in organized manner
+      // Reset filters to load fresh data
       const freshFilters = {
         search: '',
         role: 'all' as const,
         premiumStatus: 'all' as const,
         sortBy: 'created_at' as const,
         sortOrder: 'desc' as const,
-        limit: 100, // Load more users at once
+        limit: 100,
         offset: 0
       };
 
-      // Update filters which will trigger useEffect to reload
       setFilters(freshFilters);
 
       toast({
         title: "Reloading Users",
-        description: "Fetching all profiles from database...",
+        description: "Fetching fresh data from database...",
       });
 
     } catch (error: any) {
-      console.error('Error reloading users:', error);
+      console.error('❌ Error reloading users:', error);
       toast({
         title: "Reload Failed",
         description: error.message || "Failed to reload user data",
         variant: "destructive"
       });
-      setLoading(false);
-    }
-  };
-
-  const testConnection = async () => {
-    try {
-      setLoading(true);
-      console.log('🔍 Testing database connection...');
-
-      const result = await testDatabaseConnection();
-
-      if (result.success) {
-        toast({
-          title: "Database Connection Successful",
-          description: `Found ${result.data?.profileCount || 0} profiles in database`,
-        });
-
-        // If we have real data, reload users
-        if (result.data?.profileCount && result.data.profileCount > 0) {
-          await reloadAllUsers();
-        }
-      } else {
-        toast({
-          title: "Database Connection Failed",
-          description: result.error || "Unknown connection error",
-          variant: "destructive"
-        });
-      }
-    } catch (error: any) {
-      console.error('Connection test error:', error);
-      toast({
-        title: "Connection Test Failed",
-        description: error.message || "Failed to test connection",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const testProfiles = async () => {
-    try {
-      setLoading(true);
-      console.log('🧪 Testing profile access...');
-
-      const result = await testProfileAccess();
-
-      toast({
-        title: "Profile Access Test",
-        description: `Found ${result.totalCount} total profiles, can access ${result.profilesCount}. User: ${result.user}`,
-        variant: result.hasAccess ? "default" : "destructive"
-      });
-
-      console.log('🧪 Profile test result:', result);
-
-    } catch (error: any) {
-      console.error('Profile test error:', error);
-      toast({
-        title: "Profile Test Failed",
-        description: error.message || "Failed to test profile access",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const testAdminBypass = async () => {
-    try {
-      setLoading(true);
-      console.log('🛡️ Testing admin bypass...');
-
-      const result = await AdminBypass.fetchProfilesAsAdmin();
-
-      toast({
-        title: "Admin Bypass Test",
-        description: `${result.success ? 'SUCCESS' : 'FAILED'}: ${result.success ? `Got ${result.data?.length} profiles via ${result.method}` : result.error}`,
-        variant: result.success ? "default" : "destructive"
-      });
-
-      if (result.success && result.data) {
-        // Update the user list with real data
-        const enhancedUsers = result.data.map(profile => ({
-          ...profile,
-          isPremium: false,
-          isGifted: false,
-          campaignCount: 0,
-          totalCreditsUsed: 0,
-          totalRevenue: 0,
-          lastActivity: null,
-          subscription: null
-        }));
-
-        setUsers(enhancedUsers);
-        setTotalCount(enhancedUsers.length);
-      }
-
-      console.log('🛡️ Admin bypass result:', result);
-
-    } catch (error: any) {
-      console.error('Admin bypass error:', error);
-      toast({
-        title: "Admin Bypass Failed",
-        description: error.message || "Failed to test admin bypass",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const testRPCFunction = async () => {
-    try {
-      setLoading(true);
-      console.log('🗄️ Testing RPC function directly...');
-
-      const { data, error } = await adminUserManagementService.getUsers({
-        limit: 100,
-        offset: 0
-      });
-
-      if (data && !error) {
-        const { data: rpcData, error: rpcError } = await (window as any).supabase
-          ? (window as any).supabase.rpc('get_all_user_profiles')
-          : { data: null, error: 'Supabase not available' };
-
-        toast({
-          title: "RPC Function Test",
-          description: rpcData ? `SUCCESS: Got ${rpcData.length} profiles from RPC` : `FAILED: ${rpcError}`,
-          variant: rpcData ? "default" : "destructive"
-        });
-
-        if (rpcData) {
-          const enhancedUsers = rpcData.map((profile: any) => ({
-            ...profile,
-            isPremium: false,
-            isGifted: false,
-            campaignCount: 0,
-            totalCreditsUsed: 0,
-            totalRevenue: 0,
-            lastActivity: null,
-            subscription: null
-          }));
-
-          setUsers(enhancedUsers);
-          setTotalCount(enhancedUsers.length);
-        }
-      }
-
-    } catch (error: any) {
-      console.error('RPC test error:', error);
-      toast({
-        title: "RPC Test Failed",
-        description: error.message || "Failed to test RPC function",
-        variant: "destructive"
-      });
-    } finally {
       setLoading(false);
     }
   };
@@ -350,9 +246,9 @@ export function AdminUserManagement() {
 
     try {
       setLoading(true);
-      console.log('✏️ Updating user:', selectedUser.user_id, updates);
+      console.log('✏️ Updating user in database:', selectedUser.user_id, updates);
       
-      const updatedUser = await adminUserManagementService.updateUser(
+      const updatedUser = await realAdminUserService.updateUser(
         selectedUser.user_id,
         updates
       );
@@ -366,14 +262,14 @@ export function AdminUserManagement() {
       setIsEditDialogOpen(false);
       
       toast({
-        title: "User Updated",
-        description: `Successfully updated ${updatedUser.display_name || updatedUser.email}`,
+        title: "User Updated Successfully",
+        description: `Updated ${updatedUser.display_name || updatedUser.email} in database`,
       });
     } catch (error: any) {
-      console.error('Error updating user:', error);
+      console.error('❌ Error updating user:', error);
       toast({
         title: "Update Failed",
-        description: error.message || "Failed to update user",
+        description: error.message || "Failed to update user in database",
         variant: "destructive"
       });
     } finally {
@@ -384,9 +280,9 @@ export function AdminUserManagement() {
   const handleDeleteUser = async (userId: string, userName: string) => {
     try {
       setLoading(true);
-      console.log('🗑️ Deleting user:', userId);
+      console.log('🗑️ Deactivating user in database:', userId);
       
-      await adminUserManagementService.deleteUser(userId);
+      await realAdminUserService.deleteUser(userId);
       
       // Remove user from the list
       setUsers(prev => prev.filter(user => user.user_id !== userId));
@@ -394,13 +290,13 @@ export function AdminUserManagement() {
       
       toast({
         title: "User Deactivated",
-        description: `Successfully deactivated ${userName}`,
+        description: `Successfully deactivated ${userName} in database`,
       });
     } catch (error: any) {
-      console.error('Error deleting user:', error);
+      console.error('❌ Error deleting user:', error);
       toast({
-        title: "Deletion Failed",
-        description: error.message || "Failed to deactivate user",
+        title: "Deactivation Failed",
+        description: error.message || "Failed to deactivate user in database",
         variant: "destructive"
       });
     } finally {
@@ -408,10 +304,10 @@ export function AdminUserManagement() {
     }
   };
 
-  const handlePromoteToPremium = async (user: UserDetails, isGifted: boolean = false) => {
+  const handlePromoteToPremium = async (user: RealUserDetails, isGifted: boolean = false) => {
     try {
       setLoading(true);
-      console.log('🎁 Promoting user to premium:', user.user_id, 'isGifted:', isGifted);
+      console.log('🎁 Promoting user to premium in database:', user.user_id, 'isGifted:', isGifted);
 
       const updates: UserUpdatePayload = {
         isPremium: true,
@@ -420,7 +316,7 @@ export function AdminUserManagement() {
         email: user.email
       };
 
-      const updatedUser = await adminUserManagementService.updateUser(
+      const updatedUser = await realAdminUserService.updateUser(
         user.user_id,
         updates
       );
@@ -432,13 +328,13 @@ export function AdminUserManagement() {
 
       toast({
         title: isGifted ? "Premium Gifted!" : "Premium Upgraded!",
-        description: `Successfully ${isGifted ? 'gifted premium to' : 'upgraded'} ${updatedUser.display_name || updatedUser.email}`,
+        description: `Successfully ${isGifted ? 'gifted premium to' : 'upgraded'} ${updatedUser.display_name || updatedUser.email} in database`,
       });
     } catch (error: any) {
-      console.error('Error promoting user to premium:', error);
+      console.error('❌ Error promoting user to premium:', error);
       toast({
         title: "Premium Upgrade Failed",
-        description: error.message || "Failed to upgrade user to premium",
+        description: error.message || "Failed to upgrade user to premium in database",
         variant: "destructive"
       });
     } finally {
@@ -458,7 +354,7 @@ export function AdminUserManagement() {
     }).format(amount);
   };
 
-  const getUserStatusBadge = (user: UserDetails) => {
+  const getUserStatusBadge = (user: RealUserDetails) => {
     if (user.role === 'admin') {
       return <Badge variant="destructive" className="gap-1"><Shield className="h-3 w-3" />Admin</Badge>;
     }
@@ -473,395 +369,392 @@ export function AdminUserManagement() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header with Connection Status */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">User Management</h2>
-          <p className="text-muted-foreground">
-            Manage user accounts, premium subscriptions, and permissions
+          <h2 className="text-2xl font-bold tracking-tight">Real Database User Management</h2>
+          <p className="text-muted-foreground flex items-center gap-2">
+            Manage user accounts with live database synchronization
+            {connectionStatus.connected ? (
+              <span className="flex items-center gap-1 text-green-600">
+                <CheckCircle className="h-4 w-4" />
+                Connected ({connectionStatus.profileCount} profiles)
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-red-600">
+                <XCircle className="h-4 w-4" />
+                Disconnected
+              </span>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            onClick={testConnection}
-            disabled={loading}
-          >
-            <Activity className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Test Database
-          </Button>
-          <Button
-            variant="outline"
-            onClick={testProfiles}
-            disabled={loading}
-          >
-            <Users className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Test Profiles
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              console.log('🔄 Force reloading real data...');
-              setUsers([]);
-              loadUsers();
-            }}
-            disabled={loading}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Load Real Data
-          </Button>
-          <Button
-            variant="outline"
-            onClick={testAdminBypass}
-            disabled={loading}
-          >
-            <Shield className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Admin Bypass
-          </Button>
-          <Button
-            variant="outline"
-            onClick={testRPCFunction}
+            onClick={testDatabaseConnection}
             disabled={loading}
           >
             <Database className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Test RPC
+            Test Connection
           </Button>
           <Button
-            variant="outline"
             onClick={reloadAllUsers}
-            disabled={loading}
+            disabled={loading || !connectionStatus.connected}
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Reload All Profiles
+            Reload Real Data
           </Button>
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalCount}</div>
-            <p className="text-xs text-muted-foreground">Registered accounts</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Premium Users</CardTitle>
-            <Crown className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {users.filter(u => u.isPremium && !u.isGifted).length}
-            </div>
-            <p className="text-xs text-muted-foreground">Paid subscriptions</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Gifted Users</CardTitle>
-            <Gift className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {users.filter(u => u.isGifted).length}
-            </div>
-            <p className="text-xs text-muted-foreground">Complimentary access</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(users.reduce((sum, u) => sum + u.totalRevenue, 0))}
-            </div>
-            <p className="text-xs text-muted-foreground">From all users</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters and Search */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filters & Search
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Label>Search</Label>
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by email or name..."
-                  value={filters.search}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-8"
-                />
+      {/* Connection Status Card */}
+      {!connectionStatus.connected && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-red-700">
+              <AlertTriangle className="h-5 w-5" />
+              <div>
+                <p className="font-medium">Database Connection Issue</p>
+                <p className="text-sm text-red-600">
+                  {connectionStatus.error || 'Unable to connect to database. Please check your configuration.'}
+                </p>
               </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label>Role</Label>
-              <Select
-                value={filters.role}
-                onValueChange={(value) => handleFilterChange('role', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Roles</SelectItem>
-                  <SelectItem value="user">Users</SelectItem>
-                  <SelectItem value="admin">Admins</SelectItem>
-                </SelectContent>
-              </Select>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Statistics Cards */}
+      {connectionStatus.connected && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalCount}</div>
+              <p className="text-xs text-muted-foreground">Live from database</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Premium Users</CardTitle>
+              <Crown className="h-4 w-4 text-yellow-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {users.filter(u => u.isPremium && !u.isGifted).length}
+              </div>
+              <p className="text-xs text-muted-foreground">Paid subscriptions</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Gifted Users</CardTitle>
+              <Gift className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {users.filter(u => u.isGifted).length}
+              </div>
+              <p className="text-xs text-muted-foreground">Complimentary access</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+              <DollarSign className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatCurrency(users.reduce((sum, u) => sum + u.totalRevenue, 0))}
+              </div>
+              <p className="text-xs text-muted-foreground">From database records</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Filters and Search */}
+      {connectionStatus.connected && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filters & Search
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Search</Label>
+                <div className="relative">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by email or name..."
+                    value={filters.search}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <Select
+                  value={filters.role}
+                  onValueChange={(value) => handleFilterChange('role', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Roles</SelectItem>
+                    <SelectItem value="user">Users</SelectItem>
+                    <SelectItem value="admin">Admins</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Premium Status</Label>
+                <Select
+                  value={filters.premiumStatus}
+                  onValueChange={(value) => handleFilterChange('premiumStatus', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="premium">Premium</SelectItem>
+                    <SelectItem value="gifted">Gifted</SelectItem>
+                    <SelectItem value="free">Free</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Sort By</Label>
+                <Select
+                  value={filters.sortBy}
+                  onValueChange={(value) => handleFilterChange('sortBy', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="created_at">Join Date</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="last_activity">Last Activity</SelectItem>
+                    <SelectItem value="revenue">Revenue</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label>Premium Status</Label>
-              <Select
-                value={filters.premiumStatus}
-                onValueChange={(value) => handleFilterChange('premiumStatus', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="premium">Premium</SelectItem>
-                  <SelectItem value="gifted">Gifted</SelectItem>
-                  <SelectItem value="free">Free</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Sort By</Label>
-              <Select
-                value={filters.sortBy}
-                onValueChange={(value) => handleFilterChange('sortBy', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="created_at">Join Date</SelectItem>
-                  <SelectItem value="email">Email</SelectItem>
-                  <SelectItem value="last_activity">Last Activity</SelectItem>
-                  <SelectItem value="revenue">Revenue</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Users Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Users ({totalCount})</span>
-            <Button
-              size="sm"
-              onClick={reloadAllUsers}
-              disabled={loading}
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Reload All
-            </Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Activity</TableHead>
-                  <TableHead>Revenue</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading && users.length === 0 ? (
+      {connectionStatus.connected && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Live Database Users ({totalCount})</span>
+              <Button
+                size="sm"
+                onClick={reloadAllUsers}
+                disabled={loading}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      <div className="flex items-center justify-center gap-2">
-                        <RefreshCw className="h-4 w-4 animate-spin" />
-                        Loading users...
-                      </div>
-                    </TableCell>
+                    <TableHead>User</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Activity</TableHead>
+                    <TableHead>Revenue</TableHead>
+                    <TableHead>Joined</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ) : users.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      <div className="text-muted-foreground">
-                        No users found matching your criteria
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  users.map((user) => (
-                    <TableRow key={user.user_id}>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="font-medium">
-                            {user.display_name || 'No Name'}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {user.email}
-                          </div>
-                        </div>
-                      </TableCell>
-                      
-                      <TableCell>
-                        <div className="space-y-1">
-                          {getUserStatusBadge(user)}
-                          {user.campaignCount > 0 && (
-                            <div className="text-xs text-muted-foreground">
-                              {user.campaignCount} campaigns
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="text-sm">
-                            {user.lastActivity ? formatDate(user.lastActivity) : 'Never'}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {user.totalCreditsUsed} credits used
-                          </div>
-                        </div>
-                      </TableCell>
-                      
-                      <TableCell>
-                        <div className="text-sm font-medium">
-                          {formatCurrency(user.totalRevenue)}
-                        </div>
-                      </TableCell>
-                      
-                      <TableCell>
-                        <div className="text-sm">
-                          {formatDate(user.created_at)}
-                        </div>
-                      </TableCell>
-                      
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {!user.isPremium && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handlePromoteToPremium(user, true)}
-                              className="text-purple-600 hover:text-purple-700"
-                            >
-                              <Gift className="h-4 w-4 mr-1" />
-                              Gift Premium
-                            </Button>
-                          )}
-                          
-                          <Dialog
-                            open={isEditDialogOpen && selectedUser?.user_id === user.user_id}
-                            onOpenChange={(open) => {
-                              setIsEditDialogOpen(open);
-                              if (open) setSelectedUser(user);
-                            }}
-                          >
-                            <DialogTrigger asChild>
-                              <Button size="sm" variant="outline">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-md">
-                              <DialogHeader>
-                                <DialogTitle>Edit User</DialogTitle>
-                              </DialogHeader>
-                              <UserEditForm
-                                user={selectedUser}
-                                onSave={handleEditUser}
-                                onCancel={() => setIsEditDialogOpen(false)}
-                              />
-                            </DialogContent>
-                          </Dialog>
-                          
-                          {user.role !== 'admin' && (
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Deactivate User</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to deactivate {user.display_name || user.email}? 
-                                    This will cancel their subscription and remove access.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDeleteUser(user.user_id, user.display_name || user.email)}
-                                    className="bg-red-600 hover:bg-red-700"
-                                  >
-                                    Deactivate
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          )}
+                </TableHeader>
+                <TableBody>
+                  {loading && users.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8">
+                        <div className="flex items-center justify-center gap-2">
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                          Loading users from database...
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-          
-          {hasMore && (
-            <div className="flex justify-center mt-4">
-              <Button
-                variant="outline"
-                onClick={loadMore}
-                disabled={loading}
-              >
-                {loading ? (
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 mr-2" />
-                )}
-                Load More Users
-              </Button>
+                  ) : users.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8">
+                        <div className="text-muted-foreground">
+                          No users found in database matching your criteria
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    users.map((user) => (
+                      <TableRow key={user.user_id}>
+                        <TableCell>
+                          <div className="space-y-1">
+                            <div className="font-medium">
+                              {user.display_name || 'No Name'}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {user.email}
+                            </div>
+                          </div>
+                        </TableCell>
+                        
+                        <TableCell>
+                          <div className="space-y-1">
+                            {getUserStatusBadge(user)}
+                            {user.campaignCount > 0 && (
+                              <div className="text-xs text-muted-foreground">
+                                {user.campaignCount} campaigns
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        
+                        <TableCell>
+                          <div className="space-y-1">
+                            <div className="text-sm">
+                              {user.lastActivity ? formatDate(user.lastActivity) : 'Never'}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {user.totalCreditsUsed} credits used
+                            </div>
+                          </div>
+                        </TableCell>
+                        
+                        <TableCell>
+                          <div className="text-sm font-medium">
+                            {formatCurrency(user.totalRevenue)}
+                          </div>
+                        </TableCell>
+                        
+                        <TableCell>
+                          <div className="text-sm">
+                            {formatDate(user.created_at)}
+                          </div>
+                        </TableCell>
+                        
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {!user.isPremium && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handlePromoteToPremium(user, true)}
+                                className="text-purple-600 hover:text-purple-700"
+                              >
+                                <Gift className="h-4 w-4 mr-1" />
+                                Gift Premium
+                              </Button>
+                            )}
+                            
+                            <Dialog
+                              open={isEditDialogOpen && selectedUser?.user_id === user.user_id}
+                              onOpenChange={(open) => {
+                                setIsEditDialogOpen(open);
+                                if (open) setSelectedUser(user);
+                              }}
+                            >
+                              <DialogTrigger asChild>
+                                <Button size="sm" variant="outline">
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-md">
+                                <DialogHeader>
+                                  <DialogTitle>Edit User in Database</DialogTitle>
+                                </DialogHeader>
+                                <UserEditForm
+                                  user={selectedUser}
+                                  onSave={handleEditUser}
+                                  onCancel={() => setIsEditDialogOpen(false)}
+                                />
+                              </DialogContent>
+                            </Dialog>
+                            
+                            {user.role !== 'admin' && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Deactivate User in Database</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to deactivate {user.display_name || user.email}? 
+                                      This will update their status in the database and cancel their subscription.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => handleDeleteUser(user.user_id, user.display_name || user.email)}
+                                      className="bg-red-600 hover:bg-red-700"
+                                    >
+                                      Deactivate
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            
+            {hasMore && (
+              <div className="flex justify-center mt-4">
+                <Button
+                  variant="outline"
+                  onClick={loadMore}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 mr-2" />
+                  )}
+                  Load More Users
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
 
 // User Edit Form Component
 interface UserEditFormProps {
-  user: UserDetails | null;
+  user: RealUserDetails | null;
   onSave: (updates: UserUpdatePayload) => void;
   onCancel: () => void;
 }
@@ -964,7 +857,7 @@ function UserEditForm({ user, onSave, onCancel }: UserEditFormProps) {
           Cancel
         </Button>
         <Button type="submit">
-          Save Changes
+          Save to Database
         </Button>
       </div>
     </form>
