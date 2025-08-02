@@ -636,6 +636,8 @@ const Dashboard = () => {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('section') || "dashboard";
   });
+  const [isPremiumSubscriber, setIsPremiumSubscriber] = useState(false);
+  const [userProgress, setUserProgress] = useState<{ [key: string]: boolean }>({});
   const { toast } = useToast();
   const navigate = useNavigate();
 
