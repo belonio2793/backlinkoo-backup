@@ -16,6 +16,89 @@ export function SimpleAdminPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [creating, setCreating] = useState(false);
 
+  const createAdminUser = async () => {
+    setCreating(true);
+    setError(null);
+
+    try {
+      console.log('🔧 Creating admin user...');
+
+      // Try to create via Netlify function first
+      try {
+        const response = await fetch('/api/create-admin-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: 'support@backlinkoo.com',
+            password: 'Admin123!@#'
+          })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          setError(null);
+          alert('✅ Admin user created successfully! You can now sign in.');
+          return;
+        } else {
+          console.warn('Netlify function failed:', result.error);
+        }
+      } catch (funcError) {
+        console.warn('Netlify function not available:', funcError);
+      }
+
+      // Fallback: try to create via direct signup
+      console.log('📝 Trying direct signup...');
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: 'support@backlinkoo.com',
+        password: 'Admin123!@#',
+        options: {
+          data: {
+            full_name: 'Support Admin',
+            display_name: 'Support Team'
+          }
+        }
+      });
+
+      if (signUpError && !signUpError.message.includes('already registered')) {
+        throw signUpError;
+      }
+
+      // Create profile record if user was created or already exists
+      if (data.user || signUpError?.message.includes('already registered')) {
+        try {
+          // Try to insert profile - will work if RLS is disabled
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert({
+              user_id: data.user?.id || 'temp-id',
+              email: 'support@backlinkoo.com',
+              full_name: 'Support Admin',
+              display_name: 'Support Team',
+              role: 'admin',
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id'
+            });
+
+          if (profileError) {
+            console.warn('Profile creation failed:', profileError);
+          }
+        } catch (profileError) {
+          console.warn('Profile creation skipped due to RLS:', profileError);
+        }
+      }
+
+      setError(null);
+      alert('✅ Admin user setup attempted! Try signing in now.');
+
+    } catch (error: any) {
+      console.error('❌ Admin user creation failed:', error);
+      setError(`Creation failed: ${error.message}`);
+    } finally {
+      setCreating(false);
+    }
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
