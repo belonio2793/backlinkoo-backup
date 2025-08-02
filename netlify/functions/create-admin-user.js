@@ -43,7 +43,7 @@ export default async (req, context) => {
 
     console.log('🔧 Creating admin user:', email);
 
-    // Step 1: Create the auth user
+    // Step 1: Create the auth user with admin client
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: email,
       password: password,
@@ -104,7 +104,7 @@ export default async (req, context) => {
       throw new Error(`Failed to create profile: ${profileError.message}`);
     }
 
-    console.log('��� Profile created/updated:', profileData);
+    console.log('✅ Profile created/updated:', profileData);
 
     // Step 3: Verify admin access
     const { data: verifyData, error: verifyError } = await supabase
