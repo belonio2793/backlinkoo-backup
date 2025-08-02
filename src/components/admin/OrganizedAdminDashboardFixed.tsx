@@ -5,13 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AuthService } from "@/services/authService";
+
 import { useToast } from "@/hooks/use-toast";
-import { useWorkingAdminDashboardMetrics } from "@/hooks/useWorkingAdminDashboardMetrics";
+import { useSimplifiedMetrics } from "@/hooks/useSimplifiedMetrics";
 import { AdminNavigationHeader } from "@/components/admin/AdminNavigationHeader";
-import { AdminUserManagement } from "@/components/admin/AdminUserManagement";
-import { UserRegistrationDiagnostic } from "@/components/admin/UserRegistrationDiagnostic";
-import { ConfigurationDiagnostic } from "@/components/admin/ConfigurationDiagnostic";
+
 import { supabase } from '@/integrations/supabase/client';
 
 // Admin Components
@@ -33,6 +31,9 @@ import { NetlifyEnvironmentManager } from "@/components/admin/NetlifyEnvironment
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 import { DirectOpenAITest } from "@/components/admin/DirectOpenAITest";
 import { UserManagement } from "@/components/admin/UserManagement";
+import { ImprovedUserList } from "@/components/admin/ImprovedUserList";
+import { SystemStatusPanel } from "@/components/admin/SystemStatusPanel";
+import { DatabaseDiagnostic } from "@/components/admin/DatabaseDiagnostic";
 
 // Testing Tools
 import { AuthEmailTest } from "@/components/AuthEmailTest";
@@ -47,29 +48,15 @@ import {
   Users,
   Activity,
   CreditCard,
-  Clock,
-  Infinity,
-  LogOut,
-  Brain,
-  Settings,
-  Server,
   FileText,
-  Mail,
-  Shield,
-  Zap,
-  Database,
-  Globe,
-  Code,
-  BarChart3,
-  MonitorSpeaker,
   RefreshCw,
-  AlertCircle,
-  Target
+  MonitorSpeaker,
+  Database
 } from "lucide-react";
 
 export function OrganizedAdminDashboard() {
   const { toast } = useToast();
-  const { metrics, loading, error, refetch } = useWorkingAdminDashboardMetrics();
+  const { metrics, loading, refetch } = useSimplifiedMetrics();
   const [activeSection, setActiveSection] = useState("overview");
   const [adminEmail, setAdminEmail] = useState<string | undefined>();
 
@@ -98,7 +85,6 @@ export function OrganizedAdminDashboard() {
   };
 
   const handleSignOut = () => {
-    AuthService.signOut();
     window.location.replace('/');
   };
 
@@ -115,41 +101,19 @@ export function OrganizedAdminDashboard() {
         {/* Section Content */}
         {activeSection === "overview" && (
           <div className="space-y-6">
-            {/* Connection Status Alert */}
-            {error && (
-              <Alert className="border-red-200 bg-red-50">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-red-700">
-                  <div className="font-medium">Dashboard Error</div>
-                  <div className="text-sm mt-1">{error.message}</div>
-                  <div className="text-sm mt-2 text-red-600">
-                    This usually means you need to sign in as an admin user or fix the database connection.
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
-
             {/* Stats Overview */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Key Metrics</h2>
-                <div className="flex items-center gap-2">
-                  {error && (
-                    <Alert className="max-w-md">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>{error.message}</AlertDescription>
-                    </Alert>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleRefreshMetrics}
-                    disabled={loading}
-                  >
-                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                    Refresh
-                  </Button>
-                </div>
+                <h2 className="text-lg font-semibold">Dashboard Metrics</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefreshMetrics}
+                  disabled={loading}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -160,17 +124,12 @@ export function OrganizedAdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {loading ? (
-                        <div className="h-8 bg-muted animate-pulse rounded" />
-                      ) : (
-                        metrics?.totalUsers || 0
-                      )}
+                      {metrics?.totalUsers || 0}
                     </div>
-                    {loading ? (
-                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                    ) : (
-                      <p className="text-xs text-muted-foreground">All registered users</p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      All registered users
+                      {metrics?.recentSignups ? ` (+${metrics.recentSignups} this week)` : ''}
+                    </p>
                   </CardContent>
                 </Card>
 
@@ -181,17 +140,11 @@ export function OrganizedAdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {loading ? (
-                        <div className="h-8 bg-muted animate-pulse rounded" />
-                      ) : (
-                        metrics?.activeUsers || 0
-                      )}
+                      {metrics?.activeUsers || 0}
                     </div>
-                    {loading ? (
-                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                    ) : (
-                      <p className="text-xs text-muted-foreground">Currently subscribed</p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Premium subscribers
+                    </p>
                   </CardContent>
                 </Card>
 
@@ -202,66 +155,53 @@ export function OrganizedAdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-success">
-                      {loading ? (
-                        <div className="h-8 bg-muted animate-pulse rounded" />
-                      ) : (
-                        `$${metrics?.monthlyRevenue?.toFixed(2) || '0.00'}`
-                      )}
+                      ${metrics?.monthlyRevenue?.toFixed(2) || '0.00'}
                     </div>
-                    {loading ? (
-                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                    ) : (
-                      <p className="text-xs text-muted-foreground">Current month total</p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      This month
+                      {metrics?.totalRevenue ? ` (Total: $${metrics.totalRevenue.toFixed(2)})` : ''}
+                    </p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Running Campaigns</CardTitle>
-                    <Target className="h-4 w-4 text-blue-500" />
+                    <CardTitle className="text-sm font-medium">Blog Posts</CardTitle>
+                    <FileText className="h-4 w-4 text-blue-500" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-blue-600">
-                      {loading ? (
-                        <div className="h-8 bg-muted animate-pulse rounded" />
-                      ) : (
-                        metrics?.runningCampaigns || 0
-                      )}
+                      {metrics?.blogPosts || 0}
                     </div>
-                    {loading ? (
-                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                    ) : (
-                      <p className="text-xs text-muted-foreground">Active credit campaigns</p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Published posts
+                    </p>
                   </CardContent>
                 </Card>
               </div>
             </div>
+
+            {/* System Configuration Status */}
+            <SystemStatusPanel />
 
             {/* Streamlined System Status */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MonitorSpeaker className="h-5 w-5" />
-                  System Status
+                  Service Status
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ServiceConnectionStatus />
               </CardContent>
             </Card>
-
-            {/* Direct OpenAI Connection Test */}
-            <DirectOpenAITest />
           </div>
         )}
 
         {activeSection === "users" && (
           <div className="space-y-6">
-            <ConfigurationDiagnostic />
-            <UserRegistrationDiagnostic />
-            <AdminUserManagement />
+            <ImprovedUserList />
           </div>
         )}
 
@@ -307,8 +247,9 @@ export function OrganizedAdminDashboard() {
 
         {activeSection === "system" && (
           <Tabs defaultValue="assessment" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="assessment">Systems Assessment</TabsTrigger>
+              <TabsTrigger value="diagnostic">Database Diagnostic</TabsTrigger>
               <TabsTrigger value="environment">Environment & API Keys</TabsTrigger>
               <TabsTrigger value="deployment">Deployment</TabsTrigger>
               <TabsTrigger value="database">Database</TabsTrigger>
@@ -316,6 +257,10 @@ export function OrganizedAdminDashboard() {
 
             <TabsContent value="assessment">
               <SystemsAssessmentDashboard />
+            </TabsContent>
+
+            <TabsContent value="diagnostic">
+              <DatabaseDiagnostic />
             </TabsContent>
 
             <TabsContent value="environment">
