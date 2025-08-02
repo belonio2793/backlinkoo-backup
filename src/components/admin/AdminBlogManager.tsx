@@ -47,42 +47,6 @@ export function AdminBlogManager() {
       // For admin, we want to see all posts including trials
       const posts = await publishedBlogService.getRecentBlogPosts(100);
 
-      // Add sample built link if not already present
-      const sampleBuiltLink = {
-        id: 'built-link-sample-1',
-        slug: 'go-high-level-guide-1753674784638',
-        title: 'Go High Level: A Comprehensive Guide for 2024',
-        content: 'Comprehensive guide content...',
-        meta_description: 'Complete guide to Go High Level platform',
-        excerpt: 'Discover everything you need to know about Go High Level',
-        keywords: ['go high level', 'marketing automation', 'CRM'],
-        target_url: 'https://example.com/go-high-level',
-        published_url: 'https://backlinkoo.com/blog/go-high-level-guide-1753674784638',
-        status: 'published' as const,
-        is_trial_post: true,
-        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        view_count: 142,
-        seo_score: 87,
-        contextual_links: [],
-        reading_time: 8,
-        word_count: 1850,
-        featured_image: '/placeholder.svg',
-        author_name: 'Backlink ∞',
-        author_avatar: '/placeholder.svg',
-        tags: ['marketing', 'automation', 'CRM'],
-        category: 'Marketing Tools',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        published_at: new Date().toISOString(),
-        user_id: undefined
-      };
-
-      // Check if sample already exists
-      const hasSample = posts.some(post => post.slug === sampleBuiltLink.slug);
-      if (!hasSample) {
-        posts.unshift(sampleBuiltLink);
-      }
-
       setBlogPosts(posts);
     } catch (error) {
       console.error('Failed to load blog posts:', error);
