@@ -36,9 +36,27 @@ class DatabaseConnectionService {
       
       // Step 2: Check authentication status
       const { data: { user }, error: authError } = await supabase.auth.getUser();
-      
+
       if (authError) {
         console.error('❌ Auth error:', authError);
+
+        // Handle specific auth session missing error
+        if (authError.message.includes('Auth session missing')) {
+          return {
+            success: false,
+            profileCount: 0,
+            error: 'Please sign in to access admin features',
+            userInfo: {
+              authenticated: false
+            },
+            details: {
+              supabaseUrl,
+              hasAnonKey,
+              tableAccess: 'Sign in required'
+            }
+          };
+        }
+
         return {
           success: false,
           profileCount: 0,
