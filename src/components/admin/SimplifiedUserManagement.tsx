@@ -355,15 +355,28 @@ export function SimplifiedUserManagement() {
                 className="pl-10"
               />
             </div>
-            <Button 
-              onClick={fetchUsersAndStats} 
-              disabled={loading}
-              variant="outline"
-              size="sm"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Sync Data
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={fetchUsersAndStats}
+                disabled={loading}
+                variant="outline"
+                size="sm"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                Sync Data
+              </Button>
+              <Button
+                onClick={() => {
+                  console.log('Current users state:', users);
+                  console.log('Current stats:', stats);
+                  alert(`Current data: ${users.length} users loaded. Check console for details.`);
+                }}
+                variant="ghost"
+                size="sm"
+              >
+                Debug Info
+              </Button>
+            </div>
           </div>
 
           {/* Users Table */}
