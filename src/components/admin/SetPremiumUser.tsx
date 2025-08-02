@@ -179,7 +179,7 @@ export function SetPremiumUser() {
             <Input
               id="email"
               type="email"
-              placeholder="user@example.com"
+              placeholder="Enter user email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1"

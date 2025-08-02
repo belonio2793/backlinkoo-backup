@@ -90,15 +90,8 @@ export function AdminNavigationHeader({
   ];
 
   const handleSignOut = () => {
-    // Navigate immediately for instant UX
-    window.location.href = '/';
-
-    // Do sign out in background
-    setTimeout(() => {
-      AuthService.signOut().catch((error) => {
-        console.warn('Background admin sign out error (non-critical):', error);
-      });
-    }, 0);
+    AuthService.signOut();
+    window.location.replace('/');
   };
 
   return (

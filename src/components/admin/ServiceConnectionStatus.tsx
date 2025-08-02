@@ -266,7 +266,7 @@ export function ServiceConnectionStatus() {
           method: 'POST',
           body: JSON.stringify({
             test: true,
-            to: 'test@example.com',
+            to: 'admin@backlinkoo.com',
             subject: 'Test',
             html: 'Test'
           })

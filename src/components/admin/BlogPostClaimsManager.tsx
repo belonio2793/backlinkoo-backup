@@ -59,7 +59,7 @@ export function BlogPostClaimsManager() {
             status: post.is_trial_post ? 'unclaimed' : 'claimed',
             claimedBy: post.is_trial_post ? undefined : {
               userId: (post as any).user_id || 'unknown',
-              email: (post as any).user_email || 'unknown@example.com',
+              email: (post as any).user_email || 'No email',
               claimedAt: post.created_at
             },
             createdAt: post.created_at,

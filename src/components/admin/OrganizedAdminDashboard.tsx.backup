@@ -95,8 +95,15 @@ export function OrganizedAdminDashboard() {
   };
 
   const handleSignOut = () => {
-    AuthService.signOut();
-    window.location.replace('/');
+    // Navigate immediately for instant UX
+    window.location.href = '/';
+
+    // Do sign out in background
+    setTimeout(() => {
+      AuthService.signOut().catch((error) => {
+        console.warn('Background admin sign out error (non-critical):', error);
+      });
+    }, 0);
   };
 
   return (
@@ -354,6 +361,35 @@ export function OrganizedAdminDashboard() {
 
             <TabsContent value="campaigns">
               <CampaignManager />
+            </TabsContent>
+          </Tabs>
+        )}
+
+main
+              <TabsTrigger value="affiliates">Affiliate Program</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="users">
+              <UserManagement />
+            </TabsContent>
+
+            <TabsContent value="affiliates">
+              <AdminAffiliateManager />
+            </TabsContent>
+
+            <TabsContent value="analytics">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    Business Analytics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">Advanced analytics and reporting coming soon...</p>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         )}

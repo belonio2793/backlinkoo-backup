@@ -68,7 +68,10 @@ import {
   type UserListFilters,
   type UserUpdatePayload
 } from "@/services/adminUserManagementService";
+import { supabase } from "@/integrations/supabase/client";
 import { testDatabaseConnection } from "@/utils/testDatabaseConnection";
+import { testProfileAccess } from "@/utils/testProfileAccess";
+import { AdminBypass } from "@/services/adminBypass";
 
 export function AdminUserManagement() {
   const [users, setUsers] = useState<UserDetails[]>([]);
@@ -196,6 +199,127 @@ export function AdminUserManagement() {
     }
   };
 
+  const testProfiles = async () => {
+    try {
+      setLoading(true);
+      console.log('🧪 Testing profile access...');
+
+      const result = await testProfileAccess();
+
+      toast({
+        title: "Profile Access Test",
+        description: `Found ${result.totalCount} total profiles, can access ${result.profilesCount}. User: ${result.user}`,
+        variant: result.hasAccess ? "default" : "destructive"
+      });
+
+      console.log('🧪 Profile test result:', result);
+
+    } catch (error: any) {
+      console.error('Profile test error:', error);
+      toast({
+        title: "Profile Test Failed",
+        description: error.message || "Failed to test profile access",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const testAdminBypass = async () => {
+    try {
+      setLoading(true);
+      console.log('🛡️ Testing admin bypass...');
+
+      const result = await AdminBypass.fetchProfilesAsAdmin();
+
+      toast({
+        title: "Admin Bypass Test",
+        description: `${result.success ? 'SUCCESS' : 'FAILED'}: ${result.success ? `Got ${result.data?.length} profiles via ${result.method}` : result.error}`,
+        variant: result.success ? "default" : "destructive"
+      });
+
+      if (result.success && result.data) {
+        // Update the user list with real data
+        const enhancedUsers = result.data.map(profile => ({
+          ...profile,
+          isPremium: false,
+          isGifted: false,
+          campaignCount: 0,
+          totalCreditsUsed: 0,
+          totalRevenue: 0,
+          lastActivity: null,
+          subscription: null
+        }));
+
+        setUsers(enhancedUsers);
+        setTotalCount(enhancedUsers.length);
+      }
+
+      console.log('🛡️ Admin bypass result:', result);
+
+    } catch (error: any) {
+      console.error('Admin bypass error:', error);
+      toast({
+        title: "Admin Bypass Failed",
+        description: error.message || "Failed to test admin bypass",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const testRPCFunction = async () => {
+    try {
+      setLoading(true);
+      console.log('🗄️ Testing RPC function directly...');
+
+      const { data, error } = await adminUserManagementService.getUsers({
+        limit: 100,
+        offset: 0
+      });
+
+      if (data && !error) {
+        const { data: rpcData, error: rpcError } = await (window as any).supabase
+          ? (window as any).supabase.rpc('get_all_user_profiles')
+          : { data: null, error: 'Supabase not available' };
+
+        toast({
+          title: "RPC Function Test",
+          description: rpcData ? `SUCCESS: Got ${rpcData.length} profiles from RPC` : `FAILED: ${rpcError}`,
+          variant: rpcData ? "default" : "destructive"
+        });
+
+        if (rpcData) {
+          const enhancedUsers = rpcData.map((profile: any) => ({
+            ...profile,
+            isPremium: false,
+            isGifted: false,
+            campaignCount: 0,
+            totalCreditsUsed: 0,
+            totalRevenue: 0,
+            lastActivity: null,
+            subscription: null
+          }));
+
+          setUsers(enhancedUsers);
+          setTotalCount(enhancedUsers.length);
+        }
+      }
+
+    } catch (error: any) {
+      console.error('RPC test error:', error);
+      toast({
+        title: "RPC Test Failed",
+        description: error.message || "Failed to test RPC function",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSearch = (value: string) => {
     setFilters(prev => ({
       ...prev,
@@ -285,14 +409,41 @@ export function AdminUserManagement() {
   };
 
   const handlePromoteToPremium = async (user: UserDetails, isGifted: boolean = false) => {
-    const updates: UserUpdatePayload = {
-      isPremium: true,
-      isGifted,
-      subscriptionTier: isGifted ? 'premium_gifted' : 'premium',
-      email: user.email
-    };
+    try {
+      setLoading(true);
+      console.log('🎁 Promoting user to premium:', user.user_id, 'isGifted:', isGifted);
 
-    await handleEditUser(updates);
+      const updates: UserUpdatePayload = {
+        isPremium: true,
+        isGifted,
+        subscriptionTier: isGifted ? 'premium_gifted' : 'premium',
+        email: user.email
+      };
+
+      const updatedUser = await adminUserManagementService.updateUser(
+        user.user_id,
+        updates
+      );
+
+      // Update user in the list
+      setUsers(prev => prev.map(u =>
+        u.user_id === user.user_id ? updatedUser : u
+      ));
+
+      toast({
+        title: isGifted ? "Premium Gifted!" : "Premium Upgraded!",
+        description: `Successfully ${isGifted ? 'gifted premium to' : 'upgraded'} ${updatedUser.display_name || updatedUser.email}`,
+      });
+    } catch (error: any) {
+      console.error('Error promoting user to premium:', error);
+      toast({
+        title: "Premium Upgrade Failed",
+        description: error.message || "Failed to upgrade user to premium",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formatDate = (dateString: string | null) => {
@@ -338,6 +489,42 @@ export function AdminUserManagement() {
           >
             <Activity className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Test Database
+          </Button>
+          <Button
+            variant="outline"
+            onClick={testProfiles}
+            disabled={loading}
+          >
+            <Users className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Test Profiles
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              console.log('🔄 Force reloading real data...');
+              setUsers([]);
+              loadUsers();
+            }}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Load Real Data
+          </Button>
+          <Button
+            variant="outline"
+            onClick={testAdminBypass}
+            disabled={loading}
+          >
+            <Shield className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Admin Bypass
+          </Button>
+          <Button
+            variant="outline"
+            onClick={testRPCFunction}
+            disabled={loading}
+          >
+            <Database className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Test RPC
           </Button>
           <Button
             variant="outline"
