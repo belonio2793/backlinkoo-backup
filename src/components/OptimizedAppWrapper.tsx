@@ -139,11 +139,7 @@ export const OptimizedAppWrapper = () => {
               <SimpleAdminPage />
             </Suspense>
           } />
-          <Route path="/admin/setup" element={
-            <Suspense fallback={<PageLoader />}>
-              <AdminSetup />
-            </Suspense>
-          } />
+
           <Route path="/admin/diagnostic" element={
             <Suspense fallback={<PageLoader />}>
               <AdminDiagnostic />
