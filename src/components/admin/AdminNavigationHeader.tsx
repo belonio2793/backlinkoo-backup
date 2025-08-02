@@ -90,15 +90,23 @@ export function AdminNavigationHeader({
   ];
 
   const handleSignOut = () => {
-    console.log('🚪 Admin sign out initiated');
+    console.log('🚪 Admin sign out initiated - instant navigation');
 
-    // Clear any loading states immediately
+    // Provide immediate visual feedback
     document.body.style.cursor = 'wait';
 
-    // Navigate instantly - no delays
+    // Clear any admin session data immediately (local)
+    try {
+      localStorage.removeItem('admin_session');
+      sessionStorage.clear();
+    } catch (e) {
+      // Ignore storage errors
+    }
+
+    // Navigate instantly - replace history for clean logout
     window.location.replace('/');
 
-    // Background cleanup (non-blocking)
+    // Background server cleanup (non-blocking)
     AuthService.signOut().catch((error) => {
       console.warn('Background admin sign out error (non-critical):', error);
     });
