@@ -95,15 +95,18 @@ export function OrganizedAdminDashboard() {
   };
 
   const handleSignOut = () => {
-    // Navigate immediately for instant UX
-    window.location.href = '/';
+    console.log('🚪 Admin dashboard sign out initiated');
 
-    // Do sign out in background
-    setTimeout(() => {
-      AuthService.signOut().catch((error) => {
-        console.warn('Background admin sign out error (non-critical):', error);
-      });
-    }, 0);
+    // Clear any loading states immediately
+    document.body.style.cursor = 'wait';
+
+    // Navigate instantly - no delays
+    window.location.replace('/');
+
+    // Background cleanup (non-blocking)
+    AuthService.signOut().catch((error) => {
+      console.warn('Background admin sign out error (non-critical):', error);
+    });
   };
 
   return (
