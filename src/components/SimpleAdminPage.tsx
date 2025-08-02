@@ -158,23 +158,47 @@ export function SimpleAdminPage() {
               />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full h-11"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Signing In...
-                </>
-              ) : (
-                <>
-                  <Shield className="h-4 w-4 mr-2" />
-                  Access Admin Dashboard
-                </>
-              )}
-            </Button>
+            <div className="space-y-3">
+              <Button
+                type="submit"
+                className="w-full h-11"
+                disabled={loading || fixingRLS}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Signing In...
+                  </>
+                ) : (
+                  <>
+                    <Shield className="h-4 w-4 mr-2" />
+                    Access Admin Dashboard
+                  </>
+                )}
+              </Button>
+
+              {error?.includes('RLS') || error?.includes('policy') || error?.includes('infinite recursion') ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-11"
+                  onClick={fixRLSRecursion}
+                  disabled={loading || fixingRLS}
+                >
+                  {fixingRLS ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Fixing RLS Issue...
+                    </>
+                  ) : (
+                    <>
+                      <Wrench className="h-4 w-4 mr-2" />
+                      Fix RLS Issue
+                    </>
+                  )}
+                </Button>
+              ) : null}
+            </div>
           </form>
 
           <div className="mt-6 pt-4 border-t text-center">
