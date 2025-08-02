@@ -73,14 +73,7 @@ export class SafeAuth {
     } catch (error: any) {
       console.error('❌ Admin check failed:', error);
 
-      // Last resort: check if this is the support admin email
-      try {
-        const userResult = await this.getCurrentUser();
-        if (userResult.user?.email === 'support@backlinkoo.com') {
-          console.log('✅ Support admin - emergency access granted');
-          return { isAdmin: true, needsAuth: false };
-        }
-      } catch {}
+      // Return the error without emergency bypass
 
       return { isAdmin: false, needsAuth: true, error: error.message };
     }
