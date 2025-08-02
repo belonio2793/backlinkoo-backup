@@ -225,6 +225,50 @@ export function AdminUserManagement() {
     }
   };
 
+  const testAdminBypass = async () => {
+    try {
+      setLoading(true);
+      console.log('🛡️ Testing admin bypass...');
+
+      const result = await AdminBypass.fetchProfilesAsAdmin();
+
+      toast({
+        title: "Admin Bypass Test",
+        description: `${result.success ? 'SUCCESS' : 'FAILED'}: ${result.success ? `Got ${result.data?.length} profiles via ${result.method}` : result.error}`,
+        variant: result.success ? "default" : "destructive"
+      });
+
+      if (result.success && result.data) {
+        // Update the user list with real data
+        const enhancedUsers = result.data.map(profile => ({
+          ...profile,
+          isPremium: false,
+          isGifted: false,
+          campaignCount: 0,
+          totalCreditsUsed: 0,
+          totalRevenue: 0,
+          lastActivity: null,
+          subscription: null
+        }));
+
+        setUsers(enhancedUsers);
+        setTotalCount(enhancedUsers.length);
+      }
+
+      console.log('🛡️ Admin bypass result:', result);
+
+    } catch (error: any) {
+      console.error('Admin bypass error:', error);
+      toast({
+        title: "Admin Bypass Failed",
+        description: error.message || "Failed to test admin bypass",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSearch = (value: string) => {
     setFilters(prev => ({
       ...prev,
