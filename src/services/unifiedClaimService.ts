@@ -117,7 +117,7 @@ export class UnifiedClaimService {
         if (error.code === 'PGRST116') {
           return null; // No rows found
         }
-        console.error('Error fetching blog post:', error);
+        console.error('Error fetching blog post:', error.message || error);
         return null;
       }
 
