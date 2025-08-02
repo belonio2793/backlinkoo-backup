@@ -10,7 +10,6 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PremiumService } from "@/services/premiumService";
-import { PremiumDiagnosticButton } from "@/components/PremiumDiagnosticButton";
 import { Loader2, User, Mail, Calendar, MapPin, Briefcase, Globe, Save, AlertCircle, Crown, Shield } from "lucide-react";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
