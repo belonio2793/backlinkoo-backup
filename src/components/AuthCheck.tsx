@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { SafeAuth } from '@/utils/safeAuth';
 import { AdminSignIn } from './AdminSignIn';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,70 +38,56 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
       setLoading(true);
       setError(null);
 
-      // Check if user is authenticated
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      // Check if user is authenticated using SafeAuth
+      const userResult = await SafeAuth.getCurrentUser();
 
-      if (authError) {
-        console.error('❌ Auth error:', authError);
-        if (authError.message.includes('Auth session missing')) {
-          console.log('🔐 No auth session - showing sign in');
-          setShowSignIn(true);
-          return;
-        }
+      if (userResult.needsAuth || !userResult.user) {
+        console.log('🔐 No auth session - showing sign in');
+        setShowSignIn(true);
+        return;
+      }
+
+      if (userResult.error) {
+        console.error('❌ Auth error:', userResult.error);
         setError('Authentication failed. Please sign in.');
         setShowSignIn(true);
         return;
       }
 
-      if (!user) {
-        console.warn('⚠️ No authenticated user - showing sign in');
-        setShowSignIn(true);
-        return;
-      }
-
+      const user = userResult.user;
       setUser(user);
       console.log('✅ User authenticated:', user.email);
 
-      // If admin is required, check user role
+      // If admin is required, check user role using SafeAuth
       if (requireAdmin) {
-        try {
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('role, email, display_name')
-            .eq('user_id', user.id)
-            .single();
+        const adminResult = await SafeAuth.isAdmin();
 
-          if (profileError) {
-            console.error('❌ Profile fetch error:', profileError);
-            setError('Could not verify admin permissions. Please contact support.');
-            return;
-          }
+        if (adminResult.needsAuth) {
+          setError('Admin access required. Please sign in with an admin account.');
+          setShowSignIn(true);
+          return;
+        }
 
-          if (!profile) {
-            setError('No profile found. Please contact support.');
-            return;
-          }
-
-          setUserRole(profile.role);
-
-          if (profile.role !== 'admin') {
-            setError('Admin access required. Please sign in with an admin account.');
-            setShowSignIn(true);
-            return;
-          }
-
-          console.log('✅ Admin user verified:', profile.email);
-        } catch (error: any) {
-          console.error('❌ Admin check failed:', error);
+        if (adminResult.error) {
+          console.error('❌ Admin check failed:', adminResult.error);
           setError('Could not verify admin permissions.');
           return;
         }
+
+        if (!adminResult.isAdmin) {
+          setError('Admin access required. Please sign in with an admin account.');
+          setShowSignIn(true);
+          return;
+        }
+
+        setUserRole('admin');
+        console.log('✅ Admin user verified:', user.email);
       }
 
       // Success - hide sign in form
       setShowSignIn(false);
       console.log('✅ Authentication successful');
-      
+
     } catch (error: any) {
       console.error('❌ Auth check failed:', error);
       setError('Authentication check failed.');
@@ -116,7 +103,7 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
+      await SafeAuth.signOut();
       setShowSignIn(true);
       setUser(null);
       setUserRole(null);
