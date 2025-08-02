@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { SEOAcademyTab } from '@/components/SEOAcademyTab';
 import {
   Crown,
   Star,
@@ -153,10 +154,11 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
       </div>
 
       <Tabs value={activeFeature} onValueChange={setActiveFeature} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Features Overview</TabsTrigger>
           <TabsTrigger value="comparison">Plan Comparison</TabsTrigger>
           <TabsTrigger value="seo-academy">SEO Academy</TabsTrigger>
+          <TabsTrigger value="academy-courses">Course Content</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -307,6 +309,13 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="academy-courses" className="space-y-6">
+          <SEOAcademyTab
+            isSubscribed={isSubscribed}
+            onUpgrade={handleUpgrade}
+          />
         </TabsContent>
       </Tabs>
 
