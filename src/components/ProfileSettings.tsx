@@ -50,11 +50,10 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
     marketing_emails: true,
     role: user?.user_metadata?.role || 'user',
   });
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [isPremium, setIsPremium] = useState<boolean | null>(null);
-  const [premiumLoading, setPremiumLoading] = useState(true);
+  const [premiumLoading, setPremiumLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
