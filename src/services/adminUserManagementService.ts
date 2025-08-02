@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
+import { realDataFetcher } from './realDataFetcher';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 type Subscriber = Database['public']['Tables']['subscribers']['Row'];
