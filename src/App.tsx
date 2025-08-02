@@ -14,8 +14,8 @@ import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 import { autoConfigSaver } from "@/services/autoConfigSaver";
 import "@/services/blogCleanupService"; // Initialize blog cleanup service
-import "@/utils/systemsAssessment"; // Initialize systems assessment
-import "@/utils/blogSystemTest"; // Initialize blog system test
+
+
 import "@/services/rlsStatusService"; // RLS STATUS CHECK AND MANUAL FIX INSTRUCTIONS
 import "@/utils/createAdminUser"; // Admin user creation utility
 import "@/utils/autoAdminSetup"; // Auto admin user setup
