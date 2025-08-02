@@ -513,6 +513,10 @@ export function SecurityDashboard() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="activity" className="space-y-6">
+          <AdminActivityMonitor />
+        </TabsContent>
+
         <TabsContent value="roles" className="space-y-6">
 
           {/* Role Assignment */}
