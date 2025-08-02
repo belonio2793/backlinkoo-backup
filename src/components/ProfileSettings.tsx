@@ -50,6 +50,8 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [isPremium, setIsPremium] = useState<boolean | null>(null);
+  const [premiumLoading, setPremiumLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
