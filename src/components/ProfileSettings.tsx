@@ -37,8 +37,10 @@ interface ProfileSettingsProps {
 
 export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
   const [profile, setProfile] = useState<Partial<ProfileData>>({
-    full_name: '',
-    display_name: '',
+    user_id: user?.id || '',
+    email: user?.email || '',
+    full_name: user?.user_metadata?.full_name || '',
+    display_name: user?.user_metadata?.display_name || user?.user_metadata?.full_name || '',
     bio: '',
     company: '',
     website: '',
@@ -46,6 +48,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
     phone: '',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     marketing_emails: true,
+    role: user?.user_metadata?.role || 'user',
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
