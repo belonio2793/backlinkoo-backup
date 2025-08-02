@@ -118,8 +118,8 @@ class AdminUserManagementService {
               this.getUserCreditStats(profile.user_id)
             ]);
 
-            // Determine premium status
-            const subscription = (profile as any).subscribers?.[0] || null;
+            // Get subscription from our map
+            const subscription = subscribersMap.get(profile.user_id) || null;
             const isPremium = subscription?.subscribed === true;
             
             // Check for gifted status (premium without paid subscription)
