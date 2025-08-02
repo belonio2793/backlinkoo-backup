@@ -19,7 +19,7 @@ import { MetricsRefreshButton } from "@/components/admin/MetricsRefreshButton";
 import { BlogPostsDebugger } from "@/components/admin/BlogPostsDebugger";
 import { BlogManagerTestButton } from "@/components/admin/BlogManagerTestButton";
 import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
-import { SystemStatusPanel } from "@/components/admin/SystemStatusPanel";
+import { SystemStatusPanelWithTester } from "@/components/admin/SystemStatusPanel";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { NetlifyEnvironmentManager } from "@/components/admin/NetlifyEnvironmentManager";
