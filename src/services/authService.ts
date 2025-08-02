@@ -94,15 +94,9 @@ export class AuthService {
       }
 
       if (data.user && data.session) {
-        // Check if email is verified
-        if (!data.user.email_confirmed_at) {
-          await supabase.auth.signOut();
-          return {
-            success: false,
-            error: 'Email verification required. Please check your email for a verification link.',
-            requiresEmailVerification: true
-          };
-        }
+        // Temporarily bypass email verification during database issues
+        // TODO: Re-enable email verification once database is fixed
+        console.log('🔐 Auth successful for:', data.user.email, 'Verified:', !!data.user.email_confirmed_at);
 
         return {
           success: true,
