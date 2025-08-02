@@ -120,11 +120,12 @@ export class BlogService {
             const finalSlug = `${fallbackSlug}-${Date.now()}`;
             const finalData = { ...cleanBlogPostData, slug: finalSlug };
 
-            const { data: finalPost, error: finalError } = await supabase
+            const { data: finalPostArray, error: finalError } = await supabase
               .from('blog_posts')
               .insert(finalData)
-              .select()
-              .single();
+              .select();
+
+            const finalPost = finalPostArray?.[0] || null;
 
             if (finalError) {
               throw new Error(`Failed to create blog post after multiple retries: ${finalError.message}`);
