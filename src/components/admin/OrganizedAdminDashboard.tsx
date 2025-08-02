@@ -26,6 +26,7 @@ import { EnvironmentVariablesManager } from "@/components/admin/EnvironmentVaria
 import { NetlifyEnvironmentManager } from "@/components/admin/NetlifyEnvironmentManager";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 import { DirectOpenAITest } from "@/components/admin/DirectOpenAITest";
+import { UserManagement } from "@/components/admin/UserManagement";
 
 // Testing Tools
 import { AuthEmailTest } from "@/components/AuthEmailTest";
