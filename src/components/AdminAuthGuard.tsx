@@ -28,16 +28,9 @@ export const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
     try {
       setIsLoading(true);
 
-      // Add timeout to prevent infinite loading
-      const authTimeout = setTimeout(() => {
-        console.warn('Auth check is taking too long, applying emergency bypass');
-        setIsLoading(false);
-      }, 5000); // 5 second timeout
-
       const { data: { user }, error } = await supabase.auth.getUser();
 
       if (error || !user) {
-        clearTimeout(authTimeout);
         setIsAuthenticated(false);
         setIsAdmin(false);
         setIsLoading(false);
@@ -46,54 +39,23 @@ export const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
 
       setIsAuthenticated(true);
 
-      // Emergency bypass for support admin email
-      if (user.email === 'support@backlinkoo.com') {
-        console.log('✅ Support admin detected - bypassing profile check');
-        clearTimeout(authTimeout);
-        setIsAdmin(true);
-        setIsLoading(false);
-        return;
-      }
-
-      // Check if user is admin with timeout protection
+      // Check if user is admin
       try {
-        const profilePromise = supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
           .eq('user_id', user.id)
           .single();
 
-        // Race the profile query against a timeout
-        const profileResult = await Promise.race([
-          profilePromise,
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Profile query timeout')), 3000)
-          )
-        ]);
-
-        clearTimeout(authTimeout);
-
-        if (profileResult && 'data' in profileResult) {
-          const { data: profile } = profileResult as any;
-          if (profile?.role === 'admin') {
-            setIsAdmin(true);
-          } else {
-            setIsAdmin(false);
-          }
-        } else {
+        if (profileError) {
+          console.warn('Could not check admin status:', profileError);
           setIsAdmin(false);
+        } else {
+          setIsAdmin(profile?.role === 'admin');
         }
       } catch (error) {
-        clearTimeout(authTimeout);
-        console.warn('Profile check failed or timed out:', error);
-
-        // Emergency fallback for support admin
-        if (user.email === 'support@backlinkoo.com') {
-          console.log('✅ Support admin emergency access granted');
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
-        }
+        console.warn('Profile check failed:', error);
+        setIsAdmin(false);
       }
 
     } catch (error) {
