@@ -461,6 +461,14 @@ export function AdminUserManagement() {
           </Button>
           <Button
             variant="outline"
+            onClick={testAdminBypass}
+            disabled={loading}
+          >
+            <Shield className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Admin Bypass
+          </Button>
+          <Button
+            variant="outline"
             onClick={reloadAllUsers}
             disabled={loading}
           >
