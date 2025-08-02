@@ -50,12 +50,12 @@ export function DatabaseSyncedUserManagement() {
     try {
       console.log('🔄 Syncing user data from Supabase...');
 
-      // Try to use the working admin user management service first
+      // Try to use the working real admin user service first
       try {
-        const { adminUserManagementService } = await import('@/services/adminUserManagementService');
-        const result = await adminUserManagementService.getUsers({ limit: 200, offset: 0 });
+        const { realAdminUserService } = await import('@/services/realAdminUserService');
+        const result = await realAdminUserService.getUsers({ limit: 200, offset: 0 });
 
-        console.log(`✅ Successfully fetched ${result.users.length} users via admin service`);
+        console.log(`✅ Successfully fetched ${result.users.length} users via real admin service`);
 
         // Map to our format
         const mappedUsers: User[] = result.users.map(user => ({
