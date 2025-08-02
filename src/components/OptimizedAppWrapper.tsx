@@ -137,7 +137,7 @@ export const OptimizedAppWrapper = () => {
           {/* Admin routes */}
           <Route path="/admin" element={
             <Suspense fallback={<PageLoader />}>
-              <AdminLanding />
+              <SimpleAdminPage />
             </Suspense>
           } />
           <Route path="/admin/setup" element={
