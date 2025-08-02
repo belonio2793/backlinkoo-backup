@@ -131,11 +131,16 @@ export const OptimizedAppWrapper = () => {
             </EmailVerificationGuard>
           } />
 
-          {/* Admin route */}
+          {/* Admin routes */}
           <Route path="/admin" element={
             <AdminAuthGuard>
               <LazyAdminDashboard />
             </AdminAuthGuard>
+          } />
+          <Route path="/admin/setup" element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminSetup />
+            </Suspense>
           } />
 
           {/* Debug routes - only in development */}
