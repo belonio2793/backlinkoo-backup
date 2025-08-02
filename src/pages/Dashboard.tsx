@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { PremiumPlanTab } from "@/components/PremiumPlanTab";
 import { SEOAcademyTab } from "@/components/SEOAcademyTab";
-import { PremiumForcer } from "@/components/PremiumForcer";
 
 import { PremiumService } from "@/services/premiumService";
 import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
@@ -439,7 +438,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
               <div>���� Displayed: {debugInfo.displayedPosts}</div>
-              <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '✅'}</div>
+              <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '��'}</div>
             </div>
           </div>
           {debugInfo.errorMessage && (
