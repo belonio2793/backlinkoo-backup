@@ -65,6 +65,7 @@ export function SecurityDashboard() {
   };
 
   const fetchUserRoles = async () => {
+    setLoading(true);
     try {
       console.log('🔄 Fetching user profiles and roles...');
 
