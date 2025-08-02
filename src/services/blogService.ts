@@ -116,7 +116,7 @@ export class BlogService {
 
         if (retryError || !retryPost) {
           // Final attempt with timestamp
-          if (retryError.message.includes('blog_posts_slug_key')) {
+          if (retryError && retryError.message && retryError.message.includes('blog_posts_slug_key')) {
             const finalSlug = `${fallbackSlug}-${Date.now()}`;
             const finalData = { ...cleanBlogPostData, slug: finalSlug };
 
