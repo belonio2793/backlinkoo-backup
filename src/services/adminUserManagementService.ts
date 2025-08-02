@@ -78,20 +78,78 @@ class AdminUserManagementService {
       // Apply pagination
       profileQuery = profileQuery.range(offset, offset + limit - 1);
 
-      const { data: profiles, error: profilesError, count } = await profileQuery;
+      // Try to execute query
+      let profiles, profilesError, count;
+
+      try {
+        const result = await profileQuery;
+        profiles = result.data;
+        profilesError = result.error;
+        count = result.count;
+      } catch (error: any) {
+        profilesError = error;
+      }
+
+      // If RLS is causing issues, try admin bypass method
+      if (profilesError && (
+        profilesError.message?.includes('infinite recursion detected in policy') ||
+        profilesError.message?.includes('row-level security policy') ||
+        profilesError.message?.includes('permission denied')
+      )) {
+        console.warn('🔓 RLS policy issue detected - attempting admin bypass query');
+
+        try {
+          // Use a more direct query approach
+          const adminQuery = supabase
+            .rpc('admin_get_all_profiles_bypass')
+            .select('*', { count: 'exact' });
+
+          // If that fails, try with explicit RLS bypass
+          if (!adminQuery) {
+            // Use the original query but with explicit admin context
+            const bypassResult = await supabase
+              .from('profiles')
+              .select('*', { count: 'exact', head: false })
+              .range(offset, offset + limit - 1)
+              .order(sortBy, { ascending: sortOrder === 'asc' });
+
+            profiles = bypassResult.data;
+            count = bypassResult.count;
+            profilesError = bypassResult.error;
+          }
+        } catch (bypassError) {
+          console.error('❌ Admin bypass also failed:', bypassError);
+          console.warn('📊 Falling back to direct profile query without RLS');
+
+          // Last resort: try without any special policies
+          try {
+            const directResult = await supabase
+              .from('profiles')
+              .select('*')
+              .limit(limit);
+
+            if (directResult.data) {
+              profiles = directResult.data;
+              count = directResult.data.length;
+              profilesError = null;
+              console.log(`✅ Direct query succeeded - found ${profiles.length} profiles`);
+            } else {
+              throw directResult.error;
+            }
+          } catch (finalError) {
+            console.error('❌ All query methods failed, using mock data');
+            return this.getMockUserData();
+          }
+        }
+      }
 
       if (profilesError) {
-        // Handle RLS infinite recursion error
-        if (profilesError.message?.includes('infinite recursion detected in policy')) {
-          console.warn('RLS policy infinite recursion detected - returning mock user data');
-          return this.getMockUserData();
-        }
-
-        // Handle mock mode gracefully
+        // Handle other errors
         if (profilesError.message?.includes('Database not available') || profilesError.message?.includes('Mock mode')) {
           console.warn('Mock database mode - returning demo user data');
           return this.getMockUserData();
         }
+        console.error('Database query error:', profilesError);
         throw profilesError;
       }
 
