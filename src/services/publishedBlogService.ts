@@ -192,11 +192,15 @@ export class PublishedBlogService {
         .order('created_at', { ascending: false })
         .limit(limit);
 
-      if (data && !error) {
+      if (error) {
+        console.error('🐛 Error fetching blog posts:', error);
+      } else {
+        console.log(`✅ Successfully fetched ${data?.length || 0} blog posts from Supabase`);
+        console.log('Blog posts data:', data);
         return data as PublishedBlogPost[];
       }
     } catch (dbError) {
-      console.warn('Database query failed, using in-memory storage:', dbError);
+      console.error('🐛 Database query failed, using in-memory storage:', dbError);
     }
 
     // Fallback to in-memory storage
