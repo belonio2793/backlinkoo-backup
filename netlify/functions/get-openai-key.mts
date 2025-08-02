@@ -14,9 +14,8 @@ export default async (req: Request, context: Context) => {
 
   try {
     // Get the OpenAI API key from environment variables
-    const openaiKey = Netlify.env.get('OPENAI_API_KEY') || 
-                      Netlify.env.get('VITE_OPENAI_API_KEY') ||
-                      process.env.OPENAI_API_KEY;
+    const openaiKey = process.env.OPENAI_API_KEY ||
+                      process.env.VITE_OPENAI_API_KEY;
 
     if (!openaiKey) {
       return new Response(
