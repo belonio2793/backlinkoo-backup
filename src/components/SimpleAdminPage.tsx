@@ -23,6 +23,8 @@ export function SimpleAdminPage() {
     try {
       // Instant admin bypass - no database calls needed
       if (email.trim() === 'support@backlinkoo.com' && password === 'password') {
+        // Set session storage for instant admin access
+        sessionStorage.setItem('instant_admin', 'true');
         setIsLoggedIn(true);
         setLoading(false);
         return;
