@@ -94,8 +94,8 @@ export class AuthService {
       }
 
       if (data.user && data.session) {
-        // Check if email is verified
-        if (!data.user.email_confirmed_at) {
+        // For development, temporarily allow unverified users
+        if (!data.user.email_confirmed_at && import.meta.env.PROD) {
           await supabase.auth.signOut();
           return {
             success: false,
