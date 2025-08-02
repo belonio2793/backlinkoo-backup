@@ -464,7 +464,7 @@ export class UnifiedClaimService {
           if (!deleteError) {
             deletedCount++;
           } else {
-            console.error(`Failed to delete post ${post.id}:`, deleteError);
+            console.error(`Failed to delete post ${post.id}:`, deleteError.message || deleteError);
           }
         } else {
           console.log(`🔒 Preserving expired post ${post.id} - saved by users`);
@@ -475,7 +475,7 @@ export class UnifiedClaimService {
       return deletedCount;
 
     } catch (error) {
-      console.error('Error cleaning up expired posts:', error);
+      console.error('Error cleaning up expired posts:', error.message || error);
       return 0;
     }
   }
