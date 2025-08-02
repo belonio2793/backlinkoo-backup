@@ -444,10 +444,11 @@ export function AdminUserManagement() {
             <span>Users ({totalCount})</span>
             <Button
               size="sm"
-              onClick={() => setFilters(prev => ({ ...prev, offset: 0 }))}
+              onClick={reloadAllUsers}
+              disabled={loading}
             >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Reload
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Reload All
             </Button>
           </CardTitle>
         </CardHeader>
