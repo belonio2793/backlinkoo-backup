@@ -140,7 +140,41 @@ export function SecurityDashboard() {
           return;
         }
 
-        throw profilesError;
+        // If both profiles and subscribers fail, provide a minimal fallback
+        console.log('❌ Both profiles and subscribers failed, creating fallback data');
+
+        // Try to at least get the current admin user
+        let currentAdmin = null;
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            currentAdmin = {
+              id: 'current-admin',
+              user_id: user.id,
+              email: user.email || 'admin@example.com',
+              display_name: 'Current Admin',
+              role: 'admin' as const,
+              created_at: user.created_at || new Date().toISOString(),
+              created_by: 'system'
+            };
+          }
+        } catch (authError) {
+          console.warn('Could not get current user for fallback:', authError);
+        }
+
+        const fallbackUsers = currentAdmin ? [currentAdmin] : [];
+        setUsersWithRoles(fallbackUsers);
+        setUserRoles([]);
+
+        const errorMessage = profilesError?.message || subsError?.message || 'Unable to access user data tables';
+
+        toast({
+          title: 'Limited Data Access',
+          description: `Could not access user tables. ${fallbackUsers.length > 0 ? 'Showing current admin only.' : 'No user data available.'} Error: ${errorMessage}`,
+          variant: 'destructive'
+        });
+
+        return;
       }
 
       // If we have profiles, get any existing user roles
