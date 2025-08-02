@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { PremiumPlanTab } from "@/components/PremiumPlanTab";
 import { SEOAcademyTab } from "@/components/SEOAcademyTab";
 import { PremiumService } from "@/services/premiumService";
+import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -638,6 +639,7 @@ const Dashboard = () => {
   });
   const [isPremiumSubscriber, setIsPremiumSubscriber] = useState(false);
   const [userProgress, setUserProgress] = useState<{ [key: string]: boolean }>({});
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -1472,12 +1474,8 @@ const Dashboard = () => {
               <PremiumPlanTab
                 isSubscribed={isPremiumSubscriber}
                 onUpgrade={() => {
-                  // Handle upgrade - open pricing modal or redirect to payment
-                  toast({
-                    title: "Redirecting to Payment",
-                    description: "Taking you to secure checkout...",
-                  });
-                  // In real implementation, this would open a payment processor
+                  // Refresh premium status after successful upgrade
+                  PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
                 }}
               />
             ) : null}
