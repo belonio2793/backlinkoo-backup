@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 
 // Lazy load heavy page components for better code splitting
-export const LazyAdminDashboard = lazy(() => import('@/pages/AdminDashboard'));
+export const LazyAdminDashboard = lazy(() => import('@/pages/AdminDashboard').then(module => ({ default: module.default })));
 export const LazyEmailMarketing = lazy(() => import('@/pages/EmailMarketing'));
 export const LazyBacklinkReport = lazy(() => import('@/pages/BacklinkReport'));
 export const LazyReportViewer = lazy(() => import('@/pages/ReportViewer'));
