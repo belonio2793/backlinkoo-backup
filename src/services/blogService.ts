@@ -100,7 +100,7 @@ export class BlogService {
 
     if (error || !blogPost) {
       // Handle slug collision with enhanced retry strategy
-      if (error.message.includes('blog_posts_slug_key') || error.message.includes('duplicate key value violates unique constraint') || error.message.includes('null value in column "slug"')) {
+      if (error && (error.message.includes('blog_posts_slug_key') || error.message.includes('duplicate key value violates unique constraint') || error.message.includes('null value in column "slug"'))) {
         console.warn('⚠️ Slug issue detected, implementing fallback strategy...');
 
         // Fallback: Generate service-level slug with maximum uniqueness
