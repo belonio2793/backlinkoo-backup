@@ -44,9 +44,11 @@ export function AdminBlogManager() {
   const loadBlogPosts = async () => {
     setLoading(true);
     try {
+      console.log('📖 AdminBlogManager: Loading blog posts...');
       // For admin, we want to see all posts including trials
       const posts = await publishedBlogService.getRecentBlogPosts(100);
 
+      console.log('📖 AdminBlogManager: Loaded posts:', posts);
       setBlogPosts(posts);
     } catch (error) {
       console.error('Failed to load blog posts:', error);
