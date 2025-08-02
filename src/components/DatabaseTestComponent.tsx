@@ -19,36 +19,37 @@ import {
 
 export function DatabaseTestComponent() {
   const [testing, setTesting] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<{
-    connected: boolean;
-    profileCount: number;
+  const [connectionResult, setConnectionResult] = useState<ConnectionTestResult | null>(null);
+  const [adminCheck, setAdminCheck] = useState<{
+    isAdmin: boolean;
+    method?: string;
     error?: string;
   } | null>(null);
-  const [profiles, setProfiles] = useState<any[]>([]);
   const { toast } = useToast();
 
-  const testConnection = async () => {
+  // Auto-test on component mount
+  useEffect(() => {
+    runConnectionTest();
+  }, []);
+
+  const runConnectionTest = async () => {
     try {
       setTesting(true);
-      console.log('🔍 Testing database connection...');
-      
-      const result = await realAdminUserService.testConnection();
-      setConnectionStatus(result);
-      
+      console.log('🔍 Running enhanced database connection test...');
+
+      // Test database connection
+      const result = await databaseConnectionService.testConnection();
+      setConnectionResult(result);
+
+      // Test admin access
+      const adminResult = await databaseConnectionService.checkAdminAccess();
+      setAdminCheck(adminResult);
+
       if (result.success) {
         toast({
           title: "Database Connected!",
           description: `Successfully connected! Found ${result.profileCount} user profiles.`,
         });
-        
-        // If connected, try to fetch some profiles
-        try {
-          const profilesResult = await realAdminUserService.getAllProfiles();
-          setProfiles(profilesResult.slice(0, 5)); // Show first 5 profiles
-          console.log('✅ Sample profiles fetched:', profilesResult.length);
-        } catch (error: any) {
-          console.warn('⚠️ Could not fetch profiles:', error.message);
-        }
       } else {
         toast({
           title: "Database Connection Failed",
@@ -58,11 +59,12 @@ export function DatabaseTestComponent() {
       }
     } catch (error: any) {
       console.error('❌ Connection test failed:', error);
-      setConnectionStatus({
-        connected: false,
+      const errorResult: ConnectionTestResult = {
+        success: false,
         profileCount: 0,
         error: error.message
-      });
+      };
+      setConnectionResult(errorResult);
       toast({
         title: "Connection Test Failed",
         description: error.message,
@@ -71,6 +73,13 @@ export function DatabaseTestComponent() {
     } finally {
       setTesting(false);
     }
+  };
+
+  const executeRLSPolicyFix = () => {
+    toast({
+      title: "RLS Policy Setup Required",
+      description: "Please run the SQL commands from correct_rls_policies.sql in your Supabase SQL editor.",
+    });
   };
 
   return (
