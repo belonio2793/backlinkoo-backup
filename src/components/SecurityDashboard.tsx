@@ -45,6 +45,7 @@ export function SecurityDashboard() {
   const [actionFilter, setActionFilter] = useState<string>('all');
   const [resourceFilter, setResourceFilter] = useState<string>('all');
   const [activeTab, setActiveTab] = useState('overview');
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
