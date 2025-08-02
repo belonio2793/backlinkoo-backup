@@ -189,10 +189,7 @@ class AdminUserManagementService {
 
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select(`
-          *,
-          subscribers!left (*)
-        `)
+        .select('*')
         .eq('user_id', userId)
         .single();
 
