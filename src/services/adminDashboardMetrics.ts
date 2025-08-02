@@ -370,12 +370,32 @@ class AdminDashboardMetricsService {
       return 'Null or undefined error';
     }
 
+    // Supabase-specific error handling
+    if (error?.code && error?.message !== undefined) {
+      const code = error.code;
+      const message = error.message || '';
+      const hint = error.hint || '';
+      const details = error.details || '';
+
+      if (message.trim() === '' && hint.trim() === '' && details.trim() === '') {
+        return `Supabase error code ${code} with empty message/hint/details`;
+      }
+
+      const parts = [
+        message.trim() !== '' ? `Message: ${message}` : null,
+        hint.trim() !== '' ? `Hint: ${hint}` : null,
+        details.trim() !== '' ? `Details: ${details}` : null
+      ].filter(Boolean);
+
+      return `Supabase ${code}: ${parts.join(', ')}`;
+    }
+
     // Check for message property
     if (error?.message !== undefined) {
       if (typeof error.message === 'string' && error.message.trim() !== '') {
         return error.message;
       } else if (typeof error.message === 'string') {
-        return 'Empty error message';
+        return `Empty error message (error type: ${error?.constructor?.name || 'Unknown'})`;
       }
     }
 
