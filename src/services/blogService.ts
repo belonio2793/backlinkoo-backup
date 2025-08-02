@@ -141,7 +141,7 @@ export class BlogService {
         return retryPost;
       }
 
-      if (error.message.includes('row-level security') || error.message.includes('policy')) {
+      if (error && (error.message.includes('row-level security') || error.message.includes('policy'))) {
         console.error('🚨 RLS POLICY IS BLOCKING BLOG POST CREATION');
         console.error('');
         console.error('📋 MANUAL FIX REQUIRED:');
