@@ -664,24 +664,10 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
           ))}
         </div>
         
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-4 text-sm text-gray-500">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-blue-500" />
-            <span>{formatDate(post.published_at || post.created_at)}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-green-500" />
-            <span>{post.reading_time || 5}m read</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Eye className="h-4 w-4 text-purple-500" />
-            <span>{post.view_count || 0} views</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-orange-500" />
-            <span>{post.seo_score || 75}/100 SEO</span>
-          </div>
+        {/* Publish Date */}
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Calendar className="h-4 w-4 text-blue-500" />
+          <span>{formatDate(post.published_at || post.created_at)}</span>
         </div>
 
         {/* Claim Button - Enhanced for all users */}
