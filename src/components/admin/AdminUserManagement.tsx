@@ -269,6 +269,56 @@ export function AdminUserManagement() {
     }
   };
 
+  const testRPCFunction = async () => {
+    try {
+      setLoading(true);
+      console.log('🗄️ Testing RPC function directly...');
+
+      const { data, error } = await adminUserManagementService.getUsers({
+        limit: 100,
+        offset: 0
+      });
+
+      if (data && !error) {
+        const { data: rpcData, error: rpcError } = await (window as any).supabase
+          ? (window as any).supabase.rpc('get_all_user_profiles')
+          : { data: null, error: 'Supabase not available' };
+
+        toast({
+          title: "RPC Function Test",
+          description: rpcData ? `SUCCESS: Got ${rpcData.length} profiles from RPC` : `FAILED: ${rpcError}`,
+          variant: rpcData ? "default" : "destructive"
+        });
+
+        if (rpcData) {
+          const enhancedUsers = rpcData.map((profile: any) => ({
+            ...profile,
+            isPremium: false,
+            isGifted: false,
+            campaignCount: 0,
+            totalCreditsUsed: 0,
+            totalRevenue: 0,
+            lastActivity: null,
+            subscription: null
+          }));
+
+          setUsers(enhancedUsers);
+          setTotalCount(enhancedUsers.length);
+        }
+      }
+
+    } catch (error: any) {
+      console.error('RPC test error:', error);
+      toast({
+        title: "RPC Test Failed",
+        description: error.message || "Failed to test RPC function",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSearch = (value: string) => {
     setFilters(prev => ({
       ...prev,
