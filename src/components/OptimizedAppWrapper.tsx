@@ -26,7 +26,7 @@ import AdminAuthGuard from '@/components/AdminAuthGuard';
 import { EmailVerificationGuard } from '@/components/EmailVerificationGuard';
 import { TrialNotificationBanner } from '@/components/TrialNotificationBanner';
 import { AdminDiagnostic } from '@/components/AdminDiagnostic';
-import { SimpleAdminPage } from '@/components/SimpleAdminPage';
+import AdminDashboard from '@/pages/AdminDashboard';
 
 // Import lazy-loaded components
 import {
@@ -136,7 +136,7 @@ export const OptimizedAppWrapper = () => {
           {/* Admin routes */}
           <Route path="/admin" element={
             <Suspense fallback={<PageLoader />}>
-              <SimpleAdminPage />
+              <AdminDashboard />
             </Suspense>
           } />
 
