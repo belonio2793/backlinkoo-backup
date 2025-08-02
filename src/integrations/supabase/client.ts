@@ -235,8 +235,62 @@ export const supabase = hasValidCredentials ?
         'X-Client-Info': 'backlink-infinity@1.0.0',
       },
       fetch: (url, options = {}) => {
-        // Use a clean fetch instance to avoid third-party interference
-        const cleanFetch = window.fetch.bind(window);
+        // Store original fetch before any third-party scripts modify it
+        const originalFetch = (globalThis as any).__originalFetch__ || window.fetch;
+
+        // If we detect FullStory interference, use a workaround
+        const isFullStoryPresent = !!(window as any).FS || document.querySelector('script[src*="fullstory"]');
+
+        let fetchFunction = originalFetch;
+
+        if (isFullStoryPresent) {
+          console.log('🔍 FullStory detected - using workaround fetch');
+          // Create a new fetch function that bypasses FullStory
+          fetchFunction = async (url: string, init?: RequestInit) => {
+            try {
+              // Use XMLHttpRequest as fallback when FullStory interferes
+              return await new Promise<Response>((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+
+                xhr.open(init?.method || 'GET', url);
+
+                // Set headers
+                if (init?.headers) {
+                  const headers = new Headers(init.headers);
+                  headers.forEach((value, key) => {
+                    xhr.setRequestHeader(key, value);
+                  });
+                }
+
+                xhr.onload = () => {
+                  // Create Response object
+                  const response = new Response(xhr.responseText, {
+                    status: xhr.status,
+                    statusText: xhr.statusText,
+                    headers: new Headers(xhr.getAllResponseHeaders().split('\r\n').reduce((acc, line) => {
+                      const [key, value] = line.split(': ');
+                      if (key && value) acc[key] = value;
+                      return acc;
+                    }, {} as Record<string, string>))
+                  });
+                  resolve(response);
+                };
+
+                xhr.onerror = () => reject(new Error('Network request failed'));
+                xhr.ontimeout = () => reject(new Error('Request timeout'));
+
+                // Set timeout
+                xhr.timeout = 30000;
+
+                // Send request
+                xhr.send(init?.body as any);
+              });
+            } catch (error) {
+              // Fallback to original fetch if XMLHttpRequest fails
+              return originalFetch(url, init);
+            }
+          };
+        }
 
         // Create a timeout that won't interfere with existing signals
         const timeoutMs = 30000;
@@ -249,7 +303,7 @@ export const supabase = hasValidCredentials ?
 
         const finalSignal = options.signal || timeoutController.signal;
 
-        return cleanFetch(url, {
+        return fetchFunction(url, {
           ...options,
           signal: finalSignal,
         }).then(response => {
@@ -270,7 +324,9 @@ export const supabase = hasValidCredentials ?
                                    error?.message?.includes('Failed to fetch');
 
           if (isThirdPartyIssue) {
-            console.warn('🔍 Network request blocked by third-party script (FullStory/Analytics). This is not a Supabase issue.');
+            console.warn('🔍 Network request blocked by FullStory/Analytics - using workaround');
+            // Return a more specific error for third-party interference
+            throw new Error('Third-party script interference detected - request blocked');
           }
 
           console.warn('Supabase fetch error:', error);
