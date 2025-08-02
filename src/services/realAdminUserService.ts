@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
+import { databaseConnectionService } from './databaseConnectionService';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 type Subscriber = Database['public']['Tables']['subscribers']['Row'];
@@ -37,7 +38,7 @@ export interface UserListFilters {
 class RealAdminUserService {
   
   /**
-   * Test database connection and return connection status
+   * Test database connection using enhanced service
    */
   async testConnection(): Promise<{
     success: boolean;
@@ -45,30 +46,13 @@ class RealAdminUserService {
     error?: string;
   }> {
     try {
-      console.log('🔍 Testing real database connection...');
-      
-      // Test basic profiles table access
-      const { data, error, count } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
-
-      if (error) {
-        console.error('❌ Database connection failed:', error);
-        return {
-          success: false,
-          profileCount: 0,
-          error: error.message
-        };
-      }
-
-      console.log(`✅ Database connection successful. Found ${count} profiles.`);
+      const result = await databaseConnectionService.testConnection();
       return {
-        success: true,
-        profileCount: count || 0
+        success: result.success,
+        profileCount: result.profileCount,
+        error: result.error
       };
-      
     } catch (error: any) {
-      console.error('❌ Connection test failed:', error);
       return {
         success: false,
         profileCount: 0,
@@ -78,37 +62,70 @@ class RealAdminUserService {
   }
 
   /**
-   * Get all user profiles using the new RPC function
+   * Check if current user has admin access
+   */
+  async checkAdminAccess(): Promise<boolean> {
+    try {
+      const result = await databaseConnectionService.checkAdminAccess();
+      return result.isAdmin;
+    } catch (error) {
+      console.error('❌ Admin access check failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get all user profiles with proper error handling
    */
   async getAllProfiles(): Promise<Profile[]> {
     try {
-      console.log('📋 Fetching all profiles via RPC function...');
+      console.log('📋 Fetching all profiles...');
       
-      // Try the new RPC function first
-      const { data: rpcData, error: rpcError } = await supabase.rpc('get_profiles_admin_bypass');
-      
-      if (rpcData && !rpcError) {
-        console.log(`✅ RPC function successful - got ${rpcData.length} profiles`);
-        return rpcData;
+      // First check if we have admin access
+      const isAdmin = await this.checkAdminAccess();
+      if (!isAdmin) {
+        throw new Error('Admin access required. Please ensure you are signed in as an admin user.');
       }
       
-      // Fallback to direct query
-      console.log('⚠️ RPC failed, trying direct query...');
-      const { data: directData, error: directError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Try multiple methods to get profiles
+      const methods = [
+        {
+          name: 'RPC Admin Bypass',
+          execute: async () => {
+            const { data, error } = await supabase.rpc('get_profiles_admin_bypass');
+            if (error) throw error;
+            return data;
+          }
+        },
+        {
+          name: 'Direct Query',
+          execute: async () => {
+            const { data, error } = await supabase
+              .from('profiles')
+              .select('*')
+              .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data;
+          }
+        }
+      ];
       
-      if (directError) {
-        throw new Error(`Direct query failed: ${directError.message}`);
+      let lastError = null;
+      for (const method of methods) {
+        try {
+          console.log(`🧪 Trying ${method.name}...`);
+          const result = await method.execute();
+          if (result && result.length >= 0) {
+            console.log(`��� ${method.name} successful - got ${result.length} profiles`);
+            return result;
+          }
+        } catch (error: any) {
+          console.warn(`❌ ${method.name} failed:`, error.message);
+          lastError = error;
+        }
       }
       
-      if (!directData) {
-        throw new Error('No data returned from database');
-      }
-      
-      console.log(`✅ Direct query successful - got ${directData.length} profiles`);
-      return directData;
+      throw lastError || new Error('All profile fetch methods failed');
       
     } catch (error: any) {
       console.error('❌ Failed to fetch profiles:', error);
@@ -117,7 +134,7 @@ class RealAdminUserService {
   }
 
   /**
-   * Get paginated and filtered users with enhanced data
+   * Get paginated and filtered users with enhanced error handling
    */
   async getUsers(filters: UserListFilters = {}): Promise<{
     users: RealUserDetails[];
@@ -137,7 +154,13 @@ class RealAdminUserService {
 
       console.log('📋 Fetching real users with filters:', filters);
       
-      // Get all profiles first
+      // Check connection first
+      const connectionTest = await this.testConnection();
+      if (!connectionTest.success) {
+        throw new Error(connectionTest.error || 'Database connection failed');
+      }
+      
+      // Get all profiles
       const allProfiles = await this.getAllProfiles();
       
       // Apply filters
@@ -157,9 +180,10 @@ class RealAdminUserService {
         );
       }
       
-      // Get enhanced data for all filtered profiles
+      // Get enhanced data for filtered profiles (limit to improve performance)
+      const profilesToEnhance = filteredProfiles.slice(offset, offset + limit);
       const enhancedUsers = await Promise.all(
-        filteredProfiles.map(profile => this.enhanceUserProfile(profile))
+        profilesToEnhance.map(profile => this.enhanceUserProfile(profile))
       );
       
       // Apply premium status filter after enhancement
@@ -209,15 +233,13 @@ class RealAdminUserService {
         }
       });
       
-      // Apply pagination
-      const totalCount = finalUsers.length;
-      const paginatedUsers = finalUsers.slice(offset, offset + limit);
+      const totalCount = filteredProfiles.length;
       const hasMore = (offset + limit) < totalCount;
       
-      console.log(`✅ Retrieved ${paginatedUsers.length} users (${totalCount} total, hasMore: ${hasMore})`);
+      console.log(`✅ Retrieved ${finalUsers.length} users (${totalCount} total, hasMore: ${hasMore})`);
       
       return {
-        users: paginatedUsers,
+        users: finalUsers,
         totalCount,
         hasMore
       };
@@ -229,7 +251,7 @@ class RealAdminUserService {
   }
 
   /**
-   * Enhance user profile with additional data
+   * Enhance user profile with additional data (with error handling)
    */
   private async enhanceUserProfile(profile: Profile): Promise<RealUserDetails> {
     try {
@@ -240,32 +262,49 @@ class RealAdminUserService {
         .eq('user_id', profile.user_id)
         .single();
 
-      // Get campaign statistics
-      const { data: campaigns } = await supabase
-        .from('campaigns')
-        .select('created_at, credits_used')
-        .eq('user_id', profile.user_id)
-        .order('created_at', { ascending: false });
+      // Get campaign statistics (with error handling)
+      let campaignCount = 0;
+      let lastActivity = null;
+      try {
+        const { data: campaigns } = await supabase
+          .from('campaigns')
+          .select('created_at, credits_used')
+          .eq('user_id', profile.user_id)
+          .order('created_at', { ascending: false });
+        
+        campaignCount = campaigns?.length || 0;
+        lastActivity = campaigns?.[0]?.created_at || null;
+      } catch (error) {
+        console.warn(`⚠️ Could not fetch campaigns for ${profile.user_id}:`, error);
+      }
 
-      // Get credit statistics
-      const { data: credits } = await supabase
-        .from('credits')
-        .select('total_used')
-        .eq('user_id', profile.user_id)
-        .single();
+      // Get credit statistics (with error handling)
+      let totalCreditsUsed = 0;
+      try {
+        const { data: credits } = await supabase
+          .from('credits')
+          .select('total_used')
+          .eq('user_id', profile.user_id)
+          .single();
+        
+        totalCreditsUsed = credits?.total_used || 0;
+      } catch (error) {
+        console.warn(`⚠️ Could not fetch credits for ${profile.user_id}:`, error);
+      }
 
-      // Get revenue from orders
-      const { data: orders } = await supabase
-        .from('orders')
-        .select('amount')
-        .eq('user_id', profile.user_id)
-        .eq('status', 'completed');
-
-      // Calculate statistics
-      const campaignCount = campaigns?.length || 0;
-      const lastActivity = campaigns?.[0]?.created_at || null;
-      const totalCreditsUsed = credits?.total_used || 0;
-      const totalRevenue = orders?.reduce((sum, order) => sum + order.amount, 0) || 0;
+      // Get revenue from orders (with error handling)
+      let totalRevenue = 0;
+      try {
+        const { data: orders } = await supabase
+          .from('orders')
+          .select('amount')
+          .eq('user_id', profile.user_id)
+          .eq('status', 'completed');
+        
+        totalRevenue = orders?.reduce((sum, order) => sum + order.amount, 0) || 0;
+      } catch (error) {
+        console.warn(`⚠️ Could not fetch orders for ${profile.user_id}:`, error);
+      }
       
       // Determine premium status
       const isPremium = subscription?.subscribed === true;
@@ -300,11 +339,17 @@ class RealAdminUserService {
   }
 
   /**
-   * Get individual user by ID
+   * Get individual user by ID with enhanced error handling
    */
   async getUserById(userId: string): Promise<RealUserDetails | null> {
     try {
       console.log('🔍 Fetching user by ID:', userId);
+      
+      // Check admin access first
+      const isAdmin = await this.checkAdminAccess();
+      if (!isAdmin) {
+        throw new Error('Admin access required');
+      }
       
       const { data: profile, error } = await supabase
         .from('profiles')
@@ -337,11 +382,17 @@ class RealAdminUserService {
   }
 
   /**
-   * Update user profile
+   * Update user profile with enhanced error handling
    */
   async updateUser(userId: string, updates: UserUpdatePayload): Promise<RealUserDetails> {
     try {
       console.log('✏️ Updating user:', userId, updates);
+      
+      // Check admin access first
+      const isAdmin = await this.checkAdminAccess();
+      if (!isAdmin) {
+        throw new Error('Admin access required to update users');
+      }
       
       // Handle premium/subscription updates first
       if (updates.isPremium !== undefined || updates.isGifted !== undefined) {
@@ -386,7 +437,7 @@ class RealAdminUserService {
   }
 
   /**
-   * Update user premium/subscription status
+   * Update user premium/subscription status with enhanced error handling
    */
   private async updateUserPremiumStatus(userId: string, updates: UserUpdatePayload): Promise<void> {
     try {
@@ -473,11 +524,17 @@ class RealAdminUserService {
   }
 
   /**
-   * Soft delete user (deactivate)
+   * Soft delete user (deactivate) with enhanced error handling
    */
   async deleteUser(userId: string): Promise<void> {
     try {
       console.log('🗑️ Deactivating user:', userId);
+      
+      // Check admin access first
+      const isAdmin = await this.checkAdminAccess();
+      if (!isAdmin) {
+        throw new Error('Admin access required to deactivate users');
+      }
       
       // Deactivate profile
       const { error: profileError } = await supabase
@@ -527,6 +584,12 @@ class RealAdminUserService {
   }> {
     try {
       console.log('📊 Fetching user statistics...');
+      
+      // Check admin access first
+      const isAdmin = await this.checkAdminAccess();
+      if (!isAdmin) {
+        throw new Error('Admin access required to view statistics');
+      }
       
       const allUsers = await this.getUsers({ limit: 1000 }); // Get a large batch for stats
       const users = allUsers.users;
