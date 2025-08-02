@@ -20,10 +20,11 @@ export function useAdminDashboardMetrics(): UseAdminDashboardMetricsResult {
       
       const data = await adminDashboardMetricsService.fetchDashboardMetricsWithTrends();
       setMetrics(data);
-    } catch (err) {
-      console.error('Error fetching admin dashboard metrics:', err);
+    } catch (err: any) {
+      const errorMessage = err?.message || err?.error?.message || err?.toString?.() || 'Unknown error occurred';
+      console.error('Error fetching admin dashboard metrics:', errorMessage, err);
       setError({
-        message: 'Failed to load dashboard metrics',
+        message: `Failed to load dashboard metrics: ${errorMessage}`,
         details: err
       });
     } finally {
