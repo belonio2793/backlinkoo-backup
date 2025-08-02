@@ -56,7 +56,7 @@ class SystemConfigurationService {
   async fetchOpenAIKey(): Promise<string | null> {
     try {
       console.log('🔑 Fetching OpenAI API key from Netlify...');
-      
+
       this.config.keyStatus = 'loading';
       this.notifyListeners();
 
@@ -67,7 +67,37 @@ class SystemConfigurationService {
         }
       });
 
-      const result = await response.json();
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // If JSON parsing fails, use the text response
+          errorMessage = errorText || errorMessage;
+        }
+
+        console.error('❌ Failed to get API key - HTTP error:', errorMessage);
+        this.config.keyStatus = 'missing';
+        this.config.error = errorMessage;
+        this.notifyListeners();
+        return null;
+      }
+
+      // Parse the JSON response only once
+      let result;
+      try {
+        result = await response.json();
+      } catch (parseError: any) {
+        console.error('❌ Failed to parse response JSON:', parseError);
+        this.config.keyStatus = 'missing';
+        this.config.error = 'Invalid response format from server';
+        this.notifyListeners();
+        return null;
+      }
 
       if (!result.success) {
         console.error('❌ Failed to get API key:', result.error);
@@ -90,7 +120,7 @@ class SystemConfigurationService {
     } catch (error: any) {
       console.error('❌ Error fetching OpenAI API key:', error);
       this.config.keyStatus = 'missing';
-      this.config.error = error.message;
+      this.config.error = error.message || 'Network error occurred';
       this.notifyListeners();
       return null;
     }
