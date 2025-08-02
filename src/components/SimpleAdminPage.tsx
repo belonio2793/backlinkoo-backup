@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, Loader2, AlertTriangle } from 'lucide-react';
+import { Shield, Loader2, AlertTriangle, Wrench } from 'lucide-react';
 import AdminDashboard from '@/pages/AdminDashboard';
 
 export function SimpleAdminPage() {
