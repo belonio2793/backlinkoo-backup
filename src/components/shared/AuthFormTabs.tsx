@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { AuthService } from "@/services/authService";
+import { SafeAuthService } from "@/services/safeAuthService";
 import { TrialConversionService } from "@/services/trialConversionService";
 import { UserRegistrationService } from "@/services/userRegistrationService";
 import { validateEmail, validatePassword, validateRequired } from "@/utils/authValidation";
@@ -74,7 +74,7 @@ export function AuthFormTabs({
     const currentPassword = loginPassword;
 
     try {
-      const result = await AuthService.signIn({
+      const result = await SafeAuthService.signIn({
         email: currentEmail,
         password: currentPassword,
       });
