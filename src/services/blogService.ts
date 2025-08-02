@@ -107,11 +107,12 @@ export class BlogService {
         const fallbackSlug = this.generateSlug(data.title);
         const retryData = { ...cleanBlogPostData, slug: fallbackSlug };
 
-        const { data: retryPost, error: retryError } = await supabase
+        const { data: retryPostArray, error: retryError } = await supabase
           .from('blog_posts')
           .insert(retryData)
-          .select()
-          .single();
+          .select();
+
+        const retryPost = retryPostArray?.[0] || null;
 
         if (retryError) {
           // Final attempt with timestamp
