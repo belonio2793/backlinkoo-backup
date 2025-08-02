@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { SafeAuthService } from "@/services/safeAuthService";
+import { EmergencyAuthService } from "@/services/emergencyAuthService";
 import { TrialConversionService } from "@/services/trialConversionService";
 
 import { validateEmail, validatePassword, validateRequired } from "@/utils/authValidation";
@@ -74,15 +75,27 @@ export function AuthFormTabs({
     const currentPassword = loginPassword;
 
     try {
-      const result = await SafeAuthService.signIn({
+      // First try safe auth service
+      let result = await SafeAuthService.signIn({
         email: currentEmail,
         password: currentPassword,
       });
 
+      // If SafeAuth fails with database error, try emergency auth
+      if (!result.success && result.error?.includes('Database error')) {
+        console.log('🚨 Database error detected, trying emergency auth...');
+        result = await EmergencyAuthService.emergencySignIn(currentEmail, currentPassword);
+      }
+
       if (result.success) {
+        const welcomeMessage = result.emergencyBypass
+          ? `Emergency access granted for ${currentEmail}`
+          : `Signing in as ${currentEmail}`;
+
         toast({
-          title: "Welcome back!",
-          description: `Signing in as ${currentEmail}`,
+          title: result.emergencyBypass ? "Emergency Access" : "Welcome back!",
+          description: welcomeMessage,
+          variant: result.emergencyBypass ? "default" : "default"
         });
         onAuthSuccess?.(result.user);
       } else {
