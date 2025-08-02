@@ -113,41 +113,19 @@ export function UserManagement() {
     setActionLoading(userId);
     try {
       if (currentStatus) {
-        // Remove premium
-        const { error } = await supabase
-          .from('premium_subscriptions')
-          .delete()
-          .eq('user_id', userId);
-        
-        if (error) throw error;
-        
+        await AdminUserService.revokePremiumAccess(userId);
         toast({
           title: "Success",
           description: "Premium access removed"
         });
       } else {
-        // Add premium
-        const currentDate = new Date();
-        const periodEnd = new Date(currentDate.getTime() + (365 * 24 * 60 * 60 * 1000));
-        
-        const { error } = await supabase
-          .from('premium_subscriptions')
-          .upsert({
-            user_id: userId,
-            plan_type: 'premium',
-            status: 'active',
-            current_period_start: currentDate.toISOString(),
-            current_period_end: periodEnd.toISOString()
-          });
-        
-        if (error) throw error;
-        
+        await AdminUserService.grantPremiumAccess(userId);
         toast({
           title: "Success",
           description: "Premium access granted"
         });
       }
-      
+
       await loadUsers(); // Refresh data
     } catch (error: any) {
       toast({
