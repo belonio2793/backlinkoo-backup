@@ -116,15 +116,30 @@ export function OrganizedAdminDashboard() {
         {activeSection === "overview" && (
           <div className="space-y-6">
             {/* Connection Status Alert */}
-            {error && (
+            {!connected && (
               <Alert className="border-red-200 bg-red-50">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="text-red-700">
-                  <div className="font-medium">Dashboard Error</div>
-                  <div className="text-sm mt-1">{error.message}</div>
+                  <div className="font-medium">Database Connection Issue</div>
+                  <div className="text-sm mt-1">{error || 'Unable to connect to database. Please check your configuration.'}</div>
                   <div className="text-sm mt-2 text-red-600">
-                    This usually means you need to sign in as an admin user or fix the database connection.
+                    Ensure your Supabase credentials are properly configured.
                   </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {connected && (
+              <Alert className="border-green-200 bg-green-50">
+                <AlertCircle className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-700">
+                  <div className="font-medium">✅ Database Connected</div>
+                  <div className="text-sm mt-1">Successfully connected to Supabase database</div>
+                  {tableInfo && (
+                    <div className="text-sm mt-2">
+                      Available tables: {tableInfo.filter(t => t.exists).length} of {tableInfo.length}
+                    </div>
+                  )}
                 </AlertDescription>
               </Alert>
             )}
