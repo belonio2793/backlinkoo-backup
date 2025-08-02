@@ -267,9 +267,21 @@ export function SimpleAdminPage() {
             </div>
           </form>
 
-          <div className="mt-6 pt-4 border-t text-center text-xs text-muted-foreground">
-            <p>🔒 If login fails with "Invalid credentials":</p>
-            <p>Click "Create Admin User" first, then sign in</p>
+          <div className="mt-6 pt-4 border-t space-y-3">
+            <div className="text-center text-xs text-muted-foreground">
+              <p>🔒 If login fails with "Invalid credentials":</p>
+              <p>Click "Create Admin User" first, then sign in</p>
+            </div>
+
+            {error?.includes('Invalid login credentials') && (
+              <div className="bg-muted/50 p-3 rounded-lg text-xs">
+                <p className="font-medium mb-2">🛠️ Manual Fix (if button doesn't work):</p>
+                <p className="mb-1">Go to Supabase Dashboard → SQL Editor and run:</p>
+                <code className="block bg-black/20 p-2 rounded text-xs font-mono">
+                  {`INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, is_super_admin) VALUES ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated', 'support@backlinkoo.com', crypt('Admin123!@#', gen_salt('bf')), NOW(), NOW(), NOW(), '{"provider": "email", "providers": ["email"]}', FALSE) ON CONFLICT (email) DO NOTHING;`}
+                </code>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
