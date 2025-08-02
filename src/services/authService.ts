@@ -87,6 +87,13 @@ export class AuthService {
       });
 
       if (error) {
+        console.error('🚨 Sign-in error details:', {
+          message: error.message,
+          status: error.status,
+          statusText: error.statusText,
+          name: error.name,
+          email: signInData.email
+        });
         return {
           success: false,
           error: this.formatErrorMessage(error.message)
