@@ -884,14 +884,33 @@ const Dashboard = () => {
   const handleSignOut = async () => {
     try {
       console.log('🚪 Dashboard: Signing out user...');
-      await supabase.auth.signOut();
+      console.log('🚪 Current user:', user?.email);
+
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error('🚪 Sign out error:', error);
+        toast({
+          title: "Sign out error",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('🚪 Sign out successful, navigating to home...');
       navigate('/');
       toast({
         title: "Signed out successfully",
         description: "You have been signed out of your account.",
       });
     } catch (error) {
-      console.error('Dashboard sign out error:', error);
+      console.error('🚪 Dashboard sign out error:', error);
+      toast({
+        title: "Sign out failed",
+        description: "An error occurred while signing out. Please try again.",
+        variant: "destructive"
+      });
       navigate('/');
     }
   };
