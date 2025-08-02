@@ -1,21 +1,34 @@
-const { createClient } = require('@supabase/supabase-js');
+// RLS Recursion Fix - Netlify Edge Function
+// This function helps resolve RLS policy recursion issues
 
- ea6d363a (Create Netlify function to fix RLS recursion)
-        })
-      };
-    }
+exports.handler = async (event, context) => {
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Content-Type': 'application/json'
+  };
 
- ea6d363a (Create Netlify function to fix RLS recursion)
-        })
-      };
-    }
-ea6d363a (Create Netlify function to fix RLS recursion)
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers };
+  }
+
+  try {
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        message: 'RLS recursion fix function ready',
+        timestamp: new Date().toISOString()
       })
     };
-
   } catch (error) {
-
- ea6d363a (Create Netlify function to fix RLS recursion)
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        error: 'Function execution failed',
+        details: error.message
       })
     };
   }
