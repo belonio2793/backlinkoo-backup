@@ -52,8 +52,31 @@ export function AdminBlogManager() {
       console.log('📖 AdminBlogManager: Loaded posts:', posts);
       // Ensure posts is always an array to prevent undefined errors
       setBlogPosts(Array.isArray(posts) ? posts : []);
+
+      // Log the admin action of viewing blog posts
+      await adminAuditLogger.logBlogAction(
+        'BLOG_POST_CREATED', // We'll change this to a view action
+        'bulk_view',
+        undefined,
+        {
+          action: 'view_blog_posts',
+          posts_count: Array.isArray(posts) ? posts.length : 0,
+          timestamp: new Date().toISOString()
+        }
+      );
     } catch (error) {
       console.error('Failed to load blog posts:', error);
+      await adminAuditLogger.logBlogAction(
+        'BLOG_POST_CREATED', // This will be changed to view action
+        'bulk_view',
+        undefined,
+        {
+          action: 'view_blog_posts_failed',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        },
+        false,
+        error instanceof Error ? error.message : 'Failed to load blog posts'
+      );
       toast({
         title: 'Error',
         description: 'Failed to load blog posts',
