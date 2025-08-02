@@ -165,8 +165,14 @@ export function AdminNavigationHeader({
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={handleSignOut}
-                  className="text-red-600 focus:text-red-600"
+                  onClick={(e) => {
+                    // Immediate visual feedback
+                    e.currentTarget.style.opacity = '0.5';
+                    e.currentTarget.style.transform = 'scale(0.95)';
+                    // Instant sign out
+                    handleSignOut();
+                  }}
+                  className="text-red-600 focus:text-red-600 transition-all duration-75"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
