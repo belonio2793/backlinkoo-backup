@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
-import { unifiedAdminMetricsService, AdminDashboardMetrics, MetricsError } from '@/services/unifiedAdminMetrics';
+import { unifiedAdminMetrics, UnifiedAdminMetrics } from '@/services/unifiedAdminMetrics';
+
+// Type aliases for compatibility
+type AdminDashboardMetrics = UnifiedAdminMetrics;
+interface MetricsError {
+  message: string;
+  details?: any;
+}
 
 interface UseAdminDashboardMetricsResult {
   metrics: AdminDashboardMetrics | null;
@@ -19,7 +26,7 @@ export function useWorkingAdminDashboardMetrics(): UseAdminDashboardMetricsResul
       setError(null);
       
       console.log('🔍 Fetching unified dashboard metrics...');
-      const data = await unifiedAdminMetricsService.fetchDashboardMetricsWithTrends();
+      const data = await unifiedAdminMetrics.getAllMetrics();
       setMetrics(data);
       console.log('✅ Metrics fetched successfully:', data);
     } catch (err: any) {
