@@ -92,15 +92,49 @@ export function SimpleAdminPage() {
 
       // If it's invalid credentials, automatically try to create the admin user
       if (error.message?.includes('Invalid login credentials') && email === 'support@backlinkoo.com') {
-        console.log('🔧 Invalid credentials - attempting to create admin user automatically...');
-        setError('Admin user not found. Creating admin user automatically...');
+        console.log('🚨 Invalid credentials - attempting emergency admin creation...');
+        setError('⚠️ Admin user not found. Attempting automatic emergency creation...');
 
         try {
-          await createAdminUser();
-          // After creating, try to sign in again
-          setError('Admin user created! Please try signing in again.');
+          // Try emergency creation
+          const response = await fetch('/.netlify/functions/create-admin-emergency', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            setError('✅ Admin user created automatically! Please try signing in again with the credentials below.');
+
+            // Automatically retry login after 2 seconds
+            setTimeout(async () => {
+              console.log('🔄 Auto-retrying login...');
+              setError('🔄 Retrying login automatically...');
+
+              try {
+                const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword({
+                  email: 'support@backlinkoo.com',
+                  password: 'Admin123!@#'
+                });
+
+                if (retryError) {
+                  setError(`❌ Auto-retry failed: ${retryError.message}. Please try signing in manually.`);
+                } else if (retryData.user) {
+                  console.log('✅ Auto-retry successful!');
+                  setIsLoggedIn(true);
+                }
+              } catch (retryErr) {
+                setError('❌ Auto-retry failed. Please try signing in manually.');
+              }
+            }, 2000);
+
+          } else {
+            throw new Error(result.error || 'Emergency creation failed');
+          }
         } catch (createError) {
-          setError('Failed to create admin user. Please use the "Create Admin User" button below.');
+          setError('❌ Automatic creation failed. Please use the "Create Admin User" button or manual SQL method below.');
         }
       } else {
         setError(error.message || 'Sign in failed');
