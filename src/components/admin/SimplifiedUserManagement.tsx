@@ -371,9 +371,9 @@ export function SimplifiedUserManagement() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Role</TableHead>
+                  <TableHead>User Info</TableHead>
+                  <TableHead>Role & Status</TableHead>
+                  <TableHead>Subscription Tier</TableHead>
                   <TableHead>Created</TableHead>
                   <TableHead>User ID</TableHead>
                 </TableRow>
