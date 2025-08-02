@@ -288,16 +288,16 @@ export class BlogSystemDiagnostic {
   }
 }
 
-// Auto-run diagnostic in development
-if (typeof window !== 'undefined' && import.meta.env.DEV) {
+// Auto-run diagnostic in development (disabled due to third-party interference)
+if (typeof window !== 'undefined' && import.meta.env.DEV && false) {
   console.log('🔬 Auto-running blog system diagnostic...');
-  
+
   setTimeout(async () => {
     try {
       const diagnostic = new BlogSystemDiagnostic();
       await diagnostic.runFullDiagnostic();
       diagnostic.printSummary();
-      
+
       // Make results available globally for debugging
       (window as any).__blogDiagnostic = diagnostic;
       console.log('🔬 Diagnostic results available at window.__blogDiagnostic');
