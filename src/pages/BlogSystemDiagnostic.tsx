@@ -208,11 +208,12 @@ export default function BlogSystemDiagnostic() {
 
         {/* Diagnostic Results */}
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="all">All Results ({summary.total})</TabsTrigger>
             <TabsTrigger value="errors">Errors ({summary.error})</TabsTrigger>
             <TabsTrigger value="warnings">Warnings ({summary.warning})</TabsTrigger>
             <TabsTrigger value="success">Success ({summary.success})</TabsTrigger>
+            <TabsTrigger value="network">Network Test</TabsTrigger>
           </TabsList>
           
           <TabsContent value="all" className="space-y-4">
