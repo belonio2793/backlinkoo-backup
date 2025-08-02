@@ -76,9 +76,22 @@ class AdminDashboardMetricsService {
    */
   private async getTotalUsers(): Promise<number> {
     try {
-      const { count, error } = await supabase
+      console.log('Attempting to fetch user count from profiles table...');
+
+      const response = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true });
+
+      console.log('=== SUPABASE RESPONSE DEBUG ===');
+      console.log('Full response:', response);
+      console.log('Response type:', typeof response);
+      console.log('Response keys:', Object.keys(response || {}));
+      console.log('Count:', response?.count);
+      console.log('Error:', response?.error);
+      console.log('Error type:', typeof response?.error);
+      console.log('=== END RESPONSE DEBUG ===');
+
+      const { count, error } = response;
 
       if (error) {
         // Detailed debugging for empty error messages
