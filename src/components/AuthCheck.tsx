@@ -191,19 +191,9 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
     );
   }
 
-  // Show success state briefly before rendering children
+  // Render children directly for admin users
   if (user && requireAdmin && userRole === 'admin') {
-    return (
-      <div className="space-y-4">
-        <Alert className="bg-green-50 border-green-200">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-700">
-            ✅ Admin access verified for {user.email}
-          </AlertDescription>
-        </Alert>
-        {children}
-      </div>
-    );
+    return <>{children}</>;
   }
 
   return <>{children}</>;
