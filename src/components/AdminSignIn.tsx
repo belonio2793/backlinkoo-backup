@@ -93,7 +93,7 @@ export function AdminSignIn() {
               <Input
                 id="email"
                 type="email"
-                placeholder="support@backlinkoo.com"
+                placeholder="Enter your admin email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
