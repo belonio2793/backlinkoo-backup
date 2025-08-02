@@ -183,7 +183,8 @@ export class BlogSystemDiagnostic {
       // Check if we can create a test post (helps identify write permissions)
       const testSlug = `diagnostic-test-${Date.now()}`;
 
-      const testPost = await blogService.createBlogPost({
+      // Add timeout to prevent hanging
+      const testPostPromise = blogService.createBlogPost({
         title: 'Diagnostic Test Post',
         content: '<p>This is a test post created by the diagnostic system.</p>',
         targetUrl: 'https://example.com',
@@ -191,6 +192,12 @@ export class BlogSystemDiagnostic {
         readingTime: 1,
         seoScore: 85
       }, undefined, true);
+
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Test timeout after 10 seconds')), 10000);
+      });
+
+      const testPost = await Promise.race([testPostPromise, timeoutPromise]) as any;
 
       this.log('Test Data Generation', 'success', 'Can create test posts', {
         testPostId: testPost.id,
