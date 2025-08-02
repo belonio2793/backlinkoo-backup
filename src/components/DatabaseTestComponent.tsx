@@ -83,21 +83,21 @@ export function DatabaseTestComponent() {
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Database className="h-5 w-5" />
-          Database Connection Test
+          Database Connection Diagnostics
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">
-              Test the connection to your Supabase database and verify user profile access.
+              Comprehensive test of your Supabase database connection and admin access.
             </p>
           </div>
-          <Button onClick={testConnection} disabled={testing}>
+          <Button onClick={runConnectionTest} disabled={testing}>
             {testing ? (
               <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
             ) : (
@@ -107,61 +107,153 @@ export function DatabaseTestComponent() {
           </Button>
         </div>
 
-        {connectionStatus && (
-          <div className={`p-4 rounded-lg border ${
-            connectionStatus.connected 
-              ? 'bg-green-50 border-green-200' 
-              : 'bg-red-50 border-red-200'
-          }`}>
-            <div className="flex items-center gap-2">
-              {connectionStatus.connected ? (
-                <CheckCircle className="h-5 w-5 text-green-600" />
-              ) : (
-                <XCircle className="h-5 w-5 text-red-600" />
-              )}
-              <div>
-                <p className={`font-medium ${
-                  connectionStatus.connected ? 'text-green-700' : 'text-red-700'
-                }`}>
-                  {connectionStatus.connected ? 'Database Connected' : 'Connection Failed'}
-                </p>
-                <p className={`text-sm ${
-                  connectionStatus.connected ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {connectionStatus.connected 
-                    ? `Found ${connectionStatus.profileCount} user profiles in database`
-                    : connectionStatus.error || 'Unknown error occurred'
-                  }
-                </p>
+        {connectionResult && (
+          <div className="space-y-4">
+            {/* Connection Status */}
+            <div className={`p-4 rounded-lg border ${
+              connectionResult.success
+                ? 'bg-green-50 border-green-200'
+                : 'bg-red-50 border-red-200'
+            }`}>
+              <div className="flex items-center gap-2">
+                {connectionResult.success ? (
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-red-600" />
+                )}
+                <div>
+                  <p className={`font-medium ${
+                    connectionResult.success ? 'text-green-700' : 'text-red-700'
+                  }`}>
+                    {connectionResult.success ? 'Database Connected' : 'Connection Failed'}
+                  </p>
+                  <p className={`text-sm ${
+                    connectionResult.success ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {connectionResult.success
+                      ? `Found ${connectionResult.profileCount} user profiles in database`
+                      : connectionResult.error || 'Unknown error occurred'
+                    }
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
 
-        {profiles.length > 0 && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <p className="text-sm font-medium">Sample User Profiles (First 5)</p>
-            </div>
-            <div className="space-y-2">
-              {profiles.map((profile, index) => (
-                <div key={profile.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{profile.display_name || 'No Name'}</p>
-                    <p className="text-sm text-muted-foreground">{profile.email}</p>
+            {/* User Info and Admin Check */}
+            {connectionResult.userInfo && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Authentication
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Status:</span>
+                      <Badge variant={connectionResult.userInfo.authenticated ? "default" : "destructive"}>
+                        {connectionResult.userInfo.authenticated ? "Authenticated" : "Not Authenticated"}
+                      </Badge>
+                    </div>
+                    {connectionResult.userInfo.email && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Email:</span>
+                        <span className="text-sm font-mono">{connectionResult.userInfo.email}</span>
+                      </div>
+                    )}
+                    {connectionResult.userInfo.role && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Role:</span>
+                        <Badge variant={connectionResult.userInfo.role === 'admin' ? "destructive" : "outline"}>
+                          {connectionResult.userInfo.role}
+                        </Badge>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Shield className="h-4 w-4" />
+                      Admin Access
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {adminCheck && (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Admin:</span>
+                          <Badge variant={adminCheck.isAdmin ? "destructive" : "outline"}>
+                            {adminCheck.isAdmin ? "Yes" : "No"}
+                          </Badge>
+                        </div>
+                        {adminCheck.method && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Method:</span>
+                            <span className="text-sm font-mono">{adminCheck.method}</span>
+                          </div>
+                        )}
+                        {adminCheck.error && (
+                          <div className="text-sm text-red-600">
+                            Error: {adminCheck.error}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Error Resolution */}
+            {!connectionResult.success && (
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="space-y-2">
+                    <p className="font-medium">Troubleshooting Steps:</p>
+                    <ul className="list-disc list-inside space-y-1 text-sm">
+                      {!connectionResult.userInfo?.authenticated && (
+                        <li>Make sure you're signed in as an admin user</li>
+                      )}
+                      {connectionResult.userInfo?.role !== 'admin' && (
+                        <li>Your account needs admin role privileges</li>
+                      )}
+                      {connectionResult.details?.rlsPolicies === 'Check RLS policies' && (
+                        <li>
+                          Run the RLS policies from correct_rls_policies.sql
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="ml-2"
+                            onClick={executeRLSPolicyFix}
+                          >
+                            View SQL Fix
+                          </Button>
+                        </li>
+                      )}
+                      {!connectionResult.details?.hasAnonKey && (
+                        <li>Check your Supabase environment variables</li>
+                      )}
+                    </ul>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={profile.role === 'admin' ? 'destructive' : 'outline'}>
-                      {profile.role}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(profile.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Success Message */}
+            {connectionResult.success && (
+              <Alert>
+                <CheckCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <p className="font-medium text-green-700">
+                    ✅ Database connection successful! Your admin user management should now work properly.
+                  </p>
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
         )}
       </CardContent>
