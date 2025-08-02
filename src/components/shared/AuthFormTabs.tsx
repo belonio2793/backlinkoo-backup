@@ -77,22 +77,30 @@ export function AuthFormTabs({
     try {
       let result;
 
-      try {
-        // First try safe auth service
-        result = await SafeAuthService.signIn({
-          email: currentEmail,
-          password: currentPassword,
-        });
-      } catch (authError: any) {
-        console.log('🚨 SafeAuth threw exception, trying emergency auth...', authError);
-        // If SafeAuth throws an exception, treat it as a database error and use emergency auth
-        result = await EmergencyAuthService.emergencySignIn(currentEmail, currentPassword);
-      }
+      // Check for emergency accounts and bypass Supabase entirely if detected
+      const isEmergencyAccount = currentEmail.toLowerCase() === 'support@backlinkoo.com';
 
-      // If SafeAuth fails with database error response, also try emergency auth
-      if (!result.success && result.error?.includes('Database error')) {
-        console.log('🚨 Database error in response, trying emergency auth...');
+      if (isEmergencyAccount) {
+        console.log('🚨 Emergency account detected, using direct bypass...');
         result = await EmergencyAuthService.emergencySignIn(currentEmail, currentPassword);
+      } else {
+        try {
+          // First try safe auth service for regular accounts
+          result = await SafeAuthService.signIn({
+            email: currentEmail,
+            password: currentPassword,
+          });
+        } catch (authError: any) {
+          console.log('🚨 SafeAuth threw exception, trying emergency auth...', authError);
+          // If SafeAuth throws an exception, treat it as a database error and use emergency auth
+          result = await EmergencyAuthService.emergencySignIn(currentEmail, currentPassword);
+        }
+
+        // If SafeAuth fails with database error response, also try emergency auth
+        if (!result.success && result.error?.includes('Database error')) {
+          console.log('🚨 Database error in response, trying emergency auth...');
+          result = await EmergencyAuthService.emergencySignIn(currentEmail, currentPassword);
+        }
       }
 
       if (result.success) {
@@ -433,7 +441,7 @@ export function AuthFormTabs({
               <Input
                 id="signup-password"
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder="•••���••••"
                 value={signupPassword}
                 onChange={(e) => setSignupPassword(e.target.value)}
                 className={inputHeight}
