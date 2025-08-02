@@ -21,66 +21,80 @@ export const EmergencyAdminBypass = ({ children }: EmergencyAdminBypassProps) =>
   }, []);
 
   const checkAuthWithTimeout = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    // Set a maximum loading time of 3 seconds, then show emergency options
+    const maxLoadingTimer = setTimeout(() => {
+      console.warn('⏰ Auth check taking too long, showing emergency options');
+      setError('Authentication system is not responding');
+      setShowEmergency(true);
+      setIsLoading(false);
+    }, 3000);
+
     try {
-      setIsLoading(true);
-      setError(null);
+      // Try basic auth check with no timeout (let the max timer handle it)
+      const { data: { user }, error } = await supabase.auth.getUser();
 
-      // Quick auth check with immediate timeout
-      const authPromise = supabase.auth.getUser();
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Auth check timeout')), 2000)
-      );
+      // Clear the max loading timer since we got a response
+      clearTimeout(maxLoadingTimer);
 
-      const { data: { user }, error } = await Promise.race([
-        authPromise,
-        timeoutPromise
-      ]) as any;
-
-      if (error || !user) {
+      if (error) {
+        console.error('Auth error:', error);
+        setError(`Authentication error: ${error.message}`);
+        setShowEmergency(true);
         setIsAuthenticated(false);
         setIsAdmin(false);
         setIsLoading(false);
         return;
       }
 
+      if (!user) {
+        // No user logged in - show sign in
+        setIsAuthenticated(false);
+        setIsAdmin(false);
+        setIsLoading(false);
+        return;
+      }
+
+      // User is authenticated
       setIsAuthenticated(true);
 
-      // Immediate bypass for support admin
+      // Immediate bypass for support admin - don't even check database
       if (user.email === 'support@backlinkoo.com') {
-        console.log('✅ Emergency admin bypass activated');
+        console.log('✅ Support admin detected - immediate access granted');
         setIsAdmin(true);
         setIsLoading(false);
         return;
       }
 
-      // Try profile check with very short timeout
+      // For other users, try a quick profile check but don't block on it
       try {
-        const profilePromise = supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
           .eq('user_id', user.id)
           .single();
 
-        const profileTimeout = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Profile timeout')), 1000)
-        );
-
-        const { data: profile } = await Promise.race([
-          profilePromise,
-          profileTimeout
-        ]) as any;
-
-        setIsAdmin(profile?.role === 'admin');
+        if (profileError) {
+          console.warn('Profile check failed:', profileError);
+          setError('Database access issues - using emergency mode');
+          setShowEmergency(true);
+        } else {
+          setIsAdmin(profile?.role === 'admin');
+        }
       } catch (profileError) {
-        console.warn('Profile check failed, showing emergency options');
-        setError('Database connection issues detected');
+        console.warn('Profile check exception:', profileError);
+        setError('Database connection issues');
         setShowEmergency(true);
-        setIsAdmin(false);
       }
 
     } catch (error: any) {
-      console.error('Auth check completely failed:', error);
-      setError(error.message);
+      console.error('Complete auth failure:', error);
+      clearTimeout(maxLoadingTimer);
+
+      // Show emergency options immediately on any error
+      setError(`System error: ${error.message}`);
       setShowEmergency(true);
       setIsAuthenticated(false);
       setIsAdmin(false);
