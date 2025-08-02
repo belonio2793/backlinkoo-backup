@@ -259,6 +259,10 @@ export function OrganizedAdminDashboard() {
               <SystemsAssessmentDashboard />
             </TabsContent>
 
+            <TabsContent value="diagnostic">
+              <DatabaseDiagnostic />
+            </TabsContent>
+
             <TabsContent value="environment">
               <NetlifyEnvironmentManager />
             </TabsContent>
