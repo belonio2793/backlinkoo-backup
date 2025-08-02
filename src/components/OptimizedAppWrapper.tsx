@@ -27,6 +27,7 @@ import { EmergencyAdminBypass } from '@/components/EmergencyAdminBypass';
 import { EmailVerificationGuard } from '@/components/EmailVerificationGuard';
 import { TrialNotificationBanner } from '@/components/TrialNotificationBanner';
 import { AdminSetup } from '@/components/AdminSetup';
+import { AdminDiagnostic } from '@/components/AdminDiagnostic';
 
 // Import lazy-loaded components
 import {
