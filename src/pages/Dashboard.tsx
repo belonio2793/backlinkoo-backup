@@ -675,6 +675,22 @@ const Dashboard = () => {
           fetchCampaigns(session.user).catch(err => {
             console.warn('🏠 Dashboard - fetchCampaigns failed:', err);
             return null;
+          }),
+          // Check premium status
+          PremiumService.checkPremiumStatus(session.user.id).then(isPremium => {
+            setIsPremiumSubscriber(isPremium);
+            return isPremium;
+          }).catch(err => {
+            console.warn('🏠 Dashboard - premium status check failed:', err);
+            return false;
+          }),
+          // Fetch user progress if premium
+          PremiumService.getUserProgress(session.user.id).then(progress => {
+            setUserProgress(progress);
+            return progress;
+          }).catch(err => {
+            console.warn('🏠 Dashboard - progress fetch failed:', err);
+            return {};
           })
         ];
 
