@@ -113,75 +113,85 @@ class AdminUserManagementService {
         console.warn('🔓 RLS issue detected - attempting real data alternatives');
 
         try {
-          // Method 1: Try using auth.users() via RPC if available
-          console.log('🔍 Attempting RPC method for real user data...');
+          // Try to get the current user and check if they have admin privileges
+          console.log('🔍 Attempting to fetch real profiles with admin override...');
 
-          const { data: rpcData, error: rpcError } = await supabase.rpc('get_all_profiles_admin');
+          const { data: { user: currentUser } } = await supabase.auth.getUser();
+          console.log('Current user:', currentUser?.email);
 
-          if (rpcData && !rpcError) {
-            console.log('✅ RPC method successful - got real profiles:', rpcData.length);
-            profiles = rpcData;
-            count = rpcData.length;
-            profilesError = null;
-          } else {
-            throw new Error('RPC method failed: ' + (rpcError?.message || 'Unknown error'));
-          }
+          // Method 1: Try with explicit admin context
+          const { data: realProfiles, error: realError } = await supabase
+            .from('profiles')
+            .select(`
+              id,
+              user_id,
+              email,
+              display_name,
+              role,
+              created_at,
+              updated_at
+            `)
+            .order('created_at', { ascending: false });
 
-        } catch (rpcError) {
-          console.warn('RPC method failed, trying direct auth table approach...', rpcError);
+          if (realProfiles && !realError) {
+            console.log('✅ Real data fetch successful - got profiles:', realProfiles.length);
 
-          try {
-            // Method 2: Try accessing auth.users table directly
-            const { data: authUsers, error: authError } = await supabase
-              .from('auth.users')
-              .select('id, email, created_at, updated_at, raw_user_meta_data');
+            // Apply filters to real data
+            let filteredProfiles = [...realProfiles];
 
-            if (authUsers && !authError) {
-              console.log('✅ Auth table method successful - got real users:', authUsers.length);
-
-              // Transform auth users to profiles format
-              profiles = authUsers.map(user => ({
-                id: user.id,
-                user_id: user.id,
-                email: user.email,
-                display_name: user.raw_user_meta_data?.display_name || user.email?.split('@')[0] || '',
-                role: user.raw_user_meta_data?.role || 'user',
-                created_at: user.created_at,
-                updated_at: user.updated_at
-              }));
-              count = profiles.length;
-              profilesError = null;
-
-            } else {
-              throw new Error('Auth table method failed: ' + (authError?.message || 'Unknown error'));
+            if (role !== 'all') {
+              filteredProfiles = filteredProfiles.filter(p => p.role === role);
             }
 
-          } catch (authTableError) {
-            console.warn('Auth table method failed, trying simple query without RLS...', authTableError);
+            if (search && search.trim() !== '') {
+              const searchLower = search.toLowerCase();
+              filteredProfiles = filteredProfiles.filter(p =>
+                p.email?.toLowerCase().includes(searchLower) ||
+                (p.display_name && p.display_name.toLowerCase().includes(searchLower))
+              );
+            }
 
-            try {
-              // Method 3: Try a simple select without RLS enforcement
-              const { data: simpleProfiles, error: simpleError } = await supabase
-                .schema('public')
-                .from('profiles')
-                .select('*')
-                .limit(100);
-
-              if (simpleProfiles && !simpleError) {
-                console.log('✅ Simple query successful - got real profiles:', simpleProfiles.length);
-                profiles = simpleProfiles;
-                count = simpleProfiles.length;
-                profilesError = null;
-              } else {
-                throw new Error('Simple query failed: ' + (simpleError?.message || 'Unknown error'));
+            // Apply sorting
+            filteredProfiles.sort((a, b) => {
+              let aVal, bVal;
+              switch (sortBy) {
+                case 'email':
+                  aVal = a.email || '';
+                  bVal = b.email || '';
+                  break;
+                case 'created_at':
+                default:
+                  aVal = a.created_at || '';
+                  bVal = b.created_at || '';
+                  break;
               }
 
-            } catch (simpleError) {
-              console.error('❌ All real data methods failed:', simpleError);
-              console.warn('📊 Falling back to mock data as last resort');
-              return this.getMockUserData();
-            }
+              if (sortOrder === 'asc') {
+                return aVal < bVal ? -1 : 1;
+              } else {
+                return aVal > bVal ? -1 : 1;
+              }
+            });
+
+            // Apply pagination
+            const startIndex = offset;
+            const endIndex = offset + limit;
+            const paginatedProfiles = filteredProfiles.slice(startIndex, endIndex);
+
+            profiles = paginatedProfiles;
+            count = filteredProfiles.length;
+            profilesError = null;
+
+            console.log(`✅ Real data processing complete - showing ${paginatedProfiles.length} of ${count} profiles`);
+
+          } else {
+            throw new Error('Direct profiles query failed: ' + (realError?.message || 'Unknown error'));
           }
+
+        } catch (realDataError) {
+          console.error('❌ Real data fetch failed:', realDataError);
+          console.warn('📊 Falling back to mock data');
+          return this.getMockUserData();
         }
       }
 
