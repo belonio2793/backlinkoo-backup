@@ -56,7 +56,8 @@ import {
   BarChart3,
   MonitorSpeaker,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Target
 } from "lucide-react";
 
 
@@ -236,22 +237,22 @@ export function OrganizedAdminDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Claims</CardTitle>
-              <Clock className="h-4 w-4 text-warning" />
+              <CardTitle className="text-sm font-medium">Running Campaigns</CardTitle>
+              <Target className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-warning">
+              <div className="text-2xl font-bold text-blue-600">
                 {loading ? (
                   <div className="h-8 bg-muted animate-pulse rounded" />
                 ) : (
-                  metrics?.pendingClaims || 0
+                  metrics?.runningCampaigns || 0
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
                 {loading ? (
                   <div className="h-3 bg-muted animate-pulse rounded w-20" />
                 ) : (
-                  "Unclaimed blog posts"
+                  "Active credit campaigns"
                 )}
               </p>
             </CardContent>
