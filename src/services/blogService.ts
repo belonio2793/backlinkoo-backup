@@ -154,7 +154,11 @@ export class BlogService {
         throw new Error('RLS policy blocking blog creation. Manual SQL execution required in Supabase: ALTER TABLE blog_posts DISABLE ROW LEVEL SECURITY; GRANT ALL ON blog_posts TO PUBLIC;');
       }
 
-      throw new Error(`Failed to create blog post: ${error.message}`);
+      if (error) {
+        throw new Error(`Failed to create blog post: ${error.message}`);
+      } else {
+        throw new Error('Failed to create blog post: No data returned from database');
+      }
     }
 
     console.log('✅ Blog post created successfully');
