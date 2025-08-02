@@ -183,22 +183,37 @@ export function SecurityDashboard() {
     } catch (error: any) {
       console.error('❌ Error fetching user data:', error);
 
+      // Extract error message properly
+      const errorMessage = error?.message || error?.error_description || error?.details ||
+                          (typeof error === 'string' ? error : 'Unknown error occurred');
+
+      console.error('Detailed error:', {
+        error,
+        message: errorMessage,
+        type: typeof error
+      });
+
       // Log the failed fetch
-      await adminAuditLogger.logUserAction(
-        'METRICS_VIEWED',
-        'bulk_view',
-        {
-          section: 'security_dashboard',
-          action: 'fetch_user_profiles_failed',
-          error: error.message
-        },
-        false,
-        error.message
-      );
+      try {
+        await adminAuditLogger.logUserAction(
+          'METRICS_VIEWED',
+          'bulk_view',
+          {
+            section: 'security_dashboard',
+            action: 'fetch_user_profiles_failed',
+            error: errorMessage,
+            raw_error: JSON.stringify(error)
+          },
+          false,
+          errorMessage
+        );
+      } catch (logError) {
+        console.warn('Failed to log error:', logError);
+      }
 
       toast({
         title: 'Error',
-        description: `Failed to fetch users: ${error.message}`,
+        description: `Failed to fetch users: ${errorMessage}`,
         variant: 'destructive'
       });
     } finally {
