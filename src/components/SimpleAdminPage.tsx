@@ -243,8 +243,8 @@ export function SimpleAdminPage() {
           </form>
 
           <div className="mt-6 pt-4 border-t text-center text-xs text-muted-foreground">
-            <p>🔒 Simplified admin authentication</p>
-            <p>Bypasses database profile checks</p>
+            <p>🔒 If login fails with "Invalid credentials":</p>
+            <p>Click "Create Admin User" first, then sign in</p>
           </div>
         </CardContent>
       </Card>
