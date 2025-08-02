@@ -43,11 +43,34 @@ export default async (req, context) => {
 
     console.log('🔧 Creating admin user:', email);
 
-    // Step 1: Create the auth user with admin client
+    // Try direct database insertion first (more reliable)
+    try {
+      // Insert directly into auth.users table
+      const { error: insertError } = await supabase.rpc('create_admin_user_direct', {
+        admin_email: email,
+        admin_password: password
+      });
+
+      if (!insertError) {
+        console.log('✅ Direct database creation successful');
+        return new Response(JSON.stringify({
+          success: true,
+          message: 'Admin user created via direct database insertion',
+          credentials: { email, password }
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    } catch (directError) {
+      console.log('Direct database method failed, trying admin API...');
+    }
+
+    // Fallback to admin API
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: email,
       password: password,
-      email_confirm: true, // Auto-confirm email
+      email_confirm: true,
       user_metadata: {
         full_name: 'Support Admin',
         display_name: 'Support Team'
