@@ -1,0 +1,245 @@
+import { supabase } from '@/integrations/supabase/client';
+
+export interface AdminDashboardMetrics {
+  totalUsers: number;
+  activeUsers: number;
+  monthlyRevenue: number;
+  pendingClaims: number;
+  totalUsersChange?: number;
+  activeUsersChange?: number;
+  monthlyRevenueChange?: number;
+}
+
+export interface MetricsError {
+  message: string;
+  details?: any;
+}
+
+export interface MetricsResult {
+  data?: AdminDashboardMetrics;
+  error?: MetricsError;
+  loading: boolean;
+}
+
+class AdminDashboardMetricsService {
+  
+  /**
+   * Fetch all admin dashboard metrics
+   */
+  async fetchDashboardMetrics(): Promise<AdminDashboardMetrics> {
+    try {
+      // Fetch all metrics in parallel for better performance
+      const [
+        totalUsersResult,
+        activeUsersResult,
+        monthlyRevenueResult,
+        pendingClaimsResult
+      ] = await Promise.allSettled([
+        this.getTotalUsers(),
+        this.getActiveUsers(),
+        this.getMonthlyRevenue(),
+        this.getPendingClaims()
+      ]);
+
+      // Extract values or use 0 as fallback
+      const totalUsers = totalUsersResult.status === 'fulfilled' ? totalUsersResult.value : 0;
+      const activeUsers = activeUsersResult.status === 'fulfilled' ? activeUsersResult.value : 0;
+      const monthlyRevenue = monthlyRevenueResult.status === 'fulfilled' ? monthlyRevenueResult.value : 0;
+      const pendingClaims = pendingClaimsResult.status === 'fulfilled' ? pendingClaimsResult.value : 0;
+
+      // Log any failures for debugging
+      [totalUsersResult, activeUsersResult, monthlyRevenueResult, pendingClaimsResult].forEach((result, index) => {
+        if (result.status === 'rejected') {
+          const metricNames = ['Total Users', 'Active Users', 'Monthly Revenue', 'Pending Claims'];
+          console.warn(`Failed to fetch ${metricNames[index]}:`, result.reason);
+        }
+      });
+
+      return {
+        totalUsers,
+        activeUsers,
+        monthlyRevenue,
+        pendingClaims
+      };
+    } catch (error) {
+      console.error('Error fetching dashboard metrics:', error);
+      throw new Error('Failed to fetch dashboard metrics');
+    }
+  }
+
+  /**
+   * Get total number of users from profiles table
+   */
+  private async getTotalUsers(): Promise<number> {
+    try {
+      const { count, error } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      if (error) {
+        console.error('Error fetching total users:', error);
+        return 0;
+      }
+
+      return count || 0;
+    } catch (error) {
+      console.error('Error in getTotalUsers:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Get number of active subscribers from subscribers table
+   */
+  private async getActiveUsers(): Promise<number> {
+    try {
+      const { count, error } = await supabase
+        .from('subscribers')
+        .select('*', { count: 'exact', head: true })
+        .eq('subscribed', true);
+
+      if (error) {
+        console.error('Error fetching active users:', error);
+        return 0;
+      }
+
+      return count || 0;
+    } catch (error) {
+      console.error('Error in getActiveUsers:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Calculate monthly revenue from completed orders in current month
+   */
+  private async getMonthlyRevenue(): Promise<number> {
+    try {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+
+      const { data, error } = await supabase
+        .from('orders')
+        .select('amount')
+        .eq('status', 'completed')
+        .gte('created_at', startOfMonth)
+        .lte('created_at', endOfMonth);
+
+      if (error) {
+        console.error('Error fetching monthly revenue:', error);
+        return 0;
+      }
+
+      if (!data || data.length === 0) {
+        return 0;
+      }
+
+      const totalRevenue = data.reduce((sum, order) => sum + (order.amount || 0), 0);
+      return Math.round(totalRevenue * 100) / 100; // Round to 2 decimal places
+    } catch (error) {
+      console.error('Error in getMonthlyRevenue:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Get number of unclaimed blog posts that require attention
+   */
+  private async getPendingClaims(): Promise<number> {
+    try {
+      const { count, error } = await supabase
+        .from('blog_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('claimed', false)
+        .eq('status', 'published')
+        .not('user_id', 'is', null);
+
+      if (error) {
+        console.error('Error fetching pending claims:', error);
+        return 0;
+      }
+
+      return count || 0;
+    } catch (error) {
+      console.error('Error in getPendingClaims:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Get metrics with previous month comparison for trend calculation
+   */
+  async fetchDashboardMetricsWithTrends(): Promise<AdminDashboardMetrics> {
+    try {
+      const [currentMetrics, previousMonthRevenue] = await Promise.allSettled([
+        this.fetchDashboardMetrics(),
+        this.getPreviousMonthRevenue()
+      ]);
+
+      const current = currentMetrics.status === 'fulfilled' ? currentMetrics.value : {
+        totalUsers: 0,
+        activeUsers: 0,
+        monthlyRevenue: 0,
+        pendingClaims: 0
+      };
+
+      const previousRevenue = previousMonthRevenue.status === 'fulfilled' ? previousMonthRevenue.value : 0;
+
+      // Calculate revenue change percentage
+      let monthlyRevenueChange = 0;
+      if (previousRevenue > 0) {
+        monthlyRevenueChange = ((current.monthlyRevenue - previousRevenue) / previousRevenue) * 100;
+        monthlyRevenueChange = Math.round(monthlyRevenueChange * 10) / 10; // Round to 1 decimal place
+      }
+
+      return {
+        ...current,
+        monthlyRevenueChange
+      };
+    } catch (error) {
+      console.error('Error fetching dashboard metrics with trends:', error);
+      return {
+        totalUsers: 0,
+        activeUsers: 0,
+        monthlyRevenue: 0,
+        pendingClaims: 0
+      };
+    }
+  }
+
+  /**
+   * Get previous month's revenue for trend calculation
+   */
+  private async getPreviousMonthRevenue(): Promise<number> {
+    try {
+      const now = new Date();
+      const startOfPreviousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+      const endOfPreviousMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
+
+      const { data, error } = await supabase
+        .from('orders')
+        .select('amount')
+        .eq('status', 'completed')
+        .gte('created_at', startOfPreviousMonth)
+        .lte('created_at', endOfPreviousMonth);
+
+      if (error) {
+        console.error('Error fetching previous month revenue:', error);
+        return 0;
+      }
+
+      if (!data || data.length === 0) {
+        return 0;
+      }
+
+      const totalRevenue = data.reduce((sum, order) => sum + (order.amount || 0), 0);
+      return Math.round(totalRevenue * 100) / 100; // Round to 2 decimal places
+    } catch (error) {
+      console.error('Error in getPreviousMonthRevenue:', error);
+      return 0;
+    }
+  }
+}
+
+export const adminDashboardMetricsService = new AdminDashboardMetricsService();
