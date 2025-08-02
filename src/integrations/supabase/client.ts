@@ -268,16 +268,23 @@ export const supabase = hasValidCredentials ?
                 }
 
                 xhr.onload = () => {
-                  // Create Response object
-                  const response = new Response(xhr.responseText, {
-                    status: xhr.status,
-                    statusText: xhr.statusText,
-                    headers: new Headers(xhr.getAllResponseHeaders().split('\r\n').reduce((acc, line) => {
-                      const [key, value] = line.split(': ');
-                      if (key && value) acc[key] = value;
-                      return acc;
-                    }, {} as Record<string, string>))
-                  });
+                  // Status codes that cannot have a body according to HTTP spec
+                  const statusCodesWithoutBody = [204, 205, 304];
+                  const canHaveBody = !statusCodesWithoutBody.includes(xhr.status);
+
+                  // Create Response object with appropriate body handling
+                  const response = new Response(
+                    canHaveBody ? xhr.responseText : null,
+                    {
+                      status: xhr.status,
+                      statusText: xhr.statusText,
+                      headers: new Headers(xhr.getAllResponseHeaders().split('\r\n').reduce((acc, line) => {
+                        const [key, value] = line.split(': ');
+                        if (key && value) acc[key] = value;
+                        return acc;
+                      }, {} as Record<string, string>))
+                    }
+                  );
                   resolve(response);
                 };
 
