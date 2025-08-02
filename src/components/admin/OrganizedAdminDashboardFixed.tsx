@@ -11,6 +11,7 @@ import { useWorkingAdminDashboardMetrics } from "@/hooks/useWorkingAdminDashboar
 import { AdminNavigationHeader } from "@/components/admin/AdminNavigationHeader";
 import { AdminUserManagement } from "@/components/admin/AdminUserManagement";
 import { UserRegistrationDiagnostic } from "@/components/admin/UserRegistrationDiagnostic";
+import { ConfigurationDiagnostic } from "@/components/admin/ConfigurationDiagnostic";
 import { supabase } from '@/integrations/supabase/client';
 
 // Admin Components
@@ -258,6 +259,7 @@ export function OrganizedAdminDashboard() {
 
         {activeSection === "users" && (
           <div className="space-y-6">
+            <ConfigurationDiagnostic />
             <UserRegistrationDiagnostic />
             <AdminUserManagement />
           </div>
