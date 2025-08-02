@@ -16,6 +16,36 @@ export function SimpleAdminPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [fixingRLS, setFixingRLS] = useState(false);
 
+  const fixRLSRecursion = async () => {
+    setFixingRLS(true);
+    setError(null);
+
+    try {
+      console.log('🔧 Attempting to fix RLS recursion...');
+
+      const response = await fetch('/.netlify/functions/fix-rls-recursion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setError(`✅ RLS recursion fixed! ${result.message}. Please try signing in again.`);
+        console.log('✅ RLS fix successful:', result);
+      } else {
+        setError(`⚠️ RLS fix attempt: ${result.message || 'Fix may have been partially successful'}. Please try signing in again.`);
+        console.warn('⚠️ RLS fix result:', result);
+      }
+    } catch (fixError: any) {
+      console.error('❌ RLS fix failed:', fixError);
+      setError('❌ Could not fix RLS issue automatically. Manual database intervention may be required.');
+    } finally {
+      setFixingRLS(false);
+    }
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
