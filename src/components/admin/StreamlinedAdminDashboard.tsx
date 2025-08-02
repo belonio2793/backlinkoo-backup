@@ -46,20 +46,33 @@ export function StreamlinedAdminDashboard() {
   const [activeSection, setActiveSection] = useState("overview");
   const [adminEmail, setAdminEmail] = useState<string | undefined>();
 
-  // Get admin user info
+  // Get admin user info and initialize audit logger
   useEffect(() => {
-    const getAdminInfo = async () => {
+    const initializeAdmin = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user?.email) {
           setAdminEmail(user.email);
+
+          // Initialize audit logger
+          await adminAuditLogger.initialize();
+
+          // Log admin dashboard access
+          await adminAuditLogger.logSystemAction(
+            'ADMIN_LOGIN',
+            {
+              section: 'admin_dashboard',
+              action: 'dashboard_access',
+              timestamp: new Date().toISOString()
+            }
+          );
         }
       } catch (error) {
-        console.warn('Could not get admin user info:', error);
+        console.warn('Could not initialize admin:', error);
       }
     };
-    
-    getAdminInfo();
+
+    initializeAdmin();
   }, []);
 
   const handleRefreshMetrics = async () => {
