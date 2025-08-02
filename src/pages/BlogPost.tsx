@@ -384,21 +384,52 @@ export function BlogPost() {
           </nav>
 
           {/* Article Header */}
-          <article className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <article className="bg-white/95 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-sm border border-gray-100">
+            {/* Hero Section */}
+            <div className="relative bg-gradient-to-br from-slate-50 via-blue-50/50 to-purple-50/30 p-8 sm:p-12 border-b border-gray-100">
+              <div className={"absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%239C92AC\" fill-opacity=\"0.03\"%3E%3Ccircle cx=\"30\" cy=\"30\" r=\"2\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40"}></div>
+
+              <div className="relative z-10">
+                {/* Category Badge */}
+                {post.category && (
+                  <div className="mb-6">
+                    <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 px-4 py-2 text-sm font-medium tracking-wide">
+                      {post.category}
+                    </Badge>
+                  </div>
+                )}
+
+                {/* Title - SEO H1 */}
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
+                  {post.title?.replace(/<\/?h1[^>]*>/g, '') || 'Untitled Post'}
+                </h1>
+
+                {/* Meta Description */}
+                {post.meta_description && (
+                  <p className="text-xl sm:text-2xl text-gray-600 leading-relaxed mb-8 font-light max-w-4xl">
+                    {post.meta_description}
+                  </p>
+                )}
+
+                {/* Author and Date */}
+                <div className="flex items-center gap-4 text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <User className="h-5 w-5 text-white" />
+                    </div>
+                    <span className="font-medium">{post.author_name || 'Backlink ∞'}</span>
+                  </div>
+                  <div className="text-gray-400">•</div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>{formatDate(post.published_at || post.created_at)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Article Content */}
             <div className="p-8 sm:p-12">
-
-
-              {/* Title - SEO H1 */}
-              <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-                {post.title?.replace(/<\/?h1[^>]*>/g, '') || 'Untitled Post'}
-              </h1>
-
-              {/* Meta Description */}
-              {post.meta_description && (
-                <p className="text-xl text-gray-600 leading-relaxed mb-8 font-light">
-                  {post.meta_description}
-                </p>
-              )}
 
               {/* Status Badges and Actions */}
               <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-8 border-b border-gray-200">
