@@ -2,7 +2,7 @@ import AdminDashboard from '@/pages/AdminDashboard';
 
 export function SimpleAdminPage() {
 
- a38a669c (Add better error handling for infinite recursion)
+ d8226dbd (Add manual fix UI for infinite recursion error)
 }
 
 export default SimpleAdminPage;
