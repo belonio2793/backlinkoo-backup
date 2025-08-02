@@ -186,11 +186,11 @@ export class PublishedBlogService {
 
   async getRecentBlogPosts(limit: number = 10): Promise<PublishedBlogPost[]> {
     try {
+      console.log('📖 Fetching blog posts from Supabase blog_posts table...');
       const { data, error } = await supabase
-        .from('published_blog_posts')
+        .from('blog_posts')
         .select('*')
-        .eq('status', 'published')
-        .order('published_at', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(limit);
 
       if (data && !error) {
