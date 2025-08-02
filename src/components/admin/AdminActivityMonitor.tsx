@@ -142,10 +142,10 @@ export function AdminActivityMonitor() {
 
   const clearFilters = () => {
     setSearchTerm('');
-    setActionFilter('');
-    setResourceFilter('');
+    setActionFilter('all');
+    setResourceFilter('all');
     setAdminFilter('');
-    setStatusFilter('');
+    setStatusFilter('all');
   };
 
   return (
@@ -205,7 +205,7 @@ export function AdminActivityMonitor() {
                   <SelectValue placeholder="All actions" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All actions</SelectItem>
+                  <SelectItem value="all">All actions</SelectItem>
                   <SelectItem value="USER_ROLE_ASSIGNED">User Management</SelectItem>
                   <SelectItem value="BLOG_POST_CREATED">Blog Actions</SelectItem>
                   <SelectItem value="SECURITY_SETTINGS_UPDATED">Security</SelectItem>
@@ -223,7 +223,7 @@ export function AdminActivityMonitor() {
                   <SelectValue placeholder="All resources" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All resources</SelectItem>
+                  <SelectItem value="all">All resources</SelectItem>
                   <SelectItem value="users">Users</SelectItem>
                   <SelectItem value="blog_posts">Blog Posts</SelectItem>
                   <SelectItem value="system">System</SelectItem>
@@ -240,7 +240,7 @@ export function AdminActivityMonitor() {
                   <SelectValue placeholder="All status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All status</SelectItem>
+                  <SelectItem value="all">All status</SelectItem>
                   <SelectItem value="success">Success only</SelectItem>
                   <SelectItem value="failed">Failed only</SelectItem>
                 </SelectContent>
