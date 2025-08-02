@@ -33,7 +33,7 @@ import { NetlifyEnvironmentManager } from "@/components/admin/NetlifyEnvironment
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 import { DirectOpenAITest } from "@/components/admin/DirectOpenAITest";
 import { UserManagement } from "@/components/admin/UserManagement";
-import { RealUserManagement } from "@/components/admin/RealUserManagement";
+import { FastUserList } from "@/components/admin/FastUserList";
 
 // Testing Tools
 import { AuthEmailTest } from "@/components/AuthEmailTest";
