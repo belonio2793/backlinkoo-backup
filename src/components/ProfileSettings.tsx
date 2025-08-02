@@ -261,24 +261,21 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
                   </Badge>
 
                   {/* Premium Status Badge */}
-                  {premiumLoading ? (
-                    <Badge variant="outline" className="flex items-center gap-1">
+                  <Badge
+                    variant={isPremium ? "default" : "secondary"}
+                    className={`flex items-center gap-1 ${
+                      isPremium
+                        ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white hover:from-amber-600 hover:to-yellow-600'
+                        : ''
+                    } ${premiumLoading ? 'opacity-70' : ''}`}
+                  >
+                    {premiumLoading ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
-                      Checking...
-                    </Badge>
-                  ) : (
-                    <Badge
-                      variant={isPremium ? "default" : "secondary"}
-                      className={`flex items-center gap-1 ${
-                        isPremium
-                          ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white hover:from-amber-600 hover:to-yellow-600'
-                          : ''
-                      }`}
-                    >
+                    ) : (
                       <Crown className="h-3 w-3" />
-                      {isPremium ? 'Premium Member' : 'Free Plan'}
-                    </Badge>
-                  )}
+                    )}
+                    {premiumLoading ? 'Checking...' : (isPremium ? 'Premium Member' : 'Free Plan')}
+                  </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {isPremium
