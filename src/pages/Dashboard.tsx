@@ -39,7 +39,10 @@ import {
   Eye,
   Sparkles,
   RefreshCw,
-  Home
+  Home,
+  Crown,
+  BookOpen,
+  Star
 } from "lucide-react";
 import { PricingModal } from "@/components/PricingModal";
 import { CampaignForm } from "@/components/CampaignForm";
