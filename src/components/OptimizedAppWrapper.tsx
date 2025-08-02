@@ -145,6 +145,11 @@ export const OptimizedAppWrapper = () => {
               <AdminSetup />
             </Suspense>
           } />
+          <Route path="/admin/diagnostic" element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminDiagnostic />
+            </Suspense>
+          } />
 
           {/* Debug routes - only in development */}
           {import.meta.env.DEV && (
