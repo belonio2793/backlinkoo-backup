@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { realAdminUserService } from './realAdminUserService';
-import { databaseConnectionService } from './databaseConnectionService';
+import { SafeAuth } from '@/utils/safeAuth';
 
 export interface AdminDashboardMetrics {
   totalUsers: number;
@@ -26,23 +26,22 @@ export interface MetricsResult {
 class WorkingAdminDashboardMetricsService {
   
   /**
-   * Check authentication and admin access before fetching metrics
+   * Check authentication and admin access before fetching metrics using SafeAuth
    */
   private async checkAuthAndAdmin(): Promise<boolean> {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      
-      if (error || !user) {
+      const adminResult = await SafeAuth.isAdmin();
+
+      if (adminResult.needsAuth) {
         console.warn('❌ User not authenticated for metrics');
         return false;
       }
-      
-      const adminCheck = await databaseConnectionService.checkAdminAccess();
-      if (!adminCheck.isAdmin) {
+
+      if (!adminResult.isAdmin) {
         console.warn('❌ User is not admin for metrics');
         return false;
       }
-      
+
       return true;
     } catch (error) {
       console.error('❌ Auth check failed:', error);
