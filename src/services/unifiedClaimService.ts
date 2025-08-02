@@ -190,7 +190,7 @@ export class UnifiedClaimService {
         .single();
 
       if (checkError && checkError.code !== 'PGRST116') {
-        console.error('Error checking existing save:', checkError);
+        console.error('Error checking existing save:', checkError.message || checkError);
         return {
           success: false,
           message: 'Error checking if post is already saved.'
@@ -216,7 +216,7 @@ export class UnifiedClaimService {
         .single();
 
       if (saveError) {
-        console.error('Failed to save post:', saveError);
+        console.error('Failed to save post:', saveError.message || saveError);
         return {
           success: false,
           message: 'Failed to save the blog post. Please try again.'
@@ -273,14 +273,14 @@ export class UnifiedClaimService {
         .order('saved_at', { ascending: false });
 
       if (error) {
-        console.error('Failed to get user saved posts:', error);
+        console.error('Failed to get user saved posts:', error.message || error);
         return [];
       }
 
       // Extract blog posts from the joined data
       return (data || []).map(item => (item as any).blog_posts).filter(Boolean);
     } catch (error) {
-      console.error('Error getting user saved posts:', error);
+      console.error('Error getting user saved posts:', error.message || error);
       return [];
     }
   }
@@ -297,7 +297,7 @@ export class UnifiedClaimService {
         .eq('post_id', postId);
 
       if (error) {
-        console.error('Failed to remove saved post:', error);
+        console.error('Failed to remove saved post:', error.message || error);
         return {
           success: false,
           message: 'Failed to remove post from dashboard.'
@@ -309,7 +309,7 @@ export class UnifiedClaimService {
         message: 'Post removed from dashboard.'
       };
     } catch (error) {
-      console.error('Error removing saved post:', error);
+      console.error('Error removing saved post:', error.message || error);
       return {
         success: false,
         message: 'Error removing post from dashboard.'
