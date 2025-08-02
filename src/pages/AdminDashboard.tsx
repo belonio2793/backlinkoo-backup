@@ -1,46 +1,6 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SecurityDashboard } from "@/components/SecurityDashboard";
-import { CampaignManager } from "@/components/CampaignManager";
-import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager";
-
-import { EmailSystemManager } from "@/components/admin/EmailSystemManager";
-import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
-
-import { TrialPostCleanupManager } from "@/components/admin/TrialPostCleanupManager";
-import { BlogManagementPanel } from "@/components/admin/BlogManagementPanel";
-import { BlogSystemAdmin } from "@/components/admin/BlogSystemAdmin";
-import { ContentFilterManager } from "@/components/admin/ContentFilterManager";
-import { ContentModerationQueue } from "@/components/admin/ContentModerationQueue";
-import { AIPostsManager } from "@/components/admin/AIPostsManager";
-import { BlogPostClaimsManager } from "@/components/admin/BlogPostClaimsManager";
-import { EnvironmentVariablesManager } from "@/components/admin/EnvironmentVariablesManager";
-import { AuthEmailTest } from "@/components/AuthEmailTest";
-
-import { EmailTest } from "@/components/EmailTest";
-import { SupabaseEmailTest } from "@/components/SupabaseEmailTest";
-import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
-import { SMTPConfigTest } from "@/components/SMTPConfigTest";
-import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { Footer } from "@/components/Footer";
-
-import { SystemStatusCheck } from "@/components/SystemStatusCheck";
-
-import { AdminAuthService } from "@/services/adminAuthService";
-import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 import { OrganizedAdminDashboard } from "@/components/admin/OrganizedAdminDashboard";
-import {
-  Users,
-  Activity,
-  CreditCard,
-  Clock,
-  Infinity,
-  LogOut,
-  Brain
-} from "lucide-react";
 
 const AdminDashboard = () => {
   const [paymentSettings] = useState({
