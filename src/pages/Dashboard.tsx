@@ -1004,17 +1004,7 @@ const Dashboard = () => {
                   <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full"></div>
                 )}
               </Button>
-              <Button
-                variant={activeSection === "seo-academy" ? "secondary" : "ghost"}
-                onClick={() => setActiveSection("seo-academy")}
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3 relative"
-              >
-                <BookOpen className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Learn SEO</span>
-                {isPremiumSubscriber && (
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-green-500 to-blue-500 rounded-full"></div>
-                )}
-              </Button>
+
             </nav>
           </div>
         </div>
@@ -1488,18 +1478,6 @@ const Dashboard = () => {
                     description: "Taking you to secure checkout...",
                   });
                   // In real implementation, this would open a payment processor
-                }}
-              />
-            ) : activeSection === "seo-academy" ? (
-              <SEOAcademyTab
-                isSubscribed={isPremiumSubscriber}
-                onUpgrade={() => {
-                  // Redirect to premium plan
-                  setActiveSection("premium-plan");
-                  toast({
-                    title: "Premium Required",
-                    description: "Upgrade to Premium to access the SEO Academy",
-                  });
                 }}
               />
             ) : null}
