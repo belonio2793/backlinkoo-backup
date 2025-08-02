@@ -141,21 +141,13 @@ export function UserManagement() {
   const updateUserRole = async (userId: string, role: string) => {
     setActionLoading(userId);
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          user_id: userId,
-          role: role,
-          updated_at: new Date().toISOString()
-        });
-      
-      if (error) throw error;
-      
+      await AdminUserService.updateUserRole(userId, role);
+
       toast({
         title: "Success",
         description: `User role updated to ${role}`
       });
-      
+
       await loadUsers();
     } catch (error: any) {
       toast({
