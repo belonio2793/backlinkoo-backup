@@ -132,43 +132,86 @@ class UnifiedAdminMetricsService {
   }
 
   /**
-   * Get user-related metrics
+   * Get user-related metrics using working admin service
    */
   private async getUserMetrics() {
     console.log('👥 Fetching user metrics...');
-    
-    // Get total users
-    const { count: totalUsers } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true });
 
-    // Get active users (premium subscribers)
-    const { count: activeUsers } = await supabase
-      .from('subscribers')
-      .select('*', { count: 'exact', head: true })
-      .eq('subscribed', true);
+    try {
+      // Use the working admin service that handles RLS properly
+      const { realAdminUserService } = await import('@/services/realAdminUserService');
+      const result = await realAdminUserService.getUsers({ limit: 1000, offset: 0 });
 
-    // Get recent signups (last 7 days)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    
-    const { count: recentSignups } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', sevenDaysAgo.toISOString());
+      const users = result.users;
+      const totalUsers = result.totalCount;
+      const activeUsers = users.filter(u => u.isPremium).length;
+      const adminUsers = users.filter(u => u.role === 'admin').length;
 
-    // Get admin users
-    const { count: adminUsers } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .eq('role', 'admin');
+      // Recent signups (last 7 days)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const recentSignups = users.filter(u =>
+        new Date(u.created_at) > sevenDaysAgo
+      ).length;
 
-    return {
-      totalUsers: totalUsers || 0,
-      activeUsers: activeUsers || 0,
-      recentSignups: recentSignups || 0,
-      adminUsers: adminUsers || 0
-    };
+      console.log(`✅ User metrics: ${totalUsers} total, ${activeUsers} premium, ${adminUsers} admin, ${recentSignups} recent`);
+
+      return {
+        totalUsers,
+        activeUsers,
+        recentSignups,
+        adminUsers
+      };
+
+    } catch (serviceError) {
+      console.warn('⚠️ Admin service failed, trying direct queries...', serviceError);
+
+      // Fallback to direct queries
+      try {
+        // Get total users
+        const { count: totalUsers } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
+
+        // Get active users (premium subscribers)
+        const { count: activeUsers } = await supabase
+          .from('subscribers')
+          .select('*', { count: 'exact', head: true })
+          .eq('subscribed', true);
+
+        // Get recent signups (last 7 days)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        const { count: recentSignups } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', sevenDaysAgo.toISOString());
+
+        // Get admin users
+        const { count: adminUsers } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('role', 'admin');
+
+        return {
+          totalUsers: totalUsers || 0,
+          activeUsers: activeUsers || 0,
+          recentSignups: recentSignups || 0,
+          adminUsers: adminUsers || 0
+        };
+
+      } catch (directError) {
+        console.error('❌ Direct queries also failed:', directError);
+        // Return zeros if all methods fail
+        return {
+          totalUsers: 0,
+          activeUsers: 0,
+          recentSignups: 0,
+          adminUsers: 0
+        };
+      }
+    }
   }
 
   /**
