@@ -98,7 +98,7 @@ const EmailConfirmation = () => {
                 console.warn('Profile migration warning:', migrationResult.error);
               }
             } catch (profileError) {
-              console.warn('Profile creation error (non-blocking):', profileError);
+              console.warn('Profile creation error (non-blocking):', profileError.message || profileError);
             }
 
             // Send welcome email
