@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { AdminSignIn } from './AdminSignIn';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, AlertTriangle, UserX } from 'lucide-react';
+import { Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface AuthCheckProps {
   children: React.ReactNode;
@@ -16,10 +16,20 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
   const [user, setUser] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const [showSignIn, setShowSignIn] = useState(false);
 
   useEffect(() => {
     checkAuth();
+    
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔄 Auth state changed:', event, session?.user?.email);
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        checkAuth();
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const checkAuth = async () => {
@@ -32,17 +42,24 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
 
       if (authError) {
         console.error('❌ Auth error:', authError);
+        if (authError.message.includes('Auth session missing')) {
+          console.log('🔐 No auth session - showing sign in');
+          setShowSignIn(true);
+          return;
+        }
         setError('Authentication failed. Please sign in.');
+        setShowSignIn(true);
         return;
       }
 
       if (!user) {
-        console.warn('⚠️ No authenticated user');
-        setError('Please sign in to continue.');
+        console.warn('⚠️ No authenticated user - showing sign in');
+        setShowSignIn(true);
         return;
       }
 
       setUser(user);
+      console.log('✅ User authenticated:', user.email);
 
       // If admin is required, check user role
       if (requireAdmin) {
@@ -67,7 +84,8 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
           setUserRole(profile.role);
 
           if (profile.role !== 'admin') {
-            setError('Admin access required. Please contact an administrator.');
+            setError('Admin access required. Please sign in with an admin account.');
+            setShowSignIn(true);
             return;
           }
 
@@ -79,21 +97,33 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
         }
       }
 
+      // Success - hide sign in form
+      setShowSignIn(false);
       console.log('✅ Authentication successful');
+      
     } catch (error: any) {
       console.error('❌ Auth check failed:', error);
       setError('Authentication check failed.');
+      setShowSignIn(true);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSignIn = () => {
-    navigate('/');
-  };
-
   const handleRetry = () => {
     checkAuth();
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      setShowSignIn(true);
+      setUser(null);
+      setUserRole(null);
+      setError(null);
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
   };
 
   if (loading) {
@@ -116,7 +146,11 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
     );
   }
 
-  if (error) {
+  if (showSignIn || (!user && requireAdmin)) {
+    return <AdminSignIn />;
+  }
+
+  if (error && user && requireAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="w-full max-w-md">
@@ -128,26 +162,37 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
               </Alert>
 
               <div className="space-y-2">
-                {!user && (
-                  <Button onClick={handleSignIn} className="w-full">
-                    Go to Sign In
-                  </Button>
-                )}
-                
-                <Button onClick={handleRetry} variant="outline" className="w-full">
+                <Button onClick={handleRetry} className="w-full">
                   Retry
+                </Button>
+                
+                <Button onClick={handleSignOut} variant="outline" className="w-full">
+                  Sign Out & Try Different Account
                 </Button>
               </div>
 
-              {user && requireAdmin && (
-                <div className="text-center text-sm text-muted-foreground">
-                  <p>Signed in as: {user.email}</p>
-                  {userRole && <p>Role: {userRole}</p>}
-                </div>
-              )}
+              <div className="text-center text-sm text-muted-foreground">
+                <p>Signed in as: {user.email}</p>
+                {userRole && <p>Role: {userRole}</p>}
+              </div>
             </div>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  // Show success state briefly before rendering children
+  if (user && requireAdmin && userRole === 'admin') {
+    return (
+      <div className="space-y-4">
+        <Alert className="bg-green-50 border-green-200">
+          <CheckCircle className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-700">
+            ✅ Admin access verified for {user.email}
+          </AlertDescription>
+        </Alert>
+        {children}
       </div>
     );
   }
