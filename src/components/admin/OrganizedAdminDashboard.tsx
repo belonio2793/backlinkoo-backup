@@ -177,13 +177,11 @@ export function OrganizedAdminDashboard() {
                   metrics?.totalUsers || 0
                 )}
               </div>
-              <p className="text-xs text-muted-foreground">
-                {loading ? (
-                  <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                ) : (
-                  "All registered users"
-                )}
-              </p>
+              {loading ? (
+                <div className="h-3 bg-muted animate-pulse rounded w-20" />
+              ) : (
+                <p className="text-xs text-muted-foreground">All registered users</p>
+              )}
             </CardContent>
           </Card>
 
@@ -200,13 +198,11 @@ export function OrganizedAdminDashboard() {
                   metrics?.activeUsers || 0
                 )}
               </div>
-              <p className="text-xs text-muted-foreground">
-                {loading ? (
-                  <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                ) : (
-                  "Currently subscribed"
-                )}
-              </p>
+              {loading ? (
+                <div className="h-3 bg-muted animate-pulse rounded w-20" />
+              ) : (
+                <p className="text-xs text-muted-foreground">Currently subscribed</p>
+              )}
             </CardContent>
           </Card>
 
@@ -223,15 +219,15 @@ export function OrganizedAdminDashboard() {
                   `$${metrics?.monthlyRevenue?.toFixed(2) || '0.00'}`
                 )}
               </div>
-              <p className="text-xs text-muted-foreground">
-                {loading ? (
-                  <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                ) : metrics?.monthlyRevenueChange !== undefined ? (
-                  `${metrics.monthlyRevenueChange >= 0 ? '+' : ''}${metrics.monthlyRevenueChange.toFixed(1)}% from last month`
-                ) : (
-                  "Current month total"
-                )}
-              </p>
+              {loading ? (
+                <div className="h-3 bg-muted animate-pulse rounded w-20" />
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  {metrics?.monthlyRevenueChange !== undefined
+                    ? `${metrics.monthlyRevenueChange >= 0 ? '+' : ''}${metrics.monthlyRevenueChange.toFixed(1)}% from last month`
+                    : "Current month total"}
+                </p>
+              )}
             </CardContent>
           </Card>
 
@@ -248,13 +244,11 @@ export function OrganizedAdminDashboard() {
                   metrics?.runningCampaigns || 0
                 )}
               </div>
-              <p className="text-xs text-muted-foreground">
-                {loading ? (
-                  <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                ) : (
-                  "Active credit campaigns"
-                )}
-              </p>
+              {loading ? (
+                <div className="h-3 bg-muted animate-pulse rounded w-20" />
+              ) : (
+                <p className="text-xs text-muted-foreground">Active credit campaigns</p>
+              )}
             </CardContent>
           </Card>
         </div>
