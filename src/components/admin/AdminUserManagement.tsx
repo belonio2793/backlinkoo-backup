@@ -96,18 +96,18 @@ export function AdminUserManagement() {
     try {
       setLoading(true);
       console.log('📋 Loading users with filters:', filters);
-      
+
       const result = await adminUserManagementService.getUsers(filters);
-      
+
       if (filters.offset === 0) {
         setUsers(result.users);
       } else {
         setUsers(prev => [...prev, ...result.users]);
       }
-      
+
       setTotalCount(result.totalCount);
       setHasMore(result.hasMore);
-      
+
       console.log(`✅ Loaded ${result.users.length} users (${result.totalCount} total)`);
     } catch (error: any) {
       console.error('Error loading users:', error);
@@ -117,6 +117,44 @@ export function AdminUserManagement() {
         variant: "destructive"
       });
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const reloadAllUsers = async () => {
+    try {
+      setLoading(true);
+      console.log('🔄 Reloading all profiles from database...');
+
+      // Clear current data
+      setUsers([]);
+
+      // Reset filters to load all users in organized manner
+      const freshFilters = {
+        search: '',
+        role: 'all' as const,
+        premiumStatus: 'all' as const,
+        sortBy: 'created_at' as const,
+        sortOrder: 'desc' as const,
+        limit: 100, // Load more users at once
+        offset: 0
+      };
+
+      // Update filters which will trigger useEffect to reload
+      setFilters(freshFilters);
+
+      toast({
+        title: "Reloading Users",
+        description: "Fetching all profiles from database...",
+      });
+
+    } catch (error: any) {
+      console.error('Error reloading users:', error);
+      toast({
+        title: "Reload Failed",
+        description: error.message || "Failed to reload user data",
+        variant: "destructive"
+      });
       setLoading(false);
     }
   };
