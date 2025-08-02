@@ -273,14 +273,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-6 w-6 animate-spin" />
-        <span className="ml-2">Loading profile...</span>
-      </div>
-    );
-  }
+  // No blocking loading state - show UI immediately
 
   return (
     <div className="space-y-6">
