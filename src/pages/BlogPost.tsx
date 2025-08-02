@@ -431,16 +431,70 @@ export function BlogPost() {
             {/* Article Content */}
             <div className="p-8 sm:p-12">
 
-              {/* Status Badges and Actions */}
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-8 border-b border-gray-200">
-                <div className="flex flex-wrap items-center gap-3">
-                  {post.category && (
-                    <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0">
-                      {post.category}
-                    </Badge>
-                  )}
+              {/* Trial Post Status */}
+              {post.is_trial_post && (
+                <div className="mb-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <Badge
+                        className={`${isExpiringSoon(post.expires_at) ? 'bg-red-100 text-red-700 border-red-300' : 'bg-amber-100 text-amber-700 border-amber-300'} border px-3 py-1`}
+                      >
+                        {isExpiringSoon(post.expires_at) ? (
+                          <>
+                            <Timer className="mr-1 h-3 w-3" />
+                            Expiring Soon
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="mr-1 h-3 w-3" />
+                            Unclaimed Post
+                          </>
+                        )}
+                      </Badge>
+                      {post.expires_at && (
+                        <span className="text-sm text-amber-700">
+                          Expires on {formatDate(post.expires_at)}
+                        </span>
+                      )}
+                    </div>
+                    {!post.user_id && (
+                      user ? (
+                        <Button
+                          size="sm"
+                          onClick={claimPost}
+                          disabled={claiming}
+                          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                        >
+                          {claiming ? (
+                            <>
+                              <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                              Claiming...
+                            </>
+                          ) : (
+                            <>
+                              <Star className="mr-2 h-3 w-3" />
+                              Save to Dashboard
+                            </>
+                          )}
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() => navigate('/login')}
+                          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                        >
+                          <User className="mr-2 h-3 w-3" />
+                          Sign in to Save
+                        </Button>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
 
-                  {post.is_trial_post && (
+              {/* Actions Section */}
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-8 border-b border-gray-100">
+                <div className="flex items-center gap-3">{post.is_trial_post && (
                     <div className="flex items-center gap-2">
                       <Badge
                         variant="outline"
