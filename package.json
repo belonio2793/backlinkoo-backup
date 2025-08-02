@@ -20,7 +20,13 @@
     "credentials:list": "node scripts/credential-helper.js list",
     "credentials:test": "node scripts/credential-helper.js test",
     "credentials:encode": "node scripts/credential-helper.js encode",
-    "credentials:decode": "node scripts/credential-helper.js decode"
+    "credentials:decode": "node scripts/credential-helper.js decode",
+    "sync:all": "node sync-configuration.js sync",
+    "sync:validate": "node sync-configuration.js validate",
+    "sync:env": "node sync-configuration.js env",
+    "sync:health": "node sync-configuration.js health",
+    "deploy:netlify": "npx -y @netlify/mcp@latest --site-id ca6261e6-0a59-40b5-a2bc-5b5481ac8809",
+    "deploy:build": "npm run build && npm run deploy:netlify"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
