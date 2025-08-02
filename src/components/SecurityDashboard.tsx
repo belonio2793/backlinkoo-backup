@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { adminAuditLogger, type AdminAuditLog, type AdminAction } from '@/services/adminAuditLogger';
+import { AdminActivityMonitor } from '@/components/admin/AdminActivityMonitor';
 import { Shield, Users, Activity, AlertTriangle, Search, Download, RefreshCw, Clock, Eye, Filter } from 'lucide-react';
 
 interface UserRole {
