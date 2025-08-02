@@ -333,6 +333,14 @@ export function AdminUserManagement() {
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
+            onClick={testConnection}
+            disabled={loading}
+          >
+            <Activity className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Test Database
+          </Button>
+          <Button
+            variant="outline"
             onClick={reloadAllUsers}
             disabled={loading}
           >
