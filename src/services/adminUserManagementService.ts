@@ -156,7 +156,10 @@ class AdminUserManagementService {
         throw profilesError;
       }
 
+      console.log('📈 Query results - profiles:', profiles?.length, 'count:', count, 'error:', profilesError);
+
       if (!profiles) {
+        console.warn('⚠️ No profiles returned from query');
         return { users: [], totalCount: 0, hasMore: false };
       }
 
