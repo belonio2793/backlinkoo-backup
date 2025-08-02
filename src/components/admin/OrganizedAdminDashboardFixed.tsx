@@ -139,20 +139,12 @@ export function OrganizedAdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {loading ? (
-                        <div className="h-8 bg-muted animate-pulse rounded" />
-                      ) : (
-                        metrics?.totalUsers || 0
-                      )}
+                      {metrics?.totalUsers || 0}
                     </div>
-                    {loading ? (
-                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                    ) : (
-                      <p className="text-xs text-muted-foreground">
-                        All registered users
-                        {metrics?.recentSignups ? ` (+${metrics.recentSignups} this week)` : ''}
-                      </p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      All registered users
+                      {metrics?.recentSignups ? ` (+${metrics.recentSignups} this week)` : ''}
+                    </p>
                   </CardContent>
                 </Card>
 
@@ -163,20 +155,11 @@ export function OrganizedAdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {loading ? (
-                        <div className="h-8 bg-muted animate-pulse rounded" />
-                      ) : (
-                        metrics?.activeUsers || 0
-                      )}
+                      {metrics?.activeUsers || 0}
                     </div>
-                    {loading ? (
-                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                    ) : (
-                      <p className="text-xs text-muted-foreground">
-                        Premium subscribers
-                        {metrics?.trialUsers ? ` (+${metrics.trialUsers} trial)` : ''}
-                      </p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Premium subscribers
+                    </p>
                   </CardContent>
                 </Card>
 
@@ -187,20 +170,12 @@ export function OrganizedAdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-success">
-                      {loading ? (
-                        <div className="h-8 bg-muted animate-pulse rounded" />
-                      ) : (
-                        `$${metrics?.monthlyRevenue?.toFixed(2) || '0.00'}`
-                      )}
+                      ${metrics?.monthlyRevenue?.toFixed(2) || '0.00'}
                     </div>
-                    {loading ? (
-                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                    ) : (
-                      <p className="text-xs text-muted-foreground">
-                        This month
-                        {metrics?.totalRevenue ? ` (Total: $${metrics.totalRevenue.toFixed(2)})` : ''}
-                      </p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      This month
+                      {metrics?.totalRevenue ? ` (Total: $${metrics.totalRevenue.toFixed(2)})` : ''}
+                    </p>
                   </CardContent>
                 </Card>
 
@@ -211,53 +186,14 @@ export function OrganizedAdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-blue-600">
-                      {loading ? (
-                        <div className="h-8 bg-muted animate-pulse rounded" />
-                      ) : (
-                        metrics?.blogPosts || 0
-                      )}
+                      {metrics?.blogPosts || 0}
                     </div>
-                    {loading ? (
-                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                    ) : (
-                      <p className="text-xs text-muted-foreground">
-                        Published posts
-                        {metrics?.runningCampaigns ? ` (${metrics.runningCampaigns} campaigns)` : ''}
-                      </p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Published posts
+                    </p>
                   </CardContent>
                 </Card>
               </div>
-
-              {/* Database Tables Status */}
-              {tableInfo && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Database className="h-5 w-5" />
-                      Database Tables Status
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {tableInfo.map((table) => (
-                        <div key={table.tableName} className="flex items-center justify-between">
-                          <span className="text-sm font-medium">{table.tableName}</span>
-                          {table.exists ? (
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="text-green-600 border-green-200">
-                                {table.rowCount} rows
-                              </Badge>
-                            </div>
-                          ) : (
-                            <Badge variant="destructive">Missing</Badge>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
             </div>
 
             {/* Streamlined System Status */}
