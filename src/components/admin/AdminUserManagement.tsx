@@ -197,6 +197,33 @@ export function AdminUserManagement() {
     }
   };
 
+  const testProfiles = async () => {
+    try {
+      setLoading(true);
+      console.log('🧪 Testing profile access...');
+
+      const result = await testProfileAccess();
+
+      toast({
+        title: "Profile Access Test",
+        description: `Found ${result.totalCount} total profiles, can access ${result.profilesCount}. User: ${result.user}`,
+        variant: result.hasAccess ? "default" : "destructive"
+      });
+
+      console.log('🧪 Profile test result:', result);
+
+    } catch (error: any) {
+      console.error('Profile test error:', error);
+      toast({
+        title: "Profile Test Failed",
+        description: error.message || "Failed to test profile access",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSearch = (value: string) => {
     setFilters(prev => ({
       ...prev,
