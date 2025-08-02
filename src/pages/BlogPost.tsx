@@ -386,20 +386,7 @@ export function BlogPost() {
           {/* Article Header */}
           <article className="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div className="p-8 sm:p-12">
-              {/* Meta Information */}
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-6">
-                {post.reading_time && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    <span>{post.reading_time} min read</span>
-                  </div>
-                )}
 
-                <div className="flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  <span>{post.view_count || 0} views</span>
-                </div>
-              </div>
 
               {/* Title - SEO H1 */}
               <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6 leading-tight">
