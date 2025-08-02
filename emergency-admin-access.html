@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Admin Access</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        h1 {
+            margin: 10px 0;
+            font-size: 28px;
+        }
+        .description {
+            opacity: 0.9;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            background: #dc2626;
+            color: white;
+            border: 2px solid white;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+        button:hover {
+            background: white;
+            color: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .alert {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .success {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+        }
+        .info {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+        }
+        .code {
+            font-family: monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <div class="icon">🚨</div>
+            <h1>Emergency Admin Access</h1>
+            <p class="description">
+                Your authentication system is failing. Use these emergency methods to access the admin dashboard.
+            </p>
+        </div>
+
+        <div class="alert">
+            <strong>🔍 Problem Detected:</strong><br>
+            Supabase authentication is timing out or failing completely. This indicates either:
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Database connection issues</li>
+                <li>RLS policy infinite recursion</li>
+                <li>Supabase service outage</li>
+                <li>Network connectivity problems</li>
+            </ul>
+        </div>
+
+        <button onclick="setEmergencyAccess()">
+            🚨 Grant Emergency Admin Access
+        </button>
+
+        <button onclick="goToOfflineAdmin()">
+            🔌 Access Offline Admin Mode
+        </button>
+
+        <button onclick="goToDiagnostic()">
+            🔍 View System Diagnostic
+        </button>
+
+        <button onclick="clearAllAndRetry()">
+            🔄 Clear Cache & Retry
+        </button>
+
+        <div id="result"></div>
+
+        <div class="alert info">
+            <strong>📋 Available Emergency Routes:</strong>
+            <div class="code">
+                /admin/offline - Complete offline access<br>
+                /admin/diagnostic - System status check<br>
+                /admin/setup - User creation tools
+            </div>
+        </div>
+
+        <div class="alert">
+            <strong>🛠️ Manual Fixes:</strong><br>
+            1. Run database cleanup script in Supabase SQL Editor<br>
+            2. Check Supabase project status<br>
+            3. Verify environment variables<br>
+            4. Clear browser data and retry
+        </div>
+    </div>
+
+    <script>
+        function setEmergencyAccess() {
+            try {
+                // Set emergency admin access in localStorage
+                localStorage.setItem('emergency_admin_access', 'true');
+                localStorage.setItem('emergency_admin_timestamp', Date.now().toString());
+                localStorage.setItem('admin_bypass_mode', 'true');
+                
+                // Set session markers
+                sessionStorage.setItem('skip_auth_check', 'true');
+                sessionStorage.setItem('force_admin_access', 'true');
+                
+                document.getElementById('result').innerHTML = `
+                    <div class="alert success">
+                        ✅ Emergency admin access granted!<br>
+                        <strong>Valid for 24 hours</strong><br><br>
+                        <a href="/admin" style="color: white; text-decoration: underline;">
+                            → Go to Admin Dashboard
+                        </a>
+                    </div>
+                `;
+                
+                // Auto-redirect after 2 seconds
+                setTimeout(() => {
+                    window.location.href = '/admin';
+                }, 2000);
+                
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="alert">
+                        ❌ Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function goToOfflineAdmin() {
+            window.location.href = '/admin/offline';
+        }
+
+        function goToDiagnostic() {
+            window.location.href = '/admin/diagnostic';
+        }
+
+        function clearAllAndRetry() {
+            // Clear all local storage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Clear cookies
+            document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
+            
+            document.getElementById('result').innerHTML = `
+                <div class="alert success">
+                    ✅ All cache cleared!<br>
+                    Redirecting to login...
+                </div>
+            `;
+            
+            setTimeout(() => {
+                window.location.href = '/admin';
+            }, 1500);
+        }
+
+        // Check if we already have emergency access
+        window.addEventListener('load', function() {
+            const hasAccess = localStorage.getItem('emergency_admin_access');
+            const timestamp = localStorage.getItem('emergency_admin_timestamp');
+            
+            if (hasAccess === 'true' && timestamp) {
+                const accessTime = parseInt(timestamp);
+                const now = Date.now();
+                const hoursSinceAccess = (now - accessTime) / (1000 * 60 * 60);
+                
+                if (hoursSinceAccess < 24) {
+                    document.getElementById('result').innerHTML = `
+                        <div class="alert success">
+                            ✅ You already have emergency admin access!<br>
+                            <strong>Expires in ${Math.round(24 - hoursSinceAccess)} hours</strong><br><br>
+                            <a href="/admin" style="color: white; text-decoration: underline;">
+                                → Go to Admin Dashboard
+                            </a>
+                        </div>
+                    `;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
