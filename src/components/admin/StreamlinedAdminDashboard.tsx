@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { DatabaseSyncedUserManagement } from "@/components/admin/DatabaseSyncedUserManagement";
 import { AdminConnectionDebugger } from "@/components/admin/AdminConnectionDebugger";
 import { QuickConnectionTest } from "@/components/admin/QuickConnectionTest";
+import { MetricsRefreshButton } from "@/components/admin/MetricsRefreshButton";
 import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
 import { SystemStatusPanel } from "@/components/admin/SystemStatusPanel";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
@@ -148,16 +149,18 @@ export function StreamlinedAdminDashboard() {
                     : '❌ Database connection issues detected'
                   }
                 </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRefreshMetrics}
-                  disabled={loading}
-                  className="ml-4"
-                >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  Refresh
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRefreshMetrics}
+                    disabled={loading}
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                  <MetricsRefreshButton />
+                </div>
               </div>
             </AlertDescription>
           </Alert>
