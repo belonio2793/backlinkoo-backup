@@ -82,13 +82,13 @@ class AdminDashboardMetricsService {
           console.warn('Mock database mode - returning demo data for total users');
           return 42; // Demo value for mock mode
         }
-        console.error('Error fetching total users:', error.message || error);
+        console.error('Error fetching total users:', this.formatError(error));
         return 0;
       }
 
       return count || 0;
     } catch (error: any) {
-      console.error('Error in getTotalUsers:', error.message || error);
+      console.error('Error in getTotalUsers:', this.formatError(error));
       return 0;
     }
   }
@@ -109,13 +109,13 @@ class AdminDashboardMetricsService {
           console.warn('Mock database mode - returning demo data for active users');
           return 18; // Demo value for mock mode
         }
-        console.error('Error fetching active users:', error.message || error);
+        console.error('Error fetching active users:', this.formatError(error));
         return 0;
       }
 
       return count || 0;
     } catch (error: any) {
-      console.error('Error in getActiveUsers:', error.message || error);
+      console.error('Error in getActiveUsers:', this.formatError(error));
       return 0;
     }
   }
@@ -142,7 +142,7 @@ class AdminDashboardMetricsService {
           console.warn('Mock database mode - returning demo data for monthly revenue');
           return 2847.50; // Demo value for mock mode
         }
-        console.error('Error fetching monthly revenue:', error.message || error);
+        console.error('Error fetching monthly revenue:', this.formatError(error));
         return 0;
       }
 
@@ -153,7 +153,7 @@ class AdminDashboardMetricsService {
       const totalRevenue = data.reduce((sum, order) => sum + (order.amount || 0), 0);
       return Math.round(totalRevenue * 100) / 100; // Round to 2 decimal places
     } catch (error: any) {
-      console.error('Error in getMonthlyRevenue:', error.message || error);
+      console.error('Error in getMonthlyRevenue:', this.formatError(error));
       return 0;
     }
   }
@@ -176,13 +176,13 @@ class AdminDashboardMetricsService {
           console.warn('Mock database mode - returning demo data for running campaigns');
           return 7; // Demo value for mock mode
         }
-        console.error('Error fetching running campaigns:', error.message || error);
+        console.error('Error fetching running campaigns:', this.formatError(error));
         return 0;
       }
 
       return count || 0;
     } catch (error: any) {
-      console.error('Error in getRunningCampaigns:', error.message || error);
+      console.error('Error in getRunningCampaigns:', this.formatError(error));
       return 0;
     }
   }
@@ -250,7 +250,7 @@ class AdminDashboardMetricsService {
           console.warn('Mock database mode - returning demo data for previous month revenue');
           return 2635.75; // Demo value for mock mode (slightly less than current month)
         }
-        console.error('Error fetching previous month revenue:', error.message || error);
+        console.error('Error fetching previous month revenue:', this.formatError(error));
         return 0;
       }
 
@@ -261,7 +261,7 @@ class AdminDashboardMetricsService {
       const totalRevenue = data.reduce((sum, order) => sum + (order.amount || 0), 0);
       return Math.round(totalRevenue * 100) / 100; // Round to 2 decimal places
     } catch (error: any) {
-      console.error('Error in getPreviousMonthRevenue:', error.message || error);
+      console.error('Error in getPreviousMonthRevenue:', this.formatError(error));
       return 0;
     }
   }
