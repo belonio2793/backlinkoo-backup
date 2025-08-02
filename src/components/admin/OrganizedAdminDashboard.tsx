@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AuthService } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminDashboardMetrics } from "@/hooks/useAdminDashboardMetrics";
 
 // Admin Components
 import { SecurityDashboard } from "@/components/SecurityDashboard";
@@ -53,26 +54,25 @@ import {
   Globe,
   Code,
   BarChart3,
-  MonitorSpeaker
+  MonitorSpeaker,
+  RefreshCw,
+  AlertCircle
 } from "lucide-react";
 
-interface AdminStats {
-  totalUsers: number;
-  activeUsers: number;
-  monthlyRevenue: number;
-  pendingClaims: number;
-}
+
 
 export function OrganizedAdminDashboard() {
   const { toast } = useToast();
-  const [stats] = useState<AdminStats>({
-    totalUsers: 1247,
-    activeUsers: 892,
-    monthlyRevenue: 12450,
-    pendingClaims: 23
-  });
-
+  const { metrics, loading, error, refetch } = useAdminDashboardMetrics();
   const [activeCategory, setActiveCategory] = useState("overview");
+
+  const handleRefreshMetrics = async () => {
+    await refetch();
+    toast({
+      title: "Metrics Refreshed",
+      description: "Dashboard metrics have been updated with the latest data."
+    });
+  };
 
   const handleSignOut = () => {
     // Navigate immediately for instant UX
@@ -140,50 +140,123 @@ export function OrganizedAdminDashboard() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers}</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
-          </CardContent>
-        </Card>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Key Metrics</h2>
+          <div className="flex items-center gap-2">
+            {error && (
+              <Alert className="max-w-md">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error.message}</AlertDescription>
+              </Alert>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshMetrics}
+              disabled={loading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.activeUsers}</div>
-            <p className="text-xs text-muted-foreground">+15.3% from last month</p>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {loading ? (
+                  <div className="h-8 bg-muted animate-pulse rounded" />
+                ) : (
+                  metrics?.totalUsers || 0
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {loading ? (
+                  <div className="h-3 bg-muted animate-pulse rounded w-20" />
+                ) : (
+                  "All registered users"
+                )}
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
-            <CreditCard className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-success">${stats.monthlyRevenue}</div>
-            <p className="text-xs text-muted-foreground">+8.2% from last month</p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Subscribers</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {loading ? (
+                  <div className="h-8 bg-muted animate-pulse rounded" />
+                ) : (
+                  metrics?.activeUsers || 0
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {loading ? (
+                  <div className="h-3 bg-muted animate-pulse rounded w-20" />
+                ) : (
+                  "Currently subscribed"
+                )}
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Claims</CardTitle>
-            <Clock className="h-4 w-4 text-warning" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-warning">{stats.pendingClaims}</div>
-            <p className="text-xs text-muted-foreground">Requires attention</p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
+              <CreditCard className="h-4 w-4 text-success" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-success">
+                {loading ? (
+                  <div className="h-8 bg-muted animate-pulse rounded" />
+                ) : (
+                  `$${metrics?.monthlyRevenue?.toFixed(2) || '0.00'}`
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {loading ? (
+                  <div className="h-3 bg-muted animate-pulse rounded w-20" />
+                ) : metrics?.monthlyRevenueChange !== undefined ? (
+                  `${metrics.monthlyRevenueChange >= 0 ? '+' : ''}${metrics.monthlyRevenueChange.toFixed(1)}% from last month`
+                ) : (
+                  "Current month total"
+                )}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pending Claims</CardTitle>
+              <Clock className="h-4 w-4 text-warning" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-warning">
+                {loading ? (
+                  <div className="h-8 bg-muted animate-pulse rounded" />
+                ) : (
+                  metrics?.pendingClaims || 0
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {loading ? (
+                  <div className="h-3 bg-muted animate-pulse rounded w-20" />
+                ) : (
+                  "Unclaimed blog posts"
+                )}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Category Navigation */}
