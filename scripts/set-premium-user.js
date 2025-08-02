@@ -17,7 +17,7 @@ async function setPremiumUser(email) {
     const { data: users, error: userError } = await supabase.auth.admin.listUsers();
     
     if (userError) {
-      console.error('Error fetching users:', userError);
+      console.error('Error fetching users:', userError.message || userError);
       return;
     }
 
@@ -38,7 +38,7 @@ async function setPremiumUser(email) {
       .single();
 
     if (subCheckError && subCheckError.code !== 'PGRST116') { // PGRST116 = no rows found
-      console.error('Error checking existing subscription:', subCheckError);
+      console.error('Error checking existing subscription:', subCheckError.message || subCheckError);
       return;
     }
 
@@ -63,7 +63,7 @@ async function setPremiumUser(email) {
         .single();
 
       if (error) {
-        console.error('Error updating subscription:', error);
+        console.error('Error updating subscription:', error.message || error);
         return;
       }
       
@@ -84,7 +84,7 @@ async function setPremiumUser(email) {
         .single();
 
       if (error) {
-        console.error('Error creating subscription:', error);
+        console.error('Error creating subscription:', error.message || error);
         return;
       }
       
@@ -105,13 +105,13 @@ async function setPremiumUser(email) {
       .rpc('is_premium_user', { user_uuid: user.id });
 
     if (verifyError) {
-      console.error('Error verifying premium status:', verifyError);
+      console.error('Error verifying premium status:', verifyError.message || verifyError);
     } else {
       console.log(`Premium status verification: ${verification ? 'ACTIVE' : 'INACTIVE'}`);
     }
 
   } catch (error) {
-    console.error('Unexpected error:', error);
+    console.error('Unexpected error:', error.message || error);
   }
 }
 
