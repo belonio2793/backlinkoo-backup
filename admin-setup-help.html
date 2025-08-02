@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Setup Help - Backlinkoo</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fee2e2;
+            color: #991b1b;
+            line-height: 1.6;
+        }
+        .card {
+            background: white;
+            border: 2px solid #dc2626;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        h1 { color: #dc2626; text-align: center; }
+        h2 { color: #dc2626; border-bottom: 2px solid #dc2626; padding-bottom: 10px; }
+        .step {
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .step h3 {
+            margin: 0 0 10px 0;
+            color: #dc2626;
+        }
+        code {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 6px;
+            display: block;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .button {
+            display: inline-block;
+            background: #dc2626;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background: #991b1b;
+        }
+        .warning {
+            background: #fbbf24;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🚨 Admin User Setup Required</h1>
+        
+        <div class="warning">
+            ⚠️ Your admin user doesn't exist yet. You're getting "Invalid login credentials" because the admin account hasn't been created in the database.
+        </div>
+
+        <h2>Quick Fix Instructions</h2>
+
+        <div class="step">
+            <h3>Step 1: Open Supabase Dashboard</h3>
+            <p>Click this link to open your Supabase project:</p>
+            <a href="https://supabase.com/dashboard/project/dfhanacsmsvvkpunurnp/sql/new" target="_blank" class="button">
+                🚀 Open Supabase SQL Editor
+            </a>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Paste This SQL Command</h3>
+            <p>Copy and paste this entire SQL command into the SQL editor:</p>
+            <code>INSERT INTO auth.users (
+  instance_id,
+  id,
+  aud,
+  role,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  created_at,
+  updated_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  is_super_admin
+) VALUES (
+  '00000000-0000-0000-0000-000000000000',
+  gen_random_uuid(),
+  'authenticated',
+  'authenticated',
+  'support@backlinkoo.com',
+  crypt('Admin123!@#', gen_salt('bf')),
+  NOW(),
+  NOW(),
+  NOW(),
+  '{"provider": "email", "providers": ["email"]}',
+  '{"full_name": "Support Admin"}',
+  FALSE
+);</code>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Run the Command</h3>
+            <p>Click the <strong>"RUN"</strong> button in the SQL editor. You should see a success message.</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Go Back to Admin Login</h3>
+            <p>Return to your admin login page and sign in with:</p>
+            <ul>
+                <li><strong>Email:</strong> support@backlinkoo.com</li>
+                <li><strong>Password:</strong> Admin123!@#</li>
+            </ul>
+            <a href="/admin" class="button">← Back to Admin Login</a>
+        </div>
+
+        <h2>Alternative: Manual User Creation</h2>
+        <div class="step">
+            <h3>Through Supabase Dashboard</h3>
+            <p>If the SQL approach doesn't work:</p>
+            <ol>
+                <li>Go to <strong>Authentication → Users</strong> in Supabase</li>
+                <li>Click <strong>"Add User"</strong></li>
+                <li>Email: <code>support@backlinkoo.com</code></li>
+                <li>Password: <code>Admin123!@#</code></li>
+                <li>Check <strong>"Auto Confirm User"</strong></li>
+                <li>Click <strong>"Create User"</strong></li>
+            </ol>
+            <a href="https://supabase.com/dashboard/project/dfhanacsmsvvkpunurnp/auth/users" target="_blank" class="button">
+                👤 Open User Management
+            </a>
+        </div>
+
+        <div class="warning">
+            💡 <strong>Why this happens:</strong> The admin user account needs to be manually created the first time. After this one-time setup, your admin login will work normally.
+        </div>
+    </div>
+</body>
+</html>
