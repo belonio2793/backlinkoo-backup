@@ -50,11 +50,7 @@ export class SafeAuth {
         return { isAdmin: false, needsAuth: true };
       }
 
-      // Emergency bypass for support admin email
-      if (userResult.user.email === 'support@backlinkoo.com') {
-        console.log('✅ Support admin email detected - granting admin access');
-        return { isAdmin: true, needsAuth: false };
-      }
+      // Check user role normally
 
       // Check user role in profiles table
       const { data: profile, error: profileError } = await supabase
