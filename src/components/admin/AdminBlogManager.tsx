@@ -54,11 +54,10 @@ export function AdminBlogManager() {
       setBlogPosts(Array.isArray(posts) ? posts : []);
 
       // Log the admin action of viewing blog posts
-      await adminAuditLogger.logBlogAction(
-        'BLOG_POST_CREATED', // We'll change this to a view action
-        'bulk_view',
-        undefined,
+      await adminAuditLogger.logSystemAction(
+        'METRICS_VIEWED',
         {
+          section: 'blog_management',
           action: 'view_blog_posts',
           posts_count: Array.isArray(posts) ? posts.length : 0,
           timestamp: new Date().toISOString()
@@ -66,11 +65,10 @@ export function AdminBlogManager() {
       );
     } catch (error) {
       console.error('Failed to load blog posts:', error);
-      await adminAuditLogger.logBlogAction(
-        'BLOG_POST_CREATED', // This will be changed to view action
-        'bulk_view',
-        undefined,
+      await adminAuditLogger.logSystemAction(
+        'METRICS_VIEWED',
         {
+          section: 'blog_management',
           action: 'view_blog_posts_failed',
           error: error instanceof Error ? error.message : 'Unknown error'
         },
@@ -181,13 +179,41 @@ export function AdminBlogManager() {
 
   const cleanupExpiredPosts = async () => {
     try {
+      const expiredPostsCount = blogPosts.filter(p => isExpired(p)).length;
+
       await publishedBlogService.cleanupExpiredTrialPosts();
       await loadBlogPosts();
+
+      // Log the cleanup action
+      await adminAuditLogger.logBlogAction(
+        'BLOG_BULK_DELETE',
+        'bulk_cleanup',
+        undefined,
+        {
+          action: 'cleanup_expired_posts',
+          expired_posts_count: expiredPostsCount,
+          timestamp: new Date().toISOString()
+        }
+      );
+
       toast({
         title: 'Success',
         description: 'Expired trial posts cleaned up successfully'
       });
     } catch (error) {
+      // Log the failed cleanup
+      await adminAuditLogger.logBlogAction(
+        'BLOG_BULK_DELETE',
+        'bulk_cleanup',
+        undefined,
+        {
+          action: 'cleanup_expired_posts_failed',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        },
+        false,
+        error instanceof Error ? error.message : 'Failed to cleanup expired posts'
+      );
+
       toast({
         title: 'Error',
         description: 'Failed to cleanup expired posts',
@@ -241,34 +267,72 @@ export function AdminBlogManager() {
     }
   };
 
-  const exportPostsData = () => {
-    const csvData = filteredPosts.map(post => ({
-      title: post.title,
-      slug: post.slug,
-      target_url: post.target_url,
-      keywords: post.keywords.join('; '),
-      status: post.status,
-      is_trial: post.is_trial_post ? 'Yes' : 'No',
-      expires_at: post.expires_at || 'Never',
-      view_count: post.view_count,
-      seo_score: post.seo_score,
-      word_count: post.word_count,
-      created_at: post.created_at,
-      user_type: post.user_id ? 'Registered' : 'Guest'
-    }));
+  const exportPostsData = async () => {
+    try {
+      const csvData = filteredPosts.map(post => ({
+        title: post.title,
+        slug: post.slug,
+        target_url: post.target_url,
+        keywords: post.keywords.join('; '),
+        status: post.status,
+        is_trial: post.is_trial_post ? 'Yes' : 'No',
+        expires_at: post.expires_at || 'Never',
+        view_count: post.view_count,
+        seo_score: post.seo_score,
+        word_count: post.word_count,
+        created_at: post.created_at,
+        user_type: post.user_id ? 'Registered' : 'Guest'
+      }));
 
-    const csv = [
-      Object.keys(csvData[0] || {}),
-      ...csvData.map(row => Object.values(row))
-    ].map(row => row.join(',')).join('\n');
+      const csv = [
+        Object.keys(csvData[0] || {}),
+        ...csvData.map(row => Object.values(row))
+      ].map(row => row.join(',')).join('\n');
 
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `blog-posts-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `blog-posts-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      // Log the data export action
+      await adminAuditLogger.logSystemAction(
+        'DATA_EXPORT',
+        {
+          export_type: 'blog_posts_csv',
+          record_count: filteredPosts.length,
+          filters: {
+            search_term: searchTerm,
+            status_filter: statusFilter,
+            trial_filter: trialFilter
+          },
+          timestamp: new Date().toISOString()
+        }
+      );
+
+      toast({
+        title: 'Export Complete',
+        description: `Exported ${filteredPosts.length} blog posts to CSV`
+      });
+    } catch (error) {
+      await adminAuditLogger.logSystemAction(
+        'DATA_EXPORT',
+        {
+          export_type: 'blog_posts_csv_failed',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        },
+        false,
+        error instanceof Error ? error.message : 'Failed to export blog posts'
+      );
+
+      toast({
+        title: 'Export Failed',
+        description: 'Failed to export blog posts',
+        variant: 'destructive'
+      });
+    }
   };
 
   const stats = {
