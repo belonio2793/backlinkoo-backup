@@ -4,8 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { SafeAuthService } from "@/services/safeAuthService";
-import { EmergencyAuthService } from "@/services/emergencyAuthService";
+import { AuthService } from "@/services/authService";
 import { TrialConversionService } from "@/services/trialConversionService";
 
 import { validateEmail, validatePassword, validateRequired } from "@/utils/authValidation";
@@ -75,51 +74,32 @@ export function AuthFormTabs({
     const currentPassword = loginPassword;
 
     try {
-      let result;
-
-      // Check for emergency accounts and bypass Supabase entirely if detected
-      const isEmergencyAccount = currentEmail.toLowerCase() === 'support@backlinkoo.com';
-
-      if (isEmergencyAccount) {
-        console.log('🚨 Emergency account detected, using direct bypass...');
-        result = await EmergencyAuthService.emergencySignIn(currentEmail, currentPassword);
-      } else {
-        try {
-          // First try safe auth service for regular accounts
-          result = await SafeAuthService.signIn({
-            email: currentEmail,
-            password: currentPassword,
-          });
-        } catch (authError: any) {
-          console.log('🚨 SafeAuth threw exception, trying emergency auth...', authError);
-          // If SafeAuth throws an exception, treat it as a database error and use emergency auth
-          result = await EmergencyAuthService.emergencySignIn(currentEmail, currentPassword);
-        }
-
-        // If SafeAuth fails with database error response, also try emergency auth
-        if (!result.success && result.error?.includes('Database error')) {
-          console.log('🚨 Database error in response, trying emergency auth...');
-          result = await EmergencyAuthService.emergencySignIn(currentEmail, currentPassword);
-        }
-      }
+      const result = await AuthService.signIn({
+        email: currentEmail,
+        password: currentPassword,
+      });
 
       if (result.success) {
-        const welcomeMessage = result.emergencyBypass
-          ? `Emergency access granted for ${currentEmail}`
-          : `Signing in as ${currentEmail}`;
-
         toast({
-          title: result.emergencyBypass ? "Emergency Access" : "Welcome back!",
-          description: welcomeMessage,
-          variant: result.emergencyBypass ? "default" : "default"
+          title: "Welcome back!",
+          description: `Signing in as ${currentEmail}`,
         });
         onAuthSuccess?.(result.user);
       } else {
-        toast({
-          title: "Sign in failed",
-          description: result.error || "Invalid email or password.",
-          variant: "destructive",
-        });
+        // Check if this is a database error and provide helpful guidance
+        if (result.error?.includes('Database error')) {
+          toast({
+            title: "Database Configuration Issue",
+            description: "Your Supabase database needs to be configured. Please run the provided SQL fix script in your Supabase dashboard.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Sign in failed",
+            description: result.error || "Invalid email or password.",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -233,8 +213,8 @@ export function AuthFormTabs({
           });
         }
       } else {
-        // Use SafeAuthService for simple signup without complex database operations
-        const result = await SafeAuthService.signUp({
+        // Use standard AuthService for signup
+        const result = await AuthService.signUp({
           email: signupEmail.trim(),
           password: signupPassword,
           firstName: firstName.trim(),
@@ -441,7 +421,7 @@ export function AuthFormTabs({
               <Input
                 id="signup-password"
                 type={showPassword ? "text" : "password"}
-                placeholder="•••���••••"
+                placeholder="••••••••"
                 value={signupPassword}
                 onChange={(e) => setSignupPassword(e.target.value)}
                 className={inputHeight}
