@@ -69,7 +69,7 @@ import {
 
 export function OrganizedAdminDashboard() {
   const { toast } = useToast();
-  const { metrics, loading, error, refetch } = useWorkingAdminDashboardMetrics();
+  const { metrics, loading, error, refetch } = useDirectAdminMetrics();
   const [activeSection, setActiveSection] = useState("overview");
   const [adminEmail, setAdminEmail] = useState<string | undefined>();
 
