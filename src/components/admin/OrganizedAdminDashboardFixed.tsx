@@ -180,21 +180,21 @@ export function OrganizedAdminDashboard() {
               </div>
             </div>
 
+            {/* System Configuration Status */}
+            <SystemStatusPanel />
+
             {/* Streamlined System Status */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MonitorSpeaker className="h-5 w-5" />
-                  System Status
+                  Service Status
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ServiceConnectionStatus />
               </CardContent>
             </Card>
-
-            {/* Direct OpenAI Connection Test */}
-            <DirectOpenAITest />
           </div>
         )}
 
