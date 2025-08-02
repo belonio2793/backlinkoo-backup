@@ -101,11 +101,18 @@ export function AuthFormTabs({
           });
         }
       }
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (error: any) {
+      console.error('🚨 Login component error:', {
+        error: error,
+        message: error.message,
+        stack: error.stack,
+        email: currentEmail,
+        errorString: JSON.stringify(error, null, 2)
+      });
+      console.error('🚨 Raw login error object:', error);
       toast({
         title: "Sign in failed",
-        description: "An unexpected error occurred. Please try again.",
+        description: `An unexpected error occurred: ${error.message || 'Please try again.'}`,
         variant: "destructive",
       });
     } finally {
