@@ -93,11 +93,12 @@ export function AdminSignIn() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@example.com"
+                placeholder="support@backlinkoo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
                 required
+                className="h-11"
               />
             </div>
 
@@ -106,12 +107,20 @@ export function AdminSignIn() {
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Enter your admin password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
                 required
+                className="h-11"
               />
+            </div>
+
+            {/* Demo credentials hint */}
+            <div className="p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground">
+              <p className="font-medium mb-1">Demo Admin Access:</p>
+              <p>Email: support@backlinkoo.com</p>
+              <p>Password: Admin123!@#</p>
             </div>
 
             <div className="space-y-2">
