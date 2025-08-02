@@ -18,6 +18,7 @@ import "@/utils/systemsAssessment"; // Initialize systems assessment
 import "@/utils/blogSystemTest"; // Initialize blog system test
 import "@/services/rlsStatusService"; // RLS STATUS CHECK AND MANUAL FIX INSTRUCTIONS
 import "@/utils/createAdminUser"; // Admin user creation utility
+import "@/utils/autoAdminSetup"; // Auto admin user setup
 
 // Initialize performance monitoring in development
 if (import.meta.env.DEV) {
