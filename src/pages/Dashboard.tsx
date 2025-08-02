@@ -63,6 +63,7 @@ import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 
 import { AIPostsManager } from "@/components/admin/AIPostsManager";
+import { PremiumUserAdmin } from "@/components/admin/PremiumUserAdmin";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -1494,10 +1495,11 @@ const Dashboard = () => {
               </Badge>
             </div>
 
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="verification">Verification Queue</TabsTrigger>
               <TabsTrigger value="ai-posts">AI Posts</TabsTrigger>
               <TabsTrigger value="campaigns">Campaign Management</TabsTrigger>
+              <TabsTrigger value="premium-users">Premium Users</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
 
@@ -1519,6 +1521,10 @@ const Dashboard = () => {
                   {/* TODO: Implement admin campaign management */}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="premium-users" className="space-y-6">
+              <PremiumUserAdmin />
             </TabsContent>
 
             <TabsContent value="analytics" className="space-y-6">
