@@ -119,9 +119,17 @@ export class AuthService {
         error: 'No user data received from signin'
       };
     } catch (error: any) {
+      console.error('🚨 Sign-in exception caught:', {
+        error: error,
+        message: error.message,
+        stack: error.stack,
+        email: signInData.email,
+        errorString: JSON.stringify(error, null, 2)
+      });
+      console.error('🚨 Raw exception object:', error);
       return {
         success: false,
-        error: this.formatErrorMessage(error.message)
+        error: this.formatErrorMessage(error.message || 'Authentication failed')
       };
     }
   }
