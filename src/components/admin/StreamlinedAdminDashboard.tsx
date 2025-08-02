@@ -16,6 +16,7 @@ import { AdminConnectionDebugger } from "@/components/admin/AdminConnectionDebug
 import { QuickConnectionTest } from "@/components/admin/QuickConnectionTest";
 import { MetricsRefreshButton } from "@/components/admin/MetricsRefreshButton";
 import { BlogPostsDebugger } from "@/components/admin/BlogPostsDebugger";
+import { BlogManagerTestButton } from "@/components/admin/BlogManagerTestButton";
 import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
 import { SystemStatusPanel } from "@/components/admin/SystemStatusPanel";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
@@ -277,6 +278,9 @@ export function StreamlinedAdminDashboard() {
         {activeSection === "content" && (
           <div className="space-y-6">
             <BlogPostsDebugger />
+            <div className="flex gap-4">
+              <BlogManagerTestButton />
+            </div>
             <AdminBlogManager />
           </div>
         )}
