@@ -57,13 +57,10 @@ class AdminUserManagementService {
 
       console.log('📋 Fetching users with filters:', filters);
 
-      // Build base query for profiles
+      // Build base query for profiles (without join)
       let profileQuery = supabase
         .from('profiles')
-        .select(`
-          *,
-          subscribers!left (*)
-        `, { count: 'exact' });
+        .select('*', { count: 'exact' });
 
       // Apply role filter
       if (role !== 'all') {
@@ -94,6 +91,21 @@ class AdminUserManagementService {
 
       if (!profiles) {
         return { users: [], totalCount: 0, hasMore: false };
+      }
+
+      // Get all subscribers separately since there's no foreign key relationship
+      const { data: subscribers } = await supabase
+        .from('subscribers')
+        .select('*');
+
+      // Create a map of subscribers by user_id for quick lookup
+      const subscribersMap = new Map();
+      if (subscribers) {
+        subscribers.forEach(sub => {
+          if (sub.user_id) {
+            subscribersMap.set(sub.user_id, sub);
+          }
+        });
       }
 
       // Enhance profiles with additional data
