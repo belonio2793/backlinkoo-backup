@@ -97,7 +97,7 @@ export function AdminUserManagement() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      console.log('�� Loading users with filters:', filters);
+      console.log('📋 Loading users with filters:', filters);
 
       const result = await adminUserManagementService.getUsers(filters);
 
@@ -401,6 +401,18 @@ export function AdminUserManagement() {
           >
             <Users className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Test Profiles
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              console.log('🔄 Force reloading real data...');
+              setUsers([]);
+              loadUsers();
+            }}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Load Real Data
           </Button>
           <Button
             variant="outline"
