@@ -149,12 +149,12 @@ export function OrganizedAdminDashboard() {
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Key Metrics</h2>
                 <div className="flex items-center gap-2">
-                  {error && (
-                    <Alert className="max-w-md">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>{error.message}</AlertDescription>
-                    </Alert>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`} />
+                    <span className="text-sm text-muted-foreground">
+                      {connected ? 'Connected' : 'Disconnected'}
+                    </span>
+                  </div>
                   <Button
                     variant="outline"
                     size="sm"
