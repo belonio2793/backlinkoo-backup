@@ -30,6 +30,7 @@ import { EnvironmentVariablesManager } from "@/components/admin/EnvironmentVaria
 import { NetlifyEnvironmentManager } from "@/components/admin/NetlifyEnvironmentManager";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 import { DirectOpenAITest } from "@/components/admin/DirectOpenAITest";
+import { UserManagement } from "@/components/admin/UserManagement";
 
 // Testing Tools
 import { AuthEmailTest } from "@/components/AuthEmailTest";
@@ -364,12 +365,14 @@ export function OrganizedAdminDashboard() {
           </Tabs>
         )}
 
-        {activeSection === "business" && (
-          <Tabs defaultValue="affiliates" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
+main
               <TabsTrigger value="affiliates">Affiliate Program</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="users">
+              <UserManagement />
+            </TabsContent>
 
             <TabsContent value="affiliates">
               <AdminAffiliateManager />

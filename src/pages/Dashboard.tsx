@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { PremiumPlanTab } from "@/components/PremiumPlanTab";
 import { SEOAcademyTab } from "@/components/SEOAcademyTab";
-import { PremiumStatusDebug } from "@/components/PremiumStatusDebug";
+
 import { PremiumService } from "@/services/premiumService";
 import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
 import {
@@ -332,7 +332,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           <div className="text-xs text-gray-600 space-y-1">
             <div>🔧 Status: {loadingStatus}</div>
             <div>⏰ Last check: {lastRefresh?.toLocaleTimeString() || 'Never'}</div>
-            <div>🔄 Auto-refresh: Every 30 seconds</div>
+            <div>�� Auto-refresh: Every 30 seconds</div>
             <div>📡 Connection: {navigator.onLine ? 'Online' : 'Offline'}</div>
           </div>
         </div>
@@ -1493,7 +1493,6 @@ const Dashboard = () => {
               </div>
             ) : activeSection === "premium-plan" ? (
               <div className="space-y-6">
-                <PremiumStatusDebug />
                 <PremiumPlanTab
                   isSubscribed={isPremiumSubscriber}
                   onUpgrade={() => {

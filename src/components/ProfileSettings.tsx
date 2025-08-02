@@ -9,7 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, User, Mail, Calendar, MapPin, Briefcase, Globe, Save, AlertCircle } from "lucide-react";
+import { PremiumService } from "@/services/premiumService";
+import { Loader2, User, Mail, Calendar, MapPin, Briefcase, Globe, Save, AlertCircle, Crown, Shield } from "lucide-react";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface ProfileData {
@@ -36,8 +37,10 @@ interface ProfileSettingsProps {
 
 export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
   const [profile, setProfile] = useState<Partial<ProfileData>>({
-    full_name: '',
-    display_name: '',
+    user_id: user?.id || '',
+    email: user?.email || '',
+    full_name: user?.user_metadata?.full_name || '',
+    display_name: user?.user_metadata?.display_name || user?.user_metadata?.full_name || '',
     bio: '',
     company: '',
     website: '',
@@ -45,96 +48,64 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
     phone: '',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     marketing_emails: true,
+    role: user?.user_metadata?.role || 'user',
   });
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [isPremium, setIsPremium] = useState<boolean | null>(null);
+  const [premiumLoading, setPremiumLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) {
-        console.warn('🔧 ProfileSettings: No user provided, setting loading to false');
-        setIsLoading(false);
         return;
       }
 
-      console.log('🔧 ProfileSettings: Starting profile fetch for user:', user.id);
+      // Load premium status immediately in background with timeout
+      setPremiumLoading(true);
 
-      try {
-        // Try to fetch from database with longer timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      // Add additional timeout as safety net
+      const premiumTimeout = setTimeout(() => {
+        console.warn('Premium status check timeout in ProfileSettings');
+        setIsPremium(false);
+        setPremiumLoading(false);
+      }, 5000);
 
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .abortSignal(controller.signal)
-          .single();
+      PremiumService.checkPremiumStatus(user.id)
+        .then(status => {
+          clearTimeout(premiumTimeout);
+          setIsPremium(status);
+        })
+        .catch((error) => {
+          clearTimeout(premiumTimeout);
+          console.error('Premium status check error in ProfileSettings:', error);
+          setIsPremium(false);
+        })
+        .finally(() => {
+          clearTimeout(premiumTimeout);
+          setPremiumLoading(false);
+        });
 
-        clearTimeout(timeoutId);
-
-        if (error && error.code !== 'PGRST116') { // PGRST116 = row not found
-          console.error('🔧 ProfileSettings: Error fetching profile:', error);
-
-          // Only show error for non-timeout issues
-          if (!error.message?.includes('aborted')) {
-            toast({
-              title: "Warning",
-              description: "Could not load profile data from database.",
-              variant: "destructive",
-            });
+      // Load detailed profile data in background (non-blocking)
+      supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+        .then(({ data, error }) => {
+          if (data && !error) {
+            // Merge database data with current state, preserving user email
+            setProfile(prev => ({
+              ...data,
+              email: user.email || data.email,
+            }));
           }
-
-          // Initialize with user data as fallback
-          setProfile(prev => ({
-            ...prev,
-            user_id: user.id,
-            email: user.email || '',
-            full_name: user.user_metadata?.full_name || '',
-            display_name: user.user_metadata?.display_name || user.user_metadata?.full_name || '',
-          }));
-        } else if (data) {
-          console.log('🔧 ProfileSettings: Successfully loaded profile from database');
-          setProfile({
-            ...data,
-            email: user.email || data.email,
-          });
-        } else {
-          // Initialize with user data if no profile exists
-          console.log('🔧 ProfileSettings: No profile found, using user metadata');
-          setProfile(prev => ({
-            ...prev,
-            user_id: user.id,
-            email: user.email || '',
-            full_name: user.user_metadata?.full_name || '',
-            display_name: user.user_metadata?.display_name || user.user_metadata?.full_name || '',
-          }));
-        }
-      } catch (error: any) {
-        console.error('🔧 ProfileSettings: Exception fetching profile:', error);
-
-        // Handle timeout gracefully
-        if (error.name === 'AbortError') {
-          console.warn('🔧 ProfileSettings: Request timeout, using fallback data');
-          toast({
-            title: "Notice",
-            description: "Profile loading timed out, using cached data.",
-          });
-        }
-
-        // Always provide fallback data
-        setProfile(prev => ({
-          ...prev,
-          user_id: user.id,
-          email: user.email || '',
-          full_name: user.user_metadata?.full_name || 'User',
-          display_name: user.user_metadata?.display_name || user.user_metadata?.full_name || 'User',
-        }));
-      } finally {
-        setIsLoading(false);
-      }
+          // Silently fail - UI already has user data from initialization
+        })
+        .catch(() => {
+          // Silently fail - UI already functional with user metadata
+        });
     };
 
     fetchProfile();
@@ -258,14 +229,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-6 w-6 animate-spin" />
-        <span className="ml-2">Loading profile...</span>
-      </div>
-    );
-  }
+  // No blocking loading state - show UI immediately
 
   return (
     <div className="space-y-6">
@@ -300,12 +264,37 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="role">Account Type</Label>
-                <div className="flex items-center gap-2">
-                  <Badge variant={profile.role === 'admin' ? 'default' : 'secondary'}>
-                    {profile.role || 'user'}
+                <Label htmlFor="account-status">Account Status</Label>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Role Badge */}
+                  <Badge variant={profile.role === 'admin' ? 'default' : 'secondary'} className="flex items-center gap-1">
+                    <Shield className="h-3 w-3" />
+                    {profile.role === 'admin' ? 'Administrator' : 'Standard User'}
+                  </Badge>
+
+                  {/* Premium Status Badge */}
+                  <Badge
+                    variant={isPremium ? "default" : "secondary"}
+                    className={`flex items-center gap-1 ${
+                      isPremium
+                        ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white hover:from-amber-600 hover:to-yellow-600'
+                        : ''
+                    } ${premiumLoading ? 'opacity-70' : ''}`}
+                  >
+                    {premiumLoading ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Crown className="h-3 w-3" />
+                    )}
+                    {premiumLoading ? 'Checking...' : (isPremium ? 'Premium Member' : 'Free Plan')}
                   </Badge>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  {isPremium
+                    ? 'You have access to all premium features and unlimited usage.'
+                    : 'Upgrade to premium for unlimited access and advanced features.'
+                  }
+                </p>
               </div>
             </div>
 
