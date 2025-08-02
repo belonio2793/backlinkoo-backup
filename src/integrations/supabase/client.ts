@@ -215,6 +215,11 @@ console.log('🔧 Supabase client configuration:', {
   keyPrefix: SUPABASE_PUBLISHABLE_KEY ? SUPABASE_PUBLISHABLE_KEY.substring(0, 10) + '...' : 'missing'
 });
 
+// Test basic connectivity if using real client
+if (hasValidCredentials) {
+  console.log('🔗 Testing Supabase connectivity...');
+}
+
 // Use mock client if credentials are missing or invalid
 export const supabase = hasValidCredentials ?
   createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
