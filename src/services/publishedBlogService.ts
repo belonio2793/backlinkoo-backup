@@ -114,7 +114,7 @@ export class PublishedBlogService {
       if (userId) {
         try {
           const { data, error } = await supabase
-            .from('published_blog_posts')
+            .from('blog_posts')
             .insert(blogPost)
             .select()
             .single();
@@ -220,7 +220,7 @@ export class PublishedBlogService {
   async getUserBlogPosts(userId: string): Promise<PublishedBlogPost[]> {
     try {
       const { data, error } = await supabase
-        .from('published_blog_posts')
+        .from('blog_posts')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
@@ -320,7 +320,7 @@ export class PublishedBlogService {
     // Clean up database posts
     try {
       await supabase
-        .from('published_blog_posts')
+        .from('blog_posts')
         .delete()
         .eq('is_trial_post', true)
         .lt('expires_at', now.toISOString());
