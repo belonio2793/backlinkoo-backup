@@ -174,6 +174,12 @@ export class BlogSystemDiagnostic {
     try {
       console.log('🧪 Testing blog post creation permissions...');
 
+      // Skip test data generation if network issues persist
+      if (window.navigator && !window.navigator.onLine) {
+        this.log('Test Data Generation', 'warning', 'Skipping test - no network connection');
+        return;
+      }
+
       // Check if we can create a test post (helps identify write permissions)
       const testSlug = `diagnostic-test-${Date.now()}`;
 
