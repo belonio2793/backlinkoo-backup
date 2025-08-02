@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { PremiumPlanTab } from "@/components/PremiumPlanTab";
 import { SEOAcademyTab } from "@/components/SEOAcademyTab";
+import { PremiumStatusDebug } from "@/components/PremiumStatusDebug";
 import { PremiumService } from "@/services/premiumService";
 import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
 import {
@@ -883,14 +884,33 @@ const Dashboard = () => {
   const handleSignOut = async () => {
     try {
       console.log('🚪 Dashboard: Signing out user...');
-      await supabase.auth.signOut();
+      console.log('🚪 Current user:', user?.email);
+
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error('🚪 Sign out error:', error);
+        toast({
+          title: "Sign out error",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('🚪 Sign out successful, navigating to home...');
       navigate('/');
       toast({
         title: "Signed out successfully",
         description: "You have been signed out of your account.",
       });
     } catch (error) {
-      console.error('Dashboard sign out error:', error);
+      console.error('🚪 Dashboard sign out error:', error);
+      toast({
+        title: "Sign out failed",
+        description: "An error occurred while signing out. Please try again.",
+        variant: "destructive"
+      });
       navigate('/');
     }
   };
@@ -1472,13 +1492,16 @@ const Dashboard = () => {
                 <DashboardTrialPosts user={user} />
               </div>
             ) : activeSection === "premium-plan" ? (
-              <PremiumPlanTab
-                isSubscribed={isPremiumSubscriber}
-                onUpgrade={() => {
-                  // Refresh premium status after successful upgrade
-                  PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
-                }}
-              />
+              <div className="space-y-6">
+                <PremiumStatusDebug />
+                <PremiumPlanTab
+                  isSubscribed={isPremiumSubscriber}
+                  onUpgrade={() => {
+                    // Refresh premium status after successful upgrade
+                    PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
+                  }}
+                />
+              </div>
             ) : null}
           </>
         ) : (
