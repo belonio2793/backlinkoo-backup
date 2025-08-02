@@ -2,7 +2,7 @@ import AdminDashboard from '@/pages/AdminDashboard';
 
 export function SimpleAdminPage() {
 
- d8226dbd (Add manual fix UI for infinite recursion error)
+a49d444f (Make admin sign-in instant by bypassing slow database checks)
 }
 
 export default SimpleAdminPage;
