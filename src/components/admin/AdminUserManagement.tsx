@@ -369,6 +369,14 @@ export function AdminUserManagement() {
           </Button>
           <Button
             variant="outline"
+            onClick={testProfiles}
+            disabled={loading}
+          >
+            <Users className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Test Profiles
+          </Button>
+          <Button
+            variant="outline"
             onClick={reloadAllUsers}
             disabled={loading}
           >
