@@ -75,15 +75,23 @@ export function AuthFormTabs({
     const currentPassword = loginPassword;
 
     try {
-      // First try safe auth service
-      let result = await SafeAuthService.signIn({
-        email: currentEmail,
-        password: currentPassword,
-      });
+      let result;
 
-      // If SafeAuth fails with database error, try emergency auth
+      try {
+        // First try safe auth service
+        result = await SafeAuthService.signIn({
+          email: currentEmail,
+          password: currentPassword,
+        });
+      } catch (authError: any) {
+        console.log('🚨 SafeAuth threw exception, trying emergency auth...', authError);
+        // If SafeAuth throws an exception, treat it as a database error and use emergency auth
+        result = await EmergencyAuthService.emergencySignIn(currentEmail, currentPassword);
+      }
+
+      // If SafeAuth fails with database error response, also try emergency auth
       if (!result.success && result.error?.includes('Database error')) {
-        console.log('🚨 Database error detected, trying emergency auth...');
+        console.log('🚨 Database error in response, trying emergency auth...');
         result = await EmergencyAuthService.emergencySignIn(currentEmail, currentPassword);
       }
 
