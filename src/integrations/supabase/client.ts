@@ -119,7 +119,13 @@ const createMockSupabaseClient = () => {
       ilike: (column: string, pattern: string) => mockMethods,
       like: (column: string, pattern: string) => mockMethods,
       range: (from: number, to: number) => mockMethods,
-      single: () => Promise.resolve({ data: { id: 'mock-id', ...mockUser }, error: null }),
+      single: () => {
+        console.warn(`⚠️ Mock database query on table '${table}' - no real data available`);
+        return Promise.resolve({
+          data: null,
+          error: { message: `Database not available: Please configure real Supabase credentials. Attempted to query table: ${table}` }
+        });
+      },
       then: (callback: any) => {
         console.warn(`⚠️ Mock database query on table '${table}' - no real data available`);
         // Return mock error to indicate database is not available
