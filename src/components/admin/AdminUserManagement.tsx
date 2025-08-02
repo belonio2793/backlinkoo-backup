@@ -160,6 +160,42 @@ export function AdminUserManagement() {
     }
   };
 
+  const testConnection = async () => {
+    try {
+      setLoading(true);
+      console.log('🔍 Testing database connection...');
+
+      const result = await testDatabaseConnection();
+
+      if (result.success) {
+        toast({
+          title: "Database Connection Successful",
+          description: `Found ${result.data?.profileCount || 0} profiles in database`,
+        });
+
+        // If we have real data, reload users
+        if (result.data?.profileCount && result.data.profileCount > 0) {
+          await reloadAllUsers();
+        }
+      } else {
+        toast({
+          title: "Database Connection Failed",
+          description: result.error || "Unknown connection error",
+          variant: "destructive"
+        });
+      }
+    } catch (error: any) {
+      console.error('Connection test error:', error);
+      toast({
+        title: "Connection Test Failed",
+        description: error.message || "Failed to test connection",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSearch = (value: string) => {
     setFilters(prev => ({
       ...prev,
