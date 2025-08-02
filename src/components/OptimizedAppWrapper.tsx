@@ -149,11 +149,6 @@ export const OptimizedAppWrapper = () => {
               <AdminDiagnostic />
             </Suspense>
           } />
-          <Route path="/admin/offline" element={
-            <OfflineAdminAccess>
-              <LazyAdminDashboard />
-            </OfflineAdminAccess>
-          } />
 
           {/* Debug routes - only in development */}
           {import.meta.env.DEV && (
