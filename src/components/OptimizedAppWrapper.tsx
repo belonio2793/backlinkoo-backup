@@ -150,6 +150,9 @@ export const OptimizedAppWrapper = () => {
           {import.meta.env.DEV && (
             <Route path="/debug/claim-system" element={<LazyClaimSystemDebug />} />
           )}
+          {import.meta.env.DEV && (
+            <Route path="/auth-test" element={<AuthTest />} />
+          )}
 
           {/* Blog system diagnostic - accessible in all environments */}
           <Route path="/diagnostic/blog-system" element={
