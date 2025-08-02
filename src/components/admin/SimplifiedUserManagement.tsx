@@ -46,9 +46,20 @@ export function SimplifiedUserManagement() {
   const fetchUsersAndStats = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       console.log('🔄 Fetching user data (RLS-safe approach)...');
+
+      // Log that admin is accessing user data
+      await adminAuditLogger.logUserAction(
+        'METRICS_VIEWED',
+        'bulk_view',
+        {
+          section: 'user_management',
+          action: 'fetch_user_data',
+          timestamp: new Date().toISOString()
+        }
+      );
       
       // Method 1: Get ALL subscribers (not just active ones) to see more users
       const { data: subscribers, error: subscribersError } = await supabase
