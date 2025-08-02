@@ -163,8 +163,8 @@ class AdminUserManagementService {
       };
 
     } catch (error: any) {
-      console.error('Error fetching users:', error);
-      throw new Error(`Failed to fetch users: ${error.message}`);
+      console.error('Error fetching users:', this.formatError(error));
+      throw new Error(`Failed to fetch users: ${this.formatError(error)}`);
     }
   }
 
