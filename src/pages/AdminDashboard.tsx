@@ -43,6 +43,7 @@ import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { DatabaseTestComponent } from "@/components/DatabaseTestComponent";
+import { AuthDiagnostic } from "@/components/AuthDiagnostic";
 
 import {
   Users,
@@ -258,8 +259,9 @@ const AdminDashboard = () => {
 
         {activeSection === "system" && (
           <Tabs defaultValue="assessment" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="assessment">Systems Assessment</TabsTrigger>
+              <TabsTrigger value="auth-diagnostic">Auth Diagnostic</TabsTrigger>
               <TabsTrigger value="diagnostic">Database Diagnostic</TabsTrigger>
               <TabsTrigger value="environment">Environment & API Keys</TabsTrigger>
               <TabsTrigger value="deployment">Deployment</TabsTrigger>
@@ -268,6 +270,10 @@ const AdminDashboard = () => {
 
             <TabsContent value="assessment">
               <SystemsAssessmentDashboard />
+            </TabsContent>
+
+            <TabsContent value="auth-diagnostic">
+              <AuthDiagnostic />
             </TabsContent>
 
             <TabsContent value="diagnostic">
