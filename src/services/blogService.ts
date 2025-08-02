@@ -127,8 +127,8 @@ export class BlogService {
 
             const finalPost = finalPostArray?.[0] || null;
 
-            if (finalError) {
-              throw new Error(`Failed to create blog post after multiple retries: ${finalError.message}`);
+            if (finalError || !finalPost) {
+              throw new Error(`Failed to create blog post after multiple retries: ${finalError?.message || 'No data returned'}`);
             }
 
             console.log('✅ Blog post created successfully after final retry');
