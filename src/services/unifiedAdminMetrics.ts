@@ -143,7 +143,7 @@ class UnifiedAdminMetricsService {
 
       // Since we're already on the admin dashboard, bypass the auth check
       // by using the getAllProfiles method directly which has better error handling
-      const profiles = await realAdminUserService.getAllProfiles();
+      const profiles = await realAdminUserService.getAllProfiles(true);
 
       // Get subscription data for premium status
       const { data: subscribers } = await supabase
