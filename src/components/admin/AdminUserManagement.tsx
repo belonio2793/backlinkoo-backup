@@ -97,7 +97,7 @@ export function AdminUserManagement() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      console.log('📋 Loading users with filters:', filters);
+      console.log('�� Loading users with filters:', filters);
 
       const result = await adminUserManagementService.getUsers(filters);
 
@@ -313,14 +313,41 @@ export function AdminUserManagement() {
   };
 
   const handlePromoteToPremium = async (user: UserDetails, isGifted: boolean = false) => {
-    const updates: UserUpdatePayload = {
-      isPremium: true,
-      isGifted,
-      subscriptionTier: isGifted ? 'premium_gifted' : 'premium',
-      email: user.email
-    };
+    try {
+      setLoading(true);
+      console.log('🎁 Promoting user to premium:', user.user_id, 'isGifted:', isGifted);
 
-    await handleEditUser(updates);
+      const updates: UserUpdatePayload = {
+        isPremium: true,
+        isGifted,
+        subscriptionTier: isGifted ? 'premium_gifted' : 'premium',
+        email: user.email
+      };
+
+      const updatedUser = await adminUserManagementService.updateUser(
+        user.user_id,
+        updates
+      );
+
+      // Update user in the list
+      setUsers(prev => prev.map(u =>
+        u.user_id === user.user_id ? updatedUser : u
+      ));
+
+      toast({
+        title: isGifted ? "Premium Gifted!" : "Premium Upgraded!",
+        description: `Successfully ${isGifted ? 'gifted premium to' : 'upgraded'} ${updatedUser.display_name || updatedUser.email}`,
+      });
+    } catch (error: any) {
+      console.error('Error promoting user to premium:', error);
+      toast({
+        title: "Premium Upgrade Failed",
+        description: error.message || "Failed to upgrade user to premium",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formatDate = (dateString: string | null) => {
