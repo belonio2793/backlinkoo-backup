@@ -77,7 +77,7 @@ const createMockSupabaseClient = () => {
       });
     },
     signOut: () => {
-      console.log('⚠️ Mock auth signOut called');
+      console.log('��️ Mock auth signOut called');
       return Promise.resolve({ error: null });
     },
     resend: () => {
@@ -284,6 +284,23 @@ export const supabase = hasValidCredentials ?
 // Log the final client type
 if (hasValidCredentials) {
   console.log('✅ Using real Supabase client');
+
+  // Test connection in development
+  if (import.meta.env.DEV) {
+    setTimeout(async () => {
+      try {
+        console.log('🔍 Testing Supabase connection...');
+        const { data, error } = await supabase.from('blog_posts').select('id').limit(1);
+        if (error) {
+          console.warn('⚠️ Supabase connection test failed:', error.message);
+        } else {
+          console.log('✅ Supabase connection test successful');
+        }
+      } catch (testError: any) {
+        console.warn('⚠️ Supabase connection test error:', testError.message);
+      }
+    }, 1000);
+  }
 } else {
   console.warn('⚠️ Using mock Supabase client - authentication will not work!');
   console.log('Fix: Set proper VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables');
