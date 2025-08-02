@@ -2,7 +2,7 @@ import { AuthCheck } from "@/components/AuthCheck";
 import { Footer } from "@/components/Footer";
 import { OrganizedAdminDashboard } from "@/components/admin/OrganizedAdminDashboardFixed";
 
-const AdminDashboard = () => {
+const WorkingAdminDashboard = () => {
   return (
     <AuthCheck requireAdmin={true}>
       <div className="min-h-screen bg-background">
@@ -17,4 +17,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default WorkingAdminDashboard;

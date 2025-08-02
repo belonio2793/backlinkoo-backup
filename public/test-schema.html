@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Schema Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .error { background: #ffe6e6; border-left: 4px solid #ff4444; }
+        .success { background: #e6ffe6; border-left: 4px solid #44ff44; }
+        button { padding: 10px 20px; margin: 10px 0; cursor: pointer; }
+        pre { background: #f0f0f0; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Database Schema Diagnostic</h1>
+    
+    <div>
+        <button onclick="checkSchema()">Check Database Schema</button>
+        <button onclick="checkTriggers()">Check Triggers</button>
+        <button onclick="testSignup()">Test User Signup</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+    
+    <div id="logs"></div>
+
+    <script>
+        const supabaseUrl = 'https://dfhanacsmsvvkpunurnp.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT87Zqa5RY';
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log ${type}`;
+            logEntry.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+            logsDiv.appendChild(logEntry);
+            console.log(message);
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        async function checkSchema() {
+            log('🔍 Checking database schema...', 'info');
+
+            try {
+                // Check if profiles table exists and structure
+                const { data: profiles, error: profilesError } = await supabase
+                    .from('profiles')
+                    .select('user_id, email, role')
+                    .limit(1);
+
+                if (profilesError) {
+                    log(`❌ Profiles table error: ${profilesError.message}`, 'error');
+                } else {
+                    log(`✅ Profiles table exists and accessible`, 'success');
+                }
+
+                // Check if user_roles table exists
+                const { data: userRoles, error: userRolesError } = await supabase
+                    .from('user_roles')
+                    .select('user_id, role')
+                    .limit(1);
+
+                if (userRolesError) {
+                    log(`❌ User_roles table error: ${userRolesError.message}`, 'error');
+                    log(`This might be the cause of signup failures!`, 'error');
+                } else {
+                    log(`✅ User_roles table exists and accessible`, 'success');
+                }
+
+                // Check if credits table exists
+                const { data: credits, error: creditsError } = await supabase
+                    .from('credits')
+                    .select('user_id, amount')
+                    .limit(1);
+
+                if (creditsError) {
+                    log(`❌ Credits table error: ${creditsError.message}`, 'error');
+                } else {
+                    log(`✅ Credits table exists and accessible`, 'success');
+                }
+
+            } catch (error) {
+                log(`❌ Schema check failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkTriggers() {
+            log('🔍 Checking database triggers...', 'info');
+
+            try {
+                const { data, error } = await supabase.rpc('exec_sql', { 
+                    sql: "SELECT trigger_name, event_object_table, action_statement FROM information_schema.triggers WHERE trigger_name LIKE '%user%';" 
+                });
+
+                if (error) {
+                    log(`❌ Cannot check triggers: ${error.message}`, 'error');
+                } else {
+                    log(`✅ Trigger check completed`, 'success');
+                    if (data && data.length > 0) {
+                        log(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+                    } else {
+                        log('No user-related triggers found', 'info');
+                    }
+                }
+            } catch (error) {
+                log(`❌ Trigger check failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSignup() {
+            log('🧪 Testing user signup process...', 'info');
+
+            const testEmail = `test-${Date.now()}@example.com`;
+            const testPassword = 'password123';
+
+            try {
+                log(`Attempting signup with: ${testEmail}`, 'info');
+
+                const { data, error } = await supabase.auth.signUp({
+                    email: testEmail,
+                    password: testPassword,
+                    options: {
+                        data: {
+                            first_name: 'Test User',
+                            display_name: 'Test User'
+                        }
+                    }
+                });
+
+                if (error) {
+                    log(`❌ Signup failed: ${error.message}`, 'error');
+                    log(`This is the exact error users are seeing!`, 'error');
+                } else {
+                    log(`✅ Signup successful!`, 'success');
+                    log(`User ID: ${data.user?.id}`, 'success');
+                    log(`Email confirmed: ${data.user?.email_confirmed_at ? 'Yes' : 'No'}`, 'info');
+
+                    // Clean up - try to delete the test user (will likely fail due to permissions)
+                    setTimeout(async () => {
+                        try {
+                            await supabase.auth.admin.deleteUser(data.user.id);
+                            log(`Test user cleaned up`, 'info');
+                        } catch (cleanupError) {
+                            log(`Test user cleanup failed (expected)`, 'info');
+                        }
+                    }, 2000);
+                }
+
+            } catch (error) {
+                log(`❌ Signup test failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Initial log
+        log('Schema diagnostic tool ready. Click buttons to test.', 'info');
+    </script>
+</body>
+</html>

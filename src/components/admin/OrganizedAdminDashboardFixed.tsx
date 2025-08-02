@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useWorkingAdminDashboardMetrics } from "@/hooks/useWorkingAdminDashboardMetrics";
 import { AdminNavigationHeader } from "@/components/admin/AdminNavigationHeader";
 import { AdminUserManagement } from "@/components/admin/AdminUserManagement";
+import { UserRegistrationDiagnostic } from "@/components/admin/UserRegistrationDiagnostic";
+import { ConfigurationDiagnostic } from "@/components/admin/ConfigurationDiagnostic";
 import { supabase } from '@/integrations/supabase/client';
 
 // Admin Components
@@ -132,6 +134,12 @@ export function OrganizedAdminDashboard() {
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Key Metrics</h2>
                 <div className="flex items-center gap-2">
+                  {error && (
+                    <Alert className="max-w-md">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{error.message}</AlertDescription>
+                    </Alert>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -250,7 +258,11 @@ export function OrganizedAdminDashboard() {
         )}
 
         {activeSection === "users" && (
-          <AdminUserManagement />
+          <div className="space-y-6">
+            <ConfigurationDiagnostic />
+            <UserRegistrationDiagnostic />
+            <AdminUserManagement />
+          </div>
         )}
 
         {activeSection === "content" && (
