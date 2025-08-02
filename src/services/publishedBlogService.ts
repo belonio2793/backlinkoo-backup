@@ -146,10 +146,9 @@ export class PublishedBlogService {
     // Try database first
     try {
       const { data, error } = await supabase
-        .from('published_blog_posts')
+        .from('blog_posts')
         .select('*')
         .eq('slug', slug)
-        .eq('status', 'published')
         .single();
 
       if (data && !error) {
