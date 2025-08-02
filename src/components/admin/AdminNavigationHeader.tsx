@@ -91,7 +91,15 @@ export function AdminNavigationHeader({
 
   const handleSignOut = () => {
     // Navigate immediately for instant UX
-    window.location.href = '/';\n\n    // Do sign out in background\n    setTimeout(() => {\n      AuthService.signOut().catch((error) => {\n        console.warn('Background admin sign out error (non-critical):', error);\n      });\n    }, 0);\n  };
+    window.location.href = '/';
+
+    // Do sign out in background
+    setTimeout(() => {
+      AuthService.signOut().catch((error) => {
+        console.warn('Background admin sign out error (non-critical):', error);
+      });
+    }, 0);
+  };
 
   return (
     <header className="border-b bg-card">
