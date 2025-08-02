@@ -74,14 +74,40 @@ export function ImprovedUserList() {
   const fetchUsers = async () => {
     setLoading(true);
     console.log('👥 Fetching users from Supabase...');
-    
+
     try {
       // Test connection first
       const status = await testDatabaseConnection();
       setDbStatus(status);
 
       if (!status.connected) {
-        throw new Error(status.error || 'Database connection failed');
+        console.warn('⚠️ Direct connection failed, trying Netlify function...');
+
+        // Try Netlify function as fallback
+        try {
+          const response = await fetch('/api/get-auth-users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            console.log(`✅ Retrieved users via Netlify function: ${result.profiles.length} profiles`);
+            setUsers(result.profiles);
+            setDbStatus({
+              connected: true,
+              tablesAvailable: true
+            });
+            setLastFetch(new Date());
+            return;
+          } else {
+            throw new Error(result.error || 'Netlify function failed');
+          }
+        } catch (netlifyError: any) {
+          console.error('❌ Netlify function also failed:', netlifyError);
+          throw new Error(`Both direct and function access failed: ${netlifyError.message}`);
+        }
       }
 
       // Fetch users with comprehensive data
