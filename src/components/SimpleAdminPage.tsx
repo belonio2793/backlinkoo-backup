@@ -175,6 +175,16 @@ export function SimpleAdminPage() {
         </CardHeader>
         
         <CardContent>
+          {!isLoggedIn && (
+            <Alert className="mb-4">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>First time setup:</strong> If you get "Invalid login credentials",
+                click "Create Admin User" button below to set up the admin account.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <form onSubmit={handleSignIn} className="space-y-4">
             {error && (
               <Alert variant="destructive">
