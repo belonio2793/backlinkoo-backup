@@ -78,46 +78,9 @@ export function UserManagement() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      // Load users from auth table
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-      
-      if (authError) {
-        throw authError;
-      }
-
-      // Load profiles
-      const { data: profiles, error: profileError } = await supabase
-        .from('profiles')
-        .select('*');
-
-      if (profileError) {
-        console.warn('Could not load profiles:', profileError);
-      }
-
-      // Load premium subscriptions (try with admin privileges)
-      const { data: subscriptions, error: subError } = await supabase
-        .from('premium_subscriptions')
-        .select('*');
-
-      if (subError) {
-        console.warn('Could not load subscriptions:', subError);
-      }
-
-      // Combine data
-      const userData: UserData[] = authUsers.users.map(user => {
-        const profile = profiles?.find(p => p.user_id === user.id);
-        const subscription = subscriptions?.find(s => s.user_id === user.id && s.status === 'active');
-        
-        return {
-          ...user,
-          profile,
-          subscription,
-          isPremium: !!subscription && new Date(subscription.current_period_end) > new Date()
-        };
-      });
-
+      const userData = await AdminUserService.getAllUsersWithPremiumStatus();
       setUsers(userData);
-      
+
     } catch (error: any) {
       console.error('Failed to load users:', error);
       toast({
