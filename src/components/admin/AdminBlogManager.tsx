@@ -134,11 +134,11 @@ export function AdminBlogManager() {
     return new Date() > new Date(post.expires_at);
   };
 
-  const filteredPosts = blogPosts.filter(post => {
-    const matchesSearch = searchTerm === '' || 
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.target_url.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredPosts = (Array.isArray(blogPosts) ? blogPosts : []).filter(post => {
+    const matchesSearch = searchTerm === '' ||
+      post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.target_url?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (Array.isArray(post.keywords) && post.keywords.some(keyword => keyword?.toLowerCase().includes(searchTerm.toLowerCase())));
     
     const matchesStatus = statusFilter === '' || post.status === statusFilter;
     
