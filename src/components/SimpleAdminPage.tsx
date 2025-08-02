@@ -21,79 +21,36 @@ export function SimpleAdminPage() {
     setError(null);
 
     try {
-      console.log('🔧 Creating admin user...');
+      console.log('🚨 Emergency admin user creation...');
 
-      // Try to create via Netlify function first
+      // Try emergency admin creation function
       try {
-        const response = await fetch('/api/create-admin-user', {
+        const response = await fetch('/.netlify/functions/create-admin-emergency', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: 'support@backlinkoo.com',
-            password: 'Admin123!@#'
-          })
+          body: JSON.stringify({})
         });
 
         const result = await response.json();
+
         if (result.success) {
-          setError(null);
-          alert('✅ Admin user created successfully! You can now sign in.');
+          setError('✅ Admin user created successfully! You can now sign in with the credentials shown below.');
+          console.log('✅ Emergency admin creation successful');
           return;
         } else {
-          console.warn('Netlify function failed:', result.error);
+          console.warn('Emergency function failed:', result.error);
+          throw new Error(result.error || 'Emergency creation failed');
         }
       } catch (funcError) {
-        console.warn('Netlify function not available:', funcError);
+        console.warn('Emergency function not available:', funcError);
+        throw funcError;
       }
-
-      // Fallback: try to create via direct signup
-      console.log('📝 Trying direct signup...');
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: 'support@backlinkoo.com',
-        password: 'Admin123!@#',
-        options: {
-          data: {
-            full_name: 'Support Admin',
-            display_name: 'Support Team'
-          }
-        }
-      });
-
-      if (signUpError && !signUpError.message.includes('already registered')) {
-        throw signUpError;
-      }
-
-      // Create profile record if user was created or already exists
-      if (data.user || signUpError?.message.includes('already registered')) {
-        try {
-          // Try to insert profile - will work if RLS is disabled
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .upsert({
-              user_id: data.user?.id || 'temp-id',
-              email: 'support@backlinkoo.com',
-              full_name: 'Support Admin',
-              display_name: 'Support Team',
-              role: 'admin',
-              updated_at: new Date().toISOString()
-            }, {
-              onConflict: 'user_id'
-            });
-
-          if (profileError) {
-            console.warn('Profile creation failed:', profileError);
-          }
-        } catch (profileError) {
-          console.warn('Profile creation skipped due to RLS:', profileError);
-        }
-      }
-
-      setError('✅ Admin user created successfully! You can now sign in.');
-      console.log('✅ Admin user setup completed');
 
     } catch (error: any) {
-      console.error('❌ Admin user creation failed:', error);
-      setError(`Creation failed: ${error.message}`);
+      console.error('❌ Emergency admin creation failed:', error);
+
+      // Show detailed troubleshooting
+      setError(`❌ Automatic creation failed: ${error.message}. Please use manual SQL method below.`);
     } finally {
       setCreating(false);
     }
