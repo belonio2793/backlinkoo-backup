@@ -68,37 +68,10 @@ export function BlogPostClaimsManager() {
           });
         });
       } catch (dbError) {
-        console.warn('Database unavailable, using localStorage');
-      }
-
-      // Load from localStorage
-      try {
-        const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-        for (const blogMeta of allBlogPosts) {
-          if (blogPosts.find(p => p.slug === blogMeta.slug)) continue; // Skip duplicates
-
-          const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
-          if (blogData) {
-            const blogPost = JSON.parse(blogData);
-            blogPosts.push({
-              id: blogPost.id,
-              slug: blogPost.slug,
-              title: blogPost.title,
-              url: `${window.location.origin}/blog/${blogPost.slug}`,
-              status: blogPost.is_trial_post ? 'unclaimed' : 'claimed',
-              claimedBy: blogPost.is_trial_post ? undefined : {
-                userId: blogPost.user_id || 'localStorage',
-                email: 'claimed@localStorage.com',
-                claimedAt: blogPost.created_at
-              },
-              createdAt: blogPost.created_at,
-              expiresAt: blogPost.expires_at,
-              viewCount: blogPost.view_count || 0
-            });
-          }
-        }
-      } catch (storageError) {
-        console.warn('Failed to load from localStorage');
+        console.warn('Database unavailable, showing empty state');
+        setPosts([]);
+        setLoading(false);
+        return;
       }
 
       // Load from free backlink service
