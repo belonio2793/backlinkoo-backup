@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BlogSystemDiagnostic as BlogDiagnosticUtility, type DiagnosticResult } from '@/utils/blogSystemDiagnostic';
 import { DatabaseSetup } from '@/utils/databaseSetup';
+import { NetworkTester } from '@/components/NetworkTester';
 import { 
   CheckCircle, 
   AlertTriangle, 
