@@ -14,6 +14,7 @@ export function SimpleAdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
