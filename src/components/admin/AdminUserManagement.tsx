@@ -71,6 +71,7 @@ import {
   type UserListFilters,
   type UserUpdatePayload
 } from "@/services/realAdminUserService";
+import { CreateUserDialog } from "./CreateUserDialog";
 
 export function AdminUserManagement() {
   const [users, setUsers] = useState<RealUserDetails[]>([]);
@@ -304,6 +305,28 @@ export function AdminUserManagement() {
     }
   };
 
+  const handleUserCreated = async (newProfile: any) => {
+    try {
+      console.log('🎉 New user created, refreshing user list...');
+
+      // Reload the users list to include the new user
+      await reloadAllUsers();
+
+      toast({
+        title: "User Added Successfully",
+        description: `${newProfile.email} has been added to the database`,
+      });
+    } catch (error: any) {
+      console.error('❌ Error refreshing after user creation:', error);
+      // The user was created successfully, but refreshing failed
+      toast({
+        title: "User Created",
+        description: "User was created but the list may need manual refresh",
+        variant: "default"
+      });
+    }
+  };
+
   const handlePromoteToPremium = async (user: RealUserDetails, isGifted: boolean = false) => {
     try {
       setLoading(true);
@@ -389,6 +412,9 @@ export function AdminUserManagement() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {connectionStatus.connected && (
+            <CreateUserDialog onUserCreated={handleUserCreated} />
+          )}
           <Button
             variant="outline"
             onClick={testDatabaseConnection}
