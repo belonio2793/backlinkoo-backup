@@ -274,7 +274,7 @@ class AdminDashboardMetricsService {
       return error;
     }
 
-    if (error?.message) {
+    if (error?.message && error.message.trim() !== '') {
       return error.message;
     }
 
