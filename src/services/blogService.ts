@@ -91,11 +91,12 @@ export class BlogService {
     // Remove any custom id field to let database auto-generate UUID
     const { id: _, ...cleanBlogPostData } = blogPostData as any;
 
-    const { data: blogPost, error } = await supabase
+    const { data: blogPostArray, error } = await supabase
       .from('blog_posts')
       .insert(cleanBlogPostData)
-      .select()
-      .single();
+      .select();
+
+    const blogPost = blogPostArray?.[0] || null;
 
     if (error) {
       // Handle slug collision with enhanced retry strategy
