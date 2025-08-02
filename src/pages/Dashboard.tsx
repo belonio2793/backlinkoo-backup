@@ -1493,7 +1493,6 @@ const Dashboard = () => {
               </div>
             ) : activeSection === "premium-plan" ? (
               <div className="space-y-6">
-                <PremiumStatusDebug />
                 <PremiumPlanTab
                   isSubscribed={isPremiumSubscriber}
                   onUpgrade={() => {
