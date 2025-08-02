@@ -2,7 +2,7 @@ import AdminDashboard from '@/pages/AdminDashboard';
 
 export function SimpleAdminPage() {
 
-a49d444f (Make admin sign-in instant by bypassing slow database checks)
+ 06679cb1 (Make admin sign-in completely instant with credential bypass)
 }
 
 export default SimpleAdminPage;
