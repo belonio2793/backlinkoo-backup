@@ -25,6 +25,7 @@ import { BlogPostDiagnostic } from '@/components/BlogPostDiagnostic';
 import AdminAuthGuard from '@/components/AdminAuthGuard';
 import { EmailVerificationGuard } from '@/components/EmailVerificationGuard';
 import { TrialNotificationBanner } from '@/components/TrialNotificationBanner';
+import { AdminSetup } from '@/components/AdminSetup';
 
 // Import lazy-loaded components
 import {
