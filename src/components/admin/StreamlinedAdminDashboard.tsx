@@ -137,15 +137,24 @@ export function StreamlinedAdminDashboard() {
       return null;
     };
 
+    const isLoading = loading || value === undefined;
+
     return (
-      <Card>
+      <Card className="hover:shadow-md transition-shadow duration-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">{title}</CardTitle>
           <icon className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {value !== undefined ? formatValue(value) : '—'}
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="animate-pulse bg-muted rounded h-8 w-16"></div>
+                <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              formatValue(value)
+            )}
           </div>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <span>{description}</span>
