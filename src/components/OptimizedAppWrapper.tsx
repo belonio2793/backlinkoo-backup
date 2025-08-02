@@ -25,7 +25,6 @@ import { BlogPostDiagnostic } from '@/components/BlogPostDiagnostic';
 import AdminAuthGuard from '@/components/AdminAuthGuard';
 import { EmailVerificationGuard } from '@/components/EmailVerificationGuard';
 import { TrialNotificationBanner } from '@/components/TrialNotificationBanner';
-import { AdminSetup } from '@/components/AdminSetup';
 import { AdminDiagnostic } from '@/components/AdminDiagnostic';
 import { SimpleAdminPage } from '@/components/SimpleAdminPage';
 
@@ -140,11 +139,7 @@ export const OptimizedAppWrapper = () => {
               <SimpleAdminPage />
             </Suspense>
           } />
-          <Route path="/admin/setup" element={
-            <Suspense fallback={<PageLoader />}>
-              <AdminSetup />
-            </Suspense>
-          } />
+
           <Route path="/admin/diagnostic" element={
             <Suspense fallback={<PageLoader />}>
               <AdminDiagnostic />
