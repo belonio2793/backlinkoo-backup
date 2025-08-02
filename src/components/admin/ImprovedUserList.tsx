@@ -81,32 +81,32 @@ export function ImprovedUserList() {
       setDbStatus(status);
 
       if (!status.connected) {
-        console.warn('⚠️ Direct connection failed, trying Netlify function...');
+        console.warn('⚠️ Direct connection failed, using admin service fallback...');
 
-        // Try Netlify function as fallback
+        // Use admin user management service as fallback
         try {
-          const response = await fetch('/api/get-auth-users', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+          const { adminUserManagementService } = await import('@/services/adminUserManagementService');
+          const result = await adminUserManagementService.getUsers({ limit: 100, offset: 0 });
+
+          console.log(`✅ Retrieved users via admin service: ${result.users.length} users`);
+          setUsers(result.users.map(user => ({
+            id: user.id,
+            user_id: user.user_id,
+            email: user.email,
+            display_name: user.display_name,
+            is_premium: user.isPremium,
+            role: user.role,
+            created_at: user.created_at
+          })));
+          setDbStatus({
+            connected: true,
+            tablesAvailable: true
           });
-
-          const result = await response.json();
-
-          if (result.success) {
-            console.log(`✅ Retrieved users via Netlify function: ${result.profiles.length} profiles`);
-            setUsers(result.profiles);
-            setDbStatus({
-              connected: true,
-              tablesAvailable: true
-            });
-            setLastFetch(new Date());
-            return;
-          } else {
-            throw new Error(result.error || 'Netlify function failed');
-          }
-        } catch (netlifyError: any) {
-          console.error('❌ Netlify function also failed:', netlifyError);
-          throw new Error(`Both direct and function access failed: ${netlifyError.message}`);
+          setLastFetch(new Date());
+          return;
+        } catch (serviceError: any) {
+          console.error('❌ Admin service also failed:', serviceError);
+          throw new Error(`Direct connection and admin service failed: ${serviceError.message}`);
         }
       }
 
