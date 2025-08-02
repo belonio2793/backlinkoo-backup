@@ -318,18 +318,29 @@ export class BlogService {
    * Get recent published blog posts
    */
   async getRecentBlogPosts(limit: number = 10): Promise<BlogPost[]> {
-    const { data, error } = await supabase
-      .from('blog_posts')
-      .select('*')
-      .eq('status', 'published')
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+        .limit(limit);
 
-    if (error) {
-      throw new Error(`Failed to fetch recent blog posts: ${error.message}`);
+      if (error) {
+        // Handle third-party interference gracefully
+        if (error.message?.includes('Third-party script interference')) {
+          console.warn('⚠️ Third-party interference detected in getRecentBlogPosts, returning empty array');
+          return [];
+        }
+        throw new Error(`Failed to fetch recent blog posts: ${error.message}`);
+      }
+
+      return data || [];
+    } catch (networkError: any) {
+      console.warn('⚠️ Network error in getRecentBlogPosts:', networkError.message);
+      // Return empty array instead of throwing to prevent cascade failures
+      return [];
     }
-
-    return data || [];
   }
 
   /**
