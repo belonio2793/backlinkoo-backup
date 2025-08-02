@@ -64,16 +64,20 @@ export function AdminSignIn() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <Shield className="h-12 w-12 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/20">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <Shield className="h-12 w-12 text-primary" />
+            </div>
           </div>
-          <CardTitle className="text-2xl">Admin Sign In</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Administrator credentials required to access the admin dashboard
-          </p>
+          <div>
+            <CardTitle className="text-2xl font-bold">Admin Portal</CardTitle>
+            <p className="text-sm text-muted-foreground mt-2">
+              Secure access to the administrative dashboard
+            </p>
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignIn} className="space-y-4">
