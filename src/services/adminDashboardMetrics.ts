@@ -75,6 +75,13 @@ class AdminDashboardMetricsService {
    * Get total number of users from profiles table
    */
   private async getTotalUsers(): Promise<number> {
+    // Try alternative method first if profiles table is known to be problematic
+    const useAlternative = localStorage.getItem('admin_use_alternative_user_count') === 'true';
+    if (useAlternative) {
+      console.warn('Using alternative user count method (bypassing profiles table)');
+      return this.getTotalUsersAlternative();
+    }
+
     try {
       console.log('Attempting to fetch user count from profiles table...');
 
