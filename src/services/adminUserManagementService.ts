@@ -216,8 +216,8 @@ class AdminUserManagementService {
       };
 
     } catch (error: any) {
-      console.error('Error fetching user by ID:', error);
-      throw new Error(`Failed to fetch user: ${error.message}`);
+      console.error('Error fetching user by ID:', this.formatError(error));
+      throw new Error(`Failed to fetch user: ${this.formatError(error)}`);
     }
   }
 
@@ -263,8 +263,8 @@ class AdminUserManagementService {
       return updatedUser;
 
     } catch (error: any) {
-      console.error('Error updating user:', error);
-      throw new Error(`Failed to update user: ${error.message}`);
+      console.error('Error updating user:', this.formatError(error));
+      throw new Error(`Failed to update user: ${this.formatError(error)}`);
     }
   }
 
@@ -404,8 +404,8 @@ class AdminUserManagementService {
         .eq('user_id', userId);
 
     } catch (error: any) {
-      console.error('Error deactivating user:', error);
-      throw new Error(`Failed to deactivate user: ${error.message}`);
+      console.error('Error deactivating user:', this.formatError(error));
+      throw new Error(`Failed to deactivate user: ${this.formatError(error)}`);
     }
   }
 
