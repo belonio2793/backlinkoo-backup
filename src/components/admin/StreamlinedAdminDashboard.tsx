@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUnifiedAdminMetrics } from "@/hooks/useUnifiedAdminMetrics";
 import { AdminNavigationHeader } from "@/components/admin/AdminNavigationHeader";
 import { supabase } from '@/integrations/supabase/client';
+import { adminAuditLogger } from '@/services/adminAuditLogger';
 
 // Essential Components Only
 import { SimplifiedUserManagement } from "@/components/admin/SimplifiedUserManagement";
