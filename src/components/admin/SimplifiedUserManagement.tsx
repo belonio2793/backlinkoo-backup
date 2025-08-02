@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabase } from '@/integrations/supabase/client';
+import { adminAuditLogger } from '@/services/adminAuditLogger';
 import { Users, Search, Crown, Gift, RefreshCw, AlertCircle, CheckCircle, Database } from "lucide-react";
 
 interface User {
