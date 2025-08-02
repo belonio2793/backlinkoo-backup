@@ -191,7 +191,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
             description: "Save timed out, but changes have been saved locally. Database may be unavailable.",
           });
         } else {
-          console.error('🔧 ProfileSettings: Error saving profile:', error);
+          console.error('🔧 ProfileSettings: Error saving profile:', error.message || error);
           toast({
             title: "Error",
             description: error.message || "Failed to save profile",
@@ -208,7 +208,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
       setHasChanges(false);
       onClose?.();
     } catch (error: any) {
-      console.error('🔧 ProfileSettings: Error saving profile:', error);
+      console.error('🔧 ProfileSettings: Error saving profile:', error.message || error);
 
       if (error.message.includes('timeout')) {
         toast({
