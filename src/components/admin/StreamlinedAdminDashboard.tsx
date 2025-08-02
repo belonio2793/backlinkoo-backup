@@ -11,7 +11,7 @@ import { AdminNavigationHeader } from "@/components/admin/AdminNavigationHeader"
 import { supabase } from '@/integrations/supabase/client';
 
 // Essential Components Only
-import { DatabaseSyncedUserManagement } from "@/components/admin/DatabaseSyncedUserManagement";
+import { SimplifiedUserManagement } from "@/components/admin/SimplifiedUserManagement";
 import { AdminConnectionDebugger } from "@/components/admin/AdminConnectionDebugger";
 import { QuickConnectionTest } from "@/components/admin/QuickConnectionTest";
 import { MetricsRefreshButton } from "@/components/admin/MetricsRefreshButton";
@@ -269,7 +269,7 @@ export function StreamlinedAdminDashboard() {
         {activeSection === "users" && (
           <div className="space-y-6">
             <QuickConnectionTest />
-            <DatabaseSyncedUserManagement />
+            <SimplifiedUserManagement />
           </div>
         )}
 
