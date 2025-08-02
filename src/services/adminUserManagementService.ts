@@ -500,6 +500,34 @@ class AdminUserManagementService {
       hasMore: false
     };
   }
+
+  /**
+   * Format error object for better logging
+   */
+  private formatError(error: any): string {
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    if (error?.message) {
+      return error.message;
+    }
+
+    if (error?.error) {
+      return this.formatError(error.error);
+    }
+
+    if (error?.details) {
+      return error.details;
+    }
+
+    // Try to extract meaningful information from the error object
+    try {
+      return JSON.stringify(error, null, 2);
+    } catch (jsonError) {
+      return 'Unknown error occurred';
+    }
+  }
 }
 
 export const adminUserManagementService = new AdminUserManagementService();
