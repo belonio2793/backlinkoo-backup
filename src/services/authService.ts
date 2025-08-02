@@ -361,7 +361,7 @@ export class AuthService {
         console.warn('AuthService: Profile creation failed:', result.error);
       }
     } catch (error) {
-      console.error('AuthService: Profile creation error:', error);
+      console.error('AuthService: Profile creation error:', error.message || error);
     }
   }
 
