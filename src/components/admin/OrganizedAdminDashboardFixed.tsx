@@ -116,56 +116,19 @@ export function OrganizedAdminDashboard() {
         {/* Section Content */}
         {activeSection === "overview" && (
           <div className="space-y-6">
-            {/* Connection Status Alert */}
-            {!connected && (
-              <Alert className="border-red-200 bg-red-50">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-red-700">
-                  <div className="font-medium">Database Connection Issue</div>
-                  <div className="text-sm mt-1">{error || 'Unable to connect to database. Please check your configuration.'}</div>
-                  <div className="text-sm mt-2 text-red-600">
-                    Ensure your Supabase credentials are properly configured.
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {connected && (
-              <Alert className="border-green-200 bg-green-50">
-                <AlertCircle className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-700">
-                  <div className="font-medium">✅ Database Connected</div>
-                  <div className="text-sm mt-1">Successfully connected to Supabase database</div>
-                  {tableInfo && (
-                    <div className="text-sm mt-2">
-                      Available tables: {tableInfo.filter(t => t.exists).length} of {tableInfo.length}
-                    </div>
-                  )}
-                </AlertDescription>
-              </Alert>
-            )}
-
             {/* Stats Overview */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Key Metrics</h2>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`} />
-                    <span className="text-sm text-muted-foreground">
-                      {connected ? 'Connected' : 'Disconnected'}
-                    </span>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleRefreshMetrics}
-                    disabled={loading}
-                  >
-                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                    Refresh
-                  </Button>
-                </div>
+                <h2 className="text-lg font-semibold">Dashboard Metrics</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefreshMetrics}
+                  disabled={loading}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
