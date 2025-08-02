@@ -233,11 +233,32 @@ export const supabase = hasValidCredentials ?
         // Use a clean fetch instance to avoid third-party interference
         const cleanFetch = window.fetch.bind(window);
 
+        // Create a timeout that won't interfere with existing signals
+        const timeoutMs = 30000;
+        const timeoutController = new AbortController();
+
+        let timeoutId;
+        if (!options.signal) {
+          timeoutId = setTimeout(() => timeoutController.abort(), timeoutMs);
+        }
+
+        const finalSignal = options.signal || timeoutController.signal;
+
         return cleanFetch(url, {
           ...options,
-          // Ensure we're not affected by global fetch modifications
-          signal: options.signal || AbortSignal.timeout(30000), // 30 second timeout
+          signal: finalSignal,
+        }).then(response => {
+          if (timeoutId) clearTimeout(timeoutId);
+          return response;
         }).catch(error => {
+          if (timeoutId) clearTimeout(timeoutId);
+
+          // Handle specific error types
+          if (error.name === 'AbortError') {
+            console.warn('🔍 Request aborted (likely timeout):', url);
+            throw new Error('Request timeout - please try again');
+          }
+
           // Check if this is likely third-party interference
           const isThirdPartyIssue = error?.stack?.includes('fullstory') ||
                                    error?.stack?.includes('fs.js') ||
@@ -248,7 +269,7 @@ export const supabase = hasValidCredentials ?
           }
 
           console.warn('Supabase fetch error:', error);
-          throw new Error(`Network request failed: ${error.message}`);
+          throw new Error(`Network request failed: ${error.message || 'Unknown network error'}`);
         });
       },
     },
