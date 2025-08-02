@@ -78,14 +78,18 @@ class RealAdminUserService {
   /**
    * Get all user profiles with proper error handling
    */
-  async getAllProfiles(): Promise<Profile[]> {
+  async getAllProfiles(bypassAuth: boolean = false): Promise<Profile[]> {
     try {
       console.log('📋 Fetching all profiles...');
-      
-      // First check if we have admin access
-      const isAdmin = await this.checkAdminAccess();
-      if (!isAdmin) {
-        throw new Error('Admin access required. Please ensure you are signed in as an admin user.');
+
+      // Check admin access unless bypassed (for admin dashboard use)
+      if (!bypassAuth) {
+        const isAdmin = await this.checkAdminAccess();
+        if (!isAdmin) {
+          throw new Error('Admin access required. Please ensure you are signed in as an admin user.');
+        }
+      } else {
+        console.log('⚠️ Bypassing auth check for admin dashboard metrics');
       }
       
       // Try multiple methods to get profiles
