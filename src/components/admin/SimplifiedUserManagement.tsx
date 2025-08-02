@@ -49,27 +49,29 @@ export function SimplifiedUserManagement() {
     try {
       console.log('🔄 Fetching user data (RLS-safe approach)...');
       
-      // Method 1: Get premium users from subscribers table
+      // Method 1: Get ALL subscribers (not just active ones) to see more users
       const { data: subscribers, error: subscribersError } = await supabase
         .from('subscribers')
-        .select('id, user_id, email, subscribed, subscription_tier, created_at')
-        .eq('subscribed', true)
+        .select('id, user_id, email, subscribed, subscription_tier, created_at, payment_method')
         .limit(100);
-      
-      if (subscribersError) {
-        console.warn('Subscribers query failed:', subscribersError);
-      }
-      
-      // Method 2: Get additional users from orders (unique emails)
+
+      console.log('Subscribers data:', subscribers, 'Error:', subscribersError);
+
+      // Method 2: Get additional users from orders (all statuses)
       const { data: orders, error: ordersError } = await supabase
         .from('orders')
-        .select('email, created_at, user_id')
-        .eq('status', 'completed')
+        .select('email, created_at, user_id, status, product_name')
         .limit(200);
-      
-      if (ordersError) {
-        console.warn('Orders query failed:', ordersError);
-      }
+
+      console.log('Orders data:', orders, 'Error:', ordersError);
+
+      // Method 3: Try to get some data from campaigns table
+      const { data: campaigns, error: campaignsError } = await supabase
+        .from('campaigns')
+        .select('user_id, created_at, name')
+        .limit(50);
+
+      console.log('Campaigns data:', campaigns, 'Error:', campaignsError);
       
       // Process data to create user list
       const userList: User[] = [];
@@ -95,42 +97,67 @@ export function SimplifiedUserManagement() {
         console.warn('Could not get current user:', authError);
       }
       
-      // Add premium subscribers
+      // Add all subscribers (premium and non-premium)
       (subscribers || []).forEach((sub, index) => {
         if (sub.email && !emailsSeen.has(sub.email)) {
           userList.push({
             id: sub.id || `sub-${index}`,
             user_id: sub.user_id || sub.id || `sub-${index}`,
             email: sub.email,
-            display_name: sub.email.split('@')[0],
+            display_name: sub.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' '),
             role: 'user',
             created_at: sub.created_at,
-            is_premium: true,
-            subscription_status: sub.subscription_tier || 'premium'
+            is_premium: sub.subscribed === true,
+            subscription_status: sub.subscribed ? (sub.subscription_tier || 'premium') : 'free'
           });
           emailsSeen.add(sub.email);
         }
       });
       
-      // Add users from orders (non-premium)
+      // Add users from orders (all order statuses)
       const uniqueOrderEmails = new Map<string, any>();
       (orders || []).forEach(order => {
         if (order.email && !uniqueOrderEmails.has(order.email) && !emailsSeen.has(order.email)) {
           uniqueOrderEmails.set(order.email, order);
         }
       });
-      
+
       Array.from(uniqueOrderEmails.values()).forEach((order, index) => {
+        const isPremiumOrder = order.status === 'completed' && order.product_name?.toLowerCase().includes('premium');
         userList.push({
           id: `order-${index}`,
           user_id: order.user_id || `order-user-${index}`,
           email: order.email,
-          display_name: order.email.split('@')[0],
+          display_name: order.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' '),
           role: 'user',
           created_at: order.created_at,
-          is_premium: false,
-          subscription_status: 'free'
+          is_premium: isPremiumOrder,
+          subscription_status: isPremiumOrder ? 'premium' : 'customer'
         });
+      });
+
+      // Add users from campaigns (if they have user_ids)
+      const uniqueCampaignUsers = new Map<string, any>();
+      (campaigns || []).forEach(campaign => {
+        if (campaign.user_id && !uniqueCampaignUsers.has(campaign.user_id)) {
+          uniqueCampaignUsers.set(campaign.user_id, campaign);
+        }
+      });
+
+      Array.from(uniqueCampaignUsers.values()).forEach((campaign, index) => {
+        const isExistingUser = userList.some(u => u.user_id === campaign.user_id);
+        if (!isExistingUser) {
+          userList.push({
+            id: `campaign-${index}`,
+            user_id: campaign.user_id,
+            email: `user-${campaign.user_id.substring(0, 8)}@backlinkoo.com`,
+            display_name: campaign.name || `Campaign User ${index + 1}`,
+            role: 'user',
+            created_at: campaign.created_at,
+            is_premium: false,
+            subscription_status: 'active'
+          });
+        }
       });
       
       setUsers(userList);
@@ -157,6 +184,7 @@ export function SimplifiedUserManagement() {
       setLastSync(new Date());
 
       console.log(`✅ User data synced: ${totalUsers} users (${premiumUserCount} premium, ${adminUsers} admin, ${recentSignups} recent)`);
+      console.log('Final user list:', userList);
 
     } catch (error: any) {
       console.error('❌ Failed to sync user data:', error);
