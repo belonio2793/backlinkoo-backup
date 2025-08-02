@@ -21,8 +21,35 @@ export function useAdminDashboardMetrics(): UseAdminDashboardMetricsResult {
       const data = await adminDashboardMetricsService.fetchDashboardMetricsWithTrends();
       setMetrics(data);
     } catch (err: any) {
-      const errorMessage = err?.message || err?.error?.message || err?.toString?.() || 'Unknown error occurred';
-      console.error('Error fetching admin dashboard metrics:', errorMessage, err);
+      // Enhanced error debugging
+      console.error('Raw error object:', err);
+      console.error('Error type:', typeof err);
+      console.error('Error constructor:', err?.constructor?.name);
+      console.error('Error keys:', err ? Object.keys(err) : 'N/A');
+
+      let errorMessage = 'Unknown error occurred';
+
+      if (typeof err === 'string') {
+        errorMessage = err.length > 0 ? err : 'Empty error string';
+      } else if (err?.message !== undefined) {
+        if (typeof err.message === 'string' && err.message.trim() !== '') {
+          errorMessage = err.message;
+        } else {
+          errorMessage = 'Empty error message from error object';
+        }
+      } else if (err?.error?.message) {
+        errorMessage = err.error.message;
+      } else if (err?.toString && typeof err.toString === 'function') {
+        try {
+          const stringified = err.toString();
+          errorMessage = stringified !== '[object Object]' ? stringified : 'Generic object error';
+        } catch (toStringError) {
+          errorMessage = 'Error toString() failed';
+        }
+      }
+
+      console.error('Processed error message:', errorMessage);
+
       setError({
         message: `Failed to load dashboard metrics: ${errorMessage}`,
         details: err
