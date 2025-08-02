@@ -206,7 +206,7 @@ export function SimpleAdminPage() {
               <Button
                 type="submit"
                 className="w-full h-11"
-                disabled={loading}
+                disabled={loading || creating}
               >
                 {loading ? (
                   <>
@@ -217,6 +217,25 @@ export function SimpleAdminPage() {
                   <>
                     <Shield className="h-4 w-4 mr-2" />
                     Access Admin Dashboard
+                  </>
+                )}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-11"
+                onClick={createAdminUser}
+                disabled={loading || creating}
+              >
+                {creating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating Admin User...
+                  </>
+                ) : (
+                  <>
+                    🔧 Create Admin User
                   </>
                 )}
               </Button>
