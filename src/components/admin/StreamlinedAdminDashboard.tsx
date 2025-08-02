@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 // Essential Components Only
 import { DatabaseSyncedUserManagement } from "@/components/admin/DatabaseSyncedUserManagement";
 import { AdminConnectionDebugger } from "@/components/admin/AdminConnectionDebugger";
+import { QuickConnectionTest } from "@/components/admin/QuickConnectionTest";
 import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
 import { SystemStatusPanel } from "@/components/admin/SystemStatusPanel";
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
@@ -119,13 +120,16 @@ export function StreamlinedAdminDashboard() {
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Error State */}
         {error && (
-          <Alert className="mb-6 border-red-200 bg-red-50">
-            <AlertCircle className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-700">
-              <div className="font-medium">Failed to load metrics</div>
-              <div className="text-sm mt-1">{error}</div>
-            </AlertDescription>
-          </Alert>
+          <div className="space-y-4 mb-6">
+            <Alert className="border-red-200 bg-red-50">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertDescription className="text-red-700">
+                <div className="font-medium">Failed to load metrics</div>
+                <div className="text-sm mt-1">{error}</div>
+              </AlertDescription>
+            </Alert>
+            <QuickConnectionTest />
+          </div>
         )}
 
         {/* Database Connection Status */}
@@ -261,7 +265,7 @@ export function StreamlinedAdminDashboard() {
 
         {activeSection === "users" && (
           <div className="space-y-6">
-            {error && <AdminConnectionDebugger />}
+            <QuickConnectionTest />
             <DatabaseSyncedUserManagement />
           </div>
         )}
