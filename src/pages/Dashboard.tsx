@@ -1472,13 +1472,16 @@ const Dashboard = () => {
                 <DashboardTrialPosts user={user} />
               </div>
             ) : activeSection === "premium-plan" ? (
-              <PremiumPlanTab
-                isSubscribed={isPremiumSubscriber}
-                onUpgrade={() => {
-                  // Refresh premium status after successful upgrade
-                  PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
-                }}
-              />
+              <div className="space-y-6">
+                <PremiumStatusDebug />
+                <PremiumPlanTab
+                  isSubscribed={isPremiumSubscriber}
+                  onUpgrade={() => {
+                    // Refresh premium status after successful upgrade
+                    PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
+                  }}
+                />
+              </div>
             ) : null}
           </>
         ) : (
