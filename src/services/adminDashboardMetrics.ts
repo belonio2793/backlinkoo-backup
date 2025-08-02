@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { adminUserManagementService } from './adminUserManagementService';
 
 export interface AdminDashboardMetrics {
   totalUsers: number;
