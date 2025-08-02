@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AuthService } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
-import { useAdminDashboardMetrics } from "@/hooks/useAdminDashboardMetrics";
+import { useWorkingAdminDashboardMetrics } from "@/hooks/useWorkingAdminDashboardMetrics";
 import { AdminNavigationHeader } from "@/components/admin/AdminNavigationHeader";
 import { AdminUserManagement } from "@/components/admin/AdminUserManagement";
 import { supabase } from '@/integrations/supabase/client';
@@ -39,6 +39,7 @@ import { SupabaseEmailTest } from "@/components/SupabaseEmailTest";
 import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
+import { DatabaseTestComponent } from "../DatabaseTestComponent";
 
 import {
   Users,
@@ -66,7 +67,7 @@ import {
 
 export function OrganizedAdminDashboard() {
   const { toast } = useToast();
-  const { metrics, loading, error, refetch } = useAdminDashboardMetrics();
+  const { metrics, loading, error, refetch } = useWorkingAdminDashboardMetrics();
   const [activeSection, setActiveSection] = useState("overview");
   const [adminEmail, setAdminEmail] = useState<string | undefined>();
 
@@ -112,17 +113,25 @@ export function OrganizedAdminDashboard() {
         {/* Section Content */}
         {activeSection === "overview" && (
           <div className="space-y-6">
+            {/* Connection Status Alert */}
+            {error && (
+              <Alert className="border-red-200 bg-red-50">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-red-700">
+                  <div className="font-medium">Dashboard Error</div>
+                  <div className="text-sm mt-1">{error.message}</div>
+                  <div className="text-sm mt-2 text-red-600">
+                    This usually means you need to sign in as an admin user or fix the database connection.
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Stats Overview */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Key Metrics</h2>
                 <div className="flex items-center gap-2">
-                  {error && (
-                    <Alert className="max-w-md">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>{error.message}</AlertDescription>
-                    </Alert>
-                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -194,11 +203,7 @@ export function OrganizedAdminDashboard() {
                     {loading ? (
                       <div className="h-3 bg-muted animate-pulse rounded w-20" />
                     ) : (
-                      <p className="text-xs text-muted-foreground">
-                        {metrics?.monthlyRevenueChange !== undefined
-                          ? `${metrics.monthlyRevenueChange >= 0 ? '+' : ''}${metrics.monthlyRevenueChange.toFixed(1)}% from last month`
-                          : "Current month total"}
-                      </p>
+                      <p className="text-xs text-muted-foreground">Current month total</p>
                     )}
                   </CardContent>
                 </Card>
@@ -310,18 +315,21 @@ export function OrganizedAdminDashboard() {
             </TabsContent>
 
             <TabsContent value="database">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Database className="h-5 w-5" />
-                    Database Management
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <TrialPostCleanupManager />
-                  <Separator />
-                </CardContent>
-              </Card>
+              <div className="space-y-6">
+                <DatabaseTestComponent />
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Database className="h-5 w-5" />
+                      Database Management
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <TrialPostCleanupManager />
+                    <Separator />
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
         )}
