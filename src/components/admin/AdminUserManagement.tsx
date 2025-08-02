@@ -519,6 +519,14 @@ export function AdminUserManagement() {
           </Button>
           <Button
             variant="outline"
+            onClick={testRPCFunction}
+            disabled={loading}
+          >
+            <Database className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Test RPC
+          </Button>
+          <Button
+            variant="outline"
             onClick={reloadAllUsers}
             disabled={loading}
           >
