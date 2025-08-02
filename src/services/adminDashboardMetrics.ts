@@ -271,26 +271,68 @@ class AdminDashboardMetricsService {
    */
   private formatError(error: any): string {
     if (typeof error === 'string') {
-      return error;
+      return error.length > 0 ? error : 'Empty error string';
     }
 
-    if (error?.message && error.message.trim() !== '') {
-      return error.message;
+    // Handle null or undefined
+    if (!error) {
+      return 'Null or undefined error';
     }
 
+    // Check for message property
+    if (error?.message !== undefined) {
+      if (typeof error.message === 'string' && error.message.trim() !== '') {
+        return error.message;
+      } else if (typeof error.message === 'string') {
+        return 'Empty error message';
+      }
+    }
+
+    // Check for nested error
     if (error?.error) {
       return this.formatError(error.error);
     }
 
-    if (error?.details) {
+    // Check for details
+    if (error?.details && typeof error.details === 'string' && error.details.trim() !== '') {
       return error.details;
+    }
+
+    // Check for code property
+    if (error?.code) {
+      return `Error code: ${error.code}`;
+    }
+
+    // Check for status property
+    if (error?.status) {
+      return `Status: ${error.status}`;
     }
 
     // Try to extract meaningful information from the error object
     try {
+      const errorKeys = Object.keys(error);
+      if (errorKeys.length === 0) {
+        return 'Empty error object';
+      }
+
+      // Try to find useful properties
+      const usefulKeys = errorKeys.filter(key =>
+        !['stack', 'name', 'cause'].includes(key) &&
+        error[key] !== null &&
+        error[key] !== undefined
+      );
+
+      if (usefulKeys.length > 0) {
+        return JSON.stringify(
+          Object.fromEntries(usefulKeys.map(key => [key, error[key]])),
+          null,
+          2
+        );
+      }
+
       return JSON.stringify(error, null, 2);
     } catch (jsonError) {
-      return 'Unknown error occurred';
+      return `Error serialization failed: ${error?.constructor?.name || 'Unknown'} object`;
     }
   }
 }
