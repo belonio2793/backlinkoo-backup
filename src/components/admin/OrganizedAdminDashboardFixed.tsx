@@ -82,7 +82,6 @@ export function OrganizedAdminDashboard() {
   };
 
   const handleSignOut = () => {
-    AuthService.signOut();
     window.location.replace('/');
   };
 
