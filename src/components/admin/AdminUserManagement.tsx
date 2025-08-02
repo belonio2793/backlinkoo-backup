@@ -68,6 +68,7 @@ import {
   type UserListFilters,
   type UserUpdatePayload
 } from "@/services/adminUserManagementService";
+import { testDatabaseConnection } from "@/utils/testDatabaseConnection";
 
 export function AdminUserManagement() {
   const [users, setUsers] = useState<UserDetails[]>([]);
