@@ -341,7 +341,7 @@ export function StreamlinedAdminDashboard() {
             <TabsContent value="status">
               <div className="space-y-6">
                 <AdminConnectionDebugger />
-                <SystemStatusPanel />
+                <SystemStatusPanelWithTester />
               </div>
             </TabsContent>
 
