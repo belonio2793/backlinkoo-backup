@@ -62,16 +62,28 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
         return;
       }
 
-      // Load premium status immediately in background
+      // Load premium status immediately in background with timeout
       setPremiumLoading(true);
+
+      // Add additional timeout as safety net
+      const premiumTimeout = setTimeout(() => {
+        console.warn('Premium status check timeout in ProfileSettings');
+        setIsPremium(false);
+        setPremiumLoading(false);
+      }, 5000);
+
       PremiumService.checkPremiumStatus(user.id)
         .then(status => {
+          clearTimeout(premiumTimeout);
           setIsPremium(status);
         })
-        .catch(() => {
+        .catch((error) => {
+          clearTimeout(premiumTimeout);
+          console.error('Premium status check error in ProfileSettings:', error);
           setIsPremium(false);
         })
         .finally(() => {
+          clearTimeout(premiumTimeout);
           setPremiumLoading(false);
         });
 
