@@ -135,9 +135,9 @@ export const OptimizedAppWrapper = () => {
 
           {/* Admin routes */}
           <Route path="/admin" element={
-            <AdminAuthGuard>
-              <LazyAdminDashboard />
-            </AdminAuthGuard>
+            <Suspense fallback={<PageLoader />}>
+              <AdminLanding />
+            </Suspense>
           } />
           <Route path="/admin/setup" element={
             <Suspense fallback={<PageLoader />}>
