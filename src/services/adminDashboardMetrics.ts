@@ -331,9 +331,32 @@ class AdminDashboardMetricsService {
   }
 
   /**
-   * Calculate monthly revenue from completed orders in current month
+   * Calculate monthly revenue from premium subscriptions at $29/month
    */
   private async getMonthlyRevenue(): Promise<number> {
+    try {
+      console.log('💰 Calculating monthly revenue from premium subscriptions...');
+
+      // Get active subscribers count
+      const activeSubscribers = await this.getActiveUsers();
+
+      // Calculate monthly revenue: $29 per premium subscriber per month
+      const PREMIUM_PRICE_PER_MONTH = 29;
+      const monthlyRevenue = activeSubscribers * PREMIUM_PRICE_PER_MONTH;
+
+      console.log(`✅ Monthly revenue calculated: ${activeSubscribers} subscribers × $${PREMIUM_PRICE_PER_MONTH} = $${monthlyRevenue}`);
+      return monthlyRevenue;
+
+    } catch (error: any) {
+      console.error('Error calculating monthly revenue:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * DEPRECATED: Old method that used orders table
+   */
+  private async getMonthlyRevenueOld(): Promise<number> {
     try {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
