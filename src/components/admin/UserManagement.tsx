@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { AdminUserService } from '@/services/adminUserService';
+import { realAdminUserService } from '@/services/realAdminUserService';
 import { 
   Users, 
   Crown, 
@@ -78,7 +78,11 @@ export function UserManagement() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const userData = await AdminUserService.getAllUsersWithPremiumStatus();
+      const result = await realAdminUserService.getUsers({ limit: 1000, offset: 0 });
+      const userData = result.users.map(user => ({
+        ...user,
+        isPremium: user.subscription?.status === 'active' || false
+      }));
       setUsers(userData);
 
     } catch (error: any) {
@@ -113,13 +117,13 @@ export function UserManagement() {
     setActionLoading(userId);
     try {
       if (currentStatus) {
-        await AdminUserService.revokePremiumAccess(userId);
+        await realAdminUserService.updatePremiumStatus(userId, false);
         toast({
           title: "Success",
           description: "Premium access removed"
         });
       } else {
-        await AdminUserService.grantPremiumAccess(userId);
+        await realAdminUserService.updatePremiumStatus(userId, true);
         toast({
           title: "Success",
           description: "Premium access granted"
@@ -141,7 +145,7 @@ export function UserManagement() {
   const updateUserRole = async (userId: string, role: string) => {
     setActionLoading(userId);
     try {
-      await AdminUserService.updateUserRole(userId, role);
+      await realAdminUserService.updateUserRole(userId, role);
 
       toast({
         title: "Success",
