@@ -481,7 +481,7 @@ export function AdminBlogManager() {
                       </div>
                       
                       <div className="text-sm text-gray-600 mb-2">
-                        <strong>Target:</strong> {post.target_url}
+                        <strong>Target:</strong> {post.target_url || 'No target URL'}
                       </div>
                       
                       <div className="text-sm text-gray-600 mb-2">
