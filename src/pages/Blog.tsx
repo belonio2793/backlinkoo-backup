@@ -795,8 +795,10 @@ function BlogPostListItem({ post, navigate, formatDate }: any) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
-                  <User className="h-4 w-4" />
-                  <span>{post.author_name || 'Backlink ∞'}</span>
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+              <User className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-medium">{post.author_name || 'Backlink ∞'}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
