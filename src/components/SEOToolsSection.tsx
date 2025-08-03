@@ -401,7 +401,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
           <FeatureAccessGuard
             feature="automatedCampaigns"
             featureName="Automated Link Building"
-            fallbackMessage="Premium subscription required to access our automated link building system with unlimited campaigns and 24/7 automation."
+            fallbackMessage="Upgrade to Premium to access our automated link building system with unlimited campaigns and 24/7 automation."
           >
             <NoHandsSEODashboard />
           </FeatureAccessGuard>
@@ -411,7 +411,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
           <FeatureAccessGuard
             feature="keywordResearch"
             featureName="Advanced Keyword Research"
-            fallbackMessage="Premium subscription required for unlimited keyword research with geographic targeting, difficulty analysis, and SERP insights."
+            fallbackMessage="Upgrade to Premium for unlimited keyword research with geographic targeting, difficulty analysis, and SERP insights."
           >
             <KeywordResearchTool />
           </FeatureAccessGuard>
@@ -421,7 +421,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
           <FeatureAccessGuard
             feature="rankTracker"
             featureName="Real-time Rank Tracking"
-            fallbackMessage="Premium subscription required for unlimited rank tracking across multiple search engines with historical data and trend analysis."
+            fallbackMessage="Upgrade to Premium for unlimited rank tracking across multiple search engines with historical data and trend analysis."
           >
             <RankingTracker />
           </FeatureAccessGuard>

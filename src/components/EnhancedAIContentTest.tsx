@@ -1023,7 +1023,7 @@ Begin your journey with ${keyword} today!`;
                 <Clock className="h-4 w-4 text-orange-600" />
                 <AlertDescription className="text-orange-800">
                   <strong>Trial Reminder:</strong> This backlink will expire in 24 hours.
-                  To make it permanent, contact our team or ensure you have an active premium subscription.
+                  To make it permanent, contact our team or upgrade to a premium plan.
                 </AlertDescription>
               </Alert>
             )}

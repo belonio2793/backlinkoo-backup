@@ -4,11 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-
-
+import { PremiumPlanTab } from "@/components/PremiumPlanTab";
+import { SEOAcademyTab } from "@/components/SEOAcademyTab";
 
 import { PremiumService } from "@/services/premiumService";
-
+import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -641,6 +641,7 @@ const Dashboard = () => {
   });
   const [isPremiumSubscriber, setIsPremiumSubscriber] = useState(false);
   const [userProgress, setUserProgress] = useState<{ [key: string]: boolean }>({});
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -1043,7 +1044,17 @@ const Dashboard = () => {
                 <span className="hidden sm:inline">Trial</span>
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
               </Button>
-
+              <Button
+                variant={activeSection === "premium-plan" ? "secondary" : "ghost"}
+                onClick={() => setActiveSection("premium-plan")}
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3 relative"
+              >
+                <Crown className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Premium Plan</span>
+                {!isPremiumSubscriber && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full"></div>
+                )}
+              </Button>
 
             </nav>
           </div>
@@ -1508,7 +1519,16 @@ const Dashboard = () => {
               <div className="space-y-6">
                 <DashboardTrialPosts user={user} />
               </div>
-
+            ) : activeSection === "premium-plan" ? (
+              <div className="space-y-6">
+                <PremiumPlanTab
+                  isSubscribed={isPremiumSubscriber}
+                  onUpgrade={() => {
+                    // Refresh premium status after successful upgrade
+                    PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
+                  }}
+                />
+              </div>
             ) : null}
           </>
         ) : (

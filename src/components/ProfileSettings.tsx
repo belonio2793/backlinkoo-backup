@@ -464,7 +464,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
                 <p className="text-xs text-muted-foreground">
                   {isPremium
                     ? 'You have access to all premium features and unlimited usage.'
-                    : 'Premium subscription provides unlimited access and advanced features.'
+                    : 'Upgrade to premium for unlimited access and advanced features.'
                   }
                 </p>
               </div>
