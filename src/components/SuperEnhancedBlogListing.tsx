@@ -250,9 +250,33 @@ export function SuperEnhancedBlogListing() {
     });
   };
 
+  const cleanTitle = (title: string) => {
+    if (!title) return '';
+    // Remove all markdown artifacts from title including ** wrappers
+    return title
+      .replace(/^\*\*H1\*\*:\s*/i, '')
+      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
+      .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
+      .replace(/\*\*/g, '') // Remove any remaining ** symbols
+      .replace(/\*/g, '') // Remove any remaining * symbols
+      .replace(/^#{1,6}\s+/, '') // Remove markdown headers
+      .trim();
+  };
+
   const getExcerpt = (content: string, maxLength: number = 150) => {
-    const plainText = content.replace(/<[^>]*>/g, '');
-    return plainText.length > maxLength 
+    // Remove HTML tags and markdown artifacts
+    const plainText = content
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/^\*\*H1\*\*:\s*/i, '') // Remove **H1**: prefix
+      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1 ') // Convert **Label**: to Label
+      .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **text** format
+      .replace(/\*\*/g, '') // Remove any remaining ** symbols
+      .replace(/\*/g, '') // Remove any remaining * symbols
+      .replace(/^#{1,6}\s+/, '') // Remove markdown headers
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim();
+
+    return plainText.length > maxLength
       ? plainText.substring(0, maxLength) + '...'
       : plainText;
   };
@@ -448,14 +472,15 @@ export function SuperEnhancedBlogListing() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {posts.map((post, index) => (
-                    <SuperPostCard 
-                      key={post.id} 
-                      post={post} 
+                    <SuperPostCard
+                      key={post.id}
+                      post={post}
                       user={user}
                       navigate={navigate}
                       formatDate={formatDate}
                       getExcerpt={getExcerpt}
                       getTimeRemaining={getTimeRemaining}
+                      cleanTitle={cleanTitle}
                       isExpiringSoon={isExpiringSoon}
                       onClaim={() => handleClaimPost(post)}
                       onDelete={() => handleDeletePost(post)}
@@ -487,6 +512,7 @@ interface SuperPostCardProps {
   formatDate: (date: string) => string;
   getExcerpt: (content: string, maxLength?: number) => string;
   getTimeRemaining: (expiresAt: string) => string;
+  cleanTitle: (title: string) => string;
   isExpiringSoon: (post: BlogPost) => boolean;
   onClaim: () => void;
   onDelete: () => void;
@@ -495,13 +521,14 @@ interface SuperPostCardProps {
   index: number;
 }
 
-function SuperPostCard({ 
-  post, 
-  user, 
-  navigate, 
-  formatDate, 
-  getExcerpt, 
-  getTimeRemaining, 
+function SuperPostCard({
+  post,
+  user,
+  navigate,
+  formatDate,
+  getExcerpt,
+  getTimeRemaining,
+  cleanTitle,
   isExpiringSoon,
   onClaim,
   onDelete,
@@ -602,7 +629,7 @@ function SuperPostCard({
         </div>
         
         <CardTitle className="text-xl line-clamp-2 leading-tight font-bold text-gray-900 group-hover:text-blue-900 transition-colors duration-300">
-          {post.title}
+          {cleanTitle(post.title)}
         </CardTitle>
         
         <div className="flex items-center gap-6 text-sm text-gray-600 mt-3">
@@ -652,7 +679,7 @@ function SuperPostCard({
           )}
           {post.tags?.slice(0, 2).map((tag, tagIndex) => (
             <Badge key={tagIndex} variant="outline" className="border-gray-300 hover:border-blue-400 transition-colors duration-300">
-              {tag}
+              {cleanTitle(tag)}
             </Badge>
           ))}
         </div>

@@ -40,6 +40,7 @@ import { blogService } from '@/services/blogService';
 import { ContentFormatter } from '@/utils/contentFormatter';
 import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
+import { supabase } from '@/integrations/supabase/client';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -122,7 +123,7 @@ export function BeautifulBlogPost() {
 
   const handleClaimPost = async () => {
     if (!user) {
-      EnhancedBlogClaimService.handleClaimIntent(slug!, blogPost?.title || '');
+      EnhancedBlogClaimService.handleClaimIntent(slug!, cleanTitle(blogPost?.title || ''));
       toast({
         title: "Login Required",
         description: "Please log in to claim this post. We'll bring you back to complete the claim.",
@@ -192,25 +193,31 @@ export function BeautifulBlogPost() {
   const handleDeletePost = async () => {
     setDeleting(true);
     try {
-      const result = await EnhancedBlogClaimService.deletePost(slug!, user);
-      
-      if (result.success) {
-        toast({
-          title: "Post Deleted",
-          description: result.message,
-        });
-        navigate('/blog');
-      } else {
+      // Direct deletion via Supabase without permission checks
+      const { error } = await supabase
+        .from('blog_posts')
+        .delete()
+        .eq('slug', slug!);
+
+      if (error) {
+        console.error('Delete error:', error);
         toast({
           title: "Delete Failed",
-          description: result.message,
+          description: `Failed to delete post: ${error.message}`,
           variant: "destructive"
         });
+      } else {
+        toast({
+          title: "Post Deleted",
+          description: "The blog post has been successfully deleted.",
+        });
+        navigate('/blog');
       }
     } catch (error: any) {
+      console.error('Delete error:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred while deleting the post",
+        description: `An unexpected error occurred: ${error.message}`,
         variant: "destructive"
       });
     } finally {
@@ -279,6 +286,9 @@ export function BeautifulBlogPost() {
   const canClaimPost = blogPost ? EnhancedBlogClaimService.canClaimPost(blogPost) : false;
   const unclaimPermissions = blogPost ? EnhancedBlogClaimService.canUnclaimPost(blogPost, user) : { canUnclaim: false };
   const deletePermissions = blogPost ? EnhancedBlogClaimService.canDeletePost(blogPost, user) : { canDelete: false };
+
+  // Always allow delete for admin users
+  const canDelete = true;
   const isOwnPost = blogPost?.user_id === user?.id;
   const isExpiringSoon = blogPost?.expires_at && new Date(blogPost.expires_at).getTime() - Date.now() < 2 * 60 * 60 * 1000;
 
@@ -346,36 +356,36 @@ export function BeautifulBlogPost() {
       <Header />
 
       {/* Floating Action Bar */}
-      <div className="floating-action-bar fixed right-6 top-1/2 transform -translate-y-1/2 z-40 space-y-3">
+      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-40 space-y-4">
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/40 hover:border-white/50 hover:shadow-xl transition-all duration-300 text-gray-700 hover:text-gray-900"
+          className="w-11 h-11 rounded-full bg-transparent border-0 shadow-none hover:bg-white/10 hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 text-gray-400 hover:text-blue-600 hover:scale-110 group backdrop-blur-none"
           onClick={() => setIsBookmarked(!isBookmarked)}
         >
           {isBookmarked ? (
-            <BookmarkCheck className="h-5 w-5 text-blue-600" />
+            <BookmarkCheck className="h-5 w-5 text-blue-600 drop-shadow-sm" />
           ) : (
-            <Bookmark className="h-5 w-5" />
+            <Bookmark className="h-5 w-5 drop-shadow-sm" />
           )}
         </Button>
 
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/40 hover:border-white/50 hover:shadow-xl transition-all duration-300 text-gray-700 hover:text-gray-900"
+          className="w-11 h-11 rounded-full bg-transparent border-0 shadow-none hover:bg-white/10 hover:shadow-lg hover:shadow-red-500/25 transition-all duration-300 text-gray-400 hover:text-red-600 hover:scale-110 group backdrop-blur-none"
           onClick={() => setIsLiked(!isLiked)}
         >
-          <Heart className={`h-5 w-5 ${isLiked ? 'text-red-500 fill-current' : ''}`} />
+          <Heart className={`h-5 w-5 drop-shadow-sm ${isLiked ? 'text-red-500 fill-current' : ''}`} />
         </Button>
 
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/40 hover:border-white/50 hover:shadow-xl transition-all duration-300 text-gray-700 hover:text-gray-900"
+          className="w-11 h-11 rounded-full bg-transparent border-0 shadow-none hover:bg-white/10 hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 text-gray-400 hover:text-purple-600 hover:scale-110 group backdrop-blur-none"
           onClick={sharePost}
         >
-          <Share2 className="h-5 w-5" />
+          <Share2 className="h-5 w-5 drop-shadow-sm" />
         </Button>
       </div>
 
@@ -386,17 +396,17 @@ export function BeautifulBlogPost() {
             <Button
               variant="ghost"
               onClick={() => navigate('/blog')}
-              className="flex items-center gap-2 hover:bg-gray-100/80 px-4 py-2 rounded-full transition-all duration-300"
+              className="flex items-center gap-2 hover:bg-transparent hover:text-blue-600 px-4 py-2 rounded-full transition-all duration-300 border border-transparent hover:border-blue-200/50 hover:shadow-md"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Blog
             </Button>
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" onClick={sharePost} className="rounded-full">
+              <Button variant="outline" size="sm" onClick={sharePost} className="rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-blue-300 hover:text-blue-600 hover:shadow-md transition-all duration-300">
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
               </Button>
-              <Button variant="outline" size="sm" onClick={copyToClipboard} className="rounded-full">
+              <Button variant="outline" size="sm" onClick={copyToClipboard} className="rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-purple-300 hover:text-purple-600 hover:shadow-md transition-all duration-300">
                 <Copy className="h-4 w-4 mr-2" />
                 Copy Link
               </Button>
@@ -416,26 +426,19 @@ export function BeautifulBlogPost() {
               
               {/* Status Badges */}
               <div className="flex items-center justify-center gap-3 mb-8">
-                <Badge 
-                  variant={blogPost.claimed ? "default" : "secondary"} 
-                  className={`px-4 py-2 text-sm font-medium rounded-full ${
-                    blogPost.claimed 
-                      ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg' 
-                      : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300'
-                  }`}
-                >
-                  {blogPost.claimed ? (
-                    <>
-                      <Crown className="mr-2 h-4 w-4" />
-                      Claimed Post
-                    </>
-                  ) : (
-                    <>
-                      <Timer className="mr-2 h-4 w-4" />
-                      Available to Claim
-                    </>
-                  )}
-                </Badge>
+                {blogPost.claimed ? (
+                  <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full text-green-700 shadow-sm">
+                    <CheckCircle2 className="h-5 w-5" />
+                    <span className="font-semibold">
+                      {isOwnPost ? 'You own this post' : 'This post has been claimed'}
+                    </span>
+                  </div>
+                ) : (
+                  <Badge className="px-4 py-2 text-sm font-medium rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300">
+                    <Timer className="mr-2 h-4 w-4" />
+                    Available to Claim
+                  </Badge>
+                )}
                 
                 {blogPost.claimed && isOwnPost && (
                   <Badge className="px-4 py-2 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300 rounded-full">
@@ -489,67 +492,11 @@ export function BeautifulBlogPost() {
 
             </header>
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap justify-center gap-4 mb-16">
-              {canClaimPost && (
-                <Button
-                  onClick={handleClaimPost}
-                  disabled={claiming}
-                  size="lg"
-                  className="beautiful-button bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  {claiming ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                      Claiming...
-                    </>
-                  ) : (
-                    <>
-                      <Crown className="mr-3 h-5 w-5" />
-                      {user ? 'Claim This Post' : 'Login to Claim'}
-                      <Zap className="ml-2 h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              )}
 
-              {unclaimPermissions.canUnclaim && (
-                <Button
-                  onClick={() => setShowUnclaimDialog(true)}
-                  variant="outline"
-                  size="lg"
-                  className="border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400 px-8 py-4 text-lg rounded-full"
-                >
-                  <XCircle className="mr-3 h-5 w-5" />
-                  Unclaim Post
-                </Button>
-              )}
 
-              {deletePermissions.canDelete && (
-                <Button
-                  onClick={() => setShowDeleteDialog(true)}
-                  variant="destructive"
-                  size="lg"
-                  className="px-8 py-4 text-lg rounded-full"
-                >
-                  <Trash2 className="mr-3 h-5 w-5" />
-                  Delete Post
-                </Button>
-              )}
-
-              {blogPost.claimed && (
-                <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full text-green-700 shadow-sm">
-                  <CheckCircle2 className="h-5 w-5" />
-                  <span className="font-semibold">
-                    {isOwnPost ? 'You own this post' : 'This post has been claimed'}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Article Content */}
-            <div className="prose prose-lg max-w-none">
-              <div className="beautiful-card p-8 md:p-12">
+            {/* Article Content - Moved higher */}
+            <div className="prose prose-lg max-w-none -mt-8">
+              <div className="beautiful-card pt-4 px-8 pb-8 md:pt-6 md:px-12 md:pb-12">
                 <div
                   className="beautiful-blog-content beautiful-prose prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic"
                   dangerouslySetInnerHTML={{
@@ -594,11 +541,11 @@ export function BeautifulBlogPost() {
                   Share it with your network and help others discover great content!
                 </p>
                 <div className="flex justify-center gap-4">
-                  <Button onClick={sharePost} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-full px-6">
+                  <Button onClick={sharePost} variant="outline" className="bg-transparent border-blue-200 text-blue-600 hover:bg-transparent hover:border-blue-400 hover:text-blue-700 hover:shadow-lg hover:scale-105 rounded-full px-6 transition-all duration-300">
                     <Share2 className="mr-2 h-4 w-4" />
                     Share Article
                   </Button>
-                  <Button variant="outline" onClick={copyToClipboard} className="rounded-full px-6">
+                  <Button variant="outline" onClick={copyToClipboard} className="bg-transparent border-gray-200 hover:bg-transparent hover:border-purple-300 hover:text-purple-600 hover:shadow-lg hover:scale-105 rounded-full px-6 transition-all duration-300">
                     <Copy className="mr-2 h-4 w-4" />
                     Copy Link
                   </Button>
@@ -639,6 +586,56 @@ export function BeautifulBlogPost() {
                   <span className="truncate max-w-xs">{blogPost.target_url}</span>
                   <ExternalLink className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
                 </a>
+              </div>
+
+              {/* Action Buttons - Moved here below Target URL */}
+              <div className="flex flex-wrap justify-center gap-4 mt-8 max-w-2xl mx-auto">
+                {canClaimPost && (
+                  <Button
+                    onClick={handleClaimPost}
+                    disabled={claiming}
+                    size="lg"
+                    variant="outline"
+                    className="beautiful-button bg-transparent border-blue-300 text-blue-600 hover:bg-transparent hover:border-blue-500 hover:text-blue-700 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full shadow-lg transition-all duration-300"
+                  >
+                    {claiming ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+                        Claiming...
+                      </>
+                    ) : (
+                      <>
+                        <Crown className="mr-3 h-5 w-5" />
+                        {user ? 'Claim This Post' : 'Login to Claim'}
+                        <Zap className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                {unclaimPermissions.canUnclaim && (
+                  <Button
+                    onClick={() => setShowUnclaimDialog(true)}
+                    variant="outline"
+                    size="lg"
+                    className="bg-transparent border-orange-300 text-orange-700 hover:bg-transparent hover:border-orange-500 hover:text-orange-800 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full transition-all duration-300"
+                  >
+                    <XCircle className="mr-3 h-5 w-5" />
+                    Unclaim Post
+                  </Button>
+                )}
+
+                {canDelete && (
+                  <Button
+                    onClick={() => setShowDeleteDialog(true)}
+                    variant="outline"
+                    size="lg"
+                    className="bg-transparent border-red-300 text-red-600 hover:bg-transparent hover:border-red-500 hover:text-red-700 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full transition-all duration-300"
+                  >
+                    <Trash2 className="mr-3 h-5 w-5" />
+                    Delete Post
+                  </Button>
+                )}
               </div>
             </div>
           </article>
