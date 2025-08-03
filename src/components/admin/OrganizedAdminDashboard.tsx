@@ -250,7 +250,7 @@ export function OrganizedAdminDashboard() {
         )}
 
         {activeSection === "users" && (
-          <AdminUserManagement />
+          <AdminUserDashboard />
         )}
 
         {activeSection === "content" && (
