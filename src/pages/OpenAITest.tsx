@@ -46,9 +46,16 @@ export default function OpenAITest() {
   };
 
   const testQuery = async (queryIndex: number) => {
+    // Check if this query is already being tested
+    const currentQuery = queries[queryIndex];
+    if (currentQuery.status === 'testing') {
+      console.log(`Query ${queryIndex + 1} is already being tested, skipping...`);
+      return;
+    }
+
     // Update query status to testing
-    setQueries(prev => prev.map((q, i) => 
-      i === queryIndex ? { ...q, status: 'testing' as const } : q
+    setQueries(prev => prev.map((q, i) =>
+      i === queryIndex ? { ...q, status: 'testing' as const, result: undefined, error: undefined } : q
     ));
 
     try {
