@@ -325,7 +325,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
           </div>
 
           {/* Quick Premium Fix for specific user */}
-          {user?.email === 'labindalawamaryrose@gmail.com' && !premiumLoading && isPremium === false && (
+          {user?.email === 'labindalawamaryrose@gmail.com' && isPremium === false && (
             <div className="mt-6">
               <QuickPremiumFix onStatusUpdated={() => {
                 // Refresh page to reload auth context with updated premium status
