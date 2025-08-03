@@ -110,7 +110,7 @@ exports.handler = async (event, context) => {
       }
     }
 
-    // Step 5: If user has subscription but profile tier is wrong, update profile
+    // Step 5: Always update profile tier if should be premium or force premium
     if (shouldBePremium && profile.subscription_tier !== 'premium') {
       console.log('🔧 Updating profile subscription tier...');
       
