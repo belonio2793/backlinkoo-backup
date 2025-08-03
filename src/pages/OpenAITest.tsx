@@ -143,11 +143,19 @@ export default function OpenAITest() {
       description: "Running comprehensive API tests...",
     });
 
+    // Reset all queries to pending state before starting
+    setQueries(prev => prev.map(q => ({ ...q, status: 'pending', result: undefined, error: undefined })));
+
     for (let i = 0; i < queries.length; i++) {
-      await testQuery(i);
+      try {
+        await testQuery(i);
+      } catch (error) {
+        console.error(`Failed to test query ${i + 1}:`, error);
+      }
+
       // Add delay between tests to avoid rate limiting
       if (i < queries.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 2500));
       }
     }
 
