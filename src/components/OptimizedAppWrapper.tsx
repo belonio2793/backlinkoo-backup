@@ -49,7 +49,7 @@ import {
   LazySuperEnhancedBlogListing,
   LazyEnhancedBlogPost,
   LazyBeautifulBlogTemplate,
-  LazySettings,
+
   LazyTrialDashboard,
   LazyAIContentTest,
   LazyEnhancedDashboardRouter,
@@ -58,7 +58,9 @@ import {
   LazyEnhancedAILive,
   LazyGuestDashboard,
   LazyClaimSystemDebug,
-  LazySEOOptimizedBlogGenerator
+  LazySEOOptimizedBlogGenerator,
+  LazyOpenAITest,
+  LazySystemTest
 } from './LazyComponents';
 
 // Loading component for better UX
@@ -122,11 +124,7 @@ export const OptimizedAppWrapper = () => {
               </Suspense>
             </EmailVerificationGuard>
           } />
-          <Route path="/settings" element={
-            <EmailVerificationGuard>
-              <LazySettings />
-            </EmailVerificationGuard>
-          } />
+
           <Route path="/my-dashboard" element={
             <EmailVerificationGuard>
               <Suspense fallback={<PageLoader />}>
@@ -239,6 +237,18 @@ export const OptimizedAppWrapper = () => {
             <EmailVerificationGuard>
               <LazyPromotionMaterials />
             </EmailVerificationGuard>
+          } />
+
+          {/* API Testing Route */}
+          <Route path="/test-openai" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyOpenAITest />
+            </Suspense>
+          } />
+          <Route path="/system-test" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazySystemTest />
+            </Suspense>
           } />
 
           {/* 404 routes */}

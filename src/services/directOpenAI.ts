@@ -65,15 +65,44 @@ export class DirectOpenAIService {
       const targetTone = toneMap[request.tone || 'professional'] || 'professional and engaging';
       const targetLength = lengthMap[request.length || 'medium'] || '800-1200 words';
 
-      let prompt = `Write a ${targetLength} blog post about "${request.keyword}".
+      // Use enhanced query patterns for superior content generation
+      const eliteQueryPatterns = [
+        `Create an authoritative ${targetLength} expert guide on ${request.keyword} that naturally integrates ${request.anchorText} as a valuable resource linking to ${request.targetUrl}`,
+        `Write a comprehensive ${targetLength} industry-leading analysis of ${request.keyword} featuring ${request.anchorText} as a strategic reference to ${request.targetUrl}`,
+        `Develop a ${targetLength} thought leadership piece on ${request.keyword} that seamlessly incorporates ${request.anchorText} directing readers to ${request.targetUrl}`
+      ];
 
-REQUIREMENTS:
-- Create engaging, informative content that provides real value to readers
-- Include a natural mention of "${request.anchorText}" that would logically link to ${request.targetUrl}
-- Structure with clear headings and subheadings
-- Write in a ${targetTone} tone
-- Include actionable insights and examples where relevant
-- Make the content SEO-friendly with natural keyword usage`;
+      const selectedPattern = eliteQueryPatterns[Math.floor(Math.random() * eliteQueryPatterns.length)];
+      console.log('🚀 Selected elite query pattern:', selectedPattern);
+
+      let prompt = `${selectedPattern}
+
+🎯 CONTENT EXCELLENCE FRAMEWORK:
+Create premium, viral-worthy content that positions this as the definitive resource on "${request.keyword}". This should be content that industry experts bookmark and reference.
+
+📊 AUTHORITY REQUIREMENTS:
+- Write ${targetLength} of expert-level, research-backed content
+- Include 3-5 specific data points, statistics, or case studies
+- Demonstrate deep subject matter expertise throughout
+- Use ${targetTone} tone while maintaining authoritative credibility
+- Create content that drives social shares and backlinks naturally
+- Strategic placement of "${request.anchorText}" linking to ${request.targetUrl} where it adds maximum value
+
+🏗️ PREMIUM STRUCTURE:
+- Compelling H1 that promises specific, valuable outcomes
+- Hook introduction with surprising insight or provocative question
+- 4-6 main sections (H2) that each solve specific problems
+- Actionable H3 subsections with concrete examples
+- Natural integration of "${request.anchorText}" → ${request.targetUrl}
+- Powerful conclusion with clear next steps
+
+🚀 ENGAGEMENT OPTIMIZATION:
+- Open with a statistic or insight that challenges conventional thinking
+- Include numbered frameworks, step-by-step processes, or checklists
+- Use psychological triggers and persuasive writing techniques
+- Add transition phrases that maintain reading momentum
+- Include rhetorical questions that increase engagement
+- End sections with compelling hooks to continue reading`;
 
       if (request.industry) {
         prompt += `\n- Focus on ${request.industry} industry context and examples`;
@@ -83,7 +112,39 @@ REQUIREMENTS:
         prompt += `\n- Additional requirements: ${request.additionalInstructions}`;
       }
 
-      prompt += `\n\nIMPORTANT: Do not include any HTML tags or markdown formatting. Write in plain text with clear paragraph breaks.\n\nPlease write the complete blog post now:`;
+      prompt += `
+
+💻 ENHANCED OUTPUT FORMAT:
+Return the content as well-structured HTML using semantic tags:
+- <h1> for the main title (include primary keyword "${request.keyword}")
+- <h2> for major sections with compelling, benefit-driven headlines
+- <h3> for subsections and detailed breakdowns
+- <p> for paragraphs with proper spacing and flow
+- <ul>/<ol> and <li> for actionable lists and frameworks
+- <strong> for key concepts and important phrases
+- <em> for emphasis and transitional elements
+- <blockquote> for highlighted insights, quotes, or key takeaways
+- <a href="${request.targetUrl}" target="_blank" rel="noopener noreferrer">${request.anchorText}</a> for the strategic backlink
+
+🎨 CONTENT EXCELLENCE STANDARDS:
+- Every paragraph must provide immediate value
+- Use specific examples and real-world applications
+- Include actionable advice readers can implement today
+- Write with confidence and authoritative expertise
+- Create content that feels like a conversation with an industry leader
+- Ensure the backlink enhances rather than interrupts the user experience
+
+📈 SEO & VIRALITY OPTIMIZATION:
+- Naturally incorporate "${request.keyword}" throughout the content
+- Use semantic keywords and related industry terminology
+- Create scannable content with clear visual hierarchy
+- Include social proof elements and credibility indicators
+- Write headlines that make readers want to share
+- End with a compelling call-to-action that drives engagement
+
+Generate content so valuable that readers feel they've discovered insider knowledge. This should be the kind of post that gets saved, shared, and referenced by industry professionals.`;
+
+      console.log('🎯 Enhanced prompt:', prompt.substring(0, 200) + '...');
 
       console.log('📝 Generated prompt:', prompt);
 

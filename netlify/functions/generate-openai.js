@@ -48,62 +48,100 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Get OpenAI API key from request or environment
-    const apiKey = requestApiKey || process.env.OPENAI_API_KEY;
+    // Get OpenAI API key from environment variables (secure server-side only)
+    const apiKey = process.env.OPENAI_API_KEY || process.env.OPEN_AI_API_KEY;
+    console.log('🔑 API Key check:', apiKey ? `Found (${apiKey.substring(0, 7)}...)` : 'Not found');
+
     if (!apiKey) {
+      console.error('❌ No OpenAI API key found in environment variables');
       return {
         statusCode: 500,
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
-          success: false, 
-          error: 'OpenAI API key not configured' 
+        body: JSON.stringify({
+          success: false,
+          error: 'OpenAI API key not configured in Netlify environment',
+          details: 'Please set OPENAI_API_KEY or OPEN_AI_API_KEY in Netlify environment variables'
         })
       };
     }
 
-    const systemPrompt = `You are an expert SEO content writer specializing in creating high-quality, engaging blog posts that rank well in search engines. Focus on step-by-step instructions, practical tips, and actionable advice. Use ${tone} tone throughout the article. Always create original, valuable content that genuinely helps readers and ensures natural, contextual backlink integration.`;
+    const systemPrompt = `You are an elite SEO content strategist and copywriter with deep expertise in creating viral, high-ranking blog content. Your writing style combines authoritative expertise with engaging storytelling.
 
-    const userPrompt = `Create a comprehensive ${wordCount}-word ${contentType} blog post about "${keyword}" that naturally incorporates a backlink.
+KEY EXPERTISE:
+- Write compelling, data-driven content that ranks #1 on Google
+- Master storyteller who hooks readers from the first sentence
+- Expert in natural backlink integration that adds genuine value
+- Create content that drives engagement, shares, and conversions
+- Use ${tone} tone while maintaining authority and trustworthiness
 
-CONTENT REQUIREMENTS:
-- Write exactly ${wordCount} words of high-quality, original content
-- Focus on "${keyword}" as the main topic
-- Include practical, actionable advice
-- Structure with proper headings (H1, H2, H3)
-- Natural integration of anchor text "${anchorText || keyword}" linking to ${url}
+CONTENT PHILOSOPHY:
+- Every sentence must provide value to the reader
+- Use psychological triggers and persuasive writing techniques
+- Include specific examples, case studies, and actionable insights
+- Write with clarity, confidence, and compelling narrative flow
+- Integrate backlinks so naturally that they enhance the user experience`;
 
-CONTENT STRUCTURE:
-1. Compelling H1 title with the primary keyword
-2. Engaging introduction that hooks the reader
-3. 4-6 main sections with H2 headings
-4. Subsections with H3 headings where appropriate
-5. Natural placement of backlink: "${anchorText || keyword}" → ${url}
-6. Strong conclusion with actionable takeaways
+    const userPrompt = `Create an exceptional ${wordCount}-word ${contentType} blog post about "${keyword}" that will rank #1 on Google and drive massive engagement.
 
-SEO OPTIMIZATION:
-- Include primary keyword "${keyword}" naturally throughout
-- Use semantic keywords and related terms
-- Include numbered lists or bullet points
+🎯 CONTENT MISSION:
+Write a comprehensive, authoritative guide that becomes the definitive resource on "${keyword}". Make readers bookmark this post and share it across social media.
 
-BACKLINK INTEGRATION:
-- Place the backlink "${anchorText || keyword}" naturally within the content
-- Make the link contextually relevant to the surrounding text
-- Ensure it adds value to the reader
+📊 CONTENT REQUIREMENTS:
+- Target exactly ${wordCount} words of premium, original content
+- Hook readers with an irresistible opening that makes them scroll
+- Include 3-5 data points, statistics, or expert insights
+- Write scannable content with clear headings and visual breaks
+- Natural integration of "${anchorText || keyword}" linking to ${url}
+- End with a compelling call-to-action that drives engagement
 
-OUTPUT FORMAT:
-Return the content as HTML with proper tags:
-- Use <h1> for main title
-- Use <h2> for main sections
-- Use <h3> for subsections
-- Use <p> for paragraphs
-- Use <ul>/<ol> and <li> for lists
-- Use <strong> for emphasis
-- Use <a href="${url}" target="_blank" rel="noopener noreferrer">${anchorText || keyword}</a> for the backlink
+🏗️ ENHANCED STRUCTURE:
+1. **Attention-Grabbing H1**: Include "${keyword}" and promise a specific benefit
+2. **Hook Introduction**: Start with a surprising statistic, question, or story (100-150 words)
+3. **Value-Packed Sections** (4-6 H2 headings):
+   - Each section solves a specific problem
+   - Include actionable tips, examples, or case studies
+   - Use H3 subheadings to break up longer sections
+4. **Strategic Backlink Placement**: Integrate "${anchorText || keyword}" → ${url} where it adds genuine value
+5. **Powerful Conclusion**: Summarize key insights and include next steps
 
-Focus on creating valuable, informative content that genuinely helps readers.`;
+🚀 SEO & ENGAGEMENT OPTIMIZATION:
+- Naturally include "${keyword}" in H1, introduction, and 2-3 times throughout
+- Use semantic keywords and LSI terms related to "${keyword}"
+- Include numbered lists, bullet points, and actionable frameworks
+- Write compelling meta descriptions within content
+- Add transition phrases that improve readability
+- Include rhetorical questions to increase engagement
+
+🔗 STRATEGIC BACKLINK INTEGRATION:
+- Place "${anchorText || keyword}" linking to ${url} where it provides maximum value
+- Context should make the link feel like a natural extension of the content
+- The link should solve a problem or provide additional resources mentioned in the content
+- Ensure the backlink enhances rather than interrupts the reading experience
+
+💻 ENHANCED HTML OUTPUT:
+Structure the content with these semantic HTML tags:
+- <h1> for the main title (include primary keyword)
+- <h2> for major sections
+- <h3> for subsections
+- <p> for paragraphs with proper line spacing
+- <ul> or <ol> with <li> for lists
+- <strong> for key phrases and important concepts
+- <em> for emphasis and transitional phrases
+- <blockquote> for quotes or highlighted insights
+- <a href="${url}" target="_blank" rel="noopener noreferrer">${anchorText || keyword}</a> for the strategic backlink
+
+🎨 CONTENT EXCELLENCE STANDARDS:
+- Write with authority and confidence
+- Use active voice and strong action verbs
+- Include specific examples and real-world applications
+- Create content that solves problems and provides immediate value
+- Maintain reader engagement from start to finish
+- Make every paragraph contribute to the overall narrative
+
+Create content so valuable that readers feel they've discovered a hidden gem. This should be the kind of post that gets bookmarked, shared, and referenced by others in the industry.`;
 
     console.log('🚀 Starting OpenAI generation via Netlify function...');
 

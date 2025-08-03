@@ -30,6 +30,20 @@ export function OpenAIConnectionTest() {
         })
       });
 
+      // Handle 404 specifically
+      if (response.status === 404) {
+        setTestResult({
+          status: 'error',
+          message: 'Netlify function not found',
+          details: {
+            deployment: 'Function may not be deployed in this environment',
+            status: 404,
+            error: 'check-ai-provider function not available'
+          }
+        });
+        return;
+      }
+
       if (response.ok) {
         const data = await response.json();
         console.log('✅ OpenAI connection test successful via Netlify function!');
@@ -54,23 +68,46 @@ export function OpenAIConnectionTest() {
         }
       } else {
         console.error('❌ Netlify function failed:', response.status);
+
+        // Try to get error details from response
+        let errorMessage = 'Unknown error';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error?.message || errorData.message || `HTTP ${response.status}`;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+
         setTestResult({
           status: 'error',
           message: `Netlify function error: ${response.status}`,
           details: {
             deployment: 'Check Netlify function deployment',
             status: response.status,
-            error: errorData.error?.message || 'Unknown error'
+            error: errorMessage
           }
         });
       }
     } catch (error) {
       console.error('❌ Connection test error:', error);
-      setTestResult({
-        status: 'error',
-        message: `Connection test failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        details: { error: error instanceof Error ? error.message : 'Unknown error' }
-      });
+
+      // If we're in development and got a network error, show a more helpful message
+      if (error instanceof Error && error.message.includes('fetch')) {
+        setTestResult({
+          status: 'error',
+          message: 'Development Environment - Netlify functions not available',
+          details: {
+            error: 'This test requires deployed Netlify functions. In development, API calls are handled by the main application.',
+            development: true
+          }
+        });
+      } else {
+        setTestResult({
+          status: 'error',
+          message: `Connection test failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          details: { error: error instanceof Error ? error.message : 'Unknown error' }
+        });
+      }
     }
   };
 

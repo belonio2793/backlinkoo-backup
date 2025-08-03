@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Header } from '@/components/Header';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
@@ -288,69 +289,7 @@ export function SuperEnhancedBlogListing() {
       </div>
 
       {/* Header with glass effect */}
-      <header className="relative border-b border-white/20 bg-white/80 backdrop-blur-xl sticky top-0 z-50 shadow-lg shadow-blue-500/5">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 cursor-pointer group" onClick={() => navigate('/')}>
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl">
-                  <Infinity className="h-8 w-8 text-white" />
-                </div>
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent">
-                  Backlink ∞
-                </h1>
-                <p className="text-sm text-gray-600 font-medium">Premium Blog Network</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              {user ? (
-                <>
-                  <Button
-                    onClick={() => navigate("/dashboard")}
-                    variant="outline"
-                    className="border-2 border-gray-200 hover:border-blue-300 bg-white/80 backdrop-blur-sm"
-                  >
-                    <Activity className="mr-2 h-4 w-4" />
-                    Dashboard
-                  </Button>
-                  <Button
-                    onClick={() => navigate("/blog/seo-generator")}
-                    variant="outline"
-                    className="border-2 border-purple-200 hover:border-purple-400 bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 text-purple-700 hover:text-purple-800 shadow-md hover:shadow-lg transition-all duration-300"
-                  >
-                    <Target className="mr-2 h-4 w-4" />
-                    SEO Generator
-                  </Button>
-                  <Button
-                    onClick={() => navigate("/blog/create")}
-                    className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create Post
-                    <Sparkles className="ml-2 h-4 w-4" />
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="ghost" onClick={() => navigate("/login")} className="hover:bg-white/60">
-                    Sign In
-                  </Button>
-                  <Button 
-                    onClick={() => navigate("/login")}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                  >
-                    Get Started
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="relative container mx-auto px-6 py-12">
         <div className="max-w-7xl mx-auto">
