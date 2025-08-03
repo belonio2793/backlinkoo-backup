@@ -247,6 +247,16 @@ export function BeautifulBlogPost() {
     }
   };
 
+  const cleanTitle = (title: string) => {
+    if (!title) return '';
+    // Remove **H1**: prefix and other markdown artifacts from title
+    return title
+      .replace(/^\*\*H1\*\*:\s*/i, '')
+      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '')
+      .replace(/^#{1,6}\s+/, '')
+      .trim();
+  };
+
   const getTimeRemaining = (expiresAt: string) => {
     const now = new Date();
     const expiry = new Date(expiresAt);
