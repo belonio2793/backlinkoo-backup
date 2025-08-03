@@ -1,0 +1,550 @@
+/* Elite Blog Template Styles - Premium Design System */
+
+/* Enhanced Typography with Premium Features */
+.elite-blog-content {
+  font-feature-settings: "liga" 1, "onum" 1, "kern" 1, "swsh" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.9;
+  color: rgb(31 41 55);
+  font-size: 1.125rem;
+}
+
+/* Magical Drop Cap with Animation */
+.elite-blog-content p:first-of-type:first-letter {
+  float: left;
+  font-size: 5.5rem;
+  line-height: 0.75;
+  margin: 0.15em 0.15em 0.1em 0;
+  font-weight: 900;
+  background: linear-gradient(135deg, rgb(59 130 246), rgb(147 51 234), rgb(219 39 119));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: 'Georgia', serif;
+  position: relative;
+  animation: dropCapFloat 3s ease-in-out infinite;
+}
+
+.elite-blog-content p:first-of-type:first-letter::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+  border-radius: 20px;
+  z-index: -1;
+  filter: blur(20px);
+  animation: dropCapGlow 3s ease-in-out infinite;
+}
+
+/* Premium Heading Styles */
+.elite-blog-content h1 {
+  font-size: 3.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, rgb(17 24 39), rgb(59 130 246), rgb(147 51 234));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 3rem 0 2rem 0;
+  line-height: 1.1;
+  position: relative;
+  letter-spacing: -0.02em;
+}
+
+.elite-blog-content h1::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 0;
+  width: 120px;
+  height: 6px;
+  background: linear-gradient(90deg, rgb(59 130 246), rgb(147 51 234), rgb(219 39 119));
+  border-radius: 3px;
+  animation: headingUnderline 0.8s ease-out forwards;
+}
+
+.elite-blog-content h2 {
+  position: relative;
+  scroll-margin-top: 120px;
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, rgb(17 24 39), rgb(59 130 246));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 4rem 0 1.5rem 0;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.elite-blog-content h2::before {
+  content: '';
+  position: absolute;
+  left: -40px;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  background: linear-gradient(to bottom, rgb(59 130 246), rgb(147 51 234));
+  border-radius: 4px;
+  animation: shimmerGlow 2s infinite;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.elite-blog-content h3 {
+  scroll-margin-top: 120px;
+  position: relative;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: rgb(30 41 59);
+  margin: 3rem 0 1.25rem 0;
+  line-height: 1.3;
+}
+
+.elite-blog-content h3::before {
+  content: '§';
+  position: absolute;
+  left: -30px;
+  color: rgb(59 130 246);
+  font-weight: 300;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+  opacity: 0.6;
+}
+
+.elite-blog-content h3:hover::before {
+  opacity: 1;
+  transform: scale(1.2);
+  color: rgb(147 51 234);
+}
+
+/* Enhanced Paragraphs */
+.elite-blog-content p {
+  margin: 2rem 0;
+  font-size: 1.25rem;
+  line-height: 1.9;
+  color: rgb(51 65 85);
+  position: relative;
+}
+
+.elite-blog-content p:hover {
+  color: rgb(30 41 59);
+  transition: color 0.3s ease;
+}
+
+/* Premium Lists with Enhanced Styling */
+.elite-blog-content ul,
+.elite-blog-content ol {
+  margin: 2.5rem 0;
+  padding-left: 2rem;
+}
+
+.elite-blog-content li {
+  position: relative;
+  margin: 1rem 0;
+  font-size: 1.25rem;
+  line-height: 1.8;
+  color: rgb(51 65 85);
+}
+
+.elite-blog-content ul li::marker {
+  content: '';
+}
+
+.elite-blog-content ul li::before {
+  content: '→';
+  position: absolute;
+  left: -2rem;
+  color: rgb(59 130 246);
+  font-weight: 600;
+  font-size: 1.2em;
+  transition: all 0.3s ease;
+}
+
+.elite-blog-content ul li:hover::before {
+  color: rgb(147 51 234);
+  transform: translateX(5px) scale(1.1);
+}
+
+.elite-blog-content ol li::marker {
+  color: rgb(59 130 246);
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+/* Stunning Blockquotes */
+.elite-blog-content blockquote {
+  position: relative;
+  font-style: italic;
+  font-size: 1.5rem;
+  margin: 3.5rem 0;
+  padding: 3rem 3rem 3rem 4rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(147, 51, 234, 0.05));
+  border-left: 8px solid transparent;
+  border-image: linear-gradient(to bottom, rgb(59 130 246), rgb(147 51 234)) 1;
+  border-radius: 0 20px 20px 0;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.elite-blog-content blockquote::before {
+  content: '"';
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  font-size: 8rem;
+  background: linear-gradient(135deg, rgb(59 130 246), rgb(147 51 234));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  opacity: 0.3;
+  line-height: 1;
+  font-family: 'Georgia', serif;
+  font-weight: 900;
+}
+
+.elite-blog-content blockquote::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8));
+  pointer-events: none;
+}
+
+/* Premium Code Blocks */
+.elite-blog-content code:not(pre code) {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+  color: rgb(147 51 234);
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.95em;
+  font-weight: 600;
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.elite-blog-content code:not(pre code)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s ease;
+}
+
+.elite-blog-content code:not(pre code):hover::before {
+  left: 100%;
+}
+
+.elite-blog-content pre {
+  background: linear-gradient(135deg, rgb(15 23 42), rgb(30 41 59));
+  color: rgb(226 232 240);
+  padding: 3rem;
+  border-radius: 20px;
+  overflow-x: auto;
+  position: relative;
+  margin: 3rem 0;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.elite-blog-content pre::before {
+  content: 'CODE';
+  position: absolute;
+  top: 1rem;
+  right: 2rem;
+  font-size: 0.75rem;
+  color: rgb(156 163 175);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+/* Enhanced Tables */
+.elite-blog-content table {
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 3rem 0;
+  width: 100%;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.elite-blog-content th {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+  padding: 1.5rem 2rem;
+  text-align: left;
+  font-weight: 700;
+  color: rgb(30 41 59);
+  border-bottom: 3px solid rgba(59, 130, 246, 0.2);
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.elite-blog-content td {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.8);
+  font-size: 1.125rem;
+  line-height: 1.7;
+  transition: all 0.3s ease;
+}
+
+.elite-blog-content tr:hover td {
+  background: rgba(59, 130, 246, 0.03);
+  transform: scale(1.01);
+}
+
+/* Premium Links */
+.elite-blog-content a {
+  color: rgb(59 130 246);
+  text-decoration: none;
+  position: relative;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+  padding: 0.2rem 0.4rem;
+}
+
+.elite-blog-content a::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgb(59 130 246), rgb(147 51 234));
+  transition: width 0.3s ease;
+}
+
+.elite-blog-content a:hover {
+  color: rgb(147 51 234);
+  background: rgba(59, 130, 246, 0.05);
+  transform: translateY(-2px);
+}
+
+.elite-blog-content a:hover::before {
+  width: 100%;
+}
+
+/* Enhanced Images */
+.elite-blog-content img {
+  margin: 3rem 0;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  transition: all 0.5s ease;
+  width: 100%;
+  height: auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.elite-blog-content img:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 35px 70px rgba(0, 0, 0, 0.25);
+}
+
+/* Premium Animations */
+@keyframes dropCapFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-2px) rotate(0.5deg); }
+  75% { transform: translateY(2px) rotate(-0.5deg); }
+}
+
+@keyframes dropCapGlow {
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(1.05); }
+}
+
+@keyframes headingUnderline {
+  from { width: 0; opacity: 0; }
+  to { width: 120px; opacity: 1; }
+}
+
+@keyframes shimmerGlow {
+  0%, 100% { opacity: 0.7; box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+  50% { opacity: 1; box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Responsive Enhancements */
+@media (max-width: 1024px) {
+  .elite-blog-content {
+    font-size: 1.125rem;
+  }
+  
+  .elite-blog-content h1 {
+    font-size: 2.5rem;
+  }
+  
+  .elite-blog-content h2 {
+    font-size: 2rem;
+  }
+  
+  .elite-blog-content h3 {
+    font-size: 1.5rem;
+  }
+  
+  .elite-blog-content h2::before {
+    left: -20px;
+    width: 4px;
+  }
+  
+  .elite-blog-content h3::before {
+    left: -20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .elite-blog-content p:first-of-type:first-letter {
+    font-size: 4rem;
+    margin: 0.1em 0.1em 0 0;
+  }
+  
+  .elite-blog-content blockquote {
+    padding: 2rem 2rem 2rem 3rem;
+    font-size: 1.25rem;
+  }
+  
+  .elite-blog-content blockquote::before {
+    font-size: 5rem;
+    top: 1rem;
+    left: 1rem;
+  }
+  
+  .elite-blog-content pre {
+    padding: 2rem;
+  }
+  
+  .elite-blog-content th,
+  .elite-blog-content td {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .elite-blog-content {
+    font-size: 12pt;
+    line-height: 1.6;
+    color: black;
+  }
+  
+  .elite-blog-content h1,
+  .elite-blog-content h2,
+  .elite-blog-content h3 {
+    color: black;
+    background: none;
+    -webkit-text-fill-color: initial;
+    page-break-after: avoid;
+  }
+  
+  .elite-blog-content img {
+    max-width: 100%;
+    page-break-inside: avoid;
+    box-shadow: none;
+  }
+  
+  .elite-blog-content blockquote {
+    background: none;
+    border-left: 3px solid black;
+    page-break-inside: avoid;
+  }
+  
+  .elite-blog-content a {
+    color: black;
+    text-decoration: underline;
+    background: none;
+  }
+}
+
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .elite-blog-content img:hover {
+    transform: none;
+  }
+  
+  .elite-blog-content a:hover {
+    transform: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .elite-blog-content h1,
+  .elite-blog-content h2 {
+    background: none;
+    -webkit-text-fill-color: initial;
+    color: black;
+  }
+  
+  .elite-blog-content a {
+    background: none;
+    text-decoration: underline;
+    color: blue;
+  }
+  
+  .elite-blog-content blockquote {
+    background: white;
+    border: 2px solid black;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .elite-blog-content {
+    color: rgb(229 231 235);
+  }
+  
+  .elite-blog-content h2,
+  .elite-blog-content h3 {
+    color: rgb(243 244 246);
+  }
+  
+  .elite-blog-content p {
+    color: rgb(209 213 219);
+  }
+  
+  .elite-blog-content blockquote {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+    color: rgb(229 231 235);
+  }
+  
+  .elite-blog-content table {
+    background: rgb(31 41 55);
+  }
+  
+  .elite-blog-content th {
+    background: linear-gradient(135deg, rgb(55 65 81), rgb(75 85 99));
+    color: rgb(229 231 235);
+  }
+  
+  .elite-blog-content td {
+    color: rgb(209 213 219);
+    border-bottom-color: rgb(75 85 99);
+  }
+}
