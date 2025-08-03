@@ -51,20 +51,26 @@ if (typeof window !== 'undefined' && (window.ethereum || import.meta.env.PROD)) 
 
   // Global error handler for uncaught ethereum conflicts
   window.addEventListener('error', (event) => {
-    if (event.error?.message?.includes('Cannot redefine property: ethereum') ||
-        event.error?.message?.includes('evmAsk') ||
-        event.error?.message?.includes('defineProperty')) {
-      console.warn('Prevented ethereum conflict error:', event.error.message);
+    const message = event.error?.message || '';
+    if (message.includes('Cannot redefine property: ethereum') ||
+        message.includes('evmAsk') ||
+        message.includes('defineProperty') ||
+        message.includes('chrome-extension://') ||
+        event.filename?.includes('chrome-extension://')) {
+      console.warn('🔒 Crypto wallet extension conflict handled:', message);
       event.preventDefault();
+      event.stopPropagation();
       return false;
     }
   });
 
   window.addEventListener('unhandledrejection', (event) => {
-    if (event.reason?.message?.includes('Cannot redefine property: ethereum') ||
-        event.reason?.message?.includes('evmAsk') ||
-        event.reason?.message?.includes('defineProperty')) {
-      console.warn('Prevented ethereum promise rejection:', event.reason.message);
+    const message = event.reason?.message || '';
+    if (message.includes('Cannot redefine property: ethereum') ||
+        message.includes('evmAsk') ||
+        message.includes('defineProperty') ||
+        message.includes('chrome-extension://')) {
+      console.warn('🔒 Crypto wallet promise rejection handled:', message);
       event.preventDefault();
     }
   });
