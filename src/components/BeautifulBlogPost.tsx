@@ -37,6 +37,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { blogService } from '@/services/blogService';
+import { ContentFormatter } from '@/utils/contentFormatter';
 import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -246,6 +247,19 @@ export function BeautifulBlogPost() {
     }
   };
 
+  const cleanTitle = (title: string) => {
+    if (!title) return '';
+    // Remove all markdown artifacts from title including ** wrappers
+    return title
+      .replace(/^\*\*H1\*\*:\s*/i, '')
+      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
+      .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
+      .replace(/\*\*/g, '') // Remove any remaining ** symbols
+      .replace(/\*/g, '') // Remove any remaining * symbols
+      .replace(/^#{1,6}\s+/, '')
+      .trim();
+  };
+
   const getTimeRemaining = (expiresAt: string) => {
     const now = new Date();
     const expiry = new Date(expiresAt);
@@ -336,7 +350,7 @@ export function BeautifulBlogPost() {
         <Button
           variant="outline"
           size="icon"
-          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-xl transition-all duration-300"
+          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/40 hover:border-white/50 hover:shadow-xl transition-all duration-300 text-gray-700 hover:text-gray-900"
           onClick={() => setIsBookmarked(!isBookmarked)}
         >
           {isBookmarked ? (
@@ -345,11 +359,11 @@ export function BeautifulBlogPost() {
             <Bookmark className="h-5 w-5" />
           )}
         </Button>
-        
+
         <Button
           variant="outline"
           size="icon"
-          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-xl transition-all duration-300"
+          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/40 hover:border-white/50 hover:shadow-xl transition-all duration-300 text-gray-700 hover:text-gray-900"
           onClick={() => setIsLiked(!isLiked)}
         >
           <Heart className={`h-5 w-5 ${isLiked ? 'text-red-500 fill-current' : ''}`} />
@@ -358,7 +372,7 @@ export function BeautifulBlogPost() {
         <Button
           variant="outline"
           size="icon"
-          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-xl transition-all duration-300"
+          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/40 hover:border-white/50 hover:shadow-xl transition-all duration-300 text-gray-700 hover:text-gray-900"
           onClick={sharePost}
         >
           <Share2 className="h-5 w-5" />
@@ -440,7 +454,7 @@ export function BeautifulBlogPost() {
 
               {/* Title */}
               <h1 className="beautiful-blog-title text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight">
-                {blogPost.title}
+                {cleanTitle(blogPost.title)}
               </h1>
 
               {/* Meta Description */}
@@ -472,38 +486,7 @@ export function BeautifulBlogPost() {
                 </div>
               </div>
 
-              {/* Expiration Warning */}
-              {!blogPost.claimed && blogPost.expires_at && (
-                <div className="beautiful-warning max-w-2xl mx-auto p-6 mb-8 shadow-sm">
-                  <div className="flex items-center justify-center gap-3 text-amber-800 mb-2">
-                    <Timer className="h-5 w-5" />
-                    <span className="text-lg font-semibold">
-                      ⏰ {getTimeRemaining(blogPost.expires_at)}
-                    </span>
-                  </div>
-                  <p className="text-amber-700 text-center">
-                    This post will be automatically deleted when the timer expires. Claim it to save permanently!
-                  </p>
-                </div>
-              )}
 
-              {/* Target URL */}
-              <div className="beautiful-info max-w-2xl mx-auto flex items-center gap-4 p-6 mb-8 shadow-sm">
-                <div className="flex items-center gap-2 flex-1">
-                  <Target className="h-5 w-5 text-blue-600" />
-                  <span className="text-blue-700 font-semibold">Target URL:</span>
-                </div>
-                <a
-                  href={blogPost.target_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors duration-300 group"
-                >
-                  <Globe className="h-4 w-4" />
-                  <span className="truncate max-w-xs">{blogPost.target_url}</span>
-                  <ExternalLink className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
-                </a>
-              </div>
             </header>
 
             {/* Action Buttons */}
@@ -568,8 +551,14 @@ export function BeautifulBlogPost() {
             <div className="prose prose-lg max-w-none">
               <div className="beautiful-card p-8 md:p-12">
                 <div
-                  className="beautiful-blog-content beautiful-prose prose prose-xl max-w-none"
-                  dangerouslySetInnerHTML={{ __html: blogPost.content }}
+                  className="beautiful-blog-content beautiful-prose prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic"
+                  dangerouslySetInnerHTML={{
+                    __html: ContentFormatter.addSectionSpacing(
+                      ContentFormatter.sanitizeContent(
+                        ContentFormatter.formatBlogContent(blogPost.content || '', blogPost.title)
+                      )
+                    )
+                  }}
                 />
               </div>
             </div>
@@ -614,6 +603,42 @@ export function BeautifulBlogPost() {
                     Copy Link
                   </Button>
                 </div>
+              </div>
+            </div>
+
+            {/* Post Information Section */}
+            <div className="mt-12 space-y-6">
+              {/* Expiration Warning */}
+              {!blogPost.claimed && blogPost.expires_at && (
+                <div className="beautiful-warning max-w-2xl mx-auto p-6 shadow-sm">
+                  <div className="flex items-center justify-center gap-3 text-amber-800 mb-2">
+                    <Timer className="h-5 w-5" />
+                    <span className="text-lg font-semibold">
+                      ⏰ {getTimeRemaining(blogPost.expires_at)}
+                    </span>
+                  </div>
+                  <p className="text-amber-700 text-center">
+                    This post will be automatically deleted when the timer expires. Claim it to save permanently!
+                  </p>
+                </div>
+              )}
+
+              {/* Target URL */}
+              <div className="beautiful-info max-w-2xl mx-auto flex items-center gap-4 p-6 shadow-sm">
+                <div className="flex items-center gap-2 flex-1">
+                  <Target className="h-5 w-5 text-blue-600" />
+                  <span className="text-blue-700 font-semibold">Target URL:</span>
+                </div>
+                <a
+                  href={blogPost.target_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors duration-300 group"
+                >
+                  <Globe className="h-4 w-4" />
+                  <span className="truncate max-w-xs">{blogPost.target_url}</span>
+                  <ExternalLink className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+                </a>
               </div>
             </div>
           </article>
