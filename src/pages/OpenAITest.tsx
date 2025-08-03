@@ -58,6 +58,9 @@ export default function OpenAITest() {
       i === queryIndex ? { ...q, status: 'testing' as const, result: undefined, error: undefined } : q
     ));
 
+    // Small delay to ensure state update and avoid race conditions
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     try {
       const query = queries[queryIndex];
       const processedTemplate = query.template
