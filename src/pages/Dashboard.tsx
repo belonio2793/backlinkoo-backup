@@ -53,7 +53,7 @@ import { RankingTracker } from "@/components/RankingTracker";
 import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
 import AdminVerificationQueue from "@/components/AdminVerificationQueue";
 import SEOToolsSection from "@/components/SEOToolsSection";
-import { ProfileSettings } from "@/components/ProfileSettings";
+
 import { ApiConfigStatus } from "@/components/ApiConfigStatus";
 import { TrialBlogShowcase } from "@/components/TrialBlogShowcase";
 import { TrialBlogPostsDisplay as NewTrialBlogPostsDisplay } from "@/components/TrialBlogPostsDisplay";
@@ -1607,10 +1607,11 @@ const Dashboard = () => {
           <DialogHeader>
             <DialogTitle>Profile Settings</DialogTitle>
           </DialogHeader>
-          <ProfileSettings
-            user={user}
-            onClose={() => setIsProfileOpen(false)}
-          />
+          <div className="p-6">
+            <div className="text-center text-gray-500">
+              Profile settings have been removed. User preferences are now integrated into blog templates.
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
