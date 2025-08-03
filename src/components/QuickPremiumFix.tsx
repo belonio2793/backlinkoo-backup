@@ -20,34 +20,18 @@ export const QuickPremiumFix = () => {
       // Skip Netlify functions entirely and use direct Supabase approach
       await handleDirectPremiumFix();
     } catch (error: any) {
-      console.error('❌ Quick fix error:', error);
+      console.error('❌ Direct premium fix error:', error);
 
       let errorMessage = "Failed to fix premium status";
 
-      if (error.name === 'AbortError') {
-        errorMessage = "Request timed out - trying direct approach...";
-        // Try direct Supabase approach as fallback
-        try {
-          await handleDirectPremiumFix();
-          return; // Success with direct approach
-        } catch (directError) {
-          console.error('❌ Direct fix also failed:', directError);
-          errorMessage = "Both network and direct approaches failed";
-        }
-      } else if (error.message?.includes('HTTP error')) {
-        errorMessage = `Server error: ${error.message} - trying direct approach...`;
-        // Try direct approach for HTTP errors too
-        try {
-          await handleDirectPremiumFix();
-          return; // Success with direct approach
-        } catch (directError) {
-          console.error('❌ Direct fix also failed:', directError);
-          errorMessage = "Network function unavailable, direct approach failed";
-        }
-      } else if (error.message?.includes('JSON')) {
-        errorMessage = "Invalid response from server";
-      } else if (error.message?.includes('body stream already read')) {
-        errorMessage = "Network error - please refresh and try again";
+      if (error.message?.includes('No authenticated user')) {
+        errorMessage = "Please log in and try again";
+      } else if (error.message?.includes('Profile update failed')) {
+        errorMessage = "Database access error - please contact support";
+      } else if (error.message?.includes('row-level security')) {
+        errorMessage = "Database permission error - please contact support";
+      } else {
+        errorMessage = `Database error: ${error.message}`;
       }
 
       toast({
