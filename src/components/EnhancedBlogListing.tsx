@@ -26,7 +26,8 @@ import {
   Filter,
   TrendingUp,
   BookOpen,
-  Infinity
+  Infinity,
+  ChevronDown
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
