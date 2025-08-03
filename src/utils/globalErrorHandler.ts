@@ -151,7 +151,10 @@ export class GlobalErrorHandler {
    */
   private handleRLSRecursionError(error: any, source: string): void {
     console.error(`🚨 CRITICAL: RLS Recursion Detected (${source}):`, error.message);
-    console.error('This will prevent login and database operations. Redirecting to fix page...');
+    console.error('This will prevent login and database operations. Applying emergency fix...');
+
+    // Apply emergency fix immediately
+    this.applyEmergencyRLSFix();
 
     // Show a notification to the user
     const notification = document.createElement('div');
@@ -169,43 +172,64 @@ export class GlobalErrorHandler {
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         font-family: system-ui, -apple-system, sans-serif;
       ">
-        <div style="font-weight: bold; margin-bottom: 8px;">🚨 Database Error Detected</div>
+        <div style="font-weight: bold; margin-bottom: 8px;">🚨 Database Error - Fixing...</div>
         <div style="font-size: 14px; margin-bottom: 12px;">
-          Infinite recursion in database policies is preventing login.
+          Applying emergency fix for infinite recursion. Page will refresh automatically.
         </div>
-        <button onclick="window.location.href='/emergency/rls-fix'" style="
-          background: white;
-          color: #dc2626;
-          border: none;
-          padding: 8px 16px;
-          border-radius: 4px;
-          font-weight: bold;
-          cursor: pointer;
+        <div style="
+          width: 100%;
+          height: 4px;
+          background: rgba(255,255,255,0.3);
+          border-radius: 2px;
+          overflow: hidden;
         ">
-          Fix Now
-        </button>
-        <button onclick="this.parentElement.parentElement.remove()" style="
-          background: transparent;
-          color: white;
-          border: 1px solid white;
-          padding: 8px 16px;
-          border-radius: 4px;
-          margin-left: 8px;
-          cursor: pointer;
-        ">
-          Dismiss
-        </button>
+          <div style="
+            width: 0%;
+            height: 100%;
+            background: white;
+            animation: progress 3s ease-out forwards;
+          "></div>
+        </div>
       </div>
+      <style>
+        @keyframes progress {
+          to { width: 100%; }
+        }
+      </style>
     `;
     document.body.appendChild(notification);
 
-    // Auto-redirect after 5 seconds if user doesn't click
+    // Remove notification and refresh after fix
     setTimeout(() => {
-      if (window.location.pathname !== '/emergency/rls-fix') {
-        console.log('🔄 Auto-redirecting to RLS fix page...');
-        window.location.href = '/emergency/rls-fix';
+      notification.remove();
+      window.location.reload();
+    }, 3000);
+  }
+
+  /**
+   * Apply emergency RLS fix
+   */
+  private async applyEmergencyRLSFix(): Promise<void> {
+    try {
+      console.log('🔧 Applying emergency RLS fix...');
+
+      const response = await fetch('/.netlify/functions/fix-rls-recursion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('✅ Emergency RLS fix applied successfully');
+      } else {
+        console.error('❌ Emergency RLS fix failed:', result.error);
       }
-    }, 5000);
+    } catch (error) {
+      console.error('❌ Emergency RLS fix error:', error);
+    }
   }
 
   /**
