@@ -19,7 +19,8 @@ export class ContentFormatter {
       .replace(/[ \t]+/g, ' ')
       .trim();
 
-    // Process the content
+    // Process the content in correct order
+    formattedContent = this.convertMarkdownToHtml(formattedContent);
     formattedContent = this.processHeadings(formattedContent);
     formattedContent = this.processParagraphs(formattedContent);
     formattedContent = this.processLists(formattedContent);
