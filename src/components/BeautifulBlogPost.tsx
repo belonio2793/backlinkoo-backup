@@ -484,38 +484,7 @@ export function BeautifulBlogPost() {
                 </div>
               </div>
 
-              {/* Expiration Warning */}
-              {!blogPost.claimed && blogPost.expires_at && (
-                <div className="beautiful-warning max-w-2xl mx-auto p-6 mb-8 shadow-sm">
-                  <div className="flex items-center justify-center gap-3 text-amber-800 mb-2">
-                    <Timer className="h-5 w-5" />
-                    <span className="text-lg font-semibold">
-                      ⏰ {getTimeRemaining(blogPost.expires_at)}
-                    </span>
-                  </div>
-                  <p className="text-amber-700 text-center">
-                    This post will be automatically deleted when the timer expires. Claim it to save permanently!
-                  </p>
-                </div>
-              )}
 
-              {/* Target URL */}
-              <div className="beautiful-info max-w-2xl mx-auto flex items-center gap-4 p-6 mb-8 shadow-sm">
-                <div className="flex items-center gap-2 flex-1">
-                  <Target className="h-5 w-5 text-blue-600" />
-                  <span className="text-blue-700 font-semibold">Target URL:</span>
-                </div>
-                <a
-                  href={blogPost.target_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors duration-300 group"
-                >
-                  <Globe className="h-4 w-4" />
-                  <span className="truncate max-w-xs">{blogPost.target_url}</span>
-                  <ExternalLink className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
-                </a>
-              </div>
             </header>
 
             {/* Action Buttons */}
