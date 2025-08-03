@@ -71,6 +71,8 @@ export class ContentFormatter {
    */
   private static convertMarkdownToHtml(content: string): string {
     return content
+      // Convert markdown links [text](url) to <a> tags
+      .replace(/\[([^\]]+?)\]\(([^)]+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
       // Convert **H1**: patterns to <h1> tags
       .replace(/\*\*H1\*\*:\s*(.+?)(?=\n|$)/gi, '<h1>$1</h1>')
       // Convert **text**: patterns at start of line to <h2> tags (common heading pattern)
