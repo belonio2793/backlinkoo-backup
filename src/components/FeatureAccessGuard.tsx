@@ -4,8 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Crown, Lock, Zap } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import SubscriptionService, { type SubscriptionStatus } from '@/services/subscriptionService';
-import { PremiumCheckoutModal } from '@/components/PremiumCheckoutModal';
-import { useToast } from '@/hooks/use-toast';
 
 interface FeatureAccessGuardProps {
   children: ReactNode;
@@ -23,8 +21,6 @@ export const FeatureAccessGuard = ({
   const { user } = useAuth();
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -85,60 +81,40 @@ export const FeatureAccessGuard = ({
     return <>{children}</>;
   }
 
-  // User doesn't have access - show upgrade prompt
+  // User doesn't have access - show subscription required message
   return (
-    <>
-      <Card className="border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50">
-        <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
-            <Crown className="h-6 w-6 text-yellow-600" />
+    <Card className="border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50">
+      <CardHeader className="text-center">
+        <div className="mx-auto w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+          <Crown className="h-6 w-6 text-yellow-600" />
+        </div>
+        <CardTitle className="flex items-center justify-center gap-2">
+          <Zap className="h-5 w-5 text-primary" />
+          Premium Feature
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="text-center space-y-4">
+        <p className="text-muted-foreground">
+          {fallbackMessage || `Premium subscription required to access ${featureName}`}
+        </p>
+        
+        <div className="bg-white p-4 rounded-lg border border-yellow-200">
+          <div className="text-sm space-y-2">
+            <p className="font-medium">This feature requires an active premium subscription</p>
+            <ul className="text-left space-y-1 text-muted-foreground">
+              <li>• Unlimited keyword research</li>
+              <li>• Automated campaign management</li>
+              <li>• Real-time rank tracking</li>
+              <li>• Priority support</li>
+            </ul>
           </div>
-          <CardTitle className="flex items-center justify-center gap-2">
-            <Zap className="h-5 w-5 text-primary" />
-            Premium Feature
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-center space-y-4">
-          <p className="text-muted-foreground">
-            {fallbackMessage || `Upgrade to Premium to access ${featureName}`}
-          </p>
-          
-          <div className="bg-white p-4 rounded-lg border border-yellow-200">
-            <div className="text-sm space-y-2">
-              <p className="font-medium">Premium SEO Tools - $29/month</p>
-              <ul className="text-left space-y-1 text-muted-foreground">
-                <li>• Unlimited keyword research</li>
-                <li>• Automated campaign management</li>
-                <li>• Real-time rank tracking</li>
-                <li>• Priority support</li>
-              </ul>
-            </div>
-          </div>
+        </div>
 
-          <Button
-            onClick={() => setShowCheckoutModal(true)}
-            className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700"
-            size="lg"
-          >
-            <Crown className="mr-2 h-4 w-4" />
-            Upgrade to Premium
-          </Button>
-        </CardContent>
-      </Card>
-
-      <PremiumCheckoutModal
-        isOpen={showCheckoutModal}
-        onClose={() => setShowCheckoutModal(false)}
-        onSuccess={() => {
-          toast({
-            title: "Welcome to Premium!",
-            description: "Your subscription is now active. Enjoy unlimited access!",
-          });
-          // Refresh the page to check new subscription status
-          window.location.reload();
-        }}
-      />
-    </>
+        <p className="text-sm text-muted-foreground">
+          Contact support if you believe you should have access to this feature.
+        </p>
+      </CardContent>
+    </Card>
   );
 };
 
