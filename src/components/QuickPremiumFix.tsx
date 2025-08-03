@@ -6,7 +6,11 @@ import { Crown, Zap, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-export const QuickPremiumFix = () => {
+interface QuickPremiumFixProps {
+  onStatusUpdated?: () => void;
+}
+
+export const QuickPremiumFix = ({ onStatusUpdated }: QuickPremiumFixProps) => {
   const [isFixing, setIsFixing] = useState(false);
   const [isFixed, setIsFixed] = useState(false);
   const { toast } = useToast();
