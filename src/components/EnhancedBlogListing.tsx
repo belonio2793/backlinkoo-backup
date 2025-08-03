@@ -631,3 +631,31 @@ function PostCard({
     </Card>
   );
 }
+
+// Collapsible Stats for Nerds component
+function StatsForNerds() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="mt-8 border-t border-gray-200 pt-8">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            className="w-full justify-between text-gray-500 hover:text-gray-700"
+          >
+            <span className="text-sm font-mono">📊 Stats for Nerds</span>
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-200 ${
+                isOpen ? 'transform rotate-180' : ''
+              }`}
+            />
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-4">
+          <BlogDataDebugger />
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
+  );
+}
