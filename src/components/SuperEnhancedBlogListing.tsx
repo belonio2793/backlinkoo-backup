@@ -484,15 +484,27 @@ export function SuperEnhancedBlogListing() {
                         : 'Be the first to create a blog post!'
                     }
                   </p>
-                  <Button 
-                    onClick={() => navigate('/blog/create')}
-                    size="lg"
-                    className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 px-8 py-4 text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
-                  >
-                    <Plus className="h-5 w-5 mr-2" />
-                    Create First Post
-                    <Rocket className="h-5 w-5 ml-2" />
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Button
+                      onClick={() => navigate('/blog/seo-generator')}
+                      size="lg"
+                      variant="outline"
+                      className="border-2 border-purple-300 hover:border-purple-500 bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 text-purple-700 hover:text-purple-800 px-8 py-4 text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                    >
+                      <Target className="h-5 w-5 mr-2" />
+                      SEO Generator
+                      <Sparkles className="h-5 w-5 ml-2" />
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/blog/create')}
+                      size="lg"
+                      className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 px-8 py-4 text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                    >
+                      <Plus className="h-5 w-5 mr-2" />
+                      Quick Create
+                      <Rocket className="h-5 w-5 ml-2" />
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
