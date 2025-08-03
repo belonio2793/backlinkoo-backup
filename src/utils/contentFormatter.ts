@@ -31,6 +31,29 @@ export class ContentFormatter {
   }
 
   /**
+   * Convert markdown syntax to HTML
+   */
+  private static convertMarkdownToHtml(content: string): string {
+    return content
+      // Convert **H1**: patterns to <h1> tags
+      .replace(/\*\*H1\*\*:\s*(.+?)(?=\n|$)/gi, '<h1>$1</h1>')
+      // Convert **text**: patterns at start of line to <h2> tags (common heading pattern)
+      .replace(/^\*\*([^*]+?)\*\*:\s*(.+?)(?=\n|$)/gmi, '<h2>$1: $2</h2>')
+      // Convert **text** patterns at start of line to <h2> tags (standalone bold headings)
+      .replace(/^\*\*([^*]+?)\*\*(?=\s*\n|$)/gmi, '<h2>$1</h2>')
+      // Convert remaining **text** to <strong> tags (inline bold)
+      .replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>')
+      // Convert *text* to <em> tags (italic)
+      .replace(/\*([^*]+?)\*/g, '<em>$1</em>')
+      // Convert ### headings to h3
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      // Convert ## headings to h2
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      // Convert # headings to h1
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>');
+  }
+
+  /**
    * Process and format headings with proper structure
    */
   private static processHeadings(content: string): string {
