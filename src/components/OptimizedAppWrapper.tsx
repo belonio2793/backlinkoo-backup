@@ -55,7 +55,8 @@ import {
   LazyBlogEditPage,
   LazyEnhancedAILive,
   LazyGuestDashboard,
-  LazyClaimSystemDebug
+  LazyClaimSystemDebug,
+  LazySEOOptimizedBlogGenerator
 } from './LazyComponents';
 
 // Loading component for better UX
