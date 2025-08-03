@@ -287,7 +287,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
                     ) : (
                       <Crown className="h-3 w-3" />
                     )}
-                    {premiumLoading ? 'Checking...' : (isPremium ? 'Premium Member' : 'Free Plan')}
+                    {premiumLoading ? 'Checking...' : (isPremium ? 'Premium Plan' : 'Free Plan')}
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
