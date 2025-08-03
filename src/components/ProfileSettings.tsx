@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PremiumService } from "@/services/premiumService";
 import { PremiumStatusSync } from "@/components/PremiumStatusSync";
 import { QuickPremiumFix } from "@/components/QuickPremiumFix";
+import { PremiumStatusDebugger } from "@/components/PremiumStatusDebugger";
 import { Loader2, User, Mail, Calendar, MapPin, Briefcase, Globe, Save, AlertCircle, Crown, Shield, RefreshCw } from "lucide-react";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
