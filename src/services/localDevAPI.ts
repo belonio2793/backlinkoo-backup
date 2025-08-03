@@ -124,8 +124,35 @@ export class LocalDevAPI {
    * Check if we should use local dev API
    */
   static shouldUseMockAPI(): boolean {
-    // Always use mock API in development for local testing
-    return import.meta.env.DEV;
+    // Only use mock API if we're in development AND no OpenAI key is available
+    if (!import.meta.env.DEV) {
+      return false; // Never use mock in production
+    }
+
+    // Check for OpenAI API key in various locations
+    const envKey = import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.OPENAI_API_KEY;
+    if (envKey) {
+      console.log('🔑 OpenAI API key found in environment, using real OpenAI');
+      return false;
+    }
+
+    // Check localStorage for admin-configured API key
+    try {
+      const adminEnvVars = localStorage.getItem('admin_env_vars');
+      if (adminEnvVars) {
+        const vars = JSON.parse(adminEnvVars);
+        const openaiVar = vars.find((v: any) => v.key === 'OPENAI_API_KEY');
+        if (openaiVar && openaiVar.value && openaiVar.value.startsWith('sk-')) {
+          console.log('🔑 OpenAI API key found in localStorage, using real OpenAI');
+          return false;
+        }
+      }
+    } catch (error) {
+      console.warn('Error checking localStorage for API key:', error);
+    }
+
+    console.log('🧪 No OpenAI API key found, using mock API for development');
+    return true;
   }
 
   /**
