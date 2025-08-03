@@ -20,6 +20,7 @@ import SubscriptionSuccess from '@/pages/SubscriptionSuccess';
 import SubscriptionCancelled from '@/pages/SubscriptionCancelled';
 import BlogSystemDiagnostic from '@/pages/BlogSystemDiagnostic';
 import { BlogPostDiagnostic } from '@/components/BlogPostDiagnostic';
+import EmergencyRLSFix from '@/pages/EmergencyRLSFix';
 
 // Import lightweight components
 import AdminAuthGuard from '@/components/AdminAuthGuard';
