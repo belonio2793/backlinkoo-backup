@@ -32,6 +32,41 @@ export class ContentFormatter {
   }
 
   /**
+   * Remove duplicate title from content if it appears at the beginning
+   */
+  private static removeDuplicateTitle(content: string, title?: string): string {
+    if (!title) return content;
+
+    // Clean the title for comparison
+    const cleanTitle = title
+      .replace(/^\*\*H1\*\*:\s*/i, '')
+      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '')
+      .replace(/^#{1,6}\s+/, '')
+      .trim();
+
+    // Remove H1 tags that contain the same title at the beginning of content
+    const titlePattern = new RegExp(`^\\s*<h1[^>]*>\\s*${this.escapeRegex(cleanTitle)}\\s*<\\/h1>\\s*`, 'i');
+    content = content.replace(titlePattern, '');
+
+    // Also remove markdown H1 that matches the title
+    const markdownTitlePattern = new RegExp(`^\\s*#\\s+${this.escapeRegex(cleanTitle)}\\s*\\n`, 'i');
+    content = content.replace(markdownTitlePattern, '');
+
+    // Remove **H1**: title pattern at the beginning
+    const boldTitlePattern = new RegExp(`^\\s*\\*\\*H1\\*\\*:\\s*${this.escapeRegex(cleanTitle)}\\s*\\n?`, 'i');
+    content = content.replace(boldTitlePattern, '');
+
+    return content.trim();
+  }
+
+  /**
+   * Escape special regex characters
+   */
+  private static escapeRegex(text: string): string {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  /**
    * Convert markdown syntax to HTML
    */
   private static convertMarkdownToHtml(content: string): string {
