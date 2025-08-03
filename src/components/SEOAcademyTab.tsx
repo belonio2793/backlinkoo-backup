@@ -448,10 +448,10 @@ export function SEOAcademyTab({ isSubscribed, onUpgrade }: SEOAcademyTabProps) {
                 <div className="text-sm text-gray-600">Get help from pros</div>
               </div>
             </div>
-            <Button onClick={() => setIsCheckoutOpen(true)} size="lg" className="bg-blue-600 hover:bg-blue-700">
-              <Star className="mr-2 h-5 w-5" />
-              Upgrade to Premium
-            </Button>
+            <div className="text-sm text-gray-600">
+              <p>Premium subscription required to access SEO Academy content.</p>
+              <p className="mt-2">Contact support if you believe you should have access.</p>
+            </div>
           </CardContent>
         </Card>
       </div>
