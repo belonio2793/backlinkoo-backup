@@ -89,10 +89,10 @@ export function OrganizedAdminDashboard() {
   }, []);
 
   const handleRefreshMetrics = async () => {
-    await refetch();
+    await refreshMetrics();
     toast({
-      title: "Metrics Refreshed",
-      description: "Dashboard metrics have been updated with the latest data."
+      title: "Enhanced Metrics Refreshed",
+      description: "Dashboard metrics have been updated with the latest real-time data."
     });
   };
 
