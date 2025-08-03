@@ -75,7 +75,7 @@ export class GlobalErrorHandler {
   private isThirdPartyError(error: any): boolean {
     const stack = error?.stack?.toLowerCase() || '';
     const message = error?.message?.toLowerCase() || '';
-    
+
     const thirdPartyIndicators = [
       'fullstory',
       'fs.js',
@@ -84,10 +84,20 @@ export class GlobalErrorHandler {
       'facebook.net',
       'doubleclick',
       'analytics',
-      'tracking'
+      'tracking',
+      'chrome-extension://',
+      'moz-extension://',
+      'evmask',
+      'phantom',
+      'metamask',
+      'coinbase',
+      'cannot redefine property: ethereum',
+      'ethereum',
+      'web3',
+      'wallet'
     ];
 
-    return thirdPartyIndicators.some(indicator => 
+    return thirdPartyIndicators.some(indicator =>
       stack.includes(indicator) || message.includes(indicator)
     );
   }
