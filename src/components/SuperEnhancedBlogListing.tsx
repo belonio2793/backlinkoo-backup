@@ -676,7 +676,7 @@ function SuperPostCard({
           )}
           {post.tags?.slice(0, 2).map((tag, tagIndex) => (
             <Badge key={tagIndex} variant="outline" className="border-gray-300 hover:border-blue-400 transition-colors duration-300">
-              {tag}
+              {cleanTitle(tag)}
             </Badge>
           ))}
         </div>
