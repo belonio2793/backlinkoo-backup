@@ -101,12 +101,14 @@ export class ContentFormatter {
    */
   private static processHeadings(content: string): string {
     return content
+      // Normalize H3 to H2 for consistent styling (except main title H1)
+      .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, '<h2$1>$2</h2>')
       // Ensure HTML headings have proper spacing before and after
       .replace(/\n*(<h[1-6][^>]*>.*?<\/h[1-6]>)\n*/gi, '\n\n$1\n\n')
       // Ensure any remaining markdown headings have proper spacing
       .replace(/\n*(#{1,6})\s*(.+?)\n*/g, '\n\n$1 $2\n\n')
-      // Fix heading hierarchy - don't allow skipping levels
-      .replace(/\n#{4,6}/g, '\n###')
+      // Fix heading hierarchy - normalize H3+ to H2
+      .replace(/\n#{3,6}/g, '\n##')
       // Ensure remaining markdown heading text is properly capitalized
       .replace(/(#{1,6})\s*(.+)/g, (match, hashes, text) => {
         const cleanText = text.trim();
