@@ -594,6 +594,56 @@ export function BeautifulBlogPost() {
                   <ExternalLink className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
                 </a>
               </div>
+
+              {/* Action Buttons - Moved here below Target URL */}
+              <div className="flex flex-wrap justify-center gap-4 mt-8 max-w-2xl mx-auto">
+                {canClaimPost && (
+                  <Button
+                    onClick={handleClaimPost}
+                    disabled={claiming}
+                    size="lg"
+                    variant="outline"
+                    className="beautiful-button bg-transparent border-blue-600 text-blue-600 hover:bg-blue-50/50 hover:border-blue-700 hover:text-blue-700 px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                  >
+                    {claiming ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+                        Claiming...
+                      </>
+                    ) : (
+                      <>
+                        <Crown className="mr-3 h-5 w-5" />
+                        {user ? 'Claim This Post' : 'Login to Claim'}
+                        <Zap className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                {unclaimPermissions.canUnclaim && (
+                  <Button
+                    onClick={() => setShowUnclaimDialog(true)}
+                    variant="outline"
+                    size="lg"
+                    className="bg-transparent border-orange-600 text-orange-700 hover:bg-orange-50/50 hover:border-orange-700 px-8 py-4 text-lg rounded-full"
+                  >
+                    <XCircle className="mr-3 h-5 w-5" />
+                    Unclaim Post
+                  </Button>
+                )}
+
+                {deletePermissions.canDelete && (
+                  <Button
+                    onClick={() => setShowDeleteDialog(true)}
+                    variant="outline"
+                    size="lg"
+                    className="bg-transparent border-red-600 text-red-600 hover:bg-red-50/50 hover:border-red-700 hover:text-red-700 px-8 py-4 text-lg rounded-full"
+                  >
+                    <Trash2 className="mr-3 h-5 w-5" />
+                    Delete Post
+                  </Button>
+                )}
+              </div>
             </div>
           </article>
         </div>
