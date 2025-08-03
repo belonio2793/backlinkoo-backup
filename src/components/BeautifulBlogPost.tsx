@@ -452,21 +452,21 @@ export function BeautifulBlogPost() {
 
               {/* Article Meta */}
               <div className="flex flex-wrap items-center justify-center gap-6 text-gray-500 mb-8">
-                <div className="flex items-center gap-2 bg-white/80 px-4 py-2 rounded-full shadow-sm">
+                <div className="beautiful-meta flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   <span className="font-medium">
                     {format(new Date(blogPost.created_at), 'MMMM dd, yyyy')}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 bg-white/80 px-4 py-2 rounded-full shadow-sm">
+                <div className="beautiful-meta flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   <span className="font-medium">{blogPost.reading_time} min read</span>
                 </div>
-                <div className="flex items-center gap-2 bg-white/80 px-4 py-2 rounded-full shadow-sm">
+                <div className="beautiful-meta flex items-center gap-2">
                   <Eye className="h-4 w-4" />
                   <span className="font-medium">{blogPost.view_count} views</span>
                 </div>
-                <div className="flex items-center gap-2 bg-white/80 px-4 py-2 rounded-full shadow-sm">
+                <div className="beautiful-meta flex items-center gap-2">
                   <TrendingUp className="h-4 w-4" />
                   <span className="font-medium">SEO Score: {blogPost.seo_score}/100</span>
                 </div>
