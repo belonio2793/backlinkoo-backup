@@ -335,6 +335,17 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
             </div>
           </div>
 
+          {/* Premium Status Sync - Show if user should be premium but isn't showing as premium */}
+          {user?.email && !premiumLoading && isPremium === false && (
+            <div className="mt-6">
+              <PremiumStatusSync
+                userEmail={user.email}
+                currentPremiumStatus={isPremium || false}
+                onStatusUpdated={(newStatus) => setIsPremium(newStatus)}
+              />
+            </div>
+          )}
+
           <Separator />
 
           {/* Professional Information */}
