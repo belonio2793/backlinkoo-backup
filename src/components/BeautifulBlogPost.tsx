@@ -566,25 +566,9 @@ export function BeautifulBlogPost() {
 
             {/* Article Content */}
             <div className="prose prose-lg max-w-none">
-              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-xl border border-gray-200/50">
+              <div className="beautiful-card p-8 md:p-12">
                 <div
-                  className="elite-blog-content prose prose-xl max-w-none 
-                    prose-headings:text-gray-900 
-                    prose-p:text-gray-700 prose-p:text-lg prose-p:leading-relaxed prose-p:mb-6
-                    prose-a:text-blue-600 prose-a:font-semibold prose-a:no-underline hover:prose-a:text-blue-800
-                    prose-strong:text-gray-900 prose-strong:font-bold
-                    prose-em:text-gray-800 prose-em:italic
-                    prose-li:text-gray-700 prose-li:text-lg prose-li:mb-2
-                    prose-h1:text-4xl prose-h1:font-black prose-h1:mb-8 prose-h1:mt-12 prose-h1:text-gray-900
-                    prose-h2:text-3xl prose-h2:font-bold prose-h2:mb-6 prose-h2:mt-10 prose-h2:text-gray-900
-                    prose-h3:text-2xl prose-h3:font-bold prose-h3:mb-4 prose-h3:mt-8 prose-h3:text-gray-800
-                    prose-h4:text-xl prose-h4:font-semibold prose-h4:mb-3 prose-h4:mt-6 prose-h4:text-gray-800
-                    prose-ul:my-6 prose-ol:my-6 
-                    prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50/50 
-                    prose-blockquote:px-8 prose-blockquote:py-6 prose-blockquote:italic prose-blockquote:text-xl prose-blockquote:rounded-r-2xl
-                    prose-code:bg-gray-100 prose-code:text-purple-600 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:font-semibold
-                    prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:rounded-2xl prose-pre:p-6
-                    prose-img:rounded-2xl prose-img:shadow-2xl prose-img:my-8"
+                  className="beautiful-blog-content beautiful-prose prose prose-xl max-w-none"
                   dangerouslySetInnerHTML={{ __html: blogPost.content }}
                 />
               </div>
