@@ -85,62 +85,64 @@ CONTENT PHILOSOPHY:
 - Integrate backlinks so naturally that they enhance the "${keyword}" user experience
 - AVOID phrases like "in today's digital landscape" - be specific to "${keyword}"`;
 
-    const userPrompt = `Create an exceptional ${wordCount}-word ${contentType} blog post about "${keyword}" that will rank #1 on Google and drive massive engagement.
+    const userPrompt = `Create an exceptional ${wordCount}-word ${contentType} blog post SPECIFICALLY about "${keyword}" that will rank #1 on Google and drive massive engagement. You must demonstrate deep expertise in "${keyword}" - not generic content.
 
-🎯 CONTENT MISSION:
-Write a comprehensive, authoritative guide that becomes the definitive resource on "${keyword}". Make readers bookmark this post and share it across social media.
+** CONTENT MISSION:
+Write a comprehensive, authoritative guide that becomes the definitive resource on "${keyword}". Show that you understand "${keyword}" intimately and provide insights that only an expert in "${keyword}" would know. Make readers bookmark this post and share it across social media.
 
-📊 CONTENT REQUIREMENTS:
-- Target exactly ${wordCount} words of premium, original content
-- Hook readers with an irresistible opening that makes them scroll
-- Include 3-5 data points, statistics, or expert insights
-- Write scannable content with clear headings and visual breaks
+** CONTENT REQUIREMENTS:
+- Target exactly ${wordCount} words of premium, original content SPECIFICALLY about "${keyword}"
+- Hook readers with an irresistible opening about "${keyword}" that makes them scroll
+- Include 3-5 data points, statistics, or expert insights specific to "${keyword}"
+- Write scannable content with clear headings and visual breaks related to "${keyword}"
 - Natural integration of "${anchorText || keyword}" linking to ${url}
-- End with a compelling call-to-action that drives engagement
+- End with a compelling call-to-action that drives engagement for "${keyword}"
+- NEVER use generic phrases - everything must be contextually relevant to "${keyword}"
 
-🏗️ ENHANCED STRUCTURE:
-1. **Attention-Grabbing H1**: Include "${keyword}" and promise a specific benefit
-2. **Hook Introduction**: Start with a surprising statistic, question, or story (100-150 words)
-3. **Value-Packed Sections** (4-6 H2 headings):
-   - Each section solves a specific problem
-   - Include actionable tips, examples, or case studies
-   - Use H3 subheadings to break up longer sections
+** ENHANCED STRUCTURE:
+1. **Attention-Grabbing H1**: Include "${keyword}" and promise a specific benefit about "${keyword}"
+2. **Hook Introduction**: Start with a surprising statistic, question, or story about "${keyword}" (100-150 words)
+3. **Value-Packed Sections** (4-6 H2 headings about "${keyword}"):
+   - Each section solves a specific problem in "${keyword}"
+   - Include actionable tips, examples, or case studies for "${keyword}"
+   - Use H3 subheadings to break up longer sections about "${keyword}"
 4. **Strategic Backlink Placement**: Integrate "${anchorText || keyword}" → ${url} where it adds genuine value
-5. **Powerful Conclusion**: Summarize key insights and include next steps
+5. **Powerful Conclusion**: Summarize key insights and include next steps for "${keyword}"
 
-🚀 SEO & ENGAGEMENT OPTIMIZATION:
+** SEO & ENGAGEMENT OPTIMIZATION:
 - Naturally include "${keyword}" in H1, introduction, and 2-3 times throughout
-- Use semantic keywords and LSI terms related to "${keyword}"
-- Include numbered lists, bullet points, and actionable frameworks
-- Write compelling meta descriptions within content
-- Add transition phrases that improve readability
-- Include rhetorical questions to increase engagement
+- Use semantic keywords and LSI terms specifically related to "${keyword}"
+- Include numbered lists, bullet points, and actionable frameworks for "${keyword}"
+- Write compelling meta descriptions within content about "${keyword}"
+- Add transition phrases that improve readability while staying focused on "${keyword}"
+- Include rhetorical questions to increase engagement about "${keyword}"
 
-🔗 STRATEGIC BACKLINK INTEGRATION:
-- Place "${anchorText || keyword}" linking to ${url} where it provides maximum value
-- Context should make the link feel like a natural extension of the content
-- The link should solve a problem or provide additional resources mentioned in the content
+** STRATEGIC BACKLINK INTEGRATION:
+- Place "${anchorText || keyword}" linking to ${url} where it provides maximum value for "${keyword}"
+- Context should make the link feel like a natural extension of the "${keyword}" content
+- The link should solve a problem or provide additional resources mentioned in the "${keyword}" content
 - Ensure the backlink enhances rather than interrupts the reading experience
 
-💻 ENHANCED HTML OUTPUT:
+** ENHANCED HTML OUTPUT:
 Structure the content with these semantic HTML tags:
-- <h1> for the main title (include primary keyword)
-- <h2> for major sections
-- <h3> for subsections
+- <h1> for the main title (include primary keyword "${keyword}")
+- <h2> for major sections about "${keyword}"
+- <h3> for subsections about "${keyword}"
 - <p> for paragraphs with proper line spacing
-- <ul> or <ol> with <li> for lists
-- <strong> for key phrases and important concepts
+- <ul> or <ol> with <li> for lists related to "${keyword}"
+- <strong> for key phrases and important concepts about "${keyword}"
 - <em> for emphasis and transitional phrases
-- <blockquote> for quotes or highlighted insights
+- <blockquote> for quotes or highlighted insights about "${keyword}"
 - <a href="${url}" target="_blank" rel="noopener noreferrer">${anchorText || keyword}</a> for the strategic backlink
 
-🎨 CONTENT EXCELLENCE STANDARDS:
-- Write with authority and confidence
-- Use active voice and strong action verbs
-- Include specific examples and real-world applications
-- Create content that solves problems and provides immediate value
-- Maintain reader engagement from start to finish
-- Make every paragraph contribute to the overall narrative
+** CONTENT EXCELLENCE STANDARDS:
+- Write with authority and confidence about "${keyword}"
+- Use active voice and strong action verbs related to "${keyword}"
+- Include specific examples and real-world applications of "${keyword}"
+- Create content that solves problems and provides immediate value for "${keyword}"
+- Maintain reader engagement from start to finish about "${keyword}"
+- Make every paragraph contribute to the overall "${keyword}" narrative
+- AVOID generic business language - be specific to "${keyword}"
 
 Create content so valuable that readers feel they've discovered a hidden gem. This should be the kind of post that gets bookmarked, shared, and referenced by others in the industry.`;
 
