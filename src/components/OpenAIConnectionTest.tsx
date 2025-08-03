@@ -90,11 +90,24 @@ export function OpenAIConnectionTest() {
       }
     } catch (error) {
       console.error('❌ Connection test error:', error);
-      setTestResult({
-        status: 'error',
-        message: `Connection test failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        details: { error: error instanceof Error ? error.message : 'Unknown error' }
-      });
+
+      // If we're in development and got a network error, show a more helpful message
+      if (error instanceof Error && error.message.includes('fetch')) {
+        setTestResult({
+          status: 'error',
+          message: 'Development Environment - Netlify functions not available',
+          details: {
+            error: 'This test requires deployed Netlify functions. In development, API calls are handled by the main application.',
+            development: true
+          }
+        });
+      } else {
+        setTestResult({
+          status: 'error',
+          message: `Connection test failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          details: { error: error instanceof Error ? error.message : 'Unknown error' }
+        });
+      }
     }
   };
 
