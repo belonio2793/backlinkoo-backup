@@ -58,7 +58,8 @@ import {
   LazyEnhancedAILive,
   LazyGuestDashboard,
   LazyClaimSystemDebug,
-  LazySEOOptimizedBlogGenerator
+  LazySEOOptimizedBlogGenerator,
+  LazyOpenAITest
 } from './LazyComponents';
 
 // Loading component for better UX
