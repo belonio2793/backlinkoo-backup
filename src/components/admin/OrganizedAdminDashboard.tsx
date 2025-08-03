@@ -13,7 +13,7 @@ import { AdminUserDashboard } from "@/components/admin/AdminUserDashboard";
 import { supabase } from '@/integrations/supabase/client';
 
 // Admin Components
-import { SecurityDashboard } from "@/components/SecurityDashboard";
+import { EnhancedSecurityDashboard } from "@/components/EnhancedSecurityDashboard";
 import { CampaignManager } from "@/components/CampaignManager";
 import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager";
 import { EmailSystemManagerSafe } from "@/components/admin/EmailSystemManagerSafe";
