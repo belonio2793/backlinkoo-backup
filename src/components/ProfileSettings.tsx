@@ -59,6 +59,37 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
   const [forceRefreshCount, setForceRefreshCount] = useState(0);
   const { toast } = useToast();
 
+  // Function to force refresh premium status
+  const refreshPremiumStatus = async () => {
+    if (!user) return;
+
+    setPremiumLoading(true);
+    console.log('🔄 Force refreshing premium status...');
+
+    try {
+      // Clear any cached status and force a fresh check
+      const status = await PremiumService.checkPremiumStatus(user.id);
+      console.log('🔍 Fresh premium status:', status);
+      setIsPremium(status);
+
+      // If still not premium, try the sync function
+      if (!status && user.email) {
+        console.log('🔧 Status still false, trying sync...');
+        const syncResult = await PremiumService.syncPremiumStatus(user.email);
+        console.log('🔧 Sync result:', syncResult);
+
+        if (syncResult.success && syncResult.after?.isPremium) {
+          console.log('✅ Sync successful, user is now premium');
+          setIsPremium(true);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Premium status refresh failed:', error);
+    } finally {
+      setPremiumLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) {
