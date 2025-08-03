@@ -1,5 +1,5 @@
-import { BeautifulBlogTemplate } from '@/components/BeautifulBlogTemplate';
+import { ModernBlogTemplate } from '@/components/ModernBlogTemplate';
 
 export function BlogPost() {
-  return <BeautifulBlogTemplate />;
+  return <ModernBlogTemplate />;
 }
