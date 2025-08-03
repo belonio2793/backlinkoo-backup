@@ -10,23 +10,9 @@
 [functions]
   directory = "netlify/functions"
 
-# Note: Scheduled functions require Netlify Pro plan
+# Note: Scheduled functions are now configured directly in function files
+# using the schedule() function from @netlify/functions
 # For manual testing, use: /.netlify/functions/cleanup-expired
-# For scheduled cleanup: /.netlify/functions/cleanup
-
-# Uncomment below if you have Netlify Pro:
-[[plugins]]
-  package = "@netlify/plugin-scheduled-functions"
-
-# Scheduled cleanup of expired unclaimed posts (daily at midnight UTC)
-[[plugins.inputs.functions]]
-  name = "cleanup"
-  cron = "0 0 * * *"
-
-# Alternative: hourly cleanup for more aggressive cleaning
-# [[plugins.inputs.functions]]
-#   name = "cleanup-expired"
-#   cron = "0 * * * *"
 
 # Redirects for blog posts
 [[redirects]]
