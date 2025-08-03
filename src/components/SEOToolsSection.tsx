@@ -401,7 +401,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
           <FeatureAccessGuard
             feature="automatedCampaigns"
             featureName="Automated Link Building"
-            fallbackMessage="Upgrade to Premium to access our automated link building system with unlimited campaigns and 24/7 automation."
+            fallbackMessage="Premium subscription required to access our automated link building system with unlimited campaigns and 24/7 automation."
           >
             <NoHandsSEODashboard />
           </FeatureAccessGuard>
