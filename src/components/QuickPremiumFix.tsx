@@ -14,18 +14,55 @@ export const QuickPremiumFix = () => {
     setIsFixing(true);
 
     try {
-      // Call the set premium function
+      console.log('🔧 Starting quick premium fix...');
+
+      // Call the set premium function with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch('/.netlify/functions/set-user-premium', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
-          userEmail: 'labindalawamaryrose@gmail.com' 
-        })
+        body: JSON.stringify({
+          userEmail: 'labindalawamaryrose@gmail.com'
+        }),
+        signal: controller.signal
       });
 
-      const result = await response.json();
+      clearTimeout(timeoutId);
+
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response ok:', response.ok);
+
+      // Check if response is ok first
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Check if response has content
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Response is not JSON');
+      }
+
+      let result;
+      try {
+        const responseText = await response.text();
+        console.log('📡 Response text:', responseText);
+
+        if (!responseText.trim()) {
+          throw new Error('Empty response body');
+        }
+
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        throw new Error('Failed to parse response as JSON');
+      }
+
+      console.log('✅ Parse result:', result);
 
       if (result.success) {
         setIsFixed(true);
@@ -33,7 +70,7 @@ export const QuickPremiumFix = () => {
           title: "Premium Status Fixed!",
           description: "User has been set to premium. Refreshing page...",
         });
-        
+
         // Refresh page to show updated status
         setTimeout(() => {
           window.location.reload();
@@ -46,10 +83,23 @@ export const QuickPremiumFix = () => {
         });
       }
     } catch (error: any) {
-      console.error('Quick fix error:', error);
+      console.error('❌ Quick fix error:', error);
+
+      let errorMessage = "Failed to fix premium status";
+
+      if (error.name === 'AbortError') {
+        errorMessage = "Request timed out - please try again";
+      } else if (error.message?.includes('HTTP error')) {
+        errorMessage = `Server error: ${error.message}`;
+      } else if (error.message?.includes('JSON')) {
+        errorMessage = "Invalid response from server";
+      } else if (error.message?.includes('body stream already read')) {
+        errorMessage = "Network error - please refresh and try again";
+      }
+
       toast({
         title: "Error",
-        description: "Failed to fix premium status",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
