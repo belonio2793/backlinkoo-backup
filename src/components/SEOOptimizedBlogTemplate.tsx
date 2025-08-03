@@ -424,7 +424,9 @@ export function SEOOptimizedBlogTemplate({
   };
 
   return (
-    <article className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      <Header />
+      <article className="max-w-5xl mx-auto container px-6 py-8">
       {/* JSON-LD Schema for SEO */}
       <script
         type="application/ld+json"
@@ -668,5 +670,7 @@ export function SEOOptimizedBlogTemplate({
         </div>
       </div>
     </article>
+    <Footer />
+    </div>
   );
 }
