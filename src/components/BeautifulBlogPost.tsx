@@ -513,7 +513,7 @@ export function BeautifulBlogPost() {
                   onClick={handleClaimPost}
                   disabled={claiming}
                   size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="beautiful-button bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   {claiming ? (
                     <>
