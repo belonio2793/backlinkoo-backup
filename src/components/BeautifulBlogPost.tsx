@@ -332,7 +332,7 @@ export function BeautifulBlogPost() {
       <Header />
 
       {/* Floating Action Bar */}
-      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-40 space-y-3">
+      <div className="floating-action-bar fixed right-6 top-1/2 transform -translate-y-1/2 z-40 space-y-3">
         <Button
           variant="outline"
           size="icon"
