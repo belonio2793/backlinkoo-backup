@@ -351,8 +351,15 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
             </div>
           </div>
 
+          {/* Quick Premium Fix for specific user */}
+          {user?.email === 'labindalawamaryrose@gmail.com' && !premiumLoading && isPremium === false && (
+            <div className="mt-6">
+              <QuickPremiumFix />
+            </div>
+          )}
+
           {/* Premium Status Sync - Show if user should be premium but isn't showing as premium */}
-          {user?.email && !premiumLoading && isPremium === false && (
+          {user?.email && user.email !== 'labindalawamaryrose@gmail.com' && !premiumLoading && isPremium === false && (
             <div className="mt-6">
               <PremiumStatusSync
                 userEmail={user.email}
