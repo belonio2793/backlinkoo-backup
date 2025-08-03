@@ -474,7 +474,7 @@ export function BeautifulBlogPost() {
 
               {/* Expiration Warning */}
               {!blogPost.claimed && blogPost.expires_at && (
-                <div className="max-w-2xl mx-auto p-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl mb-8 shadow-sm">
+                <div className="beautiful-warning max-w-2xl mx-auto p-6 mb-8 shadow-sm">
                   <div className="flex items-center justify-center gap-3 text-amber-800 mb-2">
                     <Timer className="h-5 w-5" />
                     <span className="text-lg font-semibold">
