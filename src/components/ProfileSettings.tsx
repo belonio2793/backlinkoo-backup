@@ -399,7 +399,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
           {/* Quick Premium Fix for specific user */}
           {user?.email === 'labindalawamaryrose@gmail.com' && !premiumLoading && isPremium === false && (
             <div className="mt-6">
-              <QuickPremiumFix />
+              <QuickPremiumFix onStatusUpdated={refreshPremiumStatus} />
             </div>
           )}
 
