@@ -155,7 +155,9 @@ export function useAuth(): AuthState {
   return {
     user,
     isLoading,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
+    isPremium,
+    subscriptionTier
   };
 }
 
