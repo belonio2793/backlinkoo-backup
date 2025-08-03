@@ -48,22 +48,30 @@ export const QuickPremiumFix = () => {
     console.log('🔧 Attempting direct premium fix...');
 
     // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error('❌ User fetch error:', userError);
       throw new Error('No authenticated user found');
     }
 
+    console.log('👤 User found:', user.email);
+
     // Update profile to premium
+    console.log('🔄 Updating profile subscription tier...');
     const { error: profileError } = await supabase
       .from('profiles')
       .update({ subscription_tier: 'premium' })
       .eq('user_id', user.id);
 
     if (profileError) {
+      console.error('❌ Profile update error:', profileError);
       throw new Error(`Profile update failed: ${profileError.message}`);
     }
 
+    console.log('✅ Profile updated to premium');
+
     // Create premium subscription
+    console.log('🔄 Creating premium subscription...');
     const now = new Date();
     const periodEnd = new Date();
     periodEnd.setFullYear(periodEnd.getFullYear() + 1);
@@ -81,13 +89,15 @@ export const QuickPremiumFix = () => {
     if (subError) {
       console.warn('⚠️ Subscription creation warning:', subError.message);
       // Don't throw error for subscription creation - profile update is more important
+    } else {
+      console.log('✅ Premium subscription created');
     }
 
-    console.log('✅ Direct premium fix successful');
+    console.log('🎉 Direct premium fix successful');
     setIsFixed(true);
     toast({
       title: "Premium Status Fixed!",
-      description: "User has been set to premium via direct approach. Refreshing page...",
+      description: "Premium features have been activated. Refreshing page...",
     });
 
     setTimeout(() => {
