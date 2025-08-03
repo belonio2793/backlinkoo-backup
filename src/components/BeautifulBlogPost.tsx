@@ -548,11 +548,11 @@ export function BeautifulBlogPost() {
                   Share it with your network and help others discover great content!
                 </p>
                 <div className="flex justify-center gap-4">
-                  <Button onClick={sharePost} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-full px-6">
+                  <Button onClick={sharePost} variant="outline" className="bg-transparent border-blue-600 text-blue-600 hover:bg-blue-50/50 hover:border-blue-700 hover:text-blue-700 rounded-full px-6">
                     <Share2 className="mr-2 h-4 w-4" />
                     Share Article
                   </Button>
-                  <Button variant="outline" onClick={copyToClipboard} className="rounded-full px-6">
+                  <Button variant="outline" onClick={copyToClipboard} className="bg-transparent hover:bg-gray-100/50 rounded-full px-6">
                     <Copy className="mr-2 h-4 w-4" />
                     Copy Link
                   </Button>
