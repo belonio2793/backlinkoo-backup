@@ -405,38 +405,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="account-status">Account Status</Label>
-                  <div className="flex gap-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        console.log('🔄 Refresh button clicked!');
-                        refreshPremiumStatus();
-                      }}
-                      disabled={premiumLoading}
-                      className="h-6 px-2 text-xs"
-                    >
-                      <RefreshCw className={`h-3 w-3 mr-1 ${premiumLoading ? 'animate-spin' : ''}`} />
-                      Refresh
-                    </Button>
-                    {!isPremium && user?.email === 'labindalawamaryrose@gmail.com' && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={forcePremiumStatus}
-                        disabled={premiumLoading}
-                        className="h-6 px-2 text-xs bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
-                      >
-                        <Crown className="h-3 w-3 mr-1" />
-                        Fix
-                      </Button>
-                    )}
-                  </div>
-                </div>
+                <Label htmlFor="account-status">Account Status</Label>
                 <div className="flex items-center gap-2 flex-wrap">
                   {/* Role Badge */}
                   <Badge variant={profile.role === 'admin' ? 'default' : 'secondary'} className="flex items-center gap-1">
