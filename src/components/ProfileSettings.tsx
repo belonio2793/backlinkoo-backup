@@ -415,6 +415,13 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
             </div>
           )}
 
+          {/* Debug section for troubleshooting - only show if not premium */}
+          {user?.email && isPremium === false && (
+            <div className="mt-6">
+              <PremiumStatusDebugger />
+            </div>
+          )}
+
           <Separator />
 
           {/* Professional Information */}
