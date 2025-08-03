@@ -1,8 +1,7 @@
-const { createClient } = require('@supabase/supabase-js');
+import { schedule } from '@netlify/functions';
+import { createClient } from '@supabase/supabase-js';
 
-export const handler = async (event, context) => {
-  if (event.httpMethod !== 'POST') return { statusCode: 405 };
-
+async function cleanupExpiredPosts(event, context) {
   try {
     // Initialize Supabase client
     const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -13,6 +12,8 @@ export const handler = async (event, context) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    console.log('🧹 Starting scheduled cleanup of expired unclaimed posts...');
 
     // Delete expired posts where user_id is null (unclaimed)
     const { data, error } = await supabase
@@ -25,9 +26,10 @@ export const handler = async (event, context) => {
       console.error('❌ Cleanup failed:', error);
       return {
         statusCode: 500,
-        body: JSON.stringify({ 
+        body: JSON.stringify({
+          success: false,
           error: 'Cleanup failed',
-          details: error.message 
+          details: error.message
         }),
       };
     }
@@ -37,9 +39,10 @@ export const handler = async (event, context) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ 
-        success: true, 
+      body: JSON.stringify({
+        success: true,
         deleted: deletedCount,
+        message: `Successfully cleaned up ${deletedCount} expired unclaimed posts`,
         timestamp: new Date().toISOString()
       }),
     };
@@ -48,15 +51,14 @@ export const handler = async (event, context) => {
     console.error('❌ Fatal error during cleanup:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ 
+      body: JSON.stringify({
+        success: false,
         error: 'Cleanup failed',
-        details: error.message 
+        details: error.message
       }),
     };
   }
-};
+}
 
 // Schedule: daily at midnight UTC
-export const config = {
-  schedule: '0 0 * * *',
-};
+export const handler = schedule('0 0 * * *', cleanupExpiredPosts);
