@@ -113,16 +113,33 @@ export function useAuth(): AuthState {
 
     // Listen for auth state changes with error handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
         try {
           if (isMounted) {
-            setUser(session?.user || null);
+            const user = session?.user || null;
+            setUser(user);
+
+            // Check premium status when user signs in
+            if (user) {
+              console.log('🔄 Auth state changed - checking premium status for:', user.email);
+              const { isPremium, subscriptionTier } = await checkPremiumStatus(user);
+              if (isMounted) {
+                setIsPremium(isPremium);
+                setSubscriptionTier(subscriptionTier);
+              }
+            } else {
+              setIsPremium(false);
+              setSubscriptionTier(null);
+            }
+
             setIsLoading(false);
           }
         } catch (error: any) {
           console.warn('Auth state change error:', error.message);
           if (isMounted) {
             setUser(null);
+            setIsPremium(false);
+            setSubscriptionTier(null);
             setIsLoading(false);
           }
         }
