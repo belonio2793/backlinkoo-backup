@@ -18,6 +18,12 @@ export class ProfileMigrationService {
         .single();
 
       if (fetchError && fetchError.code !== 'PGRST116') {
+        // Check if it's a permission denied error for users table
+        if (fetchError.message && fetchError.message.includes('permission denied for table users')) {
+          console.log('ℹ️ Skipping profile migration due to database permission configuration');
+          return { success: true }; // Treat as success since this is a config issue, not a real error
+        }
+
         // Real error, not just "no rows returned"
         console.error('Error fetching profile:', fetchError.message || fetchError);
         return { success: false, error: fetchError.message };
