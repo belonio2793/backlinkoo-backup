@@ -128,12 +128,13 @@ Return the content as well-structured HTML using semantic tags:
 - <a href="${request.targetUrl}" target="_blank" rel="noopener noreferrer">${request.anchorText}</a> for the strategic backlink
 
 🎨 CONTENT EXCELLENCE STANDARDS:
-- Every paragraph must provide immediate value
-- Use specific examples and real-world applications
-- Include actionable advice readers can implement today
-- Write with confidence and authoritative expertise
-- Create content that feels like a conversation with an industry leader
+- Every paragraph must provide immediate value specifically about "${request.keyword}"
+- Use specific examples and real-world applications of "${request.keyword}"
+- Include actionable advice readers can implement today for "${request.keyword}"
+- Write with confidence and authoritative expertise in "${request.keyword}"
+- Create content that feels like a conversation with a "${request.keyword}" industry leader
 - Ensure the backlink enhances rather than interrupts the user experience
+- NEVER use generic filler content - everything must be contextually relevant to "${request.keyword}"
 
 📈 SEO & VIRALITY OPTIMIZATION:
 - Naturally incorporate "${request.keyword}" throughout the content
