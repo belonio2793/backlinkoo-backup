@@ -240,6 +240,10 @@ Generate content so valuable that readers feel they've discovered insider knowle
       let firstLine = lines[0].trim();
       // Strip HTML tags from the title
       firstLine = firstLine.replace(/<[^>]*>/g, '');
+      // Decode HTML entities and normalize special characters
+      firstLine = this.decodeHtmlEntities(firstLine);
+      // Remove problematic special characters but keep common punctuation
+      firstLine = firstLine.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"');
       // If first line looks like a title (not too long, doesn't end with period)
       if (firstLine.length <= 100 && !firstLine.endsWith('.') && firstLine.length > 10) {
         return firstLine;
@@ -251,6 +255,15 @@ Generate content so valuable that readers feel they've discovered insider knowle
       word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
     );
     return `The Complete Guide to ${keywordWords.join(' ')}`;
+  }
+
+  /**
+   * Decode HTML entities to prevent display issues
+   */
+  private static decodeHtmlEntities(text: string): string {
+    const textArea = document.createElement('textarea');
+    textArea.innerHTML = text;
+    return textArea.value;
   }
 
   /**
