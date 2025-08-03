@@ -374,12 +374,7 @@ export function EnhancedBlogListing() {
             </div>
           </div>
 
-          {/* Debug Information */}
-          {import.meta.env.DEV && (
-            <div className="mb-8">
-              <BlogDataDebugger />
-            </div>
-          )}
+
 
           {/* Loading State */}
           {loading && (
