@@ -56,6 +56,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
   const [hasChanges, setHasChanges] = useState(false);
   const [isPremium, setIsPremium] = useState<boolean | null>(null);
   const [premiumLoading, setPremiumLoading] = useState(false);
+  const [forceRefreshCount, setForceRefreshCount] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
