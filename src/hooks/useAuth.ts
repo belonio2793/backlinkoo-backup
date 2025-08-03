@@ -43,17 +43,29 @@ export function useAuth(): AuthState {
         return { isPremium: true, subscriptionTier: profile.subscription_tier };
       }
 
-      // Also check premium_subscriptions table for active subscriptions
-      const { data: premiumSubs, error: subError } = await supabase
-        .from('premium_subscriptions')
-        .select('status, plan_type, current_period_end')
-        .eq('user_id', authUser.id)
-        .eq('status', 'active')
-        .gte('current_period_end', new Date().toISOString());
+      // Also check premium_subscriptions table for active subscriptions (if it exists)
+      let premiumSubs = null;
+      try {
+        const { data: subsData, error: subError } = await supabase
+          .from('premium_subscriptions')
+          .select('status, plan_type, current_period_end')
+          .eq('user_id', authUser.id)
+          .eq('status', 'active')
+          .gte('current_period_end', new Date().toISOString());
 
-      if (subError) {
-        console.warn('⚠️ Premium subscription query error:', subError.message);
-        return { isPremium: hasPremiumTier, subscriptionTier: profile?.subscription_tier || null };
+        if (subError) {
+          // If it's a table not found error, that's expected - use profile data only
+          if (subError.message.includes('relation "public.premium_subscriptions" does not exist') ||
+              subError.message.includes('permission denied for table premium_subscriptions')) {
+            console.log('ℹ️ Premium subscriptions table not available, using profile data only');
+          } else {
+            console.warn('⚠️ Premium subscription query error:', subError.message);
+          }
+        } else {
+          premiumSubs = subsData;
+        }
+      } catch (error: any) {
+        console.warn('⚠️ Premium subscription table access failed:', error.message);
       }
 
       const hasActiveSubscription = premiumSubs && premiumSubs.length > 0;
