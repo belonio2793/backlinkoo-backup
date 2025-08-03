@@ -439,6 +439,11 @@ export function EnhancedBlogListing() {
               )}
             </>
           )}
+
+          {/* Stats for Nerds - Collapsible Debug Information */}
+          {import.meta.env.DEV && (
+            <StatsForNerds />
+          )}
         </div>
       </div>
     </div>
