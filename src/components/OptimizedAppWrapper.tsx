@@ -48,6 +48,8 @@ import {
   LazyEnhancedBlogListing,
   LazySuperEnhancedBlogListing,
   LazyEnhancedBlogPost,
+  LazyBeautifulBlogTemplate,
+  LazySettings,
   LazyTrialDashboard,
   LazyAIContentTest,
   LazyEnhancedDashboardRouter,
@@ -100,6 +102,7 @@ export const OptimizedAppWrapper = () => {
           <Route path="/blog/create" element={<LazyBlogCreation />} />
           <Route path="/blog/seo-generator" element={<LazySEOOptimizedBlogGenerator />} />
           <Route path="/blog/:slug" element={<LazyEnhancedBlogPost />} />
+          <Route path="/article/:slug" element={<LazyBeautifulBlogTemplate />} />
 
           {/* Legacy blog routes for backward compatibility */}
           <Route path="/blog-old" element={<LazyBlog />} />
@@ -117,6 +120,11 @@ export const OptimizedAppWrapper = () => {
               <Suspense fallback={<PageLoader />}>
                 <Dashboard />
               </Suspense>
+            </EmailVerificationGuard>
+          } />
+          <Route path="/settings" element={
+            <EmailVerificationGuard>
+              <LazySettings />
             </EmailVerificationGuard>
           } />
           <Route path="/my-dashboard" element={

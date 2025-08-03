@@ -4,6 +4,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Enhanced Blog Template Styles */
+@import './styles/blog-template.css';
+
 /* Enhanced animations for super beautiful UI */
 @keyframes shimmer {
   0% {
