@@ -7,7 +7,7 @@ export class ContentFormatter {
   /**
    * Format blog content with proper paragraph and headline structure
    */
-  static formatBlogContent(content: string): string {
+  static formatBlogContent(content: string, title?: string): string {
     if (!content) return '';
 
     // Split content into lines and clean up
@@ -21,6 +21,7 @@ export class ContentFormatter {
 
     // Process the content in correct order
     formattedContent = this.convertMarkdownToHtml(formattedContent);
+    formattedContent = this.removeDuplicateTitle(formattedContent, title);
     formattedContent = this.processHeadings(formattedContent);
     formattedContent = this.processParagraphs(formattedContent);
     formattedContent = this.processLists(formattedContent);
