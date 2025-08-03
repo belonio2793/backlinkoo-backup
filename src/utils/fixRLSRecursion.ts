@@ -171,8 +171,32 @@ if (import.meta.env.DEV) {
   setTimeout(() => {
     RLSRecursionFixer.fixRLSRecursion().then(result => {
       console.log('🔧 RLS fix result:', result);
+
+      // If RLS recursion is still present, show the fixer component
+      if (!result.success) {
+        import('@/components/RLSRecursionFixer').then(({ RLSRecursionFixer: FixerComponent }) => {
+          console.log('🔧 RLS recursion detected - fixer component available');
+          // Store in window for easy access
+          (window as any).__showRLSFixer = () => {
+            // This can be called from console to show the fixer
+            const event = new CustomEvent('show-rls-fixer');
+            window.dispatchEvent(event);
+          };
+        });
+      }
     }).catch(error => {
       console.error('❌ RLS fix failed:', error);
+
+      // If it's a recursion error, make the fixer available
+      if (error.message?.includes('infinite recursion')) {
+        import('@/components/RLSRecursionFixer').then(() => {
+          console.log('🔧 RLS recursion error detected - fixer component loaded');
+          (window as any).__showRLSFixer = () => {
+            const event = new CustomEvent('show-rls-fixer');
+            window.dispatchEvent(event);
+          };
+        });
+      }
     });
   }, 2000);
 }
