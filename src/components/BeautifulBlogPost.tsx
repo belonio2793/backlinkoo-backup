@@ -37,6 +37,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { blogService } from '@/services/blogService';
+import { ContentFormatter } from '@/utils/contentFormatter';
 import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 
