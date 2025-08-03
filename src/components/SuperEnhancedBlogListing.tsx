@@ -520,13 +520,14 @@ interface SuperPostCardProps {
   index: number;
 }
 
-function SuperPostCard({ 
-  post, 
-  user, 
-  navigate, 
-  formatDate, 
-  getExcerpt, 
-  getTimeRemaining, 
+function SuperPostCard({
+  post,
+  user,
+  navigate,
+  formatDate,
+  getExcerpt,
+  getTimeRemaining,
+  cleanTitle,
   isExpiringSoon,
   onClaim,
   onDelete,
