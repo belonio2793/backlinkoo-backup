@@ -76,6 +76,18 @@ export default function OpenAITest() {
         })
       });
 
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        try {
+          const errorData = await response.text(); // Use text() to avoid json parsing issues
+          errorMessage += ` - ${errorData}`;
+        } catch (textError) {
+          // If we can't read the response, use the basic error
+        }
+        throw new Error(errorMessage);
+      }
+
       const result = await response.json();
 
       if (result.success) {
