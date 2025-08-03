@@ -348,7 +348,7 @@ export function BeautifulBlogPost() {
         <Button
           variant="outline"
           size="icon"
-          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-xl transition-all duration-300"
+          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/40 hover:border-white/50 hover:shadow-xl transition-all duration-300 text-gray-700 hover:text-gray-900"
           onClick={() => setIsBookmarked(!isBookmarked)}
         >
           {isBookmarked ? (
@@ -357,11 +357,11 @@ export function BeautifulBlogPost() {
             <Bookmark className="h-5 w-5" />
           )}
         </Button>
-        
+
         <Button
           variant="outline"
           size="icon"
-          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-xl transition-all duration-300"
+          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/40 hover:border-white/50 hover:shadow-xl transition-all duration-300 text-gray-700 hover:text-gray-900"
           onClick={() => setIsLiked(!isLiked)}
         >
           <Heart className={`h-5 w-5 ${isLiked ? 'text-red-500 fill-current' : ''}`} />
@@ -370,7 +370,7 @@ export function BeautifulBlogPost() {
         <Button
           variant="outline"
           size="icon"
-          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-xl transition-all duration-300"
+          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/40 hover:border-white/50 hover:shadow-xl transition-all duration-300 text-gray-700 hover:text-gray-900"
           onClick={sharePost}
         >
           <Share2 className="h-5 w-5" />
