@@ -121,7 +121,7 @@ export function ModernBlogTemplate() {
     return content.replace(/^(#{2,3})\s+(.+)$/gm, (match, hashes, text) => {
       const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       const HeadingTag = hashes.length === 2 ? 'h2' : 'h3';
-      return `<${HeadingTag} id="${id}" class="scroll-mt-24 group relative">${text}<a href="#${id}" class="opacity-0 group-hover:opacity-100 transition-opacity ml-2 text-blue-500 hover:text-blue-600"><Hash className="inline h-4 w-4" /></a></${HeadingTag}>`;
+      return `<${HeadingTag} id="${id}" class="scroll-mt-24 group relative">${text}<a href="#${id}" class="opacity-0 group-hover:opacity-100 transition-opacity ml-2 text-blue-500 hover:text-blue-600">#</a></${HeadingTag}>`;
     });
   };
 
