@@ -638,17 +638,7 @@ export function SEOAcademyTab({ isSubscribed, onUpgrade }: SEOAcademyTabProps) {
       </Card>
 
       {/* Checkout Modal */}
-      <PremiumCheckoutModal
-        isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
-        onSuccess={() => {
-          toast({
-            title: "Welcome to Premium!",
-            description: "You now have access to the complete SEO Academy!",
-          });
-          onUpgrade();
-        }}
-      />
+
     </div>
   );
 }
