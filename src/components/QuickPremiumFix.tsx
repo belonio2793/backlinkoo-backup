@@ -15,75 +15,10 @@ export const QuickPremiumFix = () => {
     setIsFixing(true);
 
     try {
-      console.log('🔧 Starting quick premium fix...');
+      console.log('🔧 Starting direct premium fix (bypassing Netlify functions)...');
 
-      // Call the sync premium function with force premium option
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-      const response = await fetch('/.netlify/functions/sync-premium-status', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          userEmail: 'labindalawamaryrose@gmail.com',
-          forcePremium: true
-        }),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      console.log('📡 Response status:', response.status);
-      console.log('📡 Response ok:', response.ok);
-
-      // Check if response is ok first
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // Check if response has content
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Response is not JSON');
-      }
-
-      let result;
-      try {
-        const responseText = await response.text();
-        console.log('📡 Response text:', responseText);
-
-        if (!responseText.trim()) {
-          throw new Error('Empty response body');
-        }
-
-        result = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError);
-        throw new Error('Failed to parse response as JSON');
-      }
-
-      console.log('✅ Parse result:', result);
-
-      if (result.success) {
-        setIsFixed(true);
-        toast({
-          title: "Premium Status Fixed!",
-          description: "User has been set to premium. Refreshing page...",
-        });
-
-        // Refresh page to show updated status
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      } else {
-        toast({
-          title: "Fix Failed",
-          description: result.error || "Failed to set premium status",
-          variant: "destructive",
-        });
-      }
+      // Skip Netlify functions entirely and use direct Supabase approach
+      await handleDirectPremiumFix();
     } catch (error: any) {
       console.error('❌ Quick fix error:', error);
 
