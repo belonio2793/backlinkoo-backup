@@ -63,15 +63,19 @@ exports.handler = async (event, context) => {
       .eq('user_id', profile.user_id);
 
     if (subError) {
-      console.warn('⚠️ Premium subscriptions query error:', subError.message);
+      console.warn('⚠�� Premium subscriptions query error:', subError.message);
     }
 
     console.log('💎 Premium subscriptions:', premiumSubs);
 
     // Step 3: Determine if user should be premium
-    const shouldBePremium = profile.subscription_tier === 'premium' || 
+    // Check if this is a force premium request
+    const { forcePremium } = JSON.parse(event.body || '{}');
+
+    const shouldBePremium = forcePremium ||
+                           profile.subscription_tier === 'premium' ||
                            profile.subscription_tier === 'monthly' ||
-                           (premiumSubs && premiumSubs.length > 0 && 
+                           (premiumSubs && premiumSubs.length > 0 &&
                             premiumSubs.some(sub => sub.status === 'active'));
 
     console.log('🎯 Should be premium:', shouldBePremium);
