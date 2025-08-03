@@ -17,8 +17,7 @@ if (import.meta.env.DEV) {
 
   (window as any).forcePremium = async () => {
     console.log('👑 Forcing user to premium status...');
-    const { createClient } = await import('@/integrations/supabase/client');
-    const { supabase } = createClient;
+    const { supabase } = await import('@/integrations/supabase/client');
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
