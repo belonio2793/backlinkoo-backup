@@ -1592,8 +1592,6 @@ const Dashboard = () => {
         )}
       </div>
 
-      <EmergencySignOutButton />
-
       <PricingModal
         isOpen={isPricingModalOpen}
         onClose={() => setIsPricingModalOpen(false)}
