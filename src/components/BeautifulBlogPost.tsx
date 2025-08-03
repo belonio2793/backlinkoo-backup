@@ -492,17 +492,7 @@ export function BeautifulBlogPost() {
 
             </header>
 
-            {/* Only show status message in header if claimed */}
-            {blogPost.claimed && (
-              <div className="flex justify-center mb-8">
-                <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full text-green-700 shadow-sm">
-                  <CheckCircle2 className="h-5 w-5" />
-                  <span className="font-semibold">
-                    {isOwnPost ? 'You own this post' : 'This post has been claimed'}
-                  </span>
-                </div>
-              </div>
-            )}
+
 
             {/* Article Content - Moved higher */}
             <div className="prose prose-lg max-w-none -mt-8">
