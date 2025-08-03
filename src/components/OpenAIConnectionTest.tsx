@@ -30,6 +30,20 @@ export function OpenAIConnectionTest() {
         })
       });
 
+      // Handle 404 specifically
+      if (response.status === 404) {
+        setTestResult({
+          status: 'error',
+          message: 'Netlify function not found',
+          details: {
+            deployment: 'Function may not be deployed in this environment',
+            status: 404,
+            error: 'check-ai-provider function not available'
+          }
+        });
+        return;
+      }
+
       if (response.ok) {
         const data = await response.json();
         console.log('✅ OpenAI connection test successful via Netlify function!');
