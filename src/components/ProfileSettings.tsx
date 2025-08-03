@@ -245,7 +245,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
     };
 
     fetchProfile();
-  }, [user, toast, forceRefreshCount]);
+  }, [user, toast]);
 
   const handleInputChange = (field: keyof ProfileData, value: string | boolean) => {
     setProfile(prev => ({
