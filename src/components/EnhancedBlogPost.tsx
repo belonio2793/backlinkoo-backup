@@ -243,6 +243,7 @@ export function EnhancedBlogPost() {
   };
 
   const canClaimPost = blogPost ? EnhancedBlogClaimService.canClaimPost(blogPost) : false;
+  const unclaimPermissions = blogPost ? EnhancedBlogClaimService.canUnclaimPost(blogPost, user) : { canUnclaim: false };
   const deletePermissions = blogPost ? EnhancedBlogClaimService.canDeletePost(blogPost, user) : { canDelete: false };
   const isOwnPost = blogPost?.user_id === user?.id;
   const isExpiringSoon = blogPost?.expires_at && new Date(blogPost.expires_at).getTime() - Date.now() < 2 * 60 * 60 * 1000; // 2 hours
