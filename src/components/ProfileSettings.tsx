@@ -182,15 +182,12 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
         console.log('✅ Premium subscription created');
       }
 
-      // Immediately update UI
-      setIsPremium(true);
-
       toast({
         title: "Premium Status Activated!",
-        description: "Your account is now premium. Refreshing page...",
+        description: "Your account is now premium. Refreshing page to update all features...",
       });
 
-      // Refresh page to show changes everywhere
+      // Refresh page to reload auth context with new premium status
       setTimeout(() => {
         window.location.reload();
       }, 1500);
