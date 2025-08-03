@@ -27,8 +27,8 @@ class MCPIntegrationManager {
         },
         envVars: {
           configured: [
-            'CLOUDFLARE_ZONE_ID', 'NETLIFY_EMAILS_SECRET', 'OPENAI_API_KEY',
-            'RESEND_API_KEY', 'SUPABASE_URL', 'CLOUDFLARE_API_TOKEN',
+            'NETLIFY_EMAILS_SECRET', 'OPENAI_API_KEY',
+            'RESEND_API_KEY', 'SUPABASE_URL',
             'NETLIFY_EMAILS_DIRECTORY', 'SUPABASE_SERVICE_ROLE_KEY',
             'URI', 'VITE_SUPABASE_URL', 'STRIPE_SECRET_KEY',
             'SUPABASE_DATABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_JWT_SECRET'
@@ -56,7 +56,7 @@ class MCPIntegrationManager {
       email_system: { status: 'operational', provider: 'resend' },
       payment_processing: { status: 'operational', provider: 'stripe' },
       ai_content_generation: { status: 'operational', provider: 'openai' },
-      cdn_optimization: { status: 'operational', provider: 'cloudflare' }
+      cdn_optimization: { status: 'disabled', provider: 'none' }
     };
   }
 
@@ -204,7 +204,7 @@ class MCPIntegrationManager {
       ['Email System', '✅', 'Resend', '✅', 'send-email'],
       ['Payment Processing', '✅', 'Stripe', '✅', 'N/A'],
       ['Admin Dashboard', '✅', 'Custom', '✅', 'Multiple'],
-      ['CDN Optimization', '✅', 'Cloudflare', '✅', 'N/A']
+      ['CDN Optimization', '❌', 'None', '❌', 'N/A']
     ];
 
     matrix.forEach((row, index) => {
