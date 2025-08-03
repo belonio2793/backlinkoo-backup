@@ -279,14 +279,10 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
                       isPremium
                         ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white hover:from-amber-600 hover:to-yellow-600'
                         : ''
-                    } ${premiumLoading ? 'opacity-70' : ''}`}
+                    }`}
                   >
-                    {premiumLoading ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <Crown className="h-3 w-3" />
-                    )}
-                    {premiumLoading ? 'Checking...' : (isPremium ? 'Premium Plan' : 'Free Plan')}
+                    <Crown className="h-3 w-3" />
+                    {isPremium ? 'Premium Plan' : 'Free Plan'}
                   </Badge>
                 </div>
 
