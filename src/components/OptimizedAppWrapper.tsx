@@ -49,6 +49,7 @@ import {
   LazySuperEnhancedBlogListing,
   LazyEnhancedBlogPost,
   LazyBeautifulBlogTemplate,
+  LazySettings,
   LazyTrialDashboard,
   LazyAIContentTest,
   LazyEnhancedDashboardRouter,
