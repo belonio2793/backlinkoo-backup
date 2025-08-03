@@ -313,7 +313,20 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="account-status">Account Status</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="account-status">Account Status</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={refreshPremiumStatus}
+                    disabled={premiumLoading}
+                    className="h-6 px-2 text-xs"
+                  >
+                    <RefreshCw className={`h-3 w-3 mr-1 ${premiumLoading ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   {/* Role Badge */}
                   <Badge variant={profile.role === 'admin' ? 'default' : 'secondary'} className="flex items-center gap-1">
