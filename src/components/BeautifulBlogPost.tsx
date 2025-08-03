@@ -284,6 +284,18 @@ export function BeautifulBlogPost() {
   const canClaimPost = blogPost ? EnhancedBlogClaimService.canClaimPost(blogPost) : false;
   const unclaimPermissions = blogPost ? EnhancedBlogClaimService.canUnclaimPost(blogPost, user) : { canUnclaim: false };
   const deletePermissions = blogPost ? EnhancedBlogClaimService.canDeletePost(blogPost, user) : { canDelete: false };
+
+  // Debug logging for delete permissions
+  console.log('Delete permissions:', {
+    deletePermissions,
+    blogPost: blogPost ? {
+      id: blogPost.id,
+      claimed: blogPost.claimed,
+      user_id: blogPost.user_id,
+      slug: blogPost.slug
+    } : null,
+    user: user ? { id: user.id } : null
+  });
   const isOwnPost = blogPost?.user_id === user?.id;
   const isExpiringSoon = blogPost?.expires_at && new Date(blogPost.expires_at).getTime() - Date.now() < 2 * 60 * 60 * 1000;
 
