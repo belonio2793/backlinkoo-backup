@@ -15,8 +15,56 @@ if (import.meta.env.DEV) {
     window.location.href = '/emergency/rls-fix';
   };
 
+  (window as any).forcePremium = async () => {
+    console.log('👑 Forcing user to premium status...');
+    const { createClient } = await import('@/integrations/supabase/client');
+    const { supabase } = createClient;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('❌ No authenticated user found');
+      return;
+    }
+
+    console.log('👤 User:', user.email);
+
+    // Update profile
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ subscription_tier: 'premium' })
+      .eq('user_id', user.id);
+
+    if (profileError) {
+      console.error('❌ Profile update error:', profileError);
+      return;
+    }
+
+    // Create subscription
+    const now = new Date();
+    const periodEnd = new Date();
+    periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+
+    const { error: subError } = await supabase
+      .from('premium_subscriptions')
+      .upsert({
+        user_id: user.id,
+        plan_type: 'premium',
+        status: 'active',
+        current_period_start: now.toISOString(),
+        current_period_end: periodEnd.toISOString()
+      });
+
+    if (subError) {
+      console.warn('⚠️ Subscription error:', subError);
+    }
+
+    console.log('✅ User forced to premium - refresh page');
+    window.location.reload();
+  };
+
   console.log('💡 Debug helpers available:');
   console.log('  - fixRLS() - Go to RLS recursion fix page');
+  console.log('  - forcePremium() - Force current user to premium status');
 }
 
 // Priority: Get React app rendering ASAP
