@@ -14,6 +14,8 @@ interface AuthState {
 export function useAuth(): AuthState {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPremium, setIsPremium] = useState(false);
+  const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
