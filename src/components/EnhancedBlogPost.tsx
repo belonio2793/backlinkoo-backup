@@ -43,8 +43,10 @@ export function EnhancedBlogPost() {
   const [blogPost, setBlogPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
+  const [unclaiming, setUnclaiming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showUnclaimDialog, setShowUnclaimDialog] = useState(false);
 
   useEffect(() => {
     if (slug) {
