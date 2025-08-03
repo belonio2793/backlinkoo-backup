@@ -426,6 +426,19 @@ export function EnhancedBlogPost() {
               </Button>
             )}
 
+            {/* Unclaim Button - Only visible to post owner */}
+            {unclaimPermissions.canUnclaim && (
+              <Button
+                onClick={() => setShowUnclaimDialog(true)}
+                variant="outline"
+                size="lg"
+                className="border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400"
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                Unclaim Post
+              </Button>
+            )}
+
             {/* Delete Button */}
             {deletePermissions.canDelete && (
               <Button
