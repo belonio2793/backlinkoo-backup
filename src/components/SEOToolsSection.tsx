@@ -411,7 +411,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
           <FeatureAccessGuard
             feature="keywordResearch"
             featureName="Advanced Keyword Research"
-            fallbackMessage="Upgrade to Premium for unlimited keyword research with geographic targeting, difficulty analysis, and SERP insights."
+            fallbackMessage="Premium subscription required for unlimited keyword research with geographic targeting, difficulty analysis, and SERP insights."
           >
             <KeywordResearchTool />
           </FeatureAccessGuard>
