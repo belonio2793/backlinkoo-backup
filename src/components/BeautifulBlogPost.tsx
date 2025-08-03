@@ -488,7 +488,7 @@ export function BeautifulBlogPost() {
               )}
 
               {/* Target URL */}
-              <div className="max-w-2xl mx-auto flex items-center gap-4 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl mb-8 shadow-sm">
+              <div className="beautiful-info max-w-2xl mx-auto flex items-center gap-4 p-6 mb-8 shadow-sm">
                 <div className="flex items-center gap-2 flex-1">
                   <Target className="h-5 w-5 text-blue-600" />
                   <span className="text-blue-700 font-semibold">Target URL:</span>
