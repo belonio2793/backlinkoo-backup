@@ -49,7 +49,7 @@ import {
   LazySuperEnhancedBlogListing,
   LazyEnhancedBlogPost,
   LazyBeautifulBlogTemplate,
-  LazySettings,
+
   LazyTrialDashboard,
   LazyAIContentTest,
   LazyEnhancedDashboardRouter,
@@ -122,11 +122,7 @@ export const OptimizedAppWrapper = () => {
               </Suspense>
             </EmailVerificationGuard>
           } />
-          <Route path="/settings" element={
-            <EmailVerificationGuard>
-              <LazySettings />
-            </EmailVerificationGuard>
-          } />
+
           <Route path="/my-dashboard" element={
             <EmailVerificationGuard>
               <Suspense fallback={<PageLoader />}>
