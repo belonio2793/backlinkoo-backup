@@ -90,20 +90,20 @@ You are writing specifically about "${request.keyword}" - not generic content. C
 - AVOID generic phrases like "in today's digital landscape" - be specific to "${request.keyword}"
 
 🏗️ PREMIUM STRUCTURE:
-- Compelling H1 that promises specific, valuable outcomes
-- Hook introduction with surprising insight or provocative question
-- 4-6 main sections (H2) that each solve specific problems
-- Actionable H3 subsections with concrete examples
+- Compelling H1 that promises specific, valuable outcomes related to "${request.keyword}"
+- Hook introduction with surprising insight or provocative question about "${request.keyword}"
+- 4-6 main sections (H2) that each solve specific problems within "${request.keyword}"
+- Actionable H3 subsections with concrete examples specific to "${request.keyword}"
 - Natural integration of "${request.anchorText}" → ${request.targetUrl}
-- Powerful conclusion with clear next steps
+- Powerful conclusion with clear next steps for "${request.keyword}"
 
 🚀 ENGAGEMENT OPTIMIZATION:
-- Open with a statistic or insight that challenges conventional thinking
-- Include numbered frameworks, step-by-step processes, or checklists
-- Use psychological triggers and persuasive writing techniques
-- Add transition phrases that maintain reading momentum
-- Include rhetorical questions that increase engagement
-- End sections with compelling hooks to continue reading`;
+- Open with a statistic or insight that challenges conventional thinking about "${request.keyword}"
+- Include numbered frameworks, step-by-step processes, or checklists specific to "${request.keyword}"
+- Use psychological triggers and persuasive writing techniques relevant to "${request.keyword}"
+- Add transition phrases that maintain reading momentum while staying focused on "${request.keyword}"
+- Include rhetorical questions that increase engagement about "${request.keyword}"
+- End sections with compelling hooks to continue reading about "${request.keyword}"`;
 
       if (request.industry) {
         prompt += `\n- Focus on ${request.industry} industry context and examples`;
