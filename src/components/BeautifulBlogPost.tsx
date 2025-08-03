@@ -252,7 +252,8 @@ export function BeautifulBlogPost() {
     // Remove **H1**: prefix and other markdown artifacts from title
     return title
       .replace(/^\*\*H1\*\*:\s*/i, '')
-      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '')
+      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
+      .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
       .replace(/^#{1,6}\s+/, '')
       .trim();
   };
