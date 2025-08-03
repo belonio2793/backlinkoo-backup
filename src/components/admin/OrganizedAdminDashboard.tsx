@@ -7,13 +7,14 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AuthService } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
-import { useWorkingAdminDashboardMetrics } from "@/hooks/useWorkingAdminDashboardMetrics";
+import { useEnhancedAdminMetrics } from "@/hooks/useEnhancedAdminMetrics";
+import { EnhancedAdminOverview } from "@/components/admin/EnhancedAdminOverview";
 import { AdminNavigationHeader } from "@/components/admin/AdminNavigationHeader";
 import { AdminUserDashboard } from "@/components/admin/AdminUserDashboard";
 import { supabase } from '@/integrations/supabase/client';
 
 // Admin Components
-import { SecurityDashboard } from "@/components/SecurityDashboard";
+import { EnhancedSecurityDashboard } from "@/components/EnhancedSecurityDashboard";
 import { CampaignManager } from "@/components/CampaignManager";
 import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager";
 import { EmailSystemManagerSafe } from "@/components/admin/EmailSystemManagerSafe";
@@ -67,7 +68,7 @@ import {
 
 export function OrganizedAdminDashboard() {
   const { toast } = useToast();
-  const { metrics, loading, error, refetch } = useWorkingAdminDashboardMetrics();
+  const { metrics, loading, error, refreshMetrics } = useEnhancedAdminMetrics();
   const [activeSection, setActiveSection] = useState("overview");
   const [adminEmail, setAdminEmail] = useState<string | undefined>();
 
@@ -88,10 +89,10 @@ export function OrganizedAdminDashboard() {
   }, []);
 
   const handleRefreshMetrics = async () => {
-    await refetch();
+    await refreshMetrics();
     toast({
-      title: "Metrics Refreshed",
-      description: "Dashboard metrics have been updated with the latest data."
+      title: "Enhanced Metrics Refreshed",
+      description: "Dashboard metrics have been updated with the latest real-time data."
     });
   };
 
@@ -112,141 +113,7 @@ export function OrganizedAdminDashboard() {
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Section Content */}
         {activeSection === "overview" && (
-          <div className="space-y-6">
-            {/* Connection Status Alert */}
-            {error && (
-              <Alert className="border-red-200 bg-red-50">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-red-700">
-                  <div className="font-medium">Dashboard Error</div>
-                  <div className="text-sm mt-1">{error.message}</div>
-                  <div className="text-sm mt-2 text-red-600">
-                    This usually means you need to sign in as an admin user or fix the database connection.
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Stats Overview */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Key Metrics</h2>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleRefreshMetrics}
-                    disabled={loading}
-                  >
-                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                    Refresh
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {loading ? (
-                        <div className="h-8 bg-muted animate-pulse rounded" />
-                      ) : (
-                        metrics?.totalUsers || 0
-                      )}
-                    </div>
-                    {loading ? (
-                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                    ) : (
-                      <p className="text-xs text-muted-foreground">All registered users</p>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Active Subscribers</CardTitle>
-                    <Activity className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {loading ? (
-                        <div className="h-8 bg-muted animate-pulse rounded" />
-                      ) : (
-                        metrics?.activeUsers || 0
-                      )}
-                    </div>
-                    {loading ? (
-                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                    ) : (
-                      <p className="text-xs text-muted-foreground">Currently subscribed</p>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
-                    <CreditCard className="h-4 w-4 text-success" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-success">
-                      {loading ? (
-                        <div className="h-8 bg-muted animate-pulse rounded" />
-                      ) : (
-                        `$${metrics?.monthlyRevenue?.toFixed(2) || '0.00'}`
-                      )}
-                    </div>
-                    {loading ? (
-                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                    ) : (
-                      <p className="text-xs text-muted-foreground">Current month total</p>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Running Campaigns</CardTitle>
-                    <Target className="h-4 w-4 text-blue-500" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-blue-600">
-                      {loading ? (
-                        <div className="h-8 bg-muted animate-pulse rounded" />
-                      ) : (
-                        metrics?.runningCampaigns || 0
-                      )}
-                    </div>
-                    {loading ? (
-                      <div className="h-3 bg-muted animate-pulse rounded w-20" />
-                    ) : (
-                      <p className="text-xs text-muted-foreground">Active credit campaigns</p>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-
-            {/* Streamlined System Status */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MonitorSpeaker className="h-5 w-5" />
-                  System Status
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ServiceConnectionStatus />
-              </CardContent>
-            </Card>
-
-            {/* Direct OpenAI Connection Test */}
-            <DirectOpenAITest />
-          </div>
+          <EnhancedAdminOverview />
         )}
 
         {activeSection === "users" && (
@@ -368,7 +235,7 @@ export function OrganizedAdminDashboard() {
 
         {activeSection === "security" && (
           <div className="space-y-6">
-            <SecurityDashboard />
+            <EnhancedSecurityDashboard />
           </div>
         )}
       </div>

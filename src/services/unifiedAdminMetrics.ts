@@ -17,6 +17,7 @@ export interface UnifiedAdminMetrics {
   // Campaign metrics
   totalCampaigns: number;
   activeCampaigns: number;
+  runningCampaigns: number; // Alias for activeCampaigns for compatibility
   completedCampaigns: number;
   
   // Financial metrics
@@ -100,6 +101,7 @@ class UnifiedAdminMetricsService {
       // Campaign metrics
       totalCampaigns: campaignMetrics.status === 'fulfilled' ? campaignMetrics.value.totalCampaigns : 0,
       activeCampaigns: campaignMetrics.status === 'fulfilled' ? campaignMetrics.value.activeCampaigns : 0,
+      runningCampaigns: campaignMetrics.status === 'fulfilled' ? campaignMetrics.value.activeCampaigns : 0, // Alias for compatibility
       completedCampaigns: campaignMetrics.status === 'fulfilled' ? campaignMetrics.value.completedCampaigns : 0,
       
       // Financial metrics

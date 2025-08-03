@@ -119,83 +119,89 @@ requestIdleCallback(() => {
   }
 }, { timeout: 5000 });
 
-// Only setup browser extension conflicts in production or when detected
-if (typeof window !== 'undefined' && (window.ethereum || import.meta.env.PROD)) {
-  // Prevent ethereum property conflicts from browser extensions
-  try {
-    const descriptor = Object.getOwnPropertyDescriptor(window, 'ethereum');
+// Enhanced crypto wallet extension conflict handling
+if (typeof window !== 'undefined') {
+  // Import and use the dedicated crypto wallet handler
+  import('./utils/cryptoWalletHandler').then(({ CryptoWalletHandler }) => {
+    // Force re-initialization with enhanced protection
+    CryptoWalletHandler.initialize();
+  });
 
-    if (!descriptor || descriptor.configurable) {
-      const originalEthereum = window.ethereum;
+  // Immediate protection with safer approach
+  const protectProperty = (propertyName: string) => {
+    try {
+      const existing = (window as any)[propertyName];
+      const descriptor = Object.getOwnPropertyDescriptor(window, propertyName);
 
-      if (originalEthereum) {
-        delete window.ethereum;
+      // Only protect if configurable or doesn't exist
+      if (!descriptor || descriptor.configurable) {
+        // Use a proxy to handle redefinition attempts gracefully
+        let currentValue = existing;
+
+        Object.defineProperty(window, propertyName, {
+          get() {
+            return currentValue;
+          },
+          set(newValue) {
+            // Allow updates but log them
+            console.log(`🔧 ${propertyName} property updated by extension`);
+            currentValue = newValue;
+          },
+          configurable: true, // Keep configurable to allow extensions to work
+          enumerable: true
+        });
+
+        console.log(`🔧 Protected ${propertyName} with proxy getter/setter`);
       }
-
-      Object.defineProperty(window, 'ethereum', {
-        value: originalEthereum || null,
-        writable: false,
-        configurable: false,
-        enumerable: true
-      });
+    } catch (error: any) {
+      console.warn(`⚠️ Could not protect ${propertyName}:`, error.message);
     }
-  } catch (error) {
-    // Silently handle any ethereum property conflicts
-    console.warn('Ethereum property conflict handled:', error);
-  }
+  };
 
-  // Global error handler for uncaught ethereum conflicts
-  window.addEventListener('error', (event) => {
-    const message = event.error?.message || '';
-    if (message.includes('Cannot redefine property: ethereum') ||
-        message.includes('evmAsk') ||
-        message.includes('defineProperty') ||
-        message.includes('chrome-extension://') ||
-        event.filename?.includes('chrome-extension://')) {
-      console.warn('🔒 Crypto wallet extension conflict handled:', message);
-      event.preventDefault();
-      event.stopPropagation();
-      return false;
-    }
-  });
+  // Protect common wallet properties
+  protectProperty('ethereum');
+  protectProperty('web3');
+  protectProperty('solana');
 
-  window.addEventListener('unhandledrejection', (event) => {
-    const message = event.reason?.message || '';
-    if (message.includes('Cannot redefine property: ethereum') ||
-        message.includes('evmAsk') ||
-        message.includes('defineProperty') ||
-        message.includes('chrome-extension://')) {
-      console.warn('🔒 Crypto wallet promise rejection handled:', message);
-      event.preventDefault();
-    }
-  });
-
-  // Additional protection against extension injection conflicts
+  // Enhanced Object.defineProperty override with better error handling
   const originalDefineProperty = Object.defineProperty;
   Object.defineProperty = function(obj: any, prop: string | symbol, descriptor: PropertyDescriptor) {
-    if (obj === window && (prop === 'ethereum' || prop === 'web3')) {
+    // Special handling for wallet-related properties on window
+    if (obj === window && typeof prop === 'string' && ['ethereum', 'web3', 'solana'].includes(prop)) {
       try {
         const existing = Object.getOwnPropertyDescriptor(window, prop);
-        if (existing && !existing.configurable) {
-          console.warn(`🔒 Prevented attempt to redefine non-configurable ${String(prop)} property`);
-          return obj;
-        }
 
-        // Log the successful redefinition for debugging
-        console.log(`🔧 Allowing ${String(prop)} property redefinition`);
+        // If property already exists and is protected, merge the values instead of throwing
+        if (existing && !existing.configurable) {
+          console.log(`🔧 Merging ${prop} property instead of redefining`);
+
+          // If the existing property has a value and the new one does too, try to merge
+          if (existing.value && descriptor.value && typeof existing.value === 'object' && typeof descriptor.value === 'object') {
+            Object.assign(existing.value, descriptor.value);
+          }
+
+          return obj; // Return successfully without throwing
+        }
       } catch (e) {
-        console.warn(`⚠️ Error checking ${String(prop)} property:`, e);
-        // Continue with original function if check fails
+        console.warn(`⚠️ Error checking ${prop} property during redefinition:`, e);
       }
     }
 
     try {
       return originalDefineProperty.call(this, obj, prop, descriptor);
     } catch (error: any) {
+      // Handle the specific "Cannot redefine property" error gracefully
       if (error.message?.includes('Cannot redefine property')) {
-        console.warn(`🔒 Silently handled property redefinition error for ${String(prop)}:`, error.message);
-        return obj;
+        const propName = String(prop);
+        console.warn(`🔒 Gracefully handled property redefinition for ${propName}:`, error.message);
+
+        // For crypto wallet properties, this is expected behavior
+        if (['ethereum', 'web3', 'solana'].includes(propName)) {
+          return obj; // Return successfully for wallet properties
+        }
       }
+
+      // Re-throw other errors
       throw error;
     }
   };
