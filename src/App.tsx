@@ -13,6 +13,7 @@ import { EnhancedErrorBoundary } from "@/components/EnhancedErrorBoundary";
 import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 import { autoConfigSaver } from "@/services/autoConfigSaver";
+import { DebugErrorHandler } from "@/utils/debugErrorHandler";
 import "@/services/blogCleanupService"; // Initialize blog cleanup service
 
 
