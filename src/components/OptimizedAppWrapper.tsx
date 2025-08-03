@@ -98,6 +98,7 @@ export const OptimizedAppWrapper = () => {
           {/* Blog routes - enhanced system */}
           <Route path="/blog" element={<LazySuperEnhancedBlogListing />} />
           <Route path="/blog/create" element={<LazyBlogCreation />} />
+          <Route path="/blog/seo-generator" element={<LazySEOOptimizedBlogGenerator />} />
           <Route path="/blog/:slug" element={<LazyEnhancedBlogPost />} />
 
           {/* Legacy blog routes for backward compatibility */}
