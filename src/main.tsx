@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import './utils/globalErrorHandler'
+import './utils/cryptoWalletHandler'
 
 // Priority: Get React app rendering ASAP
 createRoot(document.getElementById("root")!).render(<App />);
