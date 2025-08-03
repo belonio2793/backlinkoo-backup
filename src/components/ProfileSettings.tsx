@@ -14,7 +14,7 @@ import { PremiumStatusSync } from "@/components/PremiumStatusSync";
 import { QuickPremiumFix } from "@/components/QuickPremiumFix";
 import { PremiumStatusDebugger } from "@/components/PremiumStatusDebugger";
 import { EmergencyRLSFixTrigger } from "@/components/EmergencyRLSFixTrigger";
-import { User, Mail, Calendar, MapPin, Briefcase, Globe, Save, AlertCircle, Crown, Shield } from "lucide-react";
+import { User, Mail, Calendar, MapPin, Briefcase, Globe, Save, AlertCircle, Crown, Shield, Loader2 } from "lucide-react";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface ProfileData {
