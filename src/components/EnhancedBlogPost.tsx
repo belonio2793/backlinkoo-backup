@@ -500,14 +500,16 @@ export function EnhancedBlogPost() {
               <Trash2 className="h-5 w-5 text-red-600" />
               Delete Blog Post
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{blogPost.title}"? This action cannot be undone.
-              {blogPost.claimed && (
-                <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-                  <ShieldCheck className="h-4 w-4 inline mr-1" />
-                  Note: This is a claimed post. Deletion should be carefully considered.
-                </div>
-              )}
+            <AlertDialogDescription asChild>
+              <div>
+                <p className="mb-2">Are you sure you want to delete "{blogPost.title}"? This action cannot be undone.</p>
+                {blogPost.claimed && (
+                  <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                    <ShieldCheck className="h-4 w-4 inline mr-1" />
+                    Note: This is a claimed post. Deletion should be carefully considered.
+                  </div>
+                )}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
