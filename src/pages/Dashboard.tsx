@@ -998,8 +998,13 @@ const Dashboard = () => {
 
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={handleSignOut}
-                    className="text-red-600 focus:text-red-600"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('🚪 Sign out dropdown item clicked');
+                      handleSignOut();
+                    }}
+                    className="text-red-600 focus:text-red-600 cursor-pointer"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out
