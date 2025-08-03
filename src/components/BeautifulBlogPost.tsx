@@ -426,26 +426,19 @@ export function BeautifulBlogPost() {
               
               {/* Status Badges */}
               <div className="flex items-center justify-center gap-3 mb-8">
-                <Badge 
-                  variant={blogPost.claimed ? "default" : "secondary"} 
-                  className={`px-4 py-2 text-sm font-medium rounded-full ${
-                    blogPost.claimed 
-                      ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg' 
-                      : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300'
-                  }`}
-                >
-                  {blogPost.claimed ? (
-                    <>
-                      <Crown className="mr-2 h-4 w-4" />
-                      Claimed Post
-                    </>
-                  ) : (
-                    <>
-                      <Timer className="mr-2 h-4 w-4" />
-                      Available to Claim
-                    </>
-                  )}
-                </Badge>
+                {blogPost.claimed ? (
+                  <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full text-green-700 shadow-sm">
+                    <CheckCircle2 className="h-5 w-5" />
+                    <span className="font-semibold">
+                      {isOwnPost ? 'You own this post' : 'This post has been claimed'}
+                    </span>
+                  </div>
+                ) : (
+                  <Badge className="px-4 py-2 text-sm font-medium rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300">
+                    <Timer className="mr-2 h-4 w-4" />
+                    Available to Claim
+                  </Badge>
+                )}
                 
                 {blogPost.claimed && isOwnPost && (
                   <Badge className="px-4 py-2 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300 rounded-full">
