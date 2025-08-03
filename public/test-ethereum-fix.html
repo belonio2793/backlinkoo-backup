@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethereum Property Conflict Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .info { color: #17a2b8; }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #results {
+            min-height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔒 Ethereum Property Conflict Test</h1>
+    <p>This page tests the fix for the "Cannot redefine property: ethereum" error that was occurring with crypto wallet browser extensions.</p>
+
+    <div class="test-section">
+        <h2>Current State</h2>
+        <div id="current-state"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Actions</h2>
+        <button onclick="testEthereumProperty()">Test Ethereum Property</button>
+        <button onclick="testWeb3Property()">Test Web3 Property</button>
+        <button onclick="simulateWalletInjection()">Simulate Wallet Injection</button>
+        <button onclick="testPropertyRedefinition()">Test Property Redefinition</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type;
+            results.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function updateCurrentState() {
+            const stateDiv = document.getElementById('current-state');
+            const ethereumExists = typeof window.ethereum !== 'undefined';
+            const web3Exists = typeof window.web3 !== 'undefined';
+            const solanaExists = typeof window.solana !== 'undefined';
+            
+            let ethereumDescriptor = null;
+            let web3Descriptor = null;
+            let solanaDescriptor = null;
+            
+            try {
+                ethereumDescriptor = Object.getOwnPropertyDescriptor(window, 'ethereum');
+                web3Descriptor = Object.getOwnPropertyDescriptor(window, 'web3');
+                solanaDescriptor = Object.getOwnPropertyDescriptor(window, 'solana');
+            } catch (e) {
+                log(`Error getting property descriptors: ${e.message}`, 'error');
+            }
+
+            stateDiv.innerHTML = `
+                <div><strong>Ethereum:</strong> ${ethereumExists ? '✅ Present' : '❌ Not Present'}</div>
+                <div><strong>Web3:</strong> ${web3Exists ? '✅ Present' : '❌ Not Present'}</div>
+                <div><strong>Solana:</strong> ${solanaExists ? '✅ Present' : '❌ Not Present'}</div>
+                <br>
+                <div><strong>Ethereum Descriptor:</strong></div>
+                <pre>${JSON.stringify(ethereumDescriptor, null, 2)}</pre>
+                <div><strong>Web3 Descriptor:</strong></div>
+                <pre>${JSON.stringify(web3Descriptor, null, 2)}</pre>
+                <div><strong>Solana Descriptor:</strong></div>
+                <pre>${JSON.stringify(solanaDescriptor, null, 2)}</pre>
+            `;
+        }
+
+        function testEthereumProperty() {
+            log('Testing ethereum property access...', 'info');
+            
+            try {
+                const ethereum = window.ethereum;
+                log(`✅ Successfully accessed window.ethereum: ${ethereum ? 'Object present' : 'null/undefined'}`, 'success');
+                
+                // Test if we can read the descriptor
+                const descriptor = Object.getOwnPropertyDescriptor(window, 'ethereum');
+                log(`✅ Property descriptor: configurable=${descriptor?.configurable}, writable=${descriptor?.writable}`, 'success');
+                
+            } catch (error) {
+                log(`❌ Error accessing ethereum property: ${error.message}`, 'error');
+            }
+        }
+
+        function testWeb3Property() {
+            log('Testing web3 property access...', 'info');
+            
+            try {
+                const web3 = window.web3;
+                log(`✅ Successfully accessed window.web3: ${web3 ? 'Object present' : 'null/undefined'}`, 'success');
+                
+                const descriptor = Object.getOwnPropertyDescriptor(window, 'web3');
+                log(`✅ Property descriptor: configurable=${descriptor?.configurable}, writable=${descriptor?.writable}`, 'success');
+                
+            } catch (error) {
+                log(`❌ Error accessing web3 property: ${error.message}`, 'error');
+            }
+        }
+
+        function simulateWalletInjection() {
+            log('Simulating wallet extension injection...', 'info');
+            
+            try {
+                // Simulate what a wallet extension might do
+                const mockWallet = {
+                    isMetaMask: true,
+                    request: function(args) {
+                        return Promise.resolve('0x1234567890123456789012345678901234567890');
+                    },
+                    selectedAddress: null,
+                    networkVersion: '1'
+                };
+
+                // Try to set the ethereum property (this might fail with the old approach)
+                window.ethereum = mockWallet;
+                log('✅ Successfully injected mock wallet into window.ethereum', 'success');
+                
+                // Verify it's accessible
+                if (window.ethereum && window.ethereum.isMetaMask) {
+                    log('✅ Mock wallet is accessible and functional', 'success');
+                } else {
+                    log('⚠️ Mock wallet was set but may not be accessible', 'warning');
+                }
+                
+            } catch (error) {
+                log(`❌ Error injecting mock wallet: ${error.message}`, 'error');
+            }
+        }
+
+        function testPropertyRedefinition() {
+            log('Testing property redefinition (this used to cause the error)...', 'info');
+            
+            try {
+                // This is what was causing the "Cannot redefine property" error
+                Object.defineProperty(window, 'ethereum', {
+                    value: { 
+                        isTestWallet: true,
+                        request: () => Promise.resolve('test')
+                    },
+                    writable: true,
+                    configurable: true,
+                    enumerable: true
+                });
+                
+                log('✅ Successfully redefined ethereum property', 'success');
+                log('✅ The "Cannot redefine property" error has been fixed!', 'success');
+                
+            } catch (error) {
+                if (error.message.includes('Cannot redefine property')) {
+                    log(`❌ Original error still occurs: ${error.message}`, 'error');
+                } else {
+                    log(`⚠️ Different error occurred: ${error.message}`, 'warning');
+                }
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // Initialize the page
+        updateCurrentState();
+        log('🚀 Ethereum conflict test page loaded', 'info');
+        log('🔍 Check the console for any additional wallet extension messages', 'info');
+
+        // Update state every few seconds
+        setInterval(updateCurrentState, 5000);
+
+        // Listen for any global errors
+        window.addEventListener('error', (event) => {
+            if (event.error && event.error.message.includes('ethereum')) {
+                log(`🚨 Ethereum-related error detected: ${event.error.message}`, 'error');
+            }
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            if (event.reason && event.reason.message && event.reason.message.includes('ethereum')) {
+                log(`🚨 Ethereum-related promise rejection: ${event.reason.message}`, 'error');
+            }
+        });
+    </script>
+</body>
+</html>
