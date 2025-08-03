@@ -421,7 +421,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
           <FeatureAccessGuard
             feature="rankTracker"
             featureName="Real-time Rank Tracking"
-            fallbackMessage="Upgrade to Premium for unlimited rank tracking across multiple search engines with historical data and trend analysis."
+            fallbackMessage="Premium subscription required for unlimited rank tracking across multiple search engines with historical data and trend analysis."
           >
             <RankingTracker />
           </FeatureAccessGuard>
