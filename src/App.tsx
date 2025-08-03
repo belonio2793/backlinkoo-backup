@@ -21,9 +21,10 @@ import "@/services/rlsStatusService"; // RLS STATUS CHECK AND MANUAL FIX INSTRUC
 import "@/utils/createAdminUser"; // Admin user creation utility
 import "@/utils/autoAdminSetup"; // Auto admin user setup
 
-// Initialize performance monitoring in development
+// Initialize performance monitoring and error tracking in development
 if (import.meta.env.DEV) {
   import('@/utils/performance');
+  DebugErrorHandler.initializeErrorTracking();
 }
 
 
