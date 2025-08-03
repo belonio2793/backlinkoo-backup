@@ -340,7 +340,10 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
               <PremiumStatusSync
                 userEmail={user.email}
                 currentPremiumStatus={isPremium || false}
-                onStatusUpdated={(newStatus) => setIsPremium(newStatus)}
+                onStatusUpdated={() => {
+                  // Refresh page to reload auth context with updated premium status
+                  setTimeout(() => window.location.reload(), 1000);
+                }}
               />
             </div>
           )}
