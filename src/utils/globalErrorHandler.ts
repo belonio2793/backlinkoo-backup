@@ -109,11 +109,20 @@ export class GlobalErrorHandler {
   }
 
   /**
+   * Check if error is RLS recursion related
+   */
+  private isRLSRecursionError(error: any): boolean {
+    const message = error?.message?.toLowerCase() || '';
+    return message.includes('infinite recursion detected in policy') ||
+           message.includes('infinite recursion') && message.includes('profiles');
+  }
+
+  /**
    * Check if error is network-related
    */
   private isNetworkError(error: any): boolean {
     const message = error?.message?.toLowerCase() || '';
-    return message.includes('failed to fetch') || 
+    return message.includes('failed to fetch') ||
            message.includes('network error') ||
            message.includes('connection failed');
   }
