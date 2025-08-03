@@ -27,6 +27,28 @@ export class EnhancedBlogClaimService {
   }
 
   /**
+   * Check if a post can be unclaimed by the current user
+   */
+  static canUnclaimPost(post: BlogPost, user?: User): { canUnclaim: boolean; reason?: string } {
+    // Only claimed posts can be unclaimed
+    if (!post.claimed) {
+      return { canUnclaim: false, reason: 'Post is not claimed' };
+    }
+
+    // Must be logged in
+    if (!user) {
+      return { canUnclaim: false, reason: 'Must be logged in to unclaim posts' };
+    }
+
+    // Only the post owner can unclaim their post
+    if (post.user_id !== user.id) {
+      return { canUnclaim: false, reason: 'Only the post owner can unclaim their post' };
+    }
+
+    return { canUnclaim: true };
+  }
+
+  /**
    * Check if a post can be deleted by the current user
    */
   static canDeletePost(post: BlogPost, user?: User): { canDelete: boolean; reason?: string } {
