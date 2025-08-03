@@ -392,7 +392,7 @@ export function BeautifulBlogPost() {
       </div>
 
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
+      <div className="beautiful-blog-hero relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-purple-600/5 to-pink-600/5" />
         <div className="container mx-auto px-6 py-16">
           <article className="max-w-4xl mx-auto">
