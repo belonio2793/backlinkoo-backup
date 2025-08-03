@@ -57,15 +57,16 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const [isPremium, setIsPremium] = useState<boolean | null>(null);
-  const [premiumLoading, setPremiumLoading] = useState(false);
-  const [forceRefreshCount, setForceRefreshCount] = useState(0);
   const [showRLSFix, setShowRLSFix] = useState(false);
+
+  // Get premium status from authentication context (set during login)
+  const { isPremium, subscriptionTier, userPlan } = useAuthStatus();
+  const [premiumLoading, setPremiumLoading] = useState(false);
 
   // Add logging when isPremium changes
   useEffect(() => {
-    console.log('🔍 isPremium state changed to:', isPremium);
-  }, [isPremium]);
+    console.log('🔍 Premium status from auth context:', { isPremium, subscriptionTier, userPlan });
+  }, [isPremium, subscriptionTier, userPlan]);
   const { toast } = useToast();
 
   // Function to force refresh premium status
