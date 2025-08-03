@@ -117,41 +117,68 @@ export class BlogPublisher {
 
   async generateSEOOptimizedHTML(post: BlogPost): Promise<string> {
     const currentDate = new Date().toISOString().split('T')[0];
-    
+
+    // Escape HTML special characters for safe insertion
+    const escapeHtml = (text: string) => {
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+    };
+
+    // Escape JSON special characters
+    const escapeJson = (text: string) => {
+      return text
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r')
+        .replace(/\t/g, '\\t');
+    };
+
+    const safeTitle = escapeHtml(post.title);
+    const safeDescription = escapeHtml(post.metaDescription);
+    const safeKeywords = escapeHtml(post.keywords.join(', '));
+    const jsonTitle = escapeJson(post.title);
+    const jsonDescription = escapeJson(post.metaDescription);
+    const jsonKeywords = escapeJson(post.keywords.join(', '));
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${post.title}</title>
-    <meta name="description" content="${post.metaDescription}">
-    <meta name="keywords" content="${post.keywords.join(', ')}">
-    
+    <title>${safeTitle}</title>
+    <meta name="description" content="${safeDescription}">
+    <meta name="keywords" content="${safeKeywords}">
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://${this.domain}${this.blogPath}/${post.slug}">
-    <meta property="og:title" content="${post.title}">
-    <meta property="og:description" content="${post.metaDescription}">
-    
+    <meta property="og:title" content="${safeTitle}">
+    <meta property="og:description" content="${safeDescription}">
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://${this.domain}${this.blogPath}/${post.slug}">
-    <meta property="twitter:title" content="${post.title}">
-    <meta property="twitter:description" content="${post.metaDescription}">
-    
+    <meta property="twitter:title" content="${safeTitle}">
+    <meta property="twitter:description" content="${safeDescription}">
+
     <!-- SEO Meta Tags -->
     <meta name="robots" content="index, follow">
     <meta name="author" content="Backlink ∞">
     <meta name="publisher" content="Backlink ∞">
     <link rel="canonical" href="https://${this.domain}${this.blogPath}/${post.slug}">
-    
+
     <!-- Schema.org markup -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "Article",
-        "headline": "${post.title}",
-        "description": "${post.metaDescription}",
+        "headline": "${jsonTitle}",
+        "description": "${jsonDescription}",
         "author": {
             "@type": "Organization",
             "name": "Backlink ∞"
@@ -170,7 +197,7 @@ export class BlogPublisher {
             "@type": "WebPage",
             "@id": "https://${this.domain}${this.blogPath}/${post.slug}"
         },
-        "keywords": "${post.keywords.join(', ')}"
+        "keywords": "${jsonKeywords}"
     }
     </script>
     
