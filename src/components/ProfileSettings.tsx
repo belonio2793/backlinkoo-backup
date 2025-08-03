@@ -290,6 +290,12 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
         .eq('user_id', user.id)
         .single()
         .then(({ data, error }) => {
+          if (error && error.message?.includes('infinite recursion')) {
+            console.error('🚨 RLS infinite recursion detected in profiles table!');
+            setShowRLSFix(true);
+            return;
+          }
+
           if (data && !error) {
             // Merge database data with current state, preserving user email
             setProfile(prev => ({
@@ -299,7 +305,11 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
           }
           // Silently fail - UI already has user data from initialization
         })
-        .catch(() => {
+        .catch((error) => {
+          if (error.message?.includes('infinite recursion')) {
+            console.error('🚨 RLS infinite recursion detected in profiles table!');
+            setShowRLSFix(true);
+          }
           // Silently fail - UI already functional with user metadata
         });
     };
