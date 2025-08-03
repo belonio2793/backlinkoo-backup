@@ -147,6 +147,68 @@ export class GlobalErrorHandler {
   }
 
   /**
+   * Handle RLS recursion errors - immediate action required
+   */
+  private handleRLSRecursionError(error: any, source: string): void {
+    console.error(`🚨 CRITICAL: RLS Recursion Detected (${source}):`, error.message);
+    console.error('This will prevent login and database operations. Redirecting to fix page...');
+
+    // Show a notification to the user
+    const notification = document.createElement('div');
+    notification.innerHTML = `
+      <div style="
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #dc2626;
+        color: white;
+        padding: 16px 20px;
+        border-radius: 8px;
+        z-index: 10000;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-family: system-ui, -apple-system, sans-serif;
+      ">
+        <div style="font-weight: bold; margin-bottom: 8px;">🚨 Database Error Detected</div>
+        <div style="font-size: 14px; margin-bottom: 12px;">
+          Infinite recursion in database policies is preventing login.
+        </div>
+        <button onclick="window.location.href='/emergency/rls-fix'" style="
+          background: white;
+          color: #dc2626;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 4px;
+          font-weight: bold;
+          cursor: pointer;
+        ">
+          Fix Now
+        </button>
+        <button onclick="this.parentElement.parentElement.remove()" style="
+          background: transparent;
+          color: white;
+          border: 1px solid white;
+          padding: 8px 16px;
+          border-radius: 4px;
+          margin-left: 8px;
+          cursor: pointer;
+        ">
+          Dismiss
+        </button>
+      </div>
+    `;
+    document.body.appendChild(notification);
+
+    // Auto-redirect after 5 seconds if user doesn't click
+    setTimeout(() => {
+      if (window.location.pathname !== '/emergency/rls-fix') {
+        console.log('🔄 Auto-redirecting to RLS fix page...');
+        window.location.href = '/emergency/rls-fix';
+      }
+    }, 5000);
+  }
+
+  /**
    * Handle generic errors
    */
   private handleGenericError(error: any, source: string, count: number): void {
