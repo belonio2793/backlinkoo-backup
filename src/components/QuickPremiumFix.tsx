@@ -99,6 +99,10 @@ export const QuickPremiumFix = ({ onStatusUpdated }: QuickPremiumFixProps) => {
 
     console.log('🎉 Direct premium fix successful');
     setIsFixed(true);
+
+    // Notify parent component to refresh
+    onStatusUpdated?.();
+
     toast({
       title: "Premium Status Fixed!",
       description: "Premium features have been activated. Refreshing page...",
