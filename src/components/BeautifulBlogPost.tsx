@@ -392,11 +392,11 @@ export function BeautifulBlogPost() {
               Back to Blog
             </Button>
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" onClick={sharePost} className="rounded-full">
+              <Button variant="outline" size="sm" onClick={sharePost} className="rounded-full bg-transparent hover:bg-gray-100/50">
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
               </Button>
-              <Button variant="outline" size="sm" onClick={copyToClipboard} className="rounded-full">
+              <Button variant="outline" size="sm" onClick={copyToClipboard} className="rounded-full bg-transparent hover:bg-gray-100/50">
                 <Copy className="h-4 w-4 mr-2" />
                 Copy Link
               </Button>
