@@ -54,13 +54,23 @@ export function OpenAIConnectionTest() {
         }
       } else {
         console.error('❌ Netlify function failed:', response.status);
+
+        // Try to get error details from response
+        let errorMessage = 'Unknown error';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error?.message || errorData.message || `HTTP ${response.status}`;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+
         setTestResult({
           status: 'error',
           message: `Netlify function error: ${response.status}`,
           details: {
             deployment: 'Check Netlify function deployment',
             status: response.status,
-            error: errorData.error?.message || 'Unknown error'
+            error: errorMessage
           }
         });
       }
