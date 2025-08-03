@@ -1,0 +1,204 @@
+/**
+ * Content formatting utilities for blog posts
+ * Ensures proper paragraph, headline, and spacing structure
+ */
+
+export class ContentFormatter {
+  /**
+   * Format blog content with proper paragraph and headline structure
+   */
+  static formatBlogContent(content: string): string {
+    if (!content) return '';
+
+    // Split content into lines and clean up
+    let formattedContent = content
+      // Normalize line breaks
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n')
+      // Remove excessive whitespace but preserve paragraph breaks
+      .replace(/[ \t]+/g, ' ')
+      .trim();
+
+    // Process the content
+    formattedContent = this.processHeadings(formattedContent);
+    formattedContent = this.processParagraphs(formattedContent);
+    formattedContent = this.processLists(formattedContent);
+    formattedContent = this.processBlockquotes(formattedContent);
+    formattedContent = this.fixSpacing(formattedContent);
+
+    return formattedContent;
+  }
+
+  /**
+   * Process and format headings with proper structure
+   */
+  private static processHeadings(content: string): string {
+    return content
+      // Ensure headings have proper spacing before and after
+      .replace(/\n*(#{1,6})\s*(.+?)\n*/g, '\n\n$1 $2\n\n')
+      // Fix heading hierarchy - don't allow skipping levels
+      .replace(/\n#{4,6}/g, '\n###')
+      // Ensure heading text is properly capitalized
+      .replace(/(#{1,6})\s*(.+)/g, (match, hashes, text) => {
+        const cleanText = text.trim();
+        return `${hashes} ${this.capitalizeHeading(cleanText)}`;
+      });
+  }
+
+  /**
+   * Process paragraphs with proper spacing
+   */
+  private static processParagraphs(content: string): string {
+    return content
+      // Split into paragraphs and process each
+      .split(/\n\s*\n/)
+      .map(paragraph => {
+        paragraph = paragraph.trim();
+        if (!paragraph) return '';
+        
+        // Skip headings, lists, and blockquotes
+        if (paragraph.match(/^#{1,6}\s|^[\*\-\+]\s|^>\s|^\d+\.\s/)) {
+          return paragraph;
+        }
+        
+        // Wrap regular paragraphs in <p> tags if they aren't already
+        if (!paragraph.match(/^<[^>]+>/)) {
+          return `<p>${paragraph}</p>`;
+        }
+        
+        return paragraph;
+      })
+      .filter(p => p.length > 0)
+      .join('\n\n');
+  }
+
+  /**
+   * Process lists with proper formatting
+   */
+  private static processLists(content: string): string {
+    // Process unordered lists
+    content = content.replace(
+      /((^[\*\-\+]\s.+\n?)+)/gm,
+      (match) => {
+        const items = match.trim().split('\n')
+          .map(line => {
+            const cleanLine = line.replace(/^[\*\-\+]\s/, '').trim();
+            return `  <li>${cleanLine}</li>`;
+          })
+          .join('\n');
+        return `\n<ul>\n${items}\n</ul>\n\n`;
+      }
+    );
+
+    // Process ordered lists
+    content = content.replace(
+      /((^\d+\.\s.+\n?)+)/gm,
+      (match) => {
+        const items = match.trim().split('\n')
+          .map(line => {
+            const cleanLine = line.replace(/^\d+\.\s/, '').trim();
+            return `  <li>${cleanLine}</li>`;
+          })
+          .join('\n');
+        return `\n<ol>\n${items}\n</ol>\n\n`;
+      }
+    );
+
+    return content;
+  }
+
+  /**
+   * Process blockquotes with proper formatting
+   */
+  private static processBlockquotes(content: string): string {
+    return content.replace(
+      /((^>\s.+\n?)+)/gm,
+      (match) => {
+        const quote = match.trim()
+          .split('\n')
+          .map(line => line.replace(/^>\s/, '').trim())
+          .join(' ');
+        return `\n<blockquote><p>${quote}</p></blockquote>\n\n`;
+      }
+    );
+  }
+
+  /**
+   * Fix spacing throughout the content
+   */
+  private static fixSpacing(content: string): string {
+    return content
+      // Remove excessive line breaks
+      .replace(/\n{3,}/g, '\n\n')
+      // Ensure proper spacing around block elements
+      .replace(/(<\/?(h[1-6]|p|div|ul|ol|blockquote)[^>]*>)\s*\n?\s*/g, '$1\n\n')
+      // Clean up start and end
+      .trim();
+  }
+
+  /**
+   * Capitalize heading text properly
+   */
+  private static capitalizeHeading(text: string): string {
+    // List of words that should remain lowercase unless they're the first word
+    const lowercaseWords = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'in', 'nor', 'of', 'on', 'or', 'so', 'the', 'to', 'up', 'yet'];
+    
+    return text
+      .toLowerCase()
+      .split(' ')
+      .map((word, index) => {
+        // Always capitalize first word
+        if (index === 0) {
+          return word.charAt(0).toUpperCase() + word.slice(1);
+        }
+        
+        // Keep lowercase words lowercase unless they're important
+        if (lowercaseWords.includes(word)) {
+          return word;
+        }
+        
+        // Capitalize other words
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join(' ');
+  }
+
+  /**
+   * Add proper spacing between sections
+   */
+  static addSectionSpacing(content: string): string {
+    return content
+      // Add spacing before headings
+      .replace(/(\n|^)(#{1,6}\s)/g, '\n\n$2')
+      // Add spacing after paragraphs before headings
+      .replace(/(<\/p>)\s*(#{1,6}\s)/g, '$1\n\n$2')
+      // Add spacing around lists
+      .replace(/(<\/(ul|ol)>)\s*(<p>)/g, '$1\n\n$3')
+      .replace(/(<\/p>)\s*(<(ul|ol)>)/g, '$1\n\n$2')
+      // Clean up multiple line breaks
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
+  /**
+   * Sanitize and clean content for display
+   */
+  static sanitizeContent(content: string): string {
+    return content
+      // Remove dangerous HTML tags but keep formatting
+      .replace(/<script[^>]*>.*?<\/script>/gi, '')
+      .replace(/<style[^>]*>.*?<\/style>/gi, '')
+      .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+      // Fix common HTML issues
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      // Normalize quotes
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\u201C\u201D]/g, '"')
+      // Remove excessive whitespace
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+}
