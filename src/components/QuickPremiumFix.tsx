@@ -152,7 +152,7 @@ export const QuickPremiumFix = () => {
         </Button>
 
         <p className="text-xs text-gray-600 text-center">
-          This will set subscription_tier to 'premium' and create an active premium subscription
+          Direct database update: Sets subscription_tier to 'premium' and creates active subscription
         </p>
       </CardContent>
     </Card>
