@@ -141,6 +141,73 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
     }
   };
 
+  // Function to directly force premium status
+  const forcePremiumStatus = async () => {
+    if (!user) return;
+
+    setPremiumLoading(true);
+    console.log('👑 Force setting premium status for user:', user.id, user.email);
+
+    try {
+      // Update profile to premium
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ subscription_tier: 'premium' })
+        .eq('user_id', user.id);
+
+      if (profileError) {
+        console.error('❌ Profile update error:', profileError);
+        throw new Error(`Profile update failed: ${profileError.message}`);
+      }
+
+      console.log('✅ Profile updated to premium');
+
+      // Create premium subscription
+      const now = new Date();
+      const periodEnd = new Date();
+      periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+
+      const { error: subError } = await supabase
+        .from('premium_subscriptions')
+        .upsert({
+          user_id: user.id,
+          plan_type: 'premium',
+          status: 'active',
+          current_period_start: now.toISOString(),
+          current_period_end: periodEnd.toISOString()
+        });
+
+      if (subError) {
+        console.warn('⚠️ Subscription creation warning:', subError.message);
+      } else {
+        console.log('✅ Premium subscription created');
+      }
+
+      // Immediately update UI
+      setIsPremium(true);
+
+      toast({
+        title: "Premium Status Activated!",
+        description: "Your account is now premium. Refreshing page...",
+      });
+
+      // Refresh page to show changes everywhere
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+
+    } catch (error: any) {
+      console.error('❌ Force premium failed:', error);
+      toast({
+        title: "Force Premium Failed",
+        description: error.message || "Unable to set premium status",
+        variant: "destructive",
+      });
+    } finally {
+      setPremiumLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) {
