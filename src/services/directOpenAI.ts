@@ -67,9 +67,9 @@ export class DirectOpenAIService {
 
       // Use enhanced query patterns for superior content generation
       const eliteQueryPatterns = [
-        `Create an authoritative ${targetLength} expert guide on ${request.keyword} that naturally integrates ${request.anchorText} as a valuable resource linking to ${request.targetUrl}`,
-        `Write a comprehensive ${targetLength} industry-leading analysis of ${request.keyword} featuring ${request.anchorText} as a strategic reference to ${request.targetUrl}`,
-        `Develop a ${targetLength} thought leadership piece on ${request.keyword} that seamlessly incorporates ${request.anchorText} directing readers to ${request.targetUrl}`
+        `Create an authoritative ${targetLength} expert guide specifically about ${request.keyword}. Write as an industry expert who deeply understands ${request.keyword}. Include specific examples, practical tips, and actionable insights about ${request.keyword}. Naturally integrate ${request.anchorText} as a valuable resource linking to ${request.targetUrl}`,
+        `Write a comprehensive ${targetLength} industry-leading analysis of ${request.keyword}. Focus on the latest trends, best practices, and real-world applications of ${request.keyword}. Include data, statistics, and expert insights specific to ${request.keyword}. Feature ${request.anchorText} as a strategic reference to ${request.targetUrl}`,
+        `Develop a ${targetLength} thought leadership piece about ${request.keyword}. Provide unique insights, innovative strategies, and forward-thinking perspectives on ${request.keyword}. Include case studies and examples specific to ${request.keyword}. Seamlessly incorporate ${request.anchorText} directing readers to ${request.targetUrl}`
       ];
 
       const selectedPattern = eliteQueryPatterns[Math.floor(Math.random() * eliteQueryPatterns.length)];
