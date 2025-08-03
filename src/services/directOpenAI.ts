@@ -112,7 +112,39 @@ Create premium, viral-worthy content that positions this as the definitive resou
         prompt += `\n- Additional requirements: ${request.additionalInstructions}`;
       }
 
-      prompt += `\n\nIMPORTANT: Do not include any HTML tags or markdown formatting. Write in plain text with clear paragraph breaks.\n\nPlease write the complete blog post now:`;
+      prompt += `
+
+💻 ENHANCED OUTPUT FORMAT:
+Return the content as well-structured HTML using semantic tags:
+- <h1> for the main title (include primary keyword "${request.keyword}")
+- <h2> for major sections with compelling, benefit-driven headlines
+- <h3> for subsections and detailed breakdowns
+- <p> for paragraphs with proper spacing and flow
+- <ul>/<ol> and <li> for actionable lists and frameworks
+- <strong> for key concepts and important phrases
+- <em> for emphasis and transitional elements
+- <blockquote> for highlighted insights, quotes, or key takeaways
+- <a href="${request.targetUrl}" target="_blank" rel="noopener noreferrer">${request.anchorText}</a> for the strategic backlink
+
+🎨 CONTENT EXCELLENCE STANDARDS:
+- Every paragraph must provide immediate value
+- Use specific examples and real-world applications
+- Include actionable advice readers can implement today
+- Write with confidence and authoritative expertise
+- Create content that feels like a conversation with an industry leader
+- Ensure the backlink enhances rather than interrupts the user experience
+
+📈 SEO & VIRALITY OPTIMIZATION:
+- Naturally incorporate "${request.keyword}" throughout the content
+- Use semantic keywords and related industry terminology
+- Create scannable content with clear visual hierarchy
+- Include social proof elements and credibility indicators
+- Write headlines that make readers want to share
+- End with a compelling call-to-action that drives engagement
+
+Generate content so valuable that readers feel they've discovered insider knowledge. This should be the kind of post that gets saved, shared, and referenced by industry professionals.`;
+
+      console.log('🎯 Enhanced prompt:', prompt.substring(0, 200) + '...');
 
       console.log('📝 Generated prompt:', prompt);
 
