@@ -25,7 +25,7 @@ exports.handler = async (event, context) => {
     }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
-    const { userEmail } = JSON.parse(event.body || '{}');
+    const { userEmail, forcePremium } = JSON.parse(event.body || '{}');
 
     if (!userEmail) {
       return {
@@ -63,7 +63,7 @@ exports.handler = async (event, context) => {
       .eq('user_id', profile.user_id);
 
     if (subError) {
-      console.warn('⚠�� Premium subscriptions query error:', subError.message);
+      console.warn('⚠️ Premium subscriptions query error:', subError.message);
     }
 
     console.log('💎 Premium subscriptions:', premiumSubs);
