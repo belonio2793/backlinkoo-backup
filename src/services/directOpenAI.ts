@@ -78,15 +78,16 @@ export class DirectOpenAIService {
       let prompt = `${selectedPattern}
 
 🎯 CONTENT EXCELLENCE FRAMEWORK:
-Create premium, viral-worthy content that positions this as the definitive resource on "${request.keyword}". This should be content that industry experts bookmark and reference.
+You are writing specifically about "${request.keyword}" - not generic content. Create premium, contextually rich content that demonstrates deep understanding of "${request.keyword}". This should be THE definitive resource that experts in "${request.keyword}" would bookmark and reference.
 
 📊 AUTHORITY REQUIREMENTS:
-- Write ${targetLength} of expert-level, research-backed content
-- Include 3-5 specific data points, statistics, or case studies
-- Demonstrate deep subject matter expertise throughout
-- Use ${targetTone} tone while maintaining authoritative credibility
+- Write ${targetLength} of expert-level, research-backed content SPECIFICALLY about "${request.keyword}"
+- Include 3-5 specific data points, statistics, or case studies related to "${request.keyword}"
+- Demonstrate deep subject matter expertise in "${request.keyword}" throughout
+- Use ${targetTone} tone while maintaining authoritative credibility about "${request.keyword}"
 - Create content that drives social shares and backlinks naturally
 - Strategic placement of "${request.anchorText}" linking to ${request.targetUrl} where it adds maximum value
+- AVOID generic phrases like "in today's digital landscape" - be specific to "${request.keyword}"
 
 🏗️ PREMIUM STRUCTURE:
 - Compelling H1 that promises specific, valuable outcomes
