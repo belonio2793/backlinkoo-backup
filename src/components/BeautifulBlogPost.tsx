@@ -489,63 +489,17 @@ export function BeautifulBlogPost() {
 
             </header>
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap justify-center gap-4 mb-16">
-              {canClaimPost && (
-                <Button
-                  onClick={handleClaimPost}
-                  disabled={claiming}
-                  size="lg"
-                  className="beautiful-button bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  {claiming ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                      Claiming...
-                    </>
-                  ) : (
-                    <>
-                      <Crown className="mr-3 h-5 w-5" />
-                      {user ? 'Claim This Post' : 'Login to Claim'}
-                      <Zap className="ml-2 h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              )}
-
-              {unclaimPermissions.canUnclaim && (
-                <Button
-                  onClick={() => setShowUnclaimDialog(true)}
-                  variant="outline"
-                  size="lg"
-                  className="border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400 px-8 py-4 text-lg rounded-full"
-                >
-                  <XCircle className="mr-3 h-5 w-5" />
-                  Unclaim Post
-                </Button>
-              )}
-
-              {deletePermissions.canDelete && (
-                <Button
-                  onClick={() => setShowDeleteDialog(true)}
-                  variant="destructive"
-                  size="lg"
-                  className="px-8 py-4 text-lg rounded-full"
-                >
-                  <Trash2 className="mr-3 h-5 w-5" />
-                  Delete Post
-                </Button>
-              )}
-
-              {blogPost.claimed && (
+            {/* Only show status message in header if claimed */}
+            {blogPost.claimed && (
+              <div className="flex justify-center mb-8">
                 <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full text-green-700 shadow-sm">
                   <CheckCircle2 className="h-5 w-5" />
                   <span className="font-semibold">
                     {isOwnPost ? 'You own this post' : 'This post has been claimed'}
                   </span>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Article Content */}
             <div className="prose prose-lg max-w-none">
