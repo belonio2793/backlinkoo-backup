@@ -65,27 +65,77 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
     if (!user) return;
 
     setPremiumLoading(true);
-    console.log('🔄 Force refreshing premium status...');
+    console.log('🔄 Force refreshing premium status for user:', user.id, user.email);
 
     try {
-      // Clear any cached status and force a fresh check
-      const status = await PremiumService.checkPremiumStatus(user.id);
-      console.log('🔍 Fresh premium status:', status);
-      setIsPremium(status);
+      // First, check the database directly to see what's actually there
+      console.log('📋 Checking database directly...');
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('subscription_tier, role')
+        .eq('user_id', user.id)
+        .single();
 
-      // If still not premium, try the sync function
-      if (!status && user.email) {
-        console.log('🔧 Status still false, trying sync...');
-        const syncResult = await PremiumService.syncPremiumStatus(user.email);
-        console.log('🔧 Sync result:', syncResult);
+      console.log('📋 Direct profile query result:', { profile, profileError });
 
-        if (syncResult.success && syncResult.after?.isPremium) {
-          console.log('✅ Sync successful, user is now premium');
-          setIsPremium(true);
+      const { data: premiumSubs, error: subError } = await supabase
+        .from('premium_subscriptions')
+        .select('*')
+        .eq('user_id', user.id);
+
+      console.log('💎 Direct premium subscriptions:', { premiumSubs, subError });
+
+      // Determine if user should be premium based on direct database check
+      const shouldBePremium =
+        profile?.subscription_tier === 'premium' ||
+        profile?.subscription_tier === 'monthly' ||
+        (premiumSubs && premiumSubs.length > 0 && premiumSubs.some(sub => sub.status === 'active'));
+
+      console.log('🎯 Direct check - should be premium:', shouldBePremium);
+
+      // If direct check shows premium, set it immediately
+      if (shouldBePremium) {
+        console.log('✅ Direct check confirms premium status');
+        setIsPremium(true);
+        toast({
+          title: "Premium Status Confirmed",
+          description: "Your premium subscription is active",
+        });
+      } else {
+        // Try the PremiumService method
+        console.log('🔍 Direct check shows not premium, trying PremiumService...');
+        const status = await PremiumService.checkPremiumStatus(user.id);
+        console.log('🔍 PremiumService result:', status);
+        setIsPremium(status);
+
+        // If service also says not premium, try sync
+        if (!status && user.email) {
+          console.log('🔧 Both methods say not premium, trying sync...');
+          const syncResult = await PremiumService.syncPremiumStatus(user.email);
+          console.log('🔧 Sync result:', syncResult);
+
+          if (syncResult.success && syncResult.after?.isPremium) {
+            console.log('✅ Sync successful, user is now premium');
+            setIsPremium(true);
+            toast({
+              title: "Premium Status Synced",
+              description: "Your premium subscription has been activated",
+            });
+          } else {
+            toast({
+              title: "Status Updated",
+              description: "Premium status check completed",
+            });
+          }
         }
       }
     } catch (error) {
       console.error('❌ Premium status refresh failed:', error);
+      toast({
+        title: "Refresh Failed",
+        description: "Unable to refresh premium status",
+        variant: "destructive",
+      });
     } finally {
       setPremiumLoading(false);
     }
