@@ -317,6 +317,14 @@ export function SuperEnhancedBlogListing() {
                     Dashboard
                   </Button>
                   <Button
+                    onClick={() => navigate("/blog/seo-generator")}
+                    variant="outline"
+                    className="border-2 border-purple-200 hover:border-purple-400 bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 text-purple-700 hover:text-purple-800 shadow-md hover:shadow-lg transition-all duration-300"
+                  >
+                    <Target className="mr-2 h-4 w-4" />
+                    SEO Generator
+                  </Button>
+                  <Button
                     onClick={() => navigate("/blog/create")}
                     className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                   >
