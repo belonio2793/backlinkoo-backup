@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BlogForm } from './BlogForm';
+import { EnhancedBlogForm } from './EnhancedBlogForm';
 import { BlogPreview } from './BlogPreview';
 import { BlogManager } from './BlogManager';
 import { BlogTemplate } from './BlogTemplate';
