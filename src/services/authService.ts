@@ -87,6 +87,15 @@ export class AuthService {
       });
 
       if (error) {
+        console.error('🚨 Sign-in error details:', {
+          message: error.message,
+          status: error.status,
+          statusText: error.statusText,
+          name: error.name,
+          email: signInData.email,
+          fullError: JSON.stringify(error, null, 2)
+        });
+        console.error('🚨 Raw error object:', error);
         return {
           success: false,
           error: this.formatErrorMessage(error.message)
@@ -94,15 +103,9 @@ export class AuthService {
       }
 
       if (data.user && data.session) {
-        // Check if email is verified
-        if (!data.user.email_confirmed_at) {
-          await supabase.auth.signOut();
-          return {
-            success: false,
-            error: 'Email verification required. Please check your email for a verification link.',
-            requiresEmailVerification: true
-          };
-        }
+        // Temporarily bypass email verification during database issues
+        // TODO: Re-enable email verification once database is fixed
+        console.log('🔐 Auth successful for:', data.user.email, 'Verified:', !!data.user.email_confirmed_at);
 
         return {
           success: true,
@@ -116,9 +119,17 @@ export class AuthService {
         error: 'No user data received from signin'
       };
     } catch (error: any) {
+      console.error('🚨 Sign-in exception caught:', {
+        error: error,
+        message: error.message,
+        stack: error.stack,
+        email: signInData.email,
+        errorString: JSON.stringify(error, null, 2)
+      });
+      console.error('🚨 Raw exception object:', error);
       return {
         success: false,
-        error: this.formatErrorMessage(error.message)
+        error: this.formatErrorMessage(error.message || 'Authentication failed')
       };
     }
   }

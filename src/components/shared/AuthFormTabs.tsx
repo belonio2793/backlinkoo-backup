@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/services/authService";
 import { TrialConversionService } from "@/services/trialConversionService";
-import { UserRegistrationService } from "@/services/userRegistrationService";
+
 import { validateEmail, validatePassword, validateRequired } from "@/utils/authValidation";
 import { Eye, EyeOff, Shield, CheckCircle } from "lucide-react";
 
@@ -86,17 +86,33 @@ export function AuthFormTabs({
         });
         onAuthSuccess?.(result.user);
       } else {
-        toast({
-          title: "Sign in failed",
-          description: result.error || "Invalid email or password.",
-          variant: "destructive",
-        });
+        // Check if this is a database error and provide helpful guidance
+        if (result.error?.includes('Database error')) {
+          toast({
+            title: "Database Configuration Issue",
+            description: "Your Supabase database needs to be configured. Please run the provided SQL fix script in your Supabase dashboard.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Sign in failed",
+            description: result.error || "Invalid email or password.",
+            variant: "destructive",
+          });
+        }
       }
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (error: any) {
+      console.error('🚨 Login component error:', {
+        error: error,
+        message: error.message,
+        stack: error.stack,
+        email: currentEmail,
+        errorString: JSON.stringify(error, null, 2)
+      });
+      console.error('🚨 Raw login error object:', error);
       toast({
         title: "Sign in failed",
-        description: "An unexpected error occurred. Please try again.",
+        description: `An unexpected error occurred: ${error.message || 'Please try again.'}`,
         variant: "destructive",
       });
     } finally {
@@ -204,8 +220,8 @@ export function AuthFormTabs({
           });
         }
       } else {
-        // Enhanced signup with manual profile creation to avoid database trigger issues
-        const result = await UserRegistrationService.registerUser({
+        // Use standard AuthService for signup
+        const result = await AuthService.signUp({
           email: signupEmail.trim(),
           password: signupPassword,
           firstName: firstName.trim(),
