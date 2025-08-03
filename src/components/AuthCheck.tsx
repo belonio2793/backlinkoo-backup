@@ -53,7 +53,13 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
           setShowSignIn(false);
           return;
         }
-        checkAuth();
+
+        // Use instant check for admin routes, regular check for others
+        if (requireAdmin) {
+          checkAuthInstantly();
+        } else {
+          checkAuth();
+        }
       }
     });
 
