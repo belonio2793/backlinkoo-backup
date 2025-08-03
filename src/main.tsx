@@ -78,17 +78,30 @@ if (typeof window !== 'undefined' && (window.ethereum || import.meta.env.PROD)) 
   // Additional protection against extension injection conflicts
   const originalDefineProperty = Object.defineProperty;
   Object.defineProperty = function(obj: any, prop: string | symbol, descriptor: PropertyDescriptor) {
-    if (obj === window && prop === 'ethereum') {
+    if (obj === window && (prop === 'ethereum' || prop === 'web3')) {
       try {
-        const existing = Object.getOwnPropertyDescriptor(window, 'ethereum');
+        const existing = Object.getOwnPropertyDescriptor(window, prop);
         if (existing && !existing.configurable) {
-          console.warn('Prevented attempt to redefine non-configurable ethereum property');
+          console.warn(`🔒 Prevented attempt to redefine non-configurable ${String(prop)} property`);
           return obj;
         }
+
+        // Log the successful redefinition for debugging
+        console.log(`🔧 Allowing ${String(prop)} property redefinition`);
       } catch (e) {
-        console.warn('Error checking ethereum property:', e);
+        console.warn(`⚠️ Error checking ${String(prop)} property:`, e);
+        // Continue with original function if check fails
       }
     }
-    return originalDefineProperty.call(this, obj, prop, descriptor);
+
+    try {
+      return originalDefineProperty.call(this, obj, prop, descriptor);
+    } catch (error: any) {
+      if (error.message?.includes('Cannot redefine property')) {
+        console.warn(`🔒 Silently handled property redefinition error for ${String(prop)}:`, error.message);
+        return obj;
+      }
+      throw error;
+    }
   };
 }
