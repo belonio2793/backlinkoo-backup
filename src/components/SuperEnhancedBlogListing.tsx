@@ -250,9 +250,33 @@ export function SuperEnhancedBlogListing() {
     });
   };
 
+  const cleanTitle = (title: string) => {
+    if (!title) return '';
+    // Remove all markdown artifacts from title including ** wrappers
+    return title
+      .replace(/^\*\*H1\*\*:\s*/i, '')
+      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
+      .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
+      .replace(/\*\*/g, '') // Remove any remaining ** symbols
+      .replace(/\*/g, '') // Remove any remaining * symbols
+      .replace(/^#{1,6}\s+/, '') // Remove markdown headers
+      .trim();
+  };
+
   const getExcerpt = (content: string, maxLength: number = 150) => {
-    const plainText = content.replace(/<[^>]*>/g, '');
-    return plainText.length > maxLength 
+    // Remove HTML tags and markdown artifacts
+    const plainText = content
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/^\*\*H1\*\*:\s*/i, '') // Remove **H1**: prefix
+      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1 ') // Convert **Label**: to Label
+      .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **text** format
+      .replace(/\*\*/g, '') // Remove any remaining ** symbols
+      .replace(/\*/g, '') // Remove any remaining * symbols
+      .replace(/^#{1,6}\s+/, '') // Remove markdown headers
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim();
+
+    return plainText.length > maxLength
       ? plainText.substring(0, maxLength) + '...'
       : plainText;
   };
