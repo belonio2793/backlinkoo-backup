@@ -163,13 +163,16 @@ export function useAuth(): AuthState {
 
 // Helper hook for authentication checks with better naming
 export function useAuthStatus() {
-  const { user, isLoading, isAuthenticated } = useAuth();
-  
+  const { user, isLoading, isAuthenticated, isPremium, subscriptionTier } = useAuth();
+
   return {
     currentUser: user,
     isCheckingAuth: isLoading,
     isLoggedIn: isAuthenticated,
     isGuest: !isAuthenticated && !isLoading,
-    authChecked: !isLoading
+    authChecked: !isLoading,
+    isPremium,
+    subscriptionTier,
+    userPlan: isPremium ? 'Premium Plan' : 'Free Plan'
   };
 }
