@@ -346,36 +346,36 @@ export function BeautifulBlogPost() {
       <Header />
 
       {/* Floating Action Bar */}
-      <div className="floating-action-bar fixed right-6 top-1/2 transform -translate-y-1/2 z-40 space-y-3">
+      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-40 space-y-4">
         <Button
           variant="ghost"
           size="icon"
-          className="floating-action-button w-12 h-12 rounded-full shadow-md bg-white/5 backdrop-blur-sm border border-gray-200/20 hover:bg-transparent hover:border-blue-400/30 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-500 text-gray-500 hover:text-blue-600 hover:scale-110 group"
+          className="w-11 h-11 rounded-full bg-transparent border-0 shadow-none hover:bg-white/10 hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 text-gray-400 hover:text-blue-600 hover:scale-110 group backdrop-blur-none"
           onClick={() => setIsBookmarked(!isBookmarked)}
         >
           {isBookmarked ? (
-            <BookmarkCheck className="h-5 w-5 text-blue-600 group-hover:animate-pulse" />
+            <BookmarkCheck className="h-5 w-5 text-blue-600 drop-shadow-sm" />
           ) : (
-            <Bookmark className="h-5 w-5 group-hover:animate-pulse" />
+            <Bookmark className="h-5 w-5 drop-shadow-sm" />
           )}
         </Button>
 
         <Button
           variant="ghost"
           size="icon"
-          className="floating-action-button w-12 h-12 rounded-full shadow-md bg-white/5 backdrop-blur-sm border border-gray-200/20 hover:bg-transparent hover:border-red-400/30 hover:shadow-lg hover:shadow-red-500/20 transition-all duration-500 text-gray-500 hover:text-red-600 hover:scale-110 group"
+          className="w-11 h-11 rounded-full bg-transparent border-0 shadow-none hover:bg-white/10 hover:shadow-lg hover:shadow-red-500/25 transition-all duration-300 text-gray-400 hover:text-red-600 hover:scale-110 group backdrop-blur-none"
           onClick={() => setIsLiked(!isLiked)}
         >
-          <Heart className={`h-5 w-5 group-hover:animate-pulse ${isLiked ? 'text-red-500 fill-current' : ''}`} />
+          <Heart className={`h-5 w-5 drop-shadow-sm ${isLiked ? 'text-red-500 fill-current' : ''}`} />
         </Button>
 
         <Button
           variant="ghost"
           size="icon"
-          className="floating-action-button w-12 h-12 rounded-full shadow-md bg-white/5 backdrop-blur-sm border border-gray-200/20 hover:bg-transparent hover:border-purple-400/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-500 text-gray-500 hover:text-purple-600 hover:scale-110 group"
+          className="w-11 h-11 rounded-full bg-transparent border-0 shadow-none hover:bg-white/10 hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 text-gray-400 hover:text-purple-600 hover:scale-110 group backdrop-blur-none"
           onClick={sharePost}
         >
-          <Share2 className="h-5 w-5 group-hover:animate-pulse" />
+          <Share2 className="h-5 w-5 drop-shadow-sm" />
         </Button>
       </div>
 
