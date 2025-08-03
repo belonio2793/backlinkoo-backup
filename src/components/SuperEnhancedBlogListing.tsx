@@ -472,14 +472,15 @@ export function SuperEnhancedBlogListing() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {posts.map((post, index) => (
-                    <SuperPostCard 
-                      key={post.id} 
-                      post={post} 
+                    <SuperPostCard
+                      key={post.id}
+                      post={post}
                       user={user}
                       navigate={navigate}
                       formatDate={formatDate}
                       getExcerpt={getExcerpt}
                       getTimeRemaining={getTimeRemaining}
+                      cleanTitle={cleanTitle}
                       isExpiringSoon={isExpiringSoon}
                       onClaim={() => handleClaimPost(post)}
                       onDelete={() => handleDeletePost(post)}
