@@ -8,6 +8,7 @@
 export class CryptoWalletHandler {
   private static initialized = false;
   private static conflictCount = 0;
+  private static lastConflictTime = 0;
 
   /**
    * Initialize protection against wallet extension conflicts
@@ -18,9 +19,9 @@ export class CryptoWalletHandler {
     }
 
     this.initialized = true;
-    console.log('🔒 Initializing crypto wallet conflict protection...');
+    console.log('🔒 Initializing enhanced crypto wallet conflict protection...');
 
-    // Protect ethereum property
+    // Protect wallet properties with enhanced approach
     this.protectGlobalProperty('ethereum');
     this.protectGlobalProperty('web3');
     this.protectGlobalProperty('solana');
@@ -28,67 +29,85 @@ export class CryptoWalletHandler {
     // Add error listeners specifically for wallet conflicts
     this.addWalletErrorListeners();
 
-    console.log('✅ Crypto wallet conflict protection initialized');
+    console.log('✅ Enhanced crypto wallet conflict protection initialized');
   }
 
   /**
-   * Protect a global property from redefinition conflicts
+   * Protect a global property from redefinition conflicts using a more flexible approach
    */
   private static protectGlobalProperty(propertyName: string): void {
     try {
       const existing = (window as any)[propertyName];
       const descriptor = Object.getOwnPropertyDescriptor(window, propertyName);
 
-      // If property doesn't exist or is configurable, set it up with protection
+      // Only set up protection if property is configurable or doesn't exist
       if (!descriptor || descriptor.configurable) {
-        if (existing) {
-          delete (window as any)[propertyName];
-        }
-
+        let currentValue = existing;
+        
+        // Use getter/setter to allow controlled access
         Object.defineProperty(window, propertyName, {
-          value: existing || null,
-          writable: true,
-          configurable: false, // Prevent further redefinition
+          get() {
+            return currentValue;
+          },
+          set(newValue) {
+            // Log wallet extension injections but allow them
+            if (newValue && typeof newValue === 'object') {
+              console.log(`🔧 ${propertyName} wallet extension detected and allowed`);
+            }
+            currentValue = newValue;
+          },
+          configurable: true, // Keep configurable to allow extensions to inject
           enumerable: true
         });
 
-        console.log(`🔧 Protected ${propertyName} property from redefinition`);
+        console.log(`🔧 Set up flexible protection for ${propertyName} property`);
+      } else {
+        console.log(`🔒 ${propertyName} property already protected or non-configurable`);
       }
     } catch (error: any) {
-      console.warn(`⚠️ Could not protect ${propertyName} property:`, error.message);
+      // Don't treat this as a critical error - extensions should still work
+      console.log(`🚫 ${propertyName} property protection skipped:`, error.message);
     }
   }
 
   /**
-   * Add error listeners for wallet-specific conflicts
+   * Add error listeners for wallet-specific conflicts with improved handling
    */
   private static addWalletErrorListeners(): void {
     const handleWalletError = (error: any, source: string) => {
       const message = error?.message || '';
       const stack = error?.stack || '';
+      const fileName = error?.fileName || '';
 
       const isWalletError = 
         message.includes('Cannot redefine property: ethereum') ||
         message.includes('Cannot redefine property: web3') ||
         message.includes('Cannot redefine property: solana') ||
         message.includes('evmAsk') ||
+        message.includes('MetaMask') ||
+        message.includes('Phantom') ||
+        message.includes('Coinbase') ||
         stack.includes('chrome-extension://') ||
-        stack.includes('moz-extension://');
+        stack.includes('moz-extension://') ||
+        fileName.includes('chrome-extension://') ||
+        fileName.includes('moz-extension://');
 
       if (isWalletError) {
         this.conflictCount++;
-        console.warn(`🔒 Wallet extension conflict #${this.conflictCount} handled (${source}):`, message);
+        this.lastConflictTime = Date.now();
+        console.log(`🔒 Wallet extension event #${this.conflictCount} handled (${source}):`, message);
         return true; // Indicates we handled this error
       }
 
       return false;
     };
 
-    // Handle synchronous errors
+    // Enhanced error handler that's less aggressive
     const originalErrorHandler = window.onerror;
     window.onerror = (message, source, lineno, colno, error) => {
-      if (handleWalletError(error, 'window.onerror')) {
-        return true; // Prevent default error handling
+      if (handleWalletError(error, 'global-error')) {
+        // Don't prevent the error entirely, just log it
+        return false; // Let other handlers process it too
       }
       
       // Call original handler if it exists
@@ -99,21 +118,31 @@ export class CryptoWalletHandler {
       return false;
     };
 
-    // Handle promise rejections
+    // Handle promise rejections more gracefully
     window.addEventListener('unhandledrejection', (event) => {
-      if (handleWalletError(event.reason, 'unhandledrejection')) {
-        event.preventDefault();
+      if (handleWalletError(event.reason, 'promise-rejection')) {
+        // Log but don't prevent - let the app handle it if needed
+        console.log('🔒 Wallet-related promise rejection logged and ignored');
       }
     });
+
+    // Add specific listener for extension injection events
+    window.addEventListener('error', (event) => {
+      if (event.error && handleWalletError(event.error, 'error-event')) {
+        event.stopImmediatePropagation();
+        console.log('🔒 Wallet extension error event handled');
+      }
+    }, true); // Use capture phase
   }
 
   /**
    * Get statistics about wallet conflicts
    */
-  static getConflictStats(): { conflictCount: number; isInitialized: boolean } {
+  static getConflictStats(): { conflictCount: number; isInitialized: boolean; lastConflictTime: number } {
     return {
       conflictCount: this.conflictCount,
-      isInitialized: this.initialized
+      isInitialized: this.initialized,
+      lastConflictTime: this.lastConflictTime
     };
   }
 
@@ -122,6 +151,25 @@ export class CryptoWalletHandler {
    */
   static resetStats(): void {
     this.conflictCount = 0;
+    this.lastConflictTime = 0;
+  }
+
+  /**
+   * Force reinitialization - useful when conflicts are detected
+   */
+  static reinitialize(): void {
+    this.initialized = false;
+    this.conflictCount = 0;
+    this.lastConflictTime = 0;
+    this.initialize();
+  }
+
+  /**
+   * Check if there are active wallet conflicts
+   */
+  static hasActiveConflicts(): boolean {
+    const timeSinceLastConflict = Date.now() - this.lastConflictTime;
+    return this.conflictCount > 0 && timeSinceLastConflict < 60000; // Active if within last minute
   }
 
   /**
@@ -153,8 +201,21 @@ export class CryptoWalletHandler {
 
 // Auto-initialize if we're in a browser environment
 if (typeof window !== 'undefined') {
-  // Use a small delay to let the page load first
-  setTimeout(() => {
-    CryptoWalletHandler.initialize();
-  }, 100);
+  // Use multiple initialization attempts to handle timing issues
+  const initAttempts = [0, 50, 100, 500];
+  
+  initAttempts.forEach(delay => {
+    setTimeout(() => {
+      if (!CryptoWalletHandler.getConflictStats().isInitialized) {
+        CryptoWalletHandler.initialize();
+      }
+    }, delay);
+  });
+  
+  // Additional initialization on DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => CryptoWalletHandler.initialize(), 10);
+    });
+  }
 }
