@@ -538,16 +538,18 @@ export function EnhancedBlogPost() {
               <XCircle className="h-5 w-5 text-orange-600" />
               Unclaim Blog Post
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to unclaim "{blogPost.title}"?
-              <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded text-orange-800 text-sm">
-                <div className="font-medium mb-1">⚠️ Important:</div>
-                <ul className="text-xs space-y-1">
-                  <li>• This post will return to the claimable pool for 24 hours</li>
-                  <li>• Other users will be able to claim it during this time</li>
-                  <li>• If not reclaimed, it will be automatically deleted</li>
-                  <li>• You can reclaim it yourself if it's still available</li>
-                </ul>
+            <AlertDialogDescription asChild>
+              <div>
+                <p className="mb-3">Are you sure you want to unclaim "{blogPost.title}"?</p>
+                <div className="p-3 bg-orange-50 border border-orange-200 rounded text-orange-800 text-sm">
+                  <div className="font-medium mb-1">⚠️ Important:</div>
+                  <ul className="text-xs space-y-1">
+                    <li>• This post will return to the claimable pool for 24 hours</li>
+                    <li>• Other users will be able to claim it during this time</li>
+                    <li>• If not reclaimed, it will be automatically deleted</li>
+                    <li>• You can reclaim it yourself if it's still available</li>
+                  </ul>
+                </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
