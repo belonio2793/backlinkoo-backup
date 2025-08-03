@@ -129,7 +129,7 @@ export const QuickPremiumFix = () => {
         <Alert className="border-amber-200 bg-amber-100">
           <Crown className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-amber-800">
-            This will immediately activate premium features for labindalawamaryrose@gmail.com
+            This will directly update your account to premium status using database operations.
           </AlertDescription>
         </Alert>
 
