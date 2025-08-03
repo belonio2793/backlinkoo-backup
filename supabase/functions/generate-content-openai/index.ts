@@ -111,44 +111,45 @@ serve(async (req) => {
 
     const systemPrompt = `You are an expert SEO content writer with deep specialization in "${keyword}". You create high-quality, engaging blog posts that rank well in search engines specifically for "${keyword}" topics. Focus on step-by-step instructions, practical tips, and actionable advice specifically about "${keyword}". Use ${tone} tone throughout the article. Always create original, valuable content that genuinely helps readers with "${keyword}" and ensures natural, contextual backlink integration. NEVER use generic business language - everything must be specific to "${keyword}".`;
 
-    const userPrompt = `Create a comprehensive ${wordCount}-word ${contentType} blog post about "${keyword}" that naturally incorporates a backlink.
+    const userPrompt = `Create a comprehensive ${wordCount}-word ${contentType} blog post SPECIFICALLY about "${keyword}" that naturally incorporates a backlink. You must demonstrate deep expertise in "${keyword}" - NOT generic content.
 
 CONTENT REQUIREMENTS:
-- Write exactly ${wordCount} words of high-quality, original content
-- Focus on "${keyword}" as the main topic
-- Include practical, actionable advice
-- Structure with proper headings (H1, H2, H3)
+- Write exactly ${wordCount} words of high-quality, original content SPECIFICALLY about "${keyword}"
+- Focus exclusively on "${keyword}" as the main topic - show expert knowledge
+- Include practical, actionable advice specific to "${keyword}"
+- Structure with proper headings (H1, H2, H3) all related to "${keyword}"
 - Natural integration of anchor text "${anchorText || keyword}" linking to ${url}
+- AVOID generic business phrases - be specific to "${keyword}"
 
 CONTENT STRUCTURE:
-1. Compelling H1 title with the primary keyword
-2. Engaging introduction that hooks the reader
-3. 4-6 main sections with H2 headings
-4. Subsections with H3 headings where appropriate
+1. Compelling H1 title with the primary keyword "${keyword}"
+2. Engaging introduction that hooks the reader with "${keyword}" insights
+3. 4-6 main sections with H2 headings about different aspects of "${keyword}"
+4. Subsections with H3 headings about specific "${keyword}" topics
 5. Natural placement of backlink: "${anchorText || keyword}" → ${url}
-6. Strong conclusion with actionable takeaways
+6. Strong conclusion with actionable takeaways for "${keyword}"
 
 SEO OPTIMIZATION:
 - Include primary keyword "${keyword}" naturally throughout
-- Use semantic keywords and related terms
-- Include numbered lists or bullet points
+- Use semantic keywords and related terms specific to "${keyword}"
+- Include numbered lists or bullet points about "${keyword}"
 
 BACKLINK INTEGRATION:
-- Place the backlink "${anchorText || keyword}" naturally within the content
-- Make the link contextually relevant to the surrounding text
-- Ensure it adds value to the reader
+- Place the backlink "${anchorText || keyword}" naturally within the "${keyword}" content
+- Make the link contextually relevant to the surrounding "${keyword}" text
+- Ensure it adds value to the reader learning about "${keyword}"
 
 OUTPUT FORMAT:
 Return the content as HTML with proper tags:
-- Use <h1> for main title
-- Use <h2> for main sections
-- Use <h3> for subsections
+- Use <h1> for main title about "${keyword}"
+- Use <h2> for main sections about "${keyword}"
+- Use <h3> for subsections about "${keyword}"
 - Use <p> for paragraphs
-- Use <ul>/<ol> and <li> for lists
+- Use <ul>/<ol> and <li> for lists related to "${keyword}"
 - Use <strong> for emphasis
 - Use <a href="${url}" target="_blank" rel="noopener noreferrer">${anchorText || keyword}</a> for the backlink
 
-Focus on creating valuable, informative content that genuinely helps readers.`;
+Focus on creating valuable, informative content that genuinely helps readers with "${keyword}".`;
 
     console.log('🚀 Starting OpenAI generation via Supabase Edge Function...');
     console.log(`Using prompt template ${usedPromptIndex + 1}: ${finalPrompt}`);
