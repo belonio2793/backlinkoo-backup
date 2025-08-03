@@ -349,16 +349,16 @@ export function BeautifulBlogPost() {
         <Button
           variant="outline"
           size="icon"
-          className="w-12 h-12 rounded-full shadow-lg bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-xl transition-all duration-300"
+          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-xl transition-all duration-300"
           onClick={() => setIsLiked(!isLiked)}
         >
           <Heart className={`h-5 w-5 ${isLiked ? 'text-red-500 fill-current' : ''}`} />
         </Button>
-        
+
         <Button
           variant="outline"
           size="icon"
-          className="w-12 h-12 rounded-full shadow-lg bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-xl transition-all duration-300"
+          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-xl transition-all duration-300"
           onClick={sharePost}
         >
           <Share2 className="h-5 w-5" />
