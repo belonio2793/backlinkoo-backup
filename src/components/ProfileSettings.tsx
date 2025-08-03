@@ -69,16 +69,15 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
   }, [isPremium, subscriptionTier, userPlan]);
   const { toast } = useToast();
 
-  // Function to force refresh premium status
+  // Function to refresh premium status from database and update auth context
   const refreshPremiumStatus = async () => {
     if (!user) return;
 
     setPremiumLoading(true);
-    console.log('🔄 Force refreshing premium status for user:', user.id, user.email);
+    console.log('🔄 Refreshing premium status from database for user:', user.id, user.email);
 
     try {
-      // First, check the database directly to see what's actually there
-      console.log('📋 Checking database directly...');
+      // Check the database directly
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('subscription_tier, role')
@@ -87,6 +86,15 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
 
       console.log('📋 Direct profile query result:', { profile, profileError });
 
+      if (profileError) {
+        toast({
+          title: "Refresh Failed",
+          description: "Could not access profile data",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { data: premiumSubs, error: subError } = await supabase
         .from('premium_subscriptions')
         .select('*')
@@ -94,49 +102,31 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
 
       console.log('💎 Direct premium subscriptions:', { premiumSubs, subError });
 
-      // Determine if user should be premium based on direct database check
+      // Determine current status
       const shouldBePremium =
         profile?.subscription_tier === 'premium' ||
         profile?.subscription_tier === 'monthly' ||
         (premiumSubs && premiumSubs.length > 0 && premiumSubs.some(sub => sub.status === 'active'));
 
-      console.log('🎯 Direct check - should be premium:', shouldBePremium);
+      console.log('🎯 Database check - should be premium:', shouldBePremium);
 
-      // If direct check shows premium, set it immediately
-      if (shouldBePremium) {
-        console.log('✅ Direct check confirms premium status');
-        setIsPremium(true);
+      if (shouldBePremium !== isPremium) {
+        // Status differs from auth context - page needs to be refreshed to update auth
         toast({
-          title: "Premium Status Confirmed",
-          description: "Your premium subscription is active",
+          title: shouldBePremium ? "Premium Status Found!" : "Status Updated",
+          description: shouldBePremium
+            ? "Premium subscription detected. Refreshing page to activate features..."
+            : "Premium status updated. Refreshing page...",
         });
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
       } else {
-        // Try the PremiumService method
-        console.log('🔍 Direct check shows not premium, trying PremiumService...');
-        const status = await PremiumService.checkPremiumStatus(user.id);
-        console.log('🔍 PremiumService result:', status);
-        setIsPremium(status);
-
-        // If service also says not premium, try sync
-        if (!status && user.email) {
-          console.log('🔧 Both methods say not premium, trying sync...');
-          const syncResult = await PremiumService.syncPremiumStatus(user.email);
-          console.log('🔧 Sync result:', syncResult);
-
-          if (syncResult.success && syncResult.after?.isPremium) {
-            console.log('✅ Sync successful, user is now premium');
-            setIsPremium(true);
-            toast({
-              title: "Premium Status Synced",
-              description: "Your premium subscription has been activated",
-            });
-          } else {
-            toast({
-              title: "Status Updated",
-              description: "Premium status check completed",
-            });
-          }
-        }
+        toast({
+          title: "Status Confirmed",
+          description: `Current status: ${isPremium ? 'Premium Plan' : 'Free Plan'}`,
+        });
       }
     } catch (error) {
       console.error('❌ Premium status refresh failed:', error);
