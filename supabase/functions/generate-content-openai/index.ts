@@ -109,7 +109,7 @@ serve(async (req) => {
         .replace('{{url}}', url);
     }
 
-    const systemPrompt = `You are an expert SEO content writer specializing in creating high-quality, engaging blog posts that rank well in search engines. Focus on step-by-step instructions, practical tips, and actionable advice. Use ${tone} tone throughout the article. Always create original, valuable content that genuinely helps readers and ensures natural, contextual backlink integration.`;
+    const systemPrompt = `You are an expert SEO content writer with deep specialization in "${keyword}". You create high-quality, engaging blog posts that rank well in search engines specifically for "${keyword}" topics. Focus on step-by-step instructions, practical tips, and actionable advice specifically about "${keyword}". Use ${tone} tone throughout the article. Always create original, valuable content that genuinely helps readers with "${keyword}" and ensures natural, contextual backlink integration. NEVER use generic business language - everything must be specific to "${keyword}".`;
 
     const userPrompt = `Create a comprehensive ${wordCount}-word ${contentType} blog post about "${keyword}" that naturally incorporates a backlink.
 
