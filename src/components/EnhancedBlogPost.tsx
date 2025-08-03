@@ -250,11 +250,15 @@ export function EnhancedBlogPost() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p>Loading blog post...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+        <Header />
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p>Loading blog post...</p>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -262,6 +266,7 @@ export function EnhancedBlogPost() {
   if (!blogPost) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+        <Header />
         <div className="container mx-auto px-6 py-8">
           <Card className="max-w-2xl mx-auto">
             <CardContent className="p-8 text-center">
@@ -276,6 +281,7 @@ export function EnhancedBlogPost() {
             </CardContent>
           </Card>
         </div>
+        <Footer />
       </div>
     );
   }
