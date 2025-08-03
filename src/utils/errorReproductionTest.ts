@@ -107,20 +107,22 @@ export class ErrorReproductionTest {
    */
   static async testRLSIssue(): Promise<void> {
     console.log('🔒 Testing potential RLS policy issues...');
-    
+
     try {
-      // Try to access auth.users (usually protected)
+      // Try to access profiles table (which should exist)
       const { data, error } = await supabase
-        .from('users')
-        .select('*')
+        .from('profiles')
+        .select('user_id, email, role')
         .limit(1);
-        
+
       if (error) {
         console.log('RLS/Permission error example:', {
           message: error.message,
           code: error.code,
           details: error.details
         });
+      } else {
+        console.log('✅ Profiles table accessible, data:', data);
       }
     } catch (e) {
       console.log('RLS/Permission exception:', e);
@@ -128,10 +130,7 @@ export class ErrorReproductionTest {
   }
 }
 
-// Auto-run the test when imported
-if (typeof window !== 'undefined') {
-  console.log('🚀 Auto-running error reproduction test...');
-  ErrorReproductionTest.reproduceError();
-}
+// Note: Auto-run removed to prevent unwanted queries
+// Call ErrorReproductionTest.reproduceError() manually if needed
 
 export default ErrorReproductionTest;

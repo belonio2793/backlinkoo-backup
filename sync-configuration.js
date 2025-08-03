@@ -47,7 +47,7 @@ class SyncConfiguration {
         // Note: STRIPE_SECRET_KEY is already configured
         
         // CDN and performance
-        // Note: CLOUDFLARE_API_TOKEN and CLOUDFLARE_ZONE_ID are already configured
+        // Note: Cloudflare integration removed
       },
 
       // Netlify Functions that are deployed and active
@@ -132,9 +132,9 @@ class SyncConfiguration {
           status: 'active'
         },
         cdn: {
-          enabled: true,
-          provider: 'cloudflare',
-          status: 'active'
+          enabled: false,
+          provider: 'none',
+          status: 'disabled'
         },
         ai_content: {
           enabled: true,

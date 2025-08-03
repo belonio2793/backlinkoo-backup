@@ -13,7 +13,7 @@ interface AuthCheckProps {
 }
 
 export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start with false for instant processing
   const [user, setUser] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +24,7 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
     const adminEmail = 'support@backlinkoo.com';
     const currentUrl = window.location.pathname;
 
-    // For admin routes, skip all auth checks if session storage indicates admin access
+    // For admin routes, provide immediate access if session storage indicates admin access
     if (currentUrl.includes('/admin') && sessionStorage.getItem('instant_admin') === 'true') {
       setUser({ email: adminEmail });
       setUserRole('admin');
@@ -33,7 +33,12 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
       return;
     }
 
-    checkAuth();
+    // For admin routes, check immediately without showing loading
+    if (requireAdmin) {
+      checkAuthInstantly();
+    } else {
+      checkAuth();
+    }
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -48,12 +53,89 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
           setShowSignIn(false);
           return;
         }
-        checkAuth();
+
+        // Use instant check for admin routes, regular check for others
+        if (requireAdmin) {
+          checkAuthInstantly();
+        } else {
+          checkAuth();
+        }
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const checkAuthInstantly = async () => {
+    try {
+      // Don't set loading to true for instant processing
+      setError(null);
+
+      // Check if user is authenticated using SafeAuth
+      const userResult = await SafeAuth.getCurrentUser();
+
+      if (userResult.needsAuth || !userResult.user) {
+        console.log('🔐 No auth session - showing sign in');
+        setShowSignIn(true);
+        return;
+      }
+
+      if (userResult.error) {
+        console.error('❌ Auth error:', userResult.error);
+        setError('Authentication failed. Please sign in.');
+        setShowSignIn(true);
+        return;
+      }
+
+      const user = userResult.user;
+      setUser(user);
+      console.log('✅ User authenticated:', user.email);
+
+      // For admin routes, provide instant access to admin email
+      if (user.email === 'support@backlinkoo.com') {
+        sessionStorage.setItem('instant_admin', 'true');
+        setUserRole('admin');
+        setShowSignIn(false);
+        console.log('✅ Instant admin access granted:', user.email);
+        return;
+      }
+
+      // If admin is required, check user role using SafeAuth
+      if (requireAdmin) {
+        const adminResult = await SafeAuth.isAdmin();
+
+        if (adminResult.needsAuth) {
+          setError('Admin access required. Please sign in with an admin account.');
+          setShowSignIn(true);
+          return;
+        }
+
+        if (adminResult.error) {
+          console.error('❌ Admin check failed:', adminResult.error);
+          setError('Could not verify admin permissions.');
+          return;
+        }
+
+        if (!adminResult.isAdmin) {
+          setError('Admin access required. Please sign in with an admin account.');
+          setShowSignIn(true);
+          return;
+        }
+
+        setUserRole('admin');
+        console.log('✅ Admin user verified:', user.email);
+      }
+
+      // Success - hide sign in form
+      setShowSignIn(false);
+      console.log('✅ Authentication successful');
+
+    } catch (error: any) {
+      console.error('❌ Auth check failed:', error);
+      setError('Authentication check failed.');
+      setShowSignIn(true);
+    }
+  };
 
   const checkAuth = async () => {
     try {
@@ -120,7 +202,11 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
   };
 
   const handleRetry = () => {
-    checkAuth();
+    if (requireAdmin) {
+      checkAuthInstantly();
+    } else {
+      checkAuth();
+    }
   };
 
   const handleSignOut = async () => {

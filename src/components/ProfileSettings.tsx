@@ -10,12 +10,11 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStatus } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { PremiumService } from "@/services/premiumService";
 import { PremiumStatusSync } from "@/components/PremiumStatusSync";
 import { QuickPremiumFix } from "@/components/QuickPremiumFix";
 import { PremiumStatusDebugger } from "@/components/PremiumStatusDebugger";
 import { EmergencyRLSFixTrigger } from "@/components/EmergencyRLSFixTrigger";
-import { Loader2, User, Mail, Calendar, MapPin, Briefcase, Globe, Save, AlertCircle, Crown, Shield, RefreshCw } from "lucide-react";
+import { User, Mail, Calendar, MapPin, Briefcase, Globe, Save, AlertCircle, Crown, Shield, Loader2 } from "lucide-react";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface ProfileData {
@@ -61,148 +60,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
 
   // Get premium status from authentication context (set during login)
   const { isPremium, subscriptionTier, userPlan } = useAuthStatus();
-  const [premiumLoading, setPremiumLoading] = useState(false);
-
-  // Add logging when isPremium changes
-  useEffect(() => {
-    console.log('🔍 Premium status from auth context:', { isPremium, subscriptionTier, userPlan });
-  }, [isPremium, subscriptionTier, userPlan]);
   const { toast } = useToast();
-
-  // Function to refresh premium status from database and update auth context
-  const refreshPremiumStatus = async () => {
-    if (!user) return;
-
-    setPremiumLoading(true);
-    console.log('🔄 Refreshing premium status from database for user:', user.id, user.email);
-
-    try {
-      // Check the database directly
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('subscription_tier, role')
-        .eq('user_id', user.id)
-        .single();
-
-      console.log('📋 Direct profile query result:', { profile, profileError });
-
-      if (profileError) {
-        toast({
-          title: "Refresh Failed",
-          description: "Could not access profile data",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const { data: premiumSubs, error: subError } = await supabase
-        .from('premium_subscriptions')
-        .select('*')
-        .eq('user_id', user.id);
-
-      console.log('💎 Direct premium subscriptions:', { premiumSubs, subError });
-
-      // Determine current status
-      const shouldBePremium =
-        profile?.subscription_tier === 'premium' ||
-        profile?.subscription_tier === 'monthly' ||
-        (premiumSubs && premiumSubs.length > 0 && premiumSubs.some(sub => sub.status === 'active'));
-
-      console.log('🎯 Database check - should be premium:', shouldBePremium);
-
-      if (shouldBePremium !== isPremium) {
-        // Status differs from auth context - page needs to be refreshed to update auth
-        toast({
-          title: shouldBePremium ? "Premium Status Found!" : "Status Updated",
-          description: shouldBePremium
-            ? "Premium subscription detected. Refreshing page to activate features..."
-            : "Premium status updated. Refreshing page...",
-        });
-
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
-      } else {
-        toast({
-          title: "Status Confirmed",
-          description: `Current status: ${isPremium ? 'Premium Plan' : 'Free Plan'}`,
-        });
-      }
-    } catch (error) {
-      console.error('❌ Premium status refresh failed:', error);
-      toast({
-        title: "Refresh Failed",
-        description: "Unable to refresh premium status",
-        variant: "destructive",
-      });
-    } finally {
-      setPremiumLoading(false);
-    }
-  };
-
-  // Function to directly force premium status
-  const forcePremiumStatus = async () => {
-    if (!user) return;
-
-    setPremiumLoading(true);
-    console.log('👑 Force setting premium status for user:', user.id, user.email);
-
-    try {
-      // Update profile to premium
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ subscription_tier: 'premium' })
-        .eq('user_id', user.id);
-
-      if (profileError) {
-        console.error('❌ Profile update error:', profileError);
-        throw new Error(`Profile update failed: ${profileError.message}`);
-      }
-
-      console.log('✅ Profile updated to premium');
-
-      // Create premium subscription
-      const now = new Date();
-      const periodEnd = new Date();
-      periodEnd.setFullYear(periodEnd.getFullYear() + 1);
-
-      const { error: subError } = await supabase
-        .from('premium_subscriptions')
-        .upsert({
-          user_id: user.id,
-          plan_type: 'premium',
-          status: 'active',
-          current_period_start: now.toISOString(),
-          current_period_end: periodEnd.toISOString()
-        });
-
-      if (subError) {
-        console.warn('⚠️ Subscription creation warning:', subError.message);
-      } else {
-        console.log('✅ Premium subscription created');
-      }
-
-      toast({
-        title: "Premium Status Activated!",
-        description: "Your account is now premium. Refreshing page to update all features...",
-      });
-
-      // Refresh page to reload auth context with new premium status
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
-
-    } catch (error: any) {
-      console.error('❌ Force premium failed:', error);
-      toast({
-        title: "Force Premium Failed",
-        description: error.message || "Unable to set premium status",
-        variant: "destructive",
-      });
-    } finally {
-      setPremiumLoading(false);
-    }
-  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -405,38 +263,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="account-status">Account Status</Label>
-                  <div className="flex gap-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        console.log('🔄 Refresh button clicked!');
-                        refreshPremiumStatus();
-                      }}
-                      disabled={premiumLoading}
-                      className="h-6 px-2 text-xs"
-                    >
-                      <RefreshCw className={`h-3 w-3 mr-1 ${premiumLoading ? 'animate-spin' : ''}`} />
-                      Refresh
-                    </Button>
-                    {!isPremium && user?.email === 'labindalawamaryrose@gmail.com' && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={forcePremiumStatus}
-                        disabled={premiumLoading}
-                        className="h-6 px-2 text-xs bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
-                      >
-                        <Crown className="h-3 w-3 mr-1" />
-                        Fix
-                      </Button>
-                    )}
-                  </div>
-                </div>
+                <Label htmlFor="account-status">Account Status</Label>
                 <div className="flex items-center gap-2 flex-wrap">
                   {/* Role Badge */}
                   <Badge variant={profile.role === 'admin' ? 'default' : 'secondary'} className="flex items-center gap-1">
@@ -451,22 +278,13 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
                       isPremium
                         ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white hover:from-amber-600 hover:to-yellow-600'
                         : ''
-                    } ${premiumLoading ? 'opacity-70' : ''}`}
+                    }`}
                   >
-                    {premiumLoading ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <Crown className="h-3 w-3" />
-                    )}
-                    {premiumLoading ? 'Checking...' : (isPremium ? 'Premium Plan' : 'Free Plan')}
+                    <Crown className="h-3 w-3" />
+                    {isPremium ? 'Premium Plan' : 'Free Plan'}
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {isPremium
-                    ? 'You have access to all premium features and unlimited usage.'
-                    : 'Upgrade to premium for unlimited access and advanced features.'
-                  }
-                </p>
+
               </div>
             </div>
 
@@ -507,7 +325,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
           </div>
 
           {/* Quick Premium Fix for specific user */}
-          {user?.email === 'labindalawamaryrose@gmail.com' && !premiumLoading && isPremium === false && (
+          {user?.email === 'labindalawamaryrose@gmail.com' && isPremium === false && (
             <div className="mt-6">
               <QuickPremiumFix onStatusUpdated={() => {
                 // Refresh page to reload auth context with updated premium status
@@ -517,12 +335,15 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
           )}
 
           {/* Premium Status Sync - Show if user should be premium but isn't showing as premium */}
-          {user?.email && user.email !== 'labindalawamaryrose@gmail.com' && !premiumLoading && isPremium === false && (
+          {user?.email && user.email !== 'labindalawamaryrose@gmail.com' && isPremium === false && (
             <div className="mt-6">
               <PremiumStatusSync
                 userEmail={user.email}
                 currentPremiumStatus={isPremium || false}
-                onStatusUpdated={(newStatus) => setIsPremium(newStatus)}
+                onStatusUpdated={() => {
+                  // Refresh page to reload auth context with updated premium status
+                  setTimeout(() => window.location.reload(), 1000);
+                }}
               />
             </div>
           )}

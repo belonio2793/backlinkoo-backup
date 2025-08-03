@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { DirectOpenAIService } from '@/services/directOpenAI';
 import { APIStatusIndicator } from '@/components/shared/APIStatusIndicator';
 import { AnimatedBlogHeadline } from '@/components/AnimatedBlogHeadline';
+import { RealTimeBlogStatus } from '@/components/blog/RealTimeBlogStatus';
 import { Loader2, Link, Target, Hash, Sparkles, Zap, Star, Rocket } from 'lucide-react';
 
 interface BlogFormProps {
@@ -263,6 +264,12 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Real-time Blog Generation Status Tracker */}
+      <RealTimeBlogStatus
+        isVisible={isGenerating}
+        isGenerating={isGenerating}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
@@ -25,7 +26,8 @@ import {
   Filter,
   TrendingUp,
   BookOpen,
-  Infinity
+  Infinity,
+  ChevronDown
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -374,12 +376,7 @@ export function EnhancedBlogListing() {
             </div>
           </div>
 
-          {/* Debug Information */}
-          {import.meta.env.DEV && (
-            <div className="mb-8">
-              <BlogDataDebugger />
-            </div>
-          )}
+
 
           {/* Loading State */}
           {loading && (
@@ -443,6 +440,11 @@ export function EnhancedBlogListing() {
                 </div>
               )}
             </>
+          )}
+
+          {/* Stats for Nerds - Collapsible Debug Information */}
+          {import.meta.env.DEV && (
+            <StatsForNerds />
           )}
         </div>
       </div>
@@ -627,5 +629,33 @@ function PostCard({
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+// Collapsible Stats for Nerds component
+function StatsForNerds() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="mt-8 border-t border-gray-200 pt-8">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            className="w-full justify-between text-gray-500 hover:text-gray-700"
+          >
+            <span className="text-sm font-mono">📊 Stats for Nerds</span>
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-200 ${
+                isOpen ? 'transform rotate-180' : ''
+              }`}
+            />
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-4">
+          <BlogDataDebugger />
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
   );
 }
