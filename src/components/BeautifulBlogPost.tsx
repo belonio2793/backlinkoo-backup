@@ -190,10 +190,13 @@ export function BeautifulBlogPost() {
   };
 
   const handleDeletePost = async () => {
+    console.log('handleDeletePost called', { slug, user, blogPost });
     setDeleting(true);
     try {
+      console.log('Calling EnhancedBlogClaimService.deletePost');
       const result = await EnhancedBlogClaimService.deletePost(slug!, user);
-      
+      console.log('Delete result:', result);
+
       if (result.success) {
         toast({
           title: "Post Deleted",
@@ -201,6 +204,7 @@ export function BeautifulBlogPost() {
         });
         navigate('/blog');
       } else {
+        console.error('Delete failed:', result.message);
         toast({
           title: "Delete Failed",
           description: result.message,
@@ -208,9 +212,10 @@ export function BeautifulBlogPost() {
         });
       }
     } catch (error: any) {
+      console.error('Delete error:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred while deleting the post",
+        description: `An unexpected error occurred while deleting the post: ${error.message}`,
         variant: "destructive"
       });
     } finally {
