@@ -264,6 +264,14 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Blog Generation Status Tracker */}
+      <BlogGenerationStatus
+        isVisible={isGenerating}
+        onStepUpdate={(step, status, details) => {
+          console.log(`Blog generation step: ${step} - ${status}`, details);
+        }}
+      />
     </div>
   );
 }
