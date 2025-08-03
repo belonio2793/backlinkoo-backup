@@ -626,7 +626,7 @@ function SuperPostCard({
         </div>
         
         <CardTitle className="text-xl line-clamp-2 leading-tight font-bold text-gray-900 group-hover:text-blue-900 transition-colors duration-300">
-          {post.title}
+          {cleanTitle(post.title)}
         </CardTitle>
         
         <div className="flex items-center gap-6 text-sm text-gray-600 mt-3">
