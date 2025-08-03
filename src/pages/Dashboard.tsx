@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 
 
 import { PremiumService } from "@/services/premiumService";
-import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
