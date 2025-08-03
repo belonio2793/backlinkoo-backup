@@ -13,7 +13,7 @@ interface AuthCheckProps {
 }
 
 export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start with false for instant processing
   const [user, setUser] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +24,7 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
     const adminEmail = 'support@backlinkoo.com';
     const currentUrl = window.location.pathname;
 
-    // For admin routes, skip all auth checks if session storage indicates admin access
+    // For admin routes, provide immediate access if session storage indicates admin access
     if (currentUrl.includes('/admin') && sessionStorage.getItem('instant_admin') === 'true') {
       setUser({ email: adminEmail });
       setUserRole('admin');
@@ -33,7 +33,12 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
       return;
     }
 
-    checkAuth();
+    // For admin routes, check immediately without showing loading
+    if (requireAdmin) {
+      checkAuthInstantly();
+    } else {
+      checkAuth();
+    }
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
