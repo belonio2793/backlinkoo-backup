@@ -46,20 +46,44 @@ export class DirectOpenAIService {
       // Don't fail if no local API key - Netlify functions might have it configured
       console.log('🔑 Local API key check:', clientApiKey ? 'Found' : 'Not found (will try Netlify function)');
 
-      // Build the prompt dynamically
-      const prompt = `Write a comprehensive 1000-word blog post about "${request.keyword}". 
+      // Build the prompt dynamically with enhanced parameters
+      const toneMap = {
+        'professional': 'professional and authoritative',
+        'conversational': 'conversational and friendly',
+        'technical': 'technical and detailed',
+        'casual': 'casual and engaging',
+        'persuasive': 'persuasive and action-oriented'
+      };
+
+      const lengthMap = {
+        'short': '500-800 words',
+        'medium': '800-1200 words',
+        'long': '1200-1800 words',
+        'comprehensive': '1800+ words'
+      };
+
+      const targetTone = toneMap[request.tone || 'professional'] || 'professional and engaging';
+      const targetLength = lengthMap[request.length || 'medium'] || '800-1200 words';
+
+      let prompt = `Write a ${targetLength} blog post about "${request.keyword}".
 
 REQUIREMENTS:
 - Create engaging, informative content that provides real value to readers
 - Include a natural mention of "${request.anchorText}" that would logically link to ${request.targetUrl}
 - Structure with clear headings and subheadings
-- Write in a professional yet conversational tone
+- Write in a ${targetTone} tone
 - Include actionable insights and examples where relevant
-- Make the content SEO-friendly with natural keyword usage
+- Make the content SEO-friendly with natural keyword usage`;
 
-IMPORTANT: Do not include any HTML tags or markdown formatting. Write in plain text with clear paragraph breaks.
+      if (request.industry) {
+        prompt += `\n- Focus on ${request.industry} industry context and examples`;
+      }
 
-Please write the complete blog post now:`;
+      if (request.additionalInstructions) {
+        prompt += `\n- Additional requirements: ${request.additionalInstructions}`;
+      }
+
+      prompt += `\n\nIMPORTANT: Do not include any HTML tags or markdown formatting. Write in plain text with clear paragraph breaks.\n\nPlease write the complete blog post now:`;
 
       console.log('📝 Generated prompt:', prompt);
 
