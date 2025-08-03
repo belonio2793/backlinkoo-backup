@@ -42,6 +42,12 @@ export class GlobalErrorHandler {
     const count = (this.errorCounts.get(errorKey) || 0) + 1;
     this.errorCounts.set(errorKey, count);
 
+    // Check for RLS recursion error - this needs immediate attention
+    if (this.isRLSRecursionError(error) && count === 1) {
+      this.handleRLSRecursionError(error, source);
+      return;
+    }
+
     // Only log if we haven't seen this error too many times
     if (count <= this.MAX_SAME_ERROR) {
       if (this.isThirdPartyError(error)) {
