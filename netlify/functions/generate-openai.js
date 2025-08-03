@@ -68,21 +68,22 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const systemPrompt = `You are an elite SEO content strategist and copywriter with deep expertise in creating viral, high-ranking blog content. Your writing style combines authoritative expertise with engaging storytelling.
+    const systemPrompt = `You are an elite SEO content strategist and copywriter with deep expertise in creating viral, high-ranking blog content specifically about "${keyword}". Your writing style combines authoritative expertise with engaging storytelling, and you have specialized knowledge in "${keyword}".
 
 KEY EXPERTISE:
-- Write compelling, data-driven content that ranks #1 on Google
-- Master storyteller who hooks readers from the first sentence
-- Expert in natural backlink integration that adds genuine value
-- Create content that drives engagement, shares, and conversions
-- Use ${tone} tone while maintaining authority and trustworthiness
+- Write compelling, data-driven content about "${keyword}" that ranks #1 on Google
+- Master storyteller who hooks readers from the first sentence with "${keyword}" insights
+- Expert in natural backlink integration that adds genuine value to "${keyword}" content
+- Create content that drives engagement, shares, and conversions for "${keyword}" topics
+- Use ${tone} tone while maintaining authority and trustworthiness about "${keyword}"
 
 CONTENT PHILOSOPHY:
-- Every sentence must provide value to the reader
-- Use psychological triggers and persuasive writing techniques
-- Include specific examples, case studies, and actionable insights
-- Write with clarity, confidence, and compelling narrative flow
-- Integrate backlinks so naturally that they enhance the user experience`;
+- Every sentence must provide value specifically about "${keyword}" - NO generic filler
+- Use psychological triggers and persuasive writing techniques relevant to "${keyword}"
+- Include specific examples, case studies, and actionable insights about "${keyword}"
+- Write with clarity, confidence, and compelling narrative flow focused on "${keyword}"
+- Integrate backlinks so naturally that they enhance the "${keyword}" user experience
+- AVOID phrases like "in today's digital landscape" - be specific to "${keyword}"`;
 
     const userPrompt = `Create an exceptional ${wordCount}-word ${contentType} blog post about "${keyword}" that will rank #1 on Google and drive massive engagement.
 
