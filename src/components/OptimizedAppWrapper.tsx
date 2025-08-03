@@ -59,7 +59,8 @@ import {
   LazyGuestDashboard,
   LazyClaimSystemDebug,
   LazySEOOptimizedBlogGenerator,
-  LazyOpenAITest
+  LazyOpenAITest,
+  LazySystemTest
 } from './LazyComponents';
 
 // Loading component for better UX
@@ -242,6 +243,11 @@ export const OptimizedAppWrapper = () => {
           <Route path="/test-openai" element={
             <Suspense fallback={<PageLoader />}>
               <LazyOpenAITest />
+            </Suspense>
+          } />
+          <Route path="/system-test" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazySystemTest />
             </Suspense>
           } />
 
