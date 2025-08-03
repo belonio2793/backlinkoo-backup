@@ -451,7 +451,7 @@ export function BeautifulBlogPost() {
 
               {/* Title */}
               <h1 className="beautiful-blog-title text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight">
-                {blogPost.title}
+                {cleanTitle(blogPost.title)}
               </h1>
 
               {/* Meta Description */}
