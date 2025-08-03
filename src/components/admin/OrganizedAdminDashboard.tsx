@@ -9,7 +9,7 @@ import { AuthService } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
 import { useWorkingAdminDashboardMetrics } from "@/hooks/useWorkingAdminDashboardMetrics";
 import { AdminNavigationHeader } from "@/components/admin/AdminNavigationHeader";
-import { AdminUserManagement } from "@/components/admin/AdminUserManagement";
+import { AdminUserDashboard } from "@/components/admin/AdminUserDashboard";
 import { supabase } from '@/integrations/supabase/client';
 
 // Admin Components
