@@ -65,15 +65,26 @@ export class DirectOpenAIService {
       const targetTone = toneMap[request.tone || 'professional'] || 'professional and engaging';
       const targetLength = lengthMap[request.length || 'medium'] || '800-1200 words';
 
-      let prompt = `Write a ${targetLength} blog post about "${request.keyword}".
+      // Use one of the three specific query patterns randomly for variety
+      const queryPatterns = [
+        `Generate a 1000 word blog post on ${request.keyword} including the ${request.anchorText} hyperlinked to ${request.targetUrl}`,
+        `Write a 1000 word blog post about ${request.keyword} with a hyperlinked ${request.anchorText} linked to ${request.targetUrl}`,
+        `Produce a 1000-word blog post on ${request.keyword} that links ${request.anchorText} to ${request.targetUrl}`
+      ];
+
+      const selectedPattern = queryPatterns[Math.floor(Math.random() * queryPatterns.length)];
+      console.log('📝 Selected query pattern:', selectedPattern);
+
+      let prompt = `${selectedPattern}
 
 REQUIREMENTS:
 - Create engaging, informative content that provides real value to readers
 - Include a natural mention of "${request.anchorText}" that would logically link to ${request.targetUrl}
-- Structure with clear headings and subheadings
+- Structure with clear headings and subheadings (H1, H2, H3)
 - Write in a ${targetTone} tone
 - Include actionable insights and examples where relevant
-- Make the content SEO-friendly with natural keyword usage`;
+- Make the content SEO-friendly with natural keyword usage
+- Ensure the content is exactly 1000 words`;
 
       if (request.industry) {
         prompt += `\n- Focus on ${request.industry} industry context and examples`;
