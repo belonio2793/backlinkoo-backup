@@ -122,6 +122,11 @@ export const OptimizedAppWrapper = () => {
               </Suspense>
             </EmailVerificationGuard>
           } />
+          <Route path="/settings" element={
+            <EmailVerificationGuard>
+              <LazySettings />
+            </EmailVerificationGuard>
+          } />
           <Route path="/my-dashboard" element={
             <EmailVerificationGuard>
               <Suspense fallback={<PageLoader />}>
