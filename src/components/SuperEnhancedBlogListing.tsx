@@ -511,6 +511,7 @@ interface SuperPostCardProps {
   formatDate: (date: string) => string;
   getExcerpt: (content: string, maxLength?: number) => string;
   getTimeRemaining: (expiresAt: string) => string;
+  cleanTitle: (title: string) => string;
   isExpiringSoon: (post: BlogPost) => boolean;
   onClaim: () => void;
   onDelete: () => void;
