@@ -52,7 +52,7 @@ export function BlogGenerator() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <BlogForm onContentGenerated={setGeneratedContent} />
+              <EnhancedBlogForm onContentGenerated={setGeneratedContent} />
             </CardContent>
           </Card>
         </TabsContent>
