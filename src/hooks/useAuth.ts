@@ -7,6 +7,8 @@ interface AuthState {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isPremium: boolean;
+  subscriptionTier: string | null;
 }
 
 export function useAuth(): AuthState {
