@@ -10,9 +10,24 @@ if (import.meta.env.DEV) {
   console.log('🚀 Starting Backlinkoo application...');
 
   // Add helper functions to window for debugging
-  (window as any).fixRLS = () => {
-    console.log('🔧 Redirecting to RLS fix page...');
-    window.location.href = '/emergency/rls-fix';
+  (window as any).fixRLS = async () => {
+    console.log('🔧 Applying RLS fix directly...');
+    try {
+      const response = await fetch('/.netlify/functions/fix-rls-recursion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const result = await response.json();
+      console.log('🔧 RLS fix result:', result);
+      if (result.success) {
+        console.log('✅ RLS fix successful - refreshing page...');
+        setTimeout(() => window.location.reload(), 1000);
+      }
+    } catch (error) {
+      console.error('❌ RLS fix failed:', error);
+      console.log('🔧 Redirecting to RLS fix page...');
+      window.location.href = '/emergency/rls-fix';
+    }
   };
 
   (window as any).forcePremium = async () => {
