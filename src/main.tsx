@@ -8,6 +8,15 @@ import './utils/cryptoWalletHandler'
 if (import.meta.env.DEV) {
   console.clear();
   console.log('🚀 Starting Backlinkoo application...');
+
+  // Add helper functions to window for debugging
+  (window as any).fixRLS = () => {
+    console.log('🔧 Redirecting to RLS fix page...');
+    window.location.href = '/emergency/rls-fix';
+  };
+
+  console.log('💡 Debug helpers available:');
+  console.log('  - fixRLS() - Go to RLS recursion fix page');
 }
 
 // Priority: Get React app rendering ASAP
