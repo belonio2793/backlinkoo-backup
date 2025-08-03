@@ -59,7 +59,7 @@ export function SEOAcademyTab({ isSubscribed, onUpgrade }: SEOAcademyTabProps) {
   const [activeModule, setActiveModule] = useState('fundamentals');
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [userProgress, setUserProgress] = useState<{ [key: string]: boolean }>({});
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+
 
   // Mock course data - in real implementation, this would come from a database
   const courseModules: Module[] = [
