@@ -641,7 +641,6 @@ const Dashboard = () => {
   });
   const [isPremiumSubscriber, setIsPremiumSubscriber] = useState(false);
   const [userProgress, setUserProgress] = useState<{ [key: string]: boolean }>({});
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
