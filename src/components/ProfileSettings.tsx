@@ -59,6 +59,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
   const [isPremium, setIsPremium] = useState<boolean | null>(null);
   const [premiumLoading, setPremiumLoading] = useState(false);
   const [forceRefreshCount, setForceRefreshCount] = useState(0);
+  const [showRLSFix, setShowRLSFix] = useState(false);
 
   // Add logging when isPremium changes
   useEffect(() => {
