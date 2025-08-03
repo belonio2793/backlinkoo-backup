@@ -439,15 +439,13 @@ export function BeautifulBlogPost() {
               </div>
 
               {/* Title */}
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight">
-                <span className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
-                  {blogPost.title}
-                </span>
+              <h1 className="beautiful-blog-title text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight">
+                {blogPost.title}
               </h1>
-              
+
               {/* Meta Description */}
               {blogPost.meta_description && (
-                <p className="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed max-w-3xl mx-auto">
+                <p className="beautiful-blog-subtitle text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed max-w-3xl mx-auto">
                   {blogPost.meta_description}
                 </p>
               )}
