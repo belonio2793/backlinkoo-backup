@@ -77,6 +77,21 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
         .then(status => {
           clearTimeout(premiumTimeout);
           setIsPremium(status);
+
+          // If user should be premium but isn't showing as premium, try a sync
+          if (!status && user.email) {
+            console.log('🔄 Attempting auto-sync for user:', user.email);
+            PremiumService.syncPremiumStatus(user.email)
+              .then(syncResult => {
+                if (syncResult.success && syncResult.after?.isPremium) {
+                  console.log('✅ Auto-sync successful, updating status');
+                  setIsPremium(true);
+                }
+              })
+              .catch(error => {
+                console.warn('⚠️ Auto-sync failed:', error);
+              });
+          }
         })
         .catch((error) => {
           clearTimeout(premiumTimeout);
