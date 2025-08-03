@@ -37,10 +37,11 @@ export class ContentFormatter {
   private static removeDuplicateTitle(content: string, title?: string): string {
     if (!title) return content;
 
-    // Clean the title for comparison
+    // Clean the title for comparison - handle multiple formats
     const cleanTitle = title
       .replace(/^\*\*H1\*\*:\s*/i, '')
-      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '')
+      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
+      .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
       .replace(/^#{1,6}\s+/, '')
       .trim();
 
@@ -55,6 +56,10 @@ export class ContentFormatter {
     // Remove **H1**: title pattern at the beginning
     const boldTitlePattern = new RegExp(`^\\s*\\*\\*H1\\*\\*:\\s*${this.escapeRegex(cleanTitle)}\\s*\\n?`, 'i');
     content = content.replace(boldTitlePattern, '');
+
+    // Remove **title** pattern at the beginning (for cases like **The Unforgettable Legacy...**)
+    const starTitlePattern = new RegExp(`^\\s*\\*\\*${this.escapeRegex(cleanTitle)}\\*\\*\\s*\\n?`, 'i');
+    content = content.replace(starTitlePattern, '');
 
     return content.trim();
   }
