@@ -435,6 +435,11 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
     }
   };
 
+  // Show emergency RLS fix if infinite recursion detected
+  if (showRLSFix) {
+    return <EmergencyRLSFixTrigger />;
+  }
+
   // No blocking loading state - show UI immediately
 
   return (
