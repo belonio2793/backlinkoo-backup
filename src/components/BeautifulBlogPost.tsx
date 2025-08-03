@@ -350,7 +350,7 @@ export function BeautifulBlogPost() {
         <Button
           variant="outline"
           size="icon"
-          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/40 hover:border-white/50 hover:shadow-xl transition-all duration-300 text-gray-700 hover:text-gray-900"
+          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-transparent backdrop-blur-md border-white/20 hover:bg-white/10 hover:border-blue-300/40 hover:shadow-xl transition-all duration-300 text-gray-600 hover:text-blue-600 hover:scale-105"
           onClick={() => setIsBookmarked(!isBookmarked)}
         >
           {isBookmarked ? (
@@ -363,7 +363,7 @@ export function BeautifulBlogPost() {
         <Button
           variant="outline"
           size="icon"
-          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/40 hover:border-white/50 hover:shadow-xl transition-all duration-300 text-gray-700 hover:text-gray-900"
+          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-transparent backdrop-blur-md border-white/20 hover:bg-white/10 hover:border-blue-300/40 hover:shadow-xl transition-all duration-300 text-gray-600 hover:text-blue-600 hover:scale-105"
           onClick={() => setIsLiked(!isLiked)}
         >
           <Heart className={`h-5 w-5 ${isLiked ? 'text-red-500 fill-current' : ''}`} />
@@ -372,7 +372,7 @@ export function BeautifulBlogPost() {
         <Button
           variant="outline"
           size="icon"
-          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/40 hover:border-white/50 hover:shadow-xl transition-all duration-300 text-gray-700 hover:text-gray-900"
+          className="floating-action-button w-12 h-12 rounded-full shadow-lg bg-transparent backdrop-blur-md border-white/20 hover:bg-white/10 hover:border-blue-300/40 hover:shadow-xl transition-all duration-300 text-gray-600 hover:text-blue-600 hover:scale-105"
           onClick={sharePost}
         >
           <Share2 className="h-5 w-5" />
@@ -386,17 +386,17 @@ export function BeautifulBlogPost() {
             <Button
               variant="ghost"
               onClick={() => navigate('/blog')}
-              className="flex items-center gap-2 hover:bg-gray-100/80 px-4 py-2 rounded-full transition-all duration-300"
+              className="flex items-center gap-2 hover:bg-transparent hover:text-blue-600 px-4 py-2 rounded-full transition-all duration-300 border border-transparent hover:border-blue-200/50 hover:shadow-md"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Blog
             </Button>
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" onClick={sharePost} className="rounded-full bg-transparent hover:bg-gray-100/50">
+              <Button variant="outline" size="sm" onClick={sharePost} className="rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-blue-300 hover:text-blue-600 hover:shadow-md transition-all duration-300">
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
               </Button>
-              <Button variant="outline" size="sm" onClick={copyToClipboard} className="rounded-full bg-transparent hover:bg-gray-100/50">
+              <Button variant="outline" size="sm" onClick={copyToClipboard} className="rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-purple-300 hover:text-purple-600 hover:shadow-md transition-all duration-300">
                 <Copy className="h-4 w-4 mr-2" />
                 Copy Link
               </Button>
@@ -548,11 +548,11 @@ export function BeautifulBlogPost() {
                   Share it with your network and help others discover great content!
                 </p>
                 <div className="flex justify-center gap-4">
-                  <Button onClick={sharePost} variant="outline" className="bg-transparent border-blue-600 text-blue-600 hover:bg-blue-50/50 hover:border-blue-700 hover:text-blue-700 rounded-full px-6">
+                  <Button onClick={sharePost} variant="outline" className="bg-transparent border-blue-200 text-blue-600 hover:bg-transparent hover:border-blue-400 hover:text-blue-700 hover:shadow-lg hover:scale-105 rounded-full px-6 transition-all duration-300">
                     <Share2 className="mr-2 h-4 w-4" />
                     Share Article
                   </Button>
-                  <Button variant="outline" onClick={copyToClipboard} className="bg-transparent hover:bg-gray-100/50 rounded-full px-6">
+                  <Button variant="outline" onClick={copyToClipboard} className="bg-transparent border-gray-200 hover:bg-transparent hover:border-purple-300 hover:text-purple-600 hover:shadow-lg hover:scale-105 rounded-full px-6 transition-all duration-300">
                     <Copy className="mr-2 h-4 w-4" />
                     Copy Link
                   </Button>
@@ -603,7 +603,7 @@ export function BeautifulBlogPost() {
                     disabled={claiming}
                     size="lg"
                     variant="outline"
-                    className="beautiful-button bg-transparent border-blue-600 text-blue-600 hover:bg-blue-50/50 hover:border-blue-700 hover:text-blue-700 px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="beautiful-button bg-transparent border-blue-300 text-blue-600 hover:bg-transparent hover:border-blue-500 hover:text-blue-700 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full shadow-lg transition-all duration-300"
                   >
                     {claiming ? (
                       <>
@@ -625,7 +625,7 @@ export function BeautifulBlogPost() {
                     onClick={() => setShowUnclaimDialog(true)}
                     variant="outline"
                     size="lg"
-                    className="bg-transparent border-orange-600 text-orange-700 hover:bg-orange-50/50 hover:border-orange-700 px-8 py-4 text-lg rounded-full"
+                    className="bg-transparent border-orange-300 text-orange-700 hover:bg-transparent hover:border-orange-500 hover:text-orange-800 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full transition-all duration-300"
                   >
                     <XCircle className="mr-3 h-5 w-5" />
                     Unclaim Post
@@ -637,7 +637,7 @@ export function BeautifulBlogPost() {
                     onClick={() => setShowDeleteDialog(true)}
                     variant="outline"
                     size="lg"
-                    className="bg-transparent border-red-600 text-red-600 hover:bg-red-50/50 hover:border-red-700 hover:text-red-700 px-8 py-4 text-lg rounded-full"
+                    className="bg-transparent border-red-300 text-red-600 hover:bg-transparent hover:border-red-500 hover:text-red-700 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full transition-all duration-300"
                   >
                     <Trash2 className="mr-3 h-5 w-5" />
                     Delete Post
