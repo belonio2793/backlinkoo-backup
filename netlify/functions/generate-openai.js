@@ -48,23 +48,41 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Get OpenAI API key from request or environment
-    const apiKey = requestApiKey || process.env.OPENAI_API_KEY;
+    // Get OpenAI API key from environment variables (secure server-side only)
+    const apiKey = process.env.OPENAI_API_KEY || process.env.OPEN_AI_API_KEY;
+    console.log('🔑 API Key check:', apiKey ? `Found (${apiKey.substring(0, 7)}...)` : 'Not found');
+
     if (!apiKey) {
+      console.error('❌ No OpenAI API key found in environment variables');
       return {
         statusCode: 500,
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
-          success: false, 
-          error: 'OpenAI API key not configured' 
+        body: JSON.stringify({
+          success: false,
+          error: 'OpenAI API key not configured in Netlify environment',
+          details: 'Please set OPENAI_API_KEY or OPEN_AI_API_KEY in Netlify environment variables'
         })
       };
     }
 
-    const systemPrompt = `You are an expert SEO content writer specializing in creating high-quality, engaging blog posts that rank well in search engines. Focus on step-by-step instructions, practical tips, and actionable advice. Use ${tone} tone throughout the article. Always create original, valuable content that genuinely helps readers and ensures natural, contextual backlink integration.`;
+    const systemPrompt = `You are an elite SEO content strategist and copywriter with deep expertise in creating viral, high-ranking blog content. Your writing style combines authoritative expertise with engaging storytelling.
+
+KEY EXPERTISE:
+- Write compelling, data-driven content that ranks #1 on Google
+- Master storyteller who hooks readers from the first sentence
+- Expert in natural backlink integration that adds genuine value
+- Create content that drives engagement, shares, and conversions
+- Use ${tone} tone while maintaining authority and trustworthiness
+
+CONTENT PHILOSOPHY:
+- Every sentence must provide value to the reader
+- Use psychological triggers and persuasive writing techniques
+- Include specific examples, case studies, and actionable insights
+- Write with clarity, confidence, and compelling narrative flow
+- Integrate backlinks so naturally that they enhance the user experience`;
 
     const userPrompt = `Create a comprehensive ${wordCount}-word ${contentType} blog post about "${keyword}" that naturally incorporates a backlink.
 
