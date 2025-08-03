@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { PremiumPlanTab } from "@/components/PremiumPlanTab";
+
 import { SEOAcademyTab } from "@/components/SEOAcademyTab";
 
 import { PremiumService } from "@/services/premiumService";
