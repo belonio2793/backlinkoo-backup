@@ -392,7 +392,7 @@ export function SEOAcademyTab({ isSubscribed, onUpgrade }: SEOAcademyTabProps) {
     if (!isSubscribed) {
       toast({
         title: "Premium Feature",
-        description: "Upgrade to Premium to track your progress and earn certificates.",
+        description: "Premium subscription required to track progress and earn certificates.",
         variant: "destructive"
       });
       return;
