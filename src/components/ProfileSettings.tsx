@@ -223,67 +223,8 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
         return;
       }
 
-      // Load premium status immediately in background with timeout
-      setPremiumLoading(true);
-      console.log('🚀 ProfileSettings: Starting premium status check for user:', user.email, user.id);
-
-      // For the specific user, assume premium and verify
-      if (user.email === 'labindalawamaryrose@gmail.com') {
-        console.log('👑 Special handling for premium user');
-        setIsPremium(true); // Assume premium first
-
-        // Then verify in background
-        setTimeout(async () => {
-          try {
-            const status = await PremiumService.checkPremiumStatus(user.id);
-            console.log('🔍 Background verification result:', status);
-            if (!status) {
-              console.log('❌ Background check failed, will show fix options');
-              setIsPremium(false);
-            }
-          } catch (error) {
-            console.error('❌ Background verification failed:', error);
-          }
-          setPremiumLoading(false);
-        }, 500);
-      } else {
-        // For other users, do normal check
-        const premiumTimeout = setTimeout(() => {
-          console.warn('Premium status check timeout in ProfileSettings');
-          setIsPremium(false);
-          setPremiumLoading(false);
-        }, 5000);
-
-        PremiumService.checkPremiumStatus(user.id)
-          .then(status => {
-            clearTimeout(premiumTimeout);
-            setIsPremium(status);
-
-            // If user should be premium but isn't showing as premium, try a sync
-            if (!status && user.email) {
-              console.log('🔄 Attempting auto-sync for user:', user.email);
-              PremiumService.syncPremiumStatus(user.email)
-                .then(syncResult => {
-                  if (syncResult.success && syncResult.after?.isPremium) {
-                    console.log('✅ Auto-sync successful, updating status');
-                    setIsPremium(true);
-                  }
-                })
-                .catch(error => {
-                  console.warn('⚠️ Auto-sync failed:', error);
-                });
-            }
-          })
-          .catch((error) => {
-            clearTimeout(premiumTimeout);
-            console.error('Premium status check error in ProfileSettings:', error);
-            setIsPremium(false);
-          })
-          .finally(() => {
-            clearTimeout(premiumTimeout);
-            setPremiumLoading(false);
-          });
-      }
+      // Premium status is now handled during authentication
+      console.log('🚀 ProfileSettings: Using premium status from auth context:', { isPremium, subscriptionTier });
 
       // Load detailed profile data in background (non-blocking)
       supabase
