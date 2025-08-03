@@ -79,6 +79,9 @@ exports.handler = async (event, context) => {
                             premiumSubs.some(sub => sub.status === 'active'));
 
     console.log('🎯 Should be premium:', shouldBePremium);
+    if (forcePremium) {
+      console.log('⚡ Force premium mode activated');
+    }
 
     // Step 4: If user should be premium but doesn't have active subscription, create one
     if (shouldBePremium && (!premiumSubs || premiumSubs.length === 0)) {
