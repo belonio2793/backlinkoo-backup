@@ -319,6 +319,50 @@ export class PremiumService {
   }
 
   /**
+   * Sync premium tier to user profile
+   */
+  static async syncPremiumTierToProfile(userId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ subscription_tier: 'premium' })
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('❌ Error syncing premium tier to profile:', error.message);
+        return false;
+      }
+
+      console.log('✅ Synced premium tier to profile');
+      return true;
+    } catch (error) {
+      console.error('❌ Profile sync failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Sync premium status using external function
+   */
+  static async syncPremiumStatus(userEmail: string): Promise<any> {
+    try {
+      const response = await fetch('/.netlify/functions/sync-premium-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userEmail })
+      });
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('❌ Premium sync function failed:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
    * Get subscription analytics
    */
   static async getSubscriptionAnalytics() {
