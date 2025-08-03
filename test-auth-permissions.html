@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auth Permissions Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Auth Permissions Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        // This should match your app's supabase client config
+        const supabaseUrl = 'https://dfhanacsmsvvkpunurnp.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY5MjE5ODksImV4cCI6MjA1MjQ5Nzk4OX0.EQDw5qKQ4JL0rNePqfhKz5kL5kGmzWjG9E13QTVKCbE'
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+        
+        async function testPermissions() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing permissions...</p>';
+            
+            const tests = [];
+            
+            // Test 1: Check profiles table access
+            try {
+                const { count, error } = await supabase
+                    .from('profiles')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (error) {
+                    tests.push(`❌ Profiles table: ${error.message}`);
+                } else {
+                    tests.push(`✅ Profiles table: ${count} rows accessible`);
+                }
+            } catch (err) {
+                tests.push(`❌ Profiles table: ${err.message}`);
+            }
+            
+            // Test 2: Check if premium_subscriptions table exists
+            try {
+                const { count, error } = await supabase
+                    .from('premium_subscriptions')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (error) {
+                    if (error.message.includes('does not exist') || error.message.includes('permission denied')) {
+                        tests.push(`ℹ️ Premium subscriptions table: Not available (expected)`);
+                    } else {
+                        tests.push(`❌ Premium subscriptions table: ${error.message}`);
+                    }
+                } else {
+                    tests.push(`✅ Premium subscriptions table: ${count} rows accessible`);
+                }
+            } catch (err) {
+                tests.push(`❌ Premium subscriptions table: ${err.message}`);
+            }
+            
+            // Test 3: Try the problematic RPC calls that were fixed
+            try {
+                const { data, error } = await supabase.rpc('get_user_count');
+                if (error) {
+                    tests.push(`ℹ️ get_user_count RPC: ${error.message} (expected - we removed this)`);
+                } else {
+                    tests.push(`⚠️ get_user_count RPC: Still available - ${data}`);
+                }
+            } catch (err) {
+                tests.push(`ℹ️ get_user_count RPC: ${err.message} (expected - we removed this)`);
+            }
+            
+            try {
+                const { data, error } = await supabase.rpc('get_auth_users');
+                if (error) {
+                    tests.push(`ℹ️ get_auth_users RPC: ${error.message} (expected - we removed this)`);
+                } else {
+                    tests.push(`⚠️ get_auth_users RPC: Still available - ${data?.length} users`);
+                }
+            } catch (err) {
+                tests.push(`ℹ️ get_auth_users RPC: ${err.message} (expected - we removed this)`);
+            }
+            
+            // Display results
+            results.innerHTML = '<h2>Test Results:</h2><ul>' + 
+                tests.map(test => `<li>${test}</li>`).join('') + 
+                '</ul>';
+        }
+        
+        // Run tests when page loads
+        testPermissions();
+    </script>
+</body>
+</html>
