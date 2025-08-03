@@ -438,7 +438,10 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={refreshPremiumStatus}
+                      onClick={() => {
+                        console.log('🔄 Refresh button clicked!');
+                        refreshPremiumStatus();
+                      }}
                       disabled={premiumLoading}
                       className="h-6 px-2 text-xs"
                     >
