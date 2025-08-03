@@ -34,3 +34,6 @@ export const LazyUserBlogManagement = lazy(() => import('@/components/UserBlogMa
 export const LazyBlogEditPage = lazy(() => import('@/pages/BlogEditPage').then(module => ({ default: module.BlogEditPage })));
 export const LazyEnhancedAILive = lazy(() => import('@/components/EnhancedAILive').then(module => ({ default: module.EnhancedAILive })));
 export const LazyGuestDashboard = lazy(() => import('@/components/GuestDashboard').then(module => ({ default: module.GuestDashboard })));
+
+// SEO-optimized blog components
+export const LazySEOOptimizedBlogGenerator = lazy(() => import('@/components/SEOOptimizedBlogGenerator').then(module => ({ default: module.SEOOptimizedBlogGenerator })));
