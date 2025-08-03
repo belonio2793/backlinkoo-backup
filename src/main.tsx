@@ -76,9 +76,26 @@ if (import.meta.env.DEV) {
     window.location.reload();
   };
 
+  (window as any).forceSignOut = async () => {
+    console.log('🚪 Force signing out user...');
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      await supabase.auth.signOut({ scope: 'global' });
+      console.log('✅ Force sign out successful');
+      window.location.href = '/';
+    } catch (error) {
+      console.error('❌ Force sign out failed:', error);
+      // Clear local storage and redirect anyway
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = '/';
+    }
+  };
+
   console.log('💡 Debug helpers available:');
   console.log('  - fixRLS() - Go to RLS recursion fix page');
   console.log('  - forcePremium() - Force current user to premium status');
+  console.log('  - forceSignOut() - Force sign out and redirect to home');
 }
 
 // Priority: Get React app rendering ASAP
