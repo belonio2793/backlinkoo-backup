@@ -42,6 +42,12 @@ export class GlobalErrorHandler {
     const count = (this.errorCounts.get(errorKey) || 0) + 1;
     this.errorCounts.set(errorKey, count);
 
+    // Check for RLS recursion error - this needs immediate attention
+    if (this.isRLSRecursionError(error) && count === 1) {
+      this.handleRLSRecursionError(error, source);
+      return;
+    }
+
     // Only log if we haven't seen this error too many times
     if (count <= this.MAX_SAME_ERROR) {
       if (this.isThirdPartyError(error)) {
@@ -75,7 +81,7 @@ export class GlobalErrorHandler {
   private isThirdPartyError(error: any): boolean {
     const stack = error?.stack?.toLowerCase() || '';
     const message = error?.message?.toLowerCase() || '';
-    
+
     const thirdPartyIndicators = [
       'fullstory',
       'fs.js',
@@ -84,12 +90,31 @@ export class GlobalErrorHandler {
       'facebook.net',
       'doubleclick',
       'analytics',
-      'tracking'
+      'tracking',
+      'chrome-extension://',
+      'moz-extension://',
+      'evmask',
+      'phantom',
+      'metamask',
+      'coinbase',
+      'cannot redefine property: ethereum',
+      'ethereum',
+      'web3',
+      'wallet'
     ];
 
-    return thirdPartyIndicators.some(indicator => 
+    return thirdPartyIndicators.some(indicator =>
       stack.includes(indicator) || message.includes(indicator)
     );
+  }
+
+  /**
+   * Check if error is RLS recursion related
+   */
+  private isRLSRecursionError(error: any): boolean {
+    const message = error?.message?.toLowerCase() || '';
+    return message.includes('infinite recursion detected in policy') ||
+           message.includes('infinite recursion') && message.includes('profiles');
   }
 
   /**
@@ -97,7 +122,7 @@ export class GlobalErrorHandler {
    */
   private isNetworkError(error: any): boolean {
     const message = error?.message?.toLowerCase() || '';
-    return message.includes('failed to fetch') || 
+    return message.includes('failed to fetch') ||
            message.includes('network error') ||
            message.includes('connection failed');
   }
@@ -118,6 +143,92 @@ export class GlobalErrorHandler {
   private handleNetworkError(error: any, source: string, count: number): void {
     if (count <= 3) {
       console.warn(`🌐 Network error (${source}, occurrence ${count}):`, error.message);
+    }
+  }
+
+  /**
+   * Handle RLS recursion errors - immediate action required
+   */
+  private handleRLSRecursionError(error: any, source: string): void {
+    console.error(`🚨 CRITICAL: RLS Recursion Detected (${source}):`, error.message);
+    console.error('This will prevent login and database operations. Applying emergency fix...');
+
+    // Apply emergency fix immediately
+    this.applyEmergencyRLSFix();
+
+    // Show a notification to the user
+    const notification = document.createElement('div');
+    notification.innerHTML = `
+      <div style="
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #dc2626;
+        color: white;
+        padding: 16px 20px;
+        border-radius: 8px;
+        z-index: 10000;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-family: system-ui, -apple-system, sans-serif;
+      ">
+        <div style="font-weight: bold; margin-bottom: 8px;">🚨 Database Error - Fixing...</div>
+        <div style="font-size: 14px; margin-bottom: 12px;">
+          Applying emergency fix for infinite recursion. Page will refresh automatically.
+        </div>
+        <div style="
+          width: 100%;
+          height: 4px;
+          background: rgba(255,255,255,0.3);
+          border-radius: 2px;
+          overflow: hidden;
+        ">
+          <div style="
+            width: 0%;
+            height: 100%;
+            background: white;
+            animation: progress 3s ease-out forwards;
+          "></div>
+        </div>
+      </div>
+      <style>
+        @keyframes progress {
+          to { width: 100%; }
+        }
+      </style>
+    `;
+    document.body.appendChild(notification);
+
+    // Remove notification and refresh after fix
+    setTimeout(() => {
+      notification.remove();
+      window.location.reload();
+    }, 3000);
+  }
+
+  /**
+   * Apply emergency RLS fix
+   */
+  private async applyEmergencyRLSFix(): Promise<void> {
+    try {
+      console.log('🔧 Applying emergency RLS fix...');
+
+      const response = await fetch('/.netlify/functions/fix-rls-recursion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('✅ Emergency RLS fix applied successfully');
+      } else {
+        console.error('❌ Emergency RLS fix failed:', result.error);
+      }
+    } catch (error) {
+      console.error('❌ Emergency RLS fix error:', error);
     }
   }
 

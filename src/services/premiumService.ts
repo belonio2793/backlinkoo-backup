@@ -47,6 +47,25 @@ export class PremiumService {
         controller.abort();
       }, 3000); // 3 second timeout
 
+      // First, check the profiles table for subscription_tier
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('subscription_tier')
+        .eq('user_id', userId)
+        .abortSignal(controller.signal)
+        .single();
+
+      // Check if user has premium tier in profile
+      const hasPremiumTier = profile?.subscription_tier === 'premium' ||
+                            profile?.subscription_tier === 'monthly';
+
+      if (hasPremiumTier) {
+        console.log('✅ User has premium tier in profile:', profile.subscription_tier);
+        clearTimeout(timeoutId);
+        return true;
+      }
+
+      // If no premium tier in profile, check premium_subscriptions table
       const { data, error } = await supabase
         .from('premium_subscriptions')
         .select('*')
@@ -60,7 +79,10 @@ export class PremiumService {
 
       if (error) {
         if (error.code === 'PGRST116') {
-          // No rows found - user is not premium
+          // No rows found - check if profile had error too
+          if (profileError && profileError.code !== 'PGRST116') {
+            console.warn('❌ Error checking profile tier:', profileError.message);
+          }
           console.log('✅ User is not premium (no active subscription found)');
           return false;
         }
@@ -68,8 +90,16 @@ export class PremiumService {
         return false;
       }
 
-      console.log('✅ Premium status check result:', !!data);
-      return !!data;
+      const isPremium = !!data;
+      console.log('✅ Premium status check result:', isPremium);
+
+      // If user has active subscription but no premium tier in profile, sync it
+      if (isPremium && !hasPremiumTier) {
+        console.log('🔧 Syncing premium tier to profile...');
+        this.syncPremiumTierToProfile(userId);
+      }
+
+      return isPremium;
     } catch (error: any) {
       if (error.name === 'AbortError') {
         console.warn('⏰ Premium status check timed out');
@@ -286,6 +316,50 @@ export class PremiumService {
    */
   static async canAccessPremiumFeatures(userId: string): Promise<boolean> {
     return await this.checkPremiumStatus(userId);
+  }
+
+  /**
+   * Sync premium tier to user profile
+   */
+  static async syncPremiumTierToProfile(userId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ subscription_tier: 'premium' })
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('❌ Error syncing premium tier to profile:', error.message);
+        return false;
+      }
+
+      console.log('✅ Synced premium tier to profile');
+      return true;
+    } catch (error) {
+      console.error('❌ Profile sync failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Sync premium status using external function
+   */
+  static async syncPremiumStatus(userEmail: string): Promise<any> {
+    try {
+      const response = await fetch('/.netlify/functions/sync-premium-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userEmail })
+      });
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('❌ Premium sync function failed:', error);
+      return { success: false, error: error.message };
+    }
   }
 
   /**

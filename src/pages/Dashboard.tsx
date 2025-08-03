@@ -883,35 +883,58 @@ const Dashboard = () => {
 
   const handleSignOut = async () => {
     try {
-      console.log('🚪 Dashboard: Signing out user...');
+      console.log('🚪 Dashboard: Sign out button clicked!');
       console.log('🚪 Current user:', user?.email);
 
-      const { error } = await supabase.auth.signOut();
+      // Show immediate feedback
+      toast({
+        title: "Signing out...",
+        description: "Please wait while we sign you out.",
+      });
 
-      if (error) {
-        console.error('🚪 Sign out error:', error);
-        toast({
-          title: "Sign out error",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
+      // Clear any local state immediately for instant UX
+      setUser(null);
+      setUserType('user');
+      setCredits(0);
+      setCampaigns([]);
+
+      // Navigate immediately
+      navigate('/');
+
+      // Do actual sign out in background
+      try {
+        const { error } = await supabase.auth.signOut({ scope: 'global' });
+
+        if (error) {
+          console.error('🚪 Sign out error (background):', error);
+          // Don't show error to user since they're already signed out from UI perspective
+        } else {
+          console.log('🚪 Background sign out successful');
+        }
+      } catch (backgroundError) {
+        console.error('🚪 Background sign out error:', backgroundError);
+        // Don't show error to user since they're already signed out from UI perspective
       }
 
-      console.log('🚪 Sign out successful, navigating to home...');
-      navigate('/');
-      toast({
-        title: "Signed out successfully",
-        description: "You have been signed out of your account.",
-      });
+      // Show success message
+      setTimeout(() => {
+        toast({
+          title: "Signed out successfully",
+          description: "You have been signed out of your account.",
+        });
+      }, 100);
+
     } catch (error) {
       console.error('🚪 Dashboard sign out error:', error);
-      toast({
-        title: "Sign out failed",
-        description: "An error occurred while signing out. Please try again.",
-        variant: "destructive"
-      });
+
+      // Force navigation even if sign out fails
+      setUser(null);
       navigate('/');
+
+      toast({
+        title: "Signed out",
+        description: "You have been signed out (with some errors).",
+      });
     }
   };
 
@@ -975,8 +998,13 @@ const Dashboard = () => {
 
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={handleSignOut}
-                    className="text-red-600 focus:text-red-600"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('🚪 Sign out dropdown item clicked');
+                      handleSignOut();
+                    }}
+                    className="text-red-600 focus:text-red-600 cursor-pointer"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out

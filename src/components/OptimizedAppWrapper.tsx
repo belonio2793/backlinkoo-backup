@@ -20,6 +20,7 @@ import SubscriptionSuccess from '@/pages/SubscriptionSuccess';
 import SubscriptionCancelled from '@/pages/SubscriptionCancelled';
 import BlogSystemDiagnostic from '@/pages/BlogSystemDiagnostic';
 import { BlogPostDiagnostic } from '@/components/BlogPostDiagnostic';
+import EmergencyRLSFix from '@/pages/EmergencyRLSFix';
 
 // Import lightweight components
 import AdminAuthGuard from '@/components/AdminAuthGuard';
@@ -143,6 +144,13 @@ export const OptimizedAppWrapper = () => {
           <Route path="/admin/diagnostic" element={
             <Suspense fallback={<PageLoader />}>
               <AdminDiagnostic />
+            </Suspense>
+          } />
+
+          {/* Emergency fix routes - accessible in all environments */}
+          <Route path="/emergency/rls-fix" element={
+            <Suspense fallback={<PageLoader />}>
+              <EmergencyRLSFix />
             </Suspense>
           } />
 
