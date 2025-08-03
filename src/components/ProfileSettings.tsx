@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { useAuthStatus } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { PremiumService } from "@/services/premiumService";
 import { PremiumStatusSync } from "@/components/PremiumStatusSync";
