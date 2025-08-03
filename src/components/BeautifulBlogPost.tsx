@@ -249,11 +249,13 @@ export function BeautifulBlogPost() {
 
   const cleanTitle = (title: string) => {
     if (!title) return '';
-    // Remove **H1**: prefix and other markdown artifacts from title
+    // Remove all markdown artifacts from title including ** wrappers
     return title
       .replace(/^\*\*H1\*\*:\s*/i, '')
       .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
       .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
+      .replace(/\*\*/g, '') // Remove any remaining ** symbols
+      .replace(/\*/g, '') // Remove any remaining * symbols
       .replace(/^#{1,6}\s+/, '')
       .trim();
   };
