@@ -147,6 +147,13 @@ export const OptimizedAppWrapper = () => {
             </Suspense>
           } />
 
+          {/* Emergency fix routes - accessible in all environments */}
+          <Route path="/emergency/rls-fix" element={
+            <Suspense fallback={<PageLoader />}>
+              <EmergencyRLSFix />
+            </Suspense>
+          } />
+
           {/* Debug routes - only in development */}
           {import.meta.env.DEV && (
             <Route path="/debug/claim-system" element={<LazyClaimSystemDebug />} />
