@@ -282,12 +282,14 @@ export function EnhancedBlogPost() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
-      {/* Header */}
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+      <Header />
+
+      {/* Blog Navigation */}
+      <div className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-16 z-40">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => navigate('/blog')}
               className="flex items-center gap-2"
             >
@@ -306,7 +308,7 @@ export function EnhancedBlogPost() {
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Post Content */}
       <main className="container mx-auto px-6 py-8">
