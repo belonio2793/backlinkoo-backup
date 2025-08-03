@@ -7,6 +7,10 @@ interface BlogRequest {
   keyword: string;
   anchorText: string;
   targetUrl: string;
+  tone?: string;
+  length?: string;
+  industry?: string;
+  additionalInstructions?: string;
 }
 
 interface BlogResponse {
