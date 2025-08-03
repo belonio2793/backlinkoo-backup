@@ -65,26 +65,44 @@ export class DirectOpenAIService {
       const targetTone = toneMap[request.tone || 'professional'] || 'professional and engaging';
       const targetLength = lengthMap[request.length || 'medium'] || '800-1200 words';
 
-      // Use one of the three specific query patterns randomly for variety
-      const queryPatterns = [
-        `Generate a 1000 word blog post on ${request.keyword} including the ${request.anchorText} hyperlinked to ${request.targetUrl}`,
-        `Write a 1000 word blog post about ${request.keyword} with a hyperlinked ${request.anchorText} linked to ${request.targetUrl}`,
-        `Produce a 1000-word blog post on ${request.keyword} that links ${request.anchorText} to ${request.targetUrl}`
+      // Use enhanced query patterns for superior content generation
+      const eliteQueryPatterns = [
+        `Create an authoritative ${targetLength} expert guide on ${request.keyword} that naturally integrates ${request.anchorText} as a valuable resource linking to ${request.targetUrl}`,
+        `Write a comprehensive ${targetLength} industry-leading analysis of ${request.keyword} featuring ${request.anchorText} as a strategic reference to ${request.targetUrl}`,
+        `Develop a ${targetLength} thought leadership piece on ${request.keyword} that seamlessly incorporates ${request.anchorText} directing readers to ${request.targetUrl}`
       ];
 
-      const selectedPattern = queryPatterns[Math.floor(Math.random() * queryPatterns.length)];
-      console.log('📝 Selected query pattern:', selectedPattern);
+      const selectedPattern = eliteQueryPatterns[Math.floor(Math.random() * eliteQueryPatterns.length)];
+      console.log('🚀 Selected elite query pattern:', selectedPattern);
 
       let prompt = `${selectedPattern}
 
-REQUIREMENTS:
-- Create engaging, informative content that provides real value to readers
-- Include a natural mention of "${request.anchorText}" that would logically link to ${request.targetUrl}
-- Structure with clear headings and subheadings (H1, H2, H3)
-- Write in a ${targetTone} tone
-- Include actionable insights and examples where relevant
-- Make the content SEO-friendly with natural keyword usage
-- Ensure the content is exactly 1000 words`;
+🎯 CONTENT EXCELLENCE FRAMEWORK:
+Create premium, viral-worthy content that positions this as the definitive resource on "${request.keyword}". This should be content that industry experts bookmark and reference.
+
+📊 AUTHORITY REQUIREMENTS:
+- Write ${targetLength} of expert-level, research-backed content
+- Include 3-5 specific data points, statistics, or case studies
+- Demonstrate deep subject matter expertise throughout
+- Use ${targetTone} tone while maintaining authoritative credibility
+- Create content that drives social shares and backlinks naturally
+- Strategic placement of "${request.anchorText}" linking to ${request.targetUrl} where it adds maximum value
+
+🏗️ PREMIUM STRUCTURE:
+- Compelling H1 that promises specific, valuable outcomes
+- Hook introduction with surprising insight or provocative question
+- 4-6 main sections (H2) that each solve specific problems
+- Actionable H3 subsections with concrete examples
+- Natural integration of "${request.anchorText}" → ${request.targetUrl}
+- Powerful conclusion with clear next steps
+
+🚀 ENGAGEMENT OPTIMIZATION:
+- Open with a statistic or insight that challenges conventional thinking
+- Include numbered frameworks, step-by-step processes, or checklists
+- Use psychological triggers and persuasive writing techniques
+- Add transition phrases that maintain reading momentum
+- Include rhetorical questions that increase engagement
+- End sections with compelling hooks to continue reading`;
 
       if (request.industry) {
         prompt += `\n- Focus on ${request.industry} industry context and examples`;
