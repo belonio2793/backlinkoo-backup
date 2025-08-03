@@ -16,17 +16,18 @@ export const QuickPremiumFix = () => {
     try {
       console.log('🔧 Starting quick premium fix...');
 
-      // Call the set premium function with timeout
+      // Call the sync premium function with force premium option
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-      const response = await fetch('/.netlify/functions/set-user-premium', {
+      const response = await fetch('/.netlify/functions/sync-premium-status', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          userEmail: 'labindalawamaryrose@gmail.com'
+          userEmail: 'labindalawamaryrose@gmail.com',
+          forcePremium: true
         }),
         signal: controller.signal
       });
