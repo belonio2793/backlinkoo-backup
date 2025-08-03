@@ -366,7 +366,7 @@ export function BeautifulBlogPost() {
       </div>
 
       {/* Navigation Bar */}
-      <div className="sticky top-16 z-30 border-b border-gray-200/50 bg-white/80 backdrop-blur-md">
+      <div className="beautiful-nav sticky top-16 z-30 border-b border-gray-200/50 bg-white/80 backdrop-blur-md">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Button
