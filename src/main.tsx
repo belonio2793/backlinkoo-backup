@@ -4,6 +4,12 @@ import './index.css'
 import './utils/globalErrorHandler'
 import './utils/cryptoWalletHandler'
 
+// Clear previous console errors in development
+if (import.meta.env.DEV) {
+  console.clear();
+  console.log('🚀 Starting Backlinkoo application...');
+}
+
 // Priority: Get React app rendering ASAP
 createRoot(document.getElementById("root")!).render(<App />);
 
