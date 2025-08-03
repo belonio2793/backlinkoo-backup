@@ -430,12 +430,7 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
                     {premiumLoading ? 'Checking...' : (isPremium ? 'Premium Plan' : 'Free Plan')}
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {isPremium
-                    ? 'You have access to all premium features and unlimited usage.'
-                    : 'Upgrade to premium for unlimited access and advanced features.'
-                  }
-                </p>
+
               </div>
             </div>
 
