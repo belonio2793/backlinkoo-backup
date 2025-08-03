@@ -128,18 +128,21 @@ export default function OpenAITest() {
       }
     } catch (error) {
       console.error(`❌ Query ${queryIndex + 1} failed:`, error);
-      
-      setQueries(prev => prev.map((q, i) => 
-        i === queryIndex ? { 
-          ...q, 
-          status: 'error' as const, 
-          error: error instanceof Error ? error.message : 'Unknown error'
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+      setQueries(prev => prev.map((q, i) =>
+        i === queryIndex ? {
+          ...q,
+          status: 'error' as const,
+          error: errorMessage,
+          result: undefined
         } : q
       ));
 
       toast({
         title: `❌ Query ${queryIndex + 1} Failed`,
-        description: error instanceof Error ? error.message : 'Unknown error',
+        description: errorMessage,
         variant: 'destructive'
       });
     }
