@@ -62,6 +62,7 @@ import { DashboardTrialPosts } from "@/components/DashboardTrialPosts";
 
 import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
+import { EmergencySignOutButton } from "@/components/EmergencySignOutButton";
 
 import { AIPostsManager } from "@/components/admin/AIPostsManager";
 import { PremiumUserAdmin } from "@/components/admin/PremiumUserAdmin";
