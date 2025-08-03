@@ -368,7 +368,7 @@ export function OrganizedAdminDashboard() {
 
         {activeSection === "security" && (
           <div className="space-y-6">
-            <SecurityDashboard />
+            <EnhancedSecurityDashboard />
           </div>
         )}
       </div>
