@@ -39,3 +39,6 @@ export const LazyGuestDashboard = lazy(() => import('@/components/GuestDashboard
 
 // SEO-optimized blog components
 export const LazySEOOptimizedBlogGenerator = lazy(() => import('@/pages/SEOBlogGenerator'));
+
+// API Testing components
+export const LazyOpenAITest = lazy(() => import('@/pages/OpenAITest'));

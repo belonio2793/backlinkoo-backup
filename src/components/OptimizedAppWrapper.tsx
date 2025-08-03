@@ -237,6 +237,13 @@ export const OptimizedAppWrapper = () => {
             </EmailVerificationGuard>
           } />
 
+          {/* API Testing Route */}
+          <Route path="/test-openai" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyOpenAITest />
+            </Suspense>
+          } />
+
           {/* 404 routes */}
           <Route path="/404" element={<NotFound />} />
           <Route path="*" element={<NotFound />} />
