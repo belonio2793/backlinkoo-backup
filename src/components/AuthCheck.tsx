@@ -60,6 +60,77 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
     return () => subscription.unsubscribe();
   }, []);
 
+  const checkAuthInstantly = async () => {
+    try {
+      // Don't set loading to true for instant processing
+      setError(null);
+
+      // Check if user is authenticated using SafeAuth
+      const userResult = await SafeAuth.getCurrentUser();
+
+      if (userResult.needsAuth || !userResult.user) {
+        console.log('🔐 No auth session - showing sign in');
+        setShowSignIn(true);
+        return;
+      }
+
+      if (userResult.error) {
+        console.error('❌ Auth error:', userResult.error);
+        setError('Authentication failed. Please sign in.');
+        setShowSignIn(true);
+        return;
+      }
+
+      const user = userResult.user;
+      setUser(user);
+      console.log('✅ User authenticated:', user.email);
+
+      // For admin routes, provide instant access to admin email
+      if (user.email === 'support@backlinkoo.com') {
+        sessionStorage.setItem('instant_admin', 'true');
+        setUserRole('admin');
+        setShowSignIn(false);
+        console.log('✅ Instant admin access granted:', user.email);
+        return;
+      }
+
+      // If admin is required, check user role using SafeAuth
+      if (requireAdmin) {
+        const adminResult = await SafeAuth.isAdmin();
+
+        if (adminResult.needsAuth) {
+          setError('Admin access required. Please sign in with an admin account.');
+          setShowSignIn(true);
+          return;
+        }
+
+        if (adminResult.error) {
+          console.error('❌ Admin check failed:', adminResult.error);
+          setError('Could not verify admin permissions.');
+          return;
+        }
+
+        if (!adminResult.isAdmin) {
+          setError('Admin access required. Please sign in with an admin account.');
+          setShowSignIn(true);
+          return;
+        }
+
+        setUserRole('admin');
+        console.log('✅ Admin user verified:', user.email);
+      }
+
+      // Success - hide sign in form
+      setShowSignIn(false);
+      console.log('✅ Authentication successful');
+
+    } catch (error: any) {
+      console.error('❌ Auth check failed:', error);
+      setError('Authentication check failed.');
+      setShowSignIn(true);
+    }
+  };
+
   const checkAuth = async () => {
     try {
       setLoading(true);
