@@ -66,6 +66,7 @@ export default function OpenAITest() {
         .replace('{{url}}', testData.url);
 
       console.log(`🧪 Testing Query ${queryIndex + 1}:`, processedTemplate);
+      console.log(`📡 Making API request for query ${queryIndex + 1}...`);
 
       // Make API call to Netlify function
       const response = await fetch('/.netlify/functions/generate-openai', {
