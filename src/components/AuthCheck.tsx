@@ -202,7 +202,11 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
   };
 
   const handleRetry = () => {
-    checkAuth();
+    if (requireAdmin) {
+      checkAuthInstantly();
+    } else {
+      checkAuth();
+    }
   };
 
   const handleSignOut = async () => {
