@@ -46,6 +46,7 @@ import {
   LazyBlogCreation,
   LazyBlogPostView,
   LazyEnhancedBlogListing,
+  LazySuperEnhancedBlogListing,
   LazyEnhancedBlogPost,
   LazyTrialDashboard,
   LazyAIContentTest,
@@ -94,7 +95,7 @@ export const OptimizedAppWrapper = () => {
           <Route path="/preview/:slug" element={<BlogPreview />} />
 
           {/* Blog routes - enhanced system */}
-          <Route path="/blog" element={<LazyEnhancedBlogListing />} />
+          <Route path="/blog" element={<LazySuperEnhancedBlogListing />} />
           <Route path="/blog/create" element={<LazyBlogCreation />} />
           <Route path="/blog/:slug" element={<LazyEnhancedBlogPost />} />
 

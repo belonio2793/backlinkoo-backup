@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Generation Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .loading {
+            text-align: center;
+            color: #667eea;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Blog Generation Test</h1>
+        
+        <form id="blogForm">
+            <div class="form-group">
+                <label for="keyword">Target Keyword</label>
+                <input type="text" id="keyword" placeholder="e.g., best SEO practices" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="anchorText">Anchor Text</label>
+                <input type="text" id="anchorText" placeholder="e.g., professional SEO services" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="targetUrl">Target URL</label>
+                <input type="url" id="targetUrl" placeholder="https://your-website.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="tone">Writing Tone</label>
+                <select id="tone">
+                    <option value="professional">Professional</option>
+                    <option value="conversational">Conversational</option>
+                    <option value="technical">Technical</option>
+                    <option value="casual">Casual</option>
+                    <option value="persuasive">Persuasive</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="length">Article Length</label>
+                <select id="length">
+                    <option value="short">Short (500-800 words)</option>
+                    <option value="medium" selected>Medium (800-1200 words)</option>
+                    <option value="long">Long (1200-1800 words)</option>
+                    <option value="comprehensive">Comprehensive (1800+ words)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="instructions">Additional Instructions (Optional)</label>
+                <textarea id="instructions" rows="3" placeholder="Any specific requirements or focus areas..."></textarea>
+            </div>
+            
+            <button type="submit" id="generateBtn">
+                Generate Blog Post
+            </button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('blogForm');
+        const generateBtn = document.getElementById('generateBtn');
+        const resultDiv = document.getElementById('result');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                keyword: document.getElementById('keyword').value.trim(),
+                anchorText: document.getElementById('anchorText').value.trim(),
+                targetUrl: document.getElementById('targetUrl').value.trim(),
+                tone: document.getElementById('tone').value,
+                length: document.getElementById('length').value,
+                additionalInstructions: document.getElementById('instructions').value.trim() || undefined
+            };
+
+            if (!formData.keyword || !formData.anchorText || !formData.targetUrl) {
+                showResult('Please fill in all required fields.', 'error');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<span class="spinner"></span>Generating...';
+            showResult('Generating your blog post... This may take 30-60 seconds.', 'loading');
+
+            try {
+                // Test the DirectOpenAI service by calling it directly
+                const response = await fetch('/.netlify/functions/generate-openai', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        keyword: formData.keyword,
+                        url: formData.targetUrl,
+                        anchorText: formData.anchorText,
+                        tone: formData.tone,
+                        length: formData.length,
+                        additionalInstructions: formData.additionalInstructions,
+                        wordCount: getWordCountFromLength(formData.length),
+                        contentType: 'blog-post'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    showResult(`✅ Success! Blog post generated:
+
+Title: ${result.title || 'Generated'}
+Content Length: ${result.content ? result.content.length : 0} characters
+Word Count: ${result.wordCount || 'Unknown'}
+
+Preview:
+${result.content ? result.content.substring(0, 500) + '...' : 'No content'}
+
+${result.blogUrl ? `Blog URL: ${result.blogUrl}` : ''}`, 'success');
+                } else {
+                    showResult(`❌ Generation failed: ${result.error || 'Unknown error'}`, 'error');
+                }
+
+            } catch (error) {
+                showResult(`❌ Network error: ${error.message}`, 'error');
+                console.error('Generation error:', error);
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = 'Generate Blog Post';
+            }
+        });
+
+        function getWordCountFromLength(length) {
+            const lengthMap = {
+                'short': 700,
+                'medium': 1000,
+                'long': 1500,
+                'comprehensive': 2000
+            };
+            return lengthMap[length] || 1000;
+        }
+
+        function showResult(message, type) {
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = message;
+        }
+
+        // Fill example data
+        document.getElementById('keyword').value = 'digital marketing strategies';
+        document.getElementById('anchorText').value = 'professional marketing services';
+        document.getElementById('targetUrl').value = 'https://example.com/marketing';
+    </script>
+</body>
+</html>

@@ -130,16 +130,8 @@ export function DatabaseDiagnostic() {
       } catch (authErr: any) {
         console.warn('❌ Auth admin API not available:', authErr.message);
         
-        // Try alternative method - query via RPC if available
-        try {
-          const { data: rpcUsers, error: rpcError } = await supabase.rpc('get_auth_users');
-          if (rpcUsers && !rpcError) {
-            console.log(`✅ Auth users via RPC: ${rpcUsers.length} users`);
-            setAuthUsers(rpcUsers.slice(0, 10));
-          }
-        } catch (rpcErr) {
-          console.warn('❌ RPC method also unavailable');
-        }
+        // RPC methods not available - using profiles table as source of truth
+        console.log('ℹ️ Using profiles table for user data instead of auth.users');
       }
 
       // Get profiles data if available

@@ -82,15 +82,7 @@ class DirectSupabaseMetricsService {
         return profilesCount;
       }
 
-      // Fallback to auth.users table via RPC if available
-      try {
-        const { data, error } = await supabase.rpc('get_user_count');
-        if (!error && data) {
-          return data;
-        }
-      } catch {
-        // RPC not available
-      }
+      // No fallback RPC available - profiles table is our source of truth
 
       // Fallback - return 0 with warning
       console.warn('⚠️ Could not get total users count');
