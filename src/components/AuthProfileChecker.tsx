@@ -42,8 +42,15 @@ export const AuthProfileChecker = ({ children }: AuthProfileCheckerProps) => {
             }
           }
         }
-      } catch (error) {
-        console.warn('Profile check error:', error.message || error);
+      } catch (error: any) {
+        const errorMessage = error?.message || error;
+
+        // Suppress known permission errors that don't affect functionality
+        if (errorMessage && errorMessage.includes('permission denied for table users')) {
+          console.log('ℹ️ Skipping profile check due to database permission configuration');
+        } else {
+          console.warn('Profile check error:', errorMessage);
+        }
         // Don't block app loading for profile check errors
       } finally {
         setIsChecking(false);
@@ -70,8 +77,15 @@ export const AuthProfileChecker = ({ children }: AuthProfileCheckerProps) => {
               console.warn('Profile migration failed for new login:', migrationResult.error);
             }
           }
-        } catch (error) {
-          console.warn('Profile check error on auth change:', error.message || error);
+        } catch (error: any) {
+          const errorMessage = error?.message || error;
+
+          // Suppress known permission errors that don't affect functionality
+          if (errorMessage && errorMessage.includes('permission denied for table users')) {
+            console.log('ℹ️ Skipping profile check on auth change due to database permission configuration');
+          } else {
+            console.warn('Profile check error on auth change:', errorMessage);
+          }
         }
       }
     });

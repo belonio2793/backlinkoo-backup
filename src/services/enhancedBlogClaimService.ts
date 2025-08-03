@@ -27,6 +27,28 @@ export class EnhancedBlogClaimService {
   }
 
   /**
+   * Check if a post can be unclaimed by the current user
+   */
+  static canUnclaimPost(post: BlogPost, user?: User): { canUnclaim: boolean; reason?: string } {
+    // Only claimed posts can be unclaimed
+    if (!post.claimed) {
+      return { canUnclaim: false, reason: 'Post is not claimed' };
+    }
+
+    // Must be logged in
+    if (!user) {
+      return { canUnclaim: false, reason: 'Must be logged in to unclaim posts' };
+    }
+
+    // Only the post owner can unclaim their post
+    if (post.user_id !== user.id) {
+      return { canUnclaim: false, reason: 'Only the post owner can unclaim their post' };
+    }
+
+    return { canUnclaim: true };
+  }
+
+  /**
    * Check if a post can be deleted by the current user
    */
   static canDeletePost(post: BlogPost, user?: User): { canDelete: boolean; reason?: string } {
@@ -111,6 +133,72 @@ export class EnhancedBlogClaimService {
       return {
         success: true,
         message: 'Post claimed successfully! It is now permanently saved to your account.',
+        post: updatedPost
+      };
+
+    } catch (error: any) {
+      return {
+        success: false,
+        message: `An error occurred: ${error.message}`
+      };
+    }
+  }
+
+  /**
+   * Unclaim a blog post (return it to claimable state)
+   */
+  static async unclaimPost(slug: string, user: User): Promise<ClaimResult> {
+    try {
+      // First, get the post
+      const { data: post, error: fetchError } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (fetchError || !post) {
+        return {
+          success: false,
+          message: 'Post not found'
+        };
+      }
+
+      // Check if post can be unclaimed
+      const unclaimCheck = this.canUnclaimPost(post, user);
+      if (!unclaimCheck.canUnclaim) {
+        return {
+          success: false,
+          message: unclaimCheck.reason || 'Cannot unclaim this post'
+        };
+      }
+
+      // Set expiration to 24 hours from now
+      const expirationDate = new Date();
+      expirationDate.setHours(expirationDate.getHours() + 24);
+
+      // Update the post to unclaim it
+      const { data: updatedPost, error: updateError } = await supabase
+        .from('blog_posts')
+        .update({
+          user_id: null,
+          claimed: false,
+          expires_at: expirationDate.toISOString(),
+          is_trial_post: true // Return to trial status
+        })
+        .eq('id', post.id)
+        .select()
+        .single();
+
+      if (updateError) {
+        return {
+          success: false,
+          message: `Failed to unclaim post: ${updateError.message}`
+        };
+      }
+
+      return {
+        success: true,
+        message: 'Post successfully unclaimed and returned to claimable pool for 24 hours',
         post: updatedPost
       };
 

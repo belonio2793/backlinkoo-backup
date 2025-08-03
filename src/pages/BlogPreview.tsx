@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import {
   ArrowLeft,
   ExternalLink,
@@ -107,6 +109,7 @@ export function BlogPreview() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
+        <Header />
         <div className="container mx-auto px-6 py-8">
           <div className="flex items-center justify-center py-20">
             <div className="text-center space-y-4">
@@ -115,6 +118,7 @@ export function BlogPreview() {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -122,6 +126,7 @@ export function BlogPreview() {
   if (!blogPost) {
     return (
       <div className="min-h-screen bg-background">
+        <Header />
         <div className="container mx-auto px-6 py-8">
           <Card className="max-w-2xl mx-auto">
             <CardContent className="p-8 text-center">
@@ -136,25 +141,28 @@ export function BlogPreview() {
             </CardContent>
           </Card>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+      <Header />
+
+      {/* Blog Navigation */}
+      <div className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-16 z-40">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => navigate('/')}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Home
             </Button>
-            
+
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={handleShare}>
                 <Share2 className="h-4 w-4 mr-2" />
@@ -167,7 +175,7 @@ export function BlogPreview() {
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Demo Notice */}
       <div className="bg-blue-50 dark:bg-blue-950/20 border-b border-blue-200 dark:border-blue-800">
@@ -337,6 +345,7 @@ export function BlogPreview() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

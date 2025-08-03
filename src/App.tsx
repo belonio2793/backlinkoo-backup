@@ -13,6 +13,7 @@ import { EnhancedErrorBoundary } from "@/components/EnhancedErrorBoundary";
 import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 import { autoConfigSaver } from "@/services/autoConfigSaver";
+import { DebugErrorHandler } from "@/utils/debugErrorHandler";
 import "@/services/blogCleanupService"; // Initialize blog cleanup service
 
 
@@ -20,9 +21,10 @@ import "@/services/rlsStatusService"; // RLS STATUS CHECK AND MANUAL FIX INSTRUC
 import "@/utils/createAdminUser"; // Admin user creation utility
 import "@/utils/autoAdminSetup"; // Auto admin user setup
 
-// Initialize performance monitoring in development
+// Initialize performance monitoring and error tracking in development
 if (import.meta.env.DEV) {
   import('@/utils/performance');
+  DebugErrorHandler.initializeErrorTracking();
 }
 
 

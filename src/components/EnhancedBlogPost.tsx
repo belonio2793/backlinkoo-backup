@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import {
   ArrowLeft,
   ExternalLink,
@@ -20,7 +22,8 @@ import {
   CheckCircle2,
   Timer,
   User,
-  ShieldCheck
+  ShieldCheck,
+  XCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -40,8 +43,10 @@ export function EnhancedBlogPost() {
   const [blogPost, setBlogPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
+  const [unclaiming, setUnclaiming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showUnclaimDialog, setShowUnclaimDialog] = useState(false);
 
   useEffect(() => {
     if (slug) {
@@ -133,6 +138,36 @@ export function EnhancedBlogPost() {
     }
   };
 
+  const handleUnclaimPost = async () => {
+    setUnclaiming(true);
+    try {
+      const result = await EnhancedBlogClaimService.unclaimPost(slug!, user);
+
+      if (result.success) {
+        setBlogPost(result.post!);
+        toast({
+          title: "Post Unclaimed",
+          description: result.message,
+        });
+      } else {
+        toast({
+          title: "Unclaim Failed",
+          description: result.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while unclaiming the post",
+        variant: "destructive"
+      });
+    } finally {
+      setUnclaiming(false);
+      setShowUnclaimDialog(false);
+    }
+  };
+
   const handleDeletePost = async () => {
     setDeleting(true);
     try {
@@ -208,17 +243,22 @@ export function EnhancedBlogPost() {
   };
 
   const canClaimPost = blogPost ? EnhancedBlogClaimService.canClaimPost(blogPost) : false;
+  const unclaimPermissions = blogPost ? EnhancedBlogClaimService.canUnclaimPost(blogPost, user) : { canUnclaim: false };
   const deletePermissions = blogPost ? EnhancedBlogClaimService.canDeletePost(blogPost, user) : { canDelete: false };
   const isOwnPost = blogPost?.user_id === user?.id;
   const isExpiringSoon = blogPost?.expires_at && new Date(blogPost.expires_at).getTime() - Date.now() < 2 * 60 * 60 * 1000; // 2 hours
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p>Loading blog post...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+        <Header />
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p>Loading blog post...</p>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -226,6 +266,7 @@ export function EnhancedBlogPost() {
   if (!blogPost) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+        <Header />
         <div className="container mx-auto px-6 py-8">
           <Card className="max-w-2xl mx-auto">
             <CardContent className="p-8 text-center">
@@ -240,18 +281,21 @@ export function EnhancedBlogPost() {
             </CardContent>
           </Card>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
-      {/* Header */}
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+      <Header />
+
+      {/* Blog Navigation */}
+      <div className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-16 z-40">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => navigate('/blog')}
               className="flex items-center gap-2"
             >
@@ -270,7 +314,7 @@ export function EnhancedBlogPost() {
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Post Content */}
       <main className="container mx-auto px-6 py-8">
@@ -388,6 +432,19 @@ export function EnhancedBlogPost() {
               </Button>
             )}
 
+            {/* Unclaim Button - Only visible to post owner */}
+            {unclaimPermissions.canUnclaim && (
+              <Button
+                onClick={() => setShowUnclaimDialog(true)}
+                variant="outline"
+                size="lg"
+                className="border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400"
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                Unclaim Post
+              </Button>
+            )}
+
             {/* Delete Button */}
             {deletePermissions.canDelete && (
               <Button
@@ -411,11 +468,13 @@ export function EnhancedBlogPost() {
             )}
           </div>
 
-          {/* Post Content */}
-          <div 
-            className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-blue-600 prose-strong:text-foreground prose-em:text-foreground prose-li:text-foreground"
-            dangerouslySetInnerHTML={{ __html: blogPost.content }}
-          />
+          {/* Post Content - SEO Optimized Display */}
+          <div className="seo-optimized-content">
+            <div
+              className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-blue-600 prose-strong:text-foreground prose-em:text-foreground prose-li:text-foreground prose-h1:text-4xl prose-h1:font-bold prose-h1:mb-8 prose-h1:mt-12 prose-h2:text-3xl prose-h2:font-semibold prose-h2:mb-6 prose-h2:mt-10 prose-h3:text-2xl prose-h3:font-semibold prose-h3:mb-4 prose-h3:mt-8 prose-h4:text-xl prose-h4:font-medium prose-h4:mb-3 prose-h4:mt-6 prose-p:text-lg prose-p:leading-relaxed prose-p:mb-6 prose-ul:my-6 prose-ol:my-6 prose-li:mb-2 prose-blockquote:border-l-4 prose-blockquote:border-blue-400 prose-blockquote:bg-blue-50 prose-blockquote:px-6 prose-blockquote:py-4 prose-blockquote:italic prose-blockquote:text-xl prose-strong:font-bold prose-strong:text-gray-900 prose-em:italic prose-em:text-gray-800 prose-u:underline prose-u:decoration-blue-500"
+              dangerouslySetInnerHTML={{ __html: blogPost.content }}
+            />
+          </div>
 
           {/* Keywords */}
           {blogPost.keywords && blogPost.keywords.length > 0 && (
@@ -441,14 +500,16 @@ export function EnhancedBlogPost() {
               <Trash2 className="h-5 w-5 text-red-600" />
               Delete Blog Post
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{blogPost.title}"? This action cannot be undone.
-              {blogPost.claimed && (
-                <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-                  <ShieldCheck className="h-4 w-4 inline mr-1" />
-                  Note: This is a claimed post. Deletion should be carefully considered.
-                </div>
-              )}
+            <AlertDialogDescription asChild>
+              <div>
+                <p className="mb-2">Are you sure you want to delete "{blogPost.title}"? This action cannot be undone.</p>
+                {blogPost.claimed && (
+                  <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                    <ShieldCheck className="h-4 w-4 inline mr-1" />
+                    Note: This is a claimed post. Deletion should be carefully considered.
+                  </div>
+                )}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -470,6 +531,51 @@ export function EnhancedBlogPost() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Unclaim Confirmation Dialog */}
+      <AlertDialog open={showUnclaimDialog} onOpenChange={setShowUnclaimDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <XCircle className="h-5 w-5 text-orange-600" />
+              Unclaim Blog Post
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div>
+                <p className="mb-3">Are you sure you want to unclaim "{blogPost.title}"?</p>
+                <div className="p-3 bg-orange-50 border border-orange-200 rounded text-orange-800 text-sm">
+                  <div className="font-medium mb-1">⚠️ Important:</div>
+                  <ul className="text-xs space-y-1">
+                    <li>• This post will return to the claimable pool for 24 hours</li>
+                    <li>• Other users will be able to claim it during this time</li>
+                    <li>• If not reclaimed, it will be automatically deleted</li>
+                    <li>• You can reclaim it yourself if it's still available</li>
+                  </ul>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Claimed</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUnclaimPost}
+              disabled={unclaiming}
+              className="bg-orange-600 hover:bg-orange-700"
+            >
+              {unclaiming ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Unclaiming...
+                </>
+              ) : (
+                'Unclaim Post'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Footer />
     </div>
   );
 }
