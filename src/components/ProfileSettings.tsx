@@ -58,6 +58,11 @@ export const ProfileSettings = ({ user, onClose }: ProfileSettingsProps) => {
   const [isPremium, setIsPremium] = useState<boolean | null>(null);
   const [premiumLoading, setPremiumLoading] = useState(false);
   const [forceRefreshCount, setForceRefreshCount] = useState(0);
+
+  // Add logging when isPremium changes
+  useEffect(() => {
+    console.log('🔍 isPremium state changed to:', isPremium);
+  }, [isPremium]);
   const { toast } = useToast();
 
   // Function to force refresh premium status
