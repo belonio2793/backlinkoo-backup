@@ -81,17 +81,17 @@ export class ContentFormatter {
       .map(paragraph => {
         paragraph = paragraph.trim();
         if (!paragraph) return '';
-        
-        // Skip headings, lists, and blockquotes
-        if (paragraph.match(/^#{1,6}\s|^[\*\-\+]\s|^>\s|^\d+\.\s/)) {
+
+        // Skip HTML headings, lists, and blockquotes
+        if (paragraph.match(/^<h[1-6]|^<\/h[1-6]|^#{1,6}\s|^[\*\-\+]\s|^>\s|^\d+\.\s|^<(ul|ol|blockquote)/i)) {
           return paragraph;
         }
-        
-        // Wrap regular paragraphs in <p> tags if they aren't already
-        if (!paragraph.match(/^<[^>]+>/)) {
+
+        // Wrap regular paragraphs in <p> tags if they aren't already wrapped in block elements
+        if (!paragraph.match(/^<(p|div|h[1-6]|ul|ol|blockquote|pre)/i)) {
           return `<p>${paragraph}</p>`;
         }
-        
+
         return paragraph;
       })
       .filter(p => p.length > 0)
