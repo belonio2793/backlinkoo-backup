@@ -138,6 +138,36 @@ export function EnhancedBlogPost() {
     }
   };
 
+  const handleUnclaimPost = async () => {
+    setUnclaiming(true);
+    try {
+      const result = await EnhancedBlogClaimService.unclaimPost(slug!, user);
+
+      if (result.success) {
+        setBlogPost(result.post!);
+        toast({
+          title: "Post Unclaimed",
+          description: result.message,
+        });
+      } else {
+        toast({
+          title: "Unclaim Failed",
+          description: result.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while unclaiming the post",
+        variant: "destructive"
+      });
+    } finally {
+      setUnclaiming(false);
+      setShowUnclaimDialog(false);
+    }
+  };
+
   const handleDeletePost = async () => {
     setDeleting(true);
     try {
