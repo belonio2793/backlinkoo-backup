@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import {
   ArrowLeft,
   ExternalLink,
@@ -20,7 +22,8 @@ import {
   CheckCircle2,
   Timer,
   User,
-  ShieldCheck
+  ShieldCheck,
+  XCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
