@@ -201,8 +201,8 @@ class UserService {
       
       console.log('Premium features initialized for user:', userId);
       await this.logUserAction(userId, 'premium_features_initialized', 'Premium features have been initialized');
-    } catch (error) {
-      console.error('Error initializing premium features:', error);
+    } catch (error: any) {
+      console.error('Error initializing premium features:', error.message || error);
     }
   }
 
