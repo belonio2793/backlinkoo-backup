@@ -257,19 +257,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     return { name: 'Free', color: 'bg-gray-500', icon: <User className="h-3 w-3" /> };
   };
 
-  // Only show loading if auth is actively checking and we have no user yet
-  if (authLoading && !user) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center p-12">
-          <div className="text-center space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto" />
-            <div className="text-muted-foreground">Checking authentication...</div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+
 
   if (!user) {
     return (
