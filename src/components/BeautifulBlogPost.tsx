@@ -193,20 +193,58 @@ export function BeautifulBlogPost() {
   const handleDeletePost = async () => {
     setDeleting(true);
     try {
-      // Direct deletion via Supabase without permission checks
+      console.log('🗑️ Attempting to delete post:', {
+        slug,
+        userId: user?.id,
+        blogPostUserId: blogPost?.user_id,
+        isClaimed: blogPost?.claimed,
+        isOwnPost: blogPost?.user_id === user?.id
+      });
+
+      // Try direct deletion via Supabase
       const { error } = await supabase
         .from('blog_posts')
         .delete()
         .eq('slug', slug!);
 
       if (error) {
-        console.error('Delete error:', error);
-        toast({
-          title: "Delete Failed",
-          description: `Failed to delete post: ${error.message}`,
-          variant: "destructive"
-        });
+        console.error('❌ Direct delete failed:', error);
+
+        // If RLS blocks the delete, try using a serverless function as fallback
+        try {
+          const response = await fetch('/api/delete-post', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${user?.access_token || ''}`
+            },
+            body: JSON.stringify({ slug })
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+          }
+
+          const result = await response.json();
+          if (result.success) {
+            toast({
+              title: "Post Deleted",
+              description: "The blog post has been successfully deleted.",
+            });
+            navigate('/blog');
+          } else {
+            throw new Error(result.message || 'Delete failed');
+          }
+        } catch (apiError: any) {
+          console.error('❌ API delete also failed:', apiError);
+          toast({
+            title: "Delete Failed",
+            description: `Failed to delete post. ${error.message}. You may need admin permissions or the post may be protected.`,
+            variant: "destructive"
+          });
+        }
       } else {
+        console.log('✅ Direct delete succeeded');
         toast({
           title: "Post Deleted",
           description: "The blog post has been successfully deleted.",
@@ -214,7 +252,7 @@ export function BeautifulBlogPost() {
         navigate('/blog');
       }
     } catch (error: any) {
-      console.error('Delete error:', error);
+      console.error('❌ Unexpected delete error:', error);
       toast({
         title: "Error",
         description: `An unexpected error occurred: ${error.message}`,
