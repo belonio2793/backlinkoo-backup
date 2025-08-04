@@ -42,7 +42,7 @@ export class SubscriptionService {
         .single();
 
       if (error && error.code !== 'PGRST116') { // Not a "no rows returned" error
-        console.error('Error checking subscription:', error);
+        console.error('Error checking subscription:', error?.message || JSON.stringify(error, null, 2));
       }
 
       const isSubscribed = !!subscriber;
@@ -59,8 +59,8 @@ export class SubscriptionService {
         },
         stripeCustomerId: subscriber?.stripe_customer_id,
       };
-    } catch (error) {
-      console.error('Exception checking subscription status:', error);
+    } catch (error: any) {
+      console.error('Exception checking subscription status:', error?.message || error?.toString() || 'Unknown error');
       return {
         isSubscribed: false,
         subscriptionTier: null,
@@ -89,8 +89,8 @@ export class SubscriptionService {
       });
 
       if (error) {
-        console.error('Subscription creation error:', error);
-        return { success: false, error: error.message };
+        console.error('Subscription creation error:', error?.message || JSON.stringify(error, null, 2));
+        return { success: false, error: error.message || 'Unknown subscription creation error' };
       }
 
       return { success: true, url: data.url };
@@ -122,7 +122,7 @@ export class SubscriptionService {
         .single();
 
       if (error) {
-        console.error('Error fetching subscription info:', error);
+        console.error('Error fetching subscription info:', error?.message || JSON.stringify(error, null, 2));
         return null;
       }
 
@@ -143,8 +143,8 @@ export class SubscriptionService {
           "Export capabilities"
         ]
       };
-    } catch (error) {
-      console.error('Exception fetching subscription info:', error);
+    } catch (error: any) {
+      console.error('Exception fetching subscription info:', error?.message || error?.toString() || 'Unknown error');
       return null;
     }
   }
@@ -169,8 +169,8 @@ export class SubscriptionService {
         .eq('email', user.email);
 
       if (error) {
-        console.error('Error cancelling subscription:', error);
-        return { success: false, error: 'Failed to cancel subscription' };
+        console.error('Error cancelling subscription:', error?.message || JSON.stringify(error, null, 2));
+        return { success: false, error: error?.message || 'Failed to cancel subscription' };
       }
 
       return { success: true };
@@ -194,13 +194,13 @@ export class SubscriptionService {
         .eq('email', email);
 
       if (error) {
-        console.error('Error updating subscription status:', error);
+        console.error('Error updating subscription status:', error?.message || JSON.stringify(error, null, 2));
         return false;
       }
 
       return true;
-    } catch (error) {
-      console.error('Exception updating subscription status:', error);
+    } catch (error: any) {
+      console.error('Exception updating subscription status:', error?.message || error?.toString() || 'Unknown error');
       return false;
     }
   }
