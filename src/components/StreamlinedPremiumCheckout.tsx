@@ -10,7 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { createSubscriptionWithFallback } from '@/services/fallbackSubscriptionService';
+import { EnhancedSubscriptionService } from '@/services/enhancedSubscriptionService';
 import { PremiumUpgradeService } from '@/services/premiumUpgradeService';
+import { userService } from '@/services/userService\';e\';es/userService\';erService';
 import {
   Crown,
   CreditCard,
