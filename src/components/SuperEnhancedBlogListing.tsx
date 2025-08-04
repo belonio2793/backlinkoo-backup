@@ -403,53 +403,142 @@ export function SuperEnhancedBlogListing() {
                 <div className="absolute inset-0 bg-blue-500/5 rounded-full blur-xl opacity-0 hover:opacity-100 transition-opacity duration-500 -z-10"></div>
               </div>
 
-              {/* Quick search suggestions with improved layout */}
-              <div className="mt-6">
-                <div className="flex items-center justify-center gap-4 flex-wrap">
-                  <span className="text-sm text-gray-600 font-medium whitespace-nowrap">Popular searches:</span>
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {getRandomizedKeywords().map((term) => (
-                      <button
-                        key={term}
-                        type="button"
-                        onClick={() => {
-                          setSearchQuery(term);
-                          searchPosts(term);
-                        }}
-                        className="px-4 py-2 text-sm bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 rounded-full border border-gray-200 hover:border-blue-200 transition-all duration-200 hover:scale-105 transform font-medium"
-                      >
-                        {term}
-                      </button>
-                    ))}
+              {/* Enhanced Popular searches section */}
+              <div className="mt-8 mb-6">
+                <div className="relative bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/20 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-6 shadow-sm backdrop-blur-sm">
+                  {/* Decorative elements */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full -translate-y-16 translate-x-16 blur-2xl"></div>
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-400/10 to-blue-400/10 rounded-full translate-y-12 -translate-x-12 blur-xl"></div>
+
+                  <div className="relative flex flex-col items-center gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-lg">
+                        <TrendingUp className="h-4 w-4 text-white" />
+                      </div>
+                      <h3 className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-white bg-clip-text text-transparent">
+                        Trending Topics
+                      </h3>
+                    </div>
+
+                    <p className="text-sm text-slate-600 dark:text-slate-400 text-center max-w-md">
+                      Discover what's popular right now or explore these trending categories
+                    </p>
+
+                    <div className="flex flex-wrap gap-3 justify-center max-w-2xl">
+                      {getRandomizedKeywords().map((term, index) => (
+                        <button
+                          key={term}
+                          type="button"
+                          onClick={() => {
+                            setSearchQuery(term);
+                            searchPosts(term);
+                          }}
+                          className="group relative px-6 py-3 text-sm font-medium bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/70 dark:border-slate-700/70 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
+                          style={{
+                            animation: `fade-in 0.6s ease-out forwards ${index * 100}ms`
+                          }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-blue-500/10 group-hover:via-purple-500/10 group-hover:to-pink-500/10 rounded-xl transition-all duration-300"></div>
+                          <div className="relative flex items-center gap-2">
+                            <span className="capitalize text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                              {term}
+                            </span>
+                            <ArrowRight className="h-3 w-3 text-slate-400 group-hover:text-blue-500 transition-all duration-300 group-hover:translate-x-0.5 opacity-0 group-hover:opacity-100" />
+                          </div>
+
+                          {/* Subtle glow effect */}
+                          <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-xl transition-opacity duration-300 -z-10"></div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Stats or additional info */}
+                    <div className="flex items-center gap-4 mt-2 text-xs text-slate-500 dark:text-slate-400">
+                      <div className="flex items-center gap-1">
+                        <Activity className="h-3 w-3" />
+                        <span>Live trending</span>
+                      </div>
+                      <div className="w-1 h-1 bg-slate-300 dark:bg-slate-600 rounded-full"></div>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        <span>Most searched</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </form>
 
-            {/* Filter Buttons */}
-            <div className="flex flex-wrap justify-center gap-3">
+            {/* Enhanced Filter Buttons */}
+            <div className="flex flex-wrap justify-center gap-4 p-2">
               {[
-                { key: 'all', label: 'All Posts', icon: BookOpen, color: 'from-gray-600 to-gray-700' },
-                { key: 'claimable', label: 'Claimable', icon: Crown, color: 'from-yellow-500 to-orange-500' },
-                { key: 'claimed', label: 'Claimed', icon: CheckCircle, color: 'from-green-500 to-emerald-500' },
-                ...(user ? [{ key: 'my-posts', label: 'My Posts', icon: User, color: 'from-blue-500 to-purple-500' }] : [])
-              ].map(({ key, label, icon: Icon, color }) => (
-                <Button
+                { key: 'all', label: 'All Posts', icon: BookOpen, color: 'from-slate-600 to-slate-800', hoverColor: 'from-slate-700 to-slate-900', accent: 'slate' },
+                { key: 'claimable', label: 'Claimable', icon: Crown, color: 'from-amber-500 to-orange-600', hoverColor: 'from-amber-600 to-orange-700', accent: 'amber' },
+                { key: 'claimed', label: 'Claimed', icon: CheckCircle, color: 'from-emerald-500 to-green-600', hoverColor: 'from-emerald-600 to-green-700', accent: 'emerald' },
+                ...(user ? [{ key: 'my-posts', label: 'My Posts', icon: User, color: 'from-blue-500 to-purple-600', hoverColor: 'from-blue-600 to-purple-700', accent: 'blue' }] : [])
+              ].map(({ key, label, icon: Icon, color, hoverColor, accent }, index) => (
+                <button
                   key={key}
-                  variant={filterType === key ? 'default' : 'outline'}
-                  size="lg"
                   onClick={() => setFilterType(key as any)}
                   className={`
-                    px-6 py-3 rounded-xl border-2 transition-all duration-300 transform hover:scale-105
-                    ${filterType === key 
-                      ? `bg-gradient-to-r ${color} text-white border-transparent shadow-lg` 
-                      : 'bg-white/80 border-gray-200 hover:border-gray-300 hover:bg-white/90'
+                    group relative px-8 py-4 rounded-2xl font-semibold text-sm tracking-wide
+                    transition-all duration-500 ease-out transform
+                    hover:scale-105 hover:-translate-y-1 active:scale-95
+                    shadow-lg hover:shadow-2xl
+                    ${filterType === key
+                      ? `bg-gradient-to-br ${color} text-white shadow-xl border-0
+                         before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:${hoverColor}
+                         before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300`
+                      : `bg-white/90 backdrop-blur-sm border-2 border-gray-200/50 text-gray-700
+                         hover:bg-white hover:border-${accent}-200 hover:text-${accent}-700
+                         hover:shadow-${accent}-100/50`
                     }
+                    before:content-[''] before:absolute before:inset-0 before:rounded-2xl
+                    ${filterType !== key ? `before:bg-gradient-to-br before:${color} before:opacity-0 hover:before:opacity-5 before:transition-all before:duration-300` : ''}
                   `}
+                  style={{
+                    animation: `fade-in 0.5s ease-out forwards ${index * 100}ms`
+                  }}
                 >
-                  <Icon className="h-4 w-4 mr-2" />
-                  {label}
-                </Button>
+                  {/* Glow effect for active button */}
+                  {filterType === key && (
+                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${color} blur-xl opacity-30 -z-10 group-hover:opacity-50 transition-opacity duration-300`}></div>
+                  )}
+
+                  {/* Content */}
+                  <div className="relative flex items-center gap-3 z-10">
+                    <div className={`
+                      p-1.5 rounded-lg transition-all duration-300
+                      ${filterType === key
+                        ? 'bg-white/20 group-hover:bg-white/30'
+                        : `bg-${accent}-100 group-hover:bg-${accent}-200`
+                      }
+                    `}>
+                      <Icon className={`h-4 w-4 transition-colors duration-300 ${
+                        filterType === key
+                          ? 'text-white'
+                          : `text-${accent}-600 group-hover:text-${accent}-700`
+                      }`} />
+                    </div>
+                    <span className="relative">
+                      {label}
+                      {/* Subtle shimmer effect on active */}
+                      {filterType === key && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+                      )}
+                    </span>
+                  </div>
+
+                  {/* Active indicator dot */}
+                  {filterType === key && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full shadow-lg animate-pulse"></div>
+                  )}
+
+                  {/* Ripple effect on click */}
+                  <div className="absolute inset-0 rounded-2xl overflow-hidden">
+                    <div className="absolute inset-0 bg-white/20 scale-0 group-active:scale-100 rounded-2xl transition-transform duration-200"></div>
+                  </div>
+                </button>
               ))}
             </div>
           </div>
@@ -495,27 +584,7 @@ export function SuperEnhancedBlogListing() {
                         : 'Be the first to create a blog post!'
                     }
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Button
-                      onClick={() => navigate('/blog/seo-generator')}
-                      size="lg"
-                      variant="outline"
-                      className="border-2 border-purple-300 hover:border-purple-500 bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 text-purple-700 hover:text-purple-800 px-8 py-4 text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                    >
-                      <Target className="h-5 w-5 mr-2" />
-                      SEO Generator
-                      <Sparkles className="h-5 w-5 ml-2" />
-                    </Button>
-                    <Button
-                      onClick={() => navigate('/blog/create')}
-                      size="lg"
-                      className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 px-8 py-4 text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
-                    >
-                      <Plus className="h-5 w-5 mr-2" />
-                      Quick Create
-                      <Rocket className="h-5 w-5 ml-2" />
-                    </Button>
-                  </div>
+
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -542,10 +611,7 @@ export function SuperEnhancedBlogListing() {
             </>
           )}
 
-          {/* Stats for Nerds - Collapsible Debug Information */}
-          {import.meta.env.DEV && (
-            <StatsForNerds />
-          )}
+
         </div>
       </div>
     </div>
@@ -801,38 +867,5 @@ function SuperPostCard({
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-// Collapsible Stats for Nerds component with enhanced styling
-function StatsForNerds() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="mt-16 border-t border-white/20 pt-12">
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="ghost"
-            className="w-full justify-between text-gray-500 hover:text-gray-700 bg-white/50 backdrop-blur-sm border border-white/30 rounded-2xl p-6 transition-all duration-300 hover:bg-white/70"
-          >
-            <span className="text-lg font-mono flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              📊 Debug Information
-            </span>
-            <ChevronDown
-              className={`h-5 w-5 transition-transform duration-300 ${
-                isOpen ? 'transform rotate-180' : ''
-              }`}
-            />
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-6">
-          <div className="bg-white/80 backdrop-blur-sm border border-white/30 rounded-2xl p-6">
-            <BlogDataDebugger />
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    </div>
   );
 }
