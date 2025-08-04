@@ -55,6 +55,7 @@ export function SEOScoreDisplay({
   };
 
   const getScoreBadgeColor = (score: number) => {
+    if (score === 100) return 'bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800 border-orange-300 shadow-md animate-pulse';
     if (score >= 80) return 'bg-green-100 text-green-800 border-green-200';
     if (score >= 60) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
     return 'bg-red-100 text-red-800 border-red-200';
