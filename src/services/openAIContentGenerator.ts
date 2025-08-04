@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { SEOAnalyzer } from './seoAnalyzer';
 
 export interface OpenAIContentRequest {
   keyword: string;
@@ -622,7 +623,12 @@ export class OpenAIContentGenerator {
       published_url: publishedUrl,
       word_count: content.wordCount,
       reading_time: Math.ceil(content.wordCount / 200),
-      seo_score: Math.floor(Math.random() * 15) + 85, // Random score between 85-100
+      seo_score: SEOAnalyzer.analyzeBlogPost(
+        content.title,
+        content.content,
+        content.metaDescription,
+        keyword
+      ).overallScore,
       view_count: 0,
       expires_at: expiresAt,
       is_trial_post: true,
