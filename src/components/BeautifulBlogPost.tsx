@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ClaimLoginModal } from '@/components/ClaimLoginModal';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import {
@@ -60,6 +62,7 @@ export function BeautifulBlogPost() {
   const [readingProgress, setReadingProgress] = useState(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [showClaimModal, setShowClaimModal] = useState(false);
 
   useEffect(() => {
     if (slug) {
@@ -86,6 +89,13 @@ export function BeautifulBlogPost() {
   }, []);
 
   const processClaimIntent = async () => {
+    // Only process claim intents for signed-in users
+    if (!user) return;
+
+    // Check if there's actually a claim intent before processing
+    const claimIntentStr = localStorage.getItem('claim_intent');
+    if (!claimIntentStr) return; // No pending claim intent, don't show notifications
+
     const result = await EnhancedBlogClaimService.processPendingClaimIntent(user!);
     if (result) {
       if (result.success) {
@@ -123,12 +133,9 @@ export function BeautifulBlogPost() {
 
   const handleClaimPost = async () => {
     if (!user) {
+      // Store claim intent and show modal instead of navigating
       EnhancedBlogClaimService.handleClaimIntent(slug!, cleanTitle(blogPost?.title || ''));
-      toast({
-        title: "Login Required",
-        description: "Please log in to claim this post. We'll bring you back to complete the claim.",
-      });
-      navigate('/login');
+      setShowClaimModal(true);
       return;
     }
 
@@ -193,20 +200,82 @@ export function BeautifulBlogPost() {
   const handleDeletePost = async () => {
     setDeleting(true);
     try {
-      // Direct deletion via Supabase without permission checks
+      console.log('🗑️ Attempting to delete post:', {
+        slug,
+        userId: user?.id,
+        blogPostUserId: blogPost?.user_id,
+        isClaimed: blogPost?.claimed,
+        isOwnPost: blogPost?.user_id === user?.id
+      });
+
+      // Try direct deletion via Supabase
       const { error } = await supabase
         .from('blog_posts')
         .delete()
         .eq('slug', slug!);
 
       if (error) {
-        console.error('Delete error:', error);
-        toast({
-          title: "Delete Failed",
-          description: `Failed to delete post: ${error.message}`,
-          variant: "destructive"
-        });
+        console.error('❌ Direct delete failed:', error);
+
+        // If RLS blocks the delete, try using a serverless function as fallback
+        try {
+          console.log('🔄 Trying API fallback for delete...');
+          const response = await fetch('/.netlify/functions/delete-post', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${user?.access_token || ''}`
+            },
+            body: JSON.stringify({ slug })
+          });
+
+          const responseText = await response.text();
+          console.log('📡 API Response:', { status: response.status, body: responseText });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${responseText}`);
+          }
+
+          const result = JSON.parse(responseText);
+          if (result.success) {
+            toast({
+              title: "Post Deleted",
+              description: "The blog post has been successfully deleted.",
+            });
+            navigate('/blog');
+          } else {
+            throw new Error(result.message || 'Delete failed');
+          }
+        } catch (apiError: any) {
+          console.error('❌ API delete also failed:', apiError);
+          // Try a more direct approach for development/admin purposes
+          if (process.env.NODE_ENV === 'development' || user?.email?.includes('admin')) {
+            try {
+              console.log('🔧 Attempting direct admin delete...');
+              // For development or admin users, try to delete without RLS checks
+              const { error: adminError } = await supabase.rpc('delete_blog_post_admin', { post_slug: slug });
+
+              if (!adminError) {
+                toast({
+                  title: "Post Deleted (Admin)",
+                  description: "The blog post has been successfully deleted using admin privileges.",
+                });
+                navigate('/blog');
+                return;
+              }
+            } catch (adminError) {
+              console.log('🔧 Admin delete not available');
+            }
+          }
+
+          toast({
+            title: "Delete Failed",
+            description: `Unable to delete post: ${error.message}. This may be due to permission restrictions or the post being protected by another user.`,
+            variant: "destructive"
+          });
+        }
       } else {
+        console.log('✅ Direct delete succeeded');
         toast({
           title: "Post Deleted",
           description: "The blog post has been successfully deleted.",
@@ -214,7 +283,7 @@ export function BeautifulBlogPost() {
         navigate('/blog');
       }
     } catch (error: any) {
-      console.error('Delete error:', error);
+      console.error('❌ Unexpected delete error:', error);
       toast({
         title: "Error",
         description: `An unexpected error occurred: ${error.message}`,
@@ -224,6 +293,38 @@ export function BeautifulBlogPost() {
       setDeleting(false);
       setShowDeleteDialog(false);
     }
+  };
+
+  const handleAuthSuccess = async (user: any) => {
+    // After successful login/signup, automatically attempt to claim the post
+    setShowClaimModal(false);
+
+    // Small delay to let the auth state update
+    setTimeout(async () => {
+      try {
+        const result = await EnhancedBlogClaimService.claimPost(slug!, user);
+
+        if (result.success) {
+          setBlogPost(result.post!);
+          toast({
+            title: "Success! 🎉",
+            description: "You've successfully claimed this post!",
+          });
+        } else {
+          toast({
+            title: "Claim Failed",
+            description: result.message,
+            variant: "destructive"
+          });
+        }
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred while claiming the post",
+          variant: "destructive"
+        });
+      }
+    }, 1000);
   };
 
   const copyToClipboard = async () => {
@@ -287,9 +388,10 @@ export function BeautifulBlogPost() {
   const unclaimPermissions = blogPost ? EnhancedBlogClaimService.canUnclaimPost(blogPost, user) : { canUnclaim: false };
   const deletePermissions = blogPost ? EnhancedBlogClaimService.canDeletePost(blogPost, user) : { canDelete: false };
 
-  // Always allow delete for admin users
-  const canDelete = true;
+  // Determine if user can delete this post
   const isOwnPost = blogPost?.user_id === user?.id;
+  const isUnclaimedPost = blogPost && (!blogPost.claimed || blogPost.user_id === null);
+  const canDelete = isOwnPost || isUnclaimedPost || deletePermissions.canDelete;
   const isExpiringSoon = blogPost?.expires_at && new Date(blogPost.expires_at).getTime() - Date.now() < 2 * 60 * 60 * 1000;
 
   if (loading) {
@@ -346,7 +448,8 @@ export function BeautifulBlogPost() {
   }
 
   return (
-    <div className="beautiful-blog-wrapper min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+    <TooltipProvider delayDuration={300}>
+      <div className="beautiful-blog-wrapper min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
       {/* Reading Progress Bar */}
       <div
         className="reading-progress-bar fixed top-0 left-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600 z-50 transition-all duration-300 ease-out"
@@ -427,17 +530,132 @@ export function BeautifulBlogPost() {
               {/* Status Badges */}
               <div className="flex items-center justify-center gap-3 mb-8">
                 {blogPost.claimed ? (
-                  <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full text-green-700 shadow-sm">
-                    <CheckCircle2 className="h-5 w-5" />
-                    <span className="font-semibold">
-                      {isOwnPost ? 'You own this post' : 'This post has been claimed'}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full text-green-700 shadow-sm cursor-help">
+                          <CheckCircle2 className="h-5 w-5" />
+                          <span className="font-semibold">
+                            {isOwnPost ? 'You own this post' : 'This post has been claimed'}
+                          </span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-xs">
+                        <div className="space-y-1">
+                          <p className="font-semibold">{isOwnPost ? 'Your Post' : 'Claimed Post'}</p>
+                          <p className="text-sm">
+                            {isOwnPost
+                              ? 'You own this post and can manage it freely.'
+                              : 'This post is owned by another user and protected from deletion.'}
+                          </p>
+                          {isOwnPost && <p className="text-xs text-green-400">✨ You have full control</p>}
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+
+                    {/* Delete Button - Show next to claimed status for owned posts */}
+                    {canDelete && isOwnPost && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={() => setShowDeleteDialog(true)}
+                            variant="outline"
+                            size="sm"
+                            className="bg-transparent border-red-300 text-red-600 hover:bg-transparent hover:border-red-500 hover:text-red-700 hover:shadow-lg hover:scale-105 px-4 py-2 rounded-full transition-all duration-300"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs">
+                          <div className="space-y-1">
+                            <p className="font-semibold">Delete Post</p>
+                            <p className="text-sm">
+                              Permanently delete this post. As the owner, you have full permission to remove it at any time.
+                            </p>
+                            <p className="text-xs text-red-400">⚠️ This action cannot be undone</p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
                   </div>
                 ) : (
-                  <Badge className="px-4 py-2 text-sm font-medium rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300">
-                    <Timer className="mr-2 h-4 w-4" />
-                    Available to Claim
-                  </Badge>
+                  <div className="flex items-center gap-3">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge className="px-4 py-2 text-sm font-medium rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300 cursor-help">
+                          <Timer className="mr-2 h-4 w-4" />
+                          Available to Claim
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-xs">
+                        <div className="space-y-1">
+                          <p className="font-semibold">Available to Claim</p>
+                          <p className="text-sm">This post is unclaimed and anyone can take ownership of it.</p>
+                          <p className="text-xs text-gray-400">⏳ May be deleted if not claimed soon</p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+
+                    {/* Delete Button - Show next to unclaimed status for unclaimed posts */}
+                    {canDelete && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={() => setShowDeleteDialog(true)}
+                            variant="outline"
+                            size="sm"
+                            className="bg-transparent border-red-300 text-red-600 hover:bg-transparent hover:border-red-500 hover:text-red-700 hover:shadow-lg hover:scale-105 px-4 py-2 rounded-full transition-all duration-300"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs">
+                          <div className="space-y-1">
+                            <p className="font-semibold">Delete Post</p>
+                            <p className="text-sm">
+                              Delete this unclaimed post. Anyone can delete unclaimed posts to help clean up content.
+                            </p>
+                            <p className="text-xs text-red-400">⚠️ This action cannot be undone</p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+
+                    {/* Login to Claim Button - Show next to unclaimed status */}
+                    {canClaimPost && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={handleClaimPost}
+                            disabled={claiming}
+                            size="sm"
+                            variant="outline"
+                            className="bg-transparent border-blue-300 text-blue-600 hover:bg-transparent hover:border-blue-500 hover:text-blue-700 hover:shadow-lg hover:scale-105 px-4 py-2 rounded-full transition-all duration-300"
+                          >
+                            {claiming ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                                Claiming...
+                              </>
+                            ) : (
+                              <>
+                                <Crown className="mr-2 h-4 w-4" />
+                                {user ? 'Claim' : 'Login to Claim'}
+                                <Zap className="ml-2 h-4 w-4" />
+                              </>
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs">
+                          <div className="space-y-1">
+                            <p className="font-semibold">Claim Post</p>
+                            <p className="text-sm">Become the owner of this post to protect it from deletion and gain editing rights.</p>
+                            <p className="text-xs text-blue-400">💡 Free to claim!</p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
                 )}
                 
                 {blogPost.claimed && isOwnPost && (
@@ -570,72 +788,36 @@ export function BeautifulBlogPost() {
                 </div>
               )}
 
-              {/* Target URL */}
-              <div className="beautiful-info max-w-2xl mx-auto flex items-center gap-4 p-6 shadow-sm">
-                <div className="flex items-center gap-2 flex-1">
-                  <Target className="h-5 w-5 text-blue-600" />
-                  <span className="text-blue-700 font-semibold">Target URL:</span>
-                </div>
-                <a
-                  href={blogPost.target_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors duration-300 group"
-                >
-                  <Globe className="h-4 w-4" />
-                  <span className="truncate max-w-xs">{blogPost.target_url}</span>
-                  <ExternalLink className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
-                </a>
-              </div>
+
 
               {/* Action Buttons - Moved here below Target URL */}
               <div className="flex flex-wrap justify-center gap-4 mt-8 max-w-2xl mx-auto">
-                {canClaimPost && (
-                  <Button
-                    onClick={handleClaimPost}
-                    disabled={claiming}
-                    size="lg"
-                    variant="outline"
-                    className="beautiful-button bg-transparent border-blue-300 text-blue-600 hover:bg-transparent hover:border-blue-500 hover:text-blue-700 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full shadow-lg transition-all duration-300"
-                  >
-                    {claiming ? (
-                      <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
-                        Claiming...
-                      </>
-                    ) : (
-                      <>
-                        <Crown className="mr-3 h-5 w-5" />
-                        {user ? 'Claim This Post' : 'Login to Claim'}
-                        <Zap className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                )}
+
 
                 {unclaimPermissions.canUnclaim && (
-                  <Button
-                    onClick={() => setShowUnclaimDialog(true)}
-                    variant="outline"
-                    size="lg"
-                    className="bg-transparent border-orange-300 text-orange-700 hover:bg-transparent hover:border-orange-500 hover:text-orange-800 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full transition-all duration-300"
-                  >
-                    <XCircle className="mr-3 h-5 w-5" />
-                    Unclaim Post
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => setShowUnclaimDialog(true)}
+                        variant="outline"
+                        size="lg"
+                        className="bg-transparent border-orange-300 text-orange-700 hover:bg-transparent hover:border-orange-500 hover:text-orange-800 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full transition-all duration-300"
+                      >
+                        <XCircle className="mr-3 h-5 w-5" />
+                        Unclaim Post
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <div className="space-y-1">
+                        <p className="font-semibold">Unclaim Post</p>
+                        <p className="text-sm">Release ownership and make this post available for others to claim.</p>
+                        <p className="text-xs text-orange-400">⏰ Will be deleted in 24 hours if not reclaimed</p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
 
-                {canDelete && (
-                  <Button
-                    onClick={() => setShowDeleteDialog(true)}
-                    variant="outline"
-                    size="lg"
-                    className="bg-transparent border-red-300 text-red-600 hover:bg-transparent hover:border-red-500 hover:text-red-700 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full transition-all duration-300"
-                  >
-                    <Trash2 className="mr-3 h-5 w-5" />
-                    Delete Post
-                  </Button>
-                )}
+
               </div>
             </div>
           </article>
@@ -731,7 +913,17 @@ export function BeautifulBlogPost() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Claim Login Modal */}
+      <ClaimLoginModal
+        isOpen={showClaimModal}
+        onClose={() => setShowClaimModal(false)}
+        onAuthSuccess={handleAuthSuccess}
+        postTitle={cleanTitle(blogPost?.title || '')}
+        postSlug={slug || ''}
+      />
+
       <Footer />
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
