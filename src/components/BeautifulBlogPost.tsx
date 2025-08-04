@@ -715,23 +715,7 @@ export function BeautifulBlogPost() {
                 </div>
               )}
 
-              {/* Target URL */}
-              <div className="beautiful-info max-w-2xl mx-auto flex items-center gap-4 p-6 shadow-sm">
-                <div className="flex items-center gap-2 flex-1">
-                  <Target className="h-5 w-5 text-blue-600" />
-                  <span className="text-blue-700 font-semibold">Target URL:</span>
-                </div>
-                <a
-                  href={blogPost.target_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors duration-300 group"
-                >
-                  <Globe className="h-4 w-4" />
-                  <span className="truncate max-w-xs">{blogPost.target_url}</span>
-                  <ExternalLink className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
-                </a>
-              </div>
+
 
               {/* Action Buttons - Moved here below Target URL */}
               <div className="flex flex-wrap justify-center gap-4 mt-8 max-w-2xl mx-auto">
