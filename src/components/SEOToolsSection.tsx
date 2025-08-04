@@ -115,8 +115,8 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
       // Also get subscription info for the modal
       const info = await SubscriptionService.getSubscriptionInfo(user);
       setSubscriptionInfo(info);
-    } catch (error) {
-      console.error('Error checking subscription:', error);
+    } catch (error: any) {
+      console.error('Error checking subscription:', error?.message || error?.toString() || 'Unknown subscription error');
       setSubscriptionStatus({
         isSubscribed: false,
         subscriptionTier: null,
