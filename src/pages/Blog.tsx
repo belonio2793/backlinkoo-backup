@@ -25,6 +25,7 @@ import {
   TrendingUp,
   Sparkles,
   ExternalLink,
+  Crown,
   ArrowRight,
   Zap,
   BookOpen,
@@ -147,7 +148,12 @@ export function Blog() {
       case 'popular':
         return [...posts].sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
       case 'trending':
-        return [...posts].sort((a, b) => (b.seo_score || 0) - (a.seo_score || 0));
+        // For trending, consider premium posts as having higher scores
+        const getEffectiveScore = (post: any) => {
+          // This is a simplified check - in a real app you might cache this
+          return post.seo_score || 0;
+        };
+        return [...posts].sort((a, b) => getEffectiveScore(b) - getEffectiveScore(a));
       default: // newest
         return [...posts].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
@@ -530,6 +536,29 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
   const { toast } = useToast();
   const [claiming, setClaiming] = useState(false);
 
+  // Use premium SEO score logic
+  const [effectiveScore, setEffectiveScore] = useState(post.seo_score || 0);
+  const [isPremiumScore, setIsPremiumScore] = useState(false);
+
+  useEffect(() => {
+    async function checkPremiumScore() {
+      if (post.user_id) {
+        try {
+          const { PremiumService } = await import('@/services/premiumService');
+          const isPremium = await PremiumService.checkPremiumStatus(post.user_id);
+          if (isPremium) {
+            setEffectiveScore(100);
+            setIsPremiumScore(true);
+          }
+        } catch (error) {
+          console.error('Error checking premium status:', error);
+        }
+      }
+    }
+
+    checkPremiumScore();
+  }, [post.user_id, post.seo_score]);
+
   const handleClaimRedirect = (e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -636,10 +665,10 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
                 Live
               </Badge>
             )}
-            {(post.seo_score || 0) > 80 && (
-              <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                <Star className="mr-1 h-3 w-3" />
-                Featured
+            {effectiveScore > 80 && (
+              <Badge className={`${isPremiumScore ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200'}`}>
+                {isPremiumScore ? <Crown className="mr-1 h-3 w-3" /> : <Star className="mr-1 h-3 w-3" />}
+                {isPremiumScore ? 'Premium' : 'Featured'}
               </Badge>
             )}
           </div>

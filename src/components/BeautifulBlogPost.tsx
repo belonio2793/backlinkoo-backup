@@ -38,6 +38,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
+import { usePremiumSEOScore } from '@/hooks/usePremiumSEOScore';
 import { blogService } from '@/services/blogService';
 import { ContentFormatter } from '@/utils/contentFormatter';
 import { format } from 'date-fns';
@@ -66,6 +67,9 @@ export function BeautifulBlogPost() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [showClaimModal, setShowClaimModal] = useState(false);
+
+  // Use premium SEO score logic
+  const { effectiveScore, isPremiumScore } = usePremiumSEOScore(blogPost);
 
   useEffect(() => {
     if (slug) {
@@ -380,14 +384,17 @@ export function BeautifulBlogPost() {
 
   const cleanTitle = (title: string) => {
     if (!title) return '';
-    // Remove all markdown artifacts from title including ** wrappers
+    // Remove all markdown artifacts from title including ** wrappers and Title: prefix
     return title
       .replace(/^\*\*H1\*\*:\s*/i, '')
+      .replace(/^\*\*Title\*\*:\s*/i, '') // Remove **Title**: prefix
+      .replace(/^Title:\s*/gi, '') // Remove Title: prefix (global + case insensitive)
       .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
       .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
       .replace(/\*\*/g, '') // Remove any remaining ** symbols
       .replace(/\*/g, '') // Remove any remaining * symbols
       .replace(/^#{1,6}\s+/, '')
+      .replace(/^Title:\s*/gi, '') // Final cleanup for any remaining Title: patterns
       .trim();
   };
 
@@ -733,12 +740,13 @@ export function BeautifulBlogPost() {
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <SEOScoreDisplay
-                    score={blogPost.seo_score}
+                    score={effectiveScore}
                     title={blogPost.title}
                     content={blogPost.content}
                     metaDescription={blogPost.meta_description || undefined}
                     targetKeyword={blogPost.keywords?.[0]}
                     showDetails={true}
+                    isPremiumScore={isPremiumScore}
                   />
                 </div>
               </div>
