@@ -185,9 +185,9 @@ class UserService {
           description,
           timestamp: new Date().toISOString()
         });
-    } catch (error) {
+    } catch (error: any) {
       // Don't throw error for logging failures, just log it
-      console.warn('Failed to log user action:', error);
+      console.warn('Failed to log user action:', error.message || error);
     }
   }
 
