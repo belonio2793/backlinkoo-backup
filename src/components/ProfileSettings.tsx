@@ -150,13 +150,27 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   const handleSaveSettings = async () => {
     setSaving(true);
     try {
-      // Here you would typically update the user settings in the database
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      
-      toast({
-        title: "Settings Updated",
-        description: "Your preferences have been saved.",
-      });
+      const settingsData: ProfileUserSettings = {
+        email_notifications: settings.emailNotifications,
+        marketing_emails: settings.marketingEmails,
+        weekly_reports: settings.weeklyReports,
+        security_alerts: settings.securityAlerts
+      };
+
+      const result = await profileService.updateSettings(settingsData);
+
+      if (result.success) {
+        toast({
+          title: "Settings Updated",
+          description: result.message,
+        });
+      } else {
+        toast({
+          title: "Update Failed",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       toast({
         title: "Update Failed",
