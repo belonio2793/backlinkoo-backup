@@ -818,7 +818,7 @@ function SuperPostCard({
                 onClaim();
               }}
               disabled={claiming}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 text-white font-semibold py-3"
+              className="w-full bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 transform hover:scale-105 transition-all duration-300 text-white font-semibold py-3"
               size="lg"
             >
               {claiming ? (
@@ -837,30 +837,7 @@ function SuperPostCard({
             </Button>
           )}
 
-          {deletePermissions.canDelete && (
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              disabled={deleting}
-              variant="destructive"
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 text-white font-semibold"
-              size="lg"
-            >
-              {deleting ? (
-                <>
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="h-5 w-5 mr-2" />
-                  Delete Post
-                </>
-              )}
-            </Button>
-          )}
+
         </div>
 
         {/* SEO Score Indicator */}
