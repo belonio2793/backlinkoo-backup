@@ -378,7 +378,7 @@ export function ClaimLoginModal({
               <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-semibold text-gray-800">What happens when you claim a post?</p>
+              <div className="text-sm font-semibold text-gray-800">What happens when you claim a post?</div>
               <ul className="text-xs text-gray-600 space-y-1">
                 <li>• The post becomes permanently yours</li>
                 <li>• Protected from deletion by others</li>
