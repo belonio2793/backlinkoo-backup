@@ -469,30 +469,76 @@ export function SuperEnhancedBlogListing() {
               </div>
             </form>
 
-            {/* Filter Buttons */}
-            <div className="flex flex-wrap justify-center gap-3">
+            {/* Enhanced Filter Buttons */}
+            <div className="flex flex-wrap justify-center gap-4 p-2">
               {[
-                { key: 'all', label: 'All Posts', icon: BookOpen, color: 'from-gray-600 to-gray-700' },
-                { key: 'claimable', label: 'Claimable', icon: Crown, color: 'from-yellow-500 to-orange-500' },
-                { key: 'claimed', label: 'Claimed', icon: CheckCircle, color: 'from-green-500 to-emerald-500' },
-                ...(user ? [{ key: 'my-posts', label: 'My Posts', icon: User, color: 'from-blue-500 to-purple-500' }] : [])
-              ].map(({ key, label, icon: Icon, color }) => (
-                <Button
+                { key: 'all', label: 'All Posts', icon: BookOpen, color: 'from-slate-600 to-slate-800', hoverColor: 'from-slate-700 to-slate-900', accent: 'slate' },
+                { key: 'claimable', label: 'Claimable', icon: Crown, color: 'from-amber-500 to-orange-600', hoverColor: 'from-amber-600 to-orange-700', accent: 'amber' },
+                { key: 'claimed', label: 'Claimed', icon: CheckCircle, color: 'from-emerald-500 to-green-600', hoverColor: 'from-emerald-600 to-green-700', accent: 'emerald' },
+                ...(user ? [{ key: 'my-posts', label: 'My Posts', icon: User, color: 'from-blue-500 to-purple-600', hoverColor: 'from-blue-600 to-purple-700', accent: 'blue' }] : [])
+              ].map(({ key, label, icon: Icon, color, hoverColor, accent }, index) => (
+                <button
                   key={key}
-                  variant={filterType === key ? 'default' : 'outline'}
-                  size="lg"
                   onClick={() => setFilterType(key as any)}
                   className={`
-                    px-6 py-3 rounded-xl border-2 transition-all duration-300 transform hover:scale-105
-                    ${filterType === key 
-                      ? `bg-gradient-to-r ${color} text-white border-transparent shadow-lg` 
-                      : 'bg-white/80 border-gray-200 hover:border-gray-300 hover:bg-white/90'
+                    group relative px-8 py-4 rounded-2xl font-semibold text-sm tracking-wide
+                    transition-all duration-500 ease-out transform
+                    hover:scale-105 hover:-translate-y-1 active:scale-95
+                    shadow-lg hover:shadow-2xl
+                    ${filterType === key
+                      ? `bg-gradient-to-br ${color} text-white shadow-xl border-0
+                         before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:${hoverColor}
+                         before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300`
+                      : `bg-white/90 backdrop-blur-sm border-2 border-gray-200/50 text-gray-700
+                         hover:bg-white hover:border-${accent}-200 hover:text-${accent}-700
+                         hover:shadow-${accent}-100/50`
                     }
+                    before:content-[''] before:absolute before:inset-0 before:rounded-2xl
+                    ${filterType !== key ? `before:bg-gradient-to-br before:${color} before:opacity-0 hover:before:opacity-5 before:transition-all before:duration-300` : ''}
                   `}
+                  style={{
+                    animation: `fade-in 0.5s ease-out forwards ${index * 100}ms`
+                  }}
                 >
-                  <Icon className="h-4 w-4 mr-2" />
-                  {label}
-                </Button>
+                  {/* Glow effect for active button */}
+                  {filterType === key && (
+                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${color} blur-xl opacity-30 -z-10 group-hover:opacity-50 transition-opacity duration-300`}></div>
+                  )}
+
+                  {/* Content */}
+                  <div className="relative flex items-center gap-3 z-10">
+                    <div className={`
+                      p-1.5 rounded-lg transition-all duration-300
+                      ${filterType === key
+                        ? 'bg-white/20 group-hover:bg-white/30'
+                        : `bg-${accent}-100 group-hover:bg-${accent}-200`
+                      }
+                    `}>
+                      <Icon className={`h-4 w-4 transition-colors duration-300 ${
+                        filterType === key
+                          ? 'text-white'
+                          : `text-${accent}-600 group-hover:text-${accent}-700`
+                      }`} />
+                    </div>
+                    <span className="relative">
+                      {label}
+                      {/* Subtle shimmer effect on active */}
+                      {filterType === key && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+                      )}
+                    </span>
+                  </div>
+
+                  {/* Active indicator dot */}
+                  {filterType === key && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full shadow-lg animate-pulse"></div>
+                  )}
+
+                  {/* Ripple effect on click */}
+                  <div className="absolute inset-0 rounded-2xl overflow-hidden">
+                    <div className="absolute inset-0 bg-white/20 scale-0 group-active:scale-100 rounded-2xl transition-transform duration-200"></div>
+                  </div>
+                </button>
               ))}
             </div>
           </div>
