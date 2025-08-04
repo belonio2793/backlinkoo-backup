@@ -680,11 +680,11 @@ function SuperPostCard({
       }}
       onClick={() => navigate(`/blog/${post.slug}`)}
     >
-      {/* Gradient overlay on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/8 via-green-500/6 to-teal-500/8 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      
-      {/* Animated border glow */}
-      <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 opacity-0 group-hover:opacity-15 blur-xl transition-opacity duration-500"></div>
+      {/* Illuminated gold border on hover */}
+      <div className="absolute inset-0 border-2 border-transparent group-hover:border-yellow-400 rounded-lg transition-all duration-300"></div>
+
+      {/* Gold glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-400 opacity-0 group-hover:opacity-30 blur-lg transition-opacity duration-300 rounded-lg"></div>
 
       <CardHeader className="relative z-10 pb-4">
         <div className="flex items-start justify-between mb-4">
