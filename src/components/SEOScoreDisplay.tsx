@@ -455,14 +455,12 @@ export function SEOScoreDisplay({
         )}
       </div>
 
-      {/* Premium Checkout Modal */}
-      <PremiumCheckoutModal
+      {/* Enhanced Premium Checkout Modal */}
+      <EnhancedPremiumCheckoutModal
         isOpen={premiumCheckoutOpen}
         onClose={() => setPremiumCheckoutOpen(false)}
         onSuccess={async () => {
           try {
-            // Upgrade user to premium role
-            await userService.upgradeToPremium();
             toast({
               title: "Welcome to Premium!",
               description: "You now have access to all premium features including 100/100 SEO content, unlimited claims, and advanced analytics.",
@@ -478,6 +476,7 @@ export function SEOScoreDisplay({
             });
           }
         }}
+        redirectAfterSuccess="/dashboard"
       />
     </TooltipProvider>
   );
