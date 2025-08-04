@@ -52,6 +52,7 @@ export function SEOScoreDisplay({
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysis, setAnalysis] = useState<SEOAnalysisResult | null>(null);
   const [pricingModalOpen, setPricingModalOpen] = useState(false);
+  const { toast } = useToast();
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-600';
