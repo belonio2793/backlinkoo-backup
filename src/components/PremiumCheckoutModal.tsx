@@ -261,18 +261,24 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
 
               {paymentMethod === 'card' ? (
                 <div className="space-y-4">
-                  {/* Email */}
-                  <div>
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
+                  {/* Email - only show for guests */}
+                  {!user && (
+                    <div>
+                      <Label htmlFor="email">Email Address</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="your@email.com"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        className="mt-1"
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Required for subscription management and receipts
+                      </p>
+                    </div>
+                  )}
 
                   {/* Card Details */}
                   <div>
