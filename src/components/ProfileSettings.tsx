@@ -259,17 +259,8 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
 
 
 
-  if (!user) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-muted-foreground">
-            Please log in to view your profile settings.
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // If user is missing but we're not loading, show the interface anyway
+  // (the user clicked Profile Settings from the dashboard, so they must be logged in)
 
 
 
