@@ -234,6 +234,19 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     );
   }
 
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center p-12">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+            <div className="text-muted-foreground">Loading profile settings...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const providerInfo = getProviderInfo(user.app_metadata?.providers);
   const displayName = getDisplayName();
   const avatarUrl = getAvatarUrl();
