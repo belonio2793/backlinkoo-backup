@@ -47,6 +47,7 @@ interface DashboardTrialPostsProps {
 export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { canClaimUnlimited, maxClaimedPosts, isPremium } = usePermissions();
 
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
