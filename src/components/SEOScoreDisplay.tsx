@@ -83,8 +83,13 @@ export function SEOScoreDisplay({
         <Tooltip>
           <TooltipTrigger asChild>
             <Badge className={`px-3 py-1 cursor-help ${getScoreBadgeColor(score)}`}>
-              <TrendingUp className="mr-1 h-3 w-3" />
+              {score === 100 ? (
+                <Crown className="mr-1 h-3 w-3 text-yellow-600" />
+              ) : (
+                <TrendingUp className="mr-1 h-3 w-3" />
+              )}
               SEO Score: {score}/100
+              {score === 100 && <Star className="ml-1 h-3 w-3 text-yellow-600" />}
             </Badge>
           </TooltipTrigger>
           <TooltipContent>
