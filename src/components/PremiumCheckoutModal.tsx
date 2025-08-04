@@ -372,7 +372,7 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
               <Button
                 className="w-full h-12 text-lg"
                 onClick={handleCheckout}
-                disabled={isProcessing || (!formData.email && paymentMethod === 'card')}
+                disabled={isProcessing || (!user && !formData.email)}
               >
                 {isProcessing ? (
                   <div className="flex items-center gap-2">
