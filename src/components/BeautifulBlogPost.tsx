@@ -719,8 +719,12 @@ export function BeautifulBlogPost() {
                         Unclaim Post
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Release ownership of this post. It will become available for others to claim for 24 hours before being automatically deleted.</p>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <div className="space-y-1">
+                        <p className="font-semibold">Unclaim Post</p>
+                        <p className="text-sm">Release ownership and make this post available for others to claim.</p>
+                        <p className="text-xs text-orange-400">⏰ Will be deleted in 24 hours if not reclaimed</p>
+                      </div>
                     </TooltipContent>
                   </Tooltip>
                 )}
