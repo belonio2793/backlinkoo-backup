@@ -158,8 +158,8 @@ class UserService {
         hasPrioritySupport: isPremium,
         canAccessPremiumContent: isPremium
       };
-    } catch (error) {
-      console.error('Error getting user limits:', error);
+    } catch (error: any) {
+      console.error('Error getting user limits:', error.message || error);
       // Return default (free) limits on error
       return {
         maxClaimedPosts: 3,
