@@ -50,6 +50,14 @@ class ProfileService {
 
       if (error) {
         console.error('Error fetching user profile:', error.message || error);
+
+        // Handle specific permission denied errors
+        if (error.message && error.message.includes('permission denied for table users')) {
+          console.warn('⚠️ Permission denied for "users" table - this indicates a database configuration issue');
+          console.warn('The application should only access the "profiles" table, not "users"');
+          return null;
+        }
+
         return null;
       }
 
