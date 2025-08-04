@@ -35,16 +35,20 @@ export class SubscriptionService {
 
     try {
       // Check subscribers table for active subscription
-      const { data: subscriber, error } = await supabase
+      const { data: subscribers, error } = await supabase
         .from('subscribers')
         .select('*')
         .eq('email', user.email)
-        .eq('subscribed', true)
-        .single();
+        .eq('subscribed', true);
 
-      if (error && error.code !== 'PGRST116') { // Not a "no rows returned" error
+      if (error) {
         logError('Error checking subscription', error);
       }
+
+      // Get the most recent active subscriber if multiple exist
+      const subscriber = subscribers && subscribers.length > 0
+        ? subscribers.sort((a, b) => new Date(b.updated_at || b.created_at || '').getTime() - new Date(a.updated_at || a.created_at || '').getTime())[0]
+        : null;
 
       const isSubscribed = !!subscriber;
       const tier = subscriber?.subscription_tier || null;
