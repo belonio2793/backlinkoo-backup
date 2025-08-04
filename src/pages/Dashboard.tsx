@@ -17,6 +17,17 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 import {
   CreditCard,
@@ -171,7 +182,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           setError('NOT_FOUND');
         }
       } else {
-        console.log(`✅ Successfully loaded ${finalPosts.length} blog posts`);
+        console.log(`��� Successfully loaded ${finalPosts.length} blog posts`);
         setError(null);
 
         // Show success notification on first load
