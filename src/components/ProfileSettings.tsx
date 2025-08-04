@@ -74,31 +74,43 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
 
   useEffect(() => {
     const loadProfileData = async () => {
-      // Load data if user is available
-      if (!user) {
-        // Set defaults if no user data
-        setProfileData({
-          displayName: 'User',
-          email: 'No email available',
-          bio: '',
-          website: '',
-          company: '',
-          location: ''
-        });
-        return;
-      }
-
       try {
-        // Initialize with user data immediately
-        setProfileData({
-          displayName: user.user_metadata?.display_name || user.user_metadata?.full_name || user.email?.split('@')[0] || '',
-          email: user.email || '',
-          bio: user.user_metadata?.bio || '',
-          website: user.user_metadata?.website || '',
-          company: user.user_metadata?.company || '',
-          location: user.user_metadata?.location || ''
-        });
+        // Get fresh user data from auth
+        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
 
+        if (authError) {
+          console.error('Auth error:', authError);
+          toast({
+            title: "Authentication Error",
+            description: "Failed to get user data. Please refresh the page.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (!authUser) {
+          console.log('No authenticated user found');
+          return;
+        }
+
+        console.log('🔄 Loading profile data for user:', authUser.email);
+
+        // Initialize with auth user data immediately
+        const initialData = {
+          displayName: authUser.user_metadata?.display_name ||
+                      authUser.user_metadata?.full_name ||
+                      authUser.email?.split('@')[0] ||
+                      'User',
+          email: authUser.email || '',
+          bio: authUser.user_metadata?.bio || '',
+          website: authUser.user_metadata?.website || '',
+          company: authUser.user_metadata?.company || '',
+          location: authUser.user_metadata?.location || ''
+        };
+
+        setProfileData(initialData);
+
+        // Set default settings
         setSettings({
           emailNotifications: true,
           marketingEmails: false,
@@ -106,22 +118,34 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
           securityAlerts: true
         });
 
-        // Load profile data from database in background and update if available
+        // Ensure profile exists in database
+        console.log('🔄 Ensuring profile exists in database...');
+        const ensureResult = await profileService.ensureProfileExists();
+        if (!ensureResult.success) {
+          console.warn('Failed to ensure profile exists:', ensureResult.message);
+        }
+
+        // Load profile data from database and merge with auth data
+        console.log('🔄 Loading profile from database...');
         const profile = await profileService.getUserProfile();
         const userSettings = await profileService.getUserSettings();
 
         if (profile) {
-          setProfileData(prev => ({
-            ...prev,
-            displayName: profile.display_name || prev.displayName,
-            bio: profile.bio || prev.bio,
-            website: profile.website || prev.website,
-            company: profile.company || prev.company,
-            location: profile.location || prev.location
-          }));
+          console.log('✅ Profile loaded from database:', profile);
+          setProfileData({
+            displayName: profile.display_name || initialData.displayName,
+            email: authUser.email || '', // Always use auth email
+            bio: profile.bio || initialData.bio,
+            website: profile.website || initialData.website,
+            company: profile.company || initialData.company,
+            location: profile.location || initialData.location
+          });
+        } else {
+          console.log('ℹ️ No profile found in database, using auth data');
         }
 
         if (userSettings) {
+          console.log('✅ Settings loaded from database:', userSettings);
           setSettings({
             emailNotifications: userSettings.email_notifications ?? true,
             marketingEmails: userSettings.marketing_emails ?? false,
@@ -129,25 +153,20 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
             securityAlerts: userSettings.security_alerts ?? true
           });
         }
-      } catch (error: any) {
-        console.error('Error loading profile data:', error);
 
-        // Run debug check if we get a permission error
-        if (error.message && error.message.includes('permission denied for table users')) {
-          console.log('🔍 Running profile error debugger...');
-          ProfileErrorDebugger.testProfileOperations();
-        }
+      } catch (error: any) {
+        console.error('❌ Error loading profile data:', error);
 
         toast({
           title: "Loading Error",
-          description: "Failed to load profile data. Using defaults.",
+          description: "Failed to load profile data. Please try again.",
           variant: "destructive",
         });
       }
     };
 
     loadProfileData();
-  }, [user, toast]);
+  }, [toast]);
 
   const handleSaveProfile = async () => {
     if (!user) return;
