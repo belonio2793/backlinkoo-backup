@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { SEOAnalyzer, type SEOAnalysisResult } from '@/services/seoAnalyzer';
 import { PricingModal } from '@/components/PricingModal';
+import { useToast } from '@/hooks/use-toast';
 
 interface SEOScoreDisplayProps {
   score: number;
@@ -228,7 +229,7 @@ export function SEOScoreDisplay({
                         <div className="mt-2 text-xs space-y-1">
                           <div className="flex justify-between">
                             <span>Length ({analysis.details.title.length} chars)</span>
-                            {analysis.details.title.optimalLength ? '��' : '✗'}
+                            {analysis.details.title.optimalLength ? '✓' : '✗'}
                           </div>
                           <div className="flex justify-between">
                             <span>Has Keywords</span>
