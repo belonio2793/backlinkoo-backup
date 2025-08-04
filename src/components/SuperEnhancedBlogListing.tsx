@@ -197,7 +197,7 @@ export function SuperEnhancedBlogListing() {
       
       if (result.success) {
         toast({
-          title: "Success! 🎉",
+          title: "Success! ����",
           description: result.message,
         });
         loadPosts(); // Reload to show updated status
@@ -469,13 +469,13 @@ export function SuperEnhancedBlogListing() {
               </div>
             </form>
 
-            {/* Enhanced Filter Buttons */}
+            {/* Enhanced Filter Buttons - All Blue Theme */}
             <div className="flex flex-wrap justify-center gap-4 p-2">
               {[
-                { key: 'all', label: 'All Posts', icon: BookOpen, color: 'from-slate-600 to-slate-800', hoverColor: 'from-slate-700 to-slate-900', accent: 'slate' },
-                { key: 'claimable', label: 'Claimable', icon: Crown, color: 'from-amber-500 to-orange-600', hoverColor: 'from-amber-600 to-orange-700', accent: 'amber' },
-                { key: 'claimed', label: 'Claimed', icon: CheckCircle, color: 'from-emerald-500 to-green-600', hoverColor: 'from-emerald-600 to-green-700', accent: 'emerald' },
-                ...(user ? [{ key: 'my-posts', label: 'My Posts', icon: User, color: 'from-blue-500 to-purple-600', hoverColor: 'from-blue-600 to-purple-700', accent: 'blue' }] : [])
+                { key: 'all', label: 'All Posts', icon: BookOpen, color: 'from-blue-500 to-blue-700', hoverColor: 'from-blue-600 to-blue-800', accent: 'blue' },
+                { key: 'claimable', label: 'Claimable', icon: Crown, color: 'from-blue-400 to-blue-600', hoverColor: 'from-blue-500 to-blue-700', accent: 'blue' },
+                { key: 'claimed', label: 'Claimed', icon: CheckCircle, color: 'from-blue-600 to-blue-800', hoverColor: 'from-blue-700 to-blue-900', accent: 'blue' },
+                ...(user ? [{ key: 'my-posts', label: 'My Posts', icon: User, color: 'from-blue-500 to-indigo-600', hoverColor: 'from-blue-600 to-indigo-700', accent: 'blue' }] : [])
               ].map(({ key, label, icon: Icon, color, hoverColor, accent }, index) => (
                 <button
                   key={key}
