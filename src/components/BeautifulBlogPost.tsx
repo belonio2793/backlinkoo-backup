@@ -87,6 +87,10 @@ export function BeautifulBlogPost() {
   }, []);
 
   const processClaimIntent = async () => {
+    // Check if there's actually a claim intent before processing
+    const claimIntentStr = localStorage.getItem('claim_intent');
+    if (!claimIntentStr) return; // No pending claim intent, don't show notifications
+
     const result = await EnhancedBlogClaimService.processPendingClaimIntent(user!);
     if (result) {
       if (result.success) {
