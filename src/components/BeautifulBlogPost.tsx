@@ -133,12 +133,9 @@ export function BeautifulBlogPost() {
 
   const handleClaimPost = async () => {
     if (!user) {
+      // Store claim intent and show modal instead of navigating
       EnhancedBlogClaimService.handleClaimIntent(slug!, cleanTitle(blogPost?.title || ''));
-      toast({
-        title: "Login Required",
-        description: "Please log in to claim this post. We'll bring you back to complete the claim.",
-      });
-      navigate('/login');
+      setShowClaimModal(true);
       return;
     }
 
