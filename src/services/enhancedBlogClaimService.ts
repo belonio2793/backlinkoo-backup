@@ -80,7 +80,16 @@ export class EnhancedBlogClaimService {
    */
   static async claimPost(slug: string, user: User): Promise<ClaimResult> {
     try {
-      // First, get the post
+      // Validate user authentication
+      if (!user || !user.id) {
+        return {
+          success: false,
+          message: 'User authentication required to claim posts',
+          needsLogin: true
+        };
+      }
+
+      // First, get the post/ First, get the postostrst, get the post
       const { data: post, error: fetchError } = await supabase
         .from('blog_posts')
         .select('*')
