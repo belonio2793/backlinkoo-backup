@@ -113,35 +113,20 @@ const Index = () => {
       // Clear user state immediately for better UX
       setUser(null);
 
-      const result = await AuthService.signOut();
+      // Force page refresh immediately for instant feedback
+      window.location.reload();
 
-      console.log('🚪 Home page: Sign out result:', result);
-
-      toast({
-        title: "Signed out successfully",
-        description: "You have been signed out of your account.",
+      // Do actual sign out in background (won't affect UX since page is refreshing)
+      AuthService.signOut().catch(error => {
+        console.error('Background sign out error:', error);
       });
-
-      // Force page refresh to ensure clean state
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
 
     } catch (error) {
       console.error('Home page sign out error:', error);
 
-      // Still clear user state
+      // Still clear user state and refresh
       setUser(null);
-
-      toast({
-        title: "Signed out",
-        description: "You have been signed out.",
-      });
-
-      // Force page refresh even on error
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      window.location.reload();
     }
   };
 
@@ -1020,7 +1005,7 @@ const Index = () => {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <div className="text-sm text-gray-500 font-light text-center">
-              Money-back guarantee • No setup fees • Cancel anytime
+              Money-back guarantee �� No setup fees • Cancel anytime
             </div>
           </div>
         </div>
