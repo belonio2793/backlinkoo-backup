@@ -427,8 +427,8 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
                       )}
                     </div>
                     <CardTitle className="text-lg line-clamp-2 group-hover:text-blue-600 transition-colors">
-                      {post.title}
-                    </CardTitle>
+                  {cleanTitle(post.title)}
+                </CardTitle>
                     {post.excerpt && (
                       <p className="text-gray-600 text-sm line-clamp-2">
                         {post.excerpt}
