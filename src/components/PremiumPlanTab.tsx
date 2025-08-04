@@ -267,7 +267,7 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
         </TabsContent>
 
         <TabsContent value="seo-academy" className="space-y-6">
-          <CompleteCourseExperience />
+          <CompleteCourseExperience isPremium={isSubscribed} onUpgrade={handleUpgrade} />
         </TabsContent>
       </Tabs>
 
