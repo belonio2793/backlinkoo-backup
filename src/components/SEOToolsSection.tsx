@@ -363,6 +363,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
               <div className="text-sm text-muted-foreground mb-4">per month</div>
               <Button onClick={() => {
                 console.log('Start Subscription button clicked');
+                alert('Button clicked! Opening premium modal...');
                 setIsPremiumCheckoutOpen(true);
               }} size="lg" className="w-full">
                 <CreditCard className="h-4 w-4 mr-2" />
