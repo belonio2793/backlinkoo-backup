@@ -1,4 +1,5 @@
 import type { BlogPost } from '@/types/blogTypes';
+import { SEOAnalyzer } from './seoAnalyzer';
 
 interface ExternalBlogPost {
   id: string;
@@ -81,7 +82,11 @@ export class ExternalBlogService {
       meta_description: post.meta_description || post.excerpt || '',
       target_url: `${this.BASE_URL}/blog/${post.slug}`,
       anchor_text: post.title, // Use title as default anchor text
-      seo_score: Math.floor(Math.random() * 30) + 70, // Estimate SEO score 70-100
+      seo_score: SEOAnalyzer.analyzeBlogPost(
+        post.title,
+        post.content || '',
+        post.meta_description
+      ).overallScore,
       reading_time: post.reading_time || Math.ceil((post.content?.length || 1000) / 200),
       published_url: `${this.BASE_URL}/blog/${post.slug}`,
       is_trial_post: false,
