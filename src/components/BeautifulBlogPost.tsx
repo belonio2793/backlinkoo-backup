@@ -733,7 +733,7 @@ export function BeautifulBlogPost() {
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  <span className="font-medium">{blogPost.reading_time} min read</span>
+                  <span className="font-medium">{blogPost.reading_time || 0} min read</span>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <Eye className="h-4 w-4" />
