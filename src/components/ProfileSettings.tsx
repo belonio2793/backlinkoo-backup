@@ -85,7 +85,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                     user.user_metadata?.full_name ||
                     user.email?.split('@')[0] ||
                     'User',
-        email: user.email || '',
+        email: user.email || profileData.email || '',
         bio: user.user_metadata?.bio || '',
         website: user.user_metadata?.website || '',
         company: user.user_metadata?.company || '',
