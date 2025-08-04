@@ -845,7 +845,7 @@ function SuperPostCard({
               }}
               disabled={deleting}
               variant="destructive"
-              className="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-300"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 text-white font-semibold"
               size="lg"
             >
               {deleting ? (
