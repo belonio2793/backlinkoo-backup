@@ -52,7 +52,7 @@ export function PremiumPlanPopup({
 }: PremiumPlanPopupProps) {
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
   
   // Flow management
   const [currentStep, setCurrentStep] = useState<FlowStep>('plan-selection');
