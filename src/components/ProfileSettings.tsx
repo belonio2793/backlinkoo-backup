@@ -95,8 +95,15 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
           weeklyReports: userSettings.weekly_reports ?? true,
           securityAlerts: userSettings.security_alerts ?? true
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error loading profile data:', error);
+
+        // Run debug check if we get a permission error
+        if (error.message && error.message.includes('permission denied for table users')) {
+          console.log('🔍 Running profile error debugger...');
+          ProfileErrorDebugger.testProfileOperations();
+        }
+
         toast({
           title: "Loading Error",
           description: "Failed to load profile data. Using defaults.",
