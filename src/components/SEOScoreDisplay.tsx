@@ -24,7 +24,9 @@ import {
   ChevronRight,
   CheckCircle,
   AlertTriangle,
-  XCircle
+  XCircle,
+  Crown,
+  Star
 } from 'lucide-react';
 import { SEOAnalyzer, type SEOAnalysisResult } from '@/services/seoAnalyzer';
 
