@@ -14,6 +14,7 @@ import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
 import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 import { autoConfigSaver } from "@/services/autoConfigSaver";
 import { DebugErrorHandler } from "@/utils/debugErrorHandler";
+import { PremiumPopupProvider } from "@/components/PremiumPopupProvider";
 import "@/services/blogCleanupService"; // Initialize blog cleanup service
 import "@/utils/manualRLSCleanup"; // Initialize RLS cleanup utility
 import "@/utils/subscriptionDebugger"; // Initialize subscription debugging
