@@ -682,9 +682,9 @@ export function PremiumPlanPopup({
         </p>
       </div>
       
-      <Button 
+      <Button
         onClick={() => {
-          router.push('/dashboard');
+          navigate('/dashboard');
           handleClose();
           onSuccess?.();
         }}
