@@ -212,7 +212,7 @@ export function BeautifulBlogPost() {
 
         // If RLS blocks the delete, try using a serverless function as fallback
         try {
-          const response = await fetch('/api/delete-post', {
+          const response = await fetch('/.netlify/functions/delete-post', {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json',
