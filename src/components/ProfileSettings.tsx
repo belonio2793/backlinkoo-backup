@@ -359,7 +359,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
               <h2 className="text-2xl font-bold">{displayName}</h2>
               <p className="text-muted-foreground flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                {profileData.email || 'No email available'}
+                {user?.email || profileData.email || 'No email available'}
               </p>
               <div className="flex items-center gap-2 mt-2">
                 <div className={`w-4 h-4 rounded-full ${providerInfo.color} flex items-center justify-center text-xs`}>
