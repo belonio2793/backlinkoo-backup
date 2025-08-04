@@ -128,7 +128,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     };
 
     loadProfileData();
-  }, [user, toast]);
+  }, [user, authLoading, toast]);
 
   const handleSaveProfile = async () => {
     if (!user) return;
