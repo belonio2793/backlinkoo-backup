@@ -132,7 +132,7 @@ export class EnhancedBlogClaimService {
 
       return {
         success: true,
-        message: 'Post claimed successfully! It is now permanently saved to your account.',
+        message: '',
         post: updatedPost
       };
 
