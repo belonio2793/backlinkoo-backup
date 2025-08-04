@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { createSubscriptionWithFallback } from '@/services/fallbackSubscriptionService';
 import { EnhancedSubscriptionService } from '@/services/enhancedSubscriptionService';
 import { PremiumUpgradeService } from '@/services/premiumUpgradeService';
-import { userService } from '@/services/userService\';e\';es/userService\';erService';
+import { userService } from '@/services/userService';
 import {
   Crown,
   CreditCard,
@@ -126,43 +126,63 @@ export function StreamlinedPremiumCheckout({
     setCurrentStep('processing');
 
     try {
-      // Create subscription using authenticated user
-      const result = await createSubscriptionWithFallback(user, false);
+      // Try enhanced subscription service first
+      const result = await EnhancedSubscriptionService.createSubscription(user, {
+        plan: selectedPlan,
+        paymentMethod,
+        isGuest: false
+      });
 
-      if (result.success) {
-        if (result.url && !result.usedFallback) {
-          // Redirect to Stripe/PayPal checkout
-          toast({
-            title: "Redirecting to Payment",
-            description: `Redirecting to secure ${paymentMethod === 'stripe' ? 'Stripe' : 'PayPal'} checkout...`,
-          });
-          
-          window.location.href = result.url;
-        } else {
-          // Fallback activation or direct upgrade
-          setCurrentStep('success');
-          
-          toast({
-            title: "Premium Activated!",
-            description: "Your account has been upgraded to Premium successfully.",
-          });
-
-          // Auto-redirect after delay
-          setTimeout(() => {
-            navigate(redirectAfterSuccess);
-            onClose();
-            onSuccess?.();
-          }, 2000);
-        }
-      } else {
+      if (result.success && result.url) {
+        // Redirect to payment provider
         toast({
-          title: "Payment Error",
-          description: result.error || "Payment processing failed. Please try again.",
-          variant: "destructive"
+          title: "Redirecting to Payment",
+          description: `Opening secure ${paymentMethod === 'stripe' ? 'Stripe' : 'PayPal'} checkout...`,
         });
-        setCurrentStep('checkout');
+
+        window.location.href = result.url;
+        return;
       }
+
+      // If enhanced service fails, try fallback
+      if (!result.success) {
+        console.warn('Enhanced service failed, trying fallback...', result.error);
+
+        const fallbackResult = await createSubscriptionWithFallback(user, false);
+
+        if (fallbackResult.success) {
+          if (fallbackResult.url && !fallbackResult.usedFallback) {
+            window.location.href = fallbackResult.url;
+            return;
+          } else if (fallbackResult.usedFallback) {
+            // Direct upgrade via fallback
+            setCurrentStep('success');
+
+            toast({
+              title: "Premium Activated!",
+              description: "Your account has been upgraded to Premium successfully.",
+            });
+
+            setTimeout(() => {
+              navigate(redirectAfterSuccess);
+              onClose();
+              onSuccess?.();
+            }, 2000);
+            return;
+          }
+        }
+      }
+
+      // If all methods fail
+      toast({
+        title: "Payment Setup Failed",
+        description: result.error || "Unable to process payment. Please contact support.",
+        variant: "destructive"
+      });
+      setCurrentStep('checkout');
+
     } catch (error: any) {
+      console.error('Checkout error:', error);
       toast({
         title: "Payment Error",
         description: error.message || "An unexpected error occurred during payment.",
