@@ -95,8 +95,11 @@ export class SubscriptionService {
         return { success: false, error: 'User authentication required' };
       }
 
+      // Use environment variable for price ID or fallback to default
+      const priceId = import.meta.env.VITE_STRIPE_PRICE_ID || 'price_premium_monthly';
+
       const requestBody = {
-        priceId: 'price_1QhvTGENNyNvNqhZBUZqv6s7', // Use actual Stripe price ID if available
+        priceId,
         tier: 'premium',
         isGuest,
         guestEmail: isGuest ? guestEmail : undefined
