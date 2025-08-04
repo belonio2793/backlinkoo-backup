@@ -38,7 +38,7 @@ interface ProfileSettingsProps {
 
 export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { userProfile, isPremium, isAdmin, userLimits, loading: premiumLoading, refresh: refreshPremium } = usePremium();
   
   const [loading, setLoading] = useState(true);
