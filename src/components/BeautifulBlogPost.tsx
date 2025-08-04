@@ -44,6 +44,7 @@ import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
 import { maskEmail } from '@/utils/emailMasker';
+import { SEOScoreDisplay } from '@/components/SEOScoreDisplay';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -731,8 +732,14 @@ export function BeautifulBlogPost() {
                   <span className="font-medium">{blogPost.view_count} views</span>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4" />
-                  <span className="font-medium">SEO Score: {blogPost.seo_score}/100</span>
+                  <SEOScoreDisplay
+                    score={blogPost.seo_score}
+                    title={blogPost.title}
+                    content={blogPost.content}
+                    metaDescription={blogPost.meta_description || undefined}
+                    targetKeyword={blogPost.keywords?.[0]}
+                    showDetails={true}
+                  />
                 </div>
               </div>
 
