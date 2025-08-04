@@ -90,7 +90,7 @@ export function SEOScoreDisplay({
       <div className="flex items-center gap-2">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Badge className={`px-3 py-1 cursor-help ${getScoreBadgeColor(score, isPremiumScore)}`}>
+            <Badge className={`px-3 py-1 cursor-help hover:bg-transparent ${getScoreBadgeColor(score, isPremiumScore)}`}>
               {isPremiumScore ? (
                 <Crown className="mr-1 h-3 w-3 text-purple-600" />
               ) : score === 100 ? (
