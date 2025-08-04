@@ -117,7 +117,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
       const info = await SubscriptionService.getSubscriptionInfo(user);
       setSubscriptionInfo(info);
     } catch (error: any) {
-      console.error('Error checking subscription:', error?.message || error?.toString() || 'Unknown subscription error');
+      logError('Error checking subscription', error);
       setSubscriptionStatus({
         isSubscribed: false,
         subscriptionTier: null,
@@ -405,7 +405,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="keyword-research">Keyword Research</TabsTrigger>
           <TabsTrigger value="rank-tracker">Rankings</TabsTrigger>
-          <TabsTrigger value="no-hands-seo">Backlink �� Automation Link Building (beta)</TabsTrigger>
+          <TabsTrigger value="no-hands-seo">Backlink ∞ Automation Link Building (beta)</TabsTrigger>
         </TabsList>
 
         <TabsContent value="no-hands-seo" className="space-y-6">
