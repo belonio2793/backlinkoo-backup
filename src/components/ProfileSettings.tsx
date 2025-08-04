@@ -211,7 +211,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     const provider = providers[0];
     const providerMap = {
       google: { name: 'Google', icon: '🔍', color: 'bg-red-500' },
-      facebook: { name: 'Facebook', icon: '����', color: 'bg-blue-600' },
+      facebook: { name: 'Facebook', icon: '📘', color: 'bg-blue-600' },
       linkedin_oidc: { name: 'LinkedIn', icon: '💼', color: 'bg-blue-700' },
       twitter: { name: 'X (Twitter)', icon: '🐦', color: 'bg-black' },
     };
@@ -243,14 +243,14 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     return { name: 'Free', color: 'bg-gray-500', icon: <User className="h-3 w-3" /> };
   };
 
-  // Show loading if auth is still checking or user not loaded yet
-  if (authLoading || (!user && loading)) {
+  // Only show loading if auth is actively checking and we have no user yet
+  if (authLoading && !user) {
     return (
       <Card>
         <CardContent className="flex items-center justify-center p-12">
           <div className="text-center space-y-4">
             <Loader2 className="h-8 w-8 animate-spin mx-auto" />
-            <div className="text-muted-foreground">Loading profile settings...</div>
+            <div className="text-muted-foreground">Checking authentication...</div>
           </div>
         </CardContent>
       </Card>
