@@ -1,13 +1,8 @@
-#!/usr/bin/env node
-
 // Emergency fix for "permission denied for table users" error
 // This script applies an immediate fix to get your app working again
 
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config();
+const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config();
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
@@ -93,7 +88,7 @@ async function testAndFix() {
     }
     
   } catch (error) {
-    console.error('❌ Unexpected error:', error.message);
+    console.error('�� Unexpected error:', error.message);
   }
   
   // Additional checks
