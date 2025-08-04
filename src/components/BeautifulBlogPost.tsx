@@ -679,15 +679,22 @@ export function BeautifulBlogPost() {
                 )}
 
                 {unclaimPermissions.canUnclaim && (
-                  <Button
-                    onClick={() => setShowUnclaimDialog(true)}
-                    variant="outline"
-                    size="lg"
-                    className="bg-transparent border-orange-300 text-orange-700 hover:bg-transparent hover:border-orange-500 hover:text-orange-800 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full transition-all duration-300"
-                  >
-                    <XCircle className="mr-3 h-5 w-5" />
-                    Unclaim Post
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => setShowUnclaimDialog(true)}
+                        variant="outline"
+                        size="lg"
+                        className="bg-transparent border-orange-300 text-orange-700 hover:bg-transparent hover:border-orange-500 hover:text-orange-800 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full transition-all duration-300"
+                      >
+                        <XCircle className="mr-3 h-5 w-5" />
+                        Unclaim Post
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Release ownership of this post. It will become available for others to claim for 24 hours before being automatically deleted.</p>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
 
                 {canDelete && (
