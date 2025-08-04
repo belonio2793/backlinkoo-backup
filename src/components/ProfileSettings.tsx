@@ -41,7 +41,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   const { user, isLoading: authLoading } = useAuth();
   const { userProfile, isPremium, isAdmin, userLimits, loading: premiumLoading, refresh: refreshPremium } = usePremium();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
 
