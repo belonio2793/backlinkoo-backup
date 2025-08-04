@@ -586,6 +586,41 @@ export function BeautifulBlogPost() {
                         </TooltipContent>
                       </Tooltip>
                     )}
+
+                    {/* Login to Claim Button - Show next to unclaimed status */}
+                    {canClaimPost && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={handleClaimPost}
+                            disabled={claiming}
+                            size="sm"
+                            variant="outline"
+                            className="bg-transparent border-blue-300 text-blue-600 hover:bg-transparent hover:border-blue-500 hover:text-blue-700 hover:shadow-lg hover:scale-105 px-4 py-2 rounded-full transition-all duration-300"
+                          >
+                            {claiming ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                                Claiming...
+                              </>
+                            ) : (
+                              <>
+                                <Crown className="mr-2 h-4 w-4" />
+                                {user ? 'Claim' : 'Login to Claim'}
+                                <Zap className="ml-2 h-4 w-4" />
+                              </>
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs">
+                          <div className="space-y-1">
+                            <p className="font-semibold">Claim Post</p>
+                            <p className="text-sm">Become the owner of this post to protect it from deletion and gain editing rights.</p>
+                            <p className="text-xs text-blue-400">💡 Free to claim!</p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
                   </div>
                 )}
                 
