@@ -93,8 +93,8 @@ class UserService {
       await this.logUserAction(user.id, 'upgrade_to_premium', 'User upgraded to premium role');
 
       return { success: true, message: 'Successfully upgraded to premium' };
-    } catch (error) {
-      console.error('Error in upgradeToPremium:', error);
+    } catch (error: any) {
+      console.error('Error in upgradeToPremium:', error.message || error);
       return { success: false, message: 'Unexpected error during upgrade' };
     }
   }
