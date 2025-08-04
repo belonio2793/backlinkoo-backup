@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Trophy,
@@ -16,10 +15,10 @@ import {
   Award,
   Zap,
   Fire,
-  Users,
   BarChart3,
   PieChart,
-  Activity
+  Activity,
+  Lightbulb
 } from 'lucide-react';
 
 interface CourseStats {
@@ -43,12 +42,6 @@ interface Achievement {
   earnedDate?: string;
   progress?: number;
   maxProgress?: number;
-}
-
-interface LearningStreak {
-  current: number;
-  longest: number;
-  lastActive: string;
 }
 
 export function CourseProgressDashboard() {
@@ -116,7 +109,7 @@ export function CourseProgressDashboard() {
       progress: 7,
       maxProgress: 30
     }
-  ];
+  ]);
 
   const progressPercentage = Math.round((courseStats.completedLessons / courseStats.totalLessons) * 100);
   const timeProgressPercentage = Math.round((8.5 / 53) * 100);
