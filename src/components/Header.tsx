@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 export function Header() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [defaultTab, setDefaultTab] = useState<'login' | 'signup'>('login');
 
