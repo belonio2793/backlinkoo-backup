@@ -345,6 +345,98 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     return { name: 'Free', color: 'bg-gray-500', icon: <User className="h-3 w-3" /> };
   };
 
+  // Initialize new email with current email when modal opens
+  useEffect(() => {
+    if (showUpdateEmail && user?.email) {
+      setNewEmail(user.email);
+    }
+  }, [showUpdateEmail, user?.email]);
+
+  const handleUpdateEmail = async () => {
+    if (!newEmail || newEmail === user?.email) {
+      toast({
+        title: "No Change",
+        description: "Please enter a different email address.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        email: newEmail
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email Update Requested",
+        description: "Please check both your old and new email for confirmation links.",
+      });
+
+      setShowUpdateEmail(false);
+      setNewEmail('');
+    } catch (error: any) {
+      console.error('Email update error:', error);
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update email. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!newPassword || newPassword !== confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "New passwords do not match.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Password Updated",
+        description: "Your password has been successfully changed.",
+      });
+
+      setShowChangePassword(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error: any) {
+      console.error('Password update error:', error);
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update password. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
 
   // If user is missing but we're not loading, show the interface anyway
