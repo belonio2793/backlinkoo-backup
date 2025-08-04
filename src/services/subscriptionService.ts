@@ -117,8 +117,19 @@ export class SubscriptionService {
         // Provide more specific error messages
         let errorMessage = 'Failed to create subscription';
 
-        if (typeof error === 'object' && error.message) {
-          errorMessage = error.message;
+        // Handle different error object structures
+        if (error && typeof error === 'object') {
+          // Check for nested error structures from edge functions
+          if (error.error && typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else if (error.message) {
+            errorMessage = error.message;
+          } else if (error.details) {
+            errorMessage = error.details;
+          } else {
+            // If it's an object but no clear message, stringify it
+            errorMessage = `API Error: ${JSON.stringify(error)}`;
+          }
         } else if (typeof error === 'string') {
           errorMessage = error;
         }
@@ -126,10 +137,12 @@ export class SubscriptionService {
         // Handle specific error cases
         if (errorMessage.includes('Rate limit')) {
           errorMessage = 'Too many requests. Please wait a moment and try again.';
-        } else if (errorMessage.includes('STRIPE_SECRET_KEY')) {
+        } else if (errorMessage.includes('STRIPE_SECRET_KEY') || errorMessage.includes('stripe')) {
           errorMessage = 'Payment system configuration error. Please contact support.';
-        } else if (errorMessage.includes('authentication')) {
+        } else if (errorMessage.includes('authentication') || errorMessage.includes('auth')) {
           errorMessage = 'Authentication error. Please sign in and try again.';
+        } else if (errorMessage.includes('price') || errorMessage.includes('priceId')) {
+          errorMessage = 'Invalid pricing configuration. Please contact support.';
         }
 
         logError('Subscription creation error', error);
