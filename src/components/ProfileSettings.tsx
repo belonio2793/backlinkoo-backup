@@ -73,13 +73,17 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
 
   useEffect(() => {
     const loadProfileData = async () => {
-      // Don't start loading if auth is still checking
-      if (authLoading) {
-        return;
-      }
-
+      // Load data if user is available
       if (!user) {
-        setLoading(false);
+        // Set defaults if no user data
+        setProfileData({
+          displayName: 'User',
+          email: 'No email available',
+          bio: '',
+          website: '',
+          company: '',
+          location: ''
+        });
         return;
       }
 
