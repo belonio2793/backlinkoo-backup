@@ -468,17 +468,34 @@ export function BeautifulBlogPost() {
               {/* Status Badges */}
               <div className="flex items-center justify-center gap-3 mb-8">
                 {blogPost.claimed ? (
-                  <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full text-green-700 shadow-sm">
-                    <CheckCircle2 className="h-5 w-5" />
-                    <span className="font-semibold">
-                      {isOwnPost ? 'You own this post' : 'This post has been claimed'}
-                    </span>
-                  </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full text-green-700 shadow-sm cursor-help">
+                        <CheckCircle2 className="h-5 w-5" />
+                        <span className="font-semibold">
+                          {isOwnPost ? 'You own this post' : 'This post has been claimed'}
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{isOwnPost
+                        ? 'You have claimed this post. You can edit, delete, or unclaim it at any time.'
+                        : 'This post has been claimed by another user and is now protected from automatic deletion.'}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
                 ) : (
-                  <Badge className="px-4 py-2 text-sm font-medium rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300">
-                    <Timer className="mr-2 h-4 w-4" />
-                    Available to Claim
-                  </Badge>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge className="px-4 py-2 text-sm font-medium rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300 cursor-help">
+                        <Timer className="mr-2 h-4 w-4" />
+                        Available to Claim
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>This post is unclaimed and available for anyone to claim. Claimed posts are protected from deletion and can be managed by their owner.</p>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
                 
                 {blogPost.claimed && isOwnPost && (
