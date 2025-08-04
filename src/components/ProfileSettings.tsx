@@ -69,13 +69,19 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
 
   // Debug logging
   console.log('ProfileSettings render:', {
-    user: user ? { email: user.email, id: user.id } : null,
+    user: user ? {
+      email: user.email,
+      id: user.id,
+      email_confirmed_at: user.email_confirmed_at,
+      user_metadata: user.user_metadata
+    } : null,
     userEmail: user?.email,
     profileDataEmail: profileData.email,
     authLoading,
     loading,
     hasUserProfile: !!userProfile,
-    profileData: profileData
+    profileData: profileData,
+    emailDisplay: user?.email || profileData.email || 'No email available'
   });
 
   // If we have user data from context but no profile data yet, initialize immediately
