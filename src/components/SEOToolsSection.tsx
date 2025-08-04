@@ -95,6 +95,9 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
   const [isPremiumCheckoutOpen, setIsPremiumCheckoutOpen] = useState(false);
   const { toast } = useToast();
 
+  // Debug logging for modal state
+  console.log('SEOToolsSection render - isPremiumCheckoutOpen:', isPremiumCheckoutOpen);
+
   useEffect(() => {
     if (user) {
       checkSubscriptionStatus();
