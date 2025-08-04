@@ -364,55 +364,67 @@ export function SuperEnhancedBlogListing() {
 
           {/* Enhanced Search and Filters */}
           <div className="mb-12 space-y-6">
-            {/* Search */}
-            <form onSubmit={handleSearch} className="relative max-w-4xl mx-auto">
+            {/* Modern Search Design */}
+            <form onSubmit={handleSearch} className="relative max-w-5xl mx-auto">
               <div className="relative">
-                {/* Main search container with clean design */}
-                <div className="relative bg-white rounded-full shadow-lg border border-gray-200 hover:shadow-xl hover:border-gray-300 focus-within:shadow-xl focus-within:border-blue-400 transition-all duration-300">
-                  {/* Search icon */}
-                  <div className="absolute left-6 top-1/2 transform -translate-y-1/2 z-10">
-                    <Search className="h-6 w-6 text-gray-400 transition-colors duration-300" />
+                {/* Redesigned search container with glass morphism */}
+                <div className="relative group">
+                  {/* Background with gradient and glass effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-2xl border border-blue-100/50 backdrop-blur-xl transition-all duration-500 group-focus-within:from-blue-100 group-focus-within:to-blue-50"></div>
+
+                  {/* Animated border glow */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 opacity-0 group-focus-within:opacity-20 rounded-2xl blur-xl transition-all duration-500"></div>
+
+                  {/* Main content container */}
+                  <div className="relative flex items-center p-3 gap-4">
+                    {/* Search icon with animation */}
+                    <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl group-focus-within:scale-110 transition-transform duration-300">
+                      <Search className="h-6 w-6 text-white" />
+                    </div>
+
+                    {/* Input field */}
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Search for trending posts, topics, or keywords..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full text-lg py-4 px-0 border-0 bg-transparent focus:outline-none focus:ring-0 placeholder:text-gray-500 text-gray-800 font-medium"
+                      />
+                    </div>
+
+                    {/* Search button with enhanced design */}
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="h-12 px-8 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
+                    >
+                      <span className="hidden sm:inline">Search</span>
+                      <div className="relative">
+                        <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+                      </div>
+                    </Button>
                   </div>
 
-                  {/* Input and button container */}
-                  <div className="flex items-center">
-                    <Input
-                      placeholder="Search community posts..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="flex-1 pl-16 pr-6 py-6 text-lg border-0 bg-transparent focus:outline-none focus:ring-0 placeholder:text-gray-500 text-gray-800 rounded-full"
-                    />
-
-                    {/* Search button */}
-                    <div className="pr-2">
-                      <Button
-                        type="submit"
-                        size="lg"
-                        className="h-12 px-8 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
-                      >
-                        <span>Search</span>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                      </Button>
+                  {/* Floating search suggestions indicator */}
+                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 opacity-0 group-focus-within:opacity-100 transition-all duration-300">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-blue-100 text-sm text-gray-600">
+                      <Sparkles className="h-4 w-4 text-blue-500" />
+                      <span>Press Enter to search or browse topics below</span>
                     </div>
                   </div>
                 </div>
-
-                {/* Subtle glow effect */}
-                <div className="absolute inset-0 bg-blue-500/5 rounded-full blur-xl opacity-0 hover:opacity-100 transition-opacity duration-500 -z-10"></div>
               </div>
 
               {/* Enhanced Popular searches section */}
               <div className="mt-8 mb-6">
-                <div className="relative bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/20 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-6 shadow-sm backdrop-blur-sm">
+                <div className="relative bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/20 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-6 backdrop-blur-sm">
                   {/* Decorative elements */}
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full -translate-y-16 translate-x-16 blur-2xl"></div>
                   <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-400/10 to-blue-400/10 rounded-full translate-y-12 -translate-x-12 blur-xl"></div>
 
                   <div className="relative flex flex-col items-center gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-lg">
+                      <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
                         <TrendingUp className="h-4 w-4 text-white" />
                       </div>
                       <h3 className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-white bg-clip-text text-transparent">
@@ -433,7 +445,7 @@ export function SuperEnhancedBlogListing() {
                             setSearchQuery(term);
                             searchPosts(term);
                           }}
-                          className="group relative px-6 py-3 text-sm font-medium bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/70 dark:border-slate-700/70 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
+                          className="group relative px-6 py-3 text-sm font-medium bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/70 dark:border-slate-700/70 rounded-xl transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
                           style={{
                             animation: `fade-in 0.6s ease-out forwards ${index * 100}ms`
                           }}
@@ -469,13 +481,13 @@ export function SuperEnhancedBlogListing() {
               </div>
             </form>
 
-            {/* Enhanced Filter Buttons */}
+            {/* Enhanced Filter Buttons - All Blue Theme */}
             <div className="flex flex-wrap justify-center gap-4 p-2">
               {[
-                { key: 'all', label: 'All Posts', icon: BookOpen, color: 'from-slate-600 to-slate-800', hoverColor: 'from-slate-700 to-slate-900', accent: 'slate' },
-                { key: 'claimable', label: 'Claimable', icon: Crown, color: 'from-amber-500 to-orange-600', hoverColor: 'from-amber-600 to-orange-700', accent: 'amber' },
-                { key: 'claimed', label: 'Claimed', icon: CheckCircle, color: 'from-emerald-500 to-green-600', hoverColor: 'from-emerald-600 to-green-700', accent: 'emerald' },
-                ...(user ? [{ key: 'my-posts', label: 'My Posts', icon: User, color: 'from-blue-500 to-purple-600', hoverColor: 'from-blue-600 to-purple-700', accent: 'blue' }] : [])
+                { key: 'all', label: 'All Posts', icon: BookOpen, color: 'from-blue-500 to-blue-700', hoverColor: 'from-blue-600 to-blue-800', accent: 'blue' },
+                { key: 'claimable', label: 'Claimable', icon: Crown, color: 'from-blue-400 to-blue-600', hoverColor: 'from-blue-500 to-blue-700', accent: 'blue' },
+                { key: 'claimed', label: 'Claimed', icon: CheckCircle, color: 'from-blue-600 to-blue-800', hoverColor: 'from-blue-700 to-blue-900', accent: 'blue' },
+                ...(user ? [{ key: 'my-posts', label: 'My Posts', icon: User, color: 'from-blue-500 to-indigo-600', hoverColor: 'from-blue-600 to-indigo-700', accent: 'blue' }] : [])
               ].map(({ key, label, icon: Icon, color, hoverColor, accent }, index) => (
                 <button
                   key={key}
@@ -484,7 +496,6 @@ export function SuperEnhancedBlogListing() {
                     group relative px-8 py-4 rounded-2xl font-semibold text-sm tracking-wide
                     transition-all duration-500 ease-out transform
                     hover:scale-105 hover:-translate-y-1 active:scale-95
-                    shadow-lg hover:shadow-2xl
                     ${filterType === key
                       ? `bg-gradient-to-br ${color} text-white shadow-xl border-0
                          before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:${hoverColor}
@@ -669,11 +680,11 @@ function SuperPostCard({
       }}
       onClick={() => navigate(`/blog/${post.slug}`)}
     >
-      {/* Gradient overlay on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      
-      {/* Animated border glow */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500"></div>
+      {/* Illuminated gold border on hover */}
+      <div className="absolute inset-0 border-2 border-transparent group-hover:border-yellow-400 rounded-lg transition-all duration-300"></div>
+
+      {/* Gold glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-400 opacity-0 group-hover:opacity-30 blur-lg transition-opacity duration-300 rounded-lg"></div>
 
       <CardHeader className="relative z-10 pb-4">
         <div className="flex items-start justify-between mb-4">
@@ -753,7 +764,7 @@ function SuperPostCard({
           </div>
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4 text-purple-500" />
-            {post.reading_time}m read
+{post.reading_time || 0}m read
           </div>
           <div className="flex items-center gap-1">
             <Eye className="h-4 w-4 text-green-500" />
@@ -807,7 +818,7 @@ function SuperPostCard({
                 onClaim();
               }}
               disabled={claiming}
-              className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-white font-semibold py-3"
+              className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 transform hover:scale-105 transition-all duration-300 text-white font-semibold py-3"
               size="lg"
             >
               {claiming ? (
@@ -826,30 +837,7 @@ function SuperPostCard({
             </Button>
           )}
 
-          {deletePermissions.canDelete && (
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              disabled={deleting}
-              variant="destructive"
-              className="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-              size="lg"
-            >
-              {deleting ? (
-                <>
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="h-5 w-5 mr-2" />
-                  Delete Post
-                </>
-              )}
-            </Button>
-          )}
+
         </div>
 
         {/* SEO Score Indicator */}
@@ -857,11 +845,11 @@ function SuperPostCard({
           <div className="flex items-center justify-between text-xs text-gray-500">
             <span className="flex items-center gap-1">
               <Star className="h-3 w-3 text-yellow-500" />
-              SEO Score: {post.seo_score}/100
+              SEO Score: {post.seo_score || 0}/100
             </span>
             <span className="flex items-center gap-1">
               <Globe className="h-3 w-3 text-blue-500" />
-              {post.word_count} words
+              {post.word_count || 0} words
             </span>
           </div>
         </div>
