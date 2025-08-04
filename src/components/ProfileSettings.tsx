@@ -298,7 +298,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                   {roleInfo.icon}
                   {roleInfo.name}
                 </Badge>
-                {user.email_confirmed_at ? (
+                {user?.email_confirmed_at ? (
                   <Badge variant="default" className="bg-green-500">
                     <CheckCircle className="h-3 w-3 mr-1" />
                     Verified
