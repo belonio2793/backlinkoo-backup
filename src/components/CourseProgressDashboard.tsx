@@ -14,8 +14,8 @@ import {
   Calendar,
   Award,
   Zap,
-  Fire,
-  BarChart3,
+  Flame,
+  BarChart3,Chart3,
   PieChart,
   Activity,
   Lightbulb
