@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { PremiumUpgradeService } from '@/services/premiumUpgradeService';
-import { CheckCircle, Crown, ArrowRight, Sparkles, Loader2, X } from 'lucide-react';
+import { PaymentVerificationService } from '@/services/paymentVerificationService';
+import { CheckCircle, Crown, ArrowRight, Sparkles, Loader2, X } from 'lucide-react\';ct\';t\';e-react\';lucide-react';
 
 export default function PaymentSuccess() {
   const navigate = useNavigate();
