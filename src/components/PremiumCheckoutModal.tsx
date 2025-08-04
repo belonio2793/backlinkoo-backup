@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import SubscriptionService from '@/services/subscriptionService';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Crown,
   CreditCard,
