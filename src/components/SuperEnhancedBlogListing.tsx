@@ -260,6 +260,8 @@ export function SuperEnhancedBlogListing() {
     if (!title) return '';
     // Remove all markdown artifacts from title including ** wrappers
     return title
+      .replace(/^\s*\*\*Title:\s*([^*]*)\*\*\s*/i, '$1') // Remove **Title:** wrapper and extract content
+      .replace(/^\s*Title:\s*/gi, '') // Remove Title: prefix
       .replace(/^\*\*H1\*\*:\s*/i, '')
       .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
       .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
