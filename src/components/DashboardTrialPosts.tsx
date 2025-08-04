@@ -329,7 +329,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
           </div>
           
           <CardTitle className="text-lg leading-tight hover:text-blue-600 transition-colors cursor-pointer">
-            {post.title}
+            {cleanTitle(post.title)}
           </CardTitle>
           
           <p className="text-sm text-gray-600 line-clamp-2 mt-2">
