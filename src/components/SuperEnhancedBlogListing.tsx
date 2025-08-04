@@ -403,24 +403,68 @@ export function SuperEnhancedBlogListing() {
                 <div className="absolute inset-0 bg-blue-500/5 rounded-full blur-xl opacity-0 hover:opacity-100 transition-opacity duration-500 -z-10"></div>
               </div>
 
-              {/* Quick search suggestions with improved layout */}
-              <div className="mt-6">
-                <div className="flex items-center justify-center gap-4 flex-wrap">
-                  <span className="text-sm text-gray-600 font-medium whitespace-nowrap">Popular searches:</span>
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {getRandomizedKeywords().map((term) => (
-                      <button
-                        key={term}
-                        type="button"
-                        onClick={() => {
-                          setSearchQuery(term);
-                          searchPosts(term);
-                        }}
-                        className="px-4 py-2 text-sm bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 rounded-full border border-gray-200 hover:border-blue-200 transition-all duration-200 hover:scale-105 transform font-medium"
-                      >
-                        {term}
-                      </button>
-                    ))}
+              {/* Enhanced Popular searches section */}
+              <div className="mt-8 mb-6">
+                <div className="relative bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/20 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-6 shadow-sm backdrop-blur-sm">
+                  {/* Decorative elements */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full -translate-y-16 translate-x-16 blur-2xl"></div>
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-400/10 to-blue-400/10 rounded-full translate-y-12 -translate-x-12 blur-xl"></div>
+
+                  <div className="relative flex flex-col items-center gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-lg">
+                        <TrendingUp className="h-4 w-4 text-white" />
+                      </div>
+                      <h3 className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-white bg-clip-text text-transparent">
+                        Trending Topics
+                      </h3>
+                    </div>
+
+                    <p className="text-sm text-slate-600 dark:text-slate-400 text-center max-w-md">
+                      Discover what's popular right now or explore these trending categories
+                    </p>
+
+                    <div className="flex flex-wrap gap-3 justify-center max-w-2xl">
+                      {getRandomizedKeywords().map((term, index) => (
+                        <button
+                          key={term}
+                          type="button"
+                          onClick={() => {
+                            setSearchQuery(term);
+                            searchPosts(term);
+                          }}
+                          className="group relative px-6 py-3 text-sm font-medium bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/70 dark:border-slate-700/70 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
+                          style={{
+                            animationDelay: `${index * 100}ms`,
+                            animation: 'fade-in 0.6s ease-out forwards'
+                          }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-blue-500/10 group-hover:via-purple-500/10 group-hover:to-pink-500/10 rounded-xl transition-all duration-300"></div>
+                          <div className="relative flex items-center gap-2">
+                            <span className="capitalize text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                              {term}
+                            </span>
+                            <ArrowRight className="h-3 w-3 text-slate-400 group-hover:text-blue-500 transition-all duration-300 group-hover:translate-x-0.5 opacity-0 group-hover:opacity-100" />
+                          </div>
+
+                          {/* Subtle glow effect */}
+                          <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-xl transition-opacity duration-300 -z-10"></div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Stats or additional info */}
+                    <div className="flex items-center gap-4 mt-2 text-xs text-slate-500 dark:text-slate-400">
+                      <div className="flex items-center gap-1">
+                        <Activity className="h-3 w-3" />
+                        <span>Live trending</span>
+                      </div>
+                      <div className="w-1 h-1 bg-slate-300 dark:bg-slate-600 rounded-full"></div>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        <span>Most searched</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
