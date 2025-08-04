@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { usePremium } from '@/hooks/usePremium';
 import { userService, UserProfile } from '@/services/userService';
+import { profileService, UserProfileData, UserSettings as ProfileUserSettings } from '@/services/profileService';
 import { 
   User, 
   Mail, 
