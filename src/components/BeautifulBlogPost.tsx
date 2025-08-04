@@ -698,15 +698,22 @@ export function BeautifulBlogPost() {
                 )}
 
                 {canDelete && (
-                  <Button
-                    onClick={() => setShowDeleteDialog(true)}
-                    variant="outline"
-                    size="lg"
-                    className="bg-transparent border-red-300 text-red-600 hover:bg-transparent hover:border-red-500 hover:text-red-700 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full transition-all duration-300"
-                  >
-                    <Trash2 className="mr-3 h-5 w-5" />
-                    Delete Post
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => setShowDeleteDialog(true)}
+                        variant="outline"
+                        size="lg"
+                        className="bg-transparent border-red-300 text-red-600 hover:bg-transparent hover:border-red-500 hover:text-red-700 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full transition-all duration-300"
+                      >
+                        <Trash2 className="mr-3 h-5 w-5" />
+                        Delete Post
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Permanently delete this post. {isOwnPost ? 'As the owner, you can delete this post at any time.' : 'Unclaimed posts can be deleted by anyone.'} This action cannot be undone.</p>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </div>
             </div>
