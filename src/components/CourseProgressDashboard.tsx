@@ -370,7 +370,7 @@ export function CourseProgressDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Fire className="h-5 w-5" />
+                  <Flame className={"h-5 w-5\" />=\"h-5 w-5"} />
                   Learning Streak
                 </CardTitle>
               </CardHeader>
