@@ -184,7 +184,8 @@ export default {
 				'slide-up': 'slide-up 0.6s ease-out',
 				'word-slide': 'word-slide 0.5s ease-out forwards',
 				'gradient-shift': 'gradient-shift 3s ease-in-out infinite',
-				'pulse-glow': 'pulse-glow 2s ease-in-out infinite'
+				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+				'shimmer': 'shimmer 2s infinite'
 			}
 		}
 	},
