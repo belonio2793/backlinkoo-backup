@@ -370,7 +370,7 @@ export function SuperEnhancedBlogListing() {
                 {/* Redesigned search container with glass morphism */}
                 <div className="relative group">
                   {/* Background with gradient and glass effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-2xl shadow-2xl border border-blue-100/50 backdrop-blur-xl transition-all duration-500 group-hover:shadow-3xl group-focus-within:shadow-3xl group-focus-within:from-blue-100 group-focus-within:to-blue-50"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-2xl border border-blue-100/50 backdrop-blur-xl transition-all duration-500 group-focus-within:from-blue-100 group-focus-within:to-blue-50"></div>
 
                   {/* Animated border glow */}
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 opacity-0 group-focus-within:opacity-20 rounded-2xl blur-xl transition-all duration-500"></div>
@@ -378,7 +378,7 @@ export function SuperEnhancedBlogListing() {
                   {/* Main content container */}
                   <div className="relative flex items-center p-3 gap-4">
                     {/* Search icon with animation */}
-                    <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg group-focus-within:scale-110 transition-transform duration-300">
+                    <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl group-focus-within:scale-110 transition-transform duration-300">
                       <Search className="h-6 w-6 text-white" />
                     </div>
 
@@ -396,7 +396,7 @@ export function SuperEnhancedBlogListing() {
                     <Button
                       type="submit"
                       size="lg"
-                      className="h-12 px-8 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
+                      className="h-12 px-8 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
                     >
                       <span className="hidden sm:inline">Search</span>
                       <div className="relative">
@@ -407,7 +407,7 @@ export function SuperEnhancedBlogListing() {
 
                   {/* Floating search suggestions indicator */}
                   <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 opacity-0 group-focus-within:opacity-100 transition-all duration-300">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-lg border border-blue-100 text-sm text-gray-600">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-blue-100 text-sm text-gray-600">
                       <Sparkles className="h-4 w-4 text-blue-500" />
                       <span>Press Enter to search or browse topics below</span>
                     </div>
@@ -417,14 +417,14 @@ export function SuperEnhancedBlogListing() {
 
               {/* Enhanced Popular searches section */}
               <div className="mt-8 mb-6">
-                <div className="relative bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/20 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-6 shadow-sm backdrop-blur-sm">
+                <div className="relative bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/20 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-6 backdrop-blur-sm">
                   {/* Decorative elements */}
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full -translate-y-16 translate-x-16 blur-2xl"></div>
                   <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-400/10 to-blue-400/10 rounded-full translate-y-12 -translate-x-12 blur-xl"></div>
 
                   <div className="relative flex flex-col items-center gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-lg">
+                      <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
                         <TrendingUp className="h-4 w-4 text-white" />
                       </div>
                       <h3 className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-white bg-clip-text text-transparent">
@@ -445,7 +445,7 @@ export function SuperEnhancedBlogListing() {
                             setSearchQuery(term);
                             searchPosts(term);
                           }}
-                          className="group relative px-6 py-3 text-sm font-medium bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/70 dark:border-slate-700/70 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
+                          className="group relative px-6 py-3 text-sm font-medium bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/70 dark:border-slate-700/70 rounded-xl transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
                           style={{
                             animation: `fade-in 0.6s ease-out forwards ${index * 100}ms`
                           }}
@@ -496,7 +496,6 @@ export function SuperEnhancedBlogListing() {
                     group relative px-8 py-4 rounded-2xl font-semibold text-sm tracking-wide
                     transition-all duration-500 ease-out transform
                     hover:scale-105 hover:-translate-y-1 active:scale-95
-                    shadow-lg hover:shadow-2xl
                     ${filterType === key
                       ? `bg-gradient-to-br ${color} text-white shadow-xl border-0
                          before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:${hoverColor}
@@ -819,7 +818,7 @@ function SuperPostCard({
                 onClaim();
               }}
               disabled={claiming}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-white font-semibold py-3"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 text-white font-semibold py-3"
               size="lg"
             >
               {claiming ? (
@@ -846,7 +845,7 @@ function SuperPostCard({
               }}
               disabled={deleting}
               variant="destructive"
-              className="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              className="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-300"
               size="lg"
             >
               {deleting ? (
