@@ -294,7 +294,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
     const canDelete = !post.claimed || (post.user_id === user?.id);
     const isExpiring = isExpiringSoon(post);
     const userClaimedCount = user ? posts.filter(p => p.claimed && p.user_id === user.id).length : 0;
-    const canClaim = userClaimedCount < 3;
+    const canClaim = canClaimUnlimited || userClaimedCount < maxClaimedPosts;
 
     return (
       <Card 
