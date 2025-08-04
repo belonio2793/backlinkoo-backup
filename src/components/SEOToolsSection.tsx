@@ -368,7 +368,6 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
               <Button onClick={() => {
                 console.log('SEO Tools Start Subscription clicked, opening modal');
                 console.log('Current isPremiumCheckoutOpen:', isPremiumCheckoutOpen);
-                alert('Button clicked! Opening modal...');
                 setIsPremiumCheckoutOpen(true);
                 console.log('Set isPremiumCheckoutOpen to true');
               }} size="lg" className="w-full">
