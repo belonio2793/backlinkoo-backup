@@ -29,7 +29,7 @@ import {
   Star
 } from 'lucide-react';
 import { SEOAnalyzer, type SEOAnalysisResult } from '@/services/seoAnalyzer';
-import { PremiumCheckoutModal } from '@/components/PremiumCheckoutModal';
+import { EnhancedPremiumCheckoutModal } from '@/components/EnhancedPremiumCheckoutModal';
 import { userService } from '@/services/userService';
 import { useToast } from '@/hooks/use-toast';
 
