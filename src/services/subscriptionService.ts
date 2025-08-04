@@ -195,13 +195,26 @@ export class SubscriptionService {
    */
   static async updateSubscriptionStatus(email: string, subscribed: boolean, stripeCustomerId?: string) {
     try {
-      const { error } = await supabase
+      const updateData: any = {
+        subscribed,
+        updated_at: new Date().toISOString()
+      };
+
+      if (stripeCustomerId) {
+        updateData.stripe_customer_id = stripeCustomerId;
+      }
+
+      let query = supabase
         .from('subscribers')
-        .update({ 
-          subscribed,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('email', email);
+
+      // If we have a stripe customer ID, be more specific
+      if (stripeCustomerId) {
+        query = query.eq('stripe_customer_id', stripeCustomerId);
+      }
+
+      const { error } = await query;
 
       if (error) {
         logError('Error updating subscription status', error);
