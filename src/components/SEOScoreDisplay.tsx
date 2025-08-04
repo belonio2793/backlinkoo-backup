@@ -402,6 +402,19 @@ export function SEOScoreDisplay({
           </Dialog>
         )}
       </div>
+
+      {/* Pricing Modal */}
+      <PricingModal
+        isOpen={pricingModalOpen}
+        onClose={() => setPricingModalOpen(false)}
+        onAuthSuccess={(user) => {
+          toast({
+            title: "Welcome!",
+            description: "You now have access to premium SEO content.",
+          });
+          setPricingModalOpen(false);
+        }}
+      />
     </TooltipProvider>
   );
 }
