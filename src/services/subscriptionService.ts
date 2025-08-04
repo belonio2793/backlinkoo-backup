@@ -109,6 +109,7 @@ export class SubscriptionService {
       });
 
       console.log('📨 Edge function response:', { data, error });
+      console.log('📨 Raw error object:', JSON.stringify(error, null, 2));
 
       if (error) {
         console.error('❌ Edge function error:', error);
