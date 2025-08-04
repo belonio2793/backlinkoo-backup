@@ -46,6 +46,24 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
 
+  // Profile form data
+  const [profileData, setProfileData] = useState({
+    displayName: '',
+    email: '',
+    bio: '',
+    website: '',
+    company: '',
+    location: ''
+  });
+
+  // Settings data
+  const [settings, setSettings] = useState({
+    emailNotifications: true,
+    marketingEmails: false,
+    weeklyReports: true,
+    securityAlerts: true
+  });
+
   // Debug logging
   console.log('ProfileSettings render:', {
     user: user ? { email: user.email, id: user.id } : null,
@@ -72,24 +90,6 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
       });
     }
   }, [user, profileData.email]);
-
-  // Profile form data
-  const [profileData, setProfileData] = useState({
-    displayName: '',
-    email: '',
-    bio: '',
-    website: '',
-    company: '',
-    location: ''
-  });
-
-  // Settings data
-  const [settings, setSettings] = useState({
-    emailNotifications: true,
-    marketingEmails: false,
-    weeklyReports: true,
-    securityAlerts: true
-  });
 
   useEffect(() => {
     const loadProfileData = async () => {
