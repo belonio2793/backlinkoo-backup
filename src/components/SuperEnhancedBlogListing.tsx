@@ -59,6 +59,12 @@ export function SuperEnhancedBlogListing() {
   const [claiming, setClaiming] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
 
+  // Helper function to randomize keywords on each render
+  const getRandomizedKeywords = () => {
+    const keywords = ['finance', 'technology', 'marketing', 'lifestyle', 'business', 'health', 'travel', 'education', 'food', 'sports'];
+    return keywords.sort(() => Math.random() - 0.5).slice(0, 4);
+  };
+
   useEffect(() => {
     loadPosts();
   }, [filterType]);
@@ -400,21 +406,23 @@ export function SuperEnhancedBlogListing() {
               </div>
 
               {/* Quick search suggestions */}
-              <div className="flex flex-wrap justify-center gap-2 mt-4 opacity-75 hover:opacity-100 transition-opacity duration-300">
-                <span className="text-sm text-gray-500">Quick search:</span>
-                {['finance', 'technology', 'marketing', 'lifestyle'].map((term) => (
-                  <button
-                    key={term}
-                    type="button"
-                    onClick={() => {
-                      setSearchQuery(term);
-                      searchPosts(term);
-                    }}
-                    className="px-3 py-1 text-xs bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 rounded-full transition-colors duration-200 hover:scale-105 transform"
-                  >
-                    {term}
-                  </button>
-                ))}
+              <div className="flex items-center justify-center gap-3 mt-4 opacity-75 hover:opacity-100 transition-opacity duration-300">
+                <span className="text-sm text-gray-500 font-medium">Quick search:</span>
+                <div className="flex flex-wrap gap-2">
+                  {getRandomizedKeywords().map((term) => (
+                    <button
+                      key={term}
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery(term);
+                        searchPosts(term);
+                      }}
+                      className="px-3 py-1 text-xs bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 rounded-full transition-colors duration-200 hover:scale-105 transform"
+                    >
+                      {term}
+                    </button>
+                  ))}
+                </div>
               </div>
             </form>
 
