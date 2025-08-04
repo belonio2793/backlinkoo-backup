@@ -105,11 +105,13 @@ export class ContentFormatter {
    */
   private static convertMarkdownToHtml(content: string): string {
     return content
+      // Remove any "Title:" patterns at the very beginning of content (most aggressive)
+      .replace(/^[\s\n]*Title:\s*[^\n]*\n?/i, '')
       // Convert markdown links [text](url) to <a> tags
       .replace(/\[([^\]]+?)\]\(([^)]+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
       // Convert **H1**: patterns to <h1> tags
       .replace(/\*\*H1\*\*:\s*(.+?)(?=\n|$)/gi, '<h1>$1</h1>')
-      // Convert **Title**: patterns to <h1> tags (and remove the title since it's duplicate)
+      // Convert **Title**: patterns to nothing (remove completely since it's duplicate)
       .replace(/^\*\*Title\*\*:\s*(.+?)(?=\n|$)/gmi, '')
       // Convert **text**: patterns at start of line to <h2> tags (common heading pattern)
       .replace(/^\*\*([^*]+?)\*\*:\s*(.+?)(?=\n|$)/gmi, '<h2>$1: $2</h2>')
@@ -125,7 +127,7 @@ export class ContentFormatter {
       .replace(/^## (.+)$/gm, '<h2>$1</h2>')
       // Convert # headings to h1
       .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-      // Remove standalone "Title:" patterns at start of lines
+      // Remove any remaining standalone "Title:" patterns at start of lines
       .replace(/^Title:\s*[^\n]*\n?/gmi, '');
   }
 
