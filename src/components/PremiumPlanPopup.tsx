@@ -238,7 +238,7 @@ export function PremiumPlanPopup({
 
           // Auto-redirect to dashboard after 2 seconds
           setTimeout(() => {
-            router.push('/dashboard');
+            navigate('/dashboard');
             onClose();
             onSuccess?.();
           }, 2000);
