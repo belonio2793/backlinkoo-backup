@@ -15,15 +15,21 @@ import {
 
 interface CompleteCourseExperienceProps {
   className?: string;
+  isPremium?: boolean;
+  onUpgrade?: () => void;
 }
 
-export function CompleteCourseExperience({ className }: CompleteCourseExperienceProps) {
-  const { isPremium } = useAuth();
+export function CompleteCourseExperience({ className, isPremium, onUpgrade }: CompleteCourseExperienceProps) {
+  const { isPremium: authIsPremium } = useAuth();
+  const effectiveIsPremium = isPremium ?? authIsPremium;
   const [activeTab, setActiveTab] = useState('course');
 
   const handleUpgrade = () => {
-    // This would trigger the premium popup
-    console.log('Upgrade to Premium triggered');
+    if (onUpgrade) {
+      onUpgrade();
+    } else {
+      console.log('Upgrade to Premium triggered');
+    }
   };
 
   return (
@@ -41,7 +47,7 @@ export function CompleteCourseExperience({ className }: CompleteCourseExperience
             </TabsTrigger>
           </TabsList>
 
-          {!isPremium && (
+          {!effectiveIsPremium && (
             <StreamlinedPremiumButton
               variant="default"
               size="sm"
@@ -55,14 +61,14 @@ export function CompleteCourseExperience({ className }: CompleteCourseExperience
         </div>
 
         <TabsContent value="course" className="mt-0">
-          <EnhancedCourseInterface 
-            isPremium={isPremium} 
+          <EnhancedCourseInterface
+            isPremium={effectiveIsPremium}
             onUpgrade={handleUpgrade}
           />
         </TabsContent>
 
         <TabsContent value="progress" className="mt-0">
-          {isPremium ? (
+          {effectiveIsPremium ? (
             <CourseProgressDashboard />
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center space-y-6">
