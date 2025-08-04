@@ -169,10 +169,22 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   }, [toast]);
 
   const handleSaveProfile = async () => {
-    if (!user) return;
-
     setSaving(true);
     try {
+      // Get fresh user data
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+
+      if (authError || !authUser) {
+        toast({
+          title: "Authentication Error",
+          description: "Please sign in again to save your profile.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log('🔄 Saving profile for user:', authUser.email);
+
       const updateData: UserProfileData = {
         display_name: profileData.displayName,
         bio: profileData.bio,
@@ -181,21 +193,26 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
         location: profileData.location
       };
 
+      console.log('📝 Updating profile with data:', updateData);
+
       const result = await profileService.updateProfile(updateData);
 
       if (result.success) {
+        console.log('✅ Profile updated successfully');
         toast({
           title: "Profile Updated",
-          description: result.message,
+          description: "Your profile has been saved successfully!",
         });
       } else {
+        console.error('❌ Profile update failed:', result.message);
         toast({
           title: "Update Failed",
           description: result.message,
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('❌ Profile save error:', error);
       toast({
         title: "Update Failed",
         description: "Failed to update profile. Please try again.",
