@@ -380,9 +380,11 @@ export function BeautifulBlogPost() {
 
   const cleanTitle = (title: string) => {
     if (!title) return '';
-    // Remove all markdown artifacts from title including ** wrappers
+    // Remove all markdown artifacts from title including ** wrappers and Title: prefix
     return title
       .replace(/^\*\*H1\*\*:\s*/i, '')
+      .replace(/^\*\*Title\*\*:\s*/i, '') // Remove **Title**: prefix
+      .replace(/^Title:\s*/i, '') // Remove Title: prefix
       .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
       .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
       .replace(/\*\*/g, '') // Remove any remaining ** symbols
