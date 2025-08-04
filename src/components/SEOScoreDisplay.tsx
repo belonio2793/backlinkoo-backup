@@ -39,6 +39,7 @@ interface SEOScoreDisplayProps {
   metaDescription?: string;
   targetKeyword?: string;
   showDetails?: boolean;
+  isPremiumScore?: boolean;
 }
 
 export function SEOScoreDisplay({
