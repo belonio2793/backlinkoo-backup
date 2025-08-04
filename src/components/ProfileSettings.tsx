@@ -48,6 +48,12 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
   const [showPremiumCheckout, setShowPremiumCheckout] = useState(false);
+  const [showUpdateEmail, setShowUpdateEmail] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   // Profile form data
   const [profileData, setProfileData] = useState({
