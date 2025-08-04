@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { SEOAcademyTab } from '@/components/SEOAcademyTab';
 import { PremiumCheckoutModal } from '@/components/PremiumCheckoutModal';
-import { CompleteCourseExperience } from '@/components/CompleteCourseExperience\';teCourseExperience';
+import { CompleteCourseExperience } from '@/components/CompleteCourseExperience';
 import {
   Crown,
   Star,
