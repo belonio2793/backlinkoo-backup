@@ -361,7 +361,12 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
               </div>
               <div className="text-3xl font-bold text-primary mb-1">$29</div>
               <div className="text-sm text-muted-foreground mb-4">per month</div>
-              <Button onClick={() => setIsPremiumCheckoutOpen(true)} size="lg" className="w-full">
+              <Button onClick={() => {
+                console.log('SEO Tools Start Subscription clicked, opening modal');
+                console.log('Current isPremiumCheckoutOpen:', isPremiumCheckoutOpen);
+                setIsPremiumCheckoutOpen(true);
+                console.log('Set isPremiumCheckoutOpen to true');
+              }} size="lg" className="w-full">
                 <CreditCard className="h-4 w-4 mr-2" />
                 Start Subscription
               </Button>
