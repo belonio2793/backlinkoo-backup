@@ -70,7 +70,7 @@ export function CourseProgressDashboard() {
       id: 'week-streak',
       title: 'Week Warrior',
       description: 'Study for 7 days in a row',
-      icon: <Fire className="h-6 w-6" />,
+      icon: <Flame className={"h-6 w-6\" />,-6 w-6"} />,
       earned: true,
       earnedDate: '2024-01-22'
     },
