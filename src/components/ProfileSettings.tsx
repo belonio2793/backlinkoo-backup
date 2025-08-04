@@ -70,6 +70,8 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   // Debug logging
   console.log('ProfileSettings render:', {
     user: user ? { email: user.email, id: user.id } : null,
+    userEmail: user?.email,
+    profileDataEmail: profileData.email,
     authLoading,
     loading,
     hasUserProfile: !!userProfile,
