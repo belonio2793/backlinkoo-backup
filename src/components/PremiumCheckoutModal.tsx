@@ -41,7 +41,7 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal'>('card');
   const [formData, setFormData] = useState({
-    email: '',
+    email: user?.email || '',
     cardNumber: '',
     expiryDate: '',
     cvv: '',
@@ -255,7 +255,7 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
           {/* Right Side - Payment Form */}
           <div className="p-8">
             <div className="space-y-6">
-              {/* Email for guest users */}
+              {/* Email for guest users only */}
               {!user && (
                 <div>
                   <Label htmlFor="email" className="text-lg font-semibold">Email Address</Label>
@@ -271,6 +271,17 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
                   <p className="text-xs text-gray-500 mt-1">
                     Required for subscription management and receipts
                   </p>
+                </div>
+              )}
+
+              {/* Show logged-in user info */}
+              {user && (
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="font-medium text-green-800">Account: {user.email}</span>
+                  </div>
+                  <div className="text-sm text-green-700">Premium features will be activated immediately</div>
                 </div>
               )}
 
@@ -334,7 +345,7 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
                 ) : (
                   <div className="flex items-center gap-2">
                     <Lock className="h-4 w-4" />
-                    Complete Secure Checkout
+                    Checkout with Stripe/PayPal
                   </div>
                 )}
               </Button>
