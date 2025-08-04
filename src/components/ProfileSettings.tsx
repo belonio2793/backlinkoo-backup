@@ -84,23 +84,37 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
       }
 
       try {
-        setLoading(true);
+        // Initialize with user data immediately
+        setProfileData({
+          displayName: user.user_metadata?.display_name || user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+          email: user.email || '',
+          bio: user.user_metadata?.bio || '',
+          website: user.user_metadata?.website || '',
+          company: user.user_metadata?.company || '',
+          location: user.user_metadata?.location || ''
+        });
 
-        // Ensure profile exists in database
-        await profileService.ensureProfileExists();
+        setSettings({
+          emailNotifications: true,
+          marketingEmails: false,
+          weeklyReports: true,
+          securityAlerts: true
+        });
 
-        // Load profile data from database
+        // Load profile data from database in background and update if available
         const profile = await profileService.getUserProfile();
         const userSettings = await profileService.getUserSettings();
 
-        setProfileData({
-          displayName: profile?.display_name || user.user_metadata?.display_name || user.user_metadata?.full_name || user.email?.split('@')[0] || '',
-          email: user.email || '',
-          bio: profile?.bio || user.user_metadata?.bio || '',
-          website: profile?.website || user.user_metadata?.website || '',
-          company: profile?.company || user.user_metadata?.company || '',
-          location: profile?.location || user.user_metadata?.location || ''
-        });
+        if (profile) {
+          setProfileData(prev => ({
+            ...prev,
+            displayName: profile.display_name || prev.displayName,
+            bio: profile.bio || prev.bio,
+            website: profile.website || prev.website,
+            company: profile.company || prev.company,
+            location: profile.location || prev.location
+          }));
+        }
 
         setSettings({
           emailNotifications: userSettings.email_notifications ?? true,
