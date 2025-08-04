@@ -82,15 +82,17 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (method: 'stripe' | 'paypal' = 'stripe') => {
     setIsProcessing(true);
+    setPaymentMethod(method);
 
     try {
       // Use subscription service with fallback support
       const result = await createSubscriptionWithFallback(
         user,
         !user, // isGuest if no user
-        !user ? formData.email : undefined // guestEmail if no user
+        !user ? formData.email : undefined, // guestEmail if no user
+        method // Pass the payment method
       );
 
       if (result.success && result.url) {
