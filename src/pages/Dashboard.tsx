@@ -899,12 +899,6 @@ const Dashboard = () => {
       console.log('🚪 Dashboard: Sign out button clicked!');
       console.log('🚪 Current user:', user?.email);
 
-      // Show immediate feedback
-      toast({
-        title: "Signing out...",
-        description: "Please wait while we sign you out.",
-      });
-
       // Clear any local state immediately for instant UX
       setUser(null);
       setUserType('user');
@@ -929,25 +923,12 @@ const Dashboard = () => {
         // Don't show error to user since they're already signed out from UI perspective
       }
 
-      // Show success message
-      setTimeout(() => {
-        toast({
-          title: "Signed out successfully",
-          description: "You have been signed out of your account.",
-        });
-      }, 100);
-
     } catch (error) {
       console.error('🚪 Dashboard sign out error:', error);
 
       // Force navigation even if sign out fails
       setUser(null);
       navigate('/');
-
-      toast({
-        title: "Signed out",
-        description: "You have been signed out (with some errors).",
-      });
     }
   };
 
