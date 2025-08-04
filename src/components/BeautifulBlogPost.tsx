@@ -521,8 +521,12 @@ export function BeautifulBlogPost() {
                         Available to Claim
                       </Badge>
                     </TooltipTrigger>
-                    <TooltipContent>
-                      <p>This post is unclaimed and available for anyone to claim. Claimed posts are protected from deletion and can be managed by their owner.</p>
+                    <TooltipContent side="bottom" className="max-w-xs">
+                      <div className="space-y-1">
+                        <p className="font-semibold">Available to Claim</p>
+                        <p className="text-sm">This post is unclaimed and anyone can take ownership of it.</p>
+                        <p className="text-xs text-gray-400">⏳ May be deleted if not claimed soon</p>
+                      </div>
                     </TooltipContent>
                   </Tooltip>
                 )}
