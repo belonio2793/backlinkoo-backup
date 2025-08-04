@@ -264,7 +264,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
 
 
 
-  const providerInfo = getProviderInfo(user.app_metadata?.providers);
+  const providerInfo = getProviderInfo(user?.app_metadata?.providers);
   const displayName = getDisplayName();
   const avatarUrl = getAvatarUrl();
   const roleInfo = getRoleInfo();
