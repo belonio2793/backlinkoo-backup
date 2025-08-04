@@ -129,8 +129,8 @@ class UserService {
       await this.logUserAction(user.id, 'downgrade_from_premium', 'User downgraded from premium role');
 
       return { success: true, message: 'Successfully downgraded from premium' };
-    } catch (error) {
-      console.error('Error in downgradeFromPremium:', error);
+    } catch (error: any) {
+      console.error('Error in downgradeFromPremium:', error.message || error);
       return { success: false, message: 'Unexpected error during downgrade' };
     }
   }
