@@ -15,11 +15,12 @@ import { profileService, UserProfileData, UserSettings as ProfileUserSettings } 
 import { ProfileErrorDebugger } from '@/utils/profileErrorDebugger';
 import { ProfileErrorHandler } from '@/utils/profileErrorHandler';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  User, 
-  Mail, 
-  Calendar, 
-  Shield, 
+import { PremiumCheckoutModal } from '@/components/PremiumCheckoutModal';
+import {
+  User,
+  Mail,
+  Calendar,
+  Shield,
   Crown,
   Settings,
   CheckCircle,
