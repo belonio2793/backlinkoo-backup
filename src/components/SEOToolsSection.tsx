@@ -652,16 +652,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
         </DialogContent>
       </Dialog>
 
-      {/* Premium Checkout Modal */}
-      <PremiumCheckoutModal
-        isOpen={isPremiumCheckoutOpen}
-        onClose={() => setIsPremiumCheckoutOpen(false)}
-        onSuccess={() => {
-          setIsPremiumCheckoutOpen(false);
-          // Refresh subscription status after successful payment
-          checkSubscriptionStatus();
-        }}
-      />
+
     </div>
   );
 };
