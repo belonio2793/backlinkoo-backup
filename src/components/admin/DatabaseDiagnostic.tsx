@@ -12,15 +12,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  Database, 
-  RefreshCw, 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  Database,
+  RefreshCw,
+  CheckCircle,
+  AlertCircle,
   Users,
   Key,
-  Info
+  Info,
+  Settings
 } from "lucide-react";
+import RLSPermissionFixer from './RLSPermissionFixer';
 
 interface TableInfo {
   name: string;
