@@ -1,4 +1,5 @@
 import React from 'react';
+import { logError } from '@/utils/errorFormatter';
 import { useNavigate } from 'react-router-dom';
 
 interface ErrorBoundaryState {
