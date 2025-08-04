@@ -230,6 +230,20 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     return { name: 'Free', color: 'bg-gray-500', icon: <User className="h-3 w-3" /> };
   };
 
+  // Show loading if auth is still checking or user not loaded yet
+  if (authLoading || (!user && loading)) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center p-12">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+            <div className="text-muted-foreground">Loading profile settings...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (!user) {
     return (
       <Card>
