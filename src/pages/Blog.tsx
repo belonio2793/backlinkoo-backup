@@ -664,10 +664,10 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
                 Live
               </Badge>
             )}
-            {(post.seo_score || 0) > 80 && (
-              <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                <Star className="mr-1 h-3 w-3" />
-                Featured
+            {effectiveScore > 80 && (
+              <Badge className={`${isPremiumScore ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200'}`}>
+                {isPremiumScore ? <Crown className="mr-1 h-3 w-3" /> : <Star className="mr-1 h-3 w-3" />}
+                {isPremiumScore ? 'Premium' : 'Featured'}
               </Badge>
             )}
           </div>
