@@ -13,6 +13,7 @@ import { usePremium } from '@/hooks/usePremium';
 import { userService, UserProfile } from '@/services/userService';
 import { profileService, UserProfileData, UserSettings as ProfileUserSettings } from '@/services/profileService';
 import { ProfileErrorDebugger } from '@/utils/profileErrorDebugger';
+import { ProfileErrorHandler } from '@/utils/profileErrorHandler';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   User, 
@@ -76,7 +77,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   // If we have user data from context but no profile data yet, initialize immediately
   useEffect(() => {
     if (user && !profileData.email) {
-      console.log('🔄 Initializing profile data from auth context');
+      console.log('���� Initializing profile data from auth context');
       setProfileData({
         displayName: user.user_metadata?.display_name ||
                     user.user_metadata?.full_name ||
@@ -112,7 +113,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
           return;
         }
 
-        console.log('��� Loading profile data for user:', authUser.email);
+        console.log('🔄 Loading profile data for user:', authUser.email);
 
         // Initialize with auth user data immediately
         const initialData = {
