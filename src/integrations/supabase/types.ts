@@ -349,6 +349,8 @@ export type Database = {
           email: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
+          subscription_status: string | null
+          subscription_tier: string | null
           updated_at: string
           user_id: string
         }
