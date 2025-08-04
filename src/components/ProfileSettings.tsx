@@ -116,12 +116,14 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
           }));
         }
 
-        setSettings({
-          emailNotifications: userSettings.email_notifications ?? true,
-          marketingEmails: userSettings.marketing_emails ?? false,
-          weeklyReports: userSettings.weekly_reports ?? true,
-          securityAlerts: userSettings.security_alerts ?? true
-        });
+        if (userSettings) {
+          setSettings({
+            emailNotifications: userSettings.email_notifications ?? true,
+            marketingEmails: userSettings.marketing_emails ?? false,
+            weeklyReports: userSettings.weekly_reports ?? true,
+            securityAlerts: userSettings.security_alerts ?? true
+          });
+        }
       } catch (error: any) {
         console.error('Error loading profile data:', error);
 
