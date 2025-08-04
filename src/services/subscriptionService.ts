@@ -171,11 +171,12 @@ export class SubscriptionService {
       // For now, we'll just update the local record
       const { error } = await supabase
         .from('subscribers')
-        .update({ 
+        .update({
           subscribed: false,
           updated_at: new Date().toISOString()
         })
-        .eq('email', user.email);
+        .eq('email', user.email)
+        .eq('subscribed', true);
 
       if (error) {
         logError('Error cancelling subscription', error);
