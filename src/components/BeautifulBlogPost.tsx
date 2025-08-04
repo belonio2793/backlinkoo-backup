@@ -295,6 +295,38 @@ export function BeautifulBlogPost() {
     }
   };
 
+  const handleAuthSuccess = async (user: any) => {
+    // After successful login/signup, automatically attempt to claim the post
+    setShowClaimModal(false);
+
+    // Small delay to let the auth state update
+    setTimeout(async () => {
+      try {
+        const result = await EnhancedBlogClaimService.claimPost(slug!, user);
+
+        if (result.success) {
+          setBlogPost(result.post!);
+          toast({
+            title: "Success! 🎉",
+            description: "You've successfully claimed this post!",
+          });
+        } else {
+          toast({
+            title: "Claim Failed",
+            description: result.message,
+            variant: "destructive"
+          });
+        }
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred while claiming the post",
+          variant: "destructive"
+        });
+      }
+    }, 1000);
+  };
+
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
