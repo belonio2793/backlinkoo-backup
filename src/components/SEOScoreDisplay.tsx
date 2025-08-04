@@ -50,6 +50,7 @@ export function SEOScoreDisplay({
 }: SEOScoreDisplayProps) {
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysis, setAnalysis] = useState<SEOAnalysisResult | null>(null);
+  const [pricingModalOpen, setPricingModalOpen] = useState(false);
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-600';
@@ -227,7 +228,7 @@ export function SEOScoreDisplay({
                         <div className="mt-2 text-xs space-y-1">
                           <div className="flex justify-between">
                             <span>Length ({analysis.details.title.length} chars)</span>
-                            {analysis.details.title.optimalLength ? '✓' : '✗'}
+                            {analysis.details.title.optimalLength ? '��' : '✗'}
                           </div>
                           <div className="flex justify-between">
                             <span>Has Keywords</span>
