@@ -617,7 +617,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "premium" | "user"
       user_role_type: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
