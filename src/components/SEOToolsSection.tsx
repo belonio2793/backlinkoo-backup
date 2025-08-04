@@ -92,6 +92,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const [billingEmailNotifications, setBillingEmailNotifications] = useState(true);
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
+  const [isPremiumCheckoutOpen, setIsPremiumCheckoutOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
