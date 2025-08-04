@@ -116,16 +116,20 @@ export class SubscriptionService {
     if (!user) return null;
 
     try {
-      const { data: subscriber, error } = await supabase
+      const { data: subscribers, error } = await supabase
         .from('subscribers')
         .select('*')
-        .eq('email', user.email)
-        .single();
+        .eq('email', user.email);
 
       if (error) {
         logError('Error fetching subscription info', error);
         return null;
       }
+
+      // Get the most recent subscriber if multiple exist
+      const subscriber = subscribers && subscribers.length > 0
+        ? subscribers.sort((a, b) => new Date(b.updated_at || b.created_at || '').getTime() - new Date(a.updated_at || a.created_at || '').getTime())[0]
+        : null;
 
       return {
         plan: "Premium SEO Tools",
