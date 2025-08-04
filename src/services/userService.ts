@@ -31,8 +31,8 @@ class UserService {
       }
 
       return profile;
-    } catch (error) {
-      console.error('Error getting current user profile:', error);
+    } catch (error: any) {
+      console.error('Error getting current user profile:', error.message || error);
       return null;
     }
   }
