@@ -48,8 +48,15 @@ export class ContentFormatter {
       .replace(/^#{1,6}\s+/, '')
       .trim();
 
-    // Remove "Title: " prefix patterns at the beginning
-    content = content.replace(/^[\s\n]*Title:\s*/i, '');
+    // First, aggressively remove any "Title:" patterns at the very beginning
+    content = content.replace(/^[\s\n]*Title:\s*[^\n]*\n?/i, '');
+
+    // Remove any lines that are just "Title:" followed by the actual title
+    content = content.replace(/^[\s\n]*Title:\s*(.+?)\n?/i, '');
+
+    // Remove H2 tags that contain title with "Title:" prefix (most common issue)
+    const h2TitlePrefixPattern = new RegExp(`^\\s*<h2[^>]*>\\s*Title:\\s*${this.escapeRegex(cleanTitle)}\\s*<\\/h2>\\s*`, 'i');
+    content = content.replace(h2TitlePrefixPattern, '');
 
     // Remove H1 tags that contain the same title at the beginning of content
     const titlePattern = new RegExp(`^\\s*<h1[^>]*>\\s*${this.escapeRegex(cleanTitle)}\\s*<\\/h1>\\s*`, 'i');
@@ -58,6 +65,10 @@ export class ContentFormatter {
     // Remove H1 with "Title:" prefix pattern: <h1>Title: actual title</h1>
     const titlePrefixPattern = new RegExp(`^\\s*<h1[^>]*>\\s*Title:\\s*${this.escapeRegex(cleanTitle)}\\s*<\\/h1>\\s*`, 'i');
     content = content.replace(titlePrefixPattern, '');
+
+    // Remove H2 with exact title match
+    const h2TitlePattern = new RegExp(`^\\s*<h2[^>]*>\\s*${this.escapeRegex(cleanTitle)}\\s*<\\/h2>\\s*`, 'i');
+    content = content.replace(h2TitlePattern, '');
 
     // Remove H1 with strong tags pattern: <h1><strong>title</strong></h1>
     const strongTitlePattern = new RegExp(`^\\s*<h1[^>]*>\\s*<strong[^>]*>\\s*${this.escapeRegex(cleanTitle)}\\s*<\\/strong>\\s*<\\/h1>\\s*`, 'i');
@@ -87,8 +98,8 @@ export class ContentFormatter {
     const starTitlePrefixPattern = new RegExp(`^\\s*\\*\\*Title:\\s*${this.escapeRegex(cleanTitle)}\\*\\*\\s*\\n?`, 'i');
     content = content.replace(starTitlePrefixPattern, '');
 
-    // Remove any remaining "Title:" patterns at the beginning of content
-    content = content.replace(/^[\s\n]*Title:\s*[^\n]*\n?/i, '');
+    // Final cleanup - remove any remaining "Title:" patterns at the beginning of content
+    content = content.replace(/^[\s\n]*Title:\s*[^\n]*\n?/gi, '');
 
     return content.trim();
   }
