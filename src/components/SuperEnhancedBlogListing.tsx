@@ -764,7 +764,7 @@ function SuperPostCard({
           </div>
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4 text-purple-500" />
-            {post.reading_time}m read
+{post.reading_time || 0}m read
           </div>
           <div className="flex items-center gap-1">
             <Eye className="h-4 w-4 text-green-500" />
@@ -818,7 +818,7 @@ function SuperPostCard({
                 onClaim();
               }}
               disabled={claiming}
-              className="w-full bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 transform hover:scale-105 transition-all duration-300 text-white font-semibold py-3"
+              className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 transform hover:scale-105 transition-all duration-300 text-white font-semibold py-3"
               size="lg"
             >
               {claiming ? (
@@ -845,11 +845,11 @@ function SuperPostCard({
           <div className="flex items-center justify-between text-xs text-gray-500">
             <span className="flex items-center gap-1">
               <Star className="h-3 w-3 text-yellow-500" />
-              SEO Score: {post.seo_score}/100
+              SEO Score: {post.seo_score || 0}/100
             </span>
             <span className="flex items-center gap-1">
               <Globe className="h-3 w-3 text-blue-500" />
-              {post.word_count} words
+              {post.word_count || 0} words
             </span>
           </div>
         </div>
