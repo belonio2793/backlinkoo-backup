@@ -138,8 +138,6 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
           description: "Failed to load profile data. Using defaults.",
           variant: "destructive",
         });
-      } finally {
-        setLoading(false);
       }
     };
 
