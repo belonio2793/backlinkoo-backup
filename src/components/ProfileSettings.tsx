@@ -40,10 +40,10 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   const { user } = useAuth();
   const { userProfile, isPremium, isAdmin, userLimits, loading: premiumLoading, refresh: refreshPremium } = usePremium();
   
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
-  
+
   // Profile form data
   const [profileData, setProfileData] = useState({
     displayName: '',
