@@ -165,6 +165,46 @@ export function SEOScoreDisplay({
                          analysis.overallScore >= 60 ? 'Good SEO with room for improvement' :
                          'Needs significant SEO improvements'}
                       </p>
+
+                      {/* Premium Teaser */}
+                      {analysis.overallScore < 100 && (
+                        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Crown className="h-4 w-4 text-yellow-600" />
+                                <span className="font-semibold text-blue-800">Want 100/100 SEO Scores?</span>
+                              </div>
+                              <p className="text-sm text-blue-700 mb-3">
+                                Premium Plan members get access to perfectly optimized blog posts with 100/100 SEO scores,
+                                unlimited claims, and advanced SEO features.
+                              </p>
+                              <div className="flex flex-wrap gap-2 text-xs text-blue-600">
+                                <span className="flex items-center gap-1">
+                                  <Star className="h-3 w-3" />
+                                  100/100 SEO Content
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <CheckCircle className="h-3 w-3" />
+                                  Unlimited Claims
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <BarChart3 className="h-3 w-3" />
+                                  Advanced Analytics
+                                </span>
+                              </div>
+                            </div>
+                            <Button
+                              onClick={() => setPricingModalOpen(true)}
+                              size="sm"
+                              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shrink-0"
+                            >
+                              <Crown className="mr-1 h-3 w-3" />
+                              Upgrade Now
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
 
