@@ -89,7 +89,9 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
   ];
 
   const handleUpgrade = () => {
+    console.log('PremiumPlanTab handleUpgrade called, isCheckoutOpen will be set to true');
     setIsCheckoutOpen(true);
+    console.log('isCheckoutOpen state updated');
   };
 
   const handleCheckoutSuccess = () => {
