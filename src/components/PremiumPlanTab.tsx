@@ -166,11 +166,10 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
       </div>
 
       <Tabs value={activeFeature} onValueChange={setActiveFeature} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Features Overview</TabsTrigger>
           <TabsTrigger value="comparison">Plan Comparison</TabsTrigger>
           <TabsTrigger value="seo-academy">SEO Academy</TabsTrigger>
-          <TabsTrigger value="academy-courses">Course Content</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -268,66 +267,7 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
         </TabsContent>
 
         <TabsContent value="seo-academy" className="space-y-6">
-          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <BookOpen className="h-8 w-8 text-blue-600" />
-                <div>
-                  <CardTitle className="text-2xl text-blue-800">SEO Academy</CardTitle>
-                  <p className="text-blue-600 mt-1">Complete SEO Mastery Course</p>
-                </div>
-                {!isSubscribed && (
-                  <Lock className="h-6 w-6 text-gray-400 ml-auto" />
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {!isSubscribed ? (
-                <div className="text-center py-8">
-                  <Lock className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-700 mb-2">Premium Feature</h3>
-                  <p className="text-gray-600 mb-4">
-                    Unlock the complete SEO Academy with your Premium subscription
-                  </p>
-                  <Button onClick={handleUpgrade} className="bg-blue-600 hover:bg-blue-700">
-                    <Crown className="mr-2 h-4 w-4" />
-                    Upgrade to Access
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="p-4 bg-white rounded-lg border">
-                    <div className="flex items-center gap-2 mb-2">
-                      <BookOpen className="h-5 w-5 text-green-600" />
-                      <span className="font-semibold">50+ Lessons</span>
-                    </div>
-                    <p className="text-sm text-gray-600">Comprehensive curriculum covering all aspects of SEO</p>
-                  </div>
-                  <div className="p-4 bg-white rounded-lg border">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Star className="h-5 w-5 text-yellow-500" />
-                      <span className="font-semibold">Certifications</span>
-                    </div>
-                    <p className="text-sm text-gray-600">Earn verified certificates upon course completion</p>
-                  </div>
-                  <div className="p-4 bg-white rounded-lg border">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Users className="h-5 w-5 text-blue-600" />
-                      <span className="font-semibold">Expert Support</span>
-                    </div>
-                    <p className="text-sm text-gray-600">Get help from SEO professionals</p>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="academy-courses" className="space-y-6">
-          <SEOAcademyTab
-            isSubscribed={isSubscribed}
-            onUpgrade={handleUpgrade}
-          />
+          <CompleteCourseExperience />
         </TabsContent>
       </Tabs>
 
