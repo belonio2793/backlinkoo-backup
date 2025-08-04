@@ -913,6 +913,15 @@ export function BeautifulBlogPost() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Claim Login Modal */}
+      <ClaimLoginModal
+        isOpen={showClaimModal}
+        onClose={() => setShowClaimModal(false)}
+        onAuthSuccess={handleAuthSuccess}
+        postTitle={cleanTitle(blogPost?.title || '')}
+        postSlug={slug || ''}
+      />
+
       <Footer />
       </div>
     </TooltipProvider>
