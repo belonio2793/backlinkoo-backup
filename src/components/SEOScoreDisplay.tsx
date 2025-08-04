@@ -138,9 +138,41 @@ export function SEOScoreDisplay({
                 </div>
               </div>
             ) : (
-              <div>
-                <p>Search Engine Optimization Score</p>
-                <p className="text-xs">Higher scores indicate better SEO optimization</p>
+              <div className="space-y-3 max-w-sm">
+                <div>
+                  <p className="font-semibold">Search Engine Optimization Score</p>
+                  <p className="text-xs text-gray-600">Higher scores indicate better SEO optimization</p>
+                </div>
+
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="font-medium text-blue-800 mb-2 text-sm">How the score is calculated:</p>
+                  <div className="space-y-1 text-xs text-blue-700">
+                    <div className="flex justify-between">
+                      <span>• Title optimization</span>
+                      <span className="font-medium">25%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>• Content quality</span>
+                      <span className="font-medium">30%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>• Structure & headings</span>
+                      <span className="font-medium">20%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>• Readability</span>
+                      <span className="font-medium">15%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>• Meta description</span>
+                      <span className="font-medium">10%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-xs text-gray-600">
+                  <p>Click "Analyze" for detailed breakdown and recommendations</p>
+                </div>
               </div>
             )}
           </TooltipContent>
