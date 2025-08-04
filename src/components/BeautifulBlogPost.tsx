@@ -384,12 +384,13 @@ export function BeautifulBlogPost() {
     return title
       .replace(/^\*\*H1\*\*:\s*/i, '')
       .replace(/^\*\*Title\*\*:\s*/i, '') // Remove **Title**: prefix
-      .replace(/^Title:\s*/i, '') // Remove Title: prefix
+      .replace(/^Title:\s*/gi, '') // Remove Title: prefix (global + case insensitive)
       .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
       .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
       .replace(/\*\*/g, '') // Remove any remaining ** symbols
       .replace(/\*/g, '') // Remove any remaining * symbols
       .replace(/^#{1,6}\s+/, '')
+      .replace(/^Title:\s*/gi, '') // Final cleanup for any remaining Title: patterns
       .trim();
   };
 
