@@ -57,8 +57,8 @@ class UserService {
     try {
       const profile = await this.getCurrentUserProfile();
       return profile?.role === 'admin';
-    } catch (error) {
-      console.error('Error checking admin status:', error);
+    } catch (error: any) {
+      console.error('Error checking admin status:', error.message || error);
       return false;
     }
   }
