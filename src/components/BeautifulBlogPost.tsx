@@ -386,6 +386,7 @@ export function BeautifulBlogPost() {
     if (!title) return '';
     // Remove all markdown artifacts from title including ** wrappers and Title: prefix
     return title
+      .replace(/^\s*\*\*Title:\s*([^*]*)\*\*\s*/i, '$1') // Remove **Title:** wrapper and extract content
       .replace(/^\*\*H1\*\*:\s*/i, '')
       .replace(/^\*\*Title\*\*:\s*/i, '') // Remove **Title**: prefix
       .replace(/^Title:\s*/gi, '') // Remove Title: prefix (global + case insensitive)
