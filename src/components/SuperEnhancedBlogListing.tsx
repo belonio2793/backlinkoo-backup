@@ -819,7 +819,7 @@ function SuperPostCard({
                 onClaim();
               }}
               disabled={claiming}
-              className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-white font-semibold py-3"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-white font-semibold py-3"
               size="lg"
             >
               {claiming ? (
