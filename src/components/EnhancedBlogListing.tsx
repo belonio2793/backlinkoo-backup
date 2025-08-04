@@ -551,7 +551,7 @@ function PostCard({
         </div>
         
         <CardTitle className="text-lg line-clamp-2 leading-tight">
-          {post.title}
+          {cleanTitle(post.title)}
         </CardTitle>
         
         <div className="flex items-center gap-4 text-sm text-gray-600">
