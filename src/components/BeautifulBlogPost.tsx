@@ -43,6 +43,8 @@ import { ContentFormatter } from '@/utils/contentFormatter';
 import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
+import { maskEmail } from '@/utils/emailMasker';
+import { SEOScoreDisplay } from '@/components/SEOScoreDisplay';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -53,6 +55,7 @@ export function BeautifulBlogPost() {
   const { toast } = useToast();
   
   const [blogPost, setBlogPost] = useState<BlogPost | null>(null);
+  const [authorEmail, setAuthorEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
   const [unclaiming, setUnclaiming] = useState(false);
@@ -119,6 +122,26 @@ export function BeautifulBlogPost() {
       setLoading(true);
       const post = await blogService.getBlogPostBySlug(slug);
       setBlogPost(post);
+
+      // If post is claimed, fetch the author's email
+      if (post?.claimed && post?.user_id) {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('user_id', post.user_id)
+            .single();
+
+          if (profile?.email) {
+            setAuthorEmail(profile.email);
+          }
+        } catch (emailError) {
+          console.log('Could not fetch author email:', emailError);
+          // Don't show error to user, just don't display email
+        }
+      } else {
+        setAuthorEmail(null);
+      }
     } catch (error: any) {
       console.error('Failed to load blog post:', error);
       toast({
@@ -535,9 +558,16 @@ export function BeautifulBlogPost() {
                       <TooltipTrigger asChild>
                         <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full text-green-700 shadow-sm cursor-help">
                           <CheckCircle2 className="h-5 w-5" />
-                          <span className="font-semibold">
-                            {isOwnPost ? 'You own this post' : 'This post has been claimed'}
-                          </span>
+                          <div className="flex flex-col">
+                            <span className="font-semibold">
+                              {isOwnPost ? 'You own this post' : 'This post has been claimed'}
+                            </span>
+                            {!isOwnPost && authorEmail && (
+                              <span className="text-xs text-green-600 mt-1">
+                                by {maskEmail(authorEmail)}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" className="max-w-xs">
@@ -702,8 +732,14 @@ export function BeautifulBlogPost() {
                   <span className="font-medium">{blogPost.view_count} views</span>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4" />
-                  <span className="font-medium">SEO Score: {blogPost.seo_score}/100</span>
+                  <SEOScoreDisplay
+                    score={blogPost.seo_score}
+                    title={blogPost.title}
+                    content={blogPost.content}
+                    metaDescription={blogPost.meta_description || undefined}
+                    targetKeyword={blogPost.keywords?.[0]}
+                    showDetails={true}
+                  />
                 </div>
               </div>
 

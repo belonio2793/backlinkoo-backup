@@ -4,6 +4,7 @@
  */
 
 import { enhancedOpenAI } from './enhancedOpenAIService';
+import { SEOAnalyzer } from './seoAnalyzer';
 
 export interface StreamingProgress {
   stage: 'preparing' | 'connecting' | 'generating' | 'formatting' | 'publishing' | 'complete' | 'error';
@@ -294,7 +295,11 @@ export class StreamingOpenAIService {
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
         is_trial_post: true,
         word_count: content.split(' ').length,
-        seo_score: Math.floor(Math.random() * 20) + 80, // Mock SEO score 80-100
+        seo_score: SEOAnalyzer.analyzeBlogPost(
+          title,
+          content,
+          excerpt
+        ).overallScore,
         reading_time: Math.ceil(content.split(' ').length / 200),
         // Enhanced metadata
         ai_provider: metadata?.provider || 'unknown',

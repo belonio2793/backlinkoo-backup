@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { blogPersistenceService } from './blogPersistenceService';
+import { SEOAnalyzer } from './seoAnalyzer';
 
 export type BlogPost = Tables<'blog_posts'>;
 export type CreateBlogPost = TablesInsert<'blog_posts'>;
