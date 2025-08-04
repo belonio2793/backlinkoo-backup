@@ -38,6 +38,9 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
   const [activeFeature, setActiveFeature] = useState('overview');
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
+  // Debug logging
+  console.log('PremiumPlanTab render - isCheckoutOpen:', isCheckoutOpen);
+
   const premiumFeatures = [
     {
       icon: <Infinity className="h-6 w-6" />,
