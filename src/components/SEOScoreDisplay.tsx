@@ -85,8 +85,32 @@ export function SEOScoreDisplay({
             </Badge>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Search Engine Optimization Score</p>
-            <p className="text-xs">Higher scores indicate better SEO optimization</p>
+            {score === 100 ? (
+              <div className="space-y-2 max-w-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-pulse"></div>
+                  <p className="font-semibold text-green-600">Perfect SEO Score! 🎉</p>
+                </div>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  This content achieves the highest SEO optimization possible!
+                </p>
+                <div className="p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200/50">
+                  <p className="font-semibold text-blue-800 mb-2">🚀 Upgrade to Premium Plan</p>
+                  <div className="space-y-1 text-xs text-blue-700">
+                    <p>• Claim unlimited high-quality blog posts</p>
+                    <p>• Access to 100-score optimized content</p>
+                    <p>• Advanced SEO analytics & insights</p>
+                    <p>• Priority content generation</p>
+                    <p>• Custom keyword targeting</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p>Search Engine Optimization Score</p>
+                <p className="text-xs">Higher scores indicate better SEO optimization</p>
+              </div>
+            )}
           </TooltipContent>
         </Tooltip>
 
@@ -184,7 +208,7 @@ export function SEOScoreDisplay({
                         <div className="mt-2 text-xs space-y-1">
                           <div className="flex justify-between">
                             <span>Length ({analysis.details.content.wordCount} words)</span>
-                            {analysis.details.content.optimalLength ? '✓' : '✗'}
+                            {analysis.details.content.optimalLength ? '��' : '✗'}
                           </div>
                           <div className="flex justify-between">
                             <span>Has Headings</span>
