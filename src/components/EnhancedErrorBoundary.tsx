@@ -26,10 +26,8 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Application error caught by boundary:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name,
+    logError('Application error caught by boundary', {
+      ...error,
       componentStack: errorInfo.componentStack
     });
     
