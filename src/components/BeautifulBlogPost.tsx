@@ -89,6 +89,9 @@ export function BeautifulBlogPost() {
   }, []);
 
   const processClaimIntent = async () => {
+    // Only process claim intents for signed-in users
+    if (!user) return;
+
     // Check if there's actually a claim intent before processing
     const claimIntentStr = localStorage.getItem('claim_intent');
     if (!claimIntentStr) return; // No pending claim intent, don't show notifications
