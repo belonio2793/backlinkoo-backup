@@ -47,6 +47,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
+  const [showPremiumCheckout, setShowPremiumCheckout] = useState(false);
 
   // Profile form data
   const [profileData, setProfileData] = useState({
