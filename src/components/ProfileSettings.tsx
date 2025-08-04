@@ -77,7 +77,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   // If we have user data from context but no profile data yet, initialize immediately
   useEffect(() => {
     if (user && !profileData.email) {
-      console.log('���� Initializing profile data from auth context');
+      console.log('🔄 Initializing profile data from auth context');
       setProfileData({
         displayName: user.user_metadata?.display_name ||
                     user.user_metadata?.full_name ||
@@ -149,7 +149,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
         // Load profile data from database and merge with auth data
         console.log('🔄 Loading profile from database...');
         try {
-          const profile = await profileService.getUserProfile();
+          const profile = await ProfileErrorHandler.safeGetProfile();
           const userSettings = await profileService.getUserSettings();
 
           if (profile) {
