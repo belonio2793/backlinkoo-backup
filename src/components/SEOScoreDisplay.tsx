@@ -62,7 +62,8 @@ export function SEOScoreDisplay({
     return 'text-red-600';
   };
 
-  const getScoreBadgeColor = (score: number) => {
+  const getScoreBadgeColor = (score: number, isPremium: boolean = false) => {
+    if (isPremium && score === 100) return 'bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 border-purple-300 shadow-lg';
     if (score === 100) return 'bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800 border-orange-300 shadow-md animate-pulse';
     if (score >= 80) return 'bg-green-100 text-green-800 border-green-200';
     if (score >= 60) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
