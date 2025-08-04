@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { logError } from '@/utils/errorFormatter';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -404,7 +405,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="keyword-research">Keyword Research</TabsTrigger>
           <TabsTrigger value="rank-tracker">Rankings</TabsTrigger>
-          <TabsTrigger value="no-hands-seo">Backlink ∞ Automation Link Building (beta)</TabsTrigger>
+          <TabsTrigger value="no-hands-seo">Backlink �� Automation Link Building (beta)</TabsTrigger>
         </TabsList>
 
         <TabsContent value="no-hands-seo" className="space-y-6">
