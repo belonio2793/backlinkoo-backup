@@ -125,12 +125,16 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
       return;
     }
 
-    // Check if user already has 3 claimed posts
+    // Check if user has reached their claim limit
     const userClaimedCount = posts.filter(post => post.claimed && post.user_id === user.id).length;
-    if (userClaimedCount >= 3) {
+
+    // Premium users have unlimited claims
+    if (!canClaimUnlimited && userClaimedCount >= maxClaimedPosts) {
       toast({
         title: "Claim Limit Reached",
-        description: "You can only claim a maximum of 3 posts. Please unclaim a post first.",
+        description: isPremium
+          ? "You have reached your claim limit."
+          : `You can only claim a maximum of ${maxClaimedPosts} posts. Upgrade to Premium for unlimited claims.`,
         variant: "destructive"
       });
       return;
