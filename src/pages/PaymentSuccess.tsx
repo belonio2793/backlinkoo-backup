@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { PremiumUpgradeService } from '@/services/premiumUpgradeService';
-import { CheckCircle, Crown, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
+import { CheckCircle, Crown, ArrowRight, Sparkles, Loader2, X } from 'lucide-react';
 
-export function PaymentSuccess() {
+export default function PaymentSuccess() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();

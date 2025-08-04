@@ -17,6 +17,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ProfileSettings } from "@/components/ProfileSettings";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1653,14 +1654,12 @@ const Dashboard = () => {
 
 
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Profile Settings</DialogTitle>
           </DialogHeader>
-          <div className="p-6">
-            <div className="text-center text-gray-500">
-              Profile settings have been removed. User preferences are now integrated into blog templates.
-            </div>
+          <div className="p-2">
+            <ProfileSettings onClose={() => setIsProfileOpen(false)} />
           </div>
         </DialogContent>
       </Dialog>

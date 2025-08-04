@@ -135,9 +135,12 @@ class DatabaseConnectionService {
           }
         },
         {
-          name: 'RPC function (if available)',
+          name: 'Direct profiles query',
           test: async () => {
-            const { data, error } = await supabase.rpc('get_profiles_admin_bypass');
+            const { data, error } = await supabase
+              .from('profiles')
+              .select('*')
+              .order('created_at', { ascending: false });
             return { data, error, count: data?.length || 0 };
           }
         }

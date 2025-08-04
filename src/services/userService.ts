@@ -26,13 +26,22 @@ class UserService {
         .single();
 
       if (error) {
-        console.error('Error fetching user profile:', error);
+        const errorMessage = error.message || error;
+        console.error('Error fetching user profile:', errorMessage);
+
+        // Handle specific permission denied errors
+        if (errorMessage && errorMessage.includes('permission denied for table users')) {
+          console.warn('⚠️ Permission denied for "users" table - this indicates a database configuration issue');
+          console.warn('The application should only access the "profiles" table, not "users"');
+          console.warn('This may be caused by a database trigger or RLS policy trying to access a non-existent table');
+        }
+
         return null;
       }
 
       return profile;
-    } catch (error) {
-      console.error('Error getting current user profile:', error);
+    } catch (error: any) {
+      console.error('Error getting current user profile:', error.message || error);
       return null;
     }
   }
@@ -44,8 +53,8 @@ class UserService {
     try {
       const profile = await this.getCurrentUserProfile();
       return profile?.role === 'premium' || profile?.role === 'admin';
-    } catch (error) {
-      console.error('Error checking premium status:', error);
+    } catch (error: any) {
+      console.error('Error checking premium status:', error.message || error);
       return false;
     }
   }
@@ -57,8 +66,8 @@ class UserService {
     try {
       const profile = await this.getCurrentUserProfile();
       return profile?.role === 'admin';
-    } catch (error) {
-      console.error('Error checking admin status:', error);
+    } catch (error: any) {
+      console.error('Error checking admin status:', error.message || error);
       return false;
     }
   }
@@ -93,8 +102,8 @@ class UserService {
       await this.logUserAction(user.id, 'upgrade_to_premium', 'User upgraded to premium role');
 
       return { success: true, message: 'Successfully upgraded to premium' };
-    } catch (error) {
-      console.error('Error in upgradeToPremium:', error);
+    } catch (error: any) {
+      console.error('Error in upgradeToPremium:', error.message || error);
       return { success: false, message: 'Unexpected error during upgrade' };
     }
   }
@@ -129,8 +138,8 @@ class UserService {
       await this.logUserAction(user.id, 'downgrade_from_premium', 'User downgraded from premium role');
 
       return { success: true, message: 'Successfully downgraded from premium' };
-    } catch (error) {
-      console.error('Error in downgradeFromPremium:', error);
+    } catch (error: any) {
+      console.error('Error in downgradeFromPremium:', error.message || error);
       return { success: false, message: 'Unexpected error during downgrade' };
     }
   }
@@ -158,8 +167,8 @@ class UserService {
         hasPrioritySupport: isPremium,
         canAccessPremiumContent: isPremium
       };
-    } catch (error) {
-      console.error('Error getting user limits:', error);
+    } catch (error: any) {
+      console.error('Error getting user limits:', error.message || error);
       // Return default (free) limits on error
       return {
         maxClaimedPosts: 3,
@@ -185,9 +194,9 @@ class UserService {
           description,
           timestamp: new Date().toISOString()
         });
-    } catch (error) {
+    } catch (error: any) {
       // Don't throw error for logging failures, just log it
-      console.warn('Failed to log user action:', error);
+      console.warn('Failed to log user action:', error.message || error);
     }
   }
 
@@ -201,8 +210,8 @@ class UserService {
       
       console.log('Premium features initialized for user:', userId);
       await this.logUserAction(userId, 'premium_features_initialized', 'Premium features have been initialized');
-    } catch (error) {
-      console.error('Error initializing premium features:', error);
+    } catch (error: any) {
+      console.error('Error initializing premium features:', error.message || error);
     }
   }
 
@@ -220,8 +229,8 @@ class UserService {
       
       // For regular users, check against limit
       return currentClaimedCount < limits.maxClaimedPosts;
-    } catch (error) {
-      console.error('Error checking claim eligibility:', error);
+    } catch (error: any) {
+      console.error('Error checking claim eligibility:', error.message || error);
       return false;
     }
   }
