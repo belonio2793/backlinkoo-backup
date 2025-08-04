@@ -138,10 +138,11 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
         });
 
         // Ensure profile exists in database
-        console.log('🔄 Ensuring profile exists in database...');
+        console.log('�� Ensuring profile exists in database...');
         const ensureResult = await profileService.ensureProfileExists();
         if (!ensureResult.success) {
           console.warn('Failed to ensure profile exists:', ensureResult.message);
+          // Don't let this block the UI - continue with auth user data
         }
 
         // Load profile data from database and merge with auth data
