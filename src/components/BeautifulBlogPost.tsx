@@ -696,8 +696,12 @@ export function BeautifulBlogPost() {
                         )}
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Claim this post to become its owner. Once claimed, you can edit, manage, and prevent others from deleting it.</p>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <div className="space-y-1">
+                        <p className="font-semibold">Claim Post</p>
+                        <p className="text-sm">Become the owner of this post to protect it from deletion and gain editing rights.</p>
+                        <p className="text-xs text-blue-400">💡 Free to claim!</p>
+                      </div>
                     </TooltipContent>
                   </Tooltip>
                 )}
