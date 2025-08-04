@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -202,9 +203,34 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
     });
   };
 
+  const cleanTitle = (title: string) => {
+    if (!title) return '';
+    return title
+      .replace(/^\s*\*\*Title:\s*([^*]*)\*\*\s*/i, '$1') // Remove **Title:** wrapper and extract content
+      .replace(/^\s*Title:\s*/gi, '') // Remove Title: prefix
+      .replace(/^\*\*H1\*\*:\s*/i, '')
+      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
+      .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
+      .replace(/\*\*/g, '') // Remove any remaining ** symbols
+      .replace(/\*/g, '') // Remove any remaining * symbols
+      .replace(/^#{1,6}\s+/, '') // Remove markdown headers
+      .trim();
+  };
+
   const getExcerpt = (content: string, maxLength: number = 150) => {
-    const plainText = content.replace(/<[^>]*>/g, '');
-    return plainText.length > maxLength 
+    // Remove HTML tags first
+    let plainText = content.replace(/<[^>]*>/g, '');
+
+    // Remove **Title:** patterns at the beginning
+    plainText = plainText.replace(/^\s*\*\*Title:\s*[^*]*\*\*\s*/i, '');
+
+    // Remove any remaining Title: patterns
+    plainText = plainText.replace(/^\s*Title:\s*[^\n]*/gi, '');
+
+    // Remove excessive whitespace
+    plainText = plainText.replace(/\s+/g, ' ').trim();
+
+    return plainText.length > maxLength
       ? plainText.substring(0, maxLength) + '...'
       : plainText;
   };
@@ -303,7 +329,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
           </div>
           
           <CardTitle className="text-lg leading-tight hover:text-blue-600 transition-colors cursor-pointer">
-            {post.title}
+            {cleanTitle(post.title)}
           </CardTitle>
           
           <p className="text-sm text-gray-600 line-clamp-2 mt-2">
@@ -367,26 +393,36 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
             </Button>
             
             {!isUserPost && !post.claimed && (
-              <Button
-                size="sm"
-                onClick={() => handleClaimPost(post.slug)}
-                disabled={claiming === post.slug || !canClaim}
-                className={`${
-                  canClaim
-                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700'
-                    : 'bg-gray-400 cursor-not-allowed'
-                }`}
-                title={!canClaim ? 'You have reached the maximum of 3 claimed posts' : ''}
-              >
-                {claiming === post.slug ? (
-                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <Crown className="h-3 w-3 mr-1" />
-                    {canClaim ? 'Claim' : 'Limit Reached'}
-                  </>
-                )}
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      onClick={() => handleClaimPost(post.slug)}
+                      disabled={claiming === post.slug || !canClaim}
+                      className={`${
+                        canClaim
+                          ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700'
+                          : 'bg-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      {claiming === post.slug ? (
+                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <Crown className="h-3 w-3 mr-1" />
+                          {canClaim ? 'Claim' : 'Limit Reached'}
+                        </>
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  {!canClaim && (
+                    <TooltipContent>
+                      <p>Upgrade to Premium Plan to claim unlimited blog posts</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
             )}
 
             {canDelete && (

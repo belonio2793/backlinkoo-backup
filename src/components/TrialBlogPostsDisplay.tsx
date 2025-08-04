@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -59,6 +60,20 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
     const interval = setInterval(loadTrialPosts, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const cleanTitle = (title: string) => {
+    if (!title) return '';
+    return title
+      .replace(/^\s*\*\*Title:\s*([^*]*)\*\*\s*/i, '$1') // Remove **Title:** wrapper and extract content
+      .replace(/^\s*Title:\s*/gi, '') // Remove Title: prefix
+      .replace(/^\*\*H1\*\*:\s*/i, '')
+      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
+      .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
+      .replace(/\*\*/g, '') // Remove any remaining ** symbols
+      .replace(/\*/g, '') // Remove any remaining * symbols
+      .replace(/^#{1,6}\s+/, '') // Remove markdown headers
+      .trim();
+  };
 
   const loadTrialPosts = async () => {
     try {
@@ -294,7 +309,7 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
           </div>
         </div>
         <CardTitle className="text-lg line-clamp-2 group-hover:text-blue-600 transition-colors">
-          {post.title}
+          {cleanTitle(post.title)}
         </CardTitle>
         {post.excerpt && (
           <p className="text-gray-600 text-sm line-clamp-2">
@@ -412,8 +427,8 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
                       )}
                     </div>
                     <CardTitle className="text-lg line-clamp-2 group-hover:text-blue-600 transition-colors">
-                      {post.title}
-                    </CardTitle>
+                  {cleanTitle(post.title)}
+                </CardTitle>
                     {post.excerpt && (
                       <p className="text-gray-600 text-sm line-clamp-2">
                         {post.excerpt}
@@ -444,28 +459,39 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
                     
                     {/* Actions */}
                     <div className="flex gap-2">
-                      <Button
-                        onClick={() => handleClaimPost(post)}
-                        disabled={claimingPostId === post.id || claimedPosts.length >= 3}
-                        className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50"
-                      >
-                        {claimingPostId === post.id ? (
-                          <>
-                            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                            Claiming...
-                          </>
-                        ) : claimedPosts.length >= 3 ? (
-                          <>
-                            <AlertCircle className="mr-2 h-4 w-4" />
-                            Limit Reached
-                          </>
-                        ) : (
-                          <>
-                            <Crown className="mr-2 h-4 w-4" />
-                            Claim Post
-                          </>
-                        )}
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              onClick={() => handleClaimPost(post)}
+                              disabled={claimingPostId === post.id || claimedPosts.length >= 3}
+                              className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50"
+                            >
+                              {claimingPostId === post.id ? (
+                                <>
+                                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                  Claiming...
+                                </>
+                              ) : claimedPosts.length >= 3 ? (
+                                <>
+                                  <AlertCircle className="mr-2 h-4 w-4" />
+                                  Limit Reached
+                                </>
+                              ) : (
+                                <>
+                                  <Crown className="mr-2 h-4 w-4" />
+                                  Claim Post
+                                </>
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+                          {claimedPosts.length >= 3 && (
+                            <TooltipContent>
+                              <p>Upgrade to Premium Plan to claim unlimited blog posts</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </TooltipProvider>
                       <Button
                         onClick={() => navigate(`/blog/${post.slug}`)}
                         variant="outline"

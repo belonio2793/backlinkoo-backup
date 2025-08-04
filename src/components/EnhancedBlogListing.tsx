@@ -236,9 +236,34 @@ export function EnhancedBlogListing() {
     });
   };
 
+  const cleanTitle = (title: string) => {
+    if (!title) return '';
+    return title
+      .replace(/^\s*\*\*Title:\s*([^*]*)\*\*\s*/i, '$1') // Remove **Title:** wrapper and extract content
+      .replace(/^\s*Title:\s*/gi, '') // Remove Title: prefix
+      .replace(/^\*\*H1\*\*:\s*/i, '')
+      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
+      .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
+      .replace(/\*\*/g, '') // Remove any remaining ** symbols
+      .replace(/\*/g, '') // Remove any remaining * symbols
+      .replace(/^#{1,6}\s+/, '') // Remove markdown headers
+      .trim();
+  };
+
   const getExcerpt = (content: string, maxLength: number = 150) => {
-    const plainText = content.replace(/<[^>]*>/g, '');
-    return plainText.length > maxLength 
+    // Remove HTML tags first
+    let plainText = content.replace(/<[^>]*>/g, '');
+
+    // Remove **Title:** patterns at the beginning
+    plainText = plainText.replace(/^\s*\*\*Title:\s*[^*]*\*\*\s*/i, '');
+
+    // Remove any remaining Title: patterns
+    plainText = plainText.replace(/^\s*Title:\s*[^\n]*/gi, '');
+
+    // Remove excessive whitespace
+    plainText = plainText.replace(/\s+/g, ' ').trim();
+
+    return plainText.length > maxLength
       ? plainText.substring(0, maxLength) + '...'
       : plainText;
   };
@@ -526,7 +551,7 @@ function PostCard({
         </div>
         
         <CardTitle className="text-lg line-clamp-2 leading-tight">
-          {post.title}
+          {cleanTitle(post.title)}
         </CardTitle>
         
         <div className="flex items-center gap-4 text-sm text-gray-600">

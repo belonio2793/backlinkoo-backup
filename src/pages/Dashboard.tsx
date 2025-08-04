@@ -976,6 +976,23 @@ const Dashboard = () => {
                   </Button>
                 </>
               )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  // Clear localStorage
+                  localStorage.clear();
+                  // Clear sessionStorage
+                  sessionStorage.clear();
+                  // Reload page to refresh state
+                  window.location.reload();
+                }}
+                className="px-2 sm:px-3 text-muted-foreground hover:text-foreground"
+                title="Clear cache and refresh"
+              >
+                <RefreshCw className="h-4 w-4" />
+                <span className="hidden sm:inline ml-1">Clear Cache</span>
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
