@@ -40,6 +40,55 @@ export function Header() {
     navigate('/dashboard');
   };
 
+  const handleClearCacheAndCookies = async () => {
+    try {
+      // Clear localStorage
+      localStorage.clear();
+
+      // Clear sessionStorage
+      sessionStorage.clear();
+
+      // Clear cookies (domain-specific)
+      const cookies = document.cookie.split(";");
+      for (let cookie of cookies) {
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+        // Clear for current domain
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+        // Clear for parent domain if applicable
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+        // Clear for parent domain with leading dot
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
+      }
+
+      // Clear browser cache (if supported)
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => caches.delete(cacheName))
+        );
+      }
+
+      toast({
+        title: "Cache & Cookies Cleared",
+        description: "Browser cache and cookies have been cleared successfully. Page will reload.",
+      });
+
+      // Reload the page after a short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+
+    } catch (error) {
+      console.error('Error clearing cache and cookies:', error);
+      toast({
+        title: "Clear Failed",
+        description: "Some data may not have been cleared completely.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4">
