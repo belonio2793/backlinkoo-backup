@@ -92,16 +92,8 @@ class RealAdminUserService {
         console.log('⚠️ Bypassing auth check for admin dashboard metrics');
       }
       
-      // Try multiple methods to get profiles
+      // Use direct query to profiles table to avoid auth.users permission issues
       const methods = [
-        {
-          name: 'RPC Admin Bypass',
-          execute: async () => {
-            const { data, error } = await supabase.rpc('get_profiles_admin_bypass');
-            if (error) throw error;
-            return data;
-          }
-        },
         {
           name: 'Direct Query',
           execute: async () => {
