@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { PremiumUpgradeService } from '@/services/premiumUpgradeService';
 import { PaymentVerificationService } from '@/services/paymentVerificationService';
-import { CheckCircle, Crown, ArrowRight, Sparkles, Loader2, X } from 'lucide-react\';ct\';t\';e-react\';lucide-react';
+import { CheckCircle, Crown, ArrowRight, Sparkles, Loader2, X } from 'lucide-react';
 
 export default function PaymentSuccess() {
   const navigate = useNavigate();
@@ -22,11 +22,24 @@ export default function PaymentSuccess() {
       if (authLoading) return;
 
       const sessionId = searchParams.get('session_id');
-      
-      if (!sessionId) {
-        // No session ID, but might be from fallback service
-        const result = await PremiumUpgradeService.handleUpgradeSuccess(user);
-        
+      const orderId = searchParams.get('order_id');
+      const paymentMethod = searchParams.get('payment_method') as 'stripe' | 'paypal' | null;
+
+      try {
+        let result;
+
+        if (sessionId || orderId || paymentMethod) {
+          // Process payment verification with enhanced service
+          result = await PaymentVerificationService.verifyPayment({
+            sessionId: sessionId || undefined,
+            orderId: orderId || undefined,
+            paymentMethod: paymentMethod || undefined
+          });
+        } else {
+          // No payment identifiers - might be from fallback service
+          result = await PaymentVerificationService.handleFallbackUpgrade();
+        }
+
         if (result.success) {
           setRedirectUrl(result.redirectUrl || '/dashboard');
           toast({
@@ -36,29 +49,11 @@ export default function PaymentSuccess() {
         } else {
           setProcessingError(result.error || 'Failed to process upgrade');
         }
-        
-        setIsProcessing(false);
-        return;
-      }
-
-      try {
-        // Process Stripe callback
-        const result = await PremiumUpgradeService.processStripeCallback(sessionId);
-        
-        if (result.success) {
-          setRedirectUrl(result.redirectUrl || '/dashboard');
-          toast({
-            title: "🎉 Payment Successful!",
-            description: "Your premium upgrade is complete. Welcome to Premium!",
-          });
-        } else {
-          setProcessingError(result.error || 'Failed to process payment');
-        }
       } catch (error: any) {
         console.error('Error processing payment success:', error);
         setProcessingError(error.message || 'An unexpected error occurred');
       }
-      
+
       setIsProcessing(false);
     };
 
