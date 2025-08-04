@@ -98,6 +98,18 @@ export function Header() {
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
           </div>
           <div className="flex items-center gap-4">
+            {/* Clear Cache Button - Always visible */}
+            <Button
+              onClick={handleClearCacheAndCookies}
+              variant="outline"
+              size="sm"
+              className="bg-transparent hover:bg-orange-50/50 border border-orange-200/60 text-orange-600 hover:text-orange-700 hover:border-orange-300/80 transition-all duration-200 font-medium px-4 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+              title="Clear browser cache and cookies"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Clear Cache
+            </Button>
+
             {user ? (
               <>
                 <Button
