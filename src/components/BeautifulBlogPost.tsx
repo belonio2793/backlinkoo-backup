@@ -790,35 +790,7 @@ export function BeautifulBlogPost() {
 
 
 
-              {/* Action Buttons - Moved here below Target URL */}
-              <div className="flex flex-wrap justify-center gap-4 mt-8 max-w-2xl mx-auto">
 
-
-                {unclaimPermissions.canUnclaim && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        onClick={() => setShowUnclaimDialog(true)}
-                        variant="outline"
-                        size="lg"
-                        className="bg-transparent border-orange-300 text-orange-700 hover:bg-transparent hover:border-orange-500 hover:text-orange-800 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full transition-all duration-300"
-                      >
-                        <XCircle className="mr-3 h-5 w-5" />
-                        Unclaim Post
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-xs">
-                      <div className="space-y-1">
-                        <p className="font-semibold">Unclaim Post</p>
-                        <p className="text-sm">Release ownership and make this post available for others to claim.</p>
-                        <p className="text-xs text-orange-400">⏰ Will be deleted in 24 hours if not reclaimed</p>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-
-
-              </div>
             </div>
           </article>
         </div>
