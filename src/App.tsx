@@ -15,6 +15,7 @@ import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
 import { autoConfigSaver } from "@/services/autoConfigSaver";
 import { DebugErrorHandler } from "@/utils/debugErrorHandler";
 import "@/services/blogCleanupService"; // Initialize blog cleanup service
+import "@/utils/manualRLSCleanup"; // Initialize RLS cleanup utility
 
 
 // import "@/services/rlsStatusService"; // RLS STATUS CHECK AND MANUAL FIX INSTRUCTIONS - DISABLED TO PREVENT AUTO TEST POSTS
