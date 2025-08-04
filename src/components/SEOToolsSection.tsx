@@ -42,6 +42,7 @@ import { RankingTracker } from "@/components/RankingTracker";
 import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
 import SubscriptionService, { type SubscriptionStatus } from "@/services/subscriptionService";
 import FeatureAccessGuard from "@/components/FeatureAccessGuard";
+import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
 
 interface SEOToolsSectionProps {
   user: User | null;
