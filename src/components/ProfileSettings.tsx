@@ -173,7 +173,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
             console.log('✅ Profile loaded from database:', profile);
             setProfileData({
               displayName: profile.display_name || initialData.displayName,
-              email: authUser.email || '', // Always use auth email
+              email: authUser.email || profileData.email || '', // Always prioritize auth email
               bio: profile.bio || initialData.bio,
               website: profile.website || initialData.website,
               company: profile.company || initialData.company,
