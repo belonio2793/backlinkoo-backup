@@ -1038,14 +1038,25 @@ const Index = () => {
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
         onAuthSuccess={(user) => {
-          setUser(user);
+          console.log('🎉 Index: Auth success, user:', user?.email);
+
+          // Close modal immediately
           setShowLoginModal(false);
+
+          // Update user state
+          setUser(user);
+
+          // Show success message
           toast({
             title: "Welcome!",
             description: "You have been successfully signed in.",
           });
-          // Navigate to dashboard after successful auth
-          navigate('/dashboard');
+
+          // Navigate to dashboard after a brief delay to ensure state updates
+          setTimeout(() => {
+            console.log('🚀 Index: Navigating to dashboard');
+            navigate('/dashboard');
+          }, 100);
         }}
         defaultTab={loginModalTab}
       />
