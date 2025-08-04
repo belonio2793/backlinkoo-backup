@@ -355,23 +355,66 @@ export function SuperEnhancedBlogListing() {
           {/* Enhanced Search and Filters */}
           <div className="mb-12 space-y-6">
             {/* Search */}
-            <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto">
-              <div className="relative">
-                <div className="flex bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Input
-                    placeholder="Search community posts..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 pl-12 pr-4 py-3 text-base border-0 bg-transparent focus:outline-none focus:ring-0 placeholder:text-gray-500"
-                  />
-                  <Button
-                    type="submit"
-                    className="m-1 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
-                  >
-                    Search
-                  </Button>
+            <form onSubmit={handleSearch} className="relative max-w-3xl mx-auto">
+              <div className="relative group">
+                {/* Background with subtle gradient */}
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-50 to-blue-50/50 rounded-2xl"></div>
+
+                {/* Main search container */}
+                <div className="relative bg-white/95 backdrop-blur-sm border-2 border-gray-200/60 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group-hover:border-blue-300/80 focus-within:border-blue-400 focus-within:shadow-xl">
+                  {/* Search icon */}
+                  <div className="absolute left-5 top-1/2 transform -translate-y-1/2 z-10">
+                    <Search className="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors duration-300" />
+                  </div>
+
+                  {/* Input container */}
+                  <div className="flex items-center">
+                    <Input
+                      placeholder="Search community posts..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="flex-1 pl-14 pr-4 py-5 text-lg font-medium border-0 bg-transparent focus:outline-none focus:ring-0 placeholder:text-gray-400 text-gray-700"
+                    />
+
+                    {/* Search button with enhanced styling */}
+                    <div className="pr-3">
+                      <Button
+                        type="submit"
+                        size="lg"
+                        className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
+                      >
+                        Search
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5-5 5M6 12h12" />
+                        </svg>
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Subtle bottom accent line */}
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-16 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
+
+                {/* Floating effect background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+              </div>
+
+              {/* Quick search suggestions */}
+              <div className="flex flex-wrap justify-center gap-2 mt-4 opacity-75 hover:opacity-100 transition-opacity duration-300">
+                <span className="text-sm text-gray-500">Quick search:</span>
+                {['finance', 'technology', 'marketing', 'lifestyle'].map((term) => (
+                  <button
+                    key={term}
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery(term);
+                      searchPosts(term);
+                    }}
+                    className="px-3 py-1 text-xs bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 rounded-full transition-colors duration-200 hover:scale-105 transform"
+                  >
+                    {term}
+                  </button>
+                ))}
               </div>
             </form>
 
