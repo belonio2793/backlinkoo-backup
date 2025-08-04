@@ -12,15 +12,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  Database, 
-  RefreshCw, 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  Database,
+  RefreshCw,
+  CheckCircle,
+  AlertCircle,
   Users,
   Key,
-  Info
+  Info,
+  Settings
 } from "lucide-react";
+import RLSPermissionFixer from './RLSPermissionFixer';
 
 interface TableInfo {
   name: string;
@@ -331,12 +333,25 @@ export function DatabaseDiagnostic() {
               <AlertDescription>
                 <div className="font-medium">No User Data Retrieved</div>
                 <div className="text-sm mt-1">
-                  This could indicate RLS policies preventing access or missing data. 
+                  This could indicate RLS policies preventing access or missing data.
                   Check your Supabase configuration and RLS policies.
                 </div>
               </AlertDescription>
             </Alert>
           )}
+        </CardContent>
+      </Card>
+
+      {/* RLS Permission Fixer Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            RLS Permission Issues
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <RLSPermissionFixer />
         </CardContent>
       </Card>
     </div>

@@ -43,7 +43,7 @@ import { RankingTracker } from "@/components/RankingTracker";
 import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
 import SubscriptionService, { type SubscriptionStatus } from "@/services/subscriptionService";
 import FeatureAccessGuard from "@/components/FeatureAccessGuard";
-import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
+import { useOpenPremiumPopup } from "@/components/PremiumPopupProvider";
 
 interface SEOToolsSectionProps {
   user: User | null;
@@ -93,11 +93,8 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const [billingEmailNotifications, setBillingEmailNotifications] = useState(true);
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
-  const [isPremiumCheckoutOpen, setIsPremiumCheckoutOpen] = useState(false);
   const { toast } = useToast();
-
-  // Debug logging for modal state
-  console.log('SEOToolsSection render - isPremiumCheckoutOpen:', isPremiumCheckoutOpen);
+  const { openPremiumPopup, isPremium } = useOpenPremiumPopup();
 
   useEffect(() => {
     if (user) {
@@ -366,10 +363,8 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
               <div className="text-3xl font-bold text-primary mb-1">$29</div>
               <div className="text-sm text-muted-foreground mb-4">per month</div>
               <Button onClick={() => {
-                console.log('SEO Tools Start Subscription clicked, opening modal');
-                console.log('Current isPremiumCheckoutOpen:', isPremiumCheckoutOpen);
-                setIsPremiumCheckoutOpen(true);
-                console.log('Set isPremiumCheckoutOpen to true');
+                console.log('SEO Tools Start Subscription clicked, opening premium popup');
+                openPremiumPopup(user?.email);
               }} size="lg" className="w-full">
                 <CreditCard className="h-4 w-4 mr-2" />
                 Start Subscription
@@ -657,16 +652,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
         </DialogContent>
       </Dialog>
 
-      {/* Premium Checkout Modal */}
-      <PremiumCheckoutModal
-        isOpen={isPremiumCheckoutOpen}
-        onClose={() => setIsPremiumCheckoutOpen(false)}
-        onSuccess={() => {
-          setIsPremiumCheckoutOpen(false);
-          // Refresh subscription status after successful payment
-          checkSubscriptionStatus();
-        }}
-      />
+
     </div>
   );
 };
