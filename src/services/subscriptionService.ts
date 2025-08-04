@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
+import { logError, getErrorMessage } from '@/utils/errorFormatter';
 
 export interface SubscriptionStatus {
   isSubscribed: boolean;
