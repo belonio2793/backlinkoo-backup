@@ -142,7 +142,7 @@ export function CourseProgressDashboard() {
           <p className="text-muted-foreground">Track your journey through the SEO Academy</p>
         </div>
         <Badge className="bg-green-100 text-green-800 text-lg px-4 py-2">
-          <Fire className="h-4 w-4 mr-1" />
+          <Flame className={"h-4 w-4 mr-1\" />r-1\" />-1"} />
           {courseStats.streak} day streak
         </Badge>
       </div>
