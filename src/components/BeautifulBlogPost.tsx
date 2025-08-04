@@ -740,12 +740,13 @@ export function BeautifulBlogPost() {
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <SEOScoreDisplay
-                    score={blogPost.seo_score}
+                    score={effectiveScore}
                     title={blogPost.title}
                     content={blogPost.content}
                     metaDescription={blogPost.meta_description || undefined}
                     targetKeyword={blogPost.keywords?.[0]}
                     showDetails={true}
+                    isPremiumScore={isPremiumScore}
                   />
                 </div>
               </div>
