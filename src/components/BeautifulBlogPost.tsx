@@ -501,11 +501,16 @@ export function BeautifulBlogPost() {
                         </span>
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{isOwnPost
-                        ? 'You have claimed this post. You can edit, delete, or unclaim it at any time.'
-                        : 'This post has been claimed by another user and is now protected from automatic deletion.'}
-                      </p>
+                    <TooltipContent side="bottom" className="max-w-xs">
+                      <div className="space-y-1">
+                        <p className="font-semibold">{isOwnPost ? 'Your Post' : 'Claimed Post'}</p>
+                        <p className="text-sm">
+                          {isOwnPost
+                            ? 'You own this post and can manage it freely.'
+                            : 'This post is owned by another user and protected from deletion.'}
+                        </p>
+                        {isOwnPost && <p className="text-xs text-green-400">✨ You have full control</p>}
+                      </div>
                     </TooltipContent>
                   </Tooltip>
                 ) : (
