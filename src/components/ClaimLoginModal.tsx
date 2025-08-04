@@ -198,13 +198,15 @@ export function ClaimLoginModal({
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Claim This Post
           </DialogTitle>
-          <DialogDescription className="text-center space-y-2">
-            <p className="text-base font-medium text-gray-700">
-              "{postTitle}"
-            </p>
-            <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-              <Sparkles className="h-4 w-4 text-yellow-500" />
-              <span>Sign in or create an account to claim this post for free!</span>
+          <DialogDescription asChild>
+            <div className="text-center space-y-2">
+              <p className="text-base font-medium text-gray-700">
+                "{postTitle}"
+              </p>
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                <Sparkles className="h-4 w-4 text-yellow-500" />
+                <span>Sign in or create an account to claim this post for free!</span>
+              </div>
             </div>
           </DialogDescription>
         </DialogHeader>
