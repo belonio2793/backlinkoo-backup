@@ -96,8 +96,8 @@ export class SubscriptionService {
       }
 
       const requestBody = {
-        priceId: 'price_premium_seo_tools',
-        tier: 'premium-seo-tools',
+        priceId: 'price_1QhvTGENNyNvNqhZBUZqv6s7', // Use actual Stripe price ID if available
+        tier: 'premium',
         isGuest,
         guestEmail: isGuest ? guestEmail : undefined
       };
