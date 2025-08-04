@@ -632,7 +632,10 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                       <p className="text-sm text-purple-700 mb-3">
                         Unlock unlimited blog posts, advanced SEO tools, and priority support.
                       </p>
-                      <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
+                      <Button
+                        className="bg-gradient-to-r from-purple-600 to-blue-600"
+                        onClick={() => setShowPremiumCheckout(true)}
+                      >
                         <Crown className="h-4 w-4 mr-2" />
                         Upgrade Now
                       </Button>
