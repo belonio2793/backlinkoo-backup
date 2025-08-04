@@ -361,67 +361,63 @@ export function SuperEnhancedBlogListing() {
           {/* Enhanced Search and Filters */}
           <div className="mb-12 space-y-6">
             {/* Search */}
-            <form onSubmit={handleSearch} className="relative max-w-3xl mx-auto">
-              <div className="relative group">
-                {/* Background with subtle gradient */}
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-50 to-blue-50/50 rounded-2xl"></div>
-
-                {/* Main search container */}
-                <div className="relative bg-white/95 backdrop-blur-sm border-2 border-gray-200/60 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group-hover:border-blue-300/80 focus-within:border-blue-400 focus-within:shadow-xl">
+            <form onSubmit={handleSearch} className="relative max-w-4xl mx-auto">
+              <div className="relative">
+                {/* Main search container with clean design */}
+                <div className="relative bg-white rounded-full shadow-lg border border-gray-200 hover:shadow-xl hover:border-gray-300 focus-within:shadow-xl focus-within:border-blue-400 transition-all duration-300">
                   {/* Search icon */}
-                  <div className="absolute left-5 top-1/2 transform -translate-y-1/2 z-10">
-                    <Search className="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors duration-300" />
+                  <div className="absolute left-6 top-1/2 transform -translate-y-1/2 z-10">
+                    <Search className="h-6 w-6 text-gray-400 transition-colors duration-300" />
                   </div>
 
-                  {/* Input container */}
+                  {/* Input and button container */}
                   <div className="flex items-center">
                     <Input
                       placeholder="Search community posts..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="flex-1 pl-14 pr-4 py-5 text-lg font-medium border-0 bg-transparent focus:outline-none focus:ring-0 placeholder:text-gray-400 text-gray-700"
+                      className="flex-1 pl-16 pr-6 py-6 text-lg border-0 bg-transparent focus:outline-none focus:ring-0 placeholder:text-gray-500 text-gray-800 rounded-full"
                     />
 
-                    {/* Search button with enhanced styling */}
-                    <div className="pr-3">
+                    {/* Search button */}
+                    <div className="pr-2">
                       <Button
                         type="submit"
                         size="lg"
-                        className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
+                        className="h-12 px-8 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
                       >
-                        Search
+                        <span>Search</span>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5-5 5M6 12h12" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                       </Button>
                     </div>
                   </div>
-
-                  {/* Subtle bottom accent line */}
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-16 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
 
-                {/* Floating effect background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+                {/* Subtle glow effect */}
+                <div className="absolute inset-0 bg-blue-500/5 rounded-full blur-xl opacity-0 hover:opacity-100 transition-opacity duration-500 -z-10"></div>
               </div>
 
-              {/* Quick search suggestions */}
-              <div className="flex items-center justify-center gap-3 mt-4 opacity-75 hover:opacity-100 transition-opacity duration-300">
-                <span className="text-sm text-gray-500 font-medium">Quick search:</span>
-                <div className="flex flex-wrap gap-2">
-                  {getRandomizedKeywords().map((term) => (
-                    <button
-                      key={term}
-                      type="button"
-                      onClick={() => {
-                        setSearchQuery(term);
-                        searchPosts(term);
-                      }}
-                      className="px-3 py-1 text-xs bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 rounded-full transition-colors duration-200 hover:scale-105 transform"
-                    >
-                      {term}
-                    </button>
-                  ))}
+              {/* Quick search suggestions with improved layout */}
+              <div className="mt-6">
+                <div className="flex items-center justify-center gap-4 flex-wrap">
+                  <span className="text-sm text-gray-600 font-medium whitespace-nowrap">Popular searches:</span>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {getRandomizedKeywords().map((term) => (
+                      <button
+                        key={term}
+                        type="button"
+                        onClick={() => {
+                          setSearchQuery(term);
+                          searchPosts(term);
+                        }}
+                        className="px-4 py-2 text-sm bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 rounded-full border border-gray-200 hover:border-blue-200 transition-all duration-200 hover:scale-105 transform font-medium"
+                      >
+                        {term}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </form>
