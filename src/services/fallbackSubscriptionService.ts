@@ -12,12 +12,25 @@ export class FallbackSubscriptionService {
   static async createTestSubscription(userEmail?: string): Promise<{ success: boolean; error?: string }> {
     try {
       console.log('🧪 Creating test subscription (fallback mode)...');
-      
+
+      // Check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        console.log('⚠️ No authenticated user, prompting for login...');
+        return {
+          success: false,
+          error: 'Please sign in first, then try upgrading to premium.'
+        };
+      }
+
+      console.log('👤 User authenticated:', user.email);
+
       // Simulate the upgrade process
       const result = await userService.upgradeToPremium();
-      
+
       if (result.success) {
-        console.log('��� Test subscription created successfully');
+        console.log('✅ Test subscription created successfully');
         return { success: true };
       } else {
         console.error('❌ Failed to create test subscription:', result.message);
