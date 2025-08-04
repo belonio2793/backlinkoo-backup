@@ -155,6 +155,13 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
     return v;
   };
 
+  // Update email when user state changes
+  useEffect(() => {
+    if (user?.email && !formData.email) {
+      setFormData(prev => ({ ...prev, email: user.email || '' }));
+    }
+  }, [user, formData.email]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
