@@ -39,7 +39,10 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal'>('stripe');
+
+  // Debug user state
+  console.log('PremiumCheckoutModal - User state:', { user, hasUser: !!user, email: user?.email });
   const [formData, setFormData] = useState({
     email: user?.email || '',
     cardNumber: '',
@@ -262,8 +265,16 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
           {/* Right Side - Payment Form */}
           <div className="p-8">
             <div className="space-y-6">
-              {/* Email for guest users only */}
-              {!user && (
+              {/* Show user account info or email input */}
+              {user ? (
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="font-medium text-green-800">Account: {user.email || 'Logged in user'}</span>
+                  </div>
+                  <div className="text-sm text-green-700">Premium features will be activated immediately</div>
+                </div>
+              ) : (
                 <div>
                   <Label htmlFor="email" className="text-lg font-semibold">Email Address</Label>
                   <Input
@@ -278,17 +289,6 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
                   <p className="text-xs text-gray-500 mt-1">
                     Required for subscription management and receipts
                   </p>
-                </div>
-              )}
-
-              {/* Show logged-in user info */}
-              {user && (
-                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="font-medium text-green-800">Account: {user.email}</span>
-                  </div>
-                  <div className="text-sm text-green-700">Premium features will be activated immediately</div>
                 </div>
               )}
 
@@ -338,24 +338,49 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
                 </div>
               </div>
 
-              {/* Checkout Button */}
-              <Button
-                className="w-full h-12 text-lg"
-                onClick={handleCheckout}
-                disabled={isProcessing || (!user && !formData.email)}
-              >
-                {isProcessing ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Processing...
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Lock className="h-4 w-4" />
-                    Checkout with Stripe/PayPal
-                  </div>
-                )}
-              </Button>
+              {/* Payment Method Selection */}
+              <div className="space-y-3">
+                <Label className="text-lg font-semibold">Choose Payment Method</Label>
+                <div className="grid grid-cols-1 gap-3">
+                  {/* Stripe Button */}
+                  <Button
+                    className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700"
+                    onClick={() => handleCheckout('stripe')}
+                    disabled={isProcessing || (!user && !formData.email)}
+                  >
+                    {isProcessing && paymentMethod === 'stripe' ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Processing...
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4" />
+                        Pay with Stripe
+                      </div>
+                    )}
+                  </Button>
+
+                  {/* PayPal Button */}
+                  <Button
+                    className="w-full h-12 text-lg bg-yellow-500 hover:bg-yellow-600 text-black"
+                    onClick={() => handleCheckout('paypal')}
+                    disabled={isProcessing || (!user && !formData.email)}
+                  >
+                    {isProcessing && paymentMethod === 'paypal' ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                        Processing...
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-blue-600 rounded"></div>
+                        Pay with PayPal
+                      </div>
+                    )}
+                  </Button>
+                </div>
+              </div>
 
               {/* Security Notice */}
               <div className="text-center text-sm text-gray-500">
