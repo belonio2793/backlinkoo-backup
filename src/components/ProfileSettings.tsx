@@ -636,11 +636,19 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
               <div className="space-y-4">
                 <h4 className="font-medium">Security Actions</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <Button variant="outline" className="justify-start">
+                  <Button
+                    variant="outline"
+                    className="justify-start"
+                    onClick={() => setShowChangePassword(true)}
+                  >
                     <Key className="h-4 w-4 mr-2" />
                     Change Password
                   </Button>
-                  <Button variant="outline" className="justify-start">
+                  <Button
+                    variant="outline"
+                    className="justify-start"
+                    onClick={() => setShowUpdateEmail(true)}
+                  >
                     <Mail className="h-4 w-4 mr-2" />
                     Update Email
                   </Button>
