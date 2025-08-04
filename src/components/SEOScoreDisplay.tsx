@@ -48,7 +48,8 @@ export function SEOScoreDisplay({
   content,
   metaDescription,
   targetKeyword,
-  showDetails = true
+  showDetails = true,
+  isPremiumScore = false
 }: SEOScoreDisplayProps) {
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysis, setAnalysis] = useState<SEOAnalysisResult | null>(null);
