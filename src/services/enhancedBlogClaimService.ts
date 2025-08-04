@@ -383,11 +383,18 @@ export class EnhancedBlogClaimService {
    */
   static async processPendingClaimIntent(user: User): Promise<ClaimResult | null> {
     try {
+      // Safety check: ensure user is authenticated
+      if (!user || !user.id) {
+        console.warn('Cannot process claim intent: user not authenticated');
+        localStorage.removeItem('claim_intent');
+        return null;
+      }
+
       const claimIntentStr = localStorage.getItem('claim_intent');
       if (!claimIntentStr) return null;
 
       const claimIntent = JSON.parse(claimIntentStr);
-      
+
       // Check if intent is recent (within last hour)
       if (Date.now() - claimIntent.timestamp > 60 * 60 * 1000) {
         localStorage.removeItem('claim_intent');
