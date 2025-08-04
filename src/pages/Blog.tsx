@@ -530,6 +530,29 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
   const { toast } = useToast();
   const [claiming, setClaiming] = useState(false);
 
+  // Use premium SEO score logic
+  const [effectiveScore, setEffectiveScore] = useState(post.seo_score || 0);
+  const [isPremiumScore, setIsPremiumScore] = useState(false);
+
+  useEffect(() => {
+    async function checkPremiumScore() {
+      if (post.user_id) {
+        try {
+          const { PremiumService } = await import('@/services/premiumService');
+          const isPremium = await PremiumService.checkPremiumStatus(post.user_id);
+          if (isPremium) {
+            setEffectiveScore(100);
+            setIsPremiumScore(true);
+          }
+        } catch (error) {
+          console.error('Error checking premium status:', error);
+        }
+      }
+    }
+
+    checkPremiumScore();
+  }, [post.user_id, post.seo_score]);
+
   const handleClaimRedirect = (e: React.MouseEvent) => {
     e.stopPropagation();
 
