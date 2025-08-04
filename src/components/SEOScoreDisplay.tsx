@@ -190,7 +190,7 @@ export function SEOScoreDisplay({
                       </p>
 
                       {/* Premium Teaser */}
-                      {analysis.overallScore < 100 && (
+                      {analysis.overallScore < 100 && !isPremiumScore && (
                         <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
