@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { logError } from '@/utils/errorFormatter';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -115,8 +116,8 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
       // Also get subscription info for the modal
       const info = await SubscriptionService.getSubscriptionInfo(user);
       setSubscriptionInfo(info);
-    } catch (error) {
-      console.error('Error checking subscription:', error);
+    } catch (error: any) {
+      logError('Error checking subscription', error);
       setSubscriptionStatus({
         isSubscribed: false,
         subscriptionTier: null,

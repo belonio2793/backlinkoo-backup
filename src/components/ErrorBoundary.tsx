@@ -1,4 +1,5 @@
 import React from 'react';
+import { logError } from '@/utils/errorFormatter';
 import { useNavigate } from 'react-router-dom';
 
 interface ErrorBoundaryState {
@@ -66,7 +67,10 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       return;
     }
 
-    console.error('Application error:', error, errorInfo);
+    logError('Application error', {
+      ...error,
+      componentStack: errorInfo.componentStack
+    });
     this.startRedirectCountdown();
   }
 

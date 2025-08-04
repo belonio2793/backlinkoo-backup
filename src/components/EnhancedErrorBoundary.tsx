@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { logError } from '@/utils/errorFormatter';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -25,7 +26,10 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Application error caught by boundary:', error, errorInfo);
+    logError('Application error caught by boundary', {
+      ...error,
+      componentStack: errorInfo.componentStack
+    });
     
     // Filter out browser extension errors and other non-critical errors
     const isExtensionError = error.message.includes('Cannot redefine property: ethereum') ||

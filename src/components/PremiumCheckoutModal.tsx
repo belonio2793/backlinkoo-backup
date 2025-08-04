@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import SubscriptionService from '@/services/subscriptionService';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Crown,
   CreditCard,
@@ -33,6 +35,7 @@ interface PremiumCheckoutModalProps {
 
 export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumCheckoutModalProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal'>('card');
@@ -77,22 +80,32 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
 
   const handleCheckout = async () => {
     setIsProcessing(true);
-    
+
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      // Use real subscription service to create payment checkout
+      const result = await SubscriptionService.createSubscription(
+        user,
+        !user, // isGuest if no user
+        !user ? formData.email : undefined // guestEmail if no user
+      );
+
+      if (result.success && result.url) {
+        // Redirect to Stripe checkout
+        window.open(result.url, '_blank');
+
+        toast({
+          title: "Redirecting to Payment",
+          description: "You'll be redirected to complete your payment securely.",
+        });
+
+        // Keep modal open as user will return after payment
+      } else {
+        throw new Error(result.error || 'Failed to create subscription');
+      }
+    } catch (error: any) {
       toast({
-        title: "Payment Successful!",
-        description: `Welcome to Premium! Your ${selectedPlan} subscription is now active.`,
-      });
-      
-      onSuccess?.();
-      onClose();
-    } catch (error) {
-      toast({
-        title: "Payment Failed",
-        description: "There was an issue processing your payment. Please try again.",
+        title: "Payment Setup Failed",
+        description: error.message || "There was an issue setting up your payment. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -223,116 +236,49 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
           {/* Right Side - Payment Form */}
           <div className="p-8">
             <div className="space-y-6">
-              {/* Payment Methods */}
-              <div>
-                <Label className="text-lg font-semibold mb-4 block">Payment Method</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    variant={paymentMethod === 'card' ? 'default' : 'outline'}
-                    className="h-12 justify-start"
-                    onClick={() => setPaymentMethod('card')}
-                  >
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Credit Card
-                  </Button>
-                  <Button
-                    variant={paymentMethod === 'paypal' ? 'default' : 'outline'}
-                    className="h-12 justify-start"
-                    onClick={() => setPaymentMethod('paypal')}
-                  >
-                    <div className="w-4 h-4 mr-2 bg-blue-600 rounded"></div>
-                    PayPal
-                  </Button>
-                </div>
-              </div>
-
-              {paymentMethod === 'card' ? (
-                <div className="space-y-4">
-                  {/* Email */}
-                  <div>
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-
-                  {/* Card Details */}
-                  <div>
-                    <Label htmlFor="cardNumber">Card Number</Label>
-                    <Input
-                      id="cardNumber"
-                      placeholder="1234 5678 9012 3456"
-                      value={formData.cardNumber}
-                      onChange={(e) => handleInputChange('cardNumber', formatCardNumber(e.target.value))}
-                      maxLength={19}
-                      className="mt-1"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label htmlFor="expiryDate">Expiry Date</Label>
-                      <Input
-                        id="expiryDate"
-                        placeholder="MM/YY"
-                        value={formData.expiryDate}
-                        onChange={(e) => handleInputChange('expiryDate', formatExpiryDate(e.target.value))}
-                        maxLength={5}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="cvv">CVV</Label>
-                      <Input
-                        id="cvv"
-                        placeholder="123"
-                        value={formData.cvv}
-                        onChange={(e) => handleInputChange('cvv', e.target.value.replace(/\D/g, ''))}
-                        maxLength={4}
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Billing Details */}
-                  <div>
-                    <Label htmlFor="name">Cardholder Name</Label>
-                    <Input
-                      id="name"
-                      placeholder="John Doe"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="country">Country</Label>
-                    <Input
-                      id="country"
-                      placeholder="United States"
-                      value={formData.country}
-                      onChange={(e) => handleInputChange('country', e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <div className="w-8 h-8 bg-blue-600 rounded"></div>
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">PayPal Checkout</h3>
-                  <p className="text-gray-600 mb-4">
-                    You'll be redirected to PayPal to complete your payment securely.
+              {/* Email for guest users */}
+              {!user && (
+                <div>
+                  <Label htmlFor="email" className="text-lg font-semibold">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    className="mt-2"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Required for subscription management and receipts
                   </p>
                 </div>
               )}
+
+              {/* Secure Payment Notice */}
+              <div className="text-center py-6 px-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-gray-900">Secure Stripe Checkout</h3>
+                <p className="text-gray-600 text-sm mb-3">
+                  You'll be redirected to Stripe's secure payment page to safely enter your payment details.
+                </p>
+                <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <CreditCard className="h-3 w-3" />
+                    <span>Cards</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-blue-600 rounded"></div>
+                    <span>PayPal</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-green-600 rounded"></div>
+                    <span>Apple Pay</span>
+                  </div>
+                </div>
+              </div>
 
               <Separator />
 
@@ -359,7 +305,7 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
               <Button
                 className="w-full h-12 text-lg"
                 onClick={handleCheckout}
-                disabled={isProcessing || (!formData.email && paymentMethod === 'card')}
+                disabled={isProcessing || (!user && !formData.email)}
               >
                 {isProcessing ? (
                   <div className="flex items-center gap-2">

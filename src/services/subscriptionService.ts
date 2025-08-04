@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
+import { logError, getErrorMessage } from '@/utils/errorFormatter';
 
 export interface SubscriptionStatus {
   isSubscribed: boolean;
@@ -34,16 +35,20 @@ export class SubscriptionService {
 
     try {
       // Check subscribers table for active subscription
-      const { data: subscriber, error } = await supabase
+      const { data: subscribers, error } = await supabase
         .from('subscribers')
         .select('*')
         .eq('email', user.email)
-        .eq('subscribed', true)
-        .single();
+        .eq('subscribed', true);
 
-      if (error && error.code !== 'PGRST116') { // Not a "no rows returned" error
-        console.error('Error checking subscription:', error);
+      if (error) {
+        logError('Error checking subscription', error);
       }
+
+      // Get the most recent active subscriber if multiple exist
+      const subscriber = subscribers && subscribers.length > 0
+        ? subscribers.sort((a, b) => new Date(b.updated_at || b.created_at || '').getTime() - new Date(a.updated_at || a.created_at || '').getTime())[0]
+        : null;
 
       const isSubscribed = !!subscriber;
       const tier = subscriber?.subscription_tier || null;
@@ -59,8 +64,8 @@ export class SubscriptionService {
         },
         stripeCustomerId: subscriber?.stripe_customer_id,
       };
-    } catch (error) {
-      console.error('Exception checking subscription status:', error);
+    } catch (error: any) {
+      logError('Exception checking subscription status', error);
       return {
         isSubscribed: false,
         subscriptionTier: null,
@@ -89,8 +94,8 @@ export class SubscriptionService {
       });
 
       if (error) {
-        console.error('Subscription creation error:', error);
-        return { success: false, error: error.message };
+        logError('Subscription creation error', error);
+        return { success: false, error: getErrorMessage(error) };
       }
 
       return { success: true, url: data.url };
@@ -115,16 +120,20 @@ export class SubscriptionService {
     if (!user) return null;
 
     try {
-      const { data: subscriber, error } = await supabase
+      const { data: subscribers, error } = await supabase
         .from('subscribers')
         .select('*')
-        .eq('email', user.email)
-        .single();
+        .eq('email', user.email);
 
       if (error) {
-        console.error('Error fetching subscription info:', error);
+        logError('Error fetching subscription info', error);
         return null;
       }
+
+      // Get the most recent subscriber if multiple exist
+      const subscriber = subscribers && subscribers.length > 0
+        ? subscribers.sort((a, b) => new Date(b.updated_at || b.created_at || '').getTime() - new Date(a.updated_at || a.created_at || '').getTime())[0]
+        : null;
 
       return {
         plan: "Premium SEO Tools",
@@ -143,8 +152,8 @@ export class SubscriptionService {
           "Export capabilities"
         ]
       };
-    } catch (error) {
-      console.error('Exception fetching subscription info:', error);
+    } catch (error: any) {
+      logError('Exception fetching subscription info', error);
       return null;
     }
   }
@@ -162,15 +171,16 @@ export class SubscriptionService {
       // For now, we'll just update the local record
       const { error } = await supabase
         .from('subscribers')
-        .update({ 
+        .update({
           subscribed: false,
           updated_at: new Date().toISOString()
         })
-        .eq('email', user.email);
+        .eq('email', user.email)
+        .eq('subscribed', true);
 
       if (error) {
-        console.error('Error cancelling subscription:', error);
-        return { success: false, error: 'Failed to cancel subscription' };
+        logError('Error cancelling subscription', error);
+        return { success: false, error: getErrorMessage(error) || 'Failed to cancel subscription' };
       }
 
       return { success: true };
@@ -185,22 +195,35 @@ export class SubscriptionService {
    */
   static async updateSubscriptionStatus(email: string, subscribed: boolean, stripeCustomerId?: string) {
     try {
-      const { error } = await supabase
+      const updateData: any = {
+        subscribed,
+        updated_at: new Date().toISOString()
+      };
+
+      if (stripeCustomerId) {
+        updateData.stripe_customer_id = stripeCustomerId;
+      }
+
+      let query = supabase
         .from('subscribers')
-        .update({ 
-          subscribed,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('email', email);
 
+      // If we have a stripe customer ID, be more specific
+      if (stripeCustomerId) {
+        query = query.eq('stripe_customer_id', stripeCustomerId);
+      }
+
+      const { error } = await query;
+
       if (error) {
-        console.error('Error updating subscription status:', error);
+        logError('Error updating subscription status', error);
         return false;
       }
 
       return true;
-    } catch (error) {
-      console.error('Exception updating subscription status:', error);
+    } catch (error: any) {
+      logError('Exception updating subscription status', error);
       return false;
     }
   }
