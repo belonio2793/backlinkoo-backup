@@ -649,26 +649,33 @@ export function BeautifulBlogPost() {
               {/* Action Buttons - Moved here below Target URL */}
               <div className="flex flex-wrap justify-center gap-4 mt-8 max-w-2xl mx-auto">
                 {canClaimPost && (
-                  <Button
-                    onClick={handleClaimPost}
-                    disabled={claiming}
-                    size="lg"
-                    variant="outline"
-                    className="beautiful-button bg-transparent border-blue-300 text-blue-600 hover:bg-transparent hover:border-blue-500 hover:text-blue-700 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full shadow-lg transition-all duration-300"
-                  >
-                    {claiming ? (
-                      <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
-                        Claiming...
-                      </>
-                    ) : (
-                      <>
-                        <Crown className="mr-3 h-5 w-5" />
-                        {user ? 'Claim This Post' : 'Login to Claim'}
-                        <Zap className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={handleClaimPost}
+                        disabled={claiming}
+                        size="lg"
+                        variant="outline"
+                        className="beautiful-button bg-transparent border-blue-300 text-blue-600 hover:bg-transparent hover:border-blue-500 hover:text-blue-700 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full shadow-lg transition-all duration-300"
+                      >
+                        {claiming ? (
+                          <>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+                            Claiming...
+                          </>
+                        ) : (
+                          <>
+                            <Crown className="mr-3 h-5 w-5" />
+                            {user ? 'Claim This Post' : 'Login to Claim'}
+                            <Zap className="ml-2 h-4 w-4" />
+                          </>
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Claim this post to become its owner. Once claimed, you can edit, manage, and prevent others from deleting it.</p>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
 
                 {unclaimPermissions.canUnclaim && (
