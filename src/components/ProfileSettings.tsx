@@ -51,8 +51,27 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     user: user ? { email: user.email, id: user.id } : null,
     authLoading,
     loading,
-    hasUserProfile: !!userProfile
+    hasUserProfile: !!userProfile,
+    profileData: profileData
   });
+
+  // If we have user data from context but no profile data yet, initialize immediately
+  useEffect(() => {
+    if (user && !profileData.email) {
+      console.log('🔄 Initializing profile data from auth context');
+      setProfileData({
+        displayName: user.user_metadata?.display_name ||
+                    user.user_metadata?.full_name ||
+                    user.email?.split('@')[0] ||
+                    'User',
+        email: user.email || '',
+        bio: user.user_metadata?.bio || '',
+        website: user.user_metadata?.website || '',
+        company: user.user_metadata?.company || '',
+        location: user.user_metadata?.location || ''
+      });
+    }
+  }, [user, profileData.email]);
 
   // Profile form data
   const [profileData, setProfileData] = useState({
