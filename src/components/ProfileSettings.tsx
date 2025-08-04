@@ -73,6 +73,11 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
 
   useEffect(() => {
     const loadProfileData = async () => {
+      // Don't start loading if auth is still checking
+      if (authLoading) {
+        return;
+      }
+
       if (!user) {
         setLoading(false);
         return;
