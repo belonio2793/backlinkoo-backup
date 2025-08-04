@@ -420,7 +420,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                     <span className="font-medium">Account Created:</span>
                   </div>
                   <p className="text-sm text-muted-foreground ml-6">
-                    {formatDate(user.created_at)}
+                    {user?.created_at ? formatDate(user.created_at) : 'Unknown'}
                   </p>
                 </div>
 
@@ -430,7 +430,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                     <span className="font-medium">Last Sign In:</span>
                   </div>
                   <p className="text-sm text-muted-foreground ml-6">
-                    {user.last_sign_in_at ? formatDate(user.last_sign_in_at) : 'Never'}
+                    {user?.last_sign_in_at ? formatDate(user.last_sign_in_at) : 'Never'}
                   </p>
                 </div>
 
@@ -440,7 +440,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                     <span className="font-medium">User ID:</span>
                   </div>
                   <p className="text-xs text-muted-foreground ml-6 font-mono">
-                    {user.id}
+                    {user?.id || 'No ID available'}
                   </p>
                 </div>
 
