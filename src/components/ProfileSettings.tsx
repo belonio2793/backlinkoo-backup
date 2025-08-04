@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { usePremium } from '@/hooks/usePremium';
 import { userService, UserProfile } from '@/services/userService';
 import { profileService, UserProfileData, UserSettings as ProfileUserSettings } from '@/services/profileService';
+import { ProfileErrorDebugger } from '@/utils/profileErrorDebugger';
 import { 
   User, 
   Mail, 
