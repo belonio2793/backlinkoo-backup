@@ -220,8 +220,8 @@ class UserService {
       
       // For regular users, check against limit
       return currentClaimedCount < limits.maxClaimedPosts;
-    } catch (error) {
-      console.error('Error checking claim eligibility:', error);
+    } catch (error: any) {
+      console.error('Error checking claim eligibility:', error.message || error);
       return false;
     }
   }
