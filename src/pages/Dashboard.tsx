@@ -1573,13 +1573,15 @@ const Dashboard = () => {
               </div>
             ) : activeSection === "premium-plan" ? (
               <div className="space-y-6">
-                <PremiumPlanTab
-                  isSubscribed={isPremiumSubscriber}
-                  onUpgrade={() => {
-                    // Refresh premium status after successful upgrade
-                    PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
-                  }}
-                />
+                <StreamlinedPremiumProvider>
+                  <PremiumPlanTab
+                    isSubscribed={isPremiumSubscriber}
+                    onUpgrade={() => {
+                      // Refresh premium status after successful upgrade
+                      PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
+                    }}
+                  />
+                </StreamlinedPremiumProvider>
               </div>
             ) : null}
           </>
