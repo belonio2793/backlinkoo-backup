@@ -80,22 +80,32 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
 
   const handleCheckout = async () => {
     setIsProcessing(true);
-    
+
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      // Use real subscription service to create payment checkout
+      const result = await SubscriptionService.createSubscription(
+        user,
+        !user, // isGuest if no user
+        !user ? formData.email : undefined // guestEmail if no user
+      );
+
+      if (result.success && result.url) {
+        // Redirect to Stripe checkout
+        window.open(result.url, '_blank');
+
+        toast({
+          title: "Redirecting to Payment",
+          description: "You'll be redirected to complete your payment securely.",
+        });
+
+        // Keep modal open as user will return after payment
+      } else {
+        throw new Error(result.error || 'Failed to create subscription');
+      }
+    } catch (error: any) {
       toast({
-        title: "Payment Successful!",
-        description: `Welcome to Premium! Your ${selectedPlan} subscription is now active.`,
-      });
-      
-      onSuccess?.();
-      onClose();
-    } catch (error) {
-      toast({
-        title: "Payment Failed",
-        description: "There was an issue processing your payment. Please try again.",
+        title: "Payment Setup Failed",
+        description: error.message || "There was an issue setting up your payment. Please try again.",
         variant: "destructive"
       });
     } finally {
