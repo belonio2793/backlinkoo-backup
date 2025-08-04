@@ -88,18 +88,18 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProfileChecker>
-          <PremiumPopupProvider>
-            <Toaster />
-            <Sonner />
-            <GlobalNotifications />
-            <DatabaseHealthLogger />
-            <BetaNotification />
-            <BrowserRouter>
+          <Toaster />
+          <Sonner />
+          <GlobalNotifications />
+          <DatabaseHealthLogger />
+          <BetaNotification />
+          <BrowserRouter>
+            <PremiumPopupProvider>
               <AuthRedirectHandler>
                 <OptimizedAppWrapper />
               </AuthRedirectHandler>
-            </BrowserRouter>
-          </PremiumPopupProvider>
+            </PremiumPopupProvider>
+          </BrowserRouter>
         </AuthProfileChecker>
       </TooltipProvider>
     </QueryClientProvider>
