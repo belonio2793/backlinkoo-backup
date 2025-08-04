@@ -221,7 +221,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
 
       console.log('📝 Updating profile with data:', updateData);
 
-      const result = await profileService.updateProfile(updateData);
+      const result = await ProfileErrorHandler.safeUpdateProfile(updateData);
 
       if (result.success) {
         console.log('✅ Profile updated successfully');
