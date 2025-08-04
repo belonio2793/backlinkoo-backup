@@ -43,7 +43,7 @@ export class SubscriptionService {
         .single();
 
       if (error && error.code !== 'PGRST116') { // Not a "no rows returned" error
-        console.error('Error checking subscription:', error?.message || JSON.stringify(error, null, 2));
+        logError('Error checking subscription', error);
       }
 
       const isSubscribed = !!subscriber;
@@ -61,7 +61,7 @@ export class SubscriptionService {
         stripeCustomerId: subscriber?.stripe_customer_id,
       };
     } catch (error: any) {
-      console.error('Exception checking subscription status:', error?.message || error?.toString() || 'Unknown error');
+      logError('Exception checking subscription status', error);
       return {
         isSubscribed: false,
         subscriptionTier: null,
@@ -90,8 +90,8 @@ export class SubscriptionService {
       });
 
       if (error) {
-        console.error('Subscription creation error:', error?.message || JSON.stringify(error, null, 2));
-        return { success: false, error: error.message || 'Unknown subscription creation error' };
+        logError('Subscription creation error', error);
+        return { success: false, error: getErrorMessage(error) };
       }
 
       return { success: true, url: data.url };
@@ -123,7 +123,7 @@ export class SubscriptionService {
         .single();
 
       if (error) {
-        console.error('Error fetching subscription info:', error?.message || JSON.stringify(error, null, 2));
+        logError('Error fetching subscription info', error);
         return null;
       }
 
@@ -145,7 +145,7 @@ export class SubscriptionService {
         ]
       };
     } catch (error: any) {
-      console.error('Exception fetching subscription info:', error?.message || error?.toString() || 'Unknown error');
+      logError('Exception fetching subscription info', error);
       return null;
     }
   }
@@ -170,8 +170,8 @@ export class SubscriptionService {
         .eq('email', user.email);
 
       if (error) {
-        console.error('Error cancelling subscription:', error?.message || JSON.stringify(error, null, 2));
-        return { success: false, error: error?.message || 'Failed to cancel subscription' };
+        logError('Error cancelling subscription', error);
+        return { success: false, error: getErrorMessage(error) || 'Failed to cancel subscription' };
       }
 
       return { success: true };
@@ -195,13 +195,13 @@ export class SubscriptionService {
         .eq('email', email);
 
       if (error) {
-        console.error('Error updating subscription status:', error?.message || JSON.stringify(error, null, 2));
+        logError('Error updating subscription status', error);
         return false;
       }
 
       return true;
     } catch (error: any) {
-      console.error('Exception updating subscription status:', error?.message || error?.toString() || 'Unknown error');
+      logError('Exception updating subscription status', error);
       return false;
     }
   }
