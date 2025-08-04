@@ -112,7 +112,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
           return;
         }
 
-        console.log('🔄 Loading profile data for user:', authUser.email);
+        console.log('��� Loading profile data for user:', authUser.email);
 
         // Initialize with auth user data immediately
         const initialData = {
@@ -177,16 +177,6 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
         } catch (dbError: any) {
           console.warn('⚠️ Database error, continuing with auth data only:', dbError.message);
           // Continue using the initialData we already set
-        }
-
-        if (userSettings) {
-          console.log('✅ Settings loaded from database:', userSettings);
-          setSettings({
-            emailNotifications: userSettings.email_notifications ?? true,
-            marketingEmails: userSettings.marketing_emails ?? false,
-            weeklyReports: userSettings.weekly_reports ?? true,
-            securityAlerts: userSettings.security_alerts ?? true
-          });
         }
 
       } catch (error: any) {
