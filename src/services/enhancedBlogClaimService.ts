@@ -80,7 +80,16 @@ export class EnhancedBlogClaimService {
    */
   static async claimPost(slug: string, user: User): Promise<ClaimResult> {
     try {
-      // First, get the post
+      // Validate user authentication
+      if (!user || !user.id) {
+        return {
+          success: false,
+          message: 'User authentication required to claim posts',
+          needsLogin: true
+        };
+      }
+
+      // First, get the post/ First, get the postostrst, get the post
       const { data: post, error: fetchError } = await supabase
         .from('blog_posts')
         .select('*')
@@ -383,11 +392,18 @@ export class EnhancedBlogClaimService {
    */
   static async processPendingClaimIntent(user: User): Promise<ClaimResult | null> {
     try {
+      // Safety check: ensure user is authenticated
+      if (!user || !user.id) {
+        console.warn('Cannot process claim intent: user not authenticated');
+        localStorage.removeItem('claim_intent');
+        return null;
+      }
+
       const claimIntentStr = localStorage.getItem('claim_intent');
       if (!claimIntentStr) return null;
 
       const claimIntent = JSON.parse(claimIntentStr);
-      
+
       // Check if intent is recent (within last hour)
       if (Date.now() - claimIntent.timestamp > 60 * 60 * 1000) {
         localStorage.removeItem('claim_intent');

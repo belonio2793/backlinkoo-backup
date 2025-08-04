@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { PremiumPlanTab } from "@/components/PremiumPlanTab";
 import { SEOAcademyTab } from "@/components/SEOAcademyTab";
+import { StreamlinedPremiumProvider } from "@/components/StreamlinedPremiumProvider";
 
 import { PremiumService } from "@/services/premiumService";
 import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
@@ -1572,13 +1573,15 @@ const Dashboard = () => {
               </div>
             ) : activeSection === "premium-plan" ? (
               <div className="space-y-6">
-                <PremiumPlanTab
-                  isSubscribed={isPremiumSubscriber}
-                  onUpgrade={() => {
-                    // Refresh premium status after successful upgrade
-                    PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
-                  }}
-                />
+                <StreamlinedPremiumProvider>
+                  <PremiumPlanTab
+                    isSubscribed={isPremiumSubscriber}
+                    onUpgrade={() => {
+                      // Refresh premium status after successful upgrade
+                      PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
+                    }}
+                  />
+                </StreamlinedPremiumProvider>
               </div>
             ) : null}
           </>

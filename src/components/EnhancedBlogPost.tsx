@@ -62,7 +62,14 @@ export function EnhancedBlogPost() {
   }, [user]);
 
   const processClaimIntent = async () => {
-    const result = await EnhancedBlogClaimService.processPendingClaimIntent(user!);
+    // Only process claim intents for authenticated users
+    if (!user || !user.id) {
+      // Clear any claim intents if user is not authenticated
+      localStorage.removeItem('claim_intent');
+      return;
+    }
+
+    const result = await EnhancedBlogClaimService.processPendingClaimIntent(user);
     if (result) {
       if (result.success) {
         toast({
