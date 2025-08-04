@@ -91,8 +91,7 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
       const result = await createSubscriptionWithFallback(
         user,
         !user, // isGuest if no user
-        !user ? formData.email : undefined, // guestEmail if no user
-        method // Pass the payment method
+        !user ? formData.email : undefined // guestEmail if no user
       );
 
       if (result.success && result.url) {
