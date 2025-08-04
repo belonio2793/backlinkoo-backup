@@ -1,5 +1,5 @@
 import { userService } from './userService';
-import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Fallback subscription service for when Stripe integration is not available
