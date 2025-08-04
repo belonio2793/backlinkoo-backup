@@ -236,73 +236,49 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
           {/* Right Side - Payment Form */}
           <div className="p-8">
             <div className="space-y-6">
-              {/* Payment Methods */}
-              <div>
-                <Label className="text-lg font-semibold mb-4 block">Payment Method</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    variant={paymentMethod === 'card' ? 'default' : 'outline'}
-                    className="h-12 justify-start"
-                    onClick={() => setPaymentMethod('card')}
-                  >
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Credit Card
-                  </Button>
-                  <Button
-                    variant={paymentMethod === 'paypal' ? 'default' : 'outline'}
-                    className="h-12 justify-start"
-                    onClick={() => setPaymentMethod('paypal')}
-                  >
-                    <div className="w-4 h-4 mr-2 bg-blue-600 rounded"></div>
-                    PayPal
-                  </Button>
-                </div>
-              </div>
-
-              {paymentMethod === 'card' ? (
-                <div className="space-y-4">
-                  {/* Email - only show for guests */}
-                  {!user && (
-                    <div>
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="your@email.com"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        className="mt-1"
-                        required
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Required for subscription management and receipts
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Secure Payment Notice */}
-                  <div className="text-center py-6 px-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Shield className="h-8 w-8 text-blue-600" />
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2 text-gray-900">Secure Stripe Checkout</h3>
-                    <p className="text-gray-600 text-sm">
-                      You'll be redirected to Stripe's secure payment page to safely enter your payment details.
-                      Stripe is trusted by millions of businesses worldwide.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <div className="w-8 h-8 bg-blue-600 rounded"></div>
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">PayPal Checkout</h3>
-                  <p className="text-gray-600 mb-4">
-                    You'll be redirected to PayPal to complete your payment securely.
+              {/* Email for guest users */}
+              {!user && (
+                <div>
+                  <Label htmlFor="email" className="text-lg font-semibold">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    className="mt-2"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Required for subscription management and receipts
                   </p>
                 </div>
               )}
+
+              {/* Secure Payment Notice */}
+              <div className="text-center py-6 px-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-gray-900">Secure Stripe Checkout</h3>
+                <p className="text-gray-600 text-sm mb-3">
+                  You'll be redirected to Stripe's secure payment page to safely enter your payment details.
+                </p>
+                <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <CreditCard className="h-3 w-3" />
+                    <span>Cards</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-blue-600 rounded"></div>
+                    <span>PayPal</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-green-600 rounded"></div>
+                    <span>Apple Pay</span>
+                  </div>
+                </div>
+              </div>
 
               <Separator />
 
