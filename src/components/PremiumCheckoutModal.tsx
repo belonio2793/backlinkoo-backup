@@ -280,65 +280,16 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
                     </div>
                   )}
 
-                  {/* Card Details */}
-                  <div>
-                    <Label htmlFor="cardNumber">Card Number</Label>
-                    <Input
-                      id="cardNumber"
-                      placeholder="1234 5678 9012 3456"
-                      value={formData.cardNumber}
-                      onChange={(e) => handleInputChange('cardNumber', formatCardNumber(e.target.value))}
-                      maxLength={19}
-                      className="mt-1"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label htmlFor="expiryDate">Expiry Date</Label>
-                      <Input
-                        id="expiryDate"
-                        placeholder="MM/YY"
-                        value={formData.expiryDate}
-                        onChange={(e) => handleInputChange('expiryDate', formatExpiryDate(e.target.value))}
-                        maxLength={5}
-                        className="mt-1"
-                      />
+                  {/* Secure Payment Notice */}
+                  <div className="text-center py-6 px-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Shield className="h-8 w-8 text-blue-600" />
                     </div>
-                    <div>
-                      <Label htmlFor="cvv">CVV</Label>
-                      <Input
-                        id="cvv"
-                        placeholder="123"
-                        value={formData.cvv}
-                        onChange={(e) => handleInputChange('cvv', e.target.value.replace(/\D/g, ''))}
-                        maxLength={4}
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Billing Details */}
-                  <div>
-                    <Label htmlFor="name">Cardholder Name</Label>
-                    <Input
-                      id="name"
-                      placeholder="John Doe"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="country">Country</Label>
-                    <Input
-                      id="country"
-                      placeholder="United States"
-                      value={formData.country}
-                      onChange={(e) => handleInputChange('country', e.target.value)}
-                      className="mt-1"
-                    />
+                    <h3 className="text-lg font-semibold mb-2 text-gray-900">Secure Stripe Checkout</h3>
+                    <p className="text-gray-600 text-sm">
+                      You'll be redirected to Stripe's secure payment page to safely enter your payment details.
+                      Stripe is trusted by millions of businesses worldwide.
+                    </p>
                   </div>
                 </div>
               ) : (
