@@ -42,22 +42,38 @@ export class ContentFormatter {
       .replace(/^\*\*H1\*\*:\s*/i, '')
       .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
       .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
+      .replace(/^Title:\s*/i, '') // Remove "Title:" prefix
       .replace(/\*\*/g, '') // Remove all ** symbols
       .replace(/\*/g, '') // Remove all * symbols
       .replace(/^#{1,6}\s+/, '')
       .trim();
 
+    // Remove "Title: " prefix patterns at the beginning
+    content = content.replace(/^[\s\n]*Title:\s*/i, '');
+
     // Remove H1 tags that contain the same title at the beginning of content
     const titlePattern = new RegExp(`^\\s*<h1[^>]*>\\s*${this.escapeRegex(cleanTitle)}\\s*<\\/h1>\\s*`, 'i');
     content = content.replace(titlePattern, '');
+
+    // Remove H1 with "Title:" prefix pattern: <h1>Title: actual title</h1>
+    const titlePrefixPattern = new RegExp(`^\\s*<h1[^>]*>\\s*Title:\\s*${this.escapeRegex(cleanTitle)}\\s*<\\/h1>\\s*`, 'i');
+    content = content.replace(titlePrefixPattern, '');
 
     // Remove H1 with strong tags pattern: <h1><strong>title</strong></h1>
     const strongTitlePattern = new RegExp(`^\\s*<h1[^>]*>\\s*<strong[^>]*>\\s*${this.escapeRegex(cleanTitle)}\\s*<\\/strong>\\s*<\\/h1>\\s*`, 'i');
     content = content.replace(strongTitlePattern, '');
 
+    // Remove H1 with strong tags and Title prefix: <h1><strong>Title: title</strong></h1>
+    const strongTitlePrefixPattern = new RegExp(`^\\s*<h1[^>]*>\\s*<strong[^>]*>\\s*Title:\\s*${this.escapeRegex(cleanTitle)}\\s*<\\/strong>\\s*<\\/h1>\\s*`, 'i');
+    content = content.replace(strongTitlePrefixPattern, '');
+
     // Also remove markdown H1 that matches the title
     const markdownTitlePattern = new RegExp(`^\\s*#\\s+${this.escapeRegex(cleanTitle)}\\s*\\n`, 'i');
     content = content.replace(markdownTitlePattern, '');
+
+    // Remove markdown H1 with Title prefix
+    const markdownTitlePrefixPattern = new RegExp(`^\\s*#\\s+Title:\\s*${this.escapeRegex(cleanTitle)}\\s*\\n`, 'i');
+    content = content.replace(markdownTitlePrefixPattern, '');
 
     // Remove **H1**: title pattern at the beginning
     const boldTitlePattern = new RegExp(`^\\s*\\*\\*H1\\*\\*:\\s*${this.escapeRegex(cleanTitle)}\\s*\\n?`, 'i');
@@ -66,6 +82,13 @@ export class ContentFormatter {
     // Remove **title** pattern at the beginning (for cases like **The Unforgettable Legacy...**)
     const starTitlePattern = new RegExp(`^\\s*\\*\\*${this.escapeRegex(cleanTitle)}\\*\\*\\s*\\n?`, 'i');
     content = content.replace(starTitlePattern, '');
+
+    // Remove **Title: title** pattern at the beginning
+    const starTitlePrefixPattern = new RegExp(`^\\s*\\*\\*Title:\\s*${this.escapeRegex(cleanTitle)}\\*\\*\\s*\\n?`, 'i');
+    content = content.replace(starTitlePrefixPattern, '');
+
+    // Remove any remaining "Title:" patterns at the beginning of content
+    content = content.replace(/^[\s\n]*Title:\s*[^\n]*\n?/i, '');
 
     return content.trim();
   }
