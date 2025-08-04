@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthService } from '@/services/authService';
 import { createSubscriptionWithFallback } from '@/services/fallbackSubscriptionService';
-import { useRouter } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Crown,
   CreditCard,
