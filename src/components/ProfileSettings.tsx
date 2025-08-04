@@ -111,17 +111,31 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
 
   const handleSaveProfile = async () => {
     if (!user) return;
-    
+
     setSaving(true);
     try {
-      // Here you would typically update the user profile in the database
-      // For now, we'll just show a success message
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      
-      toast({
-        title: "Profile Updated",
-        description: "Your profile has been successfully updated.",
-      });
+      const updateData: UserProfileData = {
+        display_name: profileData.displayName,
+        bio: profileData.bio,
+        website: profileData.website,
+        company: profileData.company,
+        location: profileData.location
+      };
+
+      const result = await profileService.updateProfile(updateData);
+
+      if (result.success) {
+        toast({
+          title: "Profile Updated",
+          description: result.message,
+        });
+      } else {
+        toast({
+          title: "Update Failed",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       toast({
         title: "Update Failed",
