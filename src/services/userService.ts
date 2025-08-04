@@ -26,7 +26,16 @@ class UserService {
         .single();
 
       if (error) {
-        console.error('Error fetching user profile:', error.message || error);
+        const errorMessage = error.message || error;
+        console.error('Error fetching user profile:', errorMessage);
+
+        // Handle specific permission denied errors
+        if (errorMessage && errorMessage.includes('permission denied for table users')) {
+          console.warn('⚠️ Permission denied for "users" table - this indicates a database configuration issue');
+          console.warn('The application should only access the "profiles" table, not "users"');
+          console.warn('This may be caused by a database trigger or RLS policy trying to access a non-existent table');
+        }
+
         return null;
       }
 
