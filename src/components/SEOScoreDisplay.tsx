@@ -29,6 +29,7 @@ import {
   Star
 } from 'lucide-react';
 import { SEOAnalyzer, type SEOAnalysisResult } from '@/services/seoAnalyzer';
+import { PricingModal } from '@/components/PricingModal';
 
 interface SEOScoreDisplayProps {
   score: number;
