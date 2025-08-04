@@ -138,7 +138,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
         });
 
         // Ensure profile exists in database
-        console.log('�� Ensuring profile exists in database...');
+        console.log('🔄 Ensuring profile exists in database...');
         const ensureResult = await profileService.ensureProfileExists();
         if (!ensureResult.success) {
           console.warn('Failed to ensure profile exists:', ensureResult.message);
@@ -147,21 +147,36 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
 
         // Load profile data from database and merge with auth data
         console.log('🔄 Loading profile from database...');
-        const profile = await profileService.getUserProfile();
-        const userSettings = await profileService.getUserSettings();
+        try {
+          const profile = await profileService.getUserProfile();
+          const userSettings = await profileService.getUserSettings();
 
-        if (profile) {
-          console.log('✅ Profile loaded from database:', profile);
-          setProfileData({
-            displayName: profile.display_name || initialData.displayName,
-            email: authUser.email || '', // Always use auth email
-            bio: profile.bio || initialData.bio,
-            website: profile.website || initialData.website,
-            company: profile.company || initialData.company,
-            location: profile.location || initialData.location
-          });
-        } else {
-          console.log('ℹ️ No profile found in database, using auth data');
+          if (profile) {
+            console.log('✅ Profile loaded from database:', profile);
+            setProfileData({
+              displayName: profile.display_name || initialData.displayName,
+              email: authUser.email || '', // Always use auth email
+              bio: profile.bio || initialData.bio,
+              website: profile.website || initialData.website,
+              company: profile.company || initialData.company,
+              location: profile.location || initialData.location
+            });
+          } else {
+            console.log('ℹ️ No profile found in database, using auth data');
+          }
+
+          if (userSettings) {
+            console.log('✅ Settings loaded from database:', userSettings);
+            setSettings({
+              emailNotifications: userSettings.email_notifications ?? true,
+              marketingEmails: userSettings.marketing_emails ?? false,
+              weeklyReports: userSettings.weekly_reports ?? true,
+              securityAlerts: userSettings.security_alerts ?? true
+            });
+          }
+        } catch (dbError: any) {
+          console.warn('⚠️ Database error, continuing with auth data only:', dbError.message);
+          // Continue using the initialData we already set
         }
 
         if (userSettings) {
