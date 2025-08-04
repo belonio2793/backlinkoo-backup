@@ -9,11 +9,13 @@ import {
   Menu,
   X,
   ChevronRight,
-  Zap
+  Zap,
+  Trash2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { User } from '@supabase/supabase-js';
 import { LoginModal } from "@/components/LoginModal";
+import { useToast } from "@/hooks/use-toast";
 
 interface ToolsHeaderProps {
   user: User | null;
@@ -22,6 +24,7 @@ interface ToolsHeaderProps {
 
 const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
@@ -50,6 +53,55 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
       disabled: true
     }
   ];
+
+  const handleClearCacheAndCookies = async () => {
+    try {
+      // Clear localStorage
+      localStorage.clear();
+
+      // Clear sessionStorage
+      sessionStorage.clear();
+
+      // Clear cookies (domain-specific)
+      const cookies = document.cookie.split(";");
+      for (let cookie of cookies) {
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+        // Clear for current domain
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+        // Clear for parent domain if applicable
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+        // Clear for parent domain with leading dot
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
+      }
+
+      // Clear browser cache (if supported)
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => caches.delete(cacheName))
+        );
+      }
+
+      toast({
+        title: "Cache & Cookies Cleared",
+        description: "Browser cache and cookies have been cleared successfully. Page will reload.",
+      });
+
+      // Reload the page after a short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+
+    } catch (error) {
+      console.error('Error clearing cache and cookies:', error);
+      toast({
+        title: "Clear Failed",
+        description: "Some data may not have been cleared completely.",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
@@ -133,11 +185,23 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
 
           {/* Action Buttons */}
           <div className="flex items-center gap-3">
+            {/* Clear Cache Button - Always visible */}
+            <Button
+              onClick={handleClearCacheAndCookies}
+              variant="outline"
+              size="sm"
+              className="bg-transparent hover:bg-orange-50/50 border border-orange-200/60 text-orange-600 hover:text-orange-700 hover:border-orange-300/80 transition-all duration-200 font-medium px-3 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+              title="Clear browser cache and cookies"
+            >
+              <Trash2 className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Clear Cache</span>
+            </Button>
+
             {user ? (
               <div className="flex items-center gap-3">
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate("/dashboard")} 
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/dashboard")}
                   className="hidden sm:flex items-center gap-2"
                 >
                   <Target className="h-4 w-4" />
