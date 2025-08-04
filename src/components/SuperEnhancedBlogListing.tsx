@@ -565,10 +565,7 @@ export function SuperEnhancedBlogListing() {
             </>
           )}
 
-          {/* Stats for Nerds - Collapsible Debug Information */}
-          {import.meta.env.DEV && (
-            <StatsForNerds />
-          )}
+
         </div>
       </div>
     </div>
@@ -824,38 +821,5 @@ function SuperPostCard({
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-// Collapsible Stats for Nerds component with enhanced styling
-function StatsForNerds() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="mt-16 border-t border-white/20 pt-12">
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="ghost"
-            className="w-full justify-between text-gray-500 hover:text-gray-700 bg-white/50 backdrop-blur-sm border border-white/30 rounded-2xl p-6 transition-all duration-300 hover:bg-white/70"
-          >
-            <span className="text-lg font-mono flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              📊 Debug Information
-            </span>
-            <ChevronDown
-              className={`h-5 w-5 transition-transform duration-300 ${
-                isOpen ? 'transform rotate-180' : ''
-              }`}
-            />
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-6">
-          <div className="bg-white/80 backdrop-blur-sm border border-white/30 rounded-2xl p-6">
-            <BlogDataDebugger />
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    </div>
   );
 }
