@@ -13,6 +13,7 @@ import { usePremium } from '@/hooks/usePremium';
 import { userService, UserProfile } from '@/services/userService';
 import { profileService, UserProfileData, UserSettings as ProfileUserSettings } from '@/services/profileService';
 import { ProfileErrorDebugger } from '@/utils/profileErrorDebugger';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   User, 
   Mail, 
