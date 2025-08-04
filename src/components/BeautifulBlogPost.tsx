@@ -668,7 +668,7 @@ export function BeautifulBlogPost() {
                             disabled={claiming}
                             size="sm"
                             variant="outline"
-                            className="bg-transparent border-blue-300 text-blue-600 hover:bg-transparent hover:border-blue-500 hover:text-blue-700 hover:shadow-lg hover:scale-105 px-4 py-2 rounded-full transition-all duration-300"
+                            className="bg-transparent border-blue-300 text-blue-600 hover:bg-white hover:border-blue-500 hover:text-blue-700 hover:shadow-lg hover:scale-105 px-4 py-2 rounded-full transition-all duration-300"
                           >
                             {claiming ? (
                               <>

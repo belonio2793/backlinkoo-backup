@@ -17,6 +17,17 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 import {
   CreditCard,
@@ -171,7 +182,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           setError('NOT_FOUND');
         }
       } else {
-        console.log(`✅ Successfully loaded ${finalPosts.length} blog posts`);
+        console.log(`��� Successfully loaded ${finalPosts.length} blog posts`);
         setError(null);
 
         // Show success notification on first load
@@ -976,23 +987,45 @@ const Dashboard = () => {
                   </Button>
                 </>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  // Clear localStorage
-                  localStorage.clear();
-                  // Clear sessionStorage
-                  sessionStorage.clear();
-                  // Reload page to refresh state
-                  window.location.reload();
-                }}
-                className="px-2 sm:px-3 text-muted-foreground hover:text-foreground"
-                title="Clear cache and refresh"
-              >
-                <RefreshCw className="h-4 w-4" />
-                <span className="hidden sm:inline ml-1">Clear Cache</span>
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="px-2 sm:px-3 text-muted-foreground hover:text-foreground"
+                    title="Clear cache and refresh"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                    <span className="hidden sm:inline ml-1">Clear Cache</span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Clear Cache & Refresh</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will clear all stored data (including login sessions, preferences, and cached content) and refresh the page. You may need to sign in again.
+                      <br /><br />
+                      Are you sure you want to continue?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => {
+                        // Clear localStorage
+                        localStorage.clear();
+                        // Clear sessionStorage
+                        sessionStorage.clear();
+                        // Reload page to refresh state
+                        window.location.reload();
+                      }}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Clear Cache
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button

@@ -139,7 +139,9 @@ export class RLSStatusService {
   }
 }
 
-// Auto-display status when module loads
-RLSStatusService.displayRLSStatusAndFix();
+// Auto-display status when module loads - DISABLED TO PREVENT AUTO TEST POSTS
+// RLSStatusService.displayRLSStatusAndFix();
+
+// To manually test RLS status, call: RLSStatusService.displayRLSStatusAndFix()
 
 export default RLSStatusService;

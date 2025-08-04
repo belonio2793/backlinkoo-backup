@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import SubscriptionService from '@/services/subscriptionService';
+import { createSubscriptionWithFallback } from '@/services/fallbackSubscriptionService';
 import { useAuth } from '@/hooks/useAuth';
 import {
   Crown,
@@ -82,27 +83,45 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
     setIsProcessing(true);
 
     try {
-      // Use real subscription service to create payment checkout
-      const result = await SubscriptionService.createSubscription(
+      // Use subscription service with fallback support
+      const result = await createSubscriptionWithFallback(
         user,
         !user, // isGuest if no user
         !user ? formData.email : undefined // guestEmail if no user
       );
 
       if (result.success && result.url) {
-        // Redirect to Stripe checkout
-        window.open(result.url, '_blank');
+        if (result.usedFallback) {
+          // Fallback was used - redirect directly and close modal
+          toast({
+            title: "Premium Activated!",
+            description: "Your account has been upgraded to Premium (development mode).",
+          });
 
-        toast({
-          title: "Redirecting to Payment",
-          description: "You'll be redirected to complete your payment securely.",
-        });
+          // Close modal and trigger success callback
+          onClose();
+          if (onSuccess) {
+            onSuccess();
+          }
 
-        // Keep modal open as user will return after payment
+          // Small delay then redirect
+          setTimeout(() => {
+            window.location.href = result.url!;
+          }, 1000);
+        } else {
+          // Real Stripe checkout - open in new tab
+          window.open(result.url, '_blank');
+
+          toast({
+            title: "Redirecting to Payment",
+            description: "You'll be redirected to complete your payment securely.",
+          });
+        }
       } else {
         throw new Error(result.error || 'Failed to create subscription');
       }
     } catch (error: any) {
+      console.error('Checkout error:', error);
       toast({
         title: "Payment Setup Failed",
         description: error.message || "There was an issue setting up your payment. Please try again.",

@@ -83,25 +83,102 @@ export class SubscriptionService {
    * Create subscription for $29/month plan
    */
   static async createSubscription(user: User | null, isGuest: boolean = false, guestEmail?: string): Promise<{ success: boolean; url?: string; error?: string }> {
-    try {
-      const { data, error } = await supabase.functions.invoke('create-subscription', {
-        body: {
-          priceId: 'price_premium_seo_tools',
-          tier: 'premium-seo-tools',
-          isGuest,
-          guestEmail: isGuest ? guestEmail : undefined
-        }
-      });
+    console.log('🚀 Creating subscription...', { user: !!user, isGuest, guestEmail });
 
-      if (error) {
-        logError('Subscription creation error', error);
-        return { success: false, error: getErrorMessage(error) };
+    try {
+      // Validate inputs
+      if (isGuest && !guestEmail) {
+        return { success: false, error: 'Guest email is required for guest checkout' };
       }
 
+      if (!isGuest && !user) {
+        return { success: false, error: 'User authentication required' };
+      }
+
+      // Use environment variable for price ID or fallback to default
+      const priceId = import.meta.env.VITE_STRIPE_PRICE_ID || 'price_premium_monthly';
+
+      const requestBody = {
+        priceId,
+        tier: 'premium',
+        isGuest,
+        guestEmail: isGuest ? guestEmail : undefined
+      };
+
+      console.log('📝 Request body:', requestBody);
+
+      // Get current session to ensure we have auth token
+      const { data: session } = await supabase.auth.getSession();
+      console.log('🔑 Session available:', !!session?.session);
+
+      const { data, error } = await supabase.functions.invoke('create-subscription', {
+        body: requestBody
+      });
+
+      console.log('📨 Edge function response:', { data, error });
+      console.log('📨 Raw error object:', JSON.stringify(error, null, 2));
+
+      if (error) {
+        console.error('❌ Edge function error:', error);
+
+        // Provide more specific error messages
+        let errorMessage = 'Failed to create subscription';
+
+        // Handle different error object structures
+        if (error && typeof error === 'object') {
+          // Check for nested error structures from edge functions
+          if (error.error && typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else if (error.message) {
+            errorMessage = error.message;
+          } else if (error.details) {
+            errorMessage = error.details;
+          } else {
+            // If it's an object but no clear message, stringify it
+            errorMessage = `API Error: ${JSON.stringify(error)}`;
+          }
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        }
+
+        // Handle specific error cases
+        if (errorMessage.includes('Rate limit')) {
+          errorMessage = 'Too many requests. Please wait a moment and try again.';
+        } else if (errorMessage.includes('STRIPE_SECRET_KEY') || errorMessage.includes('stripe')) {
+          errorMessage = 'Payment system configuration error. Please contact support.';
+        } else if (errorMessage.includes('authentication') || errorMessage.includes('auth')) {
+          errorMessage = 'Authentication error. Please sign in and try again.';
+        } else if (errorMessage.includes('price') || errorMessage.includes('priceId')) {
+          errorMessage = 'Invalid pricing configuration. Please contact support.';
+        }
+
+        logError('Subscription creation error', error);
+        return { success: false, error: errorMessage };
+      }
+
+      if (!data || !data.url) {
+        console.error('❌ No checkout URL returned from edge function');
+        return { success: false, error: 'Payment system did not return a checkout URL' };
+      }
+
+      console.log('✅ Subscription creation successful, URL:', data.url);
       return { success: true, url: data.url };
+
     } catch (error: any) {
-      console.error('Exception creating subscription:', error);
-      return { success: false, error: error.message || 'Failed to create subscription' };
+      console.error('❌ Exception creating subscription:', error);
+
+      let errorMessage = 'An unexpected error occurred';
+
+      if (error.message) {
+        errorMessage = error.message;
+      }
+
+      // Handle network errors
+      if (error.name === 'TypeError' || errorMessage.includes('fetch')) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      }
+
+      return { success: false, error: errorMessage };
     }
   }
 

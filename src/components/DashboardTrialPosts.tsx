@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePremium';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
@@ -46,6 +47,7 @@ interface DashboardTrialPostsProps {
 export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { canClaimUnlimited, maxClaimedPosts, isPremium } = usePermissions();
 
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -123,12 +125,16 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
       return;
     }
 
-    // Check if user already has 3 claimed posts
+    // Check if user has reached their claim limit
     const userClaimedCount = posts.filter(post => post.claimed && post.user_id === user.id).length;
-    if (userClaimedCount >= 3) {
+
+    // Premium users have unlimited claims
+    if (!canClaimUnlimited && userClaimedCount >= maxClaimedPosts) {
       toast({
         title: "Claim Limit Reached",
-        description: "You can only claim a maximum of 3 posts. Please unclaim a post first.",
+        description: isPremium
+          ? "You have reached your claim limit."
+          : `You can only claim a maximum of ${maxClaimedPosts} posts. Upgrade to Premium for unlimited claims.`,
         variant: "destructive"
       });
       return;
@@ -288,7 +294,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
     const canDelete = !post.claimed || (post.user_id === user?.id);
     const isExpiring = isExpiringSoon(post);
     const userClaimedCount = user ? posts.filter(p => p.claimed && p.user_id === user.id).length : 0;
-    const canClaim = userClaimedCount < 3;
+    const canClaim = canClaimUnlimited || userClaimedCount < maxClaimedPosts;
 
     return (
       <Card 
@@ -466,16 +472,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
           <h2 className="text-2xl font-bold text-gray-900">Trial Blog Posts</h2>
           <p className="text-gray-600">Manage your claimed posts (max 3) and discover new opportunities</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button onClick={loadPosts} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh & Recategorize
-          </Button>
-          <Button onClick={() => navigate('/?focus=generator')} size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Generate New
-          </Button>
-        </div>
+
       </div>
 
       {/* Summary Stats */}
@@ -551,7 +548,8 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
             </TabsTrigger>
             <TabsTrigger value="claimed" className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4" />
-              Claimed ({claimedPosts.length}/3)
+              Claimed ({claimedPosts.length}{canClaimUnlimited ? '' : `/${maxClaimedPosts}`})
+              {canClaimUnlimited && <Infinity className="h-3 w-3 ml-1 text-yellow-600" />}
             </TabsTrigger>
           </TabsList>
 

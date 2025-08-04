@@ -29,7 +29,8 @@ import {
   Star
 } from 'lucide-react';
 import { SEOAnalyzer, type SEOAnalysisResult } from '@/services/seoAnalyzer';
-import { PricingModal } from '@/components/PricingModal';
+import { PremiumCheckoutModal } from '@/components/PremiumCheckoutModal';
+import { userService } from '@/services/userService';
 import { useToast } from '@/hooks/use-toast';
 
 interface SEOScoreDisplayProps {
@@ -53,7 +54,7 @@ export function SEOScoreDisplay({
 }: SEOScoreDisplayProps) {
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysis, setAnalysis] = useState<SEOAnalysisResult | null>(null);
-  const [pricingModalOpen, setPricingModalOpen] = useState(false);
+  const [premiumCheckoutOpen, setPremiumCheckoutOpen] = useState(false);
   const { toast } = useToast();
 
   const getScoreColor = (score: number) => {
@@ -89,7 +90,7 @@ export function SEOScoreDisplay({
       <div className="flex items-center gap-2">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Badge className={`px-3 py-1 cursor-help ${getScoreBadgeColor(score, isPremiumScore)}`}>
+            <Badge className={`px-3 py-1 cursor-help hover:bg-transparent ${getScoreBadgeColor(score, isPremiumScore)}`}>
               {isPremiumScore ? (
                 <Crown className="mr-1 h-3 w-3 text-purple-600" />
               ) : score === 100 ? (
@@ -218,7 +219,7 @@ export function SEOScoreDisplay({
                               </div>
                             </div>
                             <Button
-                              onClick={() => setPricingModalOpen(true)}
+                              onClick={() => setPremiumCheckoutOpen(true)}
                               size="sm"
                               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shrink-0"
                             >
@@ -422,16 +423,28 @@ export function SEOScoreDisplay({
         )}
       </div>
 
-      {/* Pricing Modal */}
-      <PricingModal
-        isOpen={pricingModalOpen}
-        onClose={() => setPricingModalOpen(false)}
-        onAuthSuccess={(user) => {
-          toast({
-            title: "Welcome!",
-            description: "You now have access to premium SEO content.",
-          });
-          setPricingModalOpen(false);
+      {/* Premium Checkout Modal */}
+      <PremiumCheckoutModal
+        isOpen={premiumCheckoutOpen}
+        onClose={() => setPremiumCheckoutOpen(false)}
+        onSuccess={async () => {
+          try {
+            // Upgrade user to premium role
+            await userService.upgradeToPremium();
+            toast({
+              title: "Welcome to Premium!",
+              description: "You now have access to all premium features including 100/100 SEO content, unlimited claims, and advanced analytics.",
+            });
+            setPremiumCheckoutOpen(false);
+            // Reload to refresh premium status
+            window.location.reload();
+          } catch (error) {
+            toast({
+              title: "Upgrade Error",
+              description: "There was an issue upgrading your account. Please contact support.",
+              variant: "destructive"
+            });
+          }
         }}
       />
     </TooltipProvider>
