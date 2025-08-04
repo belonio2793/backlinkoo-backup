@@ -39,18 +39,17 @@ export const UserProfile = () => {
 
   const handleSignOut = async () => {
     try {
-      await AuthService.signOut();
-      toast({
-        title: "Signed out",
-        description: "You have been successfully signed out.",
-      });
+      // Navigate immediately for instant UX
       window.location.href = '/';
-    } catch (error) {
-      toast({
-        title: "Sign out failed",
-        description: "An error occurred while signing out.",
-        variant: "destructive",
+
+      // Do actual sign out in background
+      AuthService.signOut().catch(error => {
+        console.error('Background sign out error:', error);
       });
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Still navigate even if sign out fails
+      window.location.href = '/';
     }
   };
 
