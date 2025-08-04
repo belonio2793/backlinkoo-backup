@@ -17,7 +17,7 @@ import { DebugErrorHandler } from "@/utils/debugErrorHandler";
 import "@/services/blogCleanupService"; // Initialize blog cleanup service
 
 
-import "@/services/rlsStatusService"; // RLS STATUS CHECK AND MANUAL FIX INSTRUCTIONS
+// import "@/services/rlsStatusService"; // RLS STATUS CHECK AND MANUAL FIX INSTRUCTIONS - DISABLED TO PREVENT AUTO TEST POSTS
 import "@/utils/createAdminUser"; // Admin user creation utility
 import "@/utils/autoAdminSetup"; // Auto admin user setup
 
