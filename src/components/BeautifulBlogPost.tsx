@@ -734,8 +734,19 @@ export function BeautifulBlogPost() {
                         Delete Post
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Permanently delete this post. {isOwnPost ? 'As the owner, you can delete this post at any time.' : 'Unclaimed posts can be deleted by anyone.'} This action cannot be undone.</p>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <div className="space-y-1">
+                        <p className="font-semibold">Delete Post</p>
+                        <p className="text-sm">
+                          {isOwnPost
+                            ? 'As the owner, you have full permission to delete this post.'
+                            : isUnclaimedPost
+                              ? 'This unclaimed post can be deleted by anyone.'
+                              : 'You can delete this post.'
+                          }
+                        </p>
+                        <p className="text-xs text-red-400">⚠️ This action cannot be undone</p>
+                      </div>
                     </TooltipContent>
                   </Tooltip>
                 )}
