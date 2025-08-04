@@ -732,6 +732,19 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <PremiumCheckoutModal
+        isOpen={showPremiumCheckout}
+        onClose={() => setShowPremiumCheckout(false)}
+        onSuccess={() => {
+          setShowPremiumCheckout(false);
+          refreshPremium(); // Refresh premium status
+          toast({
+            title: "Welcome to Premium!",
+            description: "Your account has been upgraded successfully!",
+          });
+        }}
+      />
     </div>
   );
 };
