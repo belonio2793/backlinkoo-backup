@@ -41,6 +41,10 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   const { user, isLoading: authLoading } = useAuth();
   const { userProfile, isPremium, isAdmin, userLimits, loading: premiumLoading, refresh: refreshPremium } = usePremium();
 
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile');
+
   // Debug logging
   console.log('ProfileSettings render:', {
     user: user ? { email: user.email, id: user.id } : null,
@@ -48,10 +52,6 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     loading,
     hasUserProfile: !!userProfile
   });
-  
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('profile');
 
   // Profile form data
   const [profileData, setProfileData] = useState({
