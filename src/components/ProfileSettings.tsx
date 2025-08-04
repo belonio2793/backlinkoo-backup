@@ -226,6 +226,8 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   const handleSaveSettings = async () => {
     setSaving(true);
     try {
+      console.log('🔄 Saving settings:', settings);
+
       const settingsData: ProfileUserSettings = {
         email_notifications: settings.emailNotifications,
         marketing_emails: settings.marketingEmails,
@@ -236,18 +238,21 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
       const result = await profileService.updateSettings(settingsData);
 
       if (result.success) {
+        console.log('✅ Settings updated successfully');
         toast({
           title: "Settings Updated",
-          description: result.message,
+          description: "Your preferences have been saved successfully!",
         });
       } else {
+        console.error('❌ Settings update failed:', result.message);
         toast({
           title: "Update Failed",
           description: result.message,
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('❌ Settings save error:', error);
       toast({
         title: "Update Failed",
         description: "Failed to update settings. Please try again.",
