@@ -211,7 +211,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     const provider = providers[0];
     const providerMap = {
       google: { name: 'Google', icon: '🔍', color: 'bg-red-500' },
-      facebook: { name: 'Facebook', icon: '📘', color: 'bg-blue-600' },
+      facebook: { name: 'Facebook', icon: '����', color: 'bg-blue-600' },
       linkedin_oidc: { name: 'LinkedIn', icon: '💼', color: 'bg-blue-700' },
       twitter: { name: 'X (Twitter)', icon: '🐦', color: 'bg-black' },
     };
@@ -269,18 +269,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     );
   }
 
-  if (loading) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center p-12">
-          <div className="text-center space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto" />
-            <div className="text-muted-foreground">Loading profile settings...</div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+
 
   const providerInfo = getProviderInfo(user.app_metadata?.providers);
   const displayName = getDisplayName();
