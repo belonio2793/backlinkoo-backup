@@ -197,7 +197,7 @@ export function SuperEnhancedBlogListing() {
       
       if (result.success) {
         toast({
-          title: "Success! ����",
+          title: "Success! 🎉",
           description: result.message,
         });
         loadPosts(); // Reload to show updated status
@@ -364,43 +364,55 @@ export function SuperEnhancedBlogListing() {
 
           {/* Enhanced Search and Filters */}
           <div className="mb-12 space-y-6">
-            {/* Search */}
-            <form onSubmit={handleSearch} className="relative max-w-4xl mx-auto">
+            {/* Modern Search Design */}
+            <form onSubmit={handleSearch} className="relative max-w-5xl mx-auto">
               <div className="relative">
-                {/* Main search container with clean design */}
-                <div className="relative bg-white rounded-full shadow-lg border border-gray-200 hover:shadow-xl hover:border-gray-300 focus-within:shadow-xl focus-within:border-blue-400 transition-all duration-300">
-                  {/* Search icon */}
-                  <div className="absolute left-6 top-1/2 transform -translate-y-1/2 z-10">
-                    <Search className="h-6 w-6 text-gray-400 transition-colors duration-300" />
+                {/* Redesigned search container with glass morphism */}
+                <div className="relative group">
+                  {/* Background with gradient and glass effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-2xl shadow-2xl border border-blue-100/50 backdrop-blur-xl transition-all duration-500 group-hover:shadow-3xl group-focus-within:shadow-3xl group-focus-within:from-blue-100 group-focus-within:to-blue-50"></div>
+
+                  {/* Animated border glow */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 opacity-0 group-focus-within:opacity-20 rounded-2xl blur-xl transition-all duration-500"></div>
+
+                  {/* Main content container */}
+                  <div className="relative flex items-center p-3 gap-4">
+                    {/* Search icon with animation */}
+                    <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg group-focus-within:scale-110 transition-transform duration-300">
+                      <Search className="h-6 w-6 text-white" />
+                    </div>
+
+                    {/* Input field */}
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Search for trending posts, topics, or keywords..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full text-lg py-4 px-0 border-0 bg-transparent focus:outline-none focus:ring-0 placeholder:text-gray-500 text-gray-800 font-medium"
+                      />
+                    </div>
+
+                    {/* Search button with enhanced design */}
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="h-12 px-8 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
+                    >
+                      <span className="hidden sm:inline">Search</span>
+                      <div className="relative">
+                        <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+                      </div>
+                    </Button>
                   </div>
 
-                  {/* Input and button container */}
-                  <div className="flex items-center">
-                    <Input
-                      placeholder="Search community posts..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="flex-1 pl-16 pr-6 py-6 text-lg border-0 bg-transparent focus:outline-none focus:ring-0 placeholder:text-gray-500 text-gray-800 rounded-full"
-                    />
-
-                    {/* Search button */}
-                    <div className="pr-2">
-                      <Button
-                        type="submit"
-                        size="lg"
-                        className="h-12 px-8 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
-                      >
-                        <span>Search</span>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                      </Button>
+                  {/* Floating search suggestions indicator */}
+                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 opacity-0 group-focus-within:opacity-100 transition-all duration-300">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-lg border border-blue-100 text-sm text-gray-600">
+                      <Sparkles className="h-4 w-4 text-blue-500" />
+                      <span>Press Enter to search or browse topics below</span>
                     </div>
                   </div>
                 </div>
-
-                {/* Subtle glow effect */}
-                <div className="absolute inset-0 bg-blue-500/5 rounded-full blur-xl opacity-0 hover:opacity-100 transition-opacity duration-500 -z-10"></div>
               </div>
 
               {/* Enhanced Popular searches section */}
