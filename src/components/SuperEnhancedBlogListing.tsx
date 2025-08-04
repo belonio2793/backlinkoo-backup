@@ -435,8 +435,7 @@ export function SuperEnhancedBlogListing() {
                           }}
                           className="group relative px-6 py-3 text-sm font-medium bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/70 dark:border-slate-700/70 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
                           style={{
-                            animationDelay: `${index * 100}ms`,
-                            animation: 'fade-in 0.6s ease-out forwards'
+                            animation: `fade-in 0.6s ease-out forwards ${index * 100}ms`
                           }}
                         >
                           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-blue-500/10 group-hover:via-purple-500/10 group-hover:to-pink-500/10 rounded-xl transition-all duration-300"></div>
