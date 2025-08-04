@@ -63,17 +63,51 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   });
 
   useEffect(() => {
-    if (user) {
-      setProfileData({
-        displayName: user.user_metadata?.display_name || user.user_metadata?.full_name || user.email?.split('@')[0] || '',
-        email: user.email || '',
-        bio: user.user_metadata?.bio || '',
-        website: user.user_metadata?.website || '',
-        company: user.user_metadata?.company || '',
-        location: user.user_metadata?.location || ''
-      });
-    }
-  }, [user]);
+    const loadProfileData = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        // Ensure profile exists in database
+        await profileService.ensureProfileExists();
+
+        // Load profile data from database
+        const profile = await profileService.getUserProfile();
+        const userSettings = await profileService.getUserSettings();
+
+        setProfileData({
+          displayName: profile?.display_name || user.user_metadata?.display_name || user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+          email: user.email || '',
+          bio: profile?.bio || user.user_metadata?.bio || '',
+          website: profile?.website || user.user_metadata?.website || '',
+          company: profile?.company || user.user_metadata?.company || '',
+          location: profile?.location || user.user_metadata?.location || ''
+        });
+
+        setSettings({
+          emailNotifications: userSettings.email_notifications ?? true,
+          marketingEmails: userSettings.marketing_emails ?? false,
+          weeklyReports: userSettings.weekly_reports ?? true,
+          securityAlerts: userSettings.security_alerts ?? true
+        });
+      } catch (error) {
+        console.error('Error loading profile data:', error);
+        toast({
+          title: "Loading Error",
+          description: "Failed to load profile data. Using defaults.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfileData();
+  }, [user, toast]);
 
   const handleSaveProfile = async () => {
     if (!user) return;
