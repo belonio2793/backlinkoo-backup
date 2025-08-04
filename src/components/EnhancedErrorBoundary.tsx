@@ -25,7 +25,12 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Application error caught by boundary:', error, errorInfo);
+    console.error('Application error caught by boundary:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      componentStack: errorInfo.componentStack
+    });
     
     // Filter out browser extension errors and other non-critical errors
     const isExtensionError = error.message.includes('Cannot redefine property: ethereum') ||
