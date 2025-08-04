@@ -325,9 +325,10 @@ export function BeautifulBlogPost() {
   const unclaimPermissions = blogPost ? EnhancedBlogClaimService.canUnclaimPost(blogPost, user) : { canUnclaim: false };
   const deletePermissions = blogPost ? EnhancedBlogClaimService.canDeletePost(blogPost, user) : { canDelete: false };
 
-  // Always allow delete for admin users
-  const canDelete = true;
+  // Determine if user can delete this post
   const isOwnPost = blogPost?.user_id === user?.id;
+  const isUnclaimedPost = blogPost && (!blogPost.claimed || blogPost.user_id === null);
+  const canDelete = isOwnPost || isUnclaimedPost || deletePermissions.canDelete;
   const isExpiringSoon = blogPost?.expires_at && new Date(blogPost.expires_at).getTime() - Date.now() < 2 * 60 * 60 * 1000;
 
   if (loading) {
