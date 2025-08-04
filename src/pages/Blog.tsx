@@ -25,6 +25,7 @@ import {
   TrendingUp,
   Sparkles,
   ExternalLink,
+  Crown,
   ArrowRight,
   Zap,
   BookOpen,
