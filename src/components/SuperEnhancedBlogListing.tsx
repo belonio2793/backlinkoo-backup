@@ -320,8 +320,7 @@ export function SuperEnhancedBlogListing() {
           {/* Hero Section */}
           <div className="text-center mb-16 space-y-6">
             <div className="relative inline-block">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 blur-2xl opacity-20 animate-pulse"></div>
-              <h1 className="relative text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent">
+              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
                 Premium Blog Posts
               </h1>
             </div>
@@ -357,22 +356,20 @@ export function SuperEnhancedBlogListing() {
           <div className="mb-12 space-y-6">
             {/* Search */}
             <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition-opacity duration-300"></div>
-                <div className="relative flex bg-white/90 backdrop-blur-sm border-2 border-white/50 rounded-2xl overflow-hidden shadow-xl">
+              <div className="relative">
+                <div className="flex bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input
-                    placeholder="Search for the perfect blog post..."
+                    placeholder="Search community posts..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 pl-12 pr-4 py-4 text-lg border-0 bg-transparent focus:outline-none focus:ring-0"
+                    className="flex-1 pl-12 pr-4 py-3 text-base border-0 bg-transparent focus:outline-none focus:ring-0 placeholder:text-gray-500"
                   />
-                  <Button 
-                    type="submit" 
-                    className="m-2 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl"
+                  <Button
+                    type="submit"
+                    className="m-1 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
                   >
                     Search
-                    <Zap className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
               </div>
