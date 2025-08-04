@@ -548,7 +548,8 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
             </TabsTrigger>
             <TabsTrigger value="claimed" className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4" />
-              Claimed ({claimedPosts.length}/3)
+              Claimed ({claimedPosts.length}{canClaimUnlimited ? '' : `/${maxClaimedPosts}`})
+              {canClaimUnlimited && <Infinity className="h-3 w-3 ml-1 text-yellow-600" />}
             </TabsTrigger>
           </TabsList>
 
