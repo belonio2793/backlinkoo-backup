@@ -40,6 +40,14 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth();
   const { userProfile, isPremium, isAdmin, userLimits, loading: premiumLoading, refresh: refreshPremium } = usePremium();
+
+  // Debug logging
+  console.log('ProfileSettings render:', {
+    user: user ? { email: user.email, id: user.id } : null,
+    authLoading,
+    loading,
+    hasUserProfile: !!userProfile
+  });
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
