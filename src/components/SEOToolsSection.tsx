@@ -361,7 +361,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
               </div>
               <div className="text-3xl font-bold text-primary mb-1">$29</div>
               <div className="text-sm text-muted-foreground mb-4">per month</div>
-              <Button onClick={handleSubscribe} size="lg" className="w-full">
+              <Button onClick={() => setIsPremiumCheckoutOpen(true)} size="lg" className="w-full">
                 <CreditCard className="h-4 w-4 mr-2" />
                 Start Subscription
               </Button>
