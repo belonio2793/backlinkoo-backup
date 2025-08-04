@@ -1,125 +1,204 @@
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useGlobalNotifications } from "@/hooks/useGlobalNotifications";
-import { AffiliateService } from "@/services/affiliateService";
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { PremiumUpgradeService } from '@/services/premiumUpgradeService';
+import { CheckCircle, Crown, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
 
-const PaymentSuccess = () => {
-  const [searchParams] = useSearchParams();
+export function PaymentSuccess() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const { broadcastCreditPurchase } = useGlobalNotifications();
-  const [verifying, setVerifying] = useState(true);
-  const [paymentVerified, setPaymentVerified] = useState(false);
+  const { user, isLoading: authLoading } = useAuth();
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [redirectUrl, setRedirectUrl] = useState('/dashboard');
+  const [processingError, setProcessingError] = useState<string | null>(null);
 
   useEffect(() => {
-    const verifyPayment = async () => {
+    const processPaymentSuccess = async () => {
+      if (authLoading) return;
+
       const sessionId = searchParams.get('session_id');
-      const paypalOrderId = searchParams.get('paypal_order_id');
       
-      if (!sessionId && !paypalOrderId) {
-        setVerifying(false);
+      if (!sessionId) {
+        // No session ID, but might be from fallback service
+        const result = await PremiumUpgradeService.handleUpgradeSuccess(user);
+        
+        if (result.success) {
+          setRedirectUrl(result.redirectUrl || '/dashboard');
+          toast({
+            title: "🎉 Welcome to Premium!",
+            description: "Your account has been successfully upgraded. Enjoy all premium features!",
+          });
+        } else {
+          setProcessingError(result.error || 'Failed to process upgrade');
+        }
+        
+        setIsProcessing(false);
         return;
       }
 
       try {
-        const { data, error } = await supabase.functions.invoke('verify-payment', {
-          body: {
-            sessionId,
-            paypalOrderId,
-            type: 'payment'
-          }
-        });
-
-        if (error) throw error;
-
-        if (data.paid) {
-          setPaymentVerified(true);
-
-          // Process affiliate referral conversion if applicable
-          try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user && data.amount) {
-              await AffiliateService.convertReferral(user.id, data.amount);
-            }
-          } catch (affiliateError) {
-            console.error('Affiliate conversion error:', affiliateError);
-            // Don't show error to user as this is background processing
-          }
-
+        // Process Stripe callback
+        const result = await PremiumUpgradeService.processStripeCallback(sessionId);
+        
+        if (result.success) {
+          setRedirectUrl(result.redirectUrl || '/dashboard');
           toast({
-            title: "Payment Successful!",
-            description: "Your payment has been processed successfully.",
+            title: "🎉 Payment Successful!",
+            description: "Your premium upgrade is complete. Welcome to Premium!",
           });
         } else {
-          toast({
-            title: "Payment Pending",
-            description: "Your payment is still being processed.",
-            variant: "destructive",
-          });
+          setProcessingError(result.error || 'Failed to process payment');
         }
-      } catch (error) {
-        console.error('Payment verification error:', error);
-        toast({
-          title: "Verification Error",
-          description: "Unable to verify payment status.",
-          variant: "destructive",
-        });
-      } finally {
-        setVerifying(false);
+      } catch (error: any) {
+        console.error('Error processing payment success:', error);
+        setProcessingError(error.message || 'An unexpected error occurred');
       }
+      
+      setIsProcessing(false);
     };
 
-    verifyPayment();
-  }, [searchParams, toast]);
+    processPaymentSuccess();
+  }, [user, authLoading, searchParams, toast]);
+
+  // Auto-redirect after 3 seconds
+  useEffect(() => {
+    if (!isProcessing && !processingError) {
+      const timer = setTimeout(() => {
+        navigate(redirectUrl);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isProcessing, processingError, redirectUrl, navigate]);
+
+  if (authLoading || isProcessing) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="text-center py-12">
+            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Loader2 className="h-8 w-8 text-purple-600 animate-spin" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Processing Your Upgrade</h2>
+            <p className="text-gray-600">
+              Please wait while we confirm your payment and activate your premium features...
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (processingError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <X className="h-8 w-8 text-red-600" />
+            </div>
+            <CardTitle className="text-2xl text-red-600">Upgrade Error</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-gray-600">{processingError}</p>
+            <div className="space-y-2">
+              <Button onClick={() => navigate('/dashboard')} className="w-full">
+                <ArrowRight className="h-4 w-4 mr-2" />
+                Go to Dashboard
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => window.location.href = 'mailto:support@backlinkoo.com'}
+                className="w-full"
+              >
+                Contact Support
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <CheckCircle className="h-16 w-16 text-green-500" />
+          <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+            <CheckCircle className="h-12 w-12 text-green-600" />
+            <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
+              <Crown className="h-5 w-5 text-purple-600" />
+            </div>
           </div>
-          <CardTitle className="text-2xl">
-            {verifying ? "Verifying Payment..." : paymentVerified ? "Payment Successful!" : "Payment Received"}
+          <CardTitle className="text-3xl font-bold text-green-600 mb-2">
+            Welcome to Premium!
           </CardTitle>
-        </CardHeader>
-        <CardContent className="text-center space-y-4">
-          <p className="text-muted-foreground">
-            {verifying 
-              ? "Please wait while we verify your payment..."
-              : paymentVerified 
-              ? "Your payment has been processed successfully. You can now access your purchased credits or services."
-              : "Thank you for your payment. You will receive a confirmation email shortly."
-            }
+          <p className="text-gray-600">
+            Your payment was successful and your account has been upgraded.
           </p>
-          
+        </CardHeader>
+        
+        <CardContent className="space-y-6">
+          {/* Premium Features Unlocked */}
+          <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="h-5 w-5 text-purple-600" />
+              <span className="font-semibold text-purple-800">Premium Features Unlocked!</span>
+            </div>
+            <div className="space-y-2 text-sm text-purple-700">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span>Unlimited high-quality backlinks</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span>100/100 SEO optimized content</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span>Advanced analytics & insights</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span>Priority customer support</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Auto-redirect Notice */}
+          <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <p className="text-sm text-blue-700 mb-2">
+              Redirecting you to your dashboard in a few seconds...
+            </p>
+            <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
+              <div className="h-full bg-blue-600 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Manual Navigation */}
           <div className="space-y-2">
             <Button 
-              className="w-full" 
-              onClick={() => navigate("/dashboard")}
-              disabled={verifying}
+              onClick={() => navigate(redirectUrl)} 
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
             >
-              Go to Dashboard
+              <ArrowRight className="h-4 w-4 mr-2" />
+              Go to Dashboard Now
             </Button>
+            
             <Button 
               variant="outline" 
-              className="w-full" 
-              onClick={() => navigate("/")}
+              onClick={() => navigate('/blog')}
+              className="w-full"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
+              Explore Premium Content
             </Button>
           </div>
         </CardContent>
       </Card>
     </div>
   );
-};
-
-export default PaymentSuccess;
+}
