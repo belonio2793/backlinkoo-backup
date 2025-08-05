@@ -109,7 +109,7 @@ export function EnhancedUnifiedPaymentModal({
   const [guestEmail, setGuestEmail] = useState('');
 
   // Payment method availability
-  const [availablePaymentMethods, setAvailablePaymentMethods] = useState<('stripe' | 'paypal')[]>([]);
+  const [availablePaymentMethods, setAvailablePaymentMethods] = useState<'stripe'[]>(['stripe']);
 
   const CREDIT_PRICE = 1.40;
 
