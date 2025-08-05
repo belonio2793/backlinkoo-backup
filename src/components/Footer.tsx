@@ -31,6 +31,12 @@ export const Footer = () => {
   const handleAuthSuccess = (authenticatedUser: any) => {
     setShowLoginModal(false);
 
+    // Show success message
+    toast({
+      title: "Welcome!",
+      description: "Successfully signed in. Redirecting to your requested section...",
+    });
+
     // If there's a pending navigation, execute it after successful auth
     if (pendingNavigation) {
       setTimeout(() => {
@@ -42,7 +48,7 @@ export const Footer = () => {
           window.location.href = pendingNavigation.route;
         }
         setPendingNavigation(null);
-      }, 500); // Small delay to ensure user state is updated
+      }, 1000); // Slightly longer delay to show success message
     }
   };
   return (
