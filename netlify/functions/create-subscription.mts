@@ -64,7 +64,13 @@ async function createStripeSubscription(
   email: string,
   originUrl: string
 ): Promise<{ url: string; sessionId: string }> {
-  const stripe = new Stripe(Netlify.env.get("STRIPE_SECRET_KEY") || "", {
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+
+  if (!stripeSecretKey) {
+    throw new Error("STRIPE_SECRET_KEY is not configured in Netlify environment variables");
+  }
+
+  const stripe = new Stripe(stripeSecretKey, {
     apiVersion: "2023-10-16",
   });
 
