@@ -20,8 +20,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PricingModal } from "@/components/PricingModal";
-import { EnhancedUnifiedPaymentModal } from "@/components/EnhancedUnifiedPaymentModal";
-import { BuyCreditsButton, UpgradeToPremiumButton } from "@/components/UniversalPaymentTrigger";
+
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
 import { HomepageBlogGenerator } from "@/components/HomepageBlogGenerator";
 import { ProductionBlogGenerator } from "@/components/ProductionBlogGenerator";
@@ -56,8 +55,7 @@ const Index = () => {
   const [isCustomPackage, setIsCustomPackage] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginModalTab, setLoginModalTab] = useState<"login" | "signup">("login");
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentType, setPaymentType] = useState<'credits' | 'premium'>('credits');
+
   const [useProductionGenerator, setUseProductionGenerator] = useState(false);
   const [showTrialUpgrade, setShowTrialUpgrade] = useState(false);
   const [showInlineAuth, setShowInlineAuth] = useState(false);
