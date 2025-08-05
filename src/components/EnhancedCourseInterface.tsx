@@ -691,53 +691,59 @@ Users ready to make a purchase or take action.
         <h2 className="text-2xl font-bold">Course Modules</h2>
         <div className="grid gap-4">
           {courseModules.map((module) => (
-            <Card 
-              key={module.id} 
-              className={`cursor-pointer transition-all hover:shadow-lg ${
-                module.id === activeModule ? 'ring-2 ring-blue-500 bg-blue-50' : ''
-              } ${module.locked ? 'opacity-60' : ''}`}
-              onClick={() => !module.locked && setActiveModule(module.id)}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4 flex-1">
-                    <div className={`p-3 rounded-lg ${module.locked ? 'bg-gray-100' : 'bg-blue-100'}`}>
-                      {module.locked ? <Lock className="h-6 w-6 text-gray-400" /> : module.icon}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-xl font-semibold">{module.title}</h3>
-                        {module.locked && <Badge variant="secondary">Premium</Badge>}
+            <Tooltip key={module.id}>
+              <TooltipTrigger asChild>
+                <Card
+                  className={`cursor-pointer transition-all ${
+                    module.id === activeModule ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+                  } ${module.locked ? 'opacity-60' : ''}`}
+                  onClick={() => !module.locked && setActiveModule(module.id)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-4 flex-1">
+                        <div className={`p-3 rounded-lg ${module.locked ? 'bg-gray-100' : 'bg-blue-100'}`}>
+                          {module.locked ? <Lock className="h-6 w-6 text-gray-400" /> : module.icon}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-xl font-semibold">{module.title}</h3>
+                            {module.locked && <Badge variant="secondary">Premium</Badge>}
+                          </div>
+                          <p className="text-muted-foreground mb-3">{module.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <BookOpen className="h-4 w-4" />
+                              {module.totalLessons} lessons
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              {module.estimatedTime}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <CheckCircle className="h-4 w-4" />
+                              {module.completedLessons}/{module.totalLessons} complete
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-muted-foreground mb-3">{module.description}</p>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <BookOpen className="h-4 w-4" />
-                          {module.totalLessons} lessons
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {module.estimatedTime}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <CheckCircle className="h-4 w-4" />
-                          {module.completedLessons}/{module.totalLessons} complete
-                        </span>
-                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
                     </div>
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                </div>
-                {module.totalLessons > 0 && (
-                  <div className="mt-4">
-                    <Progress 
-                      value={(module.completedLessons / module.totalLessons) * 100} 
-                      className="h-2"
-                    />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                    {module.totalLessons > 0 && (
+                      <div className="mt-4">
+                        <Progress
+                          value={(module.completedLessons / module.totalLessons) * 100}
+                          className="h-2"
+                        />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{module.locked ? 'Upgrade to Premium to access this module' : `Click to view ${module.title} lessons and content`}</p>
+              </TooltipContent>
+            </Tooltip>
           ))}
         </div>
       </div>
