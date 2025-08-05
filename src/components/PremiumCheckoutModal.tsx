@@ -81,7 +81,7 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleCheckout = async (method: 'stripe' | 'paypal' = 'stripe') => {
+  const handleCheckout = async (method: 'stripe' = 'stripe') => {
     setIsProcessing(true);
     setPaymentMethod(method);
 
