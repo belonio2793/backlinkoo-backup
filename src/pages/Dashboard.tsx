@@ -673,6 +673,33 @@ const Dashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Handle hash-based navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+
+      if (hash === 'keyword-research') {
+        setActiveSection('dashboard');
+        setActiveTab('keyword-research');
+      } else if (hash === 'rank-tracker') {
+        setActiveSection('dashboard');
+        setActiveTab('rank-tracker');
+      } else if (hash === 'backlink-automation') {
+        setActiveSection('seo-tools');
+      }
+    };
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+
+    // Handle initial hash if present
+    handleHashChange();
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -749,7 +776,7 @@ const Dashboard = () => {
         console.log('🏠 Dashboard - User signed out, redirecting to home...');
         navigate('/');
       } else if (event === 'SIGNED_IN' && session) {
-        console.log('�� Dashboard - User signed in, updating user state');
+        console.log('🏠 Dashboard - User signed in, updating user state');
         setUser(session.user);
       }
     });
