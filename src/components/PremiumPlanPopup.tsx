@@ -17,6 +17,7 @@ import {
   CreditCard,
   Shield,
   CheckCircle,
+  CheckCircle2,
   X,
   Lock,
   Star,
@@ -569,6 +570,21 @@ export function PremiumPlanPopup({
 
       {/* Payment Form */}
       <div className="space-y-4">
+        {/* Authenticated User Indicator */}
+        {isAuthenticated && user && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <span className="text-sm font-medium text-green-800">
+                Signed in as {user.email}
+              </span>
+            </div>
+            <p className="text-xs text-green-600 mt-1">
+              Your account details will be used for this subscription
+            </p>
+          </div>
+        )}
+
         <div className="space-y-2">
           <Label htmlFor="paymentEmail">Email Address</Label>
           <Input
@@ -577,10 +593,15 @@ export function PremiumPlanPopup({
             placeholder="your@email.com"
             value={paymentData.email}
             onChange={(e) => handlePaymentChange('email', e.target.value)}
+            readOnly={isAuthenticated && !!user}
+            className={isAuthenticated && !!user ? "bg-gray-50 cursor-not-allowed" : ""}
             required
           />
           <p className="text-xs text-muted-foreground">
-            Required for subscription management and receipts
+            {isAuthenticated && !!user
+              ? "Using your account email address for this subscription"
+              : "Required for subscription management and receipts"
+            }
           </p>
         </div>
 

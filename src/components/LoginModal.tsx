@@ -15,9 +15,10 @@ interface LoginModalProps {
   onClose: () => void;
   onAuthSuccess?: (user: any) => void;
   defaultTab?: "login" | "signup";
+  pendingAction?: string; // Description of what user was trying to access
 }
 
-export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login" }: LoginModalProps) {
+export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login", pendingAction }: LoginModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
@@ -27,13 +28,16 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
   const handleAuthSuccess = (user: any) => {
     console.log('🎯 LoginModal: handleAuthSuccess called for user:', user?.email);
 
-    // Call the parent's onAuthSuccess first (which may close modal)
+    // Reset modal state immediately to prevent conflicts
+    setIsLoading(false);
+    setShowForgotPassword(false);
+    setForgotPasswordEmail("");
+
+    // Call the parent's onAuthSuccess first (which may handle navigation)
     onAuthSuccess?.(user);
 
-    // Ensure modal is closed if parent didn't handle it
-    setTimeout(() => {
-      onClose();
-    }, 50);
+    // Close modal immediately - no setTimeout to prevent race conditions
+    onClose();
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -95,8 +99,16 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
               <Infinity className="h-8 w-8 text-primary" />
             </div>
             <DialogTitle className="text-2xl font-bold text-foreground" role="banner">
-              Welcome Back
+              {defaultTab === "signup" ? "Get Started" : "Welcome Back"}
             </DialogTitle>
+            {pendingAction && (
+              <p className="text-sm text-muted-foreground mt-2">
+                {defaultTab === "signup"
+                  ? `Create an account to access ${pendingAction}`
+                  : `Sign in to access ${pendingAction}`
+                }
+              </p>
+            )}
             <div className="mt-3">
               <LiveUserActivity />
             </div>

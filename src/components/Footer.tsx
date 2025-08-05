@@ -1,40 +1,66 @@
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import { navigateToSection, NAVIGATION_CONFIGS } from "@/utils/navigationUtils";
+import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import * as React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginModal } from "@/components/LoginModal";
+import { FooterNavigationService, FOOTER_NAV_CONFIGS } from "@/utils/footerNavigation";
 
 export const Footer = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<any>(null);
+  const [pendingActionDescription, setPendingActionDescription] = useState<string>("");
 
-  const handleProtectedNavigation = (config: any) => {
-    if (user) {
-      // User is authenticated, navigate directly
-      navigateToSection(config);
-    } else {
-      // User is not authenticated, store pending navigation and show login modal
-      setPendingNavigation(config);
-      setShowLoginModal(true);
+  // Debug logging for user state
+  console.log('🦶 Footer: User state:', {
+    userEmail: user?.email,
+    isAuthenticated: !!user,
+    isLoading,
+    userId: user?.id
+  });
+
+  // Close login modal if user becomes authenticated
+  useEffect(() => {
+    if (user && showLoginModal) {
+      console.log('🔒 Footer: User authenticated, closing login modal');
+      setShowLoginModal(false);
+      setPendingNavigation(null);
+      setPendingActionDescription("");
     }
+  }, [user, showLoginModal]);
+
+  const handleSmartNavigation = (config: any, actionDescription?: string) => {
+    // Don't block navigation based on isLoading - let the smart nav handle auth state
+    FooterNavigationService.handleNavigation({
+      config,
+      user,
+      navigate,
+      onAuthRequired: (pendingNav) => {
+        setPendingNavigation(pendingNav);
+        setPendingActionDescription(actionDescription || "this feature");
+        setShowLoginModal(true);
+      }
+    });
   };
 
   const handleAuthSuccess = (authenticatedUser: any) => {
+    console.log('🎯 Footer: handleAuthSuccess called for user:', authenticatedUser?.email);
     setShowLoginModal(false);
 
     // If there's a pending navigation, execute it after successful auth
     if (pendingNavigation) {
-      setTimeout(() => {
-        if (pendingNavigation.hash) {
-          // Section navigation with hash
-          navigateToSection(pendingNavigation);
-        } else {
-          // Simple route navigation
-          window.location.href = pendingNavigation.route;
-        }
-        setPendingNavigation(null);
-      }, 300); // Quick redirect for seamless experience
+      console.log('🔄 Footer: Executing pending navigation:', pendingNavigation);
+
+      // Use the smart navigation system for consistent handling
+      FooterNavigationService.handleNavigation({
+        config: { ...pendingNavigation, requiresAuth: false }, // Skip auth check since user just authenticated
+        user: authenticatedUser,
+        navigate,
+        onAuthRequired: () => {} // No-op since user is already authenticated
+      });
+
+      setPendingNavigation(null);
     }
   };
 
@@ -47,27 +73,30 @@ export const Footer = () => {
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Features</h3>
             <div className="space-y-2">
               <button
-                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.CAMPAIGNS)}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.CAMPAIGNS, "Campaign Management")}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
                 title={!user ? "Sign in to access Campaign Management" : "Go to Campaign Management"}
               >
                 Campaign Management
               </button>
               <button
-                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.BACKLINK_AUTOMATION)}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.BACKLINK_AUTOMATION, "Backlink Automation")}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
+                title={!user ? "Sign in to access Backlink Automation" : "Go to Backlink Automation"}
               >
                 Backlink ∞ Automation Link Building (beta)
               </button>
               <button
-                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.KEYWORD_RESEARCH)}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.KEYWORD_RESEARCH, "Keyword Research")}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
+                title={!user ? "Sign in to access Keyword Research" : "Go to Keyword Research"}
               >
                 Keyword Research
               </button>
               <button
-                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.RANK_TRACKER)}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.RANK_TRACKER, "Rank Tracker")}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
+                title={!user ? "Sign in to access Rank Tracker" : "Go to Rank Tracker"}
               >
                 Rank Tracker
               </button>
@@ -85,15 +114,9 @@ export const Footer = () => {
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Merchant Tools</h3>
             <div className="space-y-2">
               <button
-                onClick={() => {
-                  if (user) {
-                    window.location.href = '/backlink-report';
-                  } else {
-                    setPendingNavigation({ route: '/backlink-report' });
-                    setShowLoginModal(true);
-                  }
-                }}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.BACKLINK_REPORTS, "Backlink Reports")}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
+                title={!user ? "Sign in to access Backlink Reports" : "Go to Backlink Reports"}
               >
                 Backlink Reports
               </button>
@@ -130,15 +153,9 @@ export const Footer = () => {
                 Affiliate Program
               </Link>
               <button
-                onClick={() => {
-                  if (user) {
-                    window.location.href = '/admin';
-                  } else {
-                    setPendingNavigation({ route: '/admin' });
-                    setShowLoginModal(true);
-                  }
-                }}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.ADMIN, "Admin Dashboard")}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
+                title={!user ? "Sign in to access Admin Dashboard" : "Go to Admin Dashboard"}
               >
                 Admin Dashboard
               </button>
@@ -169,9 +186,11 @@ export const Footer = () => {
         onClose={() => {
           setShowLoginModal(false);
           setPendingNavigation(null);
+          setPendingActionDescription("");
         }}
         onAuthSuccess={handleAuthSuccess}
-        defaultTab="login"
+        defaultTab="signup" // Promote signup for new users
+        pendingAction={pendingActionDescription}
       />
     </footer>
   );
