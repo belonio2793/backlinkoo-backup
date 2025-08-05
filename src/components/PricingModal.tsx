@@ -55,7 +55,7 @@ export const PricingModal = ({
   onAuthSuccess,
   defaultTab = "payment"
 }: PricingModalProps) => {
-  const CREDIT_PRICE = 0.70;
+  const CREDIT_PRICE = 1.40;
   
   const [step, setStep] = useState<"pricing" | "payment" | "auth">("pricing");
   const [selectedPlan, setSelectedPlan] = useState<string>("");
@@ -76,8 +76,8 @@ export const PricingModal = ({
       id: 'starter_100',
       name: 'Starter 100',
       credits: 100,
-      price: 70,
-      pricePerLink: 0.70,
+      price: 140,
+      pricePerLink: 1.40,
       description: 'Perfect for testing our platform',
       features: [
         'High DA backlinks',
@@ -90,8 +90,8 @@ export const PricingModal = ({
       id: 'starter_200',
       name: 'Starter 200',
       credits: 200,
-      price: 140,
-      pricePerLink: 0.70,
+      price: 280,
+      pricePerLink: 1.40,
       description: 'Most popular starting package',
       popular: true,
       savings: 'Best Value',
@@ -106,8 +106,8 @@ export const PricingModal = ({
       id: 'starter_300',
       name: 'Starter 300',
       credits: 300,
-      price: 210,
-      pricePerLink: 0.70,
+      price: 420,
+      pricePerLink: 1.40,
       description: 'Maximum starter value',
       savings: 'Most Credits',
       features: [
