@@ -48,6 +48,7 @@ import type { Tables } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ExcerptCleaner } from '@/utils/excerptCleaner';
+import { EnhancedBlogPreview } from '@/components/EnhancedBlogPreview';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -62,6 +63,8 @@ export function SuperEnhancedBlogListing() {
   const [filterType, setFilterType] = useState<'all' | 'claimable' | 'claimed' | 'my-posts'>('all');
   const [claiming, setClaiming] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [previewPost, setPreviewPost] = useState<BlogPost | null>(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   // Helper function to randomize keywords on each render
   const getRandomizedKeywords = () => {
