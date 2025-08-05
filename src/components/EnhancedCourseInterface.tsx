@@ -843,41 +843,7 @@ Users ready to make a purchase or take action.
               />
             </div>
 
-            {/* Resources */}
-            {currentLesson.resources && currentLesson.resources.length > 0 && (
-              <div className="mt-8 p-6 bg-blue-50 rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <Download className="h-5 w-5" />
-                  Lesson Resources
-                </h3>
-                <div className="grid gap-2">
-                  {currentLesson.resources.map((resource, index) => (
-                    <div key={index} className="flex items-center gap-2 text-blue-700 hover:text-blue-800">
-                      <FileText className="h-4 w-4" />
-                      <span className="text-sm cursor-pointer hover:underline">{resource}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {/* Quiz Info */}
-            {currentLesson.quiz && (
-              <div className="mt-8 p-6 bg-yellow-50 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                  <Award className="h-5 w-5" />
-                  Quiz Available
-                </h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Test your knowledge with {currentLesson.quiz.questions} questions. 
-                  Passing score: {currentLesson.quiz.passingScore}%
-                </p>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Zap className="h-4 w-4" />
-                  Take Quiz
-                </Button>
-              </div>
-            )}
           </div>
 
           {/* Navigation */}
