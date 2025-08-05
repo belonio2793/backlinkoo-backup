@@ -755,7 +755,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium">Blog Posts</span>
                           <span className="text-sm text-muted-foreground">
-                            {userLimits.hasUnlimitedClaims ? 'Unlimited' : `${userLimits.maxClaimedPosts} max`}
+                            {useFallbackData ? (effectiveIsPremium ? 'Unlimited' : '3 max') : (userLimits.hasUnlimitedClaims ? 'Unlimited' : `${userLimits.maxClaimedPosts} max`)}
                           </span>
                         </div>
                       </div>
@@ -763,7 +763,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium">Advanced SEO</span>
                           <span className="text-sm">
-                            {userLimits.hasAdvancedSEO ? (
+                            {(useFallbackData ? effectiveIsPremium : userLimits.hasAdvancedSEO) ? (
                               <CheckCircle className="h-4 w-4 text-green-500" />
                             ) : (
                               <AlertCircle className="h-4 w-4 text-gray-400" />
@@ -775,7 +775,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium">Analytics</span>
                           <span className="text-sm">
-                            {userLimits.hasAdvancedAnalytics ? (
+                            {(useFallbackData ? effectiveIsPremium : userLimits.hasAdvancedAnalytics) ? (
                               <CheckCircle className="h-4 w-4 text-green-500" />
                             ) : (
                               <AlertCircle className="h-4 w-4 text-gray-400" />
@@ -787,7 +787,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium">Priority Support</span>
                           <span className="text-sm">
-                            {userLimits.hasPrioritySupport ? (
+                            {(useFallbackData ? effectiveIsPremium : userLimits.hasPrioritySupport) ? (
                               <CheckCircle className="h-4 w-4 text-green-500" />
                             ) : (
                               <AlertCircle className="h-4 w-4 text-gray-400" />
