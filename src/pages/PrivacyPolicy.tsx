@@ -1,3 +1,6 @@
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+
 export default function PrivacyPolicy() {
   const currentYear = new Date().getFullYear();
   const lastUpdated = new Date().toLocaleDateString();
@@ -47,19 +50,7 @@ export default function PrivacyPolicy() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-gray-100 shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <a href="/" className="text-xl font-bold text-gray-900">
-            Backlinkoo
-          </a>
-          <nav className="space-x-4">
-            <a href="/" className="text-gray-700 hover:text-black">Home</a>
-            <a href="/privacy" className="text-gray-700 hover:text-black font-semibold">Privacy Policy</a>
-            {/* Add more nav links here */}
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       {/* Main content */}
       <main className="flex-grow max-w-4xl mx-auto px-4 py-12">
@@ -78,19 +69,7 @@ export default function PrivacyPolicy() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-100 py-6 mt-12">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <nav className="mb-2 space-x-4">
-            <a href="/" className="text-gray-600 hover:text-gray-900">Home</a>
-            <a href="/privacy" className="text-gray-600 hover:text-gray-900">Privacy Policy</a>
-            {/* Add terms, contact, etc. */}
-          </nav>
-          <p className="text-sm text-gray-500">
-            &copy; {currentYear} Backlink ∞. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

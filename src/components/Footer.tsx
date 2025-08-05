@@ -23,16 +23,22 @@ export const Footer = () => {
                 Backlink ∞ Automation Link Building (beta)
               </Link>
               <Link
-                to="/dashboard"
+                to="/dashboard#keyword-research"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
               >
                 Keyword Research
               </Link>
               <Link
-                to="/dashboard"
+                to="/dashboard#rank-tracker"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
               >
                 Rank Tracker
+              </Link>
+              <Link
+                to="/dashboard#backlink-automation"
+                className="block text-gray-600 hover:text-gray-900 text-sm"
+              >
+                Backlink Automation
               </Link>
               <Link
                 to="/blog"

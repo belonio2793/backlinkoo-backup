@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { PremiumPlanTab } from "@/components/PremiumPlanTab";
 import { SEOAcademyTab } from "@/components/SEOAcademyTab";
 import { StreamlinedPremiumProvider } from "@/components/StreamlinedPremiumProvider";
+import { Footer } from "@/components/Footer";
 
 import { PremiumService } from "@/services/premiumService";
 import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
@@ -184,7 +185,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           setError('NOT_FOUND');
         }
       } else {
-        console.log(`��� Successfully loaded ${finalPosts.length} blog posts`);
+        console.log(`✅ Successfully loaded ${finalPosts.length} blog posts`);
         setError(null);
 
         // Show success notification on first load
@@ -345,7 +346,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           <div className="text-xs text-gray-600 space-y-1">
             <div>🔧 Status: {loadingStatus}</div>
             <div>⏰ Last check: {lastRefresh?.toLocaleTimeString() || 'Never'}</div>
-            <div>�� Auto-refresh: Every 30 seconds</div>
+            <div>🔄 Auto-refresh: Every 30 seconds</div>
             <div>📡 Connection: {navigator.onLine ? 'Online' : 'Offline'}</div>
           </div>
         </div>
@@ -440,7 +441,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
             <div>
               <div className="text-yellow-400 mb-2">System Status:</div>
               <div>• Status: {debugInfo.loadingStatus}</div>
-              <div>• Online: {debugInfo.connectionOnline ? '✅' : '���'}</div>
+              <div>• Online: {debugInfo.connectionOnline ? '✅' : '❌'}</div>
               <div>• Last Update: {debugInfo.timestamp}</div>
               <div>• User Auth: {debugInfo.userAuthenticated ? '✅' : '❌'}</div>
               <div>• User ID: {debugInfo.userId || 'None'}</div>
@@ -450,7 +451,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div>• Database Posts: {debugInfo.dbPosts}</div>
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
-              <div>���� Displayed: {debugInfo.displayedPosts}</div>
+              <div>📊 Displayed: {debugInfo.displayedPosts}</div>
               <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '✅'}</div>
             </div>
           </div>
@@ -647,10 +648,23 @@ const Dashboard = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
+    const hash = window.location.hash.replace('#', '');
+
+    // Handle hash-based navigation for specific sections
+    if (hash === 'keyword-research') return 'keyword-research';
+    if (hash === 'rank-tracker') return 'rank-tracker';
+    if (hash === 'backlink-automation') return 'seo-tools';
+
     return urlParams.get('tab') || "overview";
   });
   const [activeSection, setActiveSection] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
+    const hash = window.location.hash.replace('#', '');
+
+    // Handle hash-based navigation for specific sections
+    if (hash === 'keyword-research' || hash === 'rank-tracker') return 'dashboard';
+    if (hash === 'backlink-automation') return 'seo-tools';
+
     return urlParams.get('section') || "dashboard";
   });
   const [isPremiumSubscriber, setIsPremiumSubscriber] = useState(false);
@@ -658,6 +672,33 @@ const Dashboard = () => {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Handle hash-based navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+
+      if (hash === 'keyword-research') {
+        setActiveSection('dashboard');
+        setActiveTab('keyword-research');
+      } else if (hash === 'rank-tracker') {
+        setActiveSection('dashboard');
+        setActiveTab('rank-tracker');
+      } else if (hash === 'backlink-automation') {
+        setActiveSection('seo-tools');
+      }
+    };
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+
+    // Handle initial hash if present
+    handleHashChange();
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -1750,6 +1791,9 @@ const Dashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
