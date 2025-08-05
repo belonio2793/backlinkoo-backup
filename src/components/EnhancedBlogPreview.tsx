@@ -21,6 +21,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ContentFormatter } from '@/utils/contentFormatter';
 
 interface EnhancedBlogPreviewProps {
   isOpen: boolean;
