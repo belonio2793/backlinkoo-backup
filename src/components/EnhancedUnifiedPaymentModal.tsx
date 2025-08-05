@@ -189,13 +189,23 @@ export function EnhancedUnifiedPaymentModal({
       setCurrentStep(isAuthenticated ? 'selection' : 'selection');
       setIsProcessing(false);
       setCheckoutType(isAuthenticated ? 'user' : 'user');
+
+      // Initialize available payment methods
+      const methods = paymentConfigService.getAvailablePaymentMethods();
+      setAvailablePaymentMethods(methods);
+
+      // Set default payment method to first available
+      if (methods.length > 0 && !methods.includes(paymentMethod)) {
+        setPaymentMethod(methods[0]);
+      }
+
       if (initialCredits) {
         setCustomCredits(initialCredits);
         setShowCustomCredits(true);
         setPaymentType('credits');
       }
     }
-  }, [isOpen, isAuthenticated, initialCredits]);
+  }, [isOpen, isAuthenticated, initialCredits, paymentMethod]);
 
   // Helper functions
   const calculateCustomPrice = (credits: number) => (credits * CREDIT_PRICE).toFixed(2);
