@@ -168,13 +168,13 @@ export class ContentFormatter {
       // Remove any "Title:" patterns at the very beginning of content (most aggressive)
       .replace(/^[\s\n]*Title:\s*[^\n]*\n?/i, '')
       // Convert markdown links [text](url) to <a> tags with proper styling
-      .replace(/\[([^\]]+?)\]\(([^)]+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;text-decoration:none;" onmouseover="this.style.textDecoration=\'underline\'" onmouseout="this.style.textDecoration=\'none\'">$1</a>')
+      .replace(/\[([^\]]+?)\]\(([^)]+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$1</a>')
 
       // Convert plain URLs to clickable links
-      .replace(/(^|[^<"'])(https?:\/\/[^\s<>"']+)/gi, '$1<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;text-decoration:none;" onmouseover="this.style.textDecoration=\'underline\'" onmouseout="this.style.textDecoration=\'none\'">$2</a>')
+      .replace(/(^|[^<"'])(https?:\/\/[^\s<>"']+)/gi, '$1<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$2</a>')
 
       // Handle specific case: "Play now at Runescape.com" pattern
-      .replace(/(Play now at\s+)([a-zA-Z0-9.-]+\.com)/gi, '$1<a href="https://$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;text-decoration:none;" onmouseover="this.style.textDecoration=\'underline\'" onmouseout="this.style.textDecoration=\'none\'">$2</a>')
+      .replace(/(Play now at\s+)([a-zA-Z0-9.-]+\.com)/gi, '$1<a href="https://$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$2</a>')
       // Convert **H1**: patterns to <h1> tags
       .replace(/\*\*H1\*\*:\s*(.+?)(?=\n|$)/gi, '<h1>$1</h1>')
       // Convert **Title**: patterns to nothing (remove completely since it's duplicate)
