@@ -148,7 +148,7 @@ export function StreamlinedPremiumCheckout({
       if (!result.success) {
         console.warn('Enhanced service failed, trying fallback...', result.error);
 
-        const fallbackResult = await SubscriptionService.createSubscription(user, false);
+        const fallbackResult = await SubscriptionService.createSubscription(user, false, undefined, 'monthly');
 
         if (fallbackResult.success) {
           if (fallbackResult.url && !fallbackResult.usedFallback) {
