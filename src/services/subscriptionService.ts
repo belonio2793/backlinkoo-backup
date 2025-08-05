@@ -148,7 +148,7 @@ export class SubscriptionService {
 
       const requestBody = {
         priceId,
-        tier: 'premium',
+        tier: planType === 'yearly' ? 'premium-annual' : 'premium-monthly',
         isGuest,
         guestEmail: isGuest ? guestEmail : undefined
       };
