@@ -569,6 +569,21 @@ export function PremiumPlanPopup({
 
       {/* Payment Form */}
       <div className="space-y-4">
+        {/* Authenticated User Indicator */}
+        {isAuthenticated && user && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <span className="text-sm font-medium text-green-800">
+                Signed in as {user.email}
+              </span>
+            </div>
+            <p className="text-xs text-green-600 mt-1">
+              Your account details will be used for this subscription
+            </p>
+          </div>
+        )}
+
         <div className="space-y-2">
           <Label htmlFor="paymentEmail">Email Address</Label>
           <Input
