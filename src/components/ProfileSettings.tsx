@@ -765,25 +765,10 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                         Subscription tier: {effectiveSubscriptionTier || 'Not set'}
                       </p>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <Badge variant="default" className={`${effectiveIsPremium ? 'bg-purple-500' : 'bg-gray-500'} text-white`}>
-                        {effectiveIsPremium ? <Crown className="h-3 w-3 mr-1" /> : <User className="h-3 w-3 mr-1" />}
-                        {effectiveIsPremium ? 'Premium' : 'Free'}
-                      </Badge>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={async () => {
-                          setUseFallbackData(false);
-                          setDirectProfileData(null);
-                          if (refreshPremium) await refreshPremium();
-                          setTimeout(() => setUseFallbackData(true), 100);
-                        }}
-                      >
-                        <ExternalLink className="h-3 w-3 mr-1" />
-                        Reload
-                      </Button>
-                    </div>
+                    <Badge variant="default" className={`${effectiveIsPremium ? 'bg-purple-500' : 'bg-gray-500'} text-white`}>
+                      {effectiveIsPremium ? <Crown className="h-3 w-3 mr-1" /> : <User className="h-3 w-3 mr-1" />}
+                      {effectiveIsPremium ? 'Premium' : 'Free'}
+                    </Badge>
                   </div>
 
                   <div className="space-y-4">
