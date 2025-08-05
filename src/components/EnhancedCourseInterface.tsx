@@ -800,9 +800,12 @@ Users ready to make a purchase or take action.
 
             {/* Lesson Content */}
             <div className="prose max-w-none">
-              <div className="whitespace-pre-line text-gray-700 leading-relaxed">
-                {currentLesson.content || 'Lesson content will be available here...'}
-              </div>
+              <div
+                className="text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: formatMarkdownContent(currentLesson.content || 'Lesson content will be available here...')
+                }}
+              />
             </div>
 
             {/* Resources */}
