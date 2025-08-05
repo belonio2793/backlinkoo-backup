@@ -251,7 +251,7 @@ export function OrganizedAdminDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   <p className="text-muted-foreground">
-                    Test payment integration functionality including Stripe and PayPal payment flows.
+                    Test payment integration functionality including Stripe payment flows.
                   </p>
                   <Button
                     onClick={() => window.open('/admin/payment-test', '_blank')}
