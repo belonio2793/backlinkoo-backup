@@ -756,7 +756,7 @@ const Dashboard = () => {
       const hashToTabMap: { [key: string]: string } = {
         'keyword-research': 'keyword-research',
         'rank-tracker': 'rank-tracker',
-        'backlink-automation': 'no-hands-seo',
+        'automation-link-building': 'automation-link-building',
         'campaigns': 'campaigns',
         'overview': 'overview'
       };
@@ -1691,7 +1691,7 @@ const Dashboard = () => {
               <KeywordResearchTool />
             </TabsContent>
 
-            <TabsContent value="no-hands-seo" data-section="no-hands-seo">
+            <TabsContent value="automation-link-building" data-section="automation-link-building">
               <NoHandsSEODashboard />
             </TabsContent>
 

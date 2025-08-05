@@ -58,8 +58,8 @@ export const NAVIGATION_CONFIGS = {
   },
   BACKLINK_AUTOMATION: {
     route: '/dashboard',
-    hash: 'backlink-automation',
-    tab: 'no-hands-seo'
+    hash: 'automation-link-building',
+    tab: 'automation-link-building'
   },
   CAMPAIGNS: {
     route: '/dashboard',
