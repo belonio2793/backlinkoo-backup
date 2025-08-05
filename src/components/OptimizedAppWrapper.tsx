@@ -1,7 +1,8 @@
-import { Routes, Route } from 'react-router-dom';
-import { Suspense } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { Suspense, useEffect } from 'react';
 import { useReferralTracking } from '@/hooks/useReferralTracking';
 import { Skeleton } from '@/components/ui/skeleton';
+import { scrollToTop } from '@/utils/scrollToTop';
 
 // Import lightweight page components directly
 import Index from '@/pages/Index';
@@ -87,12 +88,24 @@ const PageLoader = () => (
   </div>
 );
 
+// Component to handle scroll-to-top on route changes
+const ScrollToTop = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    scrollToTop();
+  }, [location.pathname]);
+
+  return null;
+};
+
 export const OptimizedAppWrapper = () => {
   useReferralTracking();
 
   return (
     <>
       <TrialNotificationBanner />
+      <ScrollToTop />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Public routes - no authentication required (loaded immediately) */}
