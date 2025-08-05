@@ -567,6 +567,15 @@ export class ContentFormatter {
    */
   private static removeSpecificMalformedPatterns(content: string): string {
     return content
+      // ULTIMATE AGGRESSIVE: Remove the exact pattern that persists
+      // Pattern: ## &lt; <p>h2&gt;Pro Tip </p>
+      .replace(/##\s*&lt;\s*<p[^>]*>\s*h[1-6]\s*&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '## Pro Tip')
+      .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
+
+      // Remove any standalone ## &lt; patterns
+      .replace(/^\s*##\s*&lt;\s*$/gm, '')
+      .replace(/##\s*&lt;(?!.*Pro\s*Tip).*$/gm, '') // Remove ## &lt; lines that don't contain Pro Tip
+
       // MOST AGGRESSIVE: Remove the exact ## &lt; h2&gt;Pro Tip pattern completely
       .replace(/##\s*&lt;[\s\S]*?h[1-6]\s*&gt;\s*Pro\s*Tip[\s\S]*?$/gm, '## Pro Tip')
       .replace(/##\s*&lt;.*$/gm, '') // Remove any line starting with ## &lt;
@@ -587,5 +596,27 @@ export class ContentFormatter {
       // Clean up any remaining malformed heading patterns
       .replace(/^\s*##\s*&lt;.*$/gm, '')
       .replace(/^\s*##\s*$/gm, '');
+  }
+
+  /**
+   * Final post-processing cleanup to catch patterns that slip through
+   */
+  static postProcessCleanup(content: string): string {
+    return content
+      // Final aggressive cleanup for the persistent ## &lt; h2&gt;Pro Tip pattern
+      .replace(/##\s*&lt;\s*<p[^>]*>\s*h[1-6]\s*&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
+      .replace(/##\s*&lt;[\s\S]*?h[1-6]\s*&gt;[\s\S]*?Pro\s*Tip[\s\S]*?/gi, '<h2>Pro Tip</h2>')
+
+      // Remove any remaining ## &lt; patterns completely
+      .replace(/##\s*&lt;[^\n]*/g, '')
+
+      // Fix any remaining corrupted style attributes
+      .replace(/style="[^"]*&lt;[^"]*&gt;[^"]*color:[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+
+      // Remove empty paragraphs that might be left over
+      .replace(/<p[^>]*>\s*<\/p>/gi, '')
+
+      // Clean up multiple consecutive line breaks
+      .replace(/\n{3,}/g, '\n\n');
   }
 }
