@@ -380,10 +380,10 @@ export function EnhancedPremiumCheckoutModal({
         <Button
           onClick={handleCheckout}
           className="w-full h-12 text-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-          disabled={isProcessing}
+          disabled={isProcessing || (!user && checkoutMode !== 'guest')}
         >
           <Lock className="h-4 w-4 mr-2" />
-          Complete Secure Checkout
+          {isProcessing ? 'Setting up checkout...' : 'Complete Secure Checkout'}
         </Button>
 
         <Button
