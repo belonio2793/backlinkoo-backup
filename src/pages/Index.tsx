@@ -1110,7 +1110,7 @@ const Index = () => {
                   <p className="text-sm text-gray-600 mb-3">
                     Test webhook functionality and payment processing backend
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <Button
                       variant="outline"
                       className="w-full"
@@ -1126,6 +1126,14 @@ const Index = () => {
                     >
                       <Shield className="h-4 w-4 mr-2" />
                       Payment Diagnostic
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => navigate('/edge-function-diagnostic')}
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      Edge Functions
                     </Button>
                   </div>
                 </CardContent>
