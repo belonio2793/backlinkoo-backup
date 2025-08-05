@@ -87,8 +87,14 @@ export class ExcerptCleaner {
       // Remove **Title**: patterns
       .replace(/\*\*Title\*\*:\s*/gi, '')
       // Remove **Introduction**, **Conclusion** etc patterns
-      .replace(/\*\*([A-Za-z]+)\*\*:\s*/g, '$1: ')
-      .replace(/\*\*([A-Za-z]+)\*\*\s/g, '$1 ')
+      .replace(/\*\*([A-Za-z]+)\*\*:\s*/g, '')
+      .replace(/\*\*([A-Za-z]+)\*\*\s/g, '')
+      // Remove common section headers at start of content
+      .replace(/^Introduction\s*:?\s*/gi, '')
+      .replace(/^Overview\s*:?\s*/gi, '')
+      .replace(/^Summary\s*:?\s*/gi, '')
+      .replace(/^Abstract\s*:?\s*/gi, '')
+      .replace(/^Preface\s*:?\s*/gi, '')
       // Remove remaining **text** bold formatting
       .replace(/\*\*([^*]+?)\*\*/g, '$1')
       // Remove *text* italic formatting
