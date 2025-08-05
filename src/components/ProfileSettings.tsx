@@ -226,7 +226,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     const getDirectProfileData = async () => {
       if (user && (premiumLoading || useFallbackData)) {
         try {
-          console.log('🔄 Direct profile query fallback...');
+          console.log('��� Direct profile query fallback...');
           const { data: profile, error } = await supabase
             .from('profiles')
             .select('subscription_tier, role, subscription_status')
@@ -796,11 +796,9 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                         variant="ghost"
                         size="sm"
                         onClick={async () => {
-                          console.log('🔄 Force reload all data sources');
                           setUseFallbackData(false);
                           setDirectProfileData(null);
                           if (refreshPremium) await refreshPremium();
-                          // Trigger direct query again
                           setTimeout(() => setUseFallbackData(true), 100);
                         }}
                       >
