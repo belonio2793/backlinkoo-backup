@@ -757,58 +757,64 @@ Users ready to make a purchase or take action.
           </div>
           <div className="grid gap-3">
             {activeModuleData.lessons.map((lesson, index) => (
-              <Card 
-                key={lesson.id}
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  lesson.locked ? 'opacity-60' : 'hover:bg-gray-50'
-                }`}
-                onClick={() => handleLessonClick(lesson)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        lesson.completed 
-                          ? 'bg-green-100 text-green-600' 
-                          : lesson.locked 
-                          ? 'bg-gray-100 text-gray-400'
-                          : 'bg-blue-100 text-blue-600'
-                      }`}>
-                        {lesson.completed ? (
-                          <CheckCircle className="h-5 w-5" />
-                        ) : lesson.locked ? (
-                          <Lock className="h-5 w-5" />
-                        ) : (
-                          <PlayCircle className="h-5 w-5" />
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{lesson.title}</h3>
-                        <p className="text-sm text-muted-foreground">{lesson.description}</p>
-                        <div className="flex items-center gap-3 mt-1">
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {lesson.duration}
-                          </span>
-                          <Badge 
-                            variant={lesson.difficulty === 'Beginner' ? 'default' : 
-                                    lesson.difficulty === 'Intermediate' ? 'secondary' : 'destructive'}
-                            className="text-xs"
-                          >
-                            {lesson.difficulty}
-                          </Badge>
-                          {lesson.quiz && (
-                            <Badge variant="outline" className="text-xs">
-                              Quiz: {lesson.quiz.questions} questions
-                            </Badge>
-                          )}
+              <Tooltip key={lesson.id}>
+                <TooltipTrigger asChild>
+                  <Card
+                    className={`cursor-pointer transition-all ${
+                      lesson.locked ? 'opacity-60' : ''
+                    }`}
+                    onClick={() => handleLessonClick(lesson)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                            lesson.completed
+                              ? 'bg-green-100 text-green-600'
+                              : lesson.locked
+                              ? 'bg-gray-100 text-gray-400'
+                              : 'bg-blue-100 text-blue-600'
+                          }`}>
+                            {lesson.completed ? (
+                              <CheckCircle className="h-5 w-5" />
+                            ) : lesson.locked ? (
+                              <Lock className="h-5 w-5" />
+                            ) : (
+                              <PlayCircle className="h-5 w-5" />
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="font-semibold">{lesson.title}</h3>
+                            <p className="text-sm text-muted-foreground">{lesson.description}</p>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {lesson.duration}
+                              </span>
+                              <Badge
+                                variant={lesson.difficulty === 'Beginner' ? 'default' :
+                                        lesson.difficulty === 'Intermediate' ? 'secondary' : 'destructive'}
+                                className="text-xs"
+                              >
+                                {lesson.difficulty}
+                              </Badge>
+                              {lesson.quiz && (
+                                <Badge variant="outline" className="text-xs">
+                                  Quiz: {lesson.quiz.questions} questions
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
                         </div>
+                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
                       </div>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{lesson.locked ? 'Premium lesson - upgrade to access' : `Click to start lesson: ${lesson.title}`}</p>
+                </TooltipContent>
+              </Tooltip>
             ))}
           </div>
         </div>
