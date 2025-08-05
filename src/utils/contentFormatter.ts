@@ -48,6 +48,7 @@ export class ContentFormatter {
       .trim();
 
     // Process the content in correct order - add comprehensive cleanup first
+    formattedContent = this.removeSpecificMalformedPatterns(formattedContent);
     formattedContent = this.cleanupMarkdownArtifacts(formattedContent);
     formattedContent = this.convertMarkdownToHtml(formattedContent);
     formattedContent = this.removeDuplicateTitle(formattedContent, title);
