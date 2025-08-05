@@ -91,30 +91,6 @@ serve(async (req) => {
       );
     }
     
-    // Handle test requests
-    if (body.test === true) {
-      console.log("Test request received, checking configuration...");
-
-      // Test configuration
-      const configStatus = {
-        supabaseUrl: !!supabaseUrl,
-        supabaseServiceKey: !!supabaseServiceKey,
-        stripeSecretKey: !!stripeSecretKey,
-        environment: Deno.env.get("ENVIRONMENT") || "unknown"
-      };
-
-      console.log("Configuration status:", configStatus);
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: "Edge Function is working",
-          config: configStatus,
-          timestamp: new Date().toISOString()
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
-      );
-    }
 
     // Input validation
     if (!body.priceId || typeof body.priceId !== 'string' || body.priceId.length > 100) {
