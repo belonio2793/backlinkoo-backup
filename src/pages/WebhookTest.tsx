@@ -264,16 +264,16 @@ const WebhookTest: React.FC = () => {
     try {
       // Test 1: Endpoint health
       const healthOk = await testWebhookEndpoint();
-      
+
       if (healthOk) {
         // Test 2: Payment webhook
         await new Promise(resolve => setTimeout(resolve, 1000));
         await testPaymentWebhook();
-        
+
         // Test 3: Subscription webhook
         await new Promise(resolve => setTimeout(resolve, 1000));
         await testSubscriptionWebhook();
-        
+
         // Test 4: Cancellation webhook
         await new Promise(resolve => setTimeout(resolve, 1000));
         await testCancellationWebhook();
@@ -282,6 +282,64 @@ const WebhookTest: React.FC = () => {
       console.error('Test suite error:', error);
     } finally {
       setIsRunning(false);
+    }
+  };
+
+  const runCreditsAndPremiumTests = async () => {
+    setIsRunningComprehensive(true);
+    setCreditsAndPremiumResults({ credits: [], premium: [] });
+
+    try {
+      const results = await tester.runComprehensiveTests();
+      setCreditsAndPremiumResults(results);
+    } catch (error) {
+      console.error('Comprehensive test error:', error);
+    } finally {
+      setIsRunningComprehensive(false);
+    }
+  };
+
+  const runQuickCreditsTest = async () => {
+    setIsRunningComprehensive(true);
+    try {
+      // Test just the popular 100 credits package
+      const result = await tester.testCreditsPurchase({
+        credits: 100,
+        amount: 70.00,
+        description: 'Quick Credits Test (100 credits)',
+        testEmail: 'quick.test@example.com'
+      });
+
+      setCreditsAndPremiumResults(prev => ({
+        ...prev,
+        credits: [result]
+      }));
+    } catch (error) {
+      console.error('Quick credits test error:', error);
+    } finally {
+      setIsRunningComprehensive(false);
+    }
+  };
+
+  const runQuickPremiumTest = async () => {
+    setIsRunningComprehensive(true);
+    try {
+      // Test monthly premium subscription
+      const result = await tester.testPremiumSubscription({
+        plan: 'monthly',
+        amount: 29.00,
+        description: 'Quick Premium Test (Monthly)',
+        testEmail: 'quick.premium@example.com'
+      });
+
+      setCreditsAndPremiumResults(prev => ({
+        ...prev,
+        premium: [result]
+      }));
+    } catch (error) {
+      console.error('Quick premium test error:', error);
+    } finally {
+      setIsRunningComprehensive(false);
     }
   };
 
