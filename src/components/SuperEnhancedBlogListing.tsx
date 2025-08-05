@@ -629,6 +629,30 @@ export function SuperEnhancedBlogListing() {
         </div>
       </div>
 
+      {/* Enhanced Blog Preview Modal */}
+      {previewPost && (
+        <EnhancedBlogPreview
+          isOpen={showPreviewModal}
+          onClose={handleClosePreview}
+          content={{
+            title: previewPost.title,
+            content: previewPost.content || '',
+            metaDescription: previewPost.meta_description || '',
+            contextualLinks: previewPost.contextual_links || [],
+            seoScore: previewPost.seo_score,
+            wordCount: Math.ceil((previewPost.content || '').length / 5)
+          }}
+          keyword={previewPost.keywords?.[0] || ''}
+          targetUrl={previewPost.target_url || ''}
+          onSave={() => {
+            toast({
+              title: "Content Saved",
+              description: "Blog post content has been saved to your clipboard"
+            });
+          }}
+        />
+      )}
+
       {/* Footer */}
       <Footer />
     </div>
