@@ -883,10 +883,17 @@ Users ready to make a purchase or take action.
                   </Tooltip>
                 )}
                 {currentLesson.completed && (
-                  <Badge className="bg-green-100 text-green-800">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Completed
-                  </Badge>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge className="bg-green-100 text-green-800">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Completed
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>This lesson has been completed successfully</p>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </div>
             </div>
