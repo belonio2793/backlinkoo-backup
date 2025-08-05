@@ -573,12 +573,13 @@ const WebhookTest: React.FC = () => {
         </TabsContent>
       </Tabs>
 
+      {/* Basic Test Results */}
       {testResults.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Test Results</CardTitle>
+            <CardTitle>Basic Test Results</CardTitle>
             <CardDescription>
-              Results from webhook testing
+              Results from basic webhook functionality tests
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -608,6 +609,127 @@ const WebhookTest: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Credits and Premium Test Results */}
+      {(creditsAndPremiumResults.credits.length > 0 || creditsAndPremiumResults.premium.length > 0) && (
+        <div className="space-y-6">
+          {/* Summary */}
+          {creditsAndPremiumResults.summary && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  Test Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-blue-600">{creditsAndPremiumResults.summary.totalTests}</div>
+                    <div className="text-sm text-gray-600">Total Tests</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-green-600">{creditsAndPremiumResults.summary.passed}</div>
+                    <div className="text-sm text-gray-600">Passed</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-red-600">{creditsAndPremiumResults.summary.failed}</div>
+                    <div className="text-sm text-gray-600">Failed</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-purple-600">{creditsAndPremiumResults.summary.successRate}</div>
+                    <div className="text-sm text-gray-600">Success Rate</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Credits Results */}
+          {creditsAndPremiumResults.credits.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-blue-600" />
+                  Credits Purchase Results
+                </CardTitle>
+                <CardDescription>
+                  Results from testing credit purchase webhooks
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {creditsAndPremiumResults.credits.map((result, index) => (
+                    <div key={index} className="flex items-start space-x-3 p-3 border rounded-lg">
+                      {result.success ? (
+                        <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-500 mt-0.5" />
+                      )}
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-medium text-sm">{result.scenario}</h4>
+                          <Badge variant={result.success ? 'success' as any : 'destructive'}>
+                            {result.success ? 'Passed' : 'Failed'}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-gray-600 mb-1">{result.message}</p>
+                        {result.details && (
+                          <div className="text-xs text-gray-500">
+                            {result.details.credits && `${result.details.credits} credits - $${result.details.amount}`}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Premium Results */}
+          {creditsAndPremiumResults.premium.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Crown className="h-5 w-5 text-purple-600" />
+                  Premium Subscription Results
+                </CardTitle>
+                <CardDescription>
+                  Results from testing premium subscription webhooks
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {creditsAndPremiumResults.premium.map((result, index) => (
+                    <div key={index} className="flex items-start space-x-3 p-3 border rounded-lg">
+                      {result.success ? (
+                        <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-500 mt-0.5" />
+                      )}
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-medium text-sm">{result.scenario}</h4>
+                          <Badge variant={result.success ? 'success' as any : 'destructive'}>
+                            {result.success ? 'Passed' : 'Failed'}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-gray-600 mb-1">{result.message}</p>
+                        {result.details && (
+                          <div className="text-xs text-gray-500">
+                            {result.details.plan && `${result.details.plan} plan - $${result.details.amount}`}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
 
       <Card className="mt-6">
