@@ -121,17 +121,19 @@ export class AuthService {
         error: 'No user data received from signin'
       };
     } catch (error: any) {
-      console.error('🚨 Sign-in exception caught:', {
-        error: error,
+      console.error('🚨 Authentication Exception:', {
+        type: 'sign_in_exception',
         message: error.message,
+        name: error.name,
         stack: error.stack,
-        email: signInData.email,
-        errorString: JSON.stringify(error, null, 2)
+        email: signInData.email.substring(0, 3) + '***', // Partial email for privacy
+        timestamp: new Date().toISOString(),
+        originalError: error
       });
-      console.error('🚨 Raw exception object:', error);
+
       return {
         success: false,
-        error: this.formatErrorMessage(error.message || 'Authentication failed')
+        error: this.formatErrorMessage(error.message || 'Authentication service unavailable. Please try again.')
       };
     }
   }
