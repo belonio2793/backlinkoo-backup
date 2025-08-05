@@ -22,10 +22,10 @@ export class SubscriptionService {
   static validateStripeConfiguration(): { isValid: boolean; error?: string } {
     const priceId = import.meta.env.VITE_STRIPE_PRICE_ID;
 
-    if (!priceId) {
+    if (!priceId || priceId.trim() === '') {
       return {
         isValid: false,
-        error: 'Stripe price ID not configured. Please contact support or check environment configuration.'
+        error: 'Stripe price ID not configured. Please add your Stripe price ID to the VITE_STRIPE_PRICE_ID environment variable in your .env file.'
       };
     }
 
@@ -34,6 +34,14 @@ export class SubscriptionService {
       return {
         isValid: false,
         error: 'Stripe is configured with placeholder values. Please set up real Stripe price IDs.'
+      };
+    }
+
+    // Basic format validation for Stripe price IDs
+    if (!priceId.startsWith('price_')) {
+      return {
+        isValid: false,
+        error: 'Invalid Stripe price ID format. Price IDs should start with "price_".'
       };
     }
 
