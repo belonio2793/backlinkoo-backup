@@ -529,13 +529,13 @@ export function SuperEnhancedBlogListing() {
                       p-1.5 rounded-lg transition-all duration-300
                       ${filterType === key
                         ? 'bg-white/20 group-hover:bg-white/30'
-                        : `bg-${accent}-100 group-hover:bg-${accent}-200`
+                        : 'bg-gray-100 group-hover:bg-gray-200'
                       }
                     `}>
                       <Icon className={`h-4 w-4 transition-colors duration-300 ${
                         filterType === key
                           ? 'text-white'
-                          : `text-${accent}-600 group-hover:text-${accent}-700`
+                          : 'text-gray-600 group-hover:text-gray-700'
                       }`} />
                     </div>
                     <span className="relative">
