@@ -370,7 +370,10 @@ export function Blog() {
       {/* Claim Status Indicator */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between">
-          <ClaimStatusIndicator onUpgrade={() => setPricingModalOpen(true)} />
+          <ClaimStatusIndicator onUpgrade={() => {
+            setPaymentDefaultTab('credits');
+            setPaymentModalOpen(true);
+          }} />
           {import.meta.env.DEV && <ClaimSystemStatus />}
         </div>
       </div>
