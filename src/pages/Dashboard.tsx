@@ -1180,7 +1180,7 @@ const Dashboard = () => {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="overview" className="space-y-6">
+            <TabsContent value="overview" className="space-y-6" data-section="overview">
               {isFirstTimeUser && credits === 0 && !isPremiumSubscriber && (
                 <Card className="border-blue-200 bg-blue-50">
                   <CardHeader>
@@ -1575,7 +1575,7 @@ const Dashboard = () => {
               )}
             </TabsContent>
 
-            <TabsContent value="campaigns" className="space-y-6">
+            <TabsContent value="campaigns" className="space-y-6" data-section="campaigns">
               {showCampaignForm ? (
                 <CampaignForm 
                   onSuccess={handleCampaignSuccess}
