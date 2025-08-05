@@ -216,6 +216,14 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     loadProfileData();
   }, [toast]);
 
+  // Force refresh premium status when component loads
+  useEffect(() => {
+    if (user && refreshPremium) {
+      console.log('🔄 Refreshing premium status for ProfileSettings...');
+      refreshPremium();
+    }
+  }, [user, refreshPremium]);
+
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
