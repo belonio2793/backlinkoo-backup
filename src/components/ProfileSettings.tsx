@@ -224,7 +224,6 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     const getDirectProfileData = async () => {
       if (user && (premiumLoading || useFallbackData)) {
         try {
-          console.log('🔄 Direct profile query fallback...');
           const { data: profile, error } = await supabase
             .from('profiles')
             .select('subscription_tier, role, subscription_status')
@@ -232,11 +231,10 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
             .single();
 
           if (!error && profile) {
-            console.log('✅ Direct profile data loaded:', profile);
             setDirectProfileData(profile);
           }
         } catch (error) {
-          console.warn('❌ Direct profile query failed:', error);
+          // Silently handle error
         }
       }
     };
