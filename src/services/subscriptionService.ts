@@ -17,6 +17,30 @@ export interface SubscriptionStatus {
 
 export class SubscriptionService {
   /**
+   * Validate Stripe configuration
+   */
+  static validateStripeConfiguration(): { isValid: boolean; error?: string } {
+    const priceId = import.meta.env.VITE_STRIPE_PRICE_ID;
+
+    if (!priceId) {
+      return {
+        isValid: false,
+        error: 'Stripe price ID not configured. Please contact support or check environment configuration.'
+      };
+    }
+
+    // Check if using placeholder/test values
+    if (priceId.includes('test_placeholder') || priceId === 'price_premium_monthly') {
+      return {
+        isValid: false,
+        error: 'Stripe is configured with placeholder values. Please set up real Stripe price IDs.'
+      };
+    }
+
+    return { isValid: true };
+  }
+
+  /**
    * Check if user has active subscription
    */
   static async getSubscriptionStatus(user: User | null): Promise<SubscriptionStatus> {
