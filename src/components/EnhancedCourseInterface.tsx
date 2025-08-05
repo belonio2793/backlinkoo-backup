@@ -670,13 +670,20 @@ Users ready to make a purchase or take action.
             <p>Certificates available upon module completion</p>
           </TooltipContent>
         </Tooltip>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <Users className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-            <div className="text-2xl font-bold">15K+</div>
-            <div className="text-sm text-muted-foreground">Students</div>
-          </CardContent>
-        </Card>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <Users className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+                <div className="text-2xl font-bold">15K+</div>
+                <div className="text-sm text-muted-foreground">Students</div>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Students who have enrolled in this course</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Course Modules */}
