@@ -198,6 +198,41 @@ export function EnhancedPremiumCheckoutModal({
     await handleCheckout();
   };
 
+  // Test Edge function connectivity (development only)
+  const testEdgeFunction = async () => {
+    console.log('🧪 Testing Edge function...');
+    const result = await SubscriptionService.testEdgeFunction();
+
+    toast({
+      title: result.success ? "✅ Edge Function Test Passed" : "❌ Edge Function Test Failed",
+      description: result.success
+        ? `Connected successfully. Environment: ${result.data?.config?.environment || 'unknown'}`
+        : result.error,
+      variant: result.success ? "default" : "destructive"
+    });
+  };
+
+  // Test premium upgrade (development only)
+  const testPremiumUpgrade = async () => {
+    console.log('🧪 Testing premium upgrade...');
+    if (!user) {
+      toast({
+        title: "❌ Test Failed",
+        description: "Please sign in first before testing premium upgrade.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const result = await userService.upgradeToPremium();
+
+    toast({
+      title: result.success ? "✅ Premium Upgrade Test Passed" : "❌ Premium Upgrade Test Failed",
+      description: result.message,
+      variant: result.success ? "default" : "destructive"
+    });
+  };
+
   const renderAuthStep = () => (
     <div className="space-y-6">
       <div className="text-center space-y-4">
