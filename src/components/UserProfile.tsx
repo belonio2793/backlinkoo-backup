@@ -39,13 +39,14 @@ export const UserProfile = () => {
 
   const handleSignOut = async () => {
     try {
-      // Navigate immediately for instant UX
-      window.location.href = '/';
+      // Do actual sign out first
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      if (error) {
+        console.error('Sign out error:', error);
+      }
 
-      // Do actual sign out in background
-      AuthService.signOut().catch(error => {
-        console.error('Background sign out error:', error);
-      });
+      // Navigate after sign out
+      window.location.href = '/';
     } catch (error) {
       console.error('Sign out error:', error);
       // Still navigate even if sign out fails
