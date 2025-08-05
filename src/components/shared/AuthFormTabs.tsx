@@ -401,7 +401,16 @@ export function AuthFormTabs({
               </div>
             )}
 
-
+            <div className="text-center">
+              <Button
+                type="button"
+                variant="link"
+                className="text-sm text-muted-foreground"
+                onClick={() => window.open('/auth-diagnostic', '_blank')}
+              >
+                Having trouble signing in?
+              </Button>
+            </div>
           </div>
         </form>
       </TabsContent>
