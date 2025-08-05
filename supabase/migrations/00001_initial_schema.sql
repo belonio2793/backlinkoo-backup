@@ -209,20 +209,7 @@ LEFT JOIN LATERAL (
     ORDER BY checked_at DESC
     LIMIT 1
 ) rr_google ON true
-LEFT JOIN LATERAL (
-    SELECT position, found, backlinks_count, checked_at
-    FROM ranking_results rr
-    WHERE rr.target_id = rt.id AND rr.search_engine = 'bing'
-    ORDER BY checked_at DESC
-    LIMIT 1
-) rr_bing ON true
-LEFT JOIN LATERAL (
-    SELECT position, found, backlinks_count, checked_at
-    FROM ranking_results rr
-    WHERE rr.target_id = rt.id AND rr.search_engine = 'yahoo'
-    ORDER BY checked_at DESC
-    LIMIT 1
-) rr_yahoo ON true;
+;
 
 -- Create functions for user role management
 CREATE OR REPLACE FUNCTION get_current_user_role()
