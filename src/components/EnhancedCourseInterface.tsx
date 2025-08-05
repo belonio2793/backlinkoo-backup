@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -605,20 +606,20 @@ Users ready to make a purchase or take action.
   const renderCourseOverview = () => (
     <div className="space-y-6">
       {/* Course Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-8 rounded-lg">
+      <div className="bg-transparent text-gray-900 p-8 rounded-lg border">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">SEO Academy</h1>
-            <p className="text-blue-100 text-lg">Complete Search Engine Optimization Masterclass</p>
+            <p className="text-gray-600 text-lg">Complete Search Engine Optimization Masterclass</p>
           </div>
           <div className="text-right">
             <div className="text-2xl font-bold">{overallProgress}%</div>
-            <div className="text-blue-100">Complete</div>
+            <div className="text-gray-500">Complete</div>
           </div>
         </div>
         <div className="mt-6">
-          <Progress value={overallProgress} className="h-3 bg-blue-500/30" />
-          <div className="flex justify-between text-sm text-blue-100 mt-2">
+          <Progress value={overallProgress} className="h-3" />
+          <div className="flex justify-between text-sm text-gray-500 mt-2">
             <span>{completedLessons} of {totalLessons} lessons completed</span>
             <span>~53 hours total</span>
           </div>
@@ -627,34 +628,62 @@ Users ready to make a purchase or take action.
 
       {/* Course Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <BookOpen className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-            <div className="text-2xl font-bold">{totalLessons}</div>
-            <div className="text-sm text-muted-foreground">Total Lessons</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <Clock className="h-8 w-8 mx-auto mb-2 text-green-600" />
-            <div className="text-2xl font-bold">53</div>
-            <div className="text-sm text-muted-foreground">Hours Content</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <Award className="h-8 w-8 mx-auto mb-2 text-yellow-600" />
-            <div className="text-2xl font-bold">12</div>
-            <div className="text-sm text-muted-foreground">Certificates</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <Users className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-            <div className="text-2xl font-bold">15K+</div>
-            <div className="text-sm text-muted-foreground">Students</div>
-          </CardContent>
-        </Card>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <BookOpen className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                <div className="text-2xl font-bold">{totalLessons}</div>
+                <div className="text-sm text-muted-foreground">Total Lessons</div>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Total number of lessons across all modules</p>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <Clock className="h-8 w-8 mx-auto mb-2 text-green-600" />
+                <div className="text-2xl font-bold">53</div>
+                <div className="text-sm text-muted-foreground">Hours Content</div>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Total estimated time to complete all course content</p>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <Award className="h-8 w-8 mx-auto mb-2 text-yellow-600" />
+                <div className="text-2xl font-bold">12</div>
+                <div className="text-sm text-muted-foreground">Certificates</div>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Certificates available upon module completion</p>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <Users className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+                <div className="text-2xl font-bold">15K+</div>
+                <div className="text-sm text-muted-foreground">Students</div>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Students who have enrolled in this course</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Course Modules */}
@@ -662,53 +691,59 @@ Users ready to make a purchase or take action.
         <h2 className="text-2xl font-bold">Course Modules</h2>
         <div className="grid gap-4">
           {courseModules.map((module) => (
-            <Card 
-              key={module.id} 
-              className={`cursor-pointer transition-all hover:shadow-lg ${
-                module.id === activeModule ? 'ring-2 ring-blue-500 bg-blue-50' : ''
-              } ${module.locked ? 'opacity-60' : ''}`}
-              onClick={() => !module.locked && setActiveModule(module.id)}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4 flex-1">
-                    <div className={`p-3 rounded-lg ${module.locked ? 'bg-gray-100' : 'bg-blue-100'}`}>
-                      {module.locked ? <Lock className="h-6 w-6 text-gray-400" /> : module.icon}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-xl font-semibold">{module.title}</h3>
-                        {module.locked && <Badge variant="secondary">Premium</Badge>}
+            <Tooltip key={module.id}>
+              <TooltipTrigger asChild>
+                <Card
+                  className={`cursor-pointer transition-all ${
+                    module.id === activeModule ? 'ring-2 ring-blue-500' : ''
+                  } ${module.locked ? 'opacity-60' : ''}`}
+                  onClick={() => !module.locked && setActiveModule(module.id)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-4 flex-1">
+                        <div className={`p-3 rounded-lg ${module.locked ? 'bg-gray-100' : 'bg-blue-100'}`}>
+                          {module.locked ? <Lock className="h-6 w-6 text-gray-400" /> : module.icon}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-xl font-semibold">{module.title}</h3>
+                            {module.locked && <Badge variant="secondary">Premium</Badge>}
+                          </div>
+                          <p className="text-muted-foreground mb-3">{module.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <BookOpen className="h-4 w-4" />
+                              {module.totalLessons} lessons
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              {module.estimatedTime}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <CheckCircle className="h-4 w-4" />
+                              {module.completedLessons}/{module.totalLessons} complete
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-muted-foreground mb-3">{module.description}</p>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <BookOpen className="h-4 w-4" />
-                          {module.totalLessons} lessons
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {module.estimatedTime}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <CheckCircle className="h-4 w-4" />
-                          {module.completedLessons}/{module.totalLessons} complete
-                        </span>
-                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
                     </div>
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                </div>
-                {module.totalLessons > 0 && (
-                  <div className="mt-4">
-                    <Progress 
-                      value={(module.completedLessons / module.totalLessons) * 100} 
-                      className="h-2"
-                    />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                    {module.totalLessons > 0 && (
+                      <div className="mt-4">
+                        <Progress
+                          value={(module.completedLessons / module.totalLessons) * 100}
+                          className="h-2"
+                        />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{module.locked ? 'Upgrade to Premium to access this module' : `Click to view ${module.title} lessons and content`}</p>
+              </TooltipContent>
+            </Tooltip>
           ))}
         </div>
       </div>
@@ -722,58 +757,64 @@ Users ready to make a purchase or take action.
           </div>
           <div className="grid gap-3">
             {activeModuleData.lessons.map((lesson, index) => (
-              <Card 
-                key={lesson.id}
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  lesson.locked ? 'opacity-60' : 'hover:bg-gray-50'
-                }`}
-                onClick={() => handleLessonClick(lesson)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        lesson.completed 
-                          ? 'bg-green-100 text-green-600' 
-                          : lesson.locked 
-                          ? 'bg-gray-100 text-gray-400'
-                          : 'bg-blue-100 text-blue-600'
-                      }`}>
-                        {lesson.completed ? (
-                          <CheckCircle className="h-5 w-5" />
-                        ) : lesson.locked ? (
-                          <Lock className="h-5 w-5" />
-                        ) : (
-                          <PlayCircle className="h-5 w-5" />
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{lesson.title}</h3>
-                        <p className="text-sm text-muted-foreground">{lesson.description}</p>
-                        <div className="flex items-center gap-3 mt-1">
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {lesson.duration}
-                          </span>
-                          <Badge 
-                            variant={lesson.difficulty === 'Beginner' ? 'default' : 
-                                    lesson.difficulty === 'Intermediate' ? 'secondary' : 'destructive'}
-                            className="text-xs"
-                          >
-                            {lesson.difficulty}
-                          </Badge>
-                          {lesson.quiz && (
-                            <Badge variant="outline" className="text-xs">
-                              Quiz: {lesson.quiz.questions} questions
-                            </Badge>
-                          )}
+              <Tooltip key={lesson.id}>
+                <TooltipTrigger asChild>
+                  <Card
+                    className={`cursor-pointer transition-all ${
+                      lesson.locked ? 'opacity-60' : ''
+                    }`}
+                    onClick={() => handleLessonClick(lesson)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                            lesson.completed
+                              ? 'bg-green-100 text-green-600'
+                              : lesson.locked
+                              ? 'bg-gray-100 text-gray-400'
+                              : 'bg-blue-100 text-blue-600'
+                          }`}>
+                            {lesson.completed ? (
+                              <CheckCircle className="h-5 w-5" />
+                            ) : lesson.locked ? (
+                              <Lock className="h-5 w-5" />
+                            ) : (
+                              <PlayCircle className="h-5 w-5" />
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="font-semibold">{lesson.title}</h3>
+                            <p className="text-sm text-muted-foreground">{lesson.description}</p>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {lesson.duration}
+                              </span>
+                              <Badge
+                                variant={lesson.difficulty === 'Beginner' ? 'default' :
+                                        lesson.difficulty === 'Intermediate' ? 'secondary' : 'destructive'}
+                                className="text-xs"
+                              >
+                                {lesson.difficulty}
+                              </Badge>
+                              {lesson.quiz && (
+                                <Badge variant="outline" className="text-xs">
+                                  Quiz: {lesson.quiz.questions} questions
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
                         </div>
+                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
                       </div>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{lesson.locked ? 'Premium lesson - upgrade to access' : `Click to start lesson: ${lesson.title}`}</p>
+                </TooltipContent>
+              </Tooltip>
             ))}
           </div>
         </div>
@@ -794,15 +835,22 @@ Users ready to make a purchase or take action.
           <div className="max-w-4xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setCourseView('overview')}
-                  className="flex items-center gap-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Course
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCourseView('overview')}
+                      className="flex items-center gap-2"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      Back to Course
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Return to the course overview and module selection</p>
+                  </TooltipContent>
+                </Tooltip>
                 <Separator orientation="vertical" className="h-6" />
                 <div>
                   <h1 className="text-xl font-semibold">{currentLesson.title}</h1>
@@ -819,19 +867,33 @@ Users ready to make a purchase or take action.
               </div>
               <div className="flex items-center gap-2">
                 {!currentLesson.completed && (
-                  <Button 
-                    onClick={() => markLessonComplete(currentLesson.id)}
-                    className="flex items-center gap-2"
-                  >
-                    <CheckCircle className="h-4 w-4" />
-                    Mark Complete
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => markLessonComplete(currentLesson.id)}
+                        className="flex items-center gap-2"
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                        Mark Complete
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Mark this lesson as completed and track your progress</p>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
                 {currentLesson.completed && (
-                  <Badge className="bg-green-100 text-green-800">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Completed
-                  </Badge>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge className="bg-green-100 text-green-800">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Completed
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>This lesson has been completed successfully</p>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </div>
             </div>
@@ -858,25 +920,39 @@ Users ready to make a purchase or take action.
           <div className="flex justify-between mt-8">
             <div>
               {prevLesson && (
-                <Button 
-                  variant="outline" 
-                  onClick={() => setCurrentLesson(prevLesson)}
-                  className="flex items-center gap-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Previous: {prevLesson.title}
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      onClick={() => setCurrentLesson(prevLesson)}
+                      className="flex items-center gap-2"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      Previous: {prevLesson.title}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Go to the previous lesson: {prevLesson.title}</p>
+                  </TooltipContent>
+                </Tooltip>
               )}
             </div>
             <div>
               {nextLesson && (
-                <Button 
-                  onClick={() => setCurrentLesson(nextLesson)}
-                  className="flex items-center gap-2"
-                >
-                  Next: {nextLesson.title}
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={() => setCurrentLesson(nextLesson)}
+                      className="flex items-center gap-2"
+                    >
+                      Next: {nextLesson.title}
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Continue to the next lesson: {nextLesson.title}</p>
+                  </TooltipContent>
+                </Tooltip>
               )}
             </div>
           </div>
@@ -886,15 +962,17 @@ Users ready to make a purchase or take action.
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {courseView === 'overview' ? (
-        <div className="max-w-6xl mx-auto p-6">
-          {renderCourseOverview()}
-        </div>
-      ) : (
-        renderLessonView()
-      )}
-    </div>
+    <TooltipProvider>
+      <div className="min-h-screen bg-gray-50">
+        {courseView === 'overview' ? (
+          <div className="max-w-6xl mx-auto p-6">
+            {renderCourseOverview()}
+          </div>
+        ) : (
+          renderLessonView()
+        )}
+      </div>
+    </TooltipProvider>
   );
 }
 
