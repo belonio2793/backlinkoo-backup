@@ -210,9 +210,8 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   useEffect(() => {
     if (premiumLoading) {
       const timeout = setTimeout(() => {
-        console.warn('⚠️ Premium loading timeout - using immediate fallback');
         setUseFallbackData(true);
-      }, 2000); // Reduced to 2 seconds
+      }, 2000);
 
       return () => clearTimeout(timeout);
     } else {
