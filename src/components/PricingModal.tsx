@@ -599,7 +599,7 @@ export const PricingModal = ({
                 {/* Payment Method */}
                 <div className="space-y-2">
                   <Label>Payment Method</Label>
-                  <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as "stripe" | "paypal")}>
+                  <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as "stripe")}>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="stripe" id="stripe" />
                       <Label htmlFor="stripe" className="flex items-center gap-2">
