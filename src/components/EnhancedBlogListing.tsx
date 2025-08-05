@@ -30,6 +30,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
+import { ExcerptCleaner } from '@/utils/excerptCleaner';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -579,7 +580,7 @@ function PostCard({
       
       <CardContent>
         <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-          {getExcerpt(post.content)}
+          {getExcerpt(post.content, post.title)}
         </p>
 
         {/* Expiration Timer */}
