@@ -16,9 +16,14 @@ class UserService {
    */
   async getCurrentUserProfile(): Promise<UserProfile | null> {
     try {
+      console.log('🔄 userService: Getting current user...');
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      if (!user) {
+        console.log('❌ userService: No authenticated user');
+        return null;
+      }
 
+      console.log('🔄 userService: Fetching profile for user:', user.email);
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
@@ -27,7 +32,7 @@ class UserService {
 
       if (error) {
         const errorMessage = error.message || error;
-        console.error('Error fetching user profile:', errorMessage);
+        console.error('❌ userService: Error fetching user profile:', errorMessage);
 
         // Handle specific permission denied errors
         if (errorMessage && errorMessage.includes('permission denied for table users')) {
@@ -39,9 +44,10 @@ class UserService {
         return null;
       }
 
+      console.log('✅ userService: Profile loaded successfully:', profile);
       return profile;
     } catch (error: any) {
-      console.error('Error getting current user profile:', error.message || error);
+      console.error('❌ userService: Error getting current user profile:', error.message || error);
       return null;
     }
   }
@@ -51,10 +57,28 @@ class UserService {
    */
   async isPremiumUser(): Promise<boolean> {
     try {
+      console.log('🔄 userService: Checking premium status...');
       const profile = await this.getCurrentUserProfile();
-      return profile?.role === 'premium' || profile?.role === 'admin';
+
+      if (!profile) {
+        console.log('❌ userService: No profile found for premium check');
+        return false;
+      }
+
+      // Check subscription_tier instead of role for premium status
+      const isPremium = profile?.subscription_tier === 'premium' ||
+                       profile?.subscription_tier === 'monthly' ||
+                       profile?.role === 'admin'; // Admin also gets premium access
+
+      console.log('✅ userService: Premium check result:', {
+        subscription_tier: profile.subscription_tier,
+        role: profile.role,
+        isPremium
+      });
+
+      return isPremium;
     } catch (error: any) {
-      console.error('Error checking premium status:', error.message || error);
+      console.error('❌ userService: Error checking premium status:', error.message || error);
       return false;
     }
   }
@@ -157,7 +181,10 @@ class UserService {
   }> {
     try {
       const profile = await this.getCurrentUserProfile();
-      const isPremium = profile?.role === 'premium' || profile?.role === 'admin';
+      // Check subscription_tier instead of role for premium status
+      const isPremium = profile?.subscription_tier === 'premium' ||
+                       profile?.subscription_tier === 'monthly' ||
+                       profile?.role === 'admin'; // Admin also gets premium access
 
       return {
         maxClaimedPosts: isPremium ? -1 : 3, // -1 means unlimited

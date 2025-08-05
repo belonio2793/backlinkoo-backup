@@ -42,7 +42,7 @@ interface ProfileSettingsProps {
 
 export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   const { toast } = useToast();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, isPremium: authIsPremium, subscriptionTier: authSubscriptionTier } = useAuth();
   const { userProfile, isPremium, isAdmin, userLimits, loading: premiumLoading, refresh: refreshPremium } = usePremium();
 
   const [loading, setLoading] = useState(false);
@@ -74,22 +74,6 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     securityAlerts: true
   });
 
-  // Debug logging
-  console.log('ProfileSettings render:', {
-    user: user ? {
-      email: user.email,
-      id: user.id,
-      email_confirmed_at: user.email_confirmed_at,
-      user_metadata: user.user_metadata
-    } : null,
-    userEmail: user?.email,
-    profileDataEmail: profileData.email,
-    authLoading,
-    loading,
-    hasUserProfile: !!userProfile,
-    profileData: profileData,
-    emailDisplay: user?.email || profileData.email || 'No email available'
-  });
 
   // If we have user data from context but no profile data yet, initialize immediately
   useEffect(() => {
@@ -210,6 +194,85 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
 
     loadProfileData();
   }, [toast]);
+
+  // Force refresh premium status when component loads
+  useEffect(() => {
+    if (user && refreshPremium) {
+      refreshPremium();
+    }
+  }, [user, refreshPremium]);
+
+  // Aggressive fallback - use auth data immediately if premium hook is loading
+  const [useFallbackData, setUseFallbackData] = useState(false);
+  const [directProfileData, setDirectProfileData] = useState<any>(null);
+
+  // Start with fallback if loading takes more than 2 seconds
+  useEffect(() => {
+    if (premiumLoading) {
+      const timeout = setTimeout(() => {
+        setUseFallbackData(true);
+      }, 2000);
+
+      return () => clearTimeout(timeout);
+    } else {
+      setUseFallbackData(false);
+    }
+  }, [premiumLoading]);
+
+  // Direct Supabase query as ultimate fallback
+  useEffect(() => {
+    const getDirectProfileData = async () => {
+      if (user && (premiumLoading || useFallbackData)) {
+        try {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('subscription_tier, role, subscription_status')
+            .eq('user_id', user.id)
+            .single();
+
+          if (!error && profile) {
+            setDirectProfileData(profile);
+          }
+        } catch (error) {
+          // Silently handle error
+        }
+      }
+    };
+
+    getDirectProfileData();
+  }, [user, premiumLoading, useFallbackData]);
+
+  // Use most reliable data source available
+  const getEffectiveData = () => {
+    // Priority: Direct profile data > Auth data > usePremium data
+    if (directProfileData) {
+      return {
+        isPremium: directProfileData.subscription_tier === 'premium' ||
+                  directProfileData.subscription_tier === 'monthly' ||
+                  directProfileData.role === 'admin',
+        subscriptionTier: directProfileData.subscription_tier,
+        source: 'direct'
+      };
+    }
+
+    if (useFallbackData || premiumLoading) {
+      return {
+        isPremium: authIsPremium,
+        subscriptionTier: authSubscriptionTier,
+        source: 'auth'
+      };
+    }
+
+    return {
+      isPremium: isPremium,
+      subscriptionTier: userProfile?.subscription_tier || null,
+      source: 'premium'
+    };
+  };
+
+  const effectiveData = getEffectiveData();
+  const effectiveIsPremium = effectiveData.isPremium;
+  const effectiveSubscriptionTier = effectiveData.subscriptionTier;
 
   const handleSaveProfile = async () => {
     setSaving(true);
@@ -673,22 +736,38 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {premiumLoading ? (
-                <div className="flex items-center justify-center p-6">
+              {/* Always show content - no more infinite loading */}
+              {(premiumLoading && !useFallbackData && !directProfileData && !authIsPremium) ? (
+                <div className="flex flex-col items-center justify-center p-6 space-y-3">
                   <Loader2 className="h-8 w-8 animate-spin" />
+                  <p className="text-sm text-muted-foreground">Loading subscription details...</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setUseFallbackData(true);
+                      if (refreshPremium) refreshPremium();
+                    }}
+                  >
+                    Show Data Now
+                  </Button>
                 </div>
               ) : (
                 <>
+
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <h4 className="font-medium">Current Plan</h4>
                       <p className="text-sm text-muted-foreground">
-                        You are currently on the {isPremium ? 'Premium' : 'Free'} plan
+                        You are currently on the {effectiveIsPremium ? 'Premium' : 'Free'} plan
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Subscription tier: {effectiveSubscriptionTier || 'Not set'}
                       </p>
                     </div>
-                    <Badge variant="default" className={`${roleInfo.color} text-white`}>
-                      {roleInfo.icon}
-                      {roleInfo.name}
+                    <Badge variant="default" className={`${effectiveIsPremium ? 'bg-purple-500' : 'bg-gray-500'} text-white`}>
+                      {effectiveIsPremium ? <Crown className="h-3 w-3 mr-1" /> : <User className="h-3 w-3 mr-1" />}
+                      {effectiveIsPremium ? 'Premium' : 'Free'}
                     </Badge>
                   </div>
 
@@ -699,7 +778,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium">Blog Posts</span>
                           <span className="text-sm text-muted-foreground">
-                            {userLimits.hasUnlimitedClaims ? 'Unlimited' : `${userLimits.maxClaimedPosts} max`}
+                            {useFallbackData ? (effectiveIsPremium ? 'Unlimited' : '3 max') : (userLimits.hasUnlimitedClaims ? 'Unlimited' : `${userLimits.maxClaimedPosts} max`)}
                           </span>
                         </div>
                       </div>
@@ -707,7 +786,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium">Advanced SEO</span>
                           <span className="text-sm">
-                            {userLimits.hasAdvancedSEO ? (
+                            {(useFallbackData ? effectiveIsPremium : userLimits.hasAdvancedSEO) ? (
                               <CheckCircle className="h-4 w-4 text-green-500" />
                             ) : (
                               <AlertCircle className="h-4 w-4 text-gray-400" />
@@ -719,7 +798,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium">Analytics</span>
                           <span className="text-sm">
-                            {userLimits.hasAdvancedAnalytics ? (
+                            {(useFallbackData ? effectiveIsPremium : userLimits.hasAdvancedAnalytics) ? (
                               <CheckCircle className="h-4 w-4 text-green-500" />
                             ) : (
                               <AlertCircle className="h-4 w-4 text-gray-400" />
@@ -731,7 +810,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium">Priority Support</span>
                           <span className="text-sm">
-                            {userLimits.hasPrioritySupport ? (
+                            {(useFallbackData ? effectiveIsPremium : userLimits.hasPrioritySupport) ? (
                               <CheckCircle className="h-4 w-4 text-green-500" />
                             ) : (
                               <AlertCircle className="h-4 w-4 text-gray-400" />
@@ -742,7 +821,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                     </div>
                   </div>
 
-                  {!isPremium && (
+                  {!effectiveIsPremium && (
                     <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <Crown className="h-5 w-5 text-purple-600" />
@@ -760,6 +839,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                       </Button>
                     </div>
                   )}
+
                 </>
               )}
             </CardContent>

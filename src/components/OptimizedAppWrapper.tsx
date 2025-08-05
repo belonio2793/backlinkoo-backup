@@ -24,12 +24,11 @@ import { BlogPostDiagnostic } from '@/components/BlogPostDiagnostic';
 import EmergencyRLSFix from '@/pages/EmergencyRLSFix';
 import AuthDiagnostic from '@/pages/AuthDiagnostic';
 
-// Import lightweight components
-import AdminAuthGuard from '@/components/AdminAuthGuard';
-import { EmailVerificationGuard } from '@/components/EmailVerificationGuard';
+// Import optimized instant authentication components
+import { InstantEmailVerificationGuard } from '@/components/InstantEmailVerificationGuard';
 import { TrialNotificationBanner } from '@/components/TrialNotificationBanner';
 import { AdminDiagnostic } from '@/components/AdminDiagnostic';
-import { SimpleAdminPage } from '@/components/SimpleAdminPage';
+import InstantAdminLanding from '@/components/InstantAdminLanding';
 
 // Import lazy-loaded components
 import {
@@ -137,35 +136,35 @@ export const OptimizedAppWrapper = () => {
 
           {/* Protected routes - require authentication and email verification */}
           <Route path="/dashboard" element={
-            <EmailVerificationGuard>
+            <InstantEmailVerificationGuard>
               <Suspense fallback={<PageLoader />}>
                 <Dashboard />
               </Suspense>
-            </EmailVerificationGuard>
+            </InstantEmailVerificationGuard>
           } />
 
           <Route path="/my-dashboard" element={
-            <EmailVerificationGuard>
+            <InstantEmailVerificationGuard>
               <Suspense fallback={<PageLoader />}>
                 <Dashboard />
               </Suspense>
-            </EmailVerificationGuard>
+            </InstantEmailVerificationGuard>
           } />
           <Route path="/my-blog" element={
-            <EmailVerificationGuard>
+            <InstantEmailVerificationGuard>
               <LazyUserBlogManagement />
-            </EmailVerificationGuard>
+            </InstantEmailVerificationGuard>
           } />
           <Route path="/blog/:postId/edit" element={
-            <EmailVerificationGuard>
+            <InstantEmailVerificationGuard>
               <LazyBlogEditPage />
-            </EmailVerificationGuard>
+            </InstantEmailVerificationGuard>
           } />
 
           {/* Admin routes */}
           <Route path="/admin" element={
             <Suspense fallback={<PageLoader />}>
-              <SimpleAdminPage />
+              <InstantAdminLanding />
             </Suspense>
           } />
 
@@ -214,61 +213,61 @@ export const OptimizedAppWrapper = () => {
 
           {/* Payment routes - lightweight, immediate load */}
           <Route path="/payment-success" element={
-            <EmailVerificationGuard>
+            <InstantEmailVerificationGuard>
               <PaymentSuccess />
-            </EmailVerificationGuard>
+            </InstantEmailVerificationGuard>
           } />
           <Route path="/payment-cancelled" element={
-            <EmailVerificationGuard>
+            <InstantEmailVerificationGuard>
               <PaymentCancelled />
-            </EmailVerificationGuard>
+            </InstantEmailVerificationGuard>
           } />
           <Route path="/subscription-success" element={
-            <EmailVerificationGuard>
+            <InstantEmailVerificationGuard>
               <SubscriptionSuccess />
-            </EmailVerificationGuard>
+            </InstantEmailVerificationGuard>
           } />
           <Route path="/subscription-cancelled" element={
-            <EmailVerificationGuard>
+            <InstantEmailVerificationGuard>
               <SubscriptionCancelled />
-            </EmailVerificationGuard>
+            </InstantEmailVerificationGuard>
           } />
 
           {/* Feature routes - lazy loaded */}
           <Route path="/campaign/:campaignId" element={
-            <EmailVerificationGuard>
+            <InstantEmailVerificationGuard>
               <LazyCampaignDeliverables />
-            </EmailVerificationGuard>
+            </InstantEmailVerificationGuard>
           } />
           <Route path="/email" element={
-            <EmailVerificationGuard>
+            <InstantEmailVerificationGuard>
               <LazyEmailMarketing />
-            </EmailVerificationGuard>
+            </InstantEmailVerificationGuard>
           } />
           <Route path="/backlink-report" element={
-            <EmailVerificationGuard>
+            <InstantEmailVerificationGuard>
               <LazyBacklinkReport />
-            </EmailVerificationGuard>
+            </InstantEmailVerificationGuard>
           } />
           <Route path="/report/:reportId" element={
-            <EmailVerificationGuard>
+            <InstantEmailVerificationGuard>
               <LazyReportViewer />
-            </EmailVerificationGuard>
+            </InstantEmailVerificationGuard>
           } />
           <Route path="/automation-link-building" element={
-            <EmailVerificationGuard>
+            <InstantEmailVerificationGuard>
               <LazyNoHandsSEO />
-            </EmailVerificationGuard>
+            </InstantEmailVerificationGuard>
           } />
           <Route path="/affiliate" element={
-            <EmailVerificationGuard>
+            <InstantEmailVerificationGuard>
               <LazyAffiliateProgram />
-            </EmailVerificationGuard>
+            </InstantEmailVerificationGuard>
           } />
           <Route path="/affiliate/promotion-materials" element={
-            <EmailVerificationGuard>
+            <InstantEmailVerificationGuard>
               <LazyPromotionMaterials />
-            </EmailVerificationGuard>
+            </InstantEmailVerificationGuard>
           } />
 
           {/* API Testing Route */}
