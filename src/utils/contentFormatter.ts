@@ -432,6 +432,9 @@ export class ContentFormatter {
       .replace(/##\s*P\s*<p[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2><p>')
       .replace(/##\s*P\s*<p[^>]*data-[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2><p>')
       .replace(/##\s*P\s*(?:<[^>]*>)?\s*ro\s*(?:<[^>]*>)?\s*Tip/gi, '<h2>Pro Tip</h2>')
+      // Fix literal "## P" text that's not being processed as markdown
+      .replace(/^##\s*P\s+/gm, '<h2>Pro Tip</h2>\n')
+      .replace(/##\s*P\s+/g, '<h2>Pro Tip</h2> ')
 
       // Fix corrupted color styles (e.g., "color:&lt;/p&gt; # 2 &lt;p&gt; 563eb;")
       .replace(/style="[^"]*color:[^#]*#[^0-9a-f]*([0-9a-f]{6})[^"]*"/gi, 'style="color:#$1;font-weight:500;"')
