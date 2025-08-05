@@ -791,7 +791,7 @@ function SuperPostCard({
       
       <CardContent className="relative z-10 pt-0">
         <p className="text-gray-600 text-sm mb-6 line-clamp-3 leading-relaxed">
-          {getExcerpt(post.content)}
+          {ExcerptCleaner.getCleanExcerpt(post.content, post.title)}
         </p>
 
         {/* Expiration Timer with beautiful styling */}
