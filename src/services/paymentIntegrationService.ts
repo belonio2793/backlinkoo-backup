@@ -46,11 +46,6 @@ class PaymentIntegrationService {
         hasPublicKey: !!stripePublicKey,
         hasSecretKey: true // We assume secret key is configured on server
       },
-      paypal: {
-        enabled: !!import.meta.env.VITE_PAYPAL_CLIENT_ID,
-        hasClientId: !!import.meta.env.VITE_PAYPAL_CLIENT_ID,
-        hasSecretKey: true // We assume secret key is configured on server
-      },
       environment
     };
   }
