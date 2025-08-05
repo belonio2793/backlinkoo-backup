@@ -276,8 +276,6 @@ export const RankingTracker = () => {
 
       const resultsData = analysisData.results || {};
       const googleData = (resultsData as any)['google'] || {};
-      const bingData = (resultsData as any)['bing'] || {};
-      const yahooData = (resultsData as any)['yahoo'] || {};
 
       const newResult: RankingResult = {
         keyword: keyword.trim(),
@@ -290,20 +288,6 @@ export const RankingTracker = () => {
             lastChecked: new Date().toLocaleString(),
             backlinks: googleData.backlinks || 0,
             errors: googleData.errors || []
-          },
-          bing: {
-            position: bingData.position || null,
-            found: bingData.found || false,
-            lastChecked: new Date().toLocaleString(),
-            backlinks: bingData.backlinks || 0,
-            errors: bingData.errors || []
-          },
-          yahoo: {
-            position: yahooData.position || null,
-            found: yahooData.found || false,
-            lastChecked: new Date().toLocaleString(),
-            backlinks: yahooData.backlinks || 0,
-            errors: yahooData.errors || []
           }
         },
         overallBest,
@@ -479,7 +463,7 @@ export const RankingTracker = () => {
                         {checkingProgress[0]}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Checking Google, Bing, and Yahoo rankings with technical analysis...
+                        Checking Google rankings with technical analysis...
                       </div>
                     </div>
                   </div>
