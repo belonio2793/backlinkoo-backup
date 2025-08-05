@@ -758,9 +758,9 @@ export function EnhancedUnifiedPaymentModal({
 
         {/* Action Buttons */}
         <div className="space-y-3">
-          <Button 
+          <Button
             onClick={handlePayment}
-            disabled={isProcessing}
+            disabled={isProcessing || availablePaymentMethods.length === 0}
             className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
             size="lg"
           >
@@ -768,6 +768,11 @@ export function EnhancedUnifiedPaymentModal({
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Processing...
+              </>
+            ) : availablePaymentMethods.length === 0 ? (
+              <>
+                <X className="mr-2 h-4 w-4" />
+                Payment Not Available
               </>
             ) : (
               <>
