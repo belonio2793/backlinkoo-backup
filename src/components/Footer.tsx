@@ -96,8 +96,9 @@ export const Footer = () => {
                   }
                 }}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+                title={!user ? "Sign in to access Backlink Reports" : "Go to Backlink Reports"}
               >
-                Backlink Reports
+                Backlink Reports {!user && <span className="text-xs opacity-60">(Login required)</span>}
               </button>
             </div>
           </div>
@@ -141,8 +142,9 @@ export const Footer = () => {
                   }
                 }}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+                title={!user ? "Sign in to access Admin Dashboard" : "Go to Admin Dashboard"}
               >
-                Admin Dashboard
+                Admin Dashboard {!user && <span className="text-xs opacity-60">(Login required)</span>}
               </button>
               <a
                 href="mailto:support@backlinkoo.com"
