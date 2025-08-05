@@ -138,10 +138,15 @@ serve(async (req) => {
     }
 
     if (!email) {
-      throw new Error("Email is required for subscription");
+      console.error("Email is required for subscription");
+      return new Response(
+        JSON.stringify({ error: "Email is required for subscription" }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    console.log("Initializing Stripe with email:", email);
+    const stripe = new Stripe(stripeSecretKey, {
       apiVersion: "2023-10-16",
     });
 
