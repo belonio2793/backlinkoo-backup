@@ -114,14 +114,12 @@ class UserService {
         .single();
 
       if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 = no rows returned
-        console.error('❌ userService: Error checking existing profile:', fetchError);
         return { success: false, message: `Database error: ${fetchError.message}` };
       }
 
       let updateResult;
 
       if (!existingProfile) {
-        console.log('📝 userService: Creating new profile for user');
         // Create new profile
         updateResult = await supabase
           .from('profiles')
