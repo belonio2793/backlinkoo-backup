@@ -24,7 +24,8 @@ import {
   Home,
   MonitorSpeaker,
   Crown,
-  Trash2
+  Trash2,
+  CreditCard
 } from "lucide-react";
 import { AuthService } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
