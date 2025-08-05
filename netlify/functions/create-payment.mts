@@ -6,7 +6,7 @@ interface PaymentRequest {
   productName: string;
   isGuest?: boolean;
   guestEmail?: string;
-  paymentMethod: 'stripe' | 'paypal';
+  paymentMethod: 'stripe';
   credits?: number;
 }
 
