@@ -10,6 +10,7 @@ import { StreamlinedPremiumProvider } from "@/components/StreamlinedPremiumProvi
 
 import { PremiumService } from "@/services/premiumService";
 import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
+import { Footer } from "@/components/Footer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1750,6 +1751,9 @@ const Dashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
