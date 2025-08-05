@@ -160,7 +160,10 @@ class UserService {
   }> {
     try {
       const profile = await this.getCurrentUserProfile();
-      const isPremium = profile?.role === 'premium' || profile?.role === 'admin';
+      // Check subscription_tier instead of role for premium status
+      const isPremium = profile?.subscription_tier === 'premium' ||
+                       profile?.subscription_tier === 'monthly' ||
+                       profile?.role === 'admin'; // Admin also gets premium access
 
       return {
         maxClaimedPosts: isPremium ? -1 : 3, // -1 means unlimited
