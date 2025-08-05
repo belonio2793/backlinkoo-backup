@@ -107,6 +107,22 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
     }
   }, [user]);
 
+  // Listen for custom events to switch to automation tab
+  useEffect(() => {
+    const handleSeoToolsTabChange = (event: CustomEvent) => {
+      const { tab } = event.detail;
+      if (tab) {
+        setActiveTab(tab);
+      }
+    };
+
+    window.addEventListener('seoToolsTabChange', handleSeoToolsTabChange as EventListener);
+
+    return () => {
+      window.removeEventListener('seoToolsTabChange', handleSeoToolsTabChange as EventListener);
+    };
+  }, []);
+
   const checkSubscriptionStatus = async () => {
     try {
       const status = await SubscriptionService.getSubscriptionStatus(user);
