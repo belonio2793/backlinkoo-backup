@@ -275,6 +275,36 @@ export class SubscriptionService {
   }
 
   /**
+   * Test Edge function connectivity and configuration
+   */
+  static async testEdgeFunction(): Promise<{ success: boolean; data?: any; error?: string }> {
+    try {
+      console.log('🧪 Testing Edge function connectivity...');
+
+      const { data, error } = await supabase.functions.invoke('create-subscription', {
+        body: { test: true }
+      });
+
+      console.log('🧪 Test response:', { data, error });
+
+      if (error) {
+        return {
+          success: false,
+          error: `Edge function test failed: ${JSON.stringify(error)}`
+        };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('🧪 Exception testing Edge function:', error);
+      return {
+        success: false,
+        error: `Test exception: ${error.message}`
+      };
+    }
+  }
+
+  /**
    * Update subscription status from webhook (called by Stripe webhooks)
    */
   static async updateSubscriptionStatus(email: string, subscribed: boolean, stripeCustomerId?: string) {
