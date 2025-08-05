@@ -567,34 +567,36 @@ export class ContentFormatter {
    */
   private static removeSpecificMalformedPatterns(content: string): string {
     return content
+      // FIRST: Decode all levels of HTML entity encoding
+      .replace(/&amp;lt;/g, '<')
+      .replace(/&amp;gt;/g, '>')
+      .replace(/&amp;amp;/g, '&')
+      .replace(/&amp;quot;/g, '"')
+
       // ULTIMATE AGGRESSIVE: Remove the exact pattern that persists
       // Pattern: ## &lt; <p>h2&gt;Pro Tip </p>
-      .replace(/##\s*&lt;\s*<p[^>]*>\s*h[1-6]\s*&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '## Pro Tip')
-      .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*(&amp;lt;|&lt;)\s*<p[^>]*>\s*h[1-6]\s*(&amp;gt;|&gt;)\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '## Pro Tip')
+      .replace(/##\s*(&amp;lt;|&lt;)\s*h[1-6]\s*(&amp;gt;|&gt;)\s*Pro\s*Tip/gi, '## Pro Tip')
 
-      // Remove any standalone ## &lt; patterns
-      .replace(/^\s*##\s*&lt;\s*$/gm, '')
-      .replace(/##\s*&lt;(?!.*Pro\s*Tip).*$/gm, '') // Remove ## &lt; lines that don't contain Pro Tip
+      // Remove any standalone ## with encoded entities
+      .replace(/^\s*##\s*(&amp;lt;|&lt;)\s*$/gm, '')
+      .replace(/##\s*(&amp;lt;|&lt;)(?!.*Pro\s*Tip).*$/gm, '') // Remove ## < lines that don't contain Pro Tip
 
-      // MOST AGGRESSIVE: Remove the exact ## &lt; h2&gt;Pro Tip pattern completely
-      .replace(/##\s*&lt;[\s\S]*?h[1-6]\s*&gt;\s*Pro\s*Tip[\s\S]*?$/gm, '## Pro Tip')
-      .replace(/##\s*&lt;.*$/gm, '') // Remove any line starting with ## &lt;
-
-      // Remove the specific malformed pattern across multiple lines
-      .replace(/##\s*&lt;\s*[\n\r]+\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
+      // MOST AGGRESSIVE: Remove any ## followed by encoded HTML
+      .replace(/##\s*(&amp;lt;|&lt;)[\s\S]*?h[1-6]\s*(&amp;gt;|&gt;)\s*Pro\s*Tip[\s\S]*?$/gm, '## Pro Tip')
+      .replace(/##\s*(&amp;lt;|&lt;).*$/gm, '') // Remove any line starting with ## <
 
       // Remove any content that looks like HTML entities after ##
-      .replace(/##\s*&lt;[^&>]*&gt;[^\n]*/g, '')
+      .replace(/##\s*(&amp;lt;|&lt;)[^&>]*(&amp;gt;|&gt;)[^\n]*/g, '')
 
-      // Clean up corrupted inline styles with HTML entities
-      .replace(/style="[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      // Clean up corrupted inline styles with any level of encoding
+      .replace(/style="[^"]*(&amp;lt;|&lt;)[^"]*(&amp;gt;|&gt;)[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
 
-      // Remove orphaned HTML entity fragments
-      .replace(/&lt;\s*\/\s*p\s*&gt;\s*#\s*\d+\s*&lt;\s*p\s*&gt;/g, '')
-      .replace(/&lt;[^&>]*&gt;/g, '') // Remove any remaining HTML entities
+      // Remove orphaned HTML entity fragments (all encoding levels)
+      .replace(/(&amp;lt;|&lt;)\s*\/?\s*[a-zA-Z]+[^&>]*(&amp;gt;|&gt;)/g, '')
 
       // Clean up any remaining malformed heading patterns
-      .replace(/^\s*##\s*&lt;.*$/gm, '')
+      .replace(/^\s*##\s*(&amp;lt;|&lt;).*$/gm, '')
       .replace(/^\s*##\s*$/gm, '');
   }
 
@@ -603,20 +605,37 @@ export class ContentFormatter {
    */
   static postProcessCleanup(content: string): string {
     return content
-      // Final aggressive cleanup for the persistent ## &lt; h2&gt;Pro Tip pattern
+      // ULTIMATE FIX: Handle double-encoded HTML entities first
+      .replace(/&amp;lt;/g, '<')
+      .replace(/&amp;gt;/g, '>')
+      .replace(/&amp;amp;/g, '&')
+
+      // Handle the exact pattern showing in DOM: ## &lt; <p>h2&gt;Pro Tip</p>
       .replace(/##\s*&lt;\s*<p[^>]*>\s*h[1-6]\s*&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
+
+      // Handle all variations of the malformed pattern
+      .replace(/##\s*&amp;lt;[\s\S]*?h[1-6]\s*&amp;gt;[\s\S]*?Pro\s*Tip[\s\S]*?/gi, '<h2>Pro Tip</h2>')
       .replace(/##\s*&lt;[\s\S]*?h[1-6]\s*&gt;[\s\S]*?Pro\s*Tip[\s\S]*?/gi, '<h2>Pro Tip</h2>')
 
-      // Remove any remaining ## &lt; patterns completely
-      .replace(/##\s*&lt;[^\n]*/g, '')
+      // Remove any line starting with ## and containing HTML entities
+      .replace(/^\s*##\s*&amp;lt;.*$/gm, '')
+      .replace(/^\s*##\s*&lt;.*$/gm, '')
 
-      // Fix any remaining corrupted style attributes
-      .replace(/style="[^"]*&lt;[^"]*&gt;[^"]*color:[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      // Ultimate pattern removal - any ## followed by encoded tags
+      .replace(/##\s*(&amp;lt;|&lt;)[^\n]*/g, '')
 
-      // Remove empty paragraphs that might be left over
+      // Fix corrupted style attributes with multiple encoding levels
+      .replace(/style="[^"]*(&amp;lt;|&lt;)[^"]*(&amp;gt;|&gt;)[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+
+      // Clean up any remaining double-encoded entities
+      .replace(/&amp;lt;\s*\/?\s*[a-zA-Z]+[^&]*&amp;gt;/g, '')
+      .replace(/&lt;\s*\/?\s*[a-zA-Z]+[^&]*&gt;/g, '')
+
+      // Remove empty paragraphs and clean up
       .replace(/<p[^>]*>\s*<\/p>/gi, '')
+      .replace(/\n{3,}/g, '\n\n')
 
-      // Clean up multiple consecutive line breaks
-      .replace(/\n{3,}/g, '\n\n');
+      // Final pass: ensure any remaining ## patterns become proper headings
+      .replace(/^\s*##\s+([A-Za-z][^\n]*)/gm, '<h2>$1</h2>');
   }
 }
