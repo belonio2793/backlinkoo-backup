@@ -157,11 +157,24 @@ export function EnhancedPremiumCheckoutModal({
         throw new Error(result.error || 'Failed to create subscription');
       }
     } catch (error: any) {
-      console.error('Checkout error:', error);
+      console.error('❌ Checkout error:', error);
+      console.error('❌ Error type:', typeof error);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error stack:', error.stack);
+
       setCurrentStep('checkout');
+
+      // Provide detailed error message for debugging
+      let errorMessage = error.message || "There was an issue setting up your payment. Please try again.";
+
+      // Add more context for common errors
+      if (errorMessage.includes('Fallback failed')) {
+        errorMessage += '. The subscription system is experiencing issues. Please try again later or contact support.';
+      }
+
       toast({
         title: "Payment Setup Failed",
-        description: error.message || "There was an issue setting up your payment. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
