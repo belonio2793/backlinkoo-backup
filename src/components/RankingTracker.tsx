@@ -32,14 +32,6 @@ interface SavedTarget {
   google_found: boolean;
   google_checked_at: string;
   google_backlinks: number;
-  bing_position: number | null;
-  bing_found: boolean;
-  bing_checked_at: string;
-  bing_backlinks: number;
-  yahoo_position: number | null;
-  yahoo_found: boolean;
-  yahoo_checked_at: string;
-  yahoo_backlinks: number;
   best_position: number;
   average_position: number;
   target_created_at?: string;
