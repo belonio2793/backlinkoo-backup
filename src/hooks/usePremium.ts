@@ -35,6 +35,7 @@ export function usePremium(): PremiumStatus {
 
   const loadUserStatus = async () => {
     if (!user) {
+      console.log('🔄 usePremium: No user, setting defaults');
       setIsPremium(false);
       setIsAdmin(false);
       setUserProfile(null);
@@ -51,22 +52,34 @@ export function usePremium(): PremiumStatus {
     }
 
     try {
+      console.log('🔄 usePremium: Loading user status for:', user.email);
       setLoading(true);
-      
-      // Load user profile and status
-      const [profile, premiumStatus, adminStatus, limits] = await Promise.all([
-        userService.getCurrentUserProfile(),
-        userService.isPremiumUser(),
-        userService.isAdminUser(),
-        userService.getUserLimits()
-      ]);
+
+      // Load user profile and status with individual error handling
+      console.log('🔄 usePremium: Getting profile...');
+      const profile = await userService.getCurrentUserProfile();
+      console.log('✅ usePremium: Profile loaded:', profile);
+
+      console.log('🔄 usePremium: Checking premium status...');
+      const premiumStatus = await userService.isPremiumUser();
+      console.log('✅ usePremium: Premium status:', premiumStatus);
+
+      console.log('🔄 usePremium: Checking admin status...');
+      const adminStatus = await userService.isAdminUser();
+      console.log('✅ usePremium: Admin status:', adminStatus);
+
+      console.log('🔄 usePremium: Getting user limits...');
+      const limits = await userService.getUserLimits();
+      console.log('✅ usePremium: User limits:', limits);
 
       setUserProfile(profile);
       setIsPremium(premiumStatus);
       setIsAdmin(adminStatus);
       setUserLimits(limits);
+
+      console.log('✅ usePremium: All data loaded successfully');
     } catch (error) {
-      console.error('Error loading user status:', error);
+      console.error('❌ usePremium: Error loading user status:', error);
       // Set safe defaults on error
       setIsPremium(false);
       setIsAdmin(false);
@@ -81,6 +94,7 @@ export function usePremium(): PremiumStatus {
       });
     } finally {
       setLoading(false);
+      console.log('🏁 usePremium: Loading complete');
     }
   };
 
