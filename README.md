@@ -12,10 +12,12 @@ To democratize access to professional SEO content creation by providing users wi
 
 ### Core Functionality
 - **AI-Powered Content Generation**: Utilizes OpenAI ChatGPT-3.5-turbo for high-quality content creation
+- **Google Ads API Integration**: Direct access to official Google keyword data for accurate search volume and competition metrics
 - **SEO-Optimized Structure**: Automatically implements SEO best practices including proper heading hierarchy, keyword density, and meta optimization
 - **Natural Backlink Integration**: Seamlessly incorporates user-specified anchor text and destination URLs
 - **Professional Blog Templates**: Multiple premium templates including EliteBlogTemplate with advanced typography and engagement features
 - **Real-time Generation**: Instant content creation with live progress tracking
+- **Advanced Keyword Research**: Comprehensive keyword analysis using Google's official Keyword Planner API
 
 ### User Input Requirements
 The system captures three essential inputs to generate targeted content:
