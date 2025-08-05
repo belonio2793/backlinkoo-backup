@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-
+import { navigateToSection, NAVIGATION_CONFIGS } from "@/utils/navigationUtils";
 
 export const Footer = () => {
   return (
@@ -10,30 +10,30 @@ export const Footer = () => {
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Features</h3>
             <div className="space-y-2">
-              <Link
-                to="/dashboard"
-                className="block text-gray-600 hover:text-gray-900 text-sm"
+              <button
+                onClick={() => navigateToSection(NAVIGATION_CONFIGS.CAMPAIGNS)}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full"
               >
                 Campaign Management
-              </Link>
-              <Link
-                to="/no-hands-seo"
-                className="block text-gray-600 hover:text-gray-900 text-sm"
+              </button>
+              <button
+                onClick={() => navigateToSection(NAVIGATION_CONFIGS.BACKLINK_AUTOMATION)}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full"
               >
                 Backlink ∞ Automation Link Building (beta)
-              </Link>
-              <Link
-                to="/dashboard"
-                className="block text-gray-600 hover:text-gray-900 text-sm"
+              </button>
+              <button
+                onClick={() => navigateToSection(NAVIGATION_CONFIGS.KEYWORD_RESEARCH)}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full"
               >
                 Keyword Research
-              </Link>
-              <Link
-                to="/dashboard"
-                className="block text-gray-600 hover:text-gray-900 text-sm"
+              </button>
+              <button
+                onClick={() => navigateToSection(NAVIGATION_CONFIGS.RANK_TRACKER)}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full"
               >
                 Rank Tracker
-              </Link>
+              </button>
               <Link
                 to="/blog"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
