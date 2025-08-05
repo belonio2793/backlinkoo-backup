@@ -143,7 +143,7 @@ export const RankingTracker = () => {
 
   // Enhanced ranking check with comprehensive analysis
   const performEnhancedRankingCheck = async (url: string, keyword: string) => {
-    const searchEngines = ['google', 'bing', 'yahoo'];
+    const searchEngines = ['google'];
     const results: { [key: string]: any } = {};
     const technicalIssues: string[] = [];
     
