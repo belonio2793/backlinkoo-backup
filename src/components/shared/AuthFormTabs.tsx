@@ -12,6 +12,7 @@ import { Eye, EyeOff, Shield, CheckCircle } from "lucide-react";
 
 interface AuthFormTabsProps {
   onAuthSuccess?: (user: any) => void;
+  onSignInStart?: () => void;
   showTrialUpgrade?: boolean;
   isCompact?: boolean;
   onForgotPassword?: () => void;
@@ -460,7 +461,7 @@ export function AuthFormTabs({
             <Input
               id="confirm-password"
               type="password"
-              placeholder="••••••••••"
+              placeholder="•���••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className={inputHeight}
