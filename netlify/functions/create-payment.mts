@@ -122,8 +122,8 @@ async function createPayPalPayment(
   email: string,
   originUrl: string
 ): Promise<{ url: string; orderId: string }> {
-  const paypalClientId = Netlify.env.get("PAYPAL_CLIENT_ID");
-  const paypalSecret = Netlify.env.get("PAYPAL_SECRET_KEY");
+  const paypalClientId = process.env.PAYPAL_CLIENT_ID;
+  const paypalSecret = process.env.PAYPAL_SECRET_KEY;
   
   if (!paypalClientId || !paypalSecret) {
     throw new Error("PayPal credentials not configured");
