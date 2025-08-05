@@ -21,6 +21,7 @@ import SubscriptionCancelled from '@/pages/SubscriptionCancelled';
 import BlogSystemDiagnostic from '@/pages/BlogSystemDiagnostic';
 import { BlogPostDiagnostic } from '@/components/BlogPostDiagnostic';
 import EmergencyRLSFix from '@/pages/EmergencyRLSFix';
+import AuthDiagnostic from '@/pages/AuthDiagnostic';
 
 // Import lightweight components
 import AdminAuthGuard from '@/components/AdminAuthGuard';
