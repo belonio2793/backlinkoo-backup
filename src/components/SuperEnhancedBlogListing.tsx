@@ -45,6 +45,9 @@ import {
   ExternalLink
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
+import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+import { ExcerptCleaner } from '@/utils/excerptCleaner';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -265,38 +268,11 @@ export function SuperEnhancedBlogListing() {
   };
 
   const cleanTitle = (title: string) => {
-    if (!title) return '';
-    // Remove all markdown artifacts from title including ** wrappers
-    return title
-      .replace(/^\s*\*\*Title:\s*([^*]*)\*\*\s*/i, '$1') // Remove **Title:** wrapper and extract content
-      .replace(/^\s*Title:\s*/gi, '') // Remove Title: prefix
-      .replace(/^\*\*H1\*\*:\s*/i, '')
-      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
-      .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
-      .replace(/\*\*/g, '') // Remove any remaining ** symbols
-      .replace(/\*/g, '') // Remove any remaining * symbols
-      .replace(/^#{1,6}\s+/, '') // Remove markdown headers
-      .trim();
+    return ExcerptCleaner.cleanTitle(title);
   };
 
   const getExcerpt = (content: string, maxLength: number = 150) => {
-    // Remove HTML tags and markdown artifacts
-    const plainText = content
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/^\s*\*\*Title:\s*[^*]*\*\*\s*/i, '') // Remove **Title:** patterns
-      .replace(/^\s*Title:\s*[^\n]*/gi, '') // Remove Title: patterns
-      .replace(/^\*\*H1\*\*:\s*/i, '') // Remove **H1**: prefix
-      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1 ') // Convert **Label**: to Label
-      .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **text** format
-      .replace(/\*\*/g, '') // Remove any remaining ** symbols
-      .replace(/\*/g, '') // Remove any remaining * symbols
-      .replace(/^#{1,6}\s+/, '') // Remove markdown headers
-      .replace(/\s+/g, ' ') // Normalize whitespace
-      .trim();
-
-    return plainText.length > maxLength
-      ? plainText.substring(0, maxLength) + '...'
-      : plainText;
+    return ExcerptCleaner.getCleanExcerpt(content, undefined, maxLength);
   };
 
   const getTimeRemaining = (expiresAt: string) => {
