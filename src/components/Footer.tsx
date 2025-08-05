@@ -3,11 +3,9 @@ import { useState } from "react";
 import { navigateToSection, NAVIGATION_CONFIGS } from "@/utils/navigationUtils";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginModal } from "@/components/LoginModal";
-import { useToast } from "@/hooks/use-toast";
 
 export const Footer = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<any>(null);
 
@@ -19,23 +17,11 @@ export const Footer = () => {
       // User is not authenticated, store pending navigation and show login modal
       setPendingNavigation(config);
       setShowLoginModal(true);
-
-      // Show informative toast
-      toast({
-        title: "Sign In Required",
-        description: "Please sign in to access this feature. We'll redirect you after authentication.",
-      });
     }
   };
 
   const handleAuthSuccess = (authenticatedUser: any) => {
     setShowLoginModal(false);
-
-    // Show success message
-    toast({
-      title: "Welcome!",
-      description: "Successfully signed in. Redirecting to your requested section...",
-    });
 
     // If there's a pending navigation, execute it after successful auth
     if (pendingNavigation) {
@@ -48,7 +34,7 @@ export const Footer = () => {
           window.location.href = pendingNavigation.route;
         }
         setPendingNavigation(null);
-      }, 1000); // Slightly longer delay to show success message
+      }, 300); // Quick redirect for seamless experience
     }
   };
   return (
@@ -64,28 +50,25 @@ export const Footer = () => {
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
                 title={!user ? "Sign in to access Campaign Management" : "Go to Campaign Management"}
               >
-                Campaign Management {!user && <span className="text-xs opacity-50">🔒</span>}
+                Campaign Management
               </button>
               <button
                 onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.BACKLINK_AUTOMATION)}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
-                title={!user ? "Sign in to access Automation Link Building" : "Go to Automation Link Building"}
               >
-                Backlink ∞ Automation Link Building (beta) {!user && <span className="text-xs opacity-50">🔒</span>}
+                Backlink ∞ Automation Link Building (beta)
               </button>
               <button
                 onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.KEYWORD_RESEARCH)}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
-                title={!user ? "Sign in to access Keyword Research" : "Go to Keyword Research"}
               >
-                Keyword Research {!user && <span className="text-xs opacity-50">🔒</span>}
+                Keyword Research
               </button>
               <button
                 onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.RANK_TRACKER)}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
-                title={!user ? "Sign in to access Rank Tracker" : "Go to Rank Tracker"}
               >
-                Rank Tracker {!user && <span className="text-xs opacity-50">🔒</span>}
+                Rank Tracker
               </button>
               <Link
                 to="/blog"
@@ -110,9 +93,8 @@ export const Footer = () => {
                   }
                 }}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
-                title={!user ? "Sign in to access Backlink Reports" : "Go to Backlink Reports"}
               >
-                Backlink Reports {!user && <span className="text-xs opacity-50">🔒</span>}
+                Backlink Reports
               </button>
             </div>
           </div>
@@ -156,9 +138,8 @@ export const Footer = () => {
                   }
                 }}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
-                title={!user ? "Sign in to access Admin Dashboard" : "Go to Admin Dashboard"}
               >
-                Admin Dashboard {!user && <span className="text-xs opacity-50">🔒</span>}
+                Admin Dashboard
               </button>
               <a
                 href="mailto:support@backlinkoo.com"
