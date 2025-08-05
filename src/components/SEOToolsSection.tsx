@@ -44,7 +44,7 @@ import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
 import SubscriptionService, { type SubscriptionStatus } from "@/services/subscriptionService";
 import FeatureAccessGuard from "@/components/FeatureAccessGuard";
 import { useOpenPremiumPopup } from "@/components/PremiumPopupProvider";
-import { EnhancedUnifiedPaymentModal } from "@/components/EnhancedUnifiedPaymentModal";
+import PremiumPlanPopup from "@/components/PremiumPlanPopup";
 
 interface SEOToolsSectionProps {
   user: User | null;
@@ -94,7 +94,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const [billingEmailNotifications, setBillingEmailNotifications] = useState(true);
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
-  const [isEnhancedPaymentOpen, setIsEnhancedPaymentOpen] = useState(false);
+  const [isPremiumPopupOpen, setIsPremiumPopupOpen] = useState(false);
   const { toast } = useToast();
   const { openPremiumPopup, isPremium } = useOpenPremiumPopup();
 
@@ -391,8 +391,8 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
                   console.log('User is already premium, showing notification');
                   return;
                 }
-                console.log('Opening enhanced payment modal for non-premium user');
-                setIsEnhancedPaymentOpen(true);
+                console.log('Opening premium plan popup for non-premium user');
+                setIsPremiumPopupOpen(true);
               }} size="lg" className="w-full" variant={isPremium ? "outline" : "default"}>
                 {isPremium ? (
                   <>
@@ -689,14 +689,13 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
         </DialogContent>
       </Dialog>
 
-      {/* Enhanced Unified Payment Modal */}
-      <EnhancedUnifiedPaymentModal
-        isOpen={isEnhancedPaymentOpen}
-        onClose={() => setIsEnhancedPaymentOpen(false)}
-        defaultTab="premium"
-        redirectAfterSuccess="/dashboard"
+      {/* Premium Plan Popup with User State Detection */}
+      <PremiumPlanPopup
+        isOpen={isPremiumPopupOpen}
+        onClose={() => setIsPremiumPopupOpen(false)}
+        defaultEmail={user?.email || ''}
         onSuccess={() => {
-          setIsEnhancedPaymentOpen(false);
+          setIsPremiumPopupOpen(false);
           checkSubscriptionStatus(); // Refresh subscription status
           toast({
             title: "Premium Activated!",
