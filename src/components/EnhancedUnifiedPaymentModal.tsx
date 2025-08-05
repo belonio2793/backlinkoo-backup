@@ -264,62 +264,36 @@ export function EnhancedUnifiedPaymentModal({
       const isGuest = checkoutType === 'guest';
       const email = isGuest ? guestEmail : user?.email;
 
+      let result;
+
       if (selection.type === 'premium') {
-        // Handle premium subscription via Netlify function
-        const response = await fetch('/api/create-subscription', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            plan: selection.plan.id,
-            isGuest,
-            guestEmail: isGuest ? guestEmail : undefined,
-            paymentMethod: 'stripe' // Subscriptions currently only support Stripe
-          })
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Subscription creation failed');
-        }
-
-        const data = await response.json();
-        if (data.url) {
-          window.location.href = data.url;
-          return;
-        }
+        // Handle premium subscription
+        result = await paymentIntegrationService.createSubscription(
+          selection.plan.id,
+          isGuest,
+          isGuest ? guestEmail : undefined
+        );
       } else {
-        // Handle credit purchase via Netlify function
-        const response = await fetch('/api/create-payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            amount: selection.price,
-            productName: `${selection.credits} Backlink Credits`,
-            credits: selection.credits,
-            isGuest,
-            guestEmail: isGuest ? guestEmail : undefined,
-            paymentMethod
-          })
-        });
+        // Handle credit purchase
+        result = await paymentIntegrationService.createPayment(
+          selection.price,
+          selection.credits,
+          paymentMethod,
+          isGuest,
+          isGuest ? guestEmail : undefined
+        );
+      }
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Payment creation failed');
-        }
-
-        const data = await response.json();
-        if (data.url) {
-          window.location.href = data.url;
-          return;
-        }
+      if (result.success && result.url) {
+        // Redirect to payment provider
+        window.location.href = result.url;
+        return;
+      } else if (!result.success) {
+        throw new Error(result.error || 'Payment processing failed');
       }
 
       setCurrentStep('success');
-      
+
     } catch (error: any) {
       console.error('Payment error:', error);
       toast({
