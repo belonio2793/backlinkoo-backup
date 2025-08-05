@@ -7,6 +7,7 @@ import { LoginModal } from './LoginModal';
 import { AuthService } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { navigateToSection, NAVIGATION_CONFIGS } from '@/utils/navigationUtils';
 
 interface HeaderProps {
   showHomeLink?: boolean;
