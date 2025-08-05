@@ -122,7 +122,8 @@ export function EnhancedPremiumCheckoutModal({
       const result = await SubscriptionService.createSubscription(
         user,
         checkoutMode === 'guest', // isGuest
-        checkoutMode === 'guest' ? guestEmail : undefined
+        checkoutMode === 'guest' ? guestEmail : undefined,
+        selectedPlan // Pass the selected plan (monthly or yearly)
       );
 
       if (result.success && result.url) {
