@@ -867,13 +867,20 @@ Users ready to make a purchase or take action.
               </div>
               <div className="flex items-center gap-2">
                 {!currentLesson.completed && (
-                  <Button 
-                    onClick={() => markLessonComplete(currentLesson.id)}
-                    className="flex items-center gap-2"
-                  >
-                    <CheckCircle className="h-4 w-4" />
-                    Mark Complete
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => markLessonComplete(currentLesson.id)}
+                        className="flex items-center gap-2"
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                        Mark Complete
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Mark this lesson as completed and track your progress</p>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
                 {currentLesson.completed && (
                   <Badge className="bg-green-100 text-green-800">
