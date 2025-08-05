@@ -16,8 +16,6 @@ interface RankingResult {
   domain: string;
   searchEngines: {
     google: { position: number | null; found: boolean; lastChecked: string; backlinks: number; errors?: string[] };
-    bing: { position: number | null; found: boolean; lastChecked: string; backlinks: number; errors?: string[] };
-    yahoo: { position: number | null; found: boolean; lastChecked: string; backlinks: number; errors?: string[] };
   };
   overallBest: number | null;
   averagePosition: number | null;
