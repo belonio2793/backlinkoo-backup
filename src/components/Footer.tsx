@@ -12,8 +12,7 @@ export const Footer = () => {
   const [pendingActionDescription, setPendingActionDescription] = useState<string>("");
 
   const handleSmartNavigation = (config: any, actionDescription?: string) => {
-    if (isLoading) return;
-
+    // Don't block navigation based on isLoading - let the smart nav handle auth state
     FooterNavigationService.handleNavigation({
       config,
       user,
@@ -56,33 +55,29 @@ export const Footer = () => {
             <div className="space-y-2">
               <button
                 onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.CAMPAIGNS, "Campaign Management")}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
                 title={!user ? "Sign in to access Campaign Management" : "Go to Campaign Management"}
-                disabled={isLoading}
               >
                 Campaign Management
               </button>
               <button
                 onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.BACKLINK_AUTOMATION, "Backlink Automation")}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
                 title={!user ? "Sign in to access Backlink Automation" : "Go to Backlink Automation"}
-                disabled={isLoading}
               >
                 Backlink ∞ Automation Link Building (beta)
               </button>
               <button
                 onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.KEYWORD_RESEARCH, "Keyword Research")}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
                 title={!user ? "Sign in to access Keyword Research" : "Go to Keyword Research"}
-                disabled={isLoading}
               >
                 Keyword Research
               </button>
               <button
                 onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.RANK_TRACKER, "Rank Tracker")}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
                 title={!user ? "Sign in to access Rank Tracker" : "Go to Rank Tracker"}
-                disabled={isLoading}
               >
                 Rank Tracker
               </button>
@@ -101,9 +96,8 @@ export const Footer = () => {
             <div className="space-y-2">
               <button
                 onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.BACKLINK_REPORTS, "Backlink Reports")}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
                 title={!user ? "Sign in to access Backlink Reports" : "Go to Backlink Reports"}
-                disabled={isLoading}
               >
                 Backlink Reports
               </button>
@@ -141,9 +135,8 @@ export const Footer = () => {
               </Link>
               <button
                 onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.ADMIN, "Admin Dashboard")}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
                 title={!user ? "Sign in to access Admin Dashboard" : "Go to Admin Dashboard"}
-                disabled={isLoading}
               >
                 Admin Dashboard
               </button>
