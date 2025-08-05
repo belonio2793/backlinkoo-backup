@@ -15,6 +15,10 @@ export class ContentFormatter {
       // Normalize line breaks
       .replace(/\r\n/g, '\n')
       .replace(/\r/g, '\n')
+      // Fix Pro Tip issue FIRST before any other processing
+      .replace(/##\s*P\s*[\n\r\s]*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s*<[^>]*>\s*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s*(?:<[^>]*>)?\s*ro\s*(?:<[^>]*>)?\s*Tip/gi, '## Pro Tip')
       // Remove excessive whitespace but preserve paragraph breaks
       .replace(/[ \t]+/g, ' ')
       .trim();
