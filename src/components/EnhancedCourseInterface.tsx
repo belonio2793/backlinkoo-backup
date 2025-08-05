@@ -642,13 +642,20 @@ Users ready to make a purchase or take action.
             <p>Total number of lessons across all modules</p>
           </TooltipContent>
         </Tooltip>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <Clock className="h-8 w-8 mx-auto mb-2 text-green-600" />
-            <div className="text-2xl font-bold">53</div>
-            <div className="text-sm text-muted-foreground">Hours Content</div>
-          </CardContent>
-        </Card>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <Clock className="h-8 w-8 mx-auto mb-2 text-green-600" />
+                <div className="text-2xl font-bold">53</div>
+                <div className="text-sm text-muted-foreground">Hours Content</div>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Total estimated time to complete all course content</p>
+          </TooltipContent>
+        </Tooltip>
         <Card>
           <CardContent className="p-4 text-center">
             <Award className="h-8 w-8 mx-auto mb-2 text-yellow-600" />
