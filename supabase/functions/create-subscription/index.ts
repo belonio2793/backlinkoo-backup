@@ -12,7 +12,6 @@ interface SubscriptionRequest {
   tier: string;
   isGuest?: boolean;
   guestEmail?: string;
-  test?: boolean;
 }
 
 // Rate limiting map
