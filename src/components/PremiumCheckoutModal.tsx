@@ -383,24 +383,6 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
                     )}
                   </Button>
 
-                  {/* PayPal Button */}
-                  <Button
-                    className="w-full h-12 text-lg bg-yellow-500 hover:bg-yellow-600 text-black"
-                    onClick={() => handleCheckout('paypal')}
-                    disabled={isProcessing || (!user && !formData.email)}
-                  >
-                    {isProcessing && paymentMethod === 'paypal' ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                        Processing...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-blue-600 rounded"></div>
-                        Pay with PayPal
-                      </div>
-                    )}
-                  </Button>
                 </div>
               </div>
 
