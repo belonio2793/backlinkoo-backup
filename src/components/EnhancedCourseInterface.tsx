@@ -606,7 +606,7 @@ Users ready to make a purchase or take action.
   const renderCourseOverview = () => (
     <div className="space-y-6">
       {/* Course Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-8 rounded-lg">
+      <div className="bg-transparent text-gray-900 p-8 rounded-lg border">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">SEO Academy</h1>
