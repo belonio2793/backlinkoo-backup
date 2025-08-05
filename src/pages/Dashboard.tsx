@@ -1094,8 +1094,18 @@ const Dashboard = () => {
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3 relative"
               >
                 <Crown className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Premium Plan</span>
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full"></div>
+                <span className="hidden sm:inline">
+                  {isPremiumSubscriber ? "Premium Dashboard" : "Premium Plan"}
+                </span>
+                <span className="sm:hidden">
+                  {isPremiumSubscriber ? "Premium" : "Upgrade"}
+                </span>
+                {!isPremiumSubscriber && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full"></div>
+                )}
+                {isPremiumSubscriber && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></div>
+                )}
               </Button>
 
             </nav>
