@@ -214,8 +214,8 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
     return ExcerptCleaner.cleanTitle(title);
   };
 
-  const getExcerpt = (content: string, title?: string, maxLength: number = 150) => {
-    return ExcerptCleaner.getCleanExcerpt(content, title, maxLength);
+  const getExcerpt = (content: string, maxLength: number = 150) => {
+    return ExcerptCleaner.getCleanExcerpt(content, undefined, maxLength);
   };
 
   const getTimeRemaining = (expiresAt: string) => {
@@ -316,7 +316,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
           </CardTitle>
           
           <p className="text-sm text-gray-600 line-clamp-2 mt-2">
-            {getExcerpt(post.content || '', post.title)}
+            {getExcerpt(post.content || '')}
           </p>
         </CardHeader>
 

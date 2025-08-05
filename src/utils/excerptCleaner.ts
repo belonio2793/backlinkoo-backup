@@ -18,13 +18,17 @@ export class ExcerptCleaner {
     // Remove the title from the beginning of content if it appears
     if (title) {
       const cleanTitle = this.cleanTitle(title);
-      // Create multiple patterns to match title variations
+      // Create multiple patterns to match title variations and partial matches
       const titlePatterns = [
         new RegExp(`^\\s*#\\s*${this.escapeRegex(cleanTitle)}\\s*`, 'i'),
         new RegExp(`^\\s*${this.escapeRegex(cleanTitle)}\\s*`, 'i'),
         new RegExp(`^\\s*\\*\\*H1\\*\\*:\\s*${this.escapeRegex(cleanTitle)}\\s*`, 'i'),
         new RegExp(`^\\s*\\*\\*Title\\*\\*:\\s*${this.escapeRegex(cleanTitle)}\\s*`, 'i'),
         new RegExp(`^\\s*Title:\\s*${this.escapeRegex(cleanTitle)}\\s*`, 'i'),
+        // Catch partial title matches (first 20+ characters)
+        new RegExp(`^\\s*${this.escapeRegex(cleanTitle.substring(0, Math.min(cleanTitle.length, 30)))}`, 'i'),
+        // Catch title fragments at sentence start
+        new RegExp(`^[^.!?]*?${this.escapeRegex(cleanTitle.split(' ').slice(0, 4).join(' '))}[^.!?]*?[.!?]\\s*`, 'i'),
       ];
 
       for (const pattern of titlePatterns) {
@@ -37,6 +41,9 @@ export class ExcerptCleaner {
 
     // Remove special characters and clean up
     cleanText = this.removeSpecialCharacters(cleanText);
+
+    // Additional cleaning for fragments and repetitive content
+    cleanText = this.removeContentFragments(cleanText, title);
 
     // Normalize whitespace
     cleanText = cleanText.replace(/\s+/g, ' ').trim();
@@ -87,8 +94,14 @@ export class ExcerptCleaner {
       // Remove **Title**: patterns
       .replace(/\*\*Title\*\*:\s*/gi, '')
       // Remove **Introduction**, **Conclusion** etc patterns
-      .replace(/\*\*([A-Za-z]+)\*\*:\s*/g, '$1: ')
-      .replace(/\*\*([A-Za-z]+)\*\*\s/g, '$1 ')
+      .replace(/\*\*([A-Za-z]+)\*\*:\s*/g, '')
+      .replace(/\*\*([A-Za-z]+)\*\*\s/g, '')
+      // Remove common section headers at start of content
+      .replace(/^Introduction\s*:?\s*/gi, '')
+      .replace(/^Overview\s*:?\s*/gi, '')
+      .replace(/^Summary\s*:?\s*/gi, '')
+      .replace(/^Abstract\s*:?\s*/gi, '')
+      .replace(/^Preface\s*:?\s*/gi, '')
       // Remove remaining **text** bold formatting
       .replace(/\*\*([^*]+?)\*\*/g, '$1')
       // Remove *text* italic formatting
@@ -133,6 +146,33 @@ export class ExcerptCleaner {
       .replace(/([,.!?;:])\s+/g, '$1 ')
       // Remove multiple consecutive spaces
       .replace(/\s{2,}/g, ' ');
+  }
+
+  /**
+   * Remove content fragments and repetitive patterns
+   */
+  private static removeContentFragments(text: string, title?: string): string {
+    if (!text) return text;
+
+    let cleanText = text;
+
+    // Remove sentences that are just repetitions of title words
+    if (title) {
+      const titleWords = title.toLowerCase().split(/\s+/).filter(word => word.length > 3);
+      titleWords.forEach(word => {
+        // Remove sentences that start with title words followed by content
+        const pattern = new RegExp(`^[^.!?]*?\\b${this.escapeRegex(word)}\\b[^.!?]*?[.!?]\\s*`, 'gi');
+        cleanText = cleanText.replace(pattern, '');
+      });
+    }
+
+    // Remove content that starts with common article patterns
+    cleanText = cleanText
+      .replace(/^(In this article|In this guide|This article|This guide|In this post)[^.!?]*?[.!?]\s*/gi, '')
+      .replace(/^(Are you|Do you|Have you)[^.!?]*?[.!?]\s*/gi, '')
+      .replace(/^(Welcome to|Introduction to)[^.!?]*?[.!?]\s*/gi, '');
+
+    return cleanText;
   }
 
   /**

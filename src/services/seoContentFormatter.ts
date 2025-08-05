@@ -345,8 +345,14 @@ export class SEOContentFormatter {
    */
   private static generateMetaDescription(content: string, title: string): string {
     const text = content.replace(/<[^>]*>/g, '');
-    const sentences = text.split(/[.!?]+/);
-    
+
+    // Remove title from beginning of content first
+    const cleanTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const titlePattern = new RegExp(`^\\s*${cleanTitle}\\s*`, 'i');
+    const cleanedText = text.replace(titlePattern, '').trim();
+
+    const sentences = cleanedText.split(/[.!?]+/);
+
     let description = '';
     for (const sentence of sentences) {
       const trimmed = sentence.trim();
@@ -357,7 +363,12 @@ export class SEOContentFormatter {
       }
     }
 
-    return description || title.substring(0, 150);
+    // Generate unique description if empty, don't use title
+    if (!description) {
+      return `Comprehensive guide with expert insights and practical tips for better results.`;
+    }
+
+    return description;
   }
 
   /**

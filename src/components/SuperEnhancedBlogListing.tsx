@@ -48,6 +48,7 @@ import type { Tables } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ExcerptCleaner } from '@/utils/excerptCleaner';
+import { EnhancedBlogPreview } from '@/components/EnhancedBlogPreview';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -62,6 +63,8 @@ export function SuperEnhancedBlogListing() {
   const [filterType, setFilterType] = useState<'all' | 'claimable' | 'claimed' | 'my-posts'>('all');
   const [claiming, setClaiming] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [previewPost, setPreviewPost] = useState<BlogPost | null>(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   // Helper function to randomize keywords on each render
   const getRandomizedKeywords = () => {
@@ -295,6 +298,16 @@ export function SuperEnhancedBlogListing() {
     if (!post.expires_at || post.claimed) return false;
     const hoursLeft = (new Date(post.expires_at).getTime() - Date.now()) / (1000 * 60 * 60);
     return hoursLeft < 2;
+  };
+
+  const handlePreviewPost = (post: BlogPost) => {
+    setPreviewPost(post);
+    setShowPreviewModal(true);
+  };
+
+  const handleClosePreview = () => {
+    setPreviewPost(null);
+    setShowPreviewModal(false);
   };
 
   return (
@@ -601,6 +614,7 @@ export function SuperEnhancedBlogListing() {
                       isExpiringSoon={isExpiringSoon}
                       onClaim={() => handleClaimPost(post)}
                       onDelete={() => handleDeletePost(post)}
+                      onPreview={() => handlePreviewPost(post)}
                       claiming={claiming === post.id}
                       deleting={deleting === post.id}
                       index={index}
@@ -614,6 +628,30 @@ export function SuperEnhancedBlogListing() {
 
         </div>
       </div>
+
+      {/* Enhanced Blog Preview Modal */}
+      {previewPost && (
+        <EnhancedBlogPreview
+          isOpen={showPreviewModal}
+          onClose={handleClosePreview}
+          content={{
+            title: previewPost.title,
+            content: previewPost.content || '',
+            metaDescription: previewPost.meta_description || '',
+            contextualLinks: previewPost.contextual_links || [],
+            seoScore: previewPost.seo_score,
+            wordCount: Math.ceil((previewPost.content || '').length / 5)
+          }}
+          keyword={previewPost.keywords?.[0] || ''}
+          targetUrl={previewPost.target_url || ''}
+          onSave={() => {
+            toast({
+              title: "Content Saved",
+              description: "Blog post content has been saved to your clipboard"
+            });
+          }}
+        />
+      )}
 
       {/* Footer */}
       <Footer />
@@ -633,6 +671,7 @@ interface SuperPostCardProps {
   isExpiringSoon: (post: BlogPost) => boolean;
   onClaim: () => void;
   onDelete: () => void;
+  onPreview: () => void;
   claiming: boolean;
   deleting: boolean;
   index: number;
@@ -649,6 +688,7 @@ function SuperPostCard({
   isExpiringSoon,
   onClaim,
   onDelete,
+  onPreview,
   claiming,
   deleting,
   index
@@ -720,6 +760,18 @@ function SuperPostCard({
           </div>
           
           <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white/50 hover:bg-blue-50"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPreview();
+              }}
+              title="Preview content"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
             <Button
               variant="ghost"
               size="sm"

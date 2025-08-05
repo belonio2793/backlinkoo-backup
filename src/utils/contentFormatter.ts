@@ -10,6 +10,15 @@ export class ContentFormatter {
   static formatBlogContent(content: string, title?: string): string {
     if (!content) return '';
 
+    // VERY EARLY preprocessing to fix critical issues before any HTML processing
+    content = content
+      // Fix Pro Tip issue immediately - most aggressive patterns
+      .replace(/##\s*P\s*[\n\r\s]*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s*<[^>]*>\s*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s*(?:<[^>]*>)?\s*ro\s*(?:<[^>]*>)?\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s*\n?\s*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s+ro\s*Tip/gi, '## Pro Tip');
+
     // Split content into lines and clean up
     let formattedContent = content
       // Normalize line breaks
@@ -23,6 +32,7 @@ export class ContentFormatter {
     formattedContent = this.cleanupMarkdownArtifacts(formattedContent);
     formattedContent = this.convertMarkdownToHtml(formattedContent);
     formattedContent = this.removeDuplicateTitle(formattedContent, title);
+    formattedContent = this.fixContentIssues(formattedContent);
     formattedContent = this.processHeadings(formattedContent);
     formattedContent = this.processParagraphs(formattedContent);
     formattedContent = this.processLists(formattedContent);
@@ -150,6 +160,14 @@ export class ContentFormatter {
    */
   private static convertMarkdownToHtml(content: string): string {
     return content
+      // Fix "## P" + "ro Tip" pattern early (before any other processing)
+      .replace(/##\s*P\s*[\n\r\s]*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s*<[^>]*>\s*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s*(?:<[^>]*>)?\s*ro\s*(?:<[^>]*>)?\s*Tip/gi, '## Pro Tip')
+      // Fix already separated HTML structure: "## P <p>ro Tip"
+      .replace(/##\s*P\s*<p[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2>')
+      .replace(/##\s*P\s*<p[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2><p>')
+
       // Remove markdown frontmatter separators (triple hyphens)
       .replace(/^---[\s\S]*?---/gm, '')
       .replace(/^---.*$/gm, '')
@@ -157,12 +175,28 @@ export class ContentFormatter {
       .replace(/\n---$/gm, '')
       // Remove any "Title:" patterns at the very beginning of content (most aggressive)
       .replace(/^[\s\n]*Title:\s*[^\n]*\n?/i, '')
-      // Convert markdown links [text](url) to <a> tags
-      .replace(/\[([^\]]+?)\]\(([^)]+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+      // Convert markdown links [text](url) to <a> tags with proper styling
+      .replace(/\[([^\]]+?)\]\(([^)]+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$1</a>')
+
+      // Convert plain URLs to clickable links
+      .replace(/(^|[^<"'])(https?:\/\/[^\s<>"']+)/gi, '$1<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$2</a>')
+
+      // Handle specific case: "Play now at Runescape.com" pattern
+      .replace(/(Play now at\s+)([a-zA-Z0-9.-]+\.com)/gi, '$1<a href="https://$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$2</a>')
       // Convert **H1**: patterns to <h1> tags
       .replace(/\*\*H1\*\*:\s*(.+?)(?=\n|$)/gi, '<h1>$1</h1>')
       // Convert **Title**: patterns to nothing (remove completely since it's duplicate)
       .replace(/^\*\*Title\*\*:\s*(.+?)(?=\n|$)/gmi, '')
+      // Fix specific case: "## P" should be "## Pro Tip" (comprehensive patterns)
+      .replace(/^##\s*P\s*$/gmi, '## Pro Tip')
+      .replace(/^##\s*P\s*ro\s*Tip.*$/gmi, '## Pro Tip')
+      .replace(/##\s*P\s*\n?\s*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s*<[^>]*>\s*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P[\s\n\r]*ro\s*Tip/gi, '## Pro Tip')
+      // Handle cases where HTML tags are already present
+      .replace(/<[^>]*>##\s*P\s*<\/[^>]*>\s*<[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2>')
+      .replace(/##\s*P\s*<\/[^>]*>\s*ro\s*Tip/gi, '## Pro Tip')
+
       // Fix malformed headings like "## P. Assessment" - only create proper headings from meaningful text
       .replace(/^##?\s+([A-Z])\.\s*([A-Za-z\s]{0,15})\s*$/gmi, (match, letter, rest) => {
         // If it's a single letter followed by a short word, it's likely malformed - convert to paragraph
@@ -387,5 +421,40 @@ export class ContentFormatter {
       .replace(/[ \t]+/g, ' ')
       .replace(/\n\s*\n\s*\n/g, '\n\n')
       .trim();
+  }
+
+  /**
+   * Fix content issues including Pro Tip headings and link styling
+   */
+  private static fixContentIssues(content: string): string {
+    return content
+      // Fix Pro Tip heading issues first
+      .replace(/##\s*P\s*<p[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2><p>')
+      .replace(/##\s*P\s*<p[^>]*data-[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2><p>')
+      .replace(/##\s*P\s*(?:<[^>]*>)?\s*ro\s*(?:<[^>]*>)?\s*Tip/gi, '<h2>Pro Tip</h2>')
+      // Fix literal "## P" text that's not being processed as markdown
+      .replace(/^##\s*P\s+/gm, '<h2>Pro Tip</h2>\n')
+      .replace(/##\s*P\s+/g, '<h2>Pro Tip</h2> ')
+
+      // Fix corrupted color styles (e.g., "color:&lt;/p&gt; # 2 &lt;p&gt; 563eb;")
+      .replace(/style="[^"]*color:[^#]*#[^0-9a-f]*([0-9a-f]{6})[^"]*"/gi, 'style="color:#$1;font-weight:500;"')
+
+      // Remove unwanted text-decoration and hover events from existing links
+      .replace(/(<a[^>]*) onmouseover="[^"]*"/gi, '$1')
+      .replace(/(<a[^>]*) onmouseout="[^"]*"/gi, '$1')
+      .replace(/(<a[^>]*style="[^"]*);?\s*text-decoration:[^;"]*;?([^"]*"[^>]*>)/gi, '$1$2')
+
+      // Fix links missing color entirely
+      .replace(/<a([^>]*href[^>]*)style="([^"]*)"([^>]*)>/gi, (match, beforeStyle, styleContent, afterStyle) => {
+        // If style doesn't contain color, add it
+        if (!styleContent.includes('color:')) {
+          const newStyle = `color:#2563eb;font-weight:500;${styleContent}`;
+          return `<a${beforeStyle}style="${newStyle}"${afterStyle}>`;
+        }
+        return match;
+      })
+
+      // Ensure all links without any style have proper styling
+      .replace(/<a([^>]*href[^>]*)(?!.*style=)([^>]*)>/gi, '<a$1 style="color:#2563eb;font-weight:500;"$2>');
   }
 }

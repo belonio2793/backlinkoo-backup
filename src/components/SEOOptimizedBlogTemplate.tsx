@@ -435,7 +435,7 @@ export function SEOOptimizedBlogTemplate({
             "@context": "https://schema.org",
             "@type": "BlogPosting",
             "headline": title,
-            "description": metaDescription || title.substring(0, 160),
+            "description": metaDescription || `Comprehensive guide on ${title.toLowerCase()} with expert insights and practical tips.`,
             "author": {
               "@type": "Person",
               "name": author

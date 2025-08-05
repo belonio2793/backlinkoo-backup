@@ -21,6 +21,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ContentFormatter } from '@/utils/contentFormatter';
 
 interface EnhancedBlogPreviewProps {
   isOpen: boolean;
@@ -80,7 +81,7 @@ export function EnhancedBlogPreview({
         <DialogHeader className="border-b pb-4">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <DialogTitle className="text-xl">Content Preview</DialogTitle>
+              <DialogTitle className="text-xl line-clamp-1">{content.title}</DialogTitle>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 {content.template && (
                   <div className="flex items-center gap-1">
@@ -197,7 +198,6 @@ export function EnhancedBlogPreview({
                 {/* Blog Post Preview */}
                 <article className="prose prose-lg max-w-none">
                   <header className="not-prose mb-8">
-                    <h1 className="text-3xl font-bold mb-4">{content.title}</h1>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
@@ -221,9 +221,19 @@ export function EnhancedBlogPreview({
                     </p>
                   </header>
                   
-                  <div 
-                    dangerouslySetInnerHTML={{ __html: content.content }}
-                    className="prose-headings:text-foreground prose-p:text-foreground prose-a:text-blue-600 prose-strong:text-foreground prose-em:text-foreground prose-li:text-foreground"
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: ContentFormatter.formatBlogContent(content.content || '', content.title)
+                    }}
+                    className="prose prose-lg max-w-none
+                      prose-headings:text-foreground prose-headings:font-bold
+                      prose-p:text-foreground prose-p:leading-relaxed
+                      prose-a:text-blue-600 prose-a:font-medium prose-a:no-underline hover:prose-a:underline
+                      prose-strong:text-foreground prose-strong:font-bold
+                      prose-em:text-foreground
+                      prose-li:text-foreground
+                      prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
+                      [&_a]:text-blue-600 [&_a]:opacity-100 [&_a]:font-medium [&_a]:no-underline hover:[&_a]:underline"
                   />
                 </article>
 
