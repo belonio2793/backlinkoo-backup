@@ -547,9 +547,11 @@ export function SuperEnhancedBlogListing() {
                     </span>
                   </div>
 
-                  {/* Active indicator dot */}
+                  {/* Active indicator dot with gradient */}
                   {filterType === key && (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full shadow-lg animate-pulse"></div>
+                    <div className={`absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br ${activeIndicator} rounded-full shadow-lg animate-pulse border-2 border-white/30`}>
+                      <div className="absolute inset-0.5 bg-gradient-to-br from-white/40 to-white/10 rounded-full"></div>
+                    </div>
                   )}
 
                   {/* Ripple effect on click */}
