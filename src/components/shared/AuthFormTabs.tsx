@@ -12,6 +12,7 @@ import { Eye, EyeOff, Shield, CheckCircle } from "lucide-react";
 
 interface AuthFormTabsProps {
   onAuthSuccess?: (user: any) => void;
+  onSignInStart?: () => void;
   showTrialUpgrade?: boolean;
   isCompact?: boolean;
   onForgotPassword?: () => void;
@@ -21,6 +22,7 @@ interface AuthFormTabsProps {
 
 export function AuthFormTabs({
   onAuthSuccess,
+  onSignInStart,
   showTrialUpgrade = false,
   isCompact = false,
   onForgotPassword,
@@ -68,6 +70,9 @@ export function AuthFormTabs({
       });
       return;
     }
+
+    // Close modal immediately when sign in is clicked
+    onSignInStart?.();
 
     setIsLoading(true);
     const currentEmail = loginEmail;
@@ -460,7 +465,7 @@ export function AuthFormTabs({
             <Input
               id="confirm-password"
               type="password"
-              placeholder="••••••••••"
+              placeholder="•���••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className={inputHeight}

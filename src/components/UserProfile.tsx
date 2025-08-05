@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AuthService } from '@/services/authService';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
   User, 
@@ -39,18 +40,18 @@ export const UserProfile = () => {
 
   const handleSignOut = async () => {
     try {
-      await AuthService.signOut();
-      toast({
-        title: "Signed out",
-        description: "You have been successfully signed out.",
-      });
+      // Do actual sign out first
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      if (error) {
+        console.error('Sign out error:', error);
+      }
+
+      // Navigate after sign out
       window.location.href = '/';
     } catch (error) {
-      toast({
-        title: "Sign out failed",
-        description: "An error occurred while signing out.",
-        variant: "destructive",
-      });
+      console.error('Sign out error:', error);
+      // Still navigate even if sign out fails
+      window.location.href = '/';
     }
   };
 

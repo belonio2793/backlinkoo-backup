@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Infinity, Trash2 } from 'lucide-react';
 import { LoginModal } from './LoginModal';
 import { AuthService } from '@/services/authService';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export function Header() {
@@ -16,7 +17,10 @@ export function Header() {
 
   const handleSignOut = async () => {
     try {
-      await AuthService.signOut();
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      if (error) {
+        console.error('Sign out error:', error);
+      }
       navigate('/');
     } catch (error) {
       console.error('Sign out error:', error);

@@ -113,35 +113,24 @@ const Index = () => {
       // Clear user state immediately for better UX
       setUser(null);
 
-      const result = await AuthService.signOut();
+      // Do actual sign out using direct Supabase call for reliability
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
 
-      console.log('🚪 Home page: Sign out result:', result);
+      if (error) {
+        console.error('🚪 Sign out error:', error);
+      } else {
+        console.log('🚪 Sign out successful');
+      }
 
-      toast({
-        title: "Signed out successfully",
-        description: "You have been signed out of your account.",
-      });
-
-      // Force page refresh to ensure clean state
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      // Force page refresh after sign out completes
+      window.location.reload();
 
     } catch (error) {
       console.error('Home page sign out error:', error);
 
-      // Still clear user state
+      // Still clear user state and refresh even if sign out fails
       setUser(null);
-
-      toast({
-        title: "Signed out",
-        description: "You have been signed out.",
-      });
-
-      // Force page refresh even on error
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      window.location.reload();
     }
   };
 
@@ -1020,7 +1009,7 @@ const Index = () => {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <div className="text-sm text-gray-500 font-light text-center">
-              Money-back guarantee • No setup fees • Cancel anytime
+              Money-back guarantee �� No setup fees • Cancel anytime
             </div>
           </div>
         </div>
@@ -1053,13 +1042,16 @@ const Index = () => {
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
         onAuthSuccess={(user) => {
-          setUser(user);
+          console.log('🎉 Index: Auth success, user:', user?.email);
+
+          // Close modal immediately
           setShowLoginModal(false);
-          toast({
-            title: "Welcome!",
-            description: "You have been successfully signed in.",
-          });
-          // Navigate to dashboard after successful auth
+
+          // Update user state
+          setUser(user);
+
+          // Navigate to dashboard instantly
+          console.log('🚀 Index: Navigating to dashboard instantly');
           navigate('/dashboard');
         }}
         defaultTab={loginModalTab}

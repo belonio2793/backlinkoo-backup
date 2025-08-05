@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { usePremium } from '@/hooks/usePremium';
@@ -15,11 +16,12 @@ import { profileService, UserProfileData, UserSettings as ProfileUserSettings } 
 import { ProfileErrorDebugger } from '@/utils/profileErrorDebugger';
 import { ProfileErrorHandler } from '@/utils/profileErrorHandler';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  User, 
-  Mail, 
-  Calendar, 
-  Shield, 
+import { PremiumCheckoutModal } from '@/components/PremiumCheckoutModal';
+import {
+  User,
+  Mail,
+  Calendar,
+  Shield,
   Crown,
   Settings,
   CheckCircle,
@@ -46,6 +48,13 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
+  const [showPremiumCheckout, setShowPremiumCheckout] = useState(false);
+  const [showUpdateEmail, setShowUpdateEmail] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   // Profile form data
   const [profileData, setProfileData] = useState({
@@ -67,11 +76,19 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
 
   // Debug logging
   console.log('ProfileSettings render:', {
-    user: user ? { email: user.email, id: user.id } : null,
+    user: user ? {
+      email: user.email,
+      id: user.id,
+      email_confirmed_at: user.email_confirmed_at,
+      user_metadata: user.user_metadata
+    } : null,
+    userEmail: user?.email,
+    profileDataEmail: profileData.email,
     authLoading,
     loading,
     hasUserProfile: !!userProfile,
-    profileData: profileData
+    profileData: profileData,
+    emailDisplay: user?.email || profileData.email || 'No email available'
   });
 
   // If we have user data from context but no profile data yet, initialize immediately
@@ -156,7 +173,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
             console.log('✅ Profile loaded from database:', profile);
             setProfileData({
               displayName: profile.display_name || initialData.displayName,
-              email: authUser.email || '', // Always use auth email
+              email: authUser.email || profileData.email || '', // Always prioritize auth email
               bio: profile.bio || initialData.bio,
               website: profile.website || initialData.website,
               company: profile.company || initialData.company,
@@ -329,6 +346,98 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     return { name: 'Free', color: 'bg-gray-500', icon: <User className="h-3 w-3" /> };
   };
 
+  // Initialize new email with current email when modal opens
+  useEffect(() => {
+    if (showUpdateEmail && user?.email) {
+      setNewEmail(user.email);
+    }
+  }, [showUpdateEmail, user?.email]);
+
+  const handleUpdateEmail = async () => {
+    if (!newEmail || newEmail === user?.email) {
+      toast({
+        title: "No Change",
+        description: "Please enter a different email address.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        email: newEmail
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email Update Requested",
+        description: "Please check both your old and new email for confirmation links.",
+      });
+
+      setShowUpdateEmail(false);
+      setNewEmail('');
+    } catch (error: any) {
+      console.error('Email update error:', error);
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update email. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!newPassword || newPassword !== confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "New passwords do not match.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Password Updated",
+        description: "Your password has been successfully changed.",
+      });
+
+      setShowChangePassword(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error: any) {
+      console.error('Password update error:', error);
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update password. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
 
   // If user is missing but we're not loading, show the interface anyway
@@ -357,7 +466,11 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
               <h2 className="text-2xl font-bold">{displayName}</h2>
               <p className="text-muted-foreground flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                {profileData.email || 'No email available'}
+                {(() => {
+                  const email = user?.email || profileData.email;
+                  console.log('Email display check:', { userEmail: user?.email, profileEmail: profileData.email, finalEmail: email });
+                  return email || 'No email available';
+                })()}
               </p>
               <div className="flex items-center gap-2 mt-2">
                 <div className={`w-4 h-4 rounded-full ${providerInfo.color} flex items-center justify-center text-xs`}>
@@ -528,11 +641,19 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
               <div className="space-y-4">
                 <h4 className="font-medium">Security Actions</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <Button variant="outline" className="justify-start">
+                  <Button
+                    variant="outline"
+                    className="justify-start"
+                    onClick={() => setShowChangePassword(true)}
+                  >
                     <Key className="h-4 w-4 mr-2" />
                     Change Password
                   </Button>
-                  <Button variant="outline" className="justify-start">
+                  <Button
+                    variant="outline"
+                    className="justify-start"
+                    onClick={() => setShowUpdateEmail(true)}
+                  >
                     <Mail className="h-4 w-4 mr-2" />
                     Update Email
                   </Button>
@@ -630,7 +751,10 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                       <p className="text-sm text-purple-700 mb-3">
                         Unlock unlimited blog posts, advanced SEO tools, and priority support.
                       </p>
-                      <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
+                      <Button
+                        className="bg-gradient-to-r from-purple-600 to-blue-600"
+                        onClick={() => setShowPremiumCheckout(true)}
+                      >
                         <Crown className="h-4 w-4 mr-2" />
                         Upgrade Now
                       </Button>
@@ -727,6 +851,126 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <PremiumCheckoutModal
+        isOpen={showPremiumCheckout}
+        onClose={() => setShowPremiumCheckout(false)}
+        onSuccess={() => {
+          setShowPremiumCheckout(false);
+          refreshPremium(); // Refresh premium status
+          toast({
+            title: "Welcome to Premium!",
+            description: "Your account has been upgraded successfully!",
+          });
+        }}
+      />
+
+      {/* Update Email Modal */}
+      <Dialog open={showUpdateEmail} onOpenChange={setShowUpdateEmail}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Update Email Address</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="current-email">Current Email</Label>
+              <Input
+                id="current-email"
+                value={user?.email || 'No email available'}
+                disabled
+                className="bg-gray-50"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-email">New Email Address</Label>
+              <Input
+                id="new-email"
+                type="email"
+                placeholder="Enter new email address"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowUpdateEmail(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdateEmail}
+                disabled={loading || !newEmail || newEmail === user?.email}
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Updating...
+                  </div>
+                ) : (
+                  'Update Email'
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Password Modal */}
+      <Dialog open={showChangePassword} onOpenChange={setShowChangePassword}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <Input
+                id="new-password"
+                type="password"
+                placeholder="Enter new password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm New Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                placeholder="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowChangePassword(false);
+                  setNewPassword('');
+                  setConfirmPassword('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleChangePassword}
+                disabled={loading || !newPassword || !confirmPassword}
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Updating...
+                  </div>
+                ) : (
+                  'Change Password'
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

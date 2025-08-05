@@ -295,8 +295,8 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
         onClose={() => setShowLoginModal(false)}
         onAuthSuccess={(user) => {
           setShowLoginModal(false);
-          // Refresh the page to update auth state
-          window.location.reload();
+          // Navigate to dashboard after successful auth
+          window.location.href = '/dashboard';
         }}
         defaultTab="login"
       />
