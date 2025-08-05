@@ -113,18 +113,17 @@ const Index = () => {
       // Clear user state immediately for better UX
       setUser(null);
 
-      // Force page refresh immediately for instant feedback
-      window.location.reload();
+      // Do actual sign out first
+      const result = await AuthService.signOut();
+      console.log('🚪 Sign out result:', result);
 
-      // Do actual sign out in background (won't affect UX since page is refreshing)
-      AuthService.signOut().catch(error => {
-        console.error('Background sign out error:', error);
-      });
+      // Force page refresh after sign out completes
+      window.location.reload();
 
     } catch (error) {
       console.error('Home page sign out error:', error);
 
-      // Still clear user state and refresh
+      // Still clear user state and refresh even if sign out fails
       setUser(null);
       window.location.reload();
     }
