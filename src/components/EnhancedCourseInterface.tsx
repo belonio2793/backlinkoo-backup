@@ -822,15 +822,6 @@ Users ready to make a purchase or take action.
         {/* Lesson Content */}
         <div className="max-w-4xl mx-auto px-6 py-8">
           <div className="bg-white rounded-lg shadow-sm p-8">
-            {/* Video placeholder */}
-            <div className="aspect-video bg-gray-900 rounded-lg mb-8 flex items-center justify-center">
-              <div className="text-center text-white">
-                <Video className="h-16 w-16 mx-auto mb-4 opacity-60" />
-                <p className="text-lg">Video Content</p>
-                <p className="text-sm opacity-60">Duration: {currentLesson.duration}</p>
-              </div>
-            </div>
-
             {/* Lesson Content */}
             <div className="prose max-w-none">
               <div
