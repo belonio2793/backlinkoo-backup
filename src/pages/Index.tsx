@@ -20,8 +20,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PricingModal } from "@/components/PricingModal";
-import { EnhancedUnifiedPaymentModal } from "@/components/EnhancedUnifiedPaymentModal";
-import { BuyCreditsButton, UpgradeToPremiumButton } from "@/components/UniversalPaymentTrigger";
+
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
 import { HomepageBlogGenerator } from "@/components/HomepageBlogGenerator";
 import { ProductionBlogGenerator } from "@/components/ProductionBlogGenerator";
@@ -56,8 +55,7 @@ const Index = () => {
   const [isCustomPackage, setIsCustomPackage] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginModalTab, setLoginModalTab] = useState<"login" | "signup">("login");
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentType, setPaymentType] = useState<'credits' | 'premium'>('credits');
+
   const [useProductionGenerator, setUseProductionGenerator] = useState(false);
   const [showTrialUpgrade, setShowTrialUpgrade] = useState(false);
   const [showInlineAuth, setShowInlineAuth] = useState(false);
@@ -1018,143 +1016,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      {/* Payment Integration Test Section */}
-      <section className="py-12 bg-gradient-to-r from-blue-50 to-purple-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center space-y-6">
-            <div className="max-w-2xl mx-auto">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                🧪 Payment Integration Test
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Test the complete Stripe & PayPal integration. Click any button below to test the payment flow.
-              </p>
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                <Shield className="h-3 w-3 mr-1" />
-                Test Mode - No Real Charges
-              </Badge>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-              {/* Credits Test */}
-              <Card className="p-6">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="h-5 w-5 text-blue-600" />
-                    Test Credit Purchase
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-sm text-gray-600">
-                    Test buying backlink credits with Stripe or PayPal
-                  </div>
-                  <div className="space-y-2">
-                    <Button
-                      onClick={() => {
-                        setPaymentType('credits');
-                        setShowPaymentModal(true);
-                      }}
-                      className="w-full bg-blue-600 hover:bg-blue-700"
-                    >
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      Test Credits Payment
-                    </Button>
-                    <BuyCreditsButton className="w-full" variant="outline">
-                      Universal Credits Button
-                    </BuyCreditsButton>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Premium Test */}
-              <Card className="p-6 border-purple-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-purple-600" />
-                    Test Premium Upgrade
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-sm text-gray-600">
-                    Test premium subscription with Stripe
-                  </div>
-                  <div className="space-y-2">
-                    <Button
-                      onClick={() => {
-                        setPaymentType('premium');
-                        setShowPaymentModal(true);
-                      }}
-                      className="w-full bg-purple-600 hover:bg-purple-700"
-                    >
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Test Premium Payment
-                    </Button>
-                    <UpgradeToPremiumButton className="w-full" variant="outline">
-                      Universal Premium Button
-                    </UpgradeToPremiumButton>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="max-w-2xl mx-auto space-y-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-purple-600" />
-                    Webhook Testing
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Test webhook functionality and payment processing backend
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => navigate('/test-webhooks')}
-                    >
-                      <Search className="h-4 w-4 mr-2" />
-                      Test Webhooks
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => navigate('/payment-diagnostic')}
-                    >
-                      <Shield className="h-4 w-4 mr-2" />
-                      Payment Diagnostic
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => navigate('/edge-function-diagnostic')}
-                    >
-                      <Shield className="h-4 w-4 mr-2" />
-                      Edge Functions
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <div className="text-sm text-yellow-800">
-                  <strong>Test Instructions:</strong> Use Stripe test card <code className="bg-yellow-100 px-1 rounded">4242 4242 4242 4242</code> with any future expiry and any 3-digit CVC. All payments are in test mode.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Payment Modal */}
-      <EnhancedUnifiedPaymentModal
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        initialTab={paymentType}
-      />
 
       {/* Pricing Modal */}
       <PricingModal

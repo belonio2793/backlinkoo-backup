@@ -238,6 +238,33 @@ export function OrganizedAdminDashboard() {
             <EnhancedSecurityDashboard />
           </div>
         )}
+
+        {activeSection === "payment-testing" && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Payment Integration Testing
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-muted-foreground">
+                    Test payment integration functionality including Stripe and PayPal payment flows.
+                  </p>
+                  <Button
+                    onClick={() => window.open('/admin/payment-test', '_blank')}
+                    className="w-full sm:w-auto"
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Open Payment Test Page
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );

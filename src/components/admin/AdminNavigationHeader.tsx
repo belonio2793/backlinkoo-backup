@@ -24,7 +24,8 @@ import {
   Home,
   MonitorSpeaker,
   Crown,
-  Trash2
+  Trash2,
+  CreditCard
 } from "lucide-react";
 import { AuthService } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
@@ -75,6 +76,12 @@ export function AdminNavigationHeader({
       name: "System",
       icon: Server,
       description: "APIs, deployment & infrastructure"
+    },
+    {
+      id: "payment-testing",
+      name: "Payment Test",
+      icon: CreditCard,
+      description: "Payment integration testing & verification"
     },
     {
       id: "communications",
