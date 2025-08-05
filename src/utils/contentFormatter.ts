@@ -27,6 +27,7 @@ export class ContentFormatter {
     formattedContent = this.cleanupMarkdownArtifacts(formattedContent);
     formattedContent = this.convertMarkdownToHtml(formattedContent);
     formattedContent = this.removeDuplicateTitle(formattedContent, title);
+    formattedContent = this.fixLinkStyling(formattedContent);
     formattedContent = this.processHeadings(formattedContent);
     formattedContent = this.processParagraphs(formattedContent);
     formattedContent = this.processLists(formattedContent);
