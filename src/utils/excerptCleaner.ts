@@ -42,6 +42,9 @@ export class ExcerptCleaner {
     // Remove special characters and clean up
     cleanText = this.removeSpecialCharacters(cleanText);
 
+    // Additional cleaning for fragments and repetitive content
+    cleanText = this.removeContentFragments(cleanText, title);
+
     // Normalize whitespace
     cleanText = cleanText.replace(/\s+/g, ' ').trim();
 
