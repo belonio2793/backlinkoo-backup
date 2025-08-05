@@ -121,12 +121,19 @@ export const Footer = () => {
               >
                 Affiliate Program
               </Link>
-              <Link
-                to="/admin"
-                className="block text-gray-600 hover:text-gray-900 text-sm"
+              <button
+                onClick={() => {
+                  if (user) {
+                    window.location.href = '/admin';
+                  } else {
+                    setPendingNavigation({ route: '/admin' });
+                    setShowLoginModal(true);
+                  }
+                }}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
               >
                 Admin Dashboard
-              </Link>
+              </button>
               <a
                 href="mailto:support@backlinkoo.com"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
