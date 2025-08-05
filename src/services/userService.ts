@@ -52,7 +52,10 @@ class UserService {
   async isPremiumUser(): Promise<boolean> {
     try {
       const profile = await this.getCurrentUserProfile();
-      return profile?.role === 'premium' || profile?.role === 'admin';
+      // Check subscription_tier instead of role for premium status
+      return profile?.subscription_tier === 'premium' ||
+             profile?.subscription_tier === 'monthly' ||
+             profile?.role === 'admin'; // Admin also gets premium access
     } catch (error: any) {
       console.error('Error checking premium status:', error.message || error);
       return false;
