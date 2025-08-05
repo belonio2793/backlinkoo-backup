@@ -1138,20 +1138,47 @@ const Dashboard = () => {
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              {isFirstTimeUser && credits === 0 && (
+              {isFirstTimeUser && credits === 0 && !isPremiumSubscriber && (
                 <Card className="border-blue-200 bg-blue-50">
                   <CardHeader>
                     <CardTitle className="text-blue-800">Welcome to Backlink ∞!</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-blue-700 mb-4">
-                      Get started by purchasing credits to create your first backlink campaign. 
+                      Get started by purchasing credits to create your first backlink campaign.
                       Our high-quality backlinks will help improve your website's search engine rankings.
                     </p>
                     <Button onClick={() => setIsPricingModalOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
                       Buy Your First Credits
                     </Button>
+                  </CardContent>
+                </Card>
+              )}
+
+              {isPremiumSubscriber && (
+                <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50">
+                  <CardHeader>
+                    <CardTitle className="text-purple-800 flex items-center gap-2">
+                      <Crown className="h-5 w-5" />
+                      Welcome back, Premium Member!
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-purple-700 mb-4">
+                      You have unlimited access to all premium features including unlimited backlinks,
+                      complete SEO Academy, and priority support. Make the most of your premium benefits!
+                    </p>
+                    <div className="flex gap-2">
+                      <Button onClick={() => setActiveSection("premium-plan")} variant="outline">
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        SEO Academy
+                      </Button>
+                      <Button onClick={() => setActiveTab('campaigns')}>
+                        <Infinity className="h-4 w-4 mr-2" />
+                        Unlimited Campaigns
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               )}
