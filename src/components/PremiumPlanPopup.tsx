@@ -577,10 +577,15 @@ export function PremiumPlanPopup({
             placeholder="your@email.com"
             value={paymentData.email}
             onChange={(e) => handlePaymentChange('email', e.target.value)}
+            readOnly={isAuthenticated && !!user}
+            className={isAuthenticated && !!user ? "bg-gray-50 cursor-not-allowed" : ""}
             required
           />
           <p className="text-xs text-muted-foreground">
-            Required for subscription management and receipts
+            {isAuthenticated && !!user
+              ? "Using your account email address for this subscription"
+              : "Required for subscription management and receipts"
+            }
           </p>
         </div>
 
