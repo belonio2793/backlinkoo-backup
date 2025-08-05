@@ -10,15 +10,20 @@ export class ContentFormatter {
   static formatBlogContent(content: string, title?: string): string {
     if (!content) return '';
 
+    // VERY EARLY preprocessing to fix critical issues before any HTML processing
+    content = content
+      // Fix Pro Tip issue immediately - most aggressive patterns
+      .replace(/##\s*P\s*[\n\r\s]*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s*<[^>]*>\s*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s*(?:<[^>]*>)?\s*ro\s*(?:<[^>]*>)?\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s*\n?\s*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s+ro\s*Tip/gi, '## Pro Tip');
+
     // Split content into lines and clean up
     let formattedContent = content
       // Normalize line breaks
       .replace(/\r\n/g, '\n')
       .replace(/\r/g, '\n')
-      // Fix Pro Tip issue FIRST before any other processing
-      .replace(/##\s*P\s*[\n\r\s]*ro\s*Tip/gi, '## Pro Tip')
-      .replace(/##\s*P\s*<[^>]*>\s*ro\s*Tip/gi, '## Pro Tip')
-      .replace(/##\s*P\s*(?:<[^>]*>)?\s*ro\s*(?:<[^>]*>)?\s*Tip/gi, '## Pro Tip')
       // Remove excessive whitespace but preserve paragraph breaks
       .replace(/[ \t]+/g, ' ')
       .trim();
