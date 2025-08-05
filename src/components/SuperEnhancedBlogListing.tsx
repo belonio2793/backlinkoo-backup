@@ -124,7 +124,7 @@ export function SuperEnhancedBlogListing() {
           if (user) {
             console.log(`🔍 Fetching posts for user: ${user.id}`);
             blogPosts = await EnhancedBlogClaimService.getUserClaimedPosts(user.id);
-            console.log(`��� Found ${blogPosts.length} user posts`);
+            console.log(`✅ Found ${blogPosts.length} user posts`);
           }
           break;
         default:
