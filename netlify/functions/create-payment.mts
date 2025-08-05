@@ -10,21 +10,6 @@ interface PaymentRequest {
   credits?: number;
 }
 
-interface PayPalAuthResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-}
-
-interface PayPalOrderResponse {
-  id: string;
-  status: string;
-  links: Array<{
-    href: string;
-    rel: string;
-    method: string;
-  }>;
-}
 
 // Rate limiting map (in production, use Redis or similar)
 const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
