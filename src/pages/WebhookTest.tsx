@@ -4,7 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, XCircle, Clock, Webhook, Database, Settings } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CheckCircle, XCircle, Clock, Webhook, Database, Settings, CreditCard, Crown, Users } from 'lucide-react';
+import CreditsAndPremiumWebhookTester, { type WebhookTestResult } from '@/utils/creditsAndPremiumWebhookTests';
 
 interface TestResult {
   test: string;
