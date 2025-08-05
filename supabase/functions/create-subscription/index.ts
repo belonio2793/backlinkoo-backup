@@ -45,11 +45,30 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabaseClient = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } }
-  );
+  // Check environment variables first
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.error("Missing Supabase configuration");
+    return new Response(
+      JSON.stringify({ error: "Service configuration error" }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  if (!stripeSecretKey) {
+    console.error("Missing Stripe configuration");
+    return new Response(
+      JSON.stringify({ error: "Payment system not configured" }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  const supabaseClient = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: { persistSession: false }
+  });
 
   try {
     // Rate limiting check
@@ -61,7 +80,16 @@ serve(async (req) => {
       );
     }
 
-    const body: SubscriptionRequest = await req.json();
+    let body: SubscriptionRequest;
+    try {
+      body = await req.json();
+    } catch (parseError) {
+      console.error("JSON parse error:", parseError);
+      return new Response(
+        JSON.stringify({ error: "Invalid request format" }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     // Input validation
     if (!body.priceId || typeof body.priceId !== 'string' || body.priceId.length > 100) {
