@@ -1161,7 +1161,7 @@ const Dashboard = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onClick={() => setIsProfileOpen(true)} className="justify-center">
+                  <DropdownMenuItem onClick={() => setIsProfileOpen(true)}>
                     <Settings className="mr-2 h-4 w-4" />
                     Profile Settings
                   </DropdownMenuItem>
