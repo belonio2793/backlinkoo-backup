@@ -59,7 +59,7 @@ import {
   BookOpen,
   Star
 } from "lucide-react";
-import { PricingModal } from "@/components/PricingModal";
+import { EnhancedUnifiedPaymentModal } from "@/components/EnhancedUnifiedPaymentModal";
 import { CampaignForm } from "@/components/CampaignForm";
 import { KeywordResearchTool } from "@/components/KeywordResearchTool";
 import { RankingTracker } from "@/components/RankingTracker";
@@ -919,7 +919,7 @@ const Dashboard = () => {
           console.log('🚪 Background sign out successful');
         }
       } catch (backgroundError) {
-        console.error('🚪 Background sign out error:', backgroundError);
+        console.error('���� Background sign out error:', backgroundError);
         // Don't show error to user since they're already signed out from UI perspective
       }
 
