@@ -618,8 +618,8 @@ Users ready to make a purchase or take action.
           </div>
         </div>
         <div className="mt-6">
-          <Progress value={overallProgress} className="h-3 bg-blue-500/30" />
-          <div className="flex justify-between text-sm text-blue-100 mt-2">
+          <Progress value={overallProgress} className="h-3" />
+          <div className="flex justify-between text-sm text-gray-500 mt-2">
             <span>{completedLessons} of {totalLessons} lessons completed</span>
             <span>~53 hours total</span>
           </div>
