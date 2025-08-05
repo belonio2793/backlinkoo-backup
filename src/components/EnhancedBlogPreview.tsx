@@ -220,9 +220,17 @@ export function EnhancedBlogPreview({
                     </p>
                   </header>
                   
-                  <div 
+                  <div
                     dangerouslySetInnerHTML={{ __html: content.content }}
-                    className="prose-headings:text-foreground prose-p:text-foreground prose-a:text-blue-600 prose-strong:text-foreground prose-em:text-foreground prose-li:text-foreground"
+                    className="prose prose-lg max-w-none
+                      prose-headings:text-foreground prose-headings:font-bold
+                      prose-p:text-foreground prose-p:leading-relaxed
+                      prose-a:text-blue-600 prose-a:font-medium prose-a:no-underline hover:prose-a:underline
+                      prose-strong:text-foreground prose-strong:font-bold
+                      prose-em:text-foreground
+                      prose-li:text-foreground
+                      prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
+                      [&_a]:text-blue-600 [&_a]:opacity-100 [&_a]:font-medium [&_a]:no-underline hover:[&_a]:underline"
                   />
                 </article>
 
