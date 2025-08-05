@@ -675,6 +675,13 @@ export class ContentFormatter {
       .replace(/<h[1-6][^>]*data-loc[^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*data-loc[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip[^<]*<\/p>/gi, '<h2>Pro Tip</h2>')
       .replace(/<h[1-6][^>]*data-loc[^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*data-loc[^>]*>\s*h[1-6]&gt;([^<]*)<\/p>/gi, '<h2>$1</h2>')
 
+      // MOST AGGRESSIVE: Catch any h2 containing just &lt; followed by p containing h2&gt;
+      .replace(/<h2[^>]*>\s*&lt;\s*<\/h2>\s*<p[^>]*>\s*h2&gt;\s*Pro\s*Tip[^<]*<\/p>/gi, '<h2>Pro Tip</h2>')
+      .replace(/<h2[^>]*>\s*&lt;\s*<\/h2>\s*<p[^>]*>\s*h2&gt;([^<]*)<\/p>/gi, '<h2>$1</h2>')
+
+      // Ultra specific for the exact DOM pattern visible
+      .replace(/<h2[^>]*>&lt;<\/h2>\s*<p[^>]*>\s*h2&gt;Pro\s*Tip\s*<\/p>/gi, '<h2>Pro Tip</h2>')
+
       // Remove standalone malformed heading + paragraph combinations
       .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>[^<]*h[1-6]&gt;[^<]*<\/p>/gi, '')
 
