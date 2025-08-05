@@ -72,3 +72,16 @@ export const NAVIGATION_CONFIGS = {
     tab: 'overview'
   }
 } as const;
+
+/**
+ * Navigate to a section with authentication awareness
+ * If user is not authenticated, return false to trigger login flow
+ */
+export const navigateToSectionWithAuth = (config: NavigationConfig, isAuthenticated: boolean): boolean => {
+  if (!isAuthenticated) {
+    return false; // Signal that authentication is required
+  }
+
+  navigateToSection(config);
+  return true; // Navigation successful
+};
