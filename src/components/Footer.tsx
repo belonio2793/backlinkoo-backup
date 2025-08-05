@@ -26,7 +26,13 @@ export const Footer = () => {
     // If there's a pending navigation, execute it after successful auth
     if (pendingNavigation) {
       setTimeout(() => {
-        navigateToSection(pendingNavigation);
+        if (pendingNavigation.hash) {
+          // Section navigation with hash
+          navigateToSection(pendingNavigation);
+        } else {
+          // Simple route navigation
+          window.location.href = pendingNavigation.route;
+        }
         setPendingNavigation(null);
       }, 500); // Small delay to ensure user state is updated
     }
