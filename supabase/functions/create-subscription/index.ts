@@ -211,7 +211,8 @@ serve(async (req) => {
     }
 
     // Update or create subscriber record
-    await supabaseClient.from("subscribers").upsert({
+    console.log("Updating subscriber record for:", email);
+    const { error: dbError } = await supabaseClient.from("subscribers").upsert({
       user_id: user?.id || null,
       email,
       stripe_customer_id: customerId,
@@ -222,6 +223,12 @@ serve(async (req) => {
       updated_at: new Date().toISOString(),
     }, { onConflict: 'email' });
 
+    if (dbError) {
+      console.error("Database error:", dbError);
+      // Don't fail the request for database errors, but log them
+    }
+
+    console.log("Successfully created checkout session:", session.id);
     return new Response(JSON.stringify({ url: session.url, sessionId: session.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
