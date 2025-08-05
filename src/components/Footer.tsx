@@ -55,7 +55,7 @@ export const Footer = () => {
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Features</h3>
             <div className="space-y-2">
               <button
-                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.CAMPAIGNS)}
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.CAMPAIGNS, "Campaign Management")}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
                 title={!user ? "Sign in to access Campaign Management" : "Go to Campaign Management"}
                 disabled={isLoading}
@@ -63,22 +63,25 @@ export const Footer = () => {
                 Campaign Management
               </button>
               <button
-                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.BACKLINK_AUTOMATION)}
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.BACKLINK_AUTOMATION, "Backlink Automation")}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                title={!user ? "Sign in to access Backlink Automation" : "Go to Backlink Automation"}
                 disabled={isLoading}
               >
                 Backlink ∞ Automation Link Building (beta)
               </button>
               <button
-                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.KEYWORD_RESEARCH)}
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.KEYWORD_RESEARCH, "Keyword Research")}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                title={!user ? "Sign in to access Keyword Research" : "Go to Keyword Research"}
                 disabled={isLoading}
               >
                 Keyword Research
               </button>
               <button
-                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.RANK_TRACKER)}
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.RANK_TRACKER, "Rank Tracker")}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                title={!user ? "Sign in to access Rank Tracker" : "Go to Rank Tracker"}
                 disabled={isLoading}
               >
                 Rank Tracker
@@ -97,7 +100,7 @@ export const Footer = () => {
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Merchant Tools</h3>
             <div className="space-y-2">
               <button
-                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.BACKLINK_REPORTS)}
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.BACKLINK_REPORTS, "Backlink Reports")}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
                 title={!user ? "Sign in to access Backlink Reports" : "Go to Backlink Reports"}
                 disabled={isLoading}
@@ -137,7 +140,7 @@ export const Footer = () => {
                 Affiliate Program
               </Link>
               <button
-                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.ADMIN)}
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.ADMIN, "Admin Dashboard")}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
                 title={!user ? "Sign in to access Admin Dashboard" : "Go to Admin Dashboard"}
                 disabled={isLoading}
