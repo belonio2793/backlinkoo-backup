@@ -128,6 +128,7 @@ export function AuthFormTabs({
       });
     } finally {
       setIsLoading(false);
+      setLoadingMessage('');
     }
   };
 
