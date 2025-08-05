@@ -763,6 +763,18 @@ function SuperPostCard({
             <Button
               variant="ghost"
               size="sm"
+              className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white/50 hover:bg-blue-50"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPreview();
+              }}
+              title="Preview content"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white/50"
               onClick={(e) => {
                 e.stopPropagation();
