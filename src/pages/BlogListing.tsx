@@ -16,6 +16,7 @@ import { LoginModal } from '@/components/LoginModal';
 
 import { Clock, Eye, Calendar, Plus, Search, Crown, Loader2, CheckCircle } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
+import { ExcerptCleaner } from '@/utils/excerptCleaner';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -483,7 +484,7 @@ export function BlogListing() {
                       
                       <CardContent>
                         <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                          {getExcerpt(post.content)}
+                          {getExcerpt(post.content, post.title)}
                         </p>
 
                         <div className="flex items-center justify-between">
