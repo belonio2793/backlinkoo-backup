@@ -213,13 +213,6 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
                     Credit Card (Stripe)
                   </Label>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="paypal" id="paypal" />
-                  <Label htmlFor="paypal" className="flex items-center gap-2">
-                    <Wallet className="w-4 h-4" />
-                    PayPal
-                  </Label>
-                </div>
               </RadioGroup>
             </div>
 
