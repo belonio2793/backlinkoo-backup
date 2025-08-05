@@ -28,10 +28,11 @@ export class FooterNavigationService {
     navigate: NavigatorFunction;
     onAuthRequired: (pendingNav: any) => void;
   }) {
-    console.log('🧭 FooterNav: Handling navigation for:', config.route, 'User:', !!user);
+    console.log('🧭 FooterNav: Handling navigation for:', config.route, 'User authenticated:', !!user, 'User email:', user?.email);
 
     // For public routes, always allow access
     if (!config.requiresAuth) {
+      console.log('✅ FooterNav: Public route, navigating directly');
       this.executeNavigation({ config, navigate });
       return;
     }
@@ -39,6 +40,7 @@ export class FooterNavigationService {
     // For protected routes with guest access
     if (config.allowGuestAccess && !user) {
       if (config.guestRedirect) {
+        console.log('👤 FooterNav: Guest access, redirecting to:', config.guestRedirect);
         navigate(config.guestRedirect);
         return;
       }
@@ -46,6 +48,7 @@ export class FooterNavigationService {
 
     // User is authenticated - proceed with navigation
     if (user) {
+      console.log('🔑 FooterNav: User authenticated, proceeding with navigation to:', config.route);
       this.executeNavigation({ config, navigate });
       return;
     }
