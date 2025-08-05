@@ -747,6 +747,45 @@ const Dashboard = () => {
     };
   }, [navigate]);
 
+  // Handle hash navigation for direct section access
+  useEffect(() => {
+    const handleHashNavigation = () => {
+      const hash = window.location.hash.substring(1); // Remove the # symbol
+
+      // Map hash values to tab values
+      const hashToTabMap: { [key: string]: string } = {
+        'keyword-research': 'keyword-research',
+        'rank-tracker': 'rank-tracker',
+        'backlink-automation': 'no-hands-seo',
+        'campaigns': 'campaigns',
+        'overview': 'overview'
+      };
+
+      const targetTab = hashToTabMap[hash];
+      if (targetTab && user) {
+        setActiveTab(targetTab);
+
+        // Scroll to the tab content after a brief delay to ensure render
+        setTimeout(() => {
+          const element = document.querySelector(`[data-section="${targetTab}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      }
+    };
+
+    // Handle initial hash on page load
+    handleHashNavigation();
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashNavigation);
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashNavigation);
+    };
+  }, [user]);
+
 
 
   const fetchUserData = async (authUser?: User) => {
