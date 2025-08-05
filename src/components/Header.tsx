@@ -16,10 +16,19 @@ interface HeaderProps {
 export function Header({ showHomeLink = true }: HeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [defaultTab, setDefaultTab] = useState<'login' | 'signup'>('login');
+
+  // Debug logging for header authentication state
+  console.log('��� Header: User authentication state:', {
+    userEmail: user?.email,
+    isAuthenticated: !!user,
+    isLoading,
+    userId: user?.id,
+    currentPath: location.pathname
+  });
 
   const handleSignOut = async () => {
     try {
