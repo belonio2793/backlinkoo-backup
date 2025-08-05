@@ -41,7 +41,7 @@ interface StreamlinedPremiumCheckoutProps {
 }
 
 type FlowStep = 'plan-selection' | 'payment-method' | 'checkout' | 'processing' | 'success';
-type PaymentMethod = 'stripe' | 'paypal';
+type PaymentMethod = 'stripe';
 
 export function StreamlinedPremiumCheckout({ 
   isOpen, 
@@ -137,7 +137,7 @@ export function StreamlinedPremiumCheckout({
         // Redirect to payment provider
         toast({
           title: "Redirecting to Payment",
-          description: `Opening secure ${paymentMethod === 'stripe' ? 'Stripe' : 'PayPal'} checkout...`,
+          description: "Opening secure Stripe checkout...",
         });
 
         window.location.href = result.url;
@@ -344,17 +344,6 @@ export function StreamlinedPremiumCheckout({
               </Label>
             </div>
             
-            <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                 onClick={() => setPaymentMethod('paypal')}>
-              <RadioGroupItem value="paypal" id="paypal" />
-              <Label htmlFor="paypal" className="flex items-center gap-3 cursor-pointer flex-1">
-                <Wallet className="w-5 h-5" />
-                <div>
-                  <div className="font-medium">PayPal</div>
-                  <div className="text-sm text-gray-500">Pay with your PayPal account or PayPal Credit</div>
-                </div>
-              </Label>
-            </div>
           </div>
         </RadioGroup>
       </div>
@@ -429,10 +418,6 @@ export function StreamlinedPremiumCheckout({
             ) : (
               <>
                 <Wallet className="h-5 w-5 text-blue-600" />
-                <div>
-                  <div className="font-medium">PayPal Checkout</div>
-                  <div className="text-sm text-blue-700">Pay with your PayPal account</div>
-                </div>
               </>
             )}
           </div>

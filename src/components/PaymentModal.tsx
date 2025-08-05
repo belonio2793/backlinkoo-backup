@@ -19,7 +19,7 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
   const CREDIT_PRICE = 1.40;
   
   const [paymentType, setPaymentType] = useState<"payment" | "subscription">("payment");
-  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "paypal">("stripe");
+  const [paymentMethod, setPaymentMethod] = useState<"stripe">("stripe");
   const [isGuest, setIsGuest] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
   const [amount, setAmount] = useState(() => initialCredits ? (initialCredits * CREDIT_PRICE).toFixed(2) : "");
@@ -205,19 +205,12 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
             {/* Payment Method */}
             <div className="space-y-2">
               <Label>Payment Method</Label>
-              <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as "stripe" | "paypal")}>
+              <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as "stripe")}>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="stripe" id="stripe" />
                   <Label htmlFor="stripe" className="flex items-center gap-2">
                     <CreditCard className="w-4 h-4" />
                     Credit Card (Stripe)
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="paypal" id="paypal" />
-                  <Label htmlFor="paypal" className="flex items-center gap-2">
-                    <Wallet className="w-4 h-4" />
-                    PayPal
                   </Label>
                 </div>
               </RadioGroup>

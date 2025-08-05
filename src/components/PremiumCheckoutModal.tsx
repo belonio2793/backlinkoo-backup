@@ -38,7 +38,7 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal'>('stripe');
+  const [paymentMethod, setPaymentMethod] = useState<'stripe'>('stripe');
 
   // Debug user state
   console.log('PremiumCheckoutModal - User state:', { user, hasUser: !!user, email: user?.email });
@@ -81,7 +81,7 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleCheckout = async (method: 'stripe' | 'paypal' = 'stripe') => {
+  const handleCheckout = async (method: 'stripe' = 'stripe') => {
     setIsProcessing(true);
     setPaymentMethod(method);
 
@@ -117,8 +117,8 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
           window.open(result.url, '_blank');
 
           toast({
-            title: `Redirecting to ${method === 'stripe' ? 'Stripe' : 'PayPal'}`,
-            description: `You'll be redirected to ${method === 'stripe' ? 'Stripe' : 'PayPal'} to complete your payment securely.`,
+            title: "Redirecting to Stripe",
+            description: "You'll be redirected to Stripe to complete your payment securely.",
           });
         }
       } else {
@@ -329,10 +329,6 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
                     <span>Cards</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-blue-600 rounded"></div>
-                    <span>PayPal</span>
-                  </div>
-                  <div className="flex items-center gap-1">
                     <div className="w-3 h-3 bg-green-600 rounded"></div>
                     <span>Apple Pay</span>
                   </div>
@@ -383,24 +379,6 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
                     )}
                   </Button>
 
-                  {/* PayPal Button */}
-                  <Button
-                    className="w-full h-12 text-lg bg-yellow-500 hover:bg-yellow-600 text-black"
-                    onClick={() => handleCheckout('paypal')}
-                    disabled={isProcessing || (!user && !formData.email)}
-                  >
-                    {isProcessing && paymentMethod === 'paypal' ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                        Processing...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-blue-600 rounded"></div>
-                        Pay with PayPal
-                      </div>
-                    )}
-                  </Button>
                 </div>
               </div>
 

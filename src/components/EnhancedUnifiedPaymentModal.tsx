@@ -52,7 +52,7 @@ interface EnhancedUnifiedPaymentModalProps {
 
 type FlowStep = 'selection' | 'auth' | 'payment' | 'processing' | 'success';
 type PaymentType = 'credits' | 'premium';
-type PaymentMethod = 'stripe' | 'paypal';
+type PaymentMethod = 'stripe';
 type CheckoutType = 'user' | 'guest';
 
 interface PremiumPlan {
@@ -109,7 +109,7 @@ export function EnhancedUnifiedPaymentModal({
   const [guestEmail, setGuestEmail] = useState('');
 
   // Payment method availability
-  const [availablePaymentMethods, setAvailablePaymentMethods] = useState<('stripe' | 'paypal')[]>([]);
+  const [availablePaymentMethods, setAvailablePaymentMethods] = useState<'stripe'[]>(['stripe']);
 
   const CREDIT_PRICE = 1.40;
 
@@ -719,19 +719,6 @@ export function EnhancedUnifiedPaymentModal({
                   </div>
                 )}
 
-                {availablePaymentMethods.includes('paypal') && (
-                  <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                       onClick={() => setPaymentMethod('paypal')}>
-                    <RadioGroupItem value="paypal" id="paypal" />
-                    <Label htmlFor="paypal" className="flex items-center gap-3 cursor-pointer flex-1">
-                      <Wallet className="w-5 h-5" />
-                      <div>
-                        <div className="font-medium">PayPal</div>
-                        <div className="text-sm text-gray-500">Pay with your PayPal account</div>
-                      </div>
-                    </Label>
-                  </div>
-                )}
               </div>
             </RadioGroup>
           )}

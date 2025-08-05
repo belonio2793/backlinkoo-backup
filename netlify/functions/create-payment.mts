@@ -6,25 +6,10 @@ interface PaymentRequest {
   productName: string;
   isGuest?: boolean;
   guestEmail?: string;
-  paymentMethod: 'stripe' | 'paypal';
+  paymentMethod: 'stripe';
   credits?: number;
 }
 
-interface PayPalAuthResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-}
-
-interface PayPalOrderResponse {
-  id: string;
-  status: string;
-  links: Array<{
-    href: string;
-    rel: string;
-    method: string;
-  }>;
-}
 
 // Rate limiting map (in production, use Redis or similar)
 const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
@@ -65,7 +50,13 @@ async function createStripePayment(
   email: string,
   originUrl: string
 ): Promise<{ url: string; sessionId: string }> {
-  const stripe = new Stripe(Netlify.env.get("STRIPE_SECRET_KEY") || "", {
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+
+  if (!stripeSecretKey) {
+    throw new Error("STRIPE_SECRET_KEY is not configured in Netlify environment variables");
+  }
+
+  const stripe = new Stripe(stripeSecretKey, {
     apiVersion: "2023-10-16",
   });
 
@@ -111,81 +102,6 @@ async function createStripePayment(
   return { url: session.url!, sessionId: session.id };
 }
 
-async function createPayPalPayment(
-  paymentData: PaymentRequest,
-  email: string,
-  originUrl: string
-): Promise<{ url: string; orderId: string }> {
-  const paypalClientId = Netlify.env.get("PAYPAL_CLIENT_ID");
-  const paypalSecret = Netlify.env.get("PAYPAL_SECRET_KEY");
-  
-  if (!paypalClientId || !paypalSecret) {
-    throw new Error("PayPal credentials not configured");
-  }
-
-  const environment = Netlify.env.get("VITE_ENVIRONMENT") || 'development';
-  const baseUrl = environment === 'production' 
-    ? 'https://api.paypal.com' 
-    : 'https://api.sandbox.paypal.com';
-
-  // Get PayPal access token
-  const authResponse = await fetch(`${baseUrl}/v1/oauth2/token`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      "Authorization": `Basic ${btoa(`${paypalClientId}:${paypalSecret}`)}`,
-    },
-    body: "grant_type=client_credentials",
-  });
-
-  if (!authResponse.ok) {
-    throw new Error(`PayPal auth failed: ${authResponse.status}`);
-  }
-
-  const authData: PayPalAuthResponse = await authResponse.json();
-
-  // Create PayPal order
-  const orderResponse = await fetch(`${baseUrl}/v2/checkout/orders`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${authData.access_token}`,
-    },
-    body: JSON.stringify({
-      intent: "CAPTURE",
-      purchase_units: [{
-        amount: {
-          currency_code: "USD",
-          value: paymentData.amount.toFixed(2),
-        },
-        description: paymentData.productName,
-        custom_id: JSON.stringify({
-          email,
-          credits: paymentData.credits || 0,
-          isGuest: paymentData.isGuest,
-          productName: paymentData.productName
-        })
-      }],
-      application_context: {
-        return_url: `${originUrl}/payment-success?payment_method=paypal&credits=${paymentData.credits || 0}`,
-        cancel_url: `${originUrl}/payment-cancelled`,
-      },
-    }),
-  });
-
-  if (!orderResponse.ok) {
-    throw new Error(`PayPal order creation failed: ${orderResponse.status}`);
-  }
-
-  const orderData: PayPalOrderResponse = await orderResponse.json();
-  const approvalUrl = orderData.links.find(link => link.rel === "approve")?.href;
-
-  if (!approvalUrl) {
-    throw new Error("PayPal approval URL not found");
-  }
-
-  return { url: approvalUrl, orderId: orderData.id };
-}
 
 export default async (req: Request, context: Context) => {
   // Handle CORS preflight
@@ -234,8 +150,8 @@ export default async (req: Request, context: Context) => {
       throw new Error('Invalid product name');
     }
 
-    if (!['stripe', 'paypal'].includes(body.paymentMethod)) {
-      throw new Error('Invalid payment method');
+    if (body.paymentMethod !== 'stripe') {
+      throw new Error('Only Stripe payments are supported');
     }
     
     const { amount, isGuest = false, paymentMethod } = body;
@@ -256,13 +172,7 @@ export default async (req: Request, context: Context) => {
 
     const originUrl = req.headers.get("origin") || "https://backlinkoo.com";
     
-    let result;
-    
-    if (paymentMethod === 'stripe') {
-      result = await createStripePayment(body, email, originUrl);
-    } else {
-      result = await createPayPalPayment(body, email, originUrl);
-    }
+    const result = await createStripePayment(body, email, originUrl);
 
     // TODO: Store order in database for tracking
     console.log(`Payment initiated: ${paymentMethod} - ${email} - $${amount}`);

@@ -616,7 +616,6 @@ export function PremiumPlanPopup({
           </p>
           <div className="flex items-center justify-center gap-4 text-xs text-blue-600">
             <span>💳 Cards</span>
-            <span>🅿️ PayPal</span>
             <span>🍎 Apple Pay</span>
           </div>
         </div>

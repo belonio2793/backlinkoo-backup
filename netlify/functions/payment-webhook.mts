@@ -11,8 +11,8 @@ interface WebhookEvent {
 
 // Initialize Supabase client for database operations
 function getSupabaseClient() {
-  const supabaseUrl = Netlify.env.get("VITE_SUPABASE_URL");
-  const supabaseServiceKey = Netlify.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const supabaseUrl = process.env.VITE_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   
   if (!supabaseUrl || !supabaseServiceKey) {
     throw new Error("Supabase configuration missing");
@@ -241,13 +241,13 @@ export default async (req: Request, context: Context) => {
   }
 
   try {
-    const stripe = new Stripe(Netlify.env.get("STRIPE_SECRET_KEY") || "", {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
       apiVersion: "2023-10-16",
     });
 
     const body = await req.text();
     const signature = req.headers.get('stripe-signature');
-    const webhookSecret = Netlify.env.get("STRIPE_WEBHOOK_SECRET");
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
     if (!signature) {
       return new Response(JSON.stringify({ error: "No signature provided" }), {

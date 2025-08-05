@@ -9,11 +9,6 @@ interface PaymentConfig {
     hasPublicKey: boolean;
     hasSecretKey: boolean;
   };
-  paypal: {
-    enabled: boolean;
-    hasClientId: boolean;
-    hasSecretKey: boolean;
-  };
   environment: 'development' | 'production' | 'preview';
 }
 
@@ -51,11 +46,6 @@ class PaymentIntegrationService {
         hasPublicKey: !!stripePublicKey,
         hasSecretKey: true // We assume secret key is configured on server
       },
-      paypal: {
-        enabled: !!import.meta.env.VITE_PAYPAL_CLIENT_ID,
-        hasClientId: !!import.meta.env.VITE_PAYPAL_CLIENT_ID,
-        hasSecretKey: true // We assume secret key is configured on server
-      },
       environment
     };
   }
@@ -70,17 +60,13 @@ class PaymentIntegrationService {
   /**
    * Get available payment methods based on configuration
    */
-  getAvailablePaymentMethods(): ('stripe' | 'paypal')[] {
-    const methods: ('stripe' | 'paypal')[] = [];
-    
+  getAvailablePaymentMethods(): 'stripe'[] {
+    const methods: 'stripe'[] = [];
+
     if (this.config.stripe.enabled) {
       methods.push('stripe');
     }
-    
-    if (this.config.paypal.enabled) {
-      methods.push('paypal');
-    }
-    
+
     return methods;
   }
 
@@ -88,7 +74,7 @@ class PaymentIntegrationService {
    * Check if payment system is properly configured
    */
   isConfigured(): boolean {
-    return this.config.stripe.enabled || this.config.paypal.enabled;
+    return this.config.stripe.enabled;
   }
 
   /**
@@ -97,7 +83,7 @@ class PaymentIntegrationService {
   async createPayment(
     amount: number,
     credits: number,
-    paymentMethod: 'stripe' | 'paypal',
+    paymentMethod: 'stripe',
     isGuest: boolean = false,
     guestEmail?: string
   ): Promise<PaymentResult> {
@@ -280,12 +266,6 @@ class PaymentIntegrationService {
     if (!this.config.stripe.enabled) {
       instructions.push(
         'Stripe Setup: Add VITE_STRIPE_PUBLISHABLE_KEY to your environment variables'
-      );
-    }
-
-    if (!this.config.paypal.enabled) {
-      instructions.push(
-        'PayPal Setup: Add VITE_PAYPAL_CLIENT_ID to your environment variables'
       );
     }
 
