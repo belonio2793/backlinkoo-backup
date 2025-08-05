@@ -91,33 +91,19 @@ export function AuthFormTabs({
         });
         onAuthSuccess?.(result.user);
       } else {
-        // Check if this is a database error and provide helpful guidance
-        if (result.error?.includes('Database error')) {
-          toast({
-            title: "Database Configuration Issue",
-            description: "Your Supabase database needs to be configured. Please run the provided SQL fix script in your Supabase dashboard.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Sign in failed",
-            description: result.error || "Invalid email or password.",
-            variant: "destructive",
-          });
-        }
+        // Use the formatted error message from AuthService
+        toast({
+          title: "Sign in failed",
+          description: result.error || "Please check your credentials and try again.",
+          variant: "destructive",
+        });
       }
     } catch (error: any) {
-      console.error('🚨 Login component error:', {
-        error: error,
-        message: error.message,
-        stack: error.stack,
-        email: currentEmail,
-        errorString: JSON.stringify(error, null, 2)
-      });
-      console.error('🚨 Raw login error object:', error);
+      // This should rarely happen since AuthService handles most errors
+      console.error('🚨 Unexpected login error:', error);
       toast({
-        title: "Sign in failed",
-        description: `An unexpected error occurred: ${error.message || 'Please try again.'}`,
+        title: "Connection error",
+        description: "Unable to connect to authentication service. Please check your internet connection and try again.",
         variant: "destructive",
       });
     } finally {
