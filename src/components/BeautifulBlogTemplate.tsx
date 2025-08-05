@@ -398,6 +398,7 @@ export function BeautifulBlogTemplate() {
                 prose-h4:text-xl prose-h4:mb-3 prose-h4:mt-6
                 prose-p:text-gray-700 prose-p:text-lg prose-p:leading-relaxed prose-p:mb-6
                 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:text-blue-800 hover:prose-a:underline
+                [&_a]:text-blue-600 [&_a]:opacity-100 [&_a]:font-medium [&_a]:no-underline hover:[&_a]:underline
                 prose-strong:text-gray-900 prose-strong:font-bold
                 prose-em:text-gray-800 prose-em:italic
                 prose-ul:my-6 prose-ol:my-6 prose-li:mb-2 prose-li:text-gray-700
