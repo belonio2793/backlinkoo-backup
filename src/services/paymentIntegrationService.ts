@@ -83,7 +83,7 @@ class PaymentIntegrationService {
   async createPayment(
     amount: number,
     credits: number,
-    paymentMethod: 'stripe' | 'paypal',
+    paymentMethod: 'stripe',
     isGuest: boolean = false,
     guestEmail?: string
   ): Promise<PaymentResult> {
