@@ -167,11 +167,8 @@ export function CourseProgressDashboard() {
       </div>
 
       <Tabs defaultValue="progress" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-1">
           <TabsTrigger value="progress">Progress</TabsTrigger>
-          <TabsTrigger value="achievements">Achievements</TabsTrigger>
-          <TabsTrigger value="activity">Activity</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="progress" className="space-y-6">
