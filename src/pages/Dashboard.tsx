@@ -1553,16 +1553,38 @@ const Dashboard = () => {
                 <DashboardTrialPosts user={user} />
               </div>
             ) : activeSection === "premium-plan" ? (
-              <div className="space-y-6">
-                <StreamlinedPremiumProvider>
-                  <PremiumPlanTab
-                    isSubscribed={isPremiumSubscriber}
-                    onUpgrade={() => {
-                      // Refresh premium status after successful upgrade
-                      PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
-                    }}
-                  />
-                </StreamlinedPremiumProvider>
+              <div className="space-y-6 relative">
+                {/* Coming Soon Overlay */}
+                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+                  <div className="text-center p-8">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                      <Crown className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                      Premium Features Coming Soon
+                    </h3>
+                    <p className="text-muted-foreground mb-4 max-w-md">
+                      We're working hard to bring you advanced premium features. This system is currently under development.
+                    </p>
+                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                      <span>Stay tuned for updates</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Blurred Premium Content */}
+                <div className="opacity-30 pointer-events-none">
+                  <StreamlinedPremiumProvider>
+                    <PremiumPlanTab
+                      isSubscribed={isPremiumSubscriber}
+                      onUpgrade={() => {
+                        // Refresh premium status after successful upgrade
+                        PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
+                      }}
+                    />
+                  </StreamlinedPremiumProvider>
+                </div>
               </div>
             ) : null}
           </>
