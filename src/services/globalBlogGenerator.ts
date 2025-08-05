@@ -223,9 +223,22 @@ class GlobalBlogGeneratorService {
       localStorage.setItem('all_blog_posts', JSON.stringify(allBlogPosts));
       localStorage.setItem(`blog_post_${blogPost.slug}`, JSON.stringify(blogPost));
 
+      // Clean content before storing in database to prevent malformed patterns
+      const cleanedBlogPost = {
+        ...blogPost,
+        content: blogPost.content
+          .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
+          .replace(/##\s*&lt;\s*h[1-6]\s*&gt;/gi, '##')
+          .replace(/##\s*&lt;[^>]*&gt;[^\n]*/g, '')
+          .replace(/&lt;\s*h[1-6]\s*&gt;/gi, '')
+          .replace(/&lt;\s*\/\s*h[1-6]\s*&gt;/gi, '')
+          .replace(/&lt;\s*p\s*&gt;/gi, '')
+          .replace(/&lt;\s*\/\s*p\s*&gt;/gi, '')
+      };
+
       // Try to store in Supabase for global access
       try {
-        const { error } = await supabase.from('published_blog_posts').insert([blogPost]);
+        const { error } = await supabase.from('published_blog_posts').insert([cleanedBlogPost]);
         if (error) {
           console.warn('Could not store in database:', error);
         } else {
