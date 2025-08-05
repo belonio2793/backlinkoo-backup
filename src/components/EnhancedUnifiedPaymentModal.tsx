@@ -192,7 +192,7 @@ export function EnhancedUnifiedPaymentModal({
       setCheckoutType(isAuthenticated ? 'user' : 'user');
 
       // Initialize available payment methods
-      const methods = paymentConfigService.getAvailablePaymentMethods();
+      const methods = paymentIntegrationService.getAvailablePaymentMethods();
       setAvailablePaymentMethods(methods);
 
       // Set default payment method to first available
