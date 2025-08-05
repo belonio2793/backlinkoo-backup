@@ -723,21 +723,28 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                 </div>
               ) : (
                 <>
+                  {useFallbackData && (
+                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <p className="text-sm text-yellow-800">
+                        <AlertCircle className="h-4 w-4 inline mr-1" />
+                        Using cached data (premium service temporarily unavailable)
+                      </p>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <h4 className="font-medium">Current Plan</h4>
                       <p className="text-sm text-muted-foreground">
-                        You are currently on the {isPremium ? 'Premium' : 'Free'} plan
+                        You are currently on the {effectiveIsPremium ? 'Premium' : 'Free'} plan
                       </p>
-                      {userProfile && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Subscription tier: {userProfile.subscription_tier || 'Not set'}
-                        </p>
-                      )}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Subscription tier: {effectiveSubscriptionTier || 'Not set'}
+                      </p>
                     </div>
-                    <Badge variant="default" className={`${roleInfo.color} text-white`}>
-                      {roleInfo.icon}
-                      {roleInfo.name}
+                    <Badge variant="default" className={`${effectiveIsPremium ? 'bg-purple-500' : 'bg-gray-500'} text-white`}>
+                      {effectiveIsPremium ? <Crown className="h-3 w-3 mr-1" /> : <User className="h-3 w-3 mr-1" />}
+                      {effectiveIsPremium ? 'Premium' : 'Free'}
                     </Badge>
                   </div>
 
