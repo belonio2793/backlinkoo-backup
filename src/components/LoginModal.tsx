@@ -149,6 +149,7 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
         ) : (
           <AuthFormTabs
             onAuthSuccess={handleAuthSuccess}
+            onSignInStart={onClose}
             onForgotPassword={() => setShowForgotPassword(true)}
             defaultTab={defaultTab}
           />
