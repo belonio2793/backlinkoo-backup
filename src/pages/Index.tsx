@@ -649,7 +649,7 @@ const Index = () => {
               </Badge>
               <h2 className="text-4xl font-light mb-6 tracking-tight">Performance Monitor</h2>
               <p className="text-xl text-muted-foreground mb-8 leading-relaxed font-light">
-                Track keyword rankings across Google and Bing with precision monitoring and instant alerts.
+                Track keyword rankings on Google with precision monitoring and instant alerts.
               </p>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3">
