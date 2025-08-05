@@ -835,15 +835,22 @@ Users ready to make a purchase or take action.
           <div className="max-w-4xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setCourseView('overview')}
-                  className="flex items-center gap-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Course
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCourseView('overview')}
+                      className="flex items-center gap-2"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      Back to Course
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Return to the course overview and module selection</p>
+                  </TooltipContent>
+                </Tooltip>
                 <Separator orientation="vertical" className="h-6" />
                 <div>
                   <h1 className="text-xl font-semibold">{currentLesson.title}</h1>
