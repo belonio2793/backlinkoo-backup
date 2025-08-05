@@ -215,15 +215,15 @@ class PaymentIntegrationService {
         })
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
         return {
           success: false,
-          error: errorData.error || 'Subscription creation failed'
+          error: data.error || 'Subscription creation failed'
         };
       }
 
-      const data = await response.json();
       return {
         success: true,
         url: data.url,
