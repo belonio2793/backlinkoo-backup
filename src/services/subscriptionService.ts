@@ -178,7 +178,9 @@ export class SubscriptionService {
         } else if (errorMessage.includes('price') || errorMessage.includes('priceId')) {
           errorMessage = 'Invalid pricing configuration. Please contact support.';
         } else if (errorMessage.includes('non-2xx')) {
-          errorMessage = 'Server configuration error. The payment system returned an error response.';
+          errorMessage = 'Server configuration error. The payment system returned an error response. Please verify Stripe webhook configuration.';
+        } else if (errorMessage.includes('No such price')) {
+          errorMessage = 'Invalid Stripe price ID. Please verify your Stripe configuration and ensure the price exists.';
         }
 
         logError('Subscription creation error', error);
