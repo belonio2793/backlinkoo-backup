@@ -148,7 +148,7 @@ export function CourseProgressDashboard() {
       </div>
 
       {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -162,46 +162,6 @@ export function CourseProgressDashboard() {
               <BookOpen className="h-8 w-8 text-blue-600" />
             </div>
             <Progress value={progressPercentage} className="mt-3 h-2" />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Time Invested</p>
-                <p className="text-3xl font-bold">{courseStats.completedTime}</p>
-                <p className="text-sm text-muted-foreground">of {courseStats.totalTime}</p>
-              </div>
-              <Clock className="h-8 w-8 text-green-600" />
-            </div>
-            <Progress value={timeProgressPercentage} className="mt-3 h-2" />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Average Score</p>
-                <p className="text-3xl font-bold">{courseStats.averageScore}%</p>
-                <p className="text-sm text-muted-foreground">Quiz Performance</p>
-              </div>
-              <Star className="h-8 w-8 text-yellow-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Class Rank</p>
-                <p className="text-3xl font-bold">#{courseStats.rank}</p>
-                <p className="text-sm text-muted-foreground">of {courseStats.totalStudents.toLocaleString()}</p>
-              </div>
-              <Trophy className="h-8 w-8 text-purple-600" />
-            </div>
           </CardContent>
         </Card>
       </div>
