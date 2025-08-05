@@ -640,6 +640,10 @@ export class ContentFormatter {
       // Fix corrupted style attributes with multiple encoding levels
       .replace(/style="[^"]*(&amp;lt;|&lt;)[^"]*(&amp;gt;|&gt;)[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
 
+      // Fix highly corrupted style attributes with embedded HTML
+      .replace(/style="[^"]*&lt;\/p&gt;[^"]*&lt;h[1-6]&gt;[^"]*&lt;\/h[1-6]&gt;[^"]*&lt;p&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      .replace(/style="[^"]*color:[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+
       // Clean up any remaining double-encoded entities
       .replace(/&amp;lt;\s*\/?\s*[a-zA-Z]+[^&]*&amp;gt;/g, '')
       .replace(/&lt;\s*\/?\s*[a-zA-Z]+[^&]*&gt;/g, '')
