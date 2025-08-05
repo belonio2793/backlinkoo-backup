@@ -74,7 +74,7 @@ export function EmailComposer({ contactCount, smtpConfigured, dnsVerified, onCam
           <li><strong>AI-Powered Content Generation:</strong> Create high-quality, SEO-optimized blog posts in minutes</li>
           <li><strong>Natural Contextual Links:</strong> Get backlinks that search engines love</li>
           <li><strong>Instant Publishing:</strong> Go live immediately with professional content</li>
-          <li><strong>Credit-Based System:</strong> Pay only for what you use, starting at $0.70 per backlink</li>
+          <li><strong>Credit-Based System:</strong> Pay only for what you use, starting at $1.40 per backlink</li>
         </ul>
         
         <h3>💡 Perfect for Your Business</h3>
@@ -125,7 +125,7 @@ export function EmailComposer({ contactCount, smtpConfigured, dnsVerified, onCam
         
         <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
           <h3 style="color: #ff6b6b; margin-top: 0;">⏰ EXPIRES IN: <span id="countdown">23:59:45</span></h3>
-          <p style="font-size: 18px; margin: 10px 0;"><s>$0.70</s> <strong style="color: #28a745;">$0.35 per backlink</strong></p>
+          <p style="font-size: 18px; margin: 10px 0;"><s>$1.40</s> <strong style="color: #28a745;">$0.70 per backlink</strong></p>
           <p style="margin-bottom: 0;">That's premium backlinks for less than a cup of coffee!</p>
         </div>
         

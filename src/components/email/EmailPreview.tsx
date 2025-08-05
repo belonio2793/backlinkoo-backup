@@ -48,7 +48,7 @@ export function EmailPreview() {
         <p>We're excited to introduce you to <strong>Backlink ∞</strong> – the revolutionary platform that's transforming how businesses approach SEO and link building.</p>
         <div style="background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0;">
           <h3 style="margin: 0; color: white;">🚀 Get Started Today</h3>
-          <p style="margin: 10px 0;">Professional backlinks starting at $0.70 each</p>
+          <p style="margin: 10px 0;">Professional backlinks starting at $1.40 each</p>
           <a href="https://backlinkoo.com" style="background: white; color: #3B82F6; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Start Free Trial</a>
         </div>
       `
