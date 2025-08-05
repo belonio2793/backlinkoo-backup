@@ -222,7 +222,9 @@ export function EnhancedBlogPreview({
                   </header>
                   
                   <div
-                    dangerouslySetInnerHTML={{ __html: content.content }}
+                    dangerouslySetInnerHTML={{
+                      __html: ContentFormatter.formatBlogContent(content.content || '', content.title)
+                    }}
                     className="prose prose-lg max-w-none
                       prose-headings:text-foreground prose-headings:font-bold
                       prose-p:text-foreground prose-p:leading-relaxed
