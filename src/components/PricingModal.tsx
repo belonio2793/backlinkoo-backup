@@ -443,7 +443,7 @@ export const PricingModal = ({
                             ${calculateCustomPrice(customCredits)}
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            {customCredits} × $0.70 = ${calculateCustomPrice(customCredits)}
+                            {customCredits} × $1.40 = ${calculateCustomPrice(customCredits)}
                           </div>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -539,7 +539,7 @@ export const PricingModal = ({
                   </div>
                   <div className="flex justify-between">
                     <span>Price per credit:</span>
-                    <span>$0.70</span>
+                    <span>$1.40</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
