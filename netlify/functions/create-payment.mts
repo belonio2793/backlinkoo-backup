@@ -129,7 +129,7 @@ async function createPayPalPayment(
     throw new Error("PayPal credentials not configured");
   }
 
-  const environment = Netlify.env.get("VITE_ENVIRONMENT") || 'development';
+  const environment = process.env.VITE_ENVIRONMENT || 'development';
   const baseUrl = environment === 'production' 
     ? 'https://api.paypal.com' 
     : 'https://api.sandbox.paypal.com';
