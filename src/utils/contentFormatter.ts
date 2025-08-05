@@ -449,6 +449,10 @@ export class ContentFormatter {
       // Remove empty headings
       .replace(/<h[1-6][^>]*>\s*<\/h[1-6]>/gi, '')
 
+      // Final cleanup for remaining malformed markdown headings
+      .replace(/^\s*#{1,6}\s*&lt;[^&>]*&gt;\s*$/gm, '') // Remove headings that are just ## &lt;tag&gt;
+      .replace(/^\s*#{1,6}\s*$/gm, '') // Remove empty headings like just ##
+
       // Fix common HTML issues
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
