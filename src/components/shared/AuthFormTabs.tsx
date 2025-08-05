@@ -71,6 +71,9 @@ export function AuthFormTabs({
       return;
     }
 
+    // Close modal immediately when sign in is clicked
+    onSignInStart?.();
+
     setIsLoading(true);
     const currentEmail = loginEmail;
     const currentPassword = loginPassword;
