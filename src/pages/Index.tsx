@@ -839,10 +839,10 @@ const Index = () => {
                 <div className="text-center">
                   <div className="text-3xl font-semibold text-gray-900 mb-2">
                     <span className="text-xl font-mono">Total: </span>
-                    <span>${customCredits > 0 ? (customCredits * 0.70).toFixed(2) : '0.00'}</span>
+                    <span>${customCredits > 0 ? (customCredits * 1.40).toFixed(2) : '0.00'}</span>
                   </div>
                   <div className="text-sm text-gray-500 font-mono">
-                    $0.70 per credit
+                    $1.40 per credit
                   </div>
                 </div>
 
