@@ -23,6 +23,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
+import { ExcerptCleaner } from '@/utils/excerptCleaner';
 
 interface TrialPost {
   id: string;
