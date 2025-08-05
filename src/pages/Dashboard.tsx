@@ -1322,9 +1322,9 @@ const Dashboard = () => {
                     <div className="text-2xl font-bold">{credits}</div>
                     <p className="text-xs text-muted-foreground">
                       {isPremiumSubscriber ? (
-                        <>$0.70 per credit • Premium subscriber</>
+                        <>$1.40 per credit • Premium subscriber</>
                       ) : (
-                        <>$0.70 per credit</>
+                        <>$1.40 per credit</>
                       )}
                     </p>
                   </CardContent>
