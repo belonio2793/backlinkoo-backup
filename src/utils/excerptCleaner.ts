@@ -149,6 +149,33 @@ export class ExcerptCleaner {
   }
 
   /**
+   * Remove content fragments and repetitive patterns
+   */
+  private static removeContentFragments(text: string, title?: string): string {
+    if (!text) return text;
+
+    let cleanText = text;
+
+    // Remove sentences that are just repetitions of title words
+    if (title) {
+      const titleWords = title.toLowerCase().split(/\s+/).filter(word => word.length > 3);
+      titleWords.forEach(word => {
+        // Remove sentences that start with title words followed by content
+        const pattern = new RegExp(`^[^.!?]*?\\b${this.escapeRegex(word)}\\b[^.!?]*?[.!?]\\s*`, 'gi');
+        cleanText = cleanText.replace(pattern, '');
+      });
+    }
+
+    // Remove content that starts with common article patterns
+    cleanText = cleanText
+      .replace(/^(In this article|In this guide|This article|This guide|In this post)[^.!?]*?[.!?]\s*/gi, '')
+      .replace(/^(Are you|Do you|Have you)[^.!?]*?[.!?]\s*/gi, '')
+      .replace(/^(Welcome to|Introduction to)[^.!?]*?[.!?]\s*/gi, '');
+
+    return cleanText;
+  }
+
+  /**
    * Escape special regex characters
    */
   private static escapeRegex(text: string): string {
