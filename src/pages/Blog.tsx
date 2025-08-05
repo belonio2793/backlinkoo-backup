@@ -385,7 +385,7 @@ export function Blog() {
           <div className="relative z-10">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-3xl font-bold mb-2">💾 Save Blog Posts to Dashboard</h2>
+                <h2 className="text-3xl font-bold mb-2">�� Save Blog Posts to Dashboard</h2>
                 <p className="text-blue-100 text-lg mb-4">
                   Save your favorite blog posts to your personal dashboard! Access them anytime and prevent auto-deletion.
                 </p>
@@ -523,10 +523,16 @@ export function Blog() {
       <Footer />
 
       {/* Pricing Modal */}
-      <PricingModal
-        isOpen={pricingModalOpen}
-        onClose={() => setPricingModalOpen(false)}
-        onAuthSuccess={(user) => {
+      <EnhancedUnifiedPaymentModal
+        isOpen={paymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+        defaultTab={paymentDefaultTab}
+        onSuccess={() => {
+          setPaymentModalOpen(false);
+          toast({
+            title: "Payment Successful!",
+            description: "Your purchase has been completed successfully.",
+          });
           toast({
             title: "Welcome!",
             description: "You have been successfully signed in. Continue with your purchase.",
