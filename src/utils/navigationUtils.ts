@@ -13,13 +13,19 @@ export interface NavigationConfig {
  */
 export const navigateToSection = (config: NavigationConfig): void => {
   const { route, hash, tab } = config;
-  
+
   if (hash) {
     // If we're already on the target route, just update the hash
     if (window.location.pathname === route) {
-      window.location.hash = hash;
-      
-      // Trigger manual scroll after hash change
+      // Update hash without triggering page reload
+      history.replaceState(null, '', `${route}#${hash}`);
+
+      // Dispatch custom event for components to listen to
+      window.dispatchEvent(new CustomEvent('dashboardTabChange', {
+        detail: { tab: tab || hash, hash }
+      }));
+
+      // Trigger manual scroll after a brief delay
       setTimeout(() => {
         const element = document.querySelector(`[data-section="${tab || hash}"]`);
         if (element) {
