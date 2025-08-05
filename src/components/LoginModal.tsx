@@ -18,7 +18,7 @@ interface LoginModalProps {
   pendingAction?: string; // Description of what user was trying to access
 }
 
-export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login" }: LoginModalProps) {
+export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login", pendingAction }: LoginModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
