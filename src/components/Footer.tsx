@@ -174,9 +174,11 @@ export const Footer = () => {
         onClose={() => {
           setShowLoginModal(false);
           setPendingNavigation(null);
+          setPendingActionDescription("");
         }}
         onAuthSuccess={handleAuthSuccess}
-        defaultTab="login"
+        defaultTab="signup" // Promote signup for new users
+        pendingAction={pendingActionDescription}
       />
     </footer>
   );
