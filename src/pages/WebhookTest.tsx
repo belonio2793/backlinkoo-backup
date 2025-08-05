@@ -732,33 +732,89 @@ const WebhookTest: React.FC = () => {
         </div>
       )}
 
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Environment Status</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Alert>
-            <Settings className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Testing Mode:</strong> This test uses mock webhook events and the development environment.
-              For production testing, use the Stripe Dashboard's webhook testing tools or Stripe CLI.
-            </AlertDescription>
-          </Alert>
-          
-          <Separator className="my-4" />
-          
-          <div className="space-y-2 text-sm">
-            <p><strong>Webhook URL:</strong> <code>/api/webhook</code></p>
-            <p><strong>Supported Events:</strong></p>
-            <ul className="list-disc list-inside ml-4 space-y-1">
-              <li><code>checkout.session.completed</code> - One-time payment completion</li>
-              <li><code>invoice.payment_succeeded</code> - Subscription payment success</li>
-              <li><code>customer.subscription.deleted</code> - Subscription cancellation</li>
-              <li><code>invoice.payment_failed</code> - Payment failure handling</li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Payment Modals That Use These Webhooks</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4 text-sm">
+              <div>
+                <h4 className="font-medium text-blue-600 mb-2">Credits Purchase Modals:</h4>
+                <ul className="list-disc list-inside ml-4 space-y-1 text-gray-600">
+                  <li><code>EnhancedUnifiedPaymentModal</code> - Main payment modal</li>
+                  <li><code>PricingModal</code> - Pricing page checkout</li>
+                  <li><code>PaymentModal</code> - Simple payment modal</li>
+                  <li><code>BuyCreditsButton</code> - Universal credit triggers</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-purple-600 mb-2">Premium Subscription Modals:</h4>
+                <ul className="list-disc list-inside ml-4 space-y-1 text-gray-600">
+                  <li><code>PremiumCheckoutModal</code> - Premium subscription checkout</li>
+                  <li><code>EnhancedPremiumCheckoutModal</code> - Enhanced premium modal</li>
+                  <li><code>UpgradeToPremiumButton</code> - Universal premium triggers</li>
+                  <li><code>StreamlinedPremiumCheckout</code> - Streamlined premium flow</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-green-600 mb-2">Guest Checkout Support:</h4>
+                <ul className="list-disc list-inside ml-4 space-y-1 text-gray-600">
+                  <li>All modals support guest checkout for credits</li>
+                  <li>Premium subscriptions require user accounts</li>
+                  <li>Guest purchases are tracked separately</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Environment Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Alert>
+              <Settings className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Testing Mode:</strong> This test uses mock webhook events and the development environment.
+                For production testing, use the Stripe Dashboard's webhook testing tools or Stripe CLI.
+              </AlertDescription>
+            </Alert>
+
+            <Separator className="my-4" />
+
+            <div className="space-y-2 text-sm">
+              <p><strong>Webhook URL:</strong> <code>/api/webhook</code></p>
+              <p><strong>Supported Events:</strong></p>
+              <ul className="list-disc list-inside ml-4 space-y-1">
+                <li><code>checkout.session.completed</code> - One-time payment completion</li>
+                <li><code>invoice.payment_succeeded</code> - Subscription payment success</li>
+                <li><code>customer.subscription.deleted</code> - Subscription cancellation</li>
+                <li><code>invoice.payment_failed</code> - Payment failure handling</li>
+              </ul>
+
+              <Separator className="my-2" />
+
+              <p><strong>Credit Packages Tested:</strong></p>
+              <ul className="list-disc list-inside ml-4 space-y-1">
+                <li>50 credits - $35.00</li>
+                <li>100 credits - $70.00 (Popular)</li>
+                <li>250 credits - $175.00</li>
+                <li>500 credits - $350.00 (Enterprise)</li>
+              </ul>
+
+              <p><strong>Premium Plans Tested:</strong></p>
+              <ul className="list-disc list-inside ml-4 space-y-1">
+                <li>Monthly - $29.00/month</li>
+                <li>Yearly - $290.00/year (Save $298)</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
