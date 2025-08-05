@@ -38,7 +38,7 @@ Your Backlinkoo platform is now fully integrated with all MCP services and ready
 |---------------|---------|--------|
 | `api-status` | System health monitoring | ✅ Active |
 | `chatgpt` | ChatGPT integration | ✅ Active |
-| `generate-openai` | OpenAI content generation | �� Active |
+| `generate-openai` | OpenAI content generation | ✅ Active |
 | `global-blog-generator` | Blog management system | ✅ Active |
 | `send-email` | Email notifications | ✅ Active |
 | `claim-post` | Post claiming system | ✅ Active |
