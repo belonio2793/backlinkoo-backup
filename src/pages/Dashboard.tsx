@@ -1157,14 +1157,11 @@ const Dashboard = () => {
                     className="px-2 sm:px-4 gap-1"
                   >
                     <User className="h-4 w-4" />
-                    <span className="hidden sm:inline">
-                      {user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Account'}
-                    </span>
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onClick={() => setIsProfileOpen(true)}>
+                  <DropdownMenuItem onClick={() => setIsProfileOpen(true)} className="justify-center">
                     <Settings className="mr-2 h-4 w-4" />
                     Profile Settings
                   </DropdownMenuItem>
