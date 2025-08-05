@@ -745,7 +745,6 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      console.log('🔄 Manual refresh triggered');
                       setUseFallbackData(true);
                       if (refreshPremium) refreshPremium();
                     }}
