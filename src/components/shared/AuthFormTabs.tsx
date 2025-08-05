@@ -93,8 +93,8 @@ export function AuthFormTabs({
     onSignInStart?.();
 
     setIsLoading(true);
-    const currentEmail = loginEmail;
-    const currentPassword = loginPassword;
+    const currentEmail = trimmedEmail;
+    const currentPassword = trimmedPassword;
 
     try {
       const result = await AuthService.signIn({
