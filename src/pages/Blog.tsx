@@ -49,7 +49,8 @@ export function Blog() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'trending'>('newest');
-  const [pricingModalOpen, setPricingModalOpen] = useState(false);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentDefaultTab, setPaymentDefaultTab] = useState<'credits' | 'premium'>('credits');
 
   useEffect(() => {
     const loadBlogPosts = async () => {
