@@ -148,7 +148,7 @@ export function SystemTest() {
             <Badge variant="outline" className="ml-auto">Live Testing</Badge>
           </CardTitle>
           <p className="text-gray-600">
-            Testing the complete blog generation pipeline with the Beyonc�� example case
+            Testing the complete blog generation pipeline with the Beyoncé example case
           </p>
         </CardHeader>
         <CardContent>

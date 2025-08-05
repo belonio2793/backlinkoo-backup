@@ -312,7 +312,7 @@ export function SEOScoreDisplay({
                         <div className="mt-2 text-xs space-y-1">
                           <div className="flex justify-between">
                             <span>Length ({analysis.details.content.wordCount} words)</span>
-                            {analysis.details.content.optimalLength ? '��' : '✗'}
+                            {analysis.details.content.optimalLength ? '✓' : '✗'}
                           </div>
                           <div className="flex justify-between">
                             <span>Has Headings</span>

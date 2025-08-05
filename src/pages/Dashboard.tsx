@@ -11,6 +11,7 @@ import { Footer } from "@/components/Footer";
 
 import { PremiumService } from "@/services/premiumService";
 import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
+import { Footer } from "@/components/Footer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -185,7 +186,12 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           setError('NOT_FOUND');
         }
       } else {
+        console.log(`⭐ Successfully loaded ${finalPosts.length} blog posts`);
+      >
         console.log(`✅ Successfully loaded ${finalPosts.length} blog posts`);
+
+        
+        >
         setError(null);
 
         // Show success notification on first load
@@ -451,7 +457,9 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div>• Database Posts: {debugInfo.dbPosts}</div>
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
+              <div>• Displayed: {debugInfo.displayedPosts}</div>
               <div>📊 Displayed: {debugInfo.displayedPosts}</div>
+        
               <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '✅'}</div>
             </div>
           </div>
@@ -786,6 +794,89 @@ const Dashboard = () => {
       subscription?.unsubscribe();
     };
   }, [navigate]);
+
+  // Handle hash navigation for direct section access
+  useEffect(() => {
+    const handleHashNavigation = () => {
+      const hash = window.location.hash.substring(1); // Remove the # symbol
+
+      // Map hash values to tab values
+      const hashToTabMap: { [key: string]: string } = {
+        'keyword-research': 'keyword-research',
+        'rank-tracker': 'rank-tracker',
+        'automation-link-building': 'automation-link-building',
+        'campaigns': 'campaigns',
+        'overview': 'overview',
+        'seo-tools-automation': 'seo-tools'
+      };
+
+      const targetTab = hashToTabMap[hash];
+      if (targetTab && user) {
+        // Handle special case for SEO Tools automation
+        if (hash === 'seo-tools-automation') {
+          setActiveSection('seo-tools');
+          // Wait for section to render, then set the automation tab
+          setTimeout(() => {
+            // Dispatch custom event to set the SEO Tools tab to automation
+            window.dispatchEvent(new CustomEvent('seoToolsTabChange', {
+              detail: { tab: 'automation-link-building' }
+            }));
+          }, 200);
+        } else {
+          setActiveTab(targetTab);
+        }
+
+        // Scroll to the tab content after a brief delay to ensure render
+        setTimeout(() => {
+          const element = document.querySelector(`[data-section="${targetTab}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      }
+    };
+
+    const handleCustomTabChange = (event: CustomEvent) => {
+      const { tab, hash } = event.detail;
+      if (tab && user) {
+        // Handle special case for SEO Tools automation
+        if (hash === 'seo-tools-automation') {
+          setActiveSection('seo-tools');
+          // Wait for section to render, then set the automation tab
+          setTimeout(() => {
+            // Dispatch custom event to set the SEO Tools tab to automation
+            window.dispatchEvent(new CustomEvent('seoToolsTabChange', {
+              detail: { tab: 'automation-link-building' }
+            }));
+          }, 200);
+        } else {
+          setActiveTab(tab);
+        }
+
+        // Scroll to the tab content after a brief delay to ensure render
+        setTimeout(() => {
+          const element = document.querySelector(`[data-section="${tab}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      }
+    };
+
+    // Handle initial hash on page load
+    handleHashNavigation();
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashNavigation);
+
+    // Listen for custom tab change events
+    window.addEventListener('dashboardTabChange', handleCustomTabChange as EventListener);
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashNavigation);
+      window.removeEventListener('dashboardTabChange', handleCustomTabChange as EventListener);
+    };
+  }, [user]);
 
 
 
@@ -1181,7 +1272,7 @@ const Dashboard = () => {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="overview" className="space-y-6">
+            <TabsContent value="overview" className="space-y-6" data-section="overview">
               {isFirstTimeUser && credits === 0 && !isPremiumSubscriber && (
                 <Card className="border-blue-200 bg-blue-50">
                   <CardHeader>
@@ -1576,7 +1667,7 @@ const Dashboard = () => {
               )}
             </TabsContent>
 
-            <TabsContent value="campaigns" className="space-y-6">
+            <TabsContent value="campaigns" className="space-y-6" data-section="campaigns">
               {showCampaignForm ? (
                 <CampaignForm 
                   onSuccess={handleCampaignSuccess}
@@ -1669,15 +1760,15 @@ const Dashboard = () => {
               )}
             </TabsContent>
 
-            <TabsContent value="keyword-research">
+            <TabsContent value="keyword-research" data-section="keyword-research">
               <KeywordResearchTool />
             </TabsContent>
 
-            <TabsContent value="no-hands-seo">
+            <TabsContent value="automation-link-building" data-section="automation-link-building">
               <NoHandsSEODashboard />
             </TabsContent>
 
-            <TabsContent value="rank-tracker">
+            <TabsContent value="rank-tracker" data-section="rank-tracker">
               <RankingTracker />
             </TabsContent>
               </Tabs>

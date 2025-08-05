@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
@@ -124,7 +125,7 @@ export function SuperEnhancedBlogListing() {
           if (user) {
             console.log(`🔍 Fetching posts for user: ${user.id}`);
             blogPosts = await EnhancedBlogClaimService.getUserClaimedPosts(user.id);
-            console.log(`��� Found ${blogPosts.length} user posts`);
+            console.log(`✅ Found ${blogPosts.length} user posts`);
           }
           break;
         default:
@@ -637,6 +638,9 @@ export function SuperEnhancedBlogListing() {
 
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

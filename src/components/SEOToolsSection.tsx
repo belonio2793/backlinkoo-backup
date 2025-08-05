@@ -107,6 +107,22 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
     }
   }, [user]);
 
+  // Listen for custom events to switch to automation tab
+  useEffect(() => {
+    const handleSeoToolsTabChange = (event: CustomEvent) => {
+      const { tab } = event.detail;
+      if (tab) {
+        setActiveTab(tab);
+      }
+    };
+
+    window.addEventListener('seoToolsTabChange', handleSeoToolsTabChange as EventListener);
+
+    return () => {
+      window.removeEventListener('seoToolsTabChange', handleSeoToolsTabChange as EventListener);
+    };
+  }, []);
+
   const checkSubscriptionStatus = async () => {
     try {
       const status = await SubscriptionService.getSubscriptionStatus(user);
@@ -421,10 +437,10 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="keyword-research">Keyword Research</TabsTrigger>
           <TabsTrigger value="rank-tracker">Rankings</TabsTrigger>
-          <TabsTrigger value="no-hands-seo">Backlink ∞ Automation Link Building (beta)</TabsTrigger>
+          <TabsTrigger value="automation-link-building">Backlink ∞ Automation Link Building (beta)</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="no-hands-seo" className="space-y-6">
+        <TabsContent value="automation-link-building" className="space-y-6">
           <FeatureAccessGuard
             feature="automatedCampaigns"
             featureName="Automated Link Building"

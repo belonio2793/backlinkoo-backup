@@ -1,7 +1,42 @@
 import { Link } from "react-router-dom";
-
+import { useState } from "react";
+import { navigateToSection, NAVIGATION_CONFIGS } from "@/utils/navigationUtils";
+import { useAuth } from "@/hooks/useAuth";
+import { LoginModal } from "@/components/LoginModal";
 
 export const Footer = () => {
+  const { user } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<any>(null);
+
+  const handleProtectedNavigation = (config: any) => {
+    if (user) {
+      // User is authenticated, navigate directly
+      navigateToSection(config);
+    } else {
+      // User is not authenticated, store pending navigation and show login modal
+      setPendingNavigation(config);
+      setShowLoginModal(true);
+    }
+  };
+
+  const handleAuthSuccess = (authenticatedUser: any) => {
+    setShowLoginModal(false);
+
+    // If there's a pending navigation, execute it after successful auth
+    if (pendingNavigation) {
+      setTimeout(() => {
+        if (pendingNavigation.hash) {
+          // Section navigation with hash
+          navigateToSection(pendingNavigation);
+        } else {
+          // Simple route navigation
+          window.location.href = pendingNavigation.route;
+        }
+        setPendingNavigation(null);
+      }, 300); // Quick redirect for seamless experience
+    }
+  };
   return (
     <footer className="bg-gray-50 border-t border-gray-200 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -10,17 +45,30 @@ export const Footer = () => {
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Features</h3>
             <div className="space-y-2">
-              <Link
-                to="/dashboard"
-                className="block text-gray-600 hover:text-gray-900 text-sm"
+              <button
+                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.CAMPAIGNS)}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+                title={!user ? "Sign in to access Campaign Management" : "Go to Campaign Management"}
               >
                 Campaign Management
-              </Link>
-              <Link
-                to="/no-hands-seo"
-                className="block text-gray-600 hover:text-gray-900 text-sm"
+              </button>
+              <button
+                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.BACKLINK_AUTOMATION)}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
               >
                 Backlink ∞ Automation Link Building (beta)
+
+              </button>
+              <button
+                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.KEYWORD_RESEARCH)}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+              >
+                Keyword Research
+              </button>
+              <button
+                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.RANK_TRACKER)}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+              >
               </Link>
               <Link
                 to="/dashboard#keyword-research"
@@ -31,9 +79,10 @@ export const Footer = () => {
               <Link
                 to="/dashboard#rank-tracker"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
+
               >
                 Rank Tracker
-              </Link>
+              </button>
               <Link
                 to="/dashboard#backlink-automation"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
@@ -53,12 +102,19 @@ export const Footer = () => {
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Merchant Tools</h3>
             <div className="space-y-2">
-              <Link
-                to="/backlink-report"
-                className="block text-gray-600 hover:text-gray-900 text-sm"
+              <button
+                onClick={() => {
+                  if (user) {
+                    window.location.href = '/backlink-report';
+                  } else {
+                    setPendingNavigation({ route: '/backlink-report' });
+                    setShowLoginModal(true);
+                  }
+                }}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
               >
                 Backlink Reports
-              </Link>
+              </button>
             </div>
           </div>
 
@@ -91,12 +147,19 @@ export const Footer = () => {
               >
                 Affiliate Program
               </Link>
-              <Link
-                to="/admin"
-                className="block text-gray-600 hover:text-gray-900 text-sm"
+              <button
+                onClick={() => {
+                  if (user) {
+                    window.location.href = '/admin';
+                  } else {
+                    setPendingNavigation({ route: '/admin' });
+                    setShowLoginModal(true);
+                  }
+                }}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
               >
                 Admin Dashboard
-              </Link>
+              </button>
               <a
                 href="mailto:support@backlinkoo.com"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
@@ -118,6 +181,17 @@ export const Footer = () => {
           </div>
         </div>
       </div>
+
+      {/* Login Modal for Authentication */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => {
+          setShowLoginModal(false);
+          setPendingNavigation(null);
+        }}
+        onAuthSuccess={handleAuthSuccess}
+        defaultTab="login"
+      />
     </footer>
   );
 };

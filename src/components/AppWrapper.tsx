@@ -128,7 +128,7 @@ export const AppWrapper = () => {
             <ReportViewer />
           </EmailVerificationGuard>
         } />
-        <Route path="/no-hands-seo" element={
+        <Route path="/automation-link-building" element={
           <EmailVerificationGuard>
             <NoHandsSEO />
           </EmailVerificationGuard>

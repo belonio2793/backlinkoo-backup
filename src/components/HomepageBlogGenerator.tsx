@@ -277,7 +277,7 @@ export function HomepageBlogGenerator() {
 
       // Verify the blog post is accessible
       if (blogPost.slug) {
-        console.log('��� Blog post details:', {
+        console.log('📝 Blog post details:', {
           slug: blogPost.slug,
           id: blogPost.id,
           title: blogPost.title,

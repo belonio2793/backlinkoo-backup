@@ -117,7 +117,7 @@ class DirectSupabaseMetricsService {
 
       return count || 0;
     } catch (error: any) {
-      console.error('��� Error getting active users:', error);
+      console.error('❌ Error getting active users:', error);
       return 0;
     }
   }

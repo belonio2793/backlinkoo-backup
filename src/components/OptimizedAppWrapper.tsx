@@ -255,7 +255,7 @@ export const OptimizedAppWrapper = () => {
               <LazyReportViewer />
             </EmailVerificationGuard>
           } />
-          <Route path="/no-hands-seo" element={
+          <Route path="/automation-link-building" element={
             <EmailVerificationGuard>
               <LazyNoHandsSEO />
             </EmailVerificationGuard>

@@ -1,15 +1,21 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
-import { Infinity, Trash2 } from 'lucide-react';
+import { Infinity, Trash2, Home } from 'lucide-react';
 import { LoginModal } from './LoginModal';
 import { AuthService } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { navigateToSection, NAVIGATION_CONFIGS } from '@/utils/navigationUtils';
 
-export function Header() {
+interface HeaderProps {
+  showHomeLink?: boolean;
+}
+
+export function Header({ showHomeLink = true }: HeaderProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -102,6 +108,19 @@ export function Header() {
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
           </div>
           <div className="flex items-center gap-4">
+            {/* Home Link - Show only on non-home pages */}
+            {showHomeLink && location.pathname !== '/' && (
+              <Button
+                onClick={() => navigate('/')}
+                variant="outline"
+                size="sm"
+                className="bg-transparent hover:bg-green-50/50 border border-green-200/60 text-green-600 hover:text-green-700 hover:border-green-300/80 transition-all duration-200 font-medium px-4 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+              >
+                <Home className="h-4 w-4 mr-2" />
+                Home
+              </Button>
+            )}
+
             {/* Clear Cache Button - Always visible */}
             <Button
               onClick={handleClearCacheAndCookies}

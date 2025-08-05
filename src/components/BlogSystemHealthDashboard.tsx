@@ -297,7 +297,7 @@ export function BlogSystemHealthDashboard() {
       {diagnostic && diagnostic.overall.status !== 'healthy' && (
         <Card>
           <CardHeader>
-            <CardTitle>��️ Fix Missing Tables</CardTitle>
+            <CardTitle>🛠️ Fix Missing Tables</CardTitle>
             <p className="text-sm text-gray-600">
               Run these SQL commands in your Supabase SQL Editor to fix missing components:
             </p>
