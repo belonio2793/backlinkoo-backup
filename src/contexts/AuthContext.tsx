@@ -24,7 +24,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     user,
-    isLoading,
+    isLoading: false, // Always false for instant experience
     isAuthenticated,
     isPremium,
     subscriptionTier,
