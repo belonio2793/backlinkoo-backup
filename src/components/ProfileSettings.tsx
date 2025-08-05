@@ -198,7 +198,6 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   // Force refresh premium status when component loads
   useEffect(() => {
     if (user && refreshPremium) {
-      console.log('🔄 Refreshing premium status for ProfileSettings...');
       refreshPremium();
     }
   }, [user, refreshPremium]);
@@ -226,7 +225,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     const getDirectProfileData = async () => {
       if (user && (premiumLoading || useFallbackData)) {
         try {
-          console.log('��� Direct profile query fallback...');
+          console.log('🔄 Direct profile query fallback...');
           const { data: profile, error } = await supabase
             .from('profiles')
             .select('subscription_tier, role, subscription_status')
