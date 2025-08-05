@@ -50,27 +50,43 @@ export const Footer = () => {
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Features</h3>
             <div className="space-y-2">
               <button
-                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.CAMPAIGNS)}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+                onClick={() => {
+                  if (isLoading) return;
+                  handleProtectedNavigation(NAVIGATION_CONFIGS.CAMPAIGNS);
+                }}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
                 title={!user ? "Sign in to access Campaign Management" : "Go to Campaign Management"}
+                disabled={isLoading}
               >
                 Campaign Management
               </button>
               <button
-                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.BACKLINK_AUTOMATION)}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+                onClick={() => {
+                  if (isLoading) return;
+                  handleProtectedNavigation(NAVIGATION_CONFIGS.BACKLINK_AUTOMATION);
+                }}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                disabled={isLoading}
               >
                 Backlink ∞ Automation Link Building (beta)
               </button>
               <button
-                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.KEYWORD_RESEARCH)}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+                onClick={() => {
+                  if (isLoading) return;
+                  handleProtectedNavigation(NAVIGATION_CONFIGS.KEYWORD_RESEARCH);
+                }}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                disabled={isLoading}
               >
                 Keyword Research
               </button>
               <button
-                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.RANK_TRACKER)}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+                onClick={() => {
+                  if (isLoading) return;
+                  handleProtectedNavigation(NAVIGATION_CONFIGS.RANK_TRACKER);
+                }}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                disabled={isLoading}
               >
                 Rank Tracker
               </button>
