@@ -414,4 +414,26 @@ export class ContentFormatter {
       .replace(/\n\s*\n\s*\n/g, '\n\n')
       .trim();
   }
+
+  /**
+   * Fix link styling to ensure all links are visible with proper blue color
+   */
+  private static fixLinkStyling(content: string): string {
+    return content
+      // Fix corrupted color styles (e.g., "color:&lt;/p&gt; # 2 &lt;p&gt; 563eb;")
+      .replace(/style="[^"]*color:[^#]*#[^0-9a-f]*([0-9a-f]{6})[^"]*"/gi, 'style="color:#$1;font-weight:500;text-decoration:none;"')
+
+      // Fix links missing color entirely
+      .replace(/<a([^>]*href[^>]*)style="([^"]*)"([^>]*)>/gi, (match, beforeStyle, styleContent, afterStyle) => {
+        // If style doesn't contain color, add it
+        if (!styleContent.includes('color:')) {
+          const newStyle = `color:#2563eb;font-weight:500;text-decoration:none;${styleContent}`;
+          return `<a${beforeStyle}style="${newStyle}"${afterStyle}>`;
+        }
+        return match;
+      })
+
+      // Ensure all links without any style have proper styling
+      .replace(/<a([^>]*href[^>]*)(?!.*style=)([^>]*)>/gi, '<a$1 style="color:#2563eb;font-weight:500;text-decoration:none;"$2>');
+  }
 }
