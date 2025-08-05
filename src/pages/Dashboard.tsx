@@ -1728,7 +1728,13 @@ const Dashboard = () => {
         onClose={() => setIsPaymentModalOpen(false)}
         defaultTab={paymentDefaultTab}
         onSuccess={() => {
-          setUser(user);
+          setIsPaymentModalOpen(false);
+          toast({
+            title: "Payment Successful!",
+            description: "Your purchase has been completed successfully.",
+          });
+          // Refresh user data if needed
+          window.location.reload();
         }}
       />
 
