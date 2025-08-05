@@ -648,10 +648,23 @@ const Dashboard = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
+    const hash = window.location.hash.replace('#', '');
+
+    // Handle hash-based navigation for specific sections
+    if (hash === 'keyword-research') return 'keyword-research';
+    if (hash === 'rank-tracker') return 'rank-tracker';
+    if (hash === 'backlink-automation') return 'seo-tools';
+
     return urlParams.get('tab') || "overview";
   });
   const [activeSection, setActiveSection] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
+    const hash = window.location.hash.replace('#', '');
+
+    // Handle hash-based navigation for specific sections
+    if (hash === 'keyword-research' || hash === 'rank-tracker') return 'dashboard';
+    if (hash === 'backlink-automation') return 'seo-tools';
+
     return urlParams.get('section') || "dashboard";
   });
   const [isPremiumSubscriber, setIsPremiumSubscriber] = useState(false);
@@ -736,7 +749,7 @@ const Dashboard = () => {
         console.log('🏠 Dashboard - User signed out, redirecting to home...');
         navigate('/');
       } else if (event === 'SIGNED_IN' && session) {
-        console.log('🏠 Dashboard - User signed in, updating user state');
+        console.log('�� Dashboard - User signed in, updating user state');
         setUser(session.user);
       }
     });
