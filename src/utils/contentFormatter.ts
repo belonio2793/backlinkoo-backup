@@ -653,6 +653,18 @@ export class ContentFormatter {
       // Clean up any remaining malformed headings that contain only symbols
       .replace(/<h[1-6][^>]*>\s*[&<>]+\s*<\/h[1-6]>/gi, '')
 
+      // REMOVE DISPLAYED HTML ENTITY TEXT - no code should be visible
+      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>/gi, '') // Remove headings showing just &lt;
+      .replace(/<p[^>]*>\s*h[1-6]&gt;[^<]*<\/p>/gi, '') // Remove paragraphs showing h2&gt; text
+      .replace(/<[^>]*>\s*&lt;\s*<\/[^>]*>/gi, '') // Remove any tag containing just &lt;
+      .replace(/<[^>]*>\s*&gt;\s*<\/[^>]*>/gi, '') // Remove any tag containing just &gt;
+
+      // Remove text fragments that are HTML entities being displayed
+      .replace(/&lt;\s*h[1-6]\s*&gt;/gi, '') // Remove &lt; h2&gt; type patterns
+      .replace(/&lt;\s*\/\s*h[1-6]\s*&gt;/gi, '') // Remove &lt;/h2&gt; type patterns
+      .replace(/&lt;\s*p\s*&gt;/gi, '') // Remove &lt;p&gt; patterns
+      .replace(/&lt;\s*\/\s*p\s*&gt;/gi, '') // Remove &lt;/p&gt; patterns
+
       // Final pass: ensure any remaining ## patterns become proper headings
       .replace(/^\s*##\s+([A-Za-z][^\n]*)/gm, '<h2>$1</h2>')
 
