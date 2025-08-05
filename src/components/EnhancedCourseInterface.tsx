@@ -75,32 +75,43 @@ interface EnhancedCourseInterfaceProps {
 
 // Simple markdown to HTML converter
 const formatMarkdownContent = (content: string): string => {
+  // Helper function to process inline markdown in text
+  const processInlineMarkdown = (text: string): string => {
+    return text
+      // Bold text **text**
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
+      // Italic text *text*
+      .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em class="italic">$1</em>')
+      // Inline code `code`
+      .replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-2 py-1 rounded text-sm font-mono">$1</code>');
+  };
+
   const lines = content.split('\n');
   const formattedLines = lines.map(line => {
-    // Headers
+    // Headers (process inline formatting in headers too)
     if (line.startsWith('### ')) {
-      return `<h3 class="text-lg font-semibold mt-6 mb-3 text-gray-800">${line.substring(4)}</h3>`;
+      return `<h3 class="text-lg font-semibold mt-6 mb-3 text-gray-800">${processInlineMarkdown(line.substring(4))}</h3>`;
     }
     if (line.startsWith('## ')) {
-      return `<h2 class="text-xl font-semibold mt-8 mb-4 text-gray-800">${line.substring(3)}</h2>`;
+      return `<h2 class="text-xl font-semibold mt-8 mb-4 text-gray-800">${processInlineMarkdown(line.substring(3))}</h2>`;
     }
     if (line.startsWith('# ')) {
-      return `<h1 class="text-2xl font-bold mt-8 mb-6 text-gray-900">${line.substring(2)}</h1>`;
+      return `<h1 class="text-2xl font-bold mt-8 mb-6 text-gray-900">${processInlineMarkdown(line.substring(2))}</h1>`;
     }
-    // List items
+    // List items (process inline formatting in list items)
     if (line.startsWith('- ')) {
-      return `<div class="ml-4 mb-2">• ${line.substring(2)}</div>`;
+      return `<div class="ml-4 mb-2">• ${processInlineMarkdown(line.substring(2))}</div>`;
     }
-    // Numbered lists
+    // Numbered lists (process inline formatting in numbered lists)
     if (/^\d+\./.test(line)) {
-      return `<div class="ml-4 mb-2">${line}</div>`;
+      return `<div class="ml-4 mb-2">${processInlineMarkdown(line)}</div>`;
     }
     // Empty lines
     if (line.trim() === '') {
       return '<div class="mb-4"></div>';
     }
-    // Regular paragraphs
-    return `<p class="mb-4">${line}</p>`;
+    // Regular paragraphs (process inline formatting)
+    return `<p class="mb-4">${processInlineMarkdown(line)}</p>`;
   });
 
   return formattedLines.join('');
