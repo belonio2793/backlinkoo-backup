@@ -161,8 +161,8 @@ const Index = () => {
       id: 'starter_100' as const,
       name: 'Starter 100',
       credits: 100,
-      price: 70,
-      pricePerLink: 0.70,
+      price: 140,
+      pricePerLink: 1.40,
       description: 'Perfect for testing our platform',
       features: [
         'High DA backlinks',
@@ -175,8 +175,8 @@ const Index = () => {
       id: 'starter_200' as const,
       name: 'Starter 200',
       credits: 200,
-      price: 140,
-      pricePerLink: 0.70,
+      price: 280,
+      pricePerLink: 1.40,
       description: 'Most popular starting package',
       features: [
         'High DA backlinks',
@@ -190,8 +190,8 @@ const Index = () => {
       id: 'starter_300' as const,
       name: 'Starter 300',
       credits: 300,
-      price: 210,
-      pricePerLink: 0.70,
+      price: 420,
+      pricePerLink: 1.40,
       description: 'Maximum starter value',
       features: [
         'High DA backlinks',
