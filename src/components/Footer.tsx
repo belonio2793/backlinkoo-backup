@@ -50,28 +50,28 @@ export const Footer = () => {
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
                 title={!user ? "Sign in to access Campaign Management" : "Go to Campaign Management"}
               >
-                Campaign Management {!user && <span className="text-xs opacity-60">(Login required)</span>}
+                Campaign Management {!user && <span className="text-xs opacity-50">🔒</span>}
               </button>
               <button
                 onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.BACKLINK_AUTOMATION)}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
                 title={!user ? "Sign in to access Automation Link Building" : "Go to Automation Link Building"}
               >
-                Backlink ∞ Automation Link Building (beta) {!user && <span className="text-xs opacity-60">(Login required)</span>}
+                Backlink ∞ Automation Link Building (beta) {!user && <span className="text-xs opacity-50">🔒</span>}
               </button>
               <button
                 onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.KEYWORD_RESEARCH)}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
                 title={!user ? "Sign in to access Keyword Research" : "Go to Keyword Research"}
               >
-                Keyword Research {!user && <span className="text-xs opacity-60">(Login required)</span>}
+                Keyword Research {!user && <span className="text-xs opacity-50">🔒</span>}
               </button>
               <button
                 onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.RANK_TRACKER)}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
                 title={!user ? "Sign in to access Rank Tracker" : "Go to Rank Tracker"}
               >
-                Rank Tracker {!user && <span className="text-xs opacity-60">(Login required)</span>}
+                Rank Tracker {!user && <span className="text-xs opacity-50">🔒</span>}
               </button>
               <Link
                 to="/blog"
@@ -98,7 +98,7 @@ export const Footer = () => {
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
                 title={!user ? "Sign in to access Backlink Reports" : "Go to Backlink Reports"}
               >
-                Backlink Reports {!user && <span className="text-xs opacity-60">(Login required)</span>}
+                Backlink Reports {!user && <span className="text-xs opacity-50">🔒</span>}
               </button>
             </div>
           </div>
@@ -144,7 +144,7 @@ export const Footer = () => {
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
                 title={!user ? "Sign in to access Admin Dashboard" : "Go to Admin Dashboard"}
               >
-                Admin Dashboard {!user && <span className="text-xs opacity-60">(Login required)</span>}
+                Admin Dashboard {!user && <span className="text-xs opacity-50">🔒</span>}
               </button>
               <a
                 href="mailto:support@backlinkoo.com"
