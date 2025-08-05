@@ -18,6 +18,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ContentFormatter } from '@/utils/contentFormatter';
 
 interface BlogPost {
   id: string;
