@@ -65,7 +65,7 @@ async function createStripePayment(
   email: string,
   originUrl: string
 ): Promise<{ url: string; sessionId: string }> {
-  const stripeSecretKey = Netlify.env.get("STRIPE_SECRET_KEY");
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
   if (!stripeSecretKey) {
     throw new Error("STRIPE_SECRET_KEY is not configured in Netlify environment variables");
