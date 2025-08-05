@@ -19,7 +19,7 @@ interface KeywordData {
   cpc: number;
   trend: 'up' | 'down' | 'stable';
   competition: 'low' | 'medium' | 'high';
-  searchEngine: 'google' | 'bing';
+  searchEngine: 'google';
   location?: string;
   competitorCount?: number;
   topCompetitors?: string[];
