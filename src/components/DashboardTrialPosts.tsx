@@ -316,7 +316,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
           </CardTitle>
           
           <p className="text-sm text-gray-600 line-clamp-2 mt-2">
-            {getExcerpt(post.content || '', post.title)}
+            {getExcerpt(post.content || '')}
           </p>
         </CardHeader>
 
