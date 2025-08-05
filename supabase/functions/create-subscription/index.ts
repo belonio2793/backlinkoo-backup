@@ -90,11 +90,14 @@ serve(async (req) => {
 
     let body: SubscriptionRequest;
     try {
-      body = await req.json();
+      const rawBody = await req.text();
+      console.log("📝 Raw request body:", rawBody);
+      body = JSON.parse(rawBody);
+      console.log("📋 Parsed request body:", body);
     } catch (parseError) {
-      console.error("JSON parse error:", parseError);
+      console.error("❌ JSON parse error:", parseError);
       return new Response(
-        JSON.stringify({ error: "Invalid request format" }),
+        JSON.stringify({ error: "Invalid request format", details: parseError.message }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
