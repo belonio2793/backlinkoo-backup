@@ -38,7 +38,7 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal'>('stripe');
+  const [paymentMethod, setPaymentMethod] = useState<'stripe'>('stripe');
 
   // Debug user state
   console.log('PremiumCheckoutModal - User state:', { user, hasUser: !!user, email: user?.email });
