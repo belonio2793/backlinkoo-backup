@@ -688,6 +688,7 @@ function SuperPostCard({
   isExpiringSoon,
   onClaim,
   onDelete,
+  onPreview,
   claiming,
   deleting,
   index
