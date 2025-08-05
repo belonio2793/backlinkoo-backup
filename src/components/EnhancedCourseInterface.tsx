@@ -695,7 +695,7 @@ Users ready to make a purchase or take action.
               <TooltipTrigger asChild>
                 <Card
                   className={`cursor-pointer transition-all ${
-                    module.id === activeModule ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+                    module.id === activeModule ? 'ring-2 ring-blue-500' : ''
                   } ${module.locked ? 'opacity-60' : ''}`}
                   onClick={() => !module.locked && setActiveModule(module.id)}
                 >
