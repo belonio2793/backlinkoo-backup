@@ -764,7 +764,19 @@ const Dashboard = () => {
 
       const targetTab = hashToTabMap[hash];
       if (targetTab && user) {
-        setActiveTab(targetTab);
+        // Handle special case for SEO Tools automation
+        if (hash === 'seo-tools-automation') {
+          setActiveSection('seo-tools');
+          // Wait for section to render, then set the automation tab
+          setTimeout(() => {
+            // Dispatch custom event to set the SEO Tools tab to automation
+            window.dispatchEvent(new CustomEvent('seoToolsTabChange', {
+              detail: { tab: 'automation-link-building' }
+            }));
+          }, 200);
+        } else {
+          setActiveTab(targetTab);
+        }
 
         // Scroll to the tab content after a brief delay to ensure render
         setTimeout(() => {
@@ -887,7 +899,7 @@ const Dashboard = () => {
       }
 
     } catch (error) {
-      console.error('���� Error fetching user data (using defaults):', error);
+      console.error('🔍 Error fetching user data (using defaults):', error);
 
       // Set safe defaults
       setCredits(0);
@@ -930,7 +942,7 @@ const Dashboard = () => {
         campaignsData = result.data;
         error = result.error;
       } catch (fetchError) {
-        console.warn('��� Campaigns fetch failed, using demo mode');
+        console.warn('📊 Campaigns fetch failed, using demo mode');
         error = fetchError;
       }
 
