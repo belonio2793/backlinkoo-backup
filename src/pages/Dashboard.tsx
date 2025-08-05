@@ -789,9 +789,21 @@ const Dashboard = () => {
     };
 
     const handleCustomTabChange = (event: CustomEvent) => {
-      const { tab } = event.detail;
+      const { tab, hash } = event.detail;
       if (tab && user) {
-        setActiveTab(tab);
+        // Handle special case for SEO Tools automation
+        if (hash === 'seo-tools-automation') {
+          setActiveSection('seo-tools');
+          // Wait for section to render, then set the automation tab
+          setTimeout(() => {
+            // Dispatch custom event to set the SEO Tools tab to automation
+            window.dispatchEvent(new CustomEvent('seoToolsTabChange', {
+              detail: { tab: 'automation-link-building' }
+            }));
+          }, 200);
+        } else {
+          setActiveTab(tab);
+        }
 
         // Scroll to the tab content after a brief delay to ensure render
         setTimeout(() => {
