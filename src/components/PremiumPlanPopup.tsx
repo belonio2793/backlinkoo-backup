@@ -17,6 +17,7 @@ import {
   CreditCard,
   Shield,
   CheckCircle,
+  CheckCircle2,
   X,
   Lock,
   Star,
