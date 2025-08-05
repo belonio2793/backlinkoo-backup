@@ -421,10 +421,10 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="keyword-research">Keyword Research</TabsTrigger>
           <TabsTrigger value="rank-tracker">Rankings</TabsTrigger>
-          <TabsTrigger value="no-hands-seo">Backlink ∞ Automation Link Building (beta)</TabsTrigger>
+          <TabsTrigger value="automation-link-building">Backlink ∞ Automation Link Building (beta)</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="no-hands-seo" className="space-y-6">
+        <TabsContent value="automation-link-building" className="space-y-6">
           <FeatureAccessGuard
             feature="automatedCampaigns"
             featureName="Automated Link Building"
