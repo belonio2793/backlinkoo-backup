@@ -33,6 +33,7 @@ The system captures three essential inputs to generate targeted content:
 - **Hosting**: Netlify for reliable, scalable deployment
 - **Database**: Supabase for robust data management and user accounts
 - **AI Engine**: OpenAI ChatGPT-3.5-turbo model
+- **Keyword Research**: Google Ads API for official search volume data
 - **Styling**: TailwindCSS with custom CSS for premium blog templates
 - **Environment**: Netlify Environment Variables for secure API key management
 
@@ -101,7 +102,7 @@ Our system uses three sophisticated prompt patterns, randomly selected for conte
 - **Analytics**: Engagement tracking and performance metrics
 - **Content Moderation**: Quality assurance and spam prevention
 
-## 🚀 Getting Started
+## ���� Getting Started
 
 ### Prerequisites
 - Node.js 18+ 
