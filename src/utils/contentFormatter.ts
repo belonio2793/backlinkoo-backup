@@ -671,6 +671,10 @@ export class ContentFormatter {
       .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip[^<]*<\/p>/gi, '<h2>Pro Tip</h2>')
       .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;([^<]*)<\/p>/gi, '<h2>$1</h2>')
 
+      // Handle the exact pattern with data-loc attributes from the DOM
+      .replace(/<h[1-6][^>]*data-loc[^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*data-loc[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip[^<]*<\/p>/gi, '<h2>Pro Tip</h2>')
+      .replace(/<h[1-6][^>]*data-loc[^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*data-loc[^>]*>\s*h[1-6]&gt;([^<]*)<\/p>/gi, '<h2>$1</h2>')
+
       // Remove standalone malformed heading + paragraph combinations
       .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>[^<]*h[1-6]&gt;[^<]*<\/p>/gi, '')
 
