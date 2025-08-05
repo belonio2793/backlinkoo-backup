@@ -540,8 +540,8 @@ Users ready to make a purchase or take action.
 
   const markLessonComplete = (lessonId: string) => {
     setUserProgress(prev => ({ ...prev, [lessonId]: true }));
-    
-    // Update lesson completed status
+
+    // Update lesson completed status in course modules
     courseModules.forEach(module => {
       const lesson = module.lessons.find(l => l.id === lessonId);
       if (lesson) {
@@ -549,6 +549,14 @@ Users ready to make a purchase or take action.
         module.completedLessons += 1;
       }
     });
+
+    // Update current lesson state if it's the one being completed
+    if (currentLesson && currentLesson.id === lessonId) {
+      setCurrentLesson({
+        ...currentLesson,
+        completed: true
+      });
+    }
 
     toast({
       title: "Lesson Completed! 🎉",
