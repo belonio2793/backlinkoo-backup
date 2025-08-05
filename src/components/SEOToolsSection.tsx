@@ -375,9 +375,18 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
                 }
                 console.log('Opening premium popup for non-premium user');
                 openPremiumPopup(user?.email);
-              }} size="lg" className="w-full">
-                <CreditCard className="h-4 w-4 mr-2" />
-                Start Subscription
+              }} size="lg" className="w-full" variant={isPremium ? "outline" : "default"}>
+                {isPremium ? (
+                  <>
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Premium Active
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Start Subscription
+                  </>
+                )}
               </Button>
               <p className="text-xs text-muted-foreground mt-2">
                 Cancel anytime • No setup fees • 30-day money back guarantee
