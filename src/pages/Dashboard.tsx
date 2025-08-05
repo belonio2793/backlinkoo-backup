@@ -1866,7 +1866,7 @@ const Dashboard = () => {
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Profile Settings</DialogTitle>
+            <DialogTitle className="text-center">Profile Settings</DialogTitle>
           </DialogHeader>
           <div className="p-2">
             <ProfileSettings onClose={() => setIsProfileOpen(false)} />
