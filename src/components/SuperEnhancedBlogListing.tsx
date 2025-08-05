@@ -614,6 +614,7 @@ export function SuperEnhancedBlogListing() {
                       isExpiringSoon={isExpiringSoon}
                       onClaim={() => handleClaimPost(post)}
                       onDelete={() => handleDeletePost(post)}
+                      onPreview={() => handlePreviewPost(post)}
                       claiming={claiming === post.id}
                       deleting={deleting === post.id}
                       index={index}
