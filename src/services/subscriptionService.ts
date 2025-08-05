@@ -120,6 +120,8 @@ export class SubscriptionService {
 
       if (error) {
         console.error('❌ Edge function error:', error);
+        console.error('❌ Error type:', typeof error);
+        console.error('❌ Error constructor:', error?.constructor?.name);
 
         // Provide more specific error messages
         let errorMessage = 'Failed to create subscription';
@@ -133,6 +135,8 @@ export class SubscriptionService {
             errorMessage = error.message;
           } else if (error.details) {
             errorMessage = error.details;
+          } else if (error.msg) {
+            errorMessage = error.msg;
           } else {
             // If it's an object but no clear message, stringify it
             errorMessage = `API Error: ${JSON.stringify(error)}`;
@@ -150,8 +154,11 @@ export class SubscriptionService {
           errorMessage = 'Authentication error. Please sign in and try again.';
         } else if (errorMessage.includes('price') || errorMessage.includes('priceId')) {
           errorMessage = 'Invalid pricing configuration. Please contact support.';
+        } else if (errorMessage.includes('non-2xx')) {
+          errorMessage = 'Server configuration error. The payment system returned an error response.';
         }
 
+        console.error('❌ Formatted error message:', errorMessage);
         logError('Subscription creation error', error);
         return { success: false, error: errorMessage };
       }
