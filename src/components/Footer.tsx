@@ -1,11 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { navigateToSection, NAVIGATION_CONFIGS } from "@/utils/navigationUtils";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginModal } from "@/components/LoginModal";
 
 export const Footer = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<any>(null);
 
@@ -21,20 +22,22 @@ export const Footer = () => {
   };
 
   const handleAuthSuccess = (authenticatedUser: any) => {
+    console.log('🎯 Footer: handleAuthSuccess called for user:', authenticatedUser?.email);
     setShowLoginModal(false);
 
     // If there's a pending navigation, execute it after successful auth
     if (pendingNavigation) {
-      setTimeout(() => {
-        if (pendingNavigation.hash) {
-          // Section navigation with hash
-          navigateToSection(pendingNavigation);
-        } else {
-          // Simple route navigation
-          window.location.href = pendingNavigation.route;
-        }
-        setPendingNavigation(null);
-      }, 300); // Quick redirect for seamless experience
+      console.log('🔄 Footer: Executing pending navigation:', pendingNavigation);
+
+      // Use immediate execution instead of setTimeout to prevent race conditions
+      if (pendingNavigation.hash) {
+        // Section navigation with hash
+        navigateToSection(pendingNavigation);
+      } else {
+        // Safe route navigation using React Router
+        navigate(pendingNavigation.route);
+      }
+      setPendingNavigation(null);
     }
   };
 
@@ -86,14 +89,17 @@ export const Footer = () => {
             <div className="space-y-2">
               <button
                 onClick={() => {
+                  if (isLoading) return; // Prevent clicks during auth loading
+
                   if (user) {
-                    window.location.href = '/backlink-report';
+                    navigate('/backlink-report');
                   } else {
                     setPendingNavigation({ route: '/backlink-report' });
                     setShowLoginModal(true);
                   }
                 }}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                disabled={isLoading}
               >
                 Backlink Reports
               </button>
@@ -131,14 +137,17 @@ export const Footer = () => {
               </Link>
               <button
                 onClick={() => {
+                  if (isLoading) return; // Prevent clicks during auth loading
+
                   if (user) {
-                    window.location.href = '/admin';
+                    navigate('/admin');
                   } else {
                     setPendingNavigation({ route: '/admin' });
                     setShowLoginModal(true);
                   }
                 }}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                disabled={isLoading}
               >
                 Admin Dashboard
               </button>
