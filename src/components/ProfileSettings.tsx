@@ -701,8 +701,19 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
             </CardHeader>
             <CardContent className="space-y-6">
               {premiumLoading ? (
-                <div className="flex items-center justify-center p-6">
+                <div className="flex flex-col items-center justify-center p-6 space-y-3">
                   <Loader2 className="h-8 w-8 animate-spin" />
+                  <p className="text-sm text-muted-foreground">Loading subscription details...</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      console.log('🔄 Manual refresh triggered');
+                      if (refreshPremium) refreshPremium();
+                    }}
+                  >
+                    Refresh
+                  </Button>
                 </div>
               ) : (
                 <>
