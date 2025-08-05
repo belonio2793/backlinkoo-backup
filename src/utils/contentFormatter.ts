@@ -667,6 +667,10 @@ export class ContentFormatter {
       .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip\s*<\/p>/gi, '<h2>Pro Tip</h2>')
       .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;[^<]*<\/p>/gi, '') // Remove any similar pattern
 
+      // SPECIFIC FIX: Remove broken <h2>&lt;</h2> and reformat following Pro Tip paragraph
+      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip[^<]*<\/p>/gi, '<h2>Pro Tip</h2>')
+      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;([^<]*)<\/p>/gi, '<h2>$1</h2>')
+
       // Remove standalone malformed heading + paragraph combinations
       .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>[^<]*h[1-6]&gt;[^<]*<\/p>/gi, '')
 
