@@ -188,24 +188,8 @@ SELECT
     rr_google.backlinks_count as google_backlinks,
     rr_google.checked_at as google_checked_at,
     
-    -- Bing results
-    rr_bing.position as bing_position,
-    rr_bing.found as bing_found,
-    rr_bing.backlinks_count as bing_backlinks,
-    rr_bing.checked_at as bing_checked_at,
-    
-    -- Yahoo results
-    rr_yahoo.position as yahoo_position,
-    rr_yahoo.found as yahoo_found,
-    rr_yahoo.backlinks_count as yahoo_backlinks,
-    rr_yahoo.checked_at as yahoo_checked_at,
-    
     -- Calculated fields
-    CASE 
-        WHEN rr_google.position IS NOT NULL AND rr_bing.position IS NOT NULL AND rr_yahoo.position IS NOT NULL
-        THEN (rr_google.position + rr_bing.position + rr_yahoo.position) / 3.0
-        WHEN rr_google.position IS NOT NULL AND rr_bing.position IS NOT NULL
-        THEN (rr_google.position + rr_bing.position) / 2.0
+    CASE
         WHEN rr_google.position IS NOT NULL
         THEN rr_google.position::DECIMAL
         ELSE NULL
