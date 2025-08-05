@@ -225,18 +225,24 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
   }, [user, refreshPremium]);
 
   // Add timeout fallback for premium loading
+  const [useFallbackData, setUseFallbackData] = useState(false);
+
   useEffect(() => {
     if (premiumLoading) {
       const timeout = setTimeout(() => {
-        console.warn('⚠️ Premium loading timeout - forcing refresh');
-        if (refreshPremium) {
-          refreshPremium();
-        }
-      }, 10000); // 10 second timeout
+        console.warn('⚠️ Premium loading timeout - using fallback auth data');
+        setUseFallbackData(true);
+      }, 5000); // 5 second timeout, then use fallback
 
       return () => clearTimeout(timeout);
+    } else {
+      setUseFallbackData(false);
     }
   }, [premiumLoading, refreshPremium]);
+
+  // Use fallback data from useAuth if usePremium is stuck
+  const effectiveIsPremium = useFallbackData ? authIsPremium : isPremium;
+  const effectiveSubscriptionTier = useFallbackData ? authSubscriptionTier : (userProfile?.subscription_tier || null);
 
   const handleSaveProfile = async () => {
     setSaving(true);
