@@ -1668,15 +1668,15 @@ const Dashboard = () => {
               )}
             </TabsContent>
 
-            <TabsContent value="keyword-research">
+            <TabsContent value="keyword-research" data-section="keyword-research">
               <KeywordResearchTool />
             </TabsContent>
 
-            <TabsContent value="no-hands-seo">
+            <TabsContent value="no-hands-seo" data-section="no-hands-seo">
               <NoHandsSEODashboard />
             </TabsContent>
 
-            <TabsContent value="rank-tracker">
+            <TabsContent value="rank-tracker" data-section="rank-tracker">
               <RankingTracker />
             </TabsContent>
               </Tabs>
