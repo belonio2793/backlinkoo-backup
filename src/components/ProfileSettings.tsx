@@ -803,6 +803,31 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                       </Button>
                     </div>
                   )}
+
+                  {/* Debug information in development */}
+                  {import.meta.env.DEV && (
+                    <div className="p-4 bg-gray-50 border rounded-lg">
+                      <h4 className="font-medium mb-2">Debug Information</h4>
+                      <div className="text-xs space-y-1">
+                        <p><strong>Premium Loading:</strong> {premiumLoading.toString()}</p>
+                        <p><strong>Is Premium:</strong> {isPremium.toString()}</p>
+                        <p><strong>Is Admin:</strong> {isAdmin.toString()}</p>
+                        <p><strong>User Profile:</strong> {userProfile ? JSON.stringify(userProfile, null, 2) : 'null'}</p>
+                        <p><strong>User Limits:</strong> {JSON.stringify(userLimits, null, 2)}</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                        onClick={() => {
+                          console.log('🔄 Force refresh from debug section');
+                          if (refreshPremium) refreshPremium();
+                        }}
+                      >
+                        Force Refresh
+                      </Button>
+                    </div>
+                  )}
                 </>
               )}
             </CardContent>
