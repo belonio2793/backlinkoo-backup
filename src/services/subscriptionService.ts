@@ -83,7 +83,6 @@ export class SubscriptionService {
    * Create subscription for $29/month plan
    */
   static async createSubscription(user: User | null, isGuest: boolean = false, guestEmail?: string): Promise<{ success: boolean; url?: string; error?: string }> {
-    console.log('🚀 Creating subscription...', { user: !!user, isGuest, guestEmail });
 
     try {
       // Validate inputs
