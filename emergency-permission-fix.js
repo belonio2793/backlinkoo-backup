@@ -88,7 +88,7 @@ async function testAndFix() {
     }
     
   } catch (error) {
-    console.error('�� Unexpected error:', error.message);
+    console.error('❌ Unexpected error:', error.message);
   }
   
   // Additional checks
