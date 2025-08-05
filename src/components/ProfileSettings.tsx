@@ -761,7 +761,8 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {premiumLoading && !useFallbackData ? (
+              {/* Always show content - no more infinite loading */}
+              {(premiumLoading && !useFallbackData && !directProfileData && !authIsPremium) ? (
                 <div className="flex flex-col items-center justify-center p-6 space-y-3">
                   <Loader2 className="h-8 w-8 animate-spin" />
                   <p className="text-sm text-muted-foreground">Loading subscription details...</p>
@@ -770,10 +771,11 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                     size="sm"
                     onClick={() => {
                       console.log('🔄 Manual refresh triggered');
+                      setUseFallbackData(true);
                       if (refreshPremium) refreshPremium();
                     }}
                   >
-                    Refresh
+                    Show Data Now
                   </Button>
                 </div>
               ) : (
