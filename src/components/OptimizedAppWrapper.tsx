@@ -182,6 +182,13 @@ export const OptimizedAppWrapper = () => {
             </div>
           } />
 
+          {/* Authentication diagnostic - accessible in all environments */}
+          <Route path="/auth-diagnostic" element={
+            <Suspense fallback={<PageLoader />}>
+              <AuthDiagnostic />
+            </Suspense>
+          } />
+
           {/* Payment routes - lightweight, immediate load */}
           <Route path="/payment-success" element={
             <EmailVerificationGuard>
