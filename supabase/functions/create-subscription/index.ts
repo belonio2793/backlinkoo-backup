@@ -41,6 +41,8 @@ function sanitizeInput(input: string): string {
 }
 
 serve(async (req) => {
+  console.log(`🚀 Edge function called: ${req.method} ${req.url}`);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -49,6 +51,12 @@ serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+
+  console.log("🔧 Environment check:", {
+    supabaseUrl: !!supabaseUrl,
+    supabaseServiceKey: !!supabaseServiceKey,
+    stripeSecretKey: !!stripeSecretKey
+  });
 
   if (!supabaseUrl || !supabaseServiceKey) {
     console.error("Missing Supabase configuration");
