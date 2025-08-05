@@ -438,6 +438,10 @@ export class ContentFormatter {
       .replace(/&amp;amp;/g, '&')
       .replace(/&amp;quot;/g, '"')
 
+      // EARLIEST CATCH: Fix specific Pro Tip pattern before any other processing
+      .replace(/<h2[^>]*>\s*&lt;\s*<\/h2>\s*<p[^>]*>\s*h2&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
+      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
+
       // AGGRESSIVE removal of the specific malformed pattern first
       .replace(/##\s*(&amp;lt;|&lt;)[\s\S]*?h[1-6]\s*(&amp;gt;|&gt;)\s*Pro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*(&amp;lt;|&lt;).*$/gm, '') // Remove any line starting with ## <
