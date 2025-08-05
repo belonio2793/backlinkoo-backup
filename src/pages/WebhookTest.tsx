@@ -18,6 +18,14 @@ interface TestResult {
 const WebhookTest: React.FC = () => {
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [creditsAndPremiumResults, setCreditsAndPremiumResults] = useState<{
+    credits: WebhookTestResult[];
+    premium: WebhookTestResult[];
+    summary?: any;
+  }>({ credits: [], premium: [] });
+  const [isRunningComprehensive, setIsRunningComprehensive] = useState(false);
+
+  const tester = new CreditsAndPremiumWebhookTester();
 
   const addTestResult = (result: TestResult) => {
     setTestResults(prev => [...prev, result]);
