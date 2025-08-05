@@ -115,18 +115,4 @@ LEFT JOIN LATERAL (
   WHERE target_id = rt.id AND search_engine = 'google'
   ORDER BY target_id, checked_at DESC
 ) google ON true
-LEFT JOIN LATERAL (
-  SELECT DISTINCT ON (target_id)
-    position, found, checked_at, backlinks_count, error_details
-  FROM public.ranking_results 
-  WHERE target_id = rt.id AND search_engine = 'bing'
-  ORDER BY target_id, checked_at DESC  
-) bing ON true
-LEFT JOIN LATERAL (
-  SELECT DISTINCT ON (target_id)
-    position, found, checked_at, backlinks_count, error_details
-  FROM public.ranking_results 
-  WHERE target_id = rt.id AND search_engine = 'yahoo'
-  ORDER BY target_id, checked_at DESC
-) yahoo ON true
 WHERE rt.is_active = true;
