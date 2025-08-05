@@ -758,7 +758,8 @@ const Dashboard = () => {
         'rank-tracker': 'rank-tracker',
         'automation-link-building': 'automation-link-building',
         'campaigns': 'campaigns',
-        'overview': 'overview'
+        'overview': 'overview',
+        'seo-tools-automation': 'seo-tools'
       };
 
       const targetTab = hashToTabMap[hash];
@@ -886,7 +887,7 @@ const Dashboard = () => {
       }
 
     } catch (error) {
-      console.error('🔍 Error fetching user data (using defaults):', error);
+      console.error('���� Error fetching user data (using defaults):', error);
 
       // Set safe defaults
       setCredits(0);
@@ -929,7 +930,7 @@ const Dashboard = () => {
         campaignsData = result.data;
         error = result.error;
       } catch (fetchError) {
-        console.warn('📊 Campaigns fetch failed, using demo mode');
+        console.warn('��� Campaigns fetch failed, using demo mode');
         error = fetchError;
       }
 
