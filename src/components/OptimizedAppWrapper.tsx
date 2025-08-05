@@ -260,6 +260,11 @@ export const OptimizedAppWrapper = () => {
               <LazySystemTest />
             </Suspense>
           } />
+          <Route path="/test-payment" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyPaymentTest />
+            </Suspense>
+          } />
 
           {/* 404 routes */}
           <Route path="/404" element={<NotFound />} />
