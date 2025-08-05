@@ -16,9 +16,14 @@ class UserService {
    */
   async getCurrentUserProfile(): Promise<UserProfile | null> {
     try {
+      console.log('🔄 userService: Getting current user...');
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      if (!user) {
+        console.log('❌ userService: No authenticated user');
+        return null;
+      }
 
+      console.log('🔄 userService: Fetching profile for user:', user.email);
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
@@ -27,7 +32,7 @@ class UserService {
 
       if (error) {
         const errorMessage = error.message || error;
-        console.error('Error fetching user profile:', errorMessage);
+        console.error('❌ userService: Error fetching user profile:', errorMessage);
 
         // Handle specific permission denied errors
         if (errorMessage && errorMessage.includes('permission denied for table users')) {
