@@ -410,28 +410,53 @@ export class AuthService {
   }
 
   private static formatErrorMessage(message: string): string {
+    if (!message) return 'An unknown error occurred. Please try again.';
+
+    const lowerMessage = message.toLowerCase();
+
     // Format common auth error messages for better user experience
-    if (message.includes('Invalid login credentials')) {
-      return 'Invalid email or password. Please check your credentials and try again.';
+    if (lowerMessage.includes('invalid login credentials') || lowerMessage.includes('invalid credentials')) {
+      return 'The email or password you entered is incorrect. Please check your credentials and try again.';
     }
-    if (message.includes('Email not confirmed')) {
+
+    if (lowerMessage.includes('email not confirmed') || lowerMessage.includes('email not verified')) {
       return 'Your email address needs to be verified. Please check your email for a confirmation link.';
     }
-    if (message.includes('User already registered')) {
+
+    if (lowerMessage.includes('user not found') || lowerMessage.includes('user does not exist')) {
+      return 'No account found with this email address. Please check your email or create a new account.';
+    }
+
+    if (lowerMessage.includes('user already registered') || lowerMessage.includes('already exists')) {
       return 'An account with this email already exists. Please try signing in instead.';
     }
-    if (message.includes('Password should be at least')) {
+
+    if (lowerMessage.includes('password should be at least') || lowerMessage.includes('password too short')) {
       return 'Password must be at least 6 characters long.';
     }
-    if (message.includes('rate limit') || message.includes('too many')) {
-      return 'Too many attempts. Please wait a few minutes before trying again.';
+
+    if (lowerMessage.includes('rate limit') || lowerMessage.includes('too many')) {
+      return 'Too many sign-in attempts. Please wait a few minutes before trying again.';
     }
-    if (message.includes('network') || message.includes('fetch')) {
+
+    if (lowerMessage.includes('network') || lowerMessage.includes('fetch') || lowerMessage.includes('connection')) {
       return 'Network error. Please check your internet connection and try again.';
     }
-    
-    // Return the original message if no specific formatting is needed
-    return message;
+
+    if (lowerMessage.includes('timeout')) {
+      return 'Request timed out. Please try again.';
+    }
+
+    if (lowerMessage.includes('unauthorized') || lowerMessage.includes('access denied')) {
+      return 'Access denied. Please check your credentials.';
+    }
+
+    if (lowerMessage.includes('database') || lowerMessage.includes('db')) {
+      return 'Database connection issue. Please try again in a moment.';
+    }
+
+    // Return a user-friendly version of the original message
+    return message.charAt(0).toUpperCase() + message.slice(1);
   }
 }
 
