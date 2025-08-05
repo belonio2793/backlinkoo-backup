@@ -41,7 +41,7 @@ interface StreamlinedPremiumCheckoutProps {
 }
 
 type FlowStep = 'plan-selection' | 'payment-method' | 'checkout' | 'processing' | 'success';
-type PaymentMethod = 'stripe' | 'paypal';
+type PaymentMethod = 'stripe';
 
 export function StreamlinedPremiumCheckout({ 
   isOpen, 
