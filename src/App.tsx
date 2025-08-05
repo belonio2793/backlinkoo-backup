@@ -7,99 +7,55 @@ import { BrowserRouter } from "react-router-dom";
 import { GlobalNotifications } from "@/components/GlobalNotifications";
 import { BetaNotification } from "@/components/BetaNotification";
 import { OptimizedAppWrapper } from "@/components/OptimizedAppWrapper";
-import { AuthProfileChecker } from "@/components/AuthProfileChecker";
-import { AuthRedirectHandler } from "@/components/AuthRedirectHandler";
+import { InstantAuthProvider } from "@/components/InstantAuth";
 import { EnhancedErrorBoundary } from "@/components/EnhancedErrorBoundary";
 import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
-import { cleanupStoredBlogPosts } from "@/utils/contentCleanup";
-import { autoConfigSaver } from "@/services/autoConfigSaver";
-import { DebugErrorHandler } from "@/utils/debugErrorHandler";
 import { PremiumPopupProvider } from "@/components/PremiumPopupProvider";
-import "@/services/blogCleanupService"; // Initialize blog cleanup service
-import "@/utils/manualRLSCleanup"; // Initialize RLS cleanup utility
-import "@/utils/subscriptionDebugger"; // Initialize subscription debugging
-import "@/utils/testSubscription"; // Initialize subscription testing
 
-
-// import "@/services/rlsStatusService"; // RLS STATUS CHECK AND MANUAL FIX INSTRUCTIONS - DISABLED TO PREVENT AUTO TEST POSTS
-import "@/utils/createAdminUser"; // Admin user creation utility
-import "@/utils/autoAdminSetup"; // Auto admin user setup
-
-// Initialize performance monitoring and error tracking in development
+// Lightweight initialization for better performance
 if (import.meta.env.DEV) {
-  import('@/utils/performance');
-  DebugErrorHandler.initializeErrorTracking();
+  console.log('🚀 Optimized app startup...');
 }
-
-
-// Debug utilities removed for better performance and stability
-// Diagnostic utilities are available manually via window.runBlogSystemDiagnostic()
 
 import { queryClient } from "@/lib/queryClient";
 
-// Run content cleanup once on app startup
+// Lightweight initialization for faster startup
 if (typeof window !== 'undefined') {
-  // Check if cleanup has been run before
-  const cleanupVersion = '1.2.0'; // Updated to trigger geolocation cleanup
-  const lastCleanup = localStorage.getItem('content_cleanup_version');
+  console.log('⚡ Instant app initialization');
 
-  if (lastCleanup !== cleanupVersion) {
-    console.log('🧹 Running one-time content cleanup...');
-    const cleanedCount = cleanupStoredBlogPosts();
-    if (cleanedCount > 0) {
-      console.log(`✅ Fixed ${cleanedCount} blog posts with malformed content`);
-    }
-    localStorage.setItem('content_cleanup_version', cleanupVersion);
-  }
-
-  // Initialize auto-config saver (disabled to prevent fetch errors)
-  // console.log('🚀 Initializing automatic configuration monitoring...');
-  // autoConfigSaver.startMonitoring();
-
-  // Load heavy initialization modules asynchronously to improve initial load time
+  // Defer heavy operations to after app mount
   setTimeout(() => {
-    // Initialize real-time configuration sync (disabled to prevent fetch errors)
-    // import('./utils/initializeConfigSync').then(({ initializeConfigSync }) => {
-    //   initializeConfigSync().then(result => {
-    //     if (result.success) {
-    //       console.log('✅ Real-time configuration sync initialized:', result.message);
-    //     } else {
-    //       console.error('❌ Configuration sync initialization failed:', result.message);
-    //     }
-    //   });
-    // });
+    // Import cleanup utilities only when needed
+    import('@/utils/contentCleanup').then(({ cleanupStoredBlogPosts }) => {
+      const cleanupVersion = '1.2.0';
+      const lastCleanup = localStorage.getItem('content_cleanup_version');
 
-    // Initialize production safety system (disabled to prevent fetch errors)
-    // import('./services/productionSafeConfig').then(({ productionSafeConfig }) => {
-    //   productionSafeConfig.ensureHomepageSafety().then(result => {
-    //     if (result.safe) {
-    //       console.log('🛡️ Homepage safety verified - users protected');
-    //     } else {
-    //       console.warn('⚠️ Homepage safety issues detected:', result.issues);
-    //     }
-    //   });
-    // });
-  }, 2000); // Delay heavy initialization by 2 seconds
+      if (lastCleanup !== cleanupVersion) {
+        const cleanedCount = cleanupStoredBlogPosts();
+        if (cleanedCount > 0) {
+          console.log(`✅ Cleaned ${cleanedCount} blog posts`);
+        }
+        localStorage.setItem('content_cleanup_version', cleanupVersion);
+      }
+    }).catch(() => {});
+  }, 5000); // Delay to prioritize app startup
 }
 
 const App = () => (
   <EnhancedErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AuthProfileChecker>
+        <InstantAuthProvider>
           <Toaster />
           <Sonner />
           <GlobalNotifications />
-          <DatabaseHealthLogger />
           <BetaNotification />
           <BrowserRouter>
             <PremiumPopupProvider>
-              <AuthRedirectHandler>
-                <OptimizedAppWrapper />
-              </AuthRedirectHandler>
+              <OptimizedAppWrapper />
             </PremiumPopupProvider>
           </BrowserRouter>
-        </AuthProfileChecker>
+        </InstantAuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   </EnhancedErrorBoundary>
