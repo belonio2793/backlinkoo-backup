@@ -269,12 +269,6 @@ class PaymentIntegrationService {
       );
     }
 
-    if (!this.config.paypal.enabled) {
-      instructions.push(
-        'PayPal Setup: Add VITE_PAYPAL_CLIENT_ID to your environment variables'
-      );
-    }
-
     if (instructions.length === 0) {
       instructions.push('Payment integration is properly configured!');
     }
