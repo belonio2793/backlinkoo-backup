@@ -663,6 +663,13 @@ export class ContentFormatter {
       .replace(/<[^>]*>\s*&lt;\s*<\/[^>]*>/gi, '') // Remove any tag containing just &lt;
       .replace(/<[^>]*>\s*&gt;\s*<\/[^>]*>/gi, '') // Remove any tag containing just &gt;
 
+      // ULTIMATE REMOVAL: The exact pattern from the image/DOM
+      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip\s*<\/p>/gi, '<h2>Pro Tip</h2>')
+      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;[^<]*<\/p>/gi, '') // Remove any similar pattern
+
+      // Remove standalone malformed heading + paragraph combinations
+      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>[^<]*h[1-6]&gt;[^<]*<\/p>/gi, '')
+
       // Remove text fragments that are HTML entities being displayed
       .replace(/&lt;\s*h[1-6]\s*&gt;/gi, '') // Remove &lt; h2&gt; type patterns
       .replace(/&lt;\s*\/\s*h[1-6]\s*&gt;/gi, '') // Remove &lt;/h2&gt; type patterns
