@@ -44,6 +44,7 @@ import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
 import SubscriptionService, { type SubscriptionStatus } from "@/services/subscriptionService";
 import FeatureAccessGuard from "@/components/FeatureAccessGuard";
 import { useOpenPremiumPopup } from "@/components/PremiumPopupProvider";
+import { EnhancedUnifiedPaymentModal } from "@/components/EnhancedUnifiedPaymentModal";
 
 interface SEOToolsSectionProps {
   user: User | null;
@@ -93,6 +94,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const [billingEmailNotifications, setBillingEmailNotifications] = useState(true);
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
+  const [isEnhancedPaymentOpen, setIsEnhancedPaymentOpen] = useState(false);
   const { toast } = useToast();
   const { openPremiumPopup, isPremium } = useOpenPremiumPopup();
 
@@ -373,8 +375,8 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
                   console.log('User is already premium, showing notification');
                   return;
                 }
-                console.log('Opening premium popup for non-premium user');
-                openPremiumPopup(user?.email);
+                console.log('Opening enhanced payment modal for non-premium user');
+                setIsEnhancedPaymentOpen(true);
               }} size="lg" className="w-full" variant={isPremium ? "outline" : "default"}>
                 {isPremium ? (
                   <>
@@ -671,6 +673,21 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
         </DialogContent>
       </Dialog>
 
+      {/* Enhanced Unified Payment Modal */}
+      <EnhancedUnifiedPaymentModal
+        isOpen={isEnhancedPaymentOpen}
+        onClose={() => setIsEnhancedPaymentOpen(false)}
+        defaultTab="premium"
+        redirectAfterSuccess="/dashboard"
+        onSuccess={() => {
+          setIsEnhancedPaymentOpen(false);
+          checkSubscriptionStatus(); // Refresh subscription status
+          toast({
+            title: "Premium Activated!",
+            description: "Welcome to Premium! All SEO tools are now available.",
+          });
+        }}
+      />
 
     </div>
   );

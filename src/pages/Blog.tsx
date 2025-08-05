@@ -11,7 +11,7 @@ import { BlogClaimService } from '@/services/blogClaimService';
 import { supabase } from '@/integrations/supabase/client';
 import { Footer } from '@/components/Footer';
 
-import { PricingModal } from '@/components/PricingModal';
+import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
 import { ClaimStatusIndicator } from '@/components/ClaimStatusIndicator';
 import { ClaimSystemStatus } from '@/components/ClaimSystemStatus';
 import { useToast } from '@/hooks/use-toast';
@@ -49,7 +49,8 @@ export function Blog() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'trending'>('newest');
-  const [pricingModalOpen, setPricingModalOpen] = useState(false);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentDefaultTab, setPaymentDefaultTab] = useState<'credits' | 'premium'>('credits');
 
   useEffect(() => {
     const loadBlogPosts = async () => {
@@ -369,7 +370,10 @@ export function Blog() {
       {/* Claim Status Indicator */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between">
-          <ClaimStatusIndicator onUpgrade={() => setPricingModalOpen(true)} />
+          <ClaimStatusIndicator onUpgrade={() => {
+            setPaymentDefaultTab('credits');
+            setPaymentModalOpen(true);
+          }} />
           {import.meta.env.DEV && <ClaimSystemStatus />}
         </div>
       </div>
@@ -381,7 +385,7 @@ export function Blog() {
           <div className="relative z-10">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-3xl font-bold mb-2">💾 Save Blog Posts to Dashboard</h2>
+                <h2 className="text-3xl font-bold mb-2">�� Save Blog Posts to Dashboard</h2>
                 <p className="text-blue-100 text-lg mb-4">
                   Save your favorite blog posts to your personal dashboard! Access them anytime and prevent auto-deletion.
                 </p>
@@ -481,7 +485,10 @@ export function Blog() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
-              onClick={() => setPricingModalOpen(true)}
+              onClick={() => {
+                setPaymentDefaultTab('credits');
+                setPaymentModalOpen(true);
+              }}
               size="lg"
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 text-lg"
             >
@@ -516,10 +523,16 @@ export function Blog() {
       <Footer />
 
       {/* Pricing Modal */}
-      <PricingModal
-        isOpen={pricingModalOpen}
-        onClose={() => setPricingModalOpen(false)}
-        onAuthSuccess={(user) => {
+      <EnhancedUnifiedPaymentModal
+        isOpen={paymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+        defaultTab={paymentDefaultTab}
+        onSuccess={() => {
+          setPaymentModalOpen(false);
+          toast({
+            title: "Payment Successful!",
+            description: "Your purchase has been completed successfully.",
+          });
           toast({
             title: "Welcome!",
             description: "You have been successfully signed in. Continue with your purchase.",

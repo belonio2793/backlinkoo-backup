@@ -31,6 +31,7 @@ export function AuthFormTabs({
 }: AuthFormTabsProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
   const [activeTab, setActiveTab] = useState<"login" | "signup">(
     defaultTab || "login"
   );
@@ -51,9 +52,18 @@ export function AuthFormTabs({
     e.preventDefault();
     if (isLoading) return;
 
-    console.log('🔐 Login attempt with:', { email: loginEmail, hasPassword: !!loginPassword });
+    console.log('🔐 Login attempt with:', {
+      email: loginEmail,
+      hasPassword: !!loginPassword,
+      emailLength: loginEmail.length,
+      passwordLength: loginPassword.length
+    });
 
-    if (!loginEmail || !loginPassword) {
+    // Trim whitespace from inputs
+    const trimmedEmail = loginEmail.trim();
+    const trimmedPassword = loginPassword.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
       toast({
         title: "Missing credentials",
         description: "Please enter both email and password.",
@@ -62,10 +72,19 @@ export function AuthFormTabs({
       return;
     }
 
-    if (!validateEmail(loginEmail)) {
+    if (!validateEmail(trimmedEmail)) {
       toast({
         title: "Invalid email format",
         description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (trimmedPassword.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters long.",
         variant: "destructive",
       });
       return;
@@ -75,8 +94,9 @@ export function AuthFormTabs({
     onSignInStart?.();
 
     setIsLoading(true);
-    const currentEmail = loginEmail;
-    const currentPassword = loginPassword;
+    setLoadingMessage('Authenticating...');
+    const currentEmail = trimmedEmail;
+    const currentPassword = trimmedPassword;
 
     try {
       const result = await AuthService.signIn({
@@ -91,37 +111,24 @@ export function AuthFormTabs({
         });
         onAuthSuccess?.(result.user);
       } else {
-        // Check if this is a database error and provide helpful guidance
-        if (result.error?.includes('Database error')) {
-          toast({
-            title: "Database Configuration Issue",
-            description: "Your Supabase database needs to be configured. Please run the provided SQL fix script in your Supabase dashboard.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Sign in failed",
-            description: result.error || "Invalid email or password.",
-            variant: "destructive",
-          });
-        }
+        // Use the formatted error message from AuthService
+        toast({
+          title: "Sign in failed",
+          description: result.error || "Please check your credentials and try again.",
+          variant: "destructive",
+        });
       }
     } catch (error: any) {
-      console.error('🚨 Login component error:', {
-        error: error,
-        message: error.message,
-        stack: error.stack,
-        email: currentEmail,
-        errorString: JSON.stringify(error, null, 2)
-      });
-      console.error('🚨 Raw login error object:', error);
+      // This should rarely happen since AuthService handles most errors
+      console.error('🚨 Unexpected login error:', error);
       toast({
-        title: "Sign in failed",
-        description: `An unexpected error occurred: ${error.message || 'Please try again.'}`,
+        title: "Connection error",
+        description: "Unable to connect to authentication service. Please check your internet connection and try again.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
+      setLoadingMessage('');
     }
   };
 
@@ -377,7 +384,7 @@ export function AuthFormTabs({
             ) : (
               <Shield className="h-4 w-4 mr-2" />
             )}
-            {isLoading ? "Signing In..." : "Sign In"}
+            {isLoading ? (loadingMessage || "Signing In...") : "Sign In"}
           </Button>
 
           <div className="space-y-2">
@@ -394,7 +401,16 @@ export function AuthFormTabs({
               </div>
             )}
 
-
+            <div className="text-center">
+              <Button
+                type="button"
+                variant="link"
+                className="text-sm text-muted-foreground"
+                onClick={() => window.open('/auth-diagnostic', '_blank')}
+              >
+                Having trouble signing in?
+              </Button>
+            </div>
           </div>
         </form>
       </TabsContent>

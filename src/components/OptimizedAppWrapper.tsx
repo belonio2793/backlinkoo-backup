@@ -21,6 +21,7 @@ import SubscriptionCancelled from '@/pages/SubscriptionCancelled';
 import BlogSystemDiagnostic from '@/pages/BlogSystemDiagnostic';
 import { BlogPostDiagnostic } from '@/components/BlogPostDiagnostic';
 import EmergencyRLSFix from '@/pages/EmergencyRLSFix';
+import AuthDiagnostic from '@/pages/AuthDiagnostic';
 
 // Import lightweight components
 import AdminAuthGuard from '@/components/AdminAuthGuard';
@@ -61,7 +62,8 @@ import {
   LazyClaimSystemDebug,
   LazySEOOptimizedBlogGenerator,
   LazyOpenAITest,
-  LazySystemTest
+  LazySystemTest,
+  LazyPaymentTest
 } from './LazyComponents';
 
 // Loading component for better UX
@@ -181,6 +183,13 @@ export const OptimizedAppWrapper = () => {
             </div>
           } />
 
+          {/* Authentication diagnostic - accessible in all environments */}
+          <Route path="/auth-diagnostic" element={
+            <Suspense fallback={<PageLoader />}>
+              <AuthDiagnostic />
+            </Suspense>
+          } />
+
           {/* Payment routes - lightweight, immediate load */}
           <Route path="/payment-success" element={
             <EmailVerificationGuard>
@@ -249,6 +258,11 @@ export const OptimizedAppWrapper = () => {
           <Route path="/system-test" element={
             <Suspense fallback={<PageLoader />}>
               <LazySystemTest />
+            </Suspense>
+          } />
+          <Route path="/test-payment" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyPaymentTest />
             </Suspense>
           } />
 

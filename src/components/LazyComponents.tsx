@@ -44,3 +44,6 @@ export const LazySEOOptimizedBlogGenerator = lazy(() => import('@/pages/SEOBlogG
 // API Testing components
 export const LazyOpenAITest = lazy(() => import('@/pages/OpenAITest'));
 export const LazySystemTest = lazy(() => import('@/components/SystemTest').then(module => ({ default: module.SystemTest })));
+
+// Payment Testing component
+export const LazyPaymentTest = lazy(() => import('@/pages/PaymentTest'));

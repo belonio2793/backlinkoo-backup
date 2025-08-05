@@ -59,7 +59,7 @@ import {
   BookOpen,
   Star
 } from "lucide-react";
-import { PricingModal } from "@/components/PricingModal";
+import { EnhancedUnifiedPaymentModal } from "@/components/EnhancedUnifiedPaymentModal";
 import { CampaignForm } from "@/components/CampaignForm";
 import { KeywordResearchTool } from "@/components/KeywordResearchTool";
 import { RankingTracker } from "@/components/RankingTracker";
@@ -639,7 +639,8 @@ const Dashboard = () => {
   const [userType, setUserType] = useState<"user" | "admin">("user");
   const [credits, setCredits] = useState(0);
   const [campaigns, setCampaigns] = useState<any[]>([]);
-  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentDefaultTab, setPaymentDefaultTab] = useState<'credits' | 'premium'>('credits');
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
@@ -965,7 +966,10 @@ const Dashboard = () => {
                     <span className="xs:hidden">{credits}</span>
                     <span className="hidden sm:inline">Credits</span>
                   </Badge>
-                  <Button variant="outline" size="sm" onClick={() => setIsPricingModalOpen(true)} className="px-2 sm:px-4">
+                  <Button variant="outline" size="sm" onClick={() => {
+                    setPaymentDefaultTab('credits');
+                    setIsPaymentModalOpen(true);
+                  }} className="px-2 sm:px-4">
                     <Plus className="h-4 w-4 sm:mr-1" />
                     <span className="hidden sm:inline">Buy Credits</span>
                   </Button>
@@ -1147,7 +1151,10 @@ const Dashboard = () => {
                       Get started by purchasing credits to create your first backlink campaign.
                       Our high-quality backlinks will help improve your website's search engine rankings.
                     </p>
-                    <Button onClick={() => setIsPricingModalOpen(true)}>
+                    <Button onClick={() => {
+                      setPaymentDefaultTab('credits');
+                      setIsPaymentModalOpen(true);
+                    }}>
                       <Plus className="h-4 w-4 mr-2" />
                       Buy Your First Credits
                     </Button>
@@ -1716,11 +1723,18 @@ const Dashboard = () => {
         )}
       </div>
 
-      <PricingModal
-        isOpen={isPricingModalOpen}
-        onClose={() => setIsPricingModalOpen(false)}
-        onAuthSuccess={(user) => {
-          setUser(user);
+      <EnhancedUnifiedPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        defaultTab={paymentDefaultTab}
+        onSuccess={() => {
+          setIsPaymentModalOpen(false);
+          toast({
+            title: "Payment Successful!",
+            description: "Your purchase has been completed successfully.",
+          });
+          // Refresh user data if needed
+          window.location.reload();
         }}
       />
 
