@@ -105,11 +105,8 @@ export class SubscriptionService {
         guestEmail: isGuest ? guestEmail : undefined
       };
 
-      console.log('📝 Request body:', requestBody);
-
       // Get current session to ensure we have auth token
       const { data: session } = await supabase.auth.getSession();
-      console.log('🔑 Session available:', !!session?.session);
 
       const { data, error } = await supabase.functions.invoke('create-subscription', {
         body: requestBody
