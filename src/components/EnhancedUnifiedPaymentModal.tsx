@@ -264,34 +264,53 @@ export function EnhancedUnifiedPaymentModal({
       const email = isGuest ? guestEmail : user?.email;
 
       if (selection.type === 'premium') {
-        // Handle premium subscription
-        const { data, error } = await supabase.functions.invoke('create-subscription', {
-          body: {
-            priceId: `price_premium_${selection.plan.id}`, // This should match your Stripe price IDs
-            tier: 'premium-seo-tools',
+        // Handle premium subscription via Netlify function
+        const response = await fetch('/api/create-subscription', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            plan: selection.plan.id,
             isGuest,
-            guestEmail: isGuest ? guestEmail : undefined
-          }
+            guestEmail: isGuest ? guestEmail : undefined,
+            paymentMethod: 'stripe' // Subscriptions currently only support Stripe
+          })
         });
 
-        if (error) throw error;
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Subscription creation failed');
+        }
+
+        const data = await response.json();
         if (data.url) {
           window.location.href = data.url;
           return;
         }
       } else {
-        // Handle credit purchase
-        const { data, error } = await supabase.functions.invoke('create-payment', {
-          body: {
+        // Handle credit purchase via Netlify function
+        const response = await fetch('/api/create-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
             amount: selection.price,
             productName: `${selection.credits} Backlink Credits`,
+            credits: selection.credits,
             isGuest,
             guestEmail: isGuest ? guestEmail : undefined,
             paymentMethod
-          }
+          })
         });
 
-        if (error) throw error;
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Payment creation failed');
+        }
+
+        const data = await response.json();
         if (data.url) {
           window.location.href = data.url;
           return;
