@@ -132,7 +132,6 @@ class UserService {
             updated_at: new Date().toISOString()
           });
       } else {
-        console.log('🔄 userService: Updating existing profile');
         // Update existing profile
         updateResult = await supabase
           .from('profiles')
