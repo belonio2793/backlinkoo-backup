@@ -80,7 +80,7 @@ export function EnhancedBlogPreview({
         <DialogHeader className="border-b pb-4">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <DialogTitle className="text-xl">Content Preview</DialogTitle>
+              <DialogTitle className="text-xl line-clamp-1">{content.title}</DialogTitle>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 {content.template && (
                   <div className="flex items-center gap-1">
@@ -413,7 +413,7 @@ export function EnhancedBlogPreview({
                           
                           <div className="flex items-center gap-4 text-xs text-muted-foreground">
                             <span>Position: Character {link.position}</span>
-                            <span>•</span>
+                            <span>��</span>
                             <span>Natural placement</span>
                             <span>•</span>
                             <span>DoFollow link</span>
