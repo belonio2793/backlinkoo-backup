@@ -163,6 +163,10 @@ export class ContentFormatter {
       .replace(/\*\*H1\*\*:\s*(.+?)(?=\n|$)/gi, '<h1>$1</h1>')
       // Convert **Title**: patterns to nothing (remove completely since it's duplicate)
       .replace(/^\*\*Title\*\*:\s*(.+?)(?=\n|$)/gmi, '')
+      // Fix specific case: "## P" should be "## Pro Tip"
+      .replace(/^##\s*P\s*$/gmi, '## Pro Tip')
+      .replace(/^##\s*P(?:\s*ro\s*Tip)?.*$/gmi, '## Pro Tip')
+
       // Fix malformed headings like "## P. Assessment" - only create proper headings from meaningful text
       .replace(/^##?\s+([A-Z])\.\s*([A-Za-z\s]{0,15})\s*$/gmi, (match, letter, rest) => {
         // If it's a single letter followed by a short word, it's likely malformed - convert to paragraph
