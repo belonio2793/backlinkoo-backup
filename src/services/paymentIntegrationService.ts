@@ -60,17 +60,13 @@ class PaymentIntegrationService {
   /**
    * Get available payment methods based on configuration
    */
-  getAvailablePaymentMethods(): ('stripe' | 'paypal')[] {
-    const methods: ('stripe' | 'paypal')[] = [];
-    
+  getAvailablePaymentMethods(): 'stripe'[] {
+    const methods: 'stripe'[] = [];
+
     if (this.config.stripe.enabled) {
       methods.push('stripe');
     }
-    
-    if (this.config.paypal.enabled) {
-      methods.push('paypal');
-    }
-    
+
     return methods;
   }
 
