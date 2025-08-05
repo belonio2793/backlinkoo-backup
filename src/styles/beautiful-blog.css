@@ -253,12 +253,44 @@
   text-decoration: none;
   font-weight: 600;
   position: relative;
-  transition: all 0.3s ease;
   border-radius: 4px;
   padding: 0.125rem 0.25rem;
 }
 
-.beautiful-prose a::before {
+/* Remove all hover effects from headline links */
+.beautiful-prose h1 a,
+.beautiful-prose h2 a,
+.beautiful-prose h3 a,
+.beautiful-prose h4 a,
+.beautiful-prose h5 a,
+.beautiful-prose h6 a {
+  color: inherit;
+  font-weight: inherit;
+  padding: 0;
+  border-radius: 0;
+  transition: none;
+  position: static;
+}
+
+.beautiful-prose h1 a:hover,
+.beautiful-prose h2 a:hover,
+.beautiful-prose h3 a:hover,
+.beautiful-prose h4 a:hover,
+.beautiful-prose h5 a:hover,
+.beautiful-prose h6 a:hover {
+  color: inherit;
+  background: none;
+  transform: none;
+}
+
+/* Keep hover effects only for regular paragraph links */
+.beautiful-prose p a,
+.beautiful-prose li a {
+  transition: all 0.3s ease;
+}
+
+.beautiful-prose p a::before,
+.beautiful-prose li a::before {
   content: '';
   position: absolute;
   bottom: 0;
@@ -269,13 +301,15 @@
   transition: width 0.3s ease;
 }
 
-.beautiful-prose a:hover {
+.beautiful-prose p a:hover,
+.beautiful-prose li a:hover {
   color: rgb(147, 51, 234);
   background: rgba(59, 130, 246, 0.05);
   transform: translateY(-1px);
 }
 
-.beautiful-prose a:hover::before {
+.beautiful-prose p a:hover::before,
+.beautiful-prose li a:hover::before {
   width: 100%;
 }
 
