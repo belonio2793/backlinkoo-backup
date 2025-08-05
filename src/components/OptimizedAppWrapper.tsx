@@ -265,6 +265,11 @@ export const OptimizedAppWrapper = () => {
               <LazyPaymentTest />
             </Suspense>
           } />
+          <Route path="/test-webhooks" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyWebhookTest />
+            </Suspense>
+          } />
 
           {/* 404 routes */}
           <Route path="/404" element={<NotFound />} />
