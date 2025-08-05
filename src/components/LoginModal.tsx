@@ -99,8 +99,16 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
               <Infinity className="h-8 w-8 text-primary" />
             </div>
             <DialogTitle className="text-2xl font-bold text-foreground" role="banner">
-              Welcome Back
+              {defaultTab === "signup" ? "Get Started" : "Welcome Back"}
             </DialogTitle>
+            {pendingAction && (
+              <p className="text-sm text-muted-foreground mt-2">
+                {defaultTab === "signup"
+                  ? `Create an account to access ${pendingAction}`
+                  : `Sign in to access ${pendingAction}`
+                }
+              </p>
+            )}
             <div className="mt-3">
               <LiveUserActivity />
             </div>
