@@ -19,7 +19,8 @@ export class ContentFormatter {
       .replace(/[ \t]+/g, ' ')
       .trim();
 
-    // Process the content in correct order
+    // Process the content in correct order - add comprehensive cleanup first
+    formattedContent = this.cleanupMarkdownArtifacts(formattedContent);
     formattedContent = this.convertMarkdownToHtml(formattedContent);
     formattedContent = this.removeDuplicateTitle(formattedContent, title);
     formattedContent = this.processHeadings(formattedContent);
@@ -29,6 +30,39 @@ export class ContentFormatter {
     formattedContent = this.fixSpacing(formattedContent);
 
     return formattedContent;
+  }
+
+  /**
+   * Clean up markdown artifacts and formatting issues
+   */
+  private static cleanupMarkdownArtifacts(content: string): string {
+    return content
+      // Remove markdown frontmatter (YAML frontmatter between triple hyphens)
+      .replace(/^---[\s\S]*?---\s*/m, '')
+      // Remove standalone triple hyphens (horizontal rules)
+      .replace(/^---+\s*$/gm, '')
+      .replace(/\n---+\n/g, '\n\n')
+      .replace(/\n---+$/gm, '')
+      // Remove malformed headings that are just single letters or abbreviations
+      .replace(/^##?\s+[A-Z]\.\s*(Assessment|needed|required|evaluation)\s*$/gmi, '')
+      // Fix common markdown formatting issues
+      .replace(/^\s*\*\*([A-Z])\.\s*([A-Za-z\s]*)\*\*\s*$/gmi, (match, letter, rest) => {
+        // Convert malformed bold patterns to regular text
+        if (rest.trim().length < 5) {
+          return `**${letter}.** ${rest}`;
+        }
+        return match;
+      })
+      // Remove empty markdown headings
+      .replace(/^#{1,6}\s*$$/gm, '')
+      // Clean up excessive markdown symbols
+      .replace(/\*{3,}/g, '**')
+      .replace(/_{3,}/g, '__')
+      // Remove orphaned colons from headings
+      .replace(/^(#{1,6})\s*([^:]+):\s*$/gm, '$1 $2')
+      // Clean up whitespace around hyphens
+      .replace(/\s*---+\s*/g, ' ')
+      .trim();
   }
 
   /**
