@@ -16,7 +16,10 @@ export function Header() {
 
   const handleSignOut = async () => {
     try {
-      await AuthService.signOut();
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      if (error) {
+        console.error('Sign out error:', error);
+      }
       navigate('/');
     } catch (error) {
       console.error('Sign out error:', error);
