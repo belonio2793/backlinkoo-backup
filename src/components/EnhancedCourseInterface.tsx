@@ -614,7 +614,7 @@ Users ready to make a purchase or take action.
           </div>
           <div className="text-right">
             <div className="text-2xl font-bold">{overallProgress}%</div>
-            <div className="text-blue-100">Complete</div>
+            <div className="text-gray-500">Complete</div>
           </div>
         </div>
         <div className="mt-6">
