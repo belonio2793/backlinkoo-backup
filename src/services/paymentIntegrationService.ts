@@ -30,6 +30,11 @@ class PaymentIntegrationService {
 
   constructor() {
     this.config = this.loadConfiguration();
+
+    // Debug logging in development
+    if (import.meta.env.DEV) {
+      console.log('🔧 Payment Integration Configuration:', this.getConfigurationStatus());
+    }
   }
 
   private loadConfiguration(): PaymentConfig {
