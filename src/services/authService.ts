@@ -87,15 +87,17 @@ export class AuthService {
       });
 
       if (error) {
-        console.error('🚨 Sign-in error details:', {
+        console.error('🚨 Authentication Error:', {
+          type: 'sign_in_error',
           message: error.message,
           status: error.status,
           statusText: error.statusText,
           name: error.name,
-          email: signInData.email,
-          fullError: JSON.stringify(error, null, 2)
+          email: signInData.email.substring(0, 3) + '***', // Partial email for privacy
+          timestamp: new Date().toISOString(),
+          originalError: error
         });
-        console.error('🚨 Raw error object:', error);
+
         return {
           success: false,
           error: this.formatErrorMessage(error.message)
