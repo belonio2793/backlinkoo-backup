@@ -1011,7 +1011,7 @@ const Index = () => {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <div className="text-sm text-gray-500 font-light text-center">
-              Money-back guarantee �� No setup fees • Cancel anytime
+              Money-back guarantee • No setup fees • Cancel anytime
             </div>
           </div>
         </div>
