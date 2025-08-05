@@ -158,7 +158,7 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
                 onClick={() => window.location.href = '/dashboard?tab=campaigns'}
                 size="lg"
                 variant="outline"
-                className="border-purple-900 text-purple-900 bg-white/10 backdrop-blur-sm hover:bg-white hover:text-purple-900 font-semibold px-6 py-3"
+                className="border-purple-900 text-purple-900 bg-white hover:bg-white hover:text-purple-900 font-semibold px-6 py-3"
               >
                 <Infinity className="mr-2 h-5 w-5" />
                 Create Campaigns
