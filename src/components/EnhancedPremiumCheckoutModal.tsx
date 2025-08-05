@@ -132,8 +132,10 @@ export function EnhancedPremiumCheckoutModal({
           description: "You'll be redirected to complete your payment securely.",
         });
 
-        // Open Stripe checkout
-        window.location.href = result.url;
+        // Small delay to show the toast before redirect
+        setTimeout(() => {
+          window.location.href = result.url;
+        }, 1000);
       } else {
         throw new Error(result.error || 'Failed to create subscription');
       }
