@@ -237,7 +237,7 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
                     placeholder="Enter number of credits"
                   />
                    <p className="text-sm text-muted-foreground">
-                     $0.70 per credit • 1 credit = 1 premium backlink
+                     $1.40 per credit • 1 credit = 1 premium backlink
                    </p>
                 </div>
                 <div className="space-y-2">
@@ -249,7 +249,7 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
                     className="bg-muted"
                   />
                    <p className="text-sm text-muted-foreground">
-                     {credits ? `${credits} credits × $0.70 = $${amount}` : 'Enter credits to see total'}
+                     {credits ? `${credits} credits × $1.40 = $${amount}` : 'Enter credits to see total'}
                    </p>
                 </div>
               </div>
