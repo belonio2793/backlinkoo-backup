@@ -22,6 +22,7 @@ interface AuthFormTabsProps {
 
 export function AuthFormTabs({
   onAuthSuccess,
+  onSignInStart,
   showTrialUpgrade = false,
   isCompact = false,
   onForgotPassword,
