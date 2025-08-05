@@ -150,6 +150,11 @@ export class ContentFormatter {
    */
   private static convertMarkdownToHtml(content: string): string {
     return content
+      // Fix "## P" + "ro Tip" pattern early (before any other processing)
+      .replace(/##\s*P\s*[\n\r\s]*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s*<[^>]*>\s*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s*(?:<[^>]*>)?\s*ro\s*(?:<[^>]*>)?\s*Tip/gi, '## Pro Tip')
+
       // Remove markdown frontmatter separators (triple hyphens)
       .replace(/^---[\s\S]*?---/gm, '')
       .replace(/^---.*$/gm, '')
