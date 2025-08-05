@@ -248,8 +248,8 @@ export function EnhancedBlogListing() {
     return ExcerptCleaner.cleanTitle(title);
   };
 
-  const getExcerpt = (content: string, title?: string, maxLength: number = 150) => {
-    return ExcerptCleaner.getCleanExcerpt(content, title, maxLength);
+  const getExcerpt = (content: string, maxLength: number = 150) => {
+    return ExcerptCleaner.getCleanExcerpt(content, undefined, maxLength);
   };
 
   const getTimeRemaining = (expiresAt: string) => {
@@ -556,7 +556,7 @@ function PostCard({
       
       <CardContent>
         <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-          {getExcerpt(post.content, post.title)}
+          {getExcerpt(post.content)}
         </p>
 
         {/* Expiration Timer */}
