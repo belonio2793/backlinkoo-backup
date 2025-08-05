@@ -628,13 +628,20 @@ Users ready to make a purchase or take action.
 
       {/* Course Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <BookOpen className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-            <div className="text-2xl font-bold">{totalLessons}</div>
-            <div className="text-sm text-muted-foreground">Total Lessons</div>
-          </CardContent>
-        </Card>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <BookOpen className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                <div className="text-2xl font-bold">{totalLessons}</div>
+                <div className="text-sm text-muted-foreground">Total Lessons</div>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Total number of lessons across all modules</p>
+          </TooltipContent>
+        </Tooltip>
         <Card>
           <CardContent className="p-4 text-center">
             <Clock className="h-8 w-8 mx-auto mb-2 text-green-600" />
