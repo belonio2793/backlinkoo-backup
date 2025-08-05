@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { navigateToSection, NAVIGATION_CONFIGS } from "@/utils/navigationUtils";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginModal } from "@/components/LoginModal";
+import { FooterNavigationService, FOOTER_NAV_CONFIGS } from "@/utils/footerNavigation";
 
 export const Footer = () => {
   const { user, isLoading } = useAuth();
@@ -10,15 +10,18 @@ export const Footer = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<any>(null);
 
-  const handleProtectedNavigation = (config: any) => {
-    if (user) {
-      // User is authenticated, navigate directly
-      navigateToSection(config);
-    } else {
-      // User is not authenticated, store pending navigation and show login modal
-      setPendingNavigation(config);
-      setShowLoginModal(true);
-    }
+  const handleSmartNavigation = (config: any) => {
+    if (isLoading) return;
+
+    FooterNavigationService.handleNavigation({
+      config,
+      user,
+      navigate,
+      onAuthRequired: (pendingNav) => {
+        setPendingNavigation(pendingNav);
+        setShowLoginModal(true);
+      }
+    });
   };
 
   const handleAuthSuccess = (authenticatedUser: any) => {
@@ -29,14 +32,14 @@ export const Footer = () => {
     if (pendingNavigation) {
       console.log('🔄 Footer: Executing pending navigation:', pendingNavigation);
 
-      // Use immediate execution instead of setTimeout to prevent race conditions
-      if (pendingNavigation.hash) {
-        // Section navigation with hash
-        navigateToSection(pendingNavigation);
-      } else {
-        // Safe route navigation using React Router
-        navigate(pendingNavigation.route);
-      }
+      // Use the smart navigation system for consistent handling
+      FooterNavigationService.handleNavigation({
+        config: { ...pendingNavigation, requiresAuth: false }, // Skip auth check since user just authenticated
+        user: authenticatedUser,
+        navigate,
+        onAuthRequired: () => {} // No-op since user is already authenticated
+      });
+
       setPendingNavigation(null);
     }
   };
@@ -50,10 +53,7 @@ export const Footer = () => {
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Features</h3>
             <div className="space-y-2">
               <button
-                onClick={() => {
-                  if (isLoading) return;
-                  handleProtectedNavigation(NAVIGATION_CONFIGS.CAMPAIGNS);
-                }}
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.CAMPAIGNS)}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
                 title={!user ? "Sign in to access Campaign Management" : "Go to Campaign Management"}
                 disabled={isLoading}
@@ -61,30 +61,21 @@ export const Footer = () => {
                 Campaign Management
               </button>
               <button
-                onClick={() => {
-                  if (isLoading) return;
-                  handleProtectedNavigation(NAVIGATION_CONFIGS.BACKLINK_AUTOMATION);
-                }}
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.BACKLINK_AUTOMATION)}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
                 disabled={isLoading}
               >
                 Backlink ∞ Automation Link Building (beta)
               </button>
               <button
-                onClick={() => {
-                  if (isLoading) return;
-                  handleProtectedNavigation(NAVIGATION_CONFIGS.KEYWORD_RESEARCH);
-                }}
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.KEYWORD_RESEARCH)}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
                 disabled={isLoading}
               >
                 Keyword Research
               </button>
               <button
-                onClick={() => {
-                  if (isLoading) return;
-                  handleProtectedNavigation(NAVIGATION_CONFIGS.RANK_TRACKER);
-                }}
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.RANK_TRACKER)}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
                 disabled={isLoading}
               >
@@ -104,17 +95,9 @@ export const Footer = () => {
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Merchant Tools</h3>
             <div className="space-y-2">
               <button
-                onClick={() => {
-                  if (isLoading) return; // Prevent clicks during auth loading
-
-                  if (user) {
-                    navigate('/backlink-report');
-                  } else {
-                    setPendingNavigation({ route: '/backlink-report' });
-                    setShowLoginModal(true);
-                  }
-                }}
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.BACKLINK_REPORTS)}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                title={!user ? "Sign in to access Backlink Reports" : "Go to Backlink Reports"}
                 disabled={isLoading}
               >
                 Backlink Reports
@@ -152,17 +135,9 @@ export const Footer = () => {
                 Affiliate Program
               </Link>
               <button
-                onClick={() => {
-                  if (isLoading) return; // Prevent clicks during auth loading
-
-                  if (user) {
-                    navigate('/admin');
-                  } else {
-                    setPendingNavigation({ route: '/admin' });
-                    setShowLoginModal(true);
-                  }
-                }}
+                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.ADMIN)}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer disabled:opacity-50"
+                title={!user ? "Sign in to access Admin Dashboard" : "Go to Admin Dashboard"}
                 disabled={isLoading}
               >
                 Admin Dashboard
