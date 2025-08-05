@@ -223,12 +223,20 @@ class PaymentIntegrationService {
         })
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        return {
+          success: false,
+          error: `Invalid response from subscription service: ${response.status} ${response.statusText}`
+        };
+      }
 
       if (!response.ok) {
         return {
           success: false,
-          error: data.error || 'Subscription creation failed'
+          error: data.error || `Subscription creation failed: ${response.status} ${response.statusText}`
         };
       }
 
