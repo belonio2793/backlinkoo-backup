@@ -642,6 +642,26 @@ export class ContentFormatter {
       .replace(/\n{3,}/g, '\n\n')
 
       // Final pass: ensure any remaining ## patterns become proper headings
-      .replace(/^\s*##\s+([A-Za-z][^\n]*)/gm, '<h2>$1</h2>');
+      .replace(/^\s*##\s+([A-Za-z][^\n]*)/gm, '<h2>$1</h2>')
+
+      // COMPREHENSIVE HEADLINE PROTOCOL ENFORCEMENT
+      // Ensure all headings follow proper HTML structure
+      .replace(/<h([1-6])[^>]*>\s*([^<]*?)\s*<\/h[1-6]>/gi, (match, level, text) => {
+        const cleanText = text.trim().replace(/[*#]+/g, '').trim();
+        if (cleanText) {
+          return `<h${level}>${cleanText}</h${level}>`;
+        }
+        return ''; // Remove empty headings
+      })
+
+      // Convert any remaining markdown-style headings to HTML
+      .replace(/^\s*(#{1,6})\s+(.+?)\s*$/gm, (match, hashes, text) => {
+        const level = Math.min(hashes.length, 6);
+        const cleanText = text.trim().replace(/[*#]+/g, '').trim();
+        if (cleanText) {
+          return `<h${level}>${cleanText}</h${level}>`;
+        }
+        return ''; // Remove empty headings
+      });
   }
 }
