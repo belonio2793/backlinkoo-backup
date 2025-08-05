@@ -94,6 +94,7 @@ export function AuthFormTabs({
     onSignInStart?.();
 
     setIsLoading(true);
+    setLoadingMessage('Authenticating...');
     const currentEmail = trimmedEmail;
     const currentPassword = trimmedPassword;
 
