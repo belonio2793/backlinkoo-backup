@@ -329,13 +329,37 @@
   transition: width 0.3s ease;
 }
 
-.elite-blog-content a:hover {
+/* Remove hover effects from headline links */
+.elite-blog-content h1 a:hover,
+.elite-blog-content h2 a:hover,
+.elite-blog-content h3 a:hover,
+.elite-blog-content h4 a:hover,
+.elite-blog-content h5 a:hover,
+.elite-blog-content h6 a:hover {
+  color: inherit;
+  background: none;
+  transform: none;
+}
+
+.elite-blog-content h1 a:hover::before,
+.elite-blog-content h2 a:hover::before,
+.elite-blog-content h3 a:hover::before,
+.elite-blog-content h4 a:hover::before,
+.elite-blog-content h5 a:hover::before,
+.elite-blog-content h6 a:hover::before {
+  width: 0;
+}
+
+/* Keep hover effects only for paragraph and list links */
+.elite-blog-content p a:hover,
+.elite-blog-content li a:hover {
   color: rgb(147 51 234);
   background: rgba(59, 130, 246, 0.05);
   transform: translateY(-2px);
 }
 
-.elite-blog-content a:hover::before {
+.elite-blog-content p a:hover::before,
+.elite-blog-content li a:hover::before {
   width: 100%;
 }
 
