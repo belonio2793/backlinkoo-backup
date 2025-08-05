@@ -10,8 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { AuthFormTabs } from '@/components/shared/AuthFormTabs';
 import SubscriptionService from '@/services/subscriptionService';
-import { userService } from '@/services/userService';
-import { createSubscriptionWithFallback } from '@/services/fallbackSubscriptionService';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -120,62 +118,33 @@ export function EnhancedPremiumCheckoutModal({
         redirectUrl: redirectAfterSuccess
       }));
 
-      // Use subscription service with fallback support
-      const result = await createSubscriptionWithFallback(
+      // Create subscription using Stripe checkout
+      const result = await SubscriptionService.createSubscription(
         user,
         checkoutMode === 'guest', // isGuest
         checkoutMode === 'guest' ? guestEmail : undefined
       );
 
       if (result.success && result.url) {
-        if (result.usedFallback) {
-          // Fallback was used - upgrade successful
-          setCurrentStep('success');
-          toast({
-            title: "Premium Activated!",
-            description: "Your account has been upgraded to Premium.",
-          });
+        // Redirect to Stripe checkout
+        toast({
+          title: "Redirecting to Payment",
+          description: "You'll be redirected to complete your payment securely.",
+        });
 
-          // Trigger success callback and redirect after delay
-          setTimeout(() => {
-            onClose();
-            if (onSuccess) {
-              onSuccess();
-            }
-            navigate(redirectAfterSuccess);
-          }, 2000);
-        } else {
-          // Real Stripe checkout - redirect
-          toast({
-            title: "Redirecting to Payment",
-            description: "You'll be redirected to complete your payment securely.",
-          });
-          
-          // Open Stripe checkout
-          window.location.href = result.url;
-        }
+        // Open Stripe checkout
+        window.location.href = result.url;
       } else {
         throw new Error(result.error || 'Failed to create subscription');
       }
     } catch (error: any) {
       console.error('❌ Checkout error:', error);
-      console.error('❌ Error type:', typeof error);
-      console.error('❌ Error message:', error.message);
-      console.error('❌ Error stack:', error.stack);
 
       setCurrentStep('checkout');
 
-      // Provide detailed error message for debugging
-      let errorMessage = error.message || "There was an issue setting up your payment. Please try again.";
-
-      // Add more context for common errors
-      if (errorMessage.includes('Fallback failed')) {
-        errorMessage += '. The subscription system is experiencing issues. Please try again later or contact support.';
-      }
-
       toast({
         title: "Payment Setup Failed",
-        description: errorMessage,
+        description: error.message || "There was an issue setting up your payment. Please try again.",
         variant: "destructive"
       });
     } finally {
