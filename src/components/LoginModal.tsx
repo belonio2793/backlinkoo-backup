@@ -27,13 +27,16 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
   const handleAuthSuccess = (user: any) => {
     console.log('🎯 LoginModal: handleAuthSuccess called for user:', user?.email);
 
-    // Call the parent's onAuthSuccess first (which may close modal)
+    // Reset modal state immediately to prevent conflicts
+    setIsLoading(false);
+    setShowForgotPassword(false);
+    setForgotPasswordEmail("");
+
+    // Call the parent's onAuthSuccess first (which may handle navigation)
     onAuthSuccess?.(user);
 
-    // Ensure modal is closed if parent didn't handle it
-    setTimeout(() => {
-      onClose();
-    }, 50);
+    // Close modal immediately - no setTimeout to prevent race conditions
+    onClose();
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
