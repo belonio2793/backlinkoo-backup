@@ -706,7 +706,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {premiumLoading ? (
+              {premiumLoading && !useFallbackData ? (
                 <div className="flex flex-col items-center justify-center p-6 space-y-3">
                   <Loader2 className="h-8 w-8 animate-spin" />
                   <p className="text-sm text-muted-foreground">Loading subscription details...</p>
