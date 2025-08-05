@@ -76,7 +76,6 @@ if (typeof window !== 'undefined') {
     //       console.log('🛡️ Homepage safety verified - users protected');
     //     } else {
     //       console.warn('⚠️ Homepage safety issues detected:', result.issues);
-    //       console.log('🛡️ Automatic fallbacks have been enabled to protect users');
     //     }
     //   });
     // });

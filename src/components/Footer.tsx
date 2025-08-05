@@ -57,6 +57,7 @@ export const Footer = () => {
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
               >
                 Backlink ∞ Automation Link Building (beta)
+
               </button>
               <button
                 onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.KEYWORD_RESEARCH)}
@@ -68,8 +69,26 @@ export const Footer = () => {
                 onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.RANK_TRACKER)}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
               >
+              </Link>
+              <Link
+                to="/dashboard#keyword-research"
+                className="block text-gray-600 hover:text-gray-900 text-sm"
+              >
+                Keyword Research
+              </Link>
+              <Link
+                to="/dashboard#rank-tracker"
+                className="block text-gray-600 hover:text-gray-900 text-sm"
+
+              >
                 Rank Tracker
               </button>
+              <Link
+                to="/dashboard#backlink-automation"
+                className="block text-gray-600 hover:text-gray-900 text-sm"
+              >
+                Backlink Automation
+              </Link>
               <Link
                 to="/blog"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
