@@ -126,9 +126,30 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
       }
     } catch (error: any) {
       console.error('Checkout error:', error);
+
+      let errorMessage = "There was an issue setting up your payment. Please try again.";
+
+      // Handle different error types
+      if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.error) {
+        errorMessage = error.error;
+      }
+
+      // Handle specific error cases
+      if (errorMessage.includes('authentication') || errorMessage.includes('auth')) {
+        errorMessage = 'Please sign in first, then try upgrading to premium.';
+      } else if (errorMessage.includes('configuration') || errorMessage.includes('not configured')) {
+        errorMessage = 'Payment system is not configured. Please contact support.';
+      } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      }
+
       toast({
         title: "Payment Setup Failed",
-        description: error.message || "There was an issue setting up your payment. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {

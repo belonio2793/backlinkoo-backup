@@ -1017,8 +1017,6 @@ const Index = () => {
         </div>
       </section>
 
-
-
       {/* Pricing Modal */}
       <PricingModal
         isOpen={pricingModalOpen}
