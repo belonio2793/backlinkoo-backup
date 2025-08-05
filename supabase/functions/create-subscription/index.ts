@@ -238,8 +238,19 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error("Error in create-subscription:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("❌ Unhandled error in create-subscription:", error);
+    console.error("❌ Error stack:", error.stack);
+
+    let errorMessage = "Internal server error";
+    if (error.message) {
+      errorMessage = error.message;
+    }
+
+    return new Response(JSON.stringify({
+      error: errorMessage,
+      details: "Check server logs for more information",
+      timestamp: new Date().toISOString()
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
