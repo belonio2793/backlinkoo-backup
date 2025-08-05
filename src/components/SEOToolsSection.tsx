@@ -44,7 +44,7 @@ import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
 import SubscriptionService, { type SubscriptionStatus } from "@/services/subscriptionService";
 import FeatureAccessGuard from "@/components/FeatureAccessGuard";
 import { useOpenPremiumPopup } from "@/components/PremiumPopupProvider";
-import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
+import { EnhancedUnifiedPaymentModal } from "@/components/EnhancedUnifiedPaymentModal";
 
 interface SEOToolsSectionProps {
   user: User | null;
