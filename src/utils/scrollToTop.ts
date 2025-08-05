@@ -1,3 +1,5 @@
+import React from 'react';
+
 /**
  * Utility function to smoothly scroll to the top of the page
  * @param behavior - 'smooth' or 'auto' for scroll behavior
@@ -30,9 +32,6 @@ export const withScrollToTop = <P extends object>(Component: React.ComponentType
       scrollToTop();
     }, []);
 
-    return <Component {...props} />;
+    return React.createElement(Component, props);
   };
 };
-
-// Add React import
-import React from 'react';
