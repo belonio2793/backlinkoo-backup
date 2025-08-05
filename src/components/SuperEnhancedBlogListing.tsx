@@ -488,14 +488,14 @@ export function SuperEnhancedBlogListing() {
               </div>
             </form>
 
-            {/* Enhanced Filter Buttons - All Blue Theme */}
+            {/* Enhanced Filter Buttons - Distinct Gradient Colors */}
             <div className="flex flex-wrap justify-center gap-4 p-2">
               {[
-                { key: 'all', label: 'All Posts', icon: BookOpen, color: 'from-blue-500 to-blue-700', hoverColor: 'from-blue-600 to-blue-800', accent: 'blue' },
-                { key: 'claimable', label: 'Claimable', icon: Crown, color: 'from-blue-400 to-blue-600', hoverColor: 'from-blue-500 to-blue-700', accent: 'blue' },
-                { key: 'claimed', label: 'Claimed', icon: CheckCircle, color: 'from-blue-600 to-blue-800', hoverColor: 'from-blue-700 to-blue-900', accent: 'blue' },
-                ...(user ? [{ key: 'my-posts', label: 'My Posts', icon: User, color: 'from-blue-500 to-indigo-600', hoverColor: 'from-blue-600 to-indigo-700', accent: 'blue' }] : [])
-              ].map(({ key, label, icon: Icon, color, hoverColor, accent }, index) => (
+                { key: 'all', label: 'All Posts', icon: BookOpen, color: 'from-blue-500 to-cyan-600', hoverColor: 'from-blue-600 to-cyan-700', accent: 'blue', activeIndicator: 'from-blue-400 to-cyan-500' },
+                { key: 'claimable', label: 'Claimable', icon: Crown, color: 'from-purple-500 to-pink-600', hoverColor: 'from-purple-600 to-pink-700', accent: 'purple', activeIndicator: 'from-purple-400 to-pink-500' },
+                { key: 'claimed', label: 'Claimed', icon: CheckCircle, color: 'from-emerald-500 to-teal-600', hoverColor: 'from-emerald-600 to-teal-700', accent: 'emerald', activeIndicator: 'from-emerald-400 to-teal-500' },
+                ...(user ? [{ key: 'my-posts', label: 'My Posts', icon: User, color: 'from-orange-500 to-red-600', hoverColor: 'from-orange-600 to-red-700', accent: 'orange', activeIndicator: 'from-orange-400 to-red-500' }] : [])
+              ].map(({ key, label, icon: Icon, color, hoverColor, accent, activeIndicator }, index) => (
                 <button
                   key={key}
                   onClick={() => setFilterType(key as any)}
