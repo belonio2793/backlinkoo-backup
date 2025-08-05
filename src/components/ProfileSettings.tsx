@@ -723,6 +723,11 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                       <p className="text-sm text-muted-foreground">
                         You are currently on the {isPremium ? 'Premium' : 'Free'} plan
                       </p>
+                      {userProfile && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Subscription tier: {userProfile.subscription_tier || 'Not set'}
+                        </p>
+                      )}
                     </div>
                     <Badge variant="default" className={`${roleInfo.color} text-white`}>
                       {roleInfo.icon}
