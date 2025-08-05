@@ -582,10 +582,6 @@ export type Database = {
         Row: {
           average_position: number | null
           best_position: number | null
-          bing_backlinks: number | null
-          bing_checked_at: string | null
-          bing_found: boolean | null
-          bing_position: number | null
           domain: string | null
           google_backlinks: number | null
           google_checked_at: string | null
@@ -599,10 +595,6 @@ export type Database = {
           target_updated_at: string | null
           url: string | null
           user_id: string | null
-          yahoo_backlinks: number | null
-          yahoo_checked_at: string | null
-          yahoo_found: boolean | null
-          yahoo_position: number | null
         }
         Relationships: []
       }
