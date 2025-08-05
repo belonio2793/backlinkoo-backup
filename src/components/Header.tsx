@@ -22,7 +22,7 @@ export function Header({ showHomeLink = true }: HeaderProps) {
   const [defaultTab, setDefaultTab] = useState<'login' | 'signup'>('login');
 
   // Debug logging for header authentication state
-  console.log('��� Header: User authentication state:', {
+  console.log('🎯 Header: User authentication state:', {
     userEmail: user?.email,
     isAuthenticated: !!user,
     isLoading,
@@ -142,7 +142,14 @@ export function Header({ showHomeLink = true }: HeaderProps) {
               Clear Cache
             </Button>
 
-            {user ? (
+            {isLoading ? (
+              // Show loading state during authentication check
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-9 bg-gray-200 animate-pulse rounded"></div>
+                <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
+              </div>
+            ) : user ? (
+              // Authenticated user buttons
               <>
                 <Button
                   onClick={() => navigate("/dashboard")}
@@ -164,6 +171,7 @@ export function Header({ showHomeLink = true }: HeaderProps) {
                 </Button>
               </>
             ) : (
+              // Unauthenticated user buttons
               <>
                 <Button variant="ghost" onClick={handleSignInClick} className="font-medium">
                   Sign In
