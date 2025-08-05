@@ -136,15 +136,9 @@ export function CourseProgressDashboard() {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Your Learning Progress</h1>
-          <p className="text-muted-foreground">Track your journey through the SEO Academy</p>
-        </div>
-        <Badge className="bg-green-100 text-green-800 text-lg px-4 py-2">
-          <Flame className={"h-4 w-4 mr-1\" />r-1\" />-1"} />
-          {courseStats.streak} day streak
-        </Badge>
+      <div>
+        <h1 className="text-3xl font-bold">Your Learning Progress</h1>
+        <p className="text-muted-foreground">Track your journey through the SEO Academy</p>
       </div>
 
       {/* Main Stats Grid */}
