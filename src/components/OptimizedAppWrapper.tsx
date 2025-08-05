@@ -63,7 +63,10 @@ import {
   LazySEOOptimizedBlogGenerator,
   LazyOpenAITest,
   LazySystemTest,
-  LazyPaymentTest
+  LazyPaymentTest,
+  LazyWebhookTest,
+  LazyPaymentDiagnostic,
+  LazyEdgeFunctionDiagnostic
 } from './LazyComponents';
 
 // Loading component for better UX
@@ -263,6 +266,21 @@ export const OptimizedAppWrapper = () => {
           <Route path="/test-payment" element={
             <Suspense fallback={<PageLoader />}>
               <LazyPaymentTest />
+            </Suspense>
+          } />
+          <Route path="/test-webhooks" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyWebhookTest />
+            </Suspense>
+          } />
+          <Route path="/payment-diagnostic" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyPaymentDiagnostic />
+            </Suspense>
+          } />
+          <Route path="/edge-function-diagnostic" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyEdgeFunctionDiagnostic />
             </Suspense>
           } />
 

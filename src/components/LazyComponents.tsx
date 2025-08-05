@@ -47,3 +47,12 @@ export const LazySystemTest = lazy(() => import('@/components/SystemTest').then(
 
 // Payment Testing component
 export const LazyPaymentTest = lazy(() => import('@/pages/PaymentTest'));
+
+// Webhook Testing component
+export const LazyWebhookTest = lazy(() => import('@/pages/WebhookTest'));
+
+// Payment Diagnostic component
+export const LazyPaymentDiagnostic = lazy(() => import('@/pages/PaymentDiagnostic'));
+
+// Edge Function Diagnostic component
+export const LazyEdgeFunctionDiagnostic = lazy(() => import('@/pages/EdgeFunctionDiagnostic'));

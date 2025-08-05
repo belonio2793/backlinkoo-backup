@@ -488,14 +488,14 @@ export function SuperEnhancedBlogListing() {
               </div>
             </form>
 
-            {/* Enhanced Filter Buttons - All Blue Theme */}
+            {/* Enhanced Filter Buttons - Distinct Gradient Colors */}
             <div className="flex flex-wrap justify-center gap-4 p-2">
               {[
-                { key: 'all', label: 'All Posts', icon: BookOpen, color: 'from-blue-500 to-blue-700', hoverColor: 'from-blue-600 to-blue-800', accent: 'blue' },
-                { key: 'claimable', label: 'Claimable', icon: Crown, color: 'from-blue-400 to-blue-600', hoverColor: 'from-blue-500 to-blue-700', accent: 'blue' },
-                { key: 'claimed', label: 'Claimed', icon: CheckCircle, color: 'from-blue-600 to-blue-800', hoverColor: 'from-blue-700 to-blue-900', accent: 'blue' },
-                ...(user ? [{ key: 'my-posts', label: 'My Posts', icon: User, color: 'from-blue-500 to-indigo-600', hoverColor: 'from-blue-600 to-indigo-700', accent: 'blue' }] : [])
-              ].map(({ key, label, icon: Icon, color, hoverColor, accent }, index) => (
+                { key: 'all', label: 'All Posts', icon: BookOpen, color: 'from-blue-500 to-cyan-600', hoverColor: 'from-blue-600 to-cyan-700', accent: 'blue', activeIndicator: 'from-blue-400 to-cyan-500' },
+                { key: 'claimable', label: 'Claimable', icon: Crown, color: 'from-purple-500 to-pink-600', hoverColor: 'from-purple-600 to-pink-700', accent: 'purple', activeIndicator: 'from-purple-400 to-pink-500' },
+                { key: 'claimed', label: 'Claimed', icon: CheckCircle, color: 'from-emerald-500 to-teal-600', hoverColor: 'from-emerald-600 to-teal-700', accent: 'emerald', activeIndicator: 'from-emerald-400 to-teal-500' },
+                ...(user ? [{ key: 'my-posts', label: 'My Posts', icon: User, color: 'from-orange-500 to-red-600', hoverColor: 'from-orange-600 to-red-700', accent: 'orange', activeIndicator: 'from-orange-400 to-red-500' }] : [])
+              ].map(({ key, label, icon: Icon, color, hoverColor, accent, activeIndicator }, index) => (
                 <button
                   key={key}
                   onClick={() => setFilterType(key as any)}
@@ -508,8 +508,8 @@ export function SuperEnhancedBlogListing() {
                          before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:${hoverColor}
                          before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300`
                       : `bg-white/90 backdrop-blur-sm border-2 border-gray-200/50 text-gray-700
-                         hover:bg-white hover:border-${accent}-200 hover:text-${accent}-700
-                         hover:shadow-${accent}-100/50`
+                         hover:bg-white hover:border-opacity-70 hover:text-gray-800
+                         hover:shadow-lg hover:shadow-gray-200/50`
                     }
                     before:content-[''] before:absolute before:inset-0 before:rounded-2xl
                     ${filterType !== key ? `before:bg-gradient-to-br before:${color} before:opacity-0 hover:before:opacity-5 before:transition-all before:duration-300` : ''}
@@ -529,13 +529,13 @@ export function SuperEnhancedBlogListing() {
                       p-1.5 rounded-lg transition-all duration-300
                       ${filterType === key
                         ? 'bg-white/20 group-hover:bg-white/30'
-                        : `bg-${accent}-100 group-hover:bg-${accent}-200`
+                        : 'bg-gray-100 group-hover:bg-gray-200'
                       }
                     `}>
                       <Icon className={`h-4 w-4 transition-colors duration-300 ${
                         filterType === key
                           ? 'text-white'
-                          : `text-${accent}-600 group-hover:text-${accent}-700`
+                          : 'text-gray-600 group-hover:text-gray-700'
                       }`} />
                     </div>
                     <span className="relative">
@@ -547,9 +547,14 @@ export function SuperEnhancedBlogListing() {
                     </span>
                   </div>
 
-                  {/* Active indicator dot */}
+                  {/* Active indicator dot with gradient */}
                   {filterType === key && (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full shadow-lg animate-pulse"></div>
+                    <div
+                      className={`absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br ${activeIndicator} rounded-full shadow-lg border-2 border-white/30`}
+                      style={{ animation: 'gradientPulse 2s ease-in-out infinite' }}
+                    >
+                      <div className="absolute inset-0.5 bg-gradient-to-br from-white/40 to-white/10 rounded-full"></div>
+                    </div>
                   )}
 
                   {/* Ripple effect on click */}
