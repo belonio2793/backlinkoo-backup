@@ -655,7 +655,7 @@ export const KeywordResearchTool = () => {
                       {statusMessages[currentStatusMessage]}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Analyzing search trends and competition data...
+                      Using Google Ads API for official search volume data...
                     </div>
                   </div>
                 </div>
