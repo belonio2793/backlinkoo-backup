@@ -3,9 +3,11 @@ import { useState } from "react";
 import { navigateToSection, NAVIGATION_CONFIGS } from "@/utils/navigationUtils";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginModal } from "@/components/LoginModal";
+import { useToast } from "@/hooks/use-toast";
 
 export const Footer = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<any>(null);
 
@@ -17,6 +19,12 @@ export const Footer = () => {
       // User is not authenticated, store pending navigation and show login modal
       setPendingNavigation(config);
       setShowLoginModal(true);
+
+      // Show informative toast
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in to access this feature. We'll redirect you after authentication.",
+      });
     }
   };
 
