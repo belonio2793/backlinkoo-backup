@@ -107,6 +107,9 @@ export function EnhancedUnifiedPaymentModal({
   // Guest checkout
   const [guestEmail, setGuestEmail] = useState('');
 
+  // Payment method availability
+  const [availablePaymentMethods, setAvailablePaymentMethods] = useState<('stripe' | 'paypal')[]>([]);
+
   const CREDIT_PRICE = 0.70;
 
   // Premium plans configuration
