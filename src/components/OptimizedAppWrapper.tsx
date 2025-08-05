@@ -64,7 +64,8 @@ import {
   LazyOpenAITest,
   LazySystemTest,
   LazyPaymentTest,
-  LazyWebhookTest
+  LazyWebhookTest,
+  LazyPaymentDiagnostic
 } from './LazyComponents';
 
 // Loading component for better UX
