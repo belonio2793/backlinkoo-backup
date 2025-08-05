@@ -548,9 +548,22 @@ exports.handler = async (event, context) => {
 
     // Store in database
     try {
+      // Clean content before storing in database to prevent malformed patterns
+      const cleanedBlogPost = {
+        ...blogPost,
+        content: blogPost.content
+          .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
+          .replace(/##\s*&lt;\s*h[1-6]\s*&gt;/gi, '##')
+          .replace(/##\s*&lt;[^>]*&gt;[^\n]*/g, '')
+          .replace(/&lt;\s*h[1-6]\s*&gt;/gi, '')
+          .replace(/&lt;\s*\/\s*h[1-6]\s*&gt;/gi, '')
+          .replace(/&lt;\s*p\s*&gt;/gi, '')
+          .replace(/&lt;\s*\/\s*p\s*&gt;/gi, '')
+      };
+
       const { error: dbError } = await supabase
         .from('published_blog_posts')
-        .insert([blogPost]);
+        .insert([cleanedBlogPost]);
 
       if (dbError) {
         console.warn('Database insert failed:', dbError);
