@@ -23,6 +23,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
+import { ExcerptCleaner } from '@/utils/excerptCleaner';
 
 interface TrialPost {
   id: string;
@@ -62,17 +63,7 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
   }, []);
 
   const cleanTitle = (title: string) => {
-    if (!title) return '';
-    return title
-      .replace(/^\s*\*\*Title:\s*([^*]*)\*\*\s*/i, '$1') // Remove **Title:** wrapper and extract content
-      .replace(/^\s*Title:\s*/gi, '') // Remove Title: prefix
-      .replace(/^\*\*H1\*\*:\s*/i, '')
-      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
-      .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
-      .replace(/\*\*/g, '') // Remove any remaining ** symbols
-      .replace(/\*/g, '') // Remove any remaining * symbols
-      .replace(/^#{1,6}\s+/, '') // Remove markdown headers
-      .trim();
+    return ExcerptCleaner.cleanTitle(title);
   };
 
   const loadTrialPosts = async () => {

@@ -347,7 +347,6 @@ Need help? Reply to this email or contact our support team.
 Best regards,
 The Backlink ∞ Team
 
----
 Professional SEO & Backlink Management Platform
 ${origin}`,
       from: 'Backlink ∞ <support@backlinkoo.com>'
@@ -430,7 +429,6 @@ Need help? Contact our support team at support@backlinkoo.com
 Best regards,
 The Backlink ∞ Team
 
----
 Professional SEO & Backlink Management Platform
 https://backlinkoo.com`,
         from: 'Backlink ∞ <support@backlinkoo.com>'
@@ -512,7 +510,6 @@ Questions? Our support team is here to help at support@backlinkoo.com
 Best regards,
 The Backlink ∞ Team
 
----
 Professional SEO & Backlink Management Platform
 https://backlinkoo.com`,
         from: 'Backlink ∞ <support@backlinkoo.com>'

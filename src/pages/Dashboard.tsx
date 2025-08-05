@@ -1157,9 +1157,6 @@ const Dashboard = () => {
                     className="px-2 sm:px-4 gap-1"
                   >
                     <User className="h-4 w-4" />
-                    <span className="hidden sm:inline">
-                      {user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Account'}
-                    </span>
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -1220,9 +1217,9 @@ const Dashboard = () => {
               <Button
                 variant={activeSection === "premium-plan" ? "secondary" : "ghost"}
                 onClick={() => setActiveSection("premium-plan")}
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3 relative"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3 relative flex items-center gap-2"
               >
-                <Crown className="h-4 w-4 sm:mr-2" />
+                <Crown className="h-4 w-4" />
                 <span className="hidden sm:inline">
                   {isPremiumSubscriber ? "Premium Dashboard" : "Premium Plan"}
                 </span>
@@ -1869,7 +1866,7 @@ const Dashboard = () => {
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Profile Settings</DialogTitle>
+            <DialogTitle className="text-center">Profile Settings</DialogTitle>
           </DialogHeader>
           <div className="p-2">
             <ProfileSettings onClose={() => setIsProfileOpen(false)} />

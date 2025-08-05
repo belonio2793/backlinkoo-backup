@@ -527,21 +527,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
             </Avatar>
             <div className="flex-1">
               <h2 className="text-2xl font-bold">{displayName}</h2>
-              <p className="text-muted-foreground flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                {(() => {
-                  const email = user?.email || profileData.email;
-                  console.log('Email display check:', { userEmail: user?.email, profileEmail: profileData.email, finalEmail: email });
-                  return email || 'No email available';
-                })()}
-              </p>
               <div className="flex items-center gap-2 mt-2">
-                <div className={`w-4 h-4 rounded-full ${providerInfo.color} flex items-center justify-center text-xs`}>
-                  {providerInfo.icon}
-                </div>
-                <Badge variant="outline">
-                  {providerInfo.name} Account
-                </Badge>
                 <Badge variant="default" className={`${roleInfo.color} text-white`}>
                   {roleInfo.icon}
                   {roleInfo.name}

@@ -19,7 +19,8 @@ export class ContentFormatter {
       .replace(/[ \t]+/g, ' ')
       .trim();
 
-    // Process the content in correct order
+    // Process the content in correct order - add comprehensive cleanup first
+    formattedContent = this.cleanupMarkdownArtifacts(formattedContent);
     formattedContent = this.convertMarkdownToHtml(formattedContent);
     formattedContent = this.removeDuplicateTitle(formattedContent, title);
     formattedContent = this.processHeadings(formattedContent);
@@ -29,6 +30,39 @@ export class ContentFormatter {
     formattedContent = this.fixSpacing(formattedContent);
 
     return formattedContent;
+  }
+
+  /**
+   * Clean up markdown artifacts and formatting issues
+   */
+  private static cleanupMarkdownArtifacts(content: string): string {
+    return content
+      // Remove markdown frontmatter (YAML frontmatter between triple hyphens)
+      .replace(/^---[\s\S]*?---\s*/m, '')
+      // Remove standalone triple hyphens (horizontal rules)
+      .replace(/^---+\s*$/gm, '')
+      .replace(/\n---+\n/g, '\n\n')
+      .replace(/\n---+$/gm, '')
+      // Remove malformed headings that are just single letters or abbreviations
+      .replace(/^##?\s+[A-Z]\.\s*(Assessment|needed|required|evaluation)\s*$/gmi, '')
+      // Fix common markdown formatting issues
+      .replace(/^\s*\*\*([A-Z])\.\s*([A-Za-z\s]*)\*\*\s*$/gmi, (match, letter, rest) => {
+        // Convert malformed bold patterns to regular text
+        if (rest.trim().length < 5) {
+          return `**${letter}.** ${rest}`;
+        }
+        return match;
+      })
+      // Remove empty markdown headings
+      .replace(/^#{1,6}\s*$$/gm, '')
+      // Clean up excessive markdown symbols
+      .replace(/\*{3,}/g, '**')
+      .replace(/_{3,}/g, '__')
+      // Remove orphaned colons from headings
+      .replace(/^(#{1,6})\s*([^:]+):\s*$/gm, '$1 $2')
+      // Clean up whitespace around hyphens
+      .replace(/\s*---+\s*/g, ' ')
+      .trim();
   }
 
   /**
@@ -116,6 +150,11 @@ export class ContentFormatter {
    */
   private static convertMarkdownToHtml(content: string): string {
     return content
+      // Remove markdown frontmatter separators (triple hyphens)
+      .replace(/^---[\s\S]*?---/gm, '')
+      .replace(/^---.*$/gm, '')
+      .replace(/\n---\n/g, '\n')
+      .replace(/\n---$/gm, '')
       // Remove any "Title:" patterns at the very beginning of content (most aggressive)
       .replace(/^[\s\n]*Title:\s*[^\n]*\n?/i, '')
       // Convert markdown links [text](url) to <a> tags
@@ -124,8 +163,23 @@ export class ContentFormatter {
       .replace(/\*\*H1\*\*:\s*(.+?)(?=\n|$)/gi, '<h1>$1</h1>')
       // Convert **Title**: patterns to nothing (remove completely since it's duplicate)
       .replace(/^\*\*Title\*\*:\s*(.+?)(?=\n|$)/gmi, '')
+      // Fix malformed headings like "## P. Assessment" - only create proper headings from meaningful text
+      .replace(/^##?\s+([A-Z])\.\s*([A-Za-z\s]{0,15})\s*$/gmi, (match, letter, rest) => {
+        // If it's a single letter followed by a short word, it's likely malformed - convert to paragraph
+        if (rest.trim().length < 3 || /^(Assessment|needed|required)$/i.test(rest.trim())) {
+          return `<p><strong>${letter}. ${rest}</strong></p>`;
+        }
+        return `<h2>${letter}. ${rest}</h2>`;
+      })
       // Convert **text**: patterns at start of line to <h2> tags (common heading pattern)
-      .replace(/^\*\*([^*]+?)\*\*:\s*(.+?)(?=\n|$)/gmi, '<h2>$1: $2</h2>')
+      // But avoid single letters with colons that create malformed headings
+      .replace(/^\*\*([^*]+?)\*\*:\s*(.+?)(?=\n|$)/gmi, (match, prefix, content) => {
+        // If prefix is just a single letter, treat as regular text
+        if (prefix.trim().length === 1) {
+          return `<p><strong>${prefix}:</strong> ${content}</p>`;
+        }
+        return `<h2>${prefix}: ${content}</h2>`;
+      })
       // Convert **text** patterns at start of line to <h2> tags (standalone bold headings)
       .replace(/^\*\*([^*]+?)\*\*(?=\s*\n|$)/gmi, '<h2>$1</h2>')
       // Convert remaining **text** to <strong> tags (inline bold)
@@ -134,12 +188,20 @@ export class ContentFormatter {
       .replace(/\*([^*]+?)\*/g, '<em>$1</em>')
       // Convert ### headings to h3
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-      // Convert ## headings to h2
-      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      // Convert ## headings to h2, but filter out malformed ones
+      .replace(/^## (.+)$/gm, (match, content) => {
+        // Skip if it's a malformed heading like "P. Assessment"
+        if (/^[A-Z]\.\s*[A-Za-z\s]{0,15}$/.test(content.trim())) {
+          return `<p><strong>${content}</strong></p>`;
+        }
+        return `<h2>${content}</h2>`;
+      })
       // Convert # headings to h1
       .replace(/^# (.+)$/gm, '<h1>$1</h1>')
       // Remove any remaining standalone "Title:" patterns at start of lines
-      .replace(/^Title:\s*[^\n]*\n?/gmi, '');
+      .replace(/^Title:\s*[^\n]*\n?/gmi, '')
+      // Clean up any remaining triple hyphens that might be inline
+      .replace(/---+/g, '');
   }
 
   /**
@@ -306,6 +368,13 @@ export class ContentFormatter {
       .replace(/<script[^>]*>.*?<\/script>/gi, '')
       .replace(/<style[^>]*>.*?<\/style>/gi, '')
       .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+      // Remove any remaining markdown artifacts
+      .replace(/---+/g, '')
+      .replace(/^\s*---\s*$/gm, '')
+      // Remove malformed HTML headings with single letters
+      .replace(/<h[1-6][^>]*>\s*[A-Z]\.\s*(Assessment|needed|required|evaluation)\s*<\/h[1-6]>/gi, '')
+      // Remove empty headings
+      .replace(/<h[1-6][^>]*>\s*<\/h[1-6]>/gi, '')
       // Fix common HTML issues
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
@@ -314,8 +383,9 @@ export class ContentFormatter {
       // Normalize quotes
       .replace(/[\u2018\u2019]/g, "'")
       .replace(/[\u201C\u201D]/g, '"')
-      // Remove excessive whitespace
-      .replace(/\s+/g, ' ')
+      // Remove excessive whitespace but preserve paragraph structure
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n\s*\n\s*\n/g, '\n\n')
       .trim();
   }
 }
