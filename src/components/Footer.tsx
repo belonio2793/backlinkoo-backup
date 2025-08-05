@@ -9,6 +9,7 @@ export const Footer = () => {
   const navigate = useNavigate();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<any>(null);
+  const [pendingActionDescription, setPendingActionDescription] = useState<string>("");
 
   const handleSmartNavigation = (config: any) => {
     if (isLoading) return;
