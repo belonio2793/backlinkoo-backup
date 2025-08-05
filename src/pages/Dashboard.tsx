@@ -1151,7 +1151,10 @@ const Dashboard = () => {
                       Get started by purchasing credits to create your first backlink campaign.
                       Our high-quality backlinks will help improve your website's search engine rankings.
                     </p>
-                    <Button onClick={() => setIsPricingModalOpen(true)}>
+                    <Button onClick={() => {
+                      setPaymentDefaultTab('credits');
+                      setIsPaymentModalOpen(true);
+                    }}>
                       <Plus className="h-4 w-4 mr-2" />
                       Buy Your First Credits
                     </Button>
