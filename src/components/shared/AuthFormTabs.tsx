@@ -51,9 +51,18 @@ export function AuthFormTabs({
     e.preventDefault();
     if (isLoading) return;
 
-    console.log('🔐 Login attempt with:', { email: loginEmail, hasPassword: !!loginPassword });
+    console.log('🔐 Login attempt with:', {
+      email: loginEmail,
+      hasPassword: !!loginPassword,
+      emailLength: loginEmail.length,
+      passwordLength: loginPassword.length
+    });
 
-    if (!loginEmail || !loginPassword) {
+    // Trim whitespace from inputs
+    const trimmedEmail = loginEmail.trim();
+    const trimmedPassword = loginPassword.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
       toast({
         title: "Missing credentials",
         description: "Please enter both email and password.",
@@ -62,10 +71,19 @@ export function AuthFormTabs({
       return;
     }
 
-    if (!validateEmail(loginEmail)) {
+    if (!validateEmail(trimmedEmail)) {
       toast({
         title: "Invalid email format",
         description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (trimmedPassword.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters long.",
         variant: "destructive",
       });
       return;
