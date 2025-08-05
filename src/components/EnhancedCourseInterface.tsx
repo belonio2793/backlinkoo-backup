@@ -610,7 +610,7 @@ Users ready to make a purchase or take action.
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">SEO Academy</h1>
-            <p className="text-blue-100 text-lg">Complete Search Engine Optimization Masterclass</p>
+            <p className="text-gray-600 text-lg">Complete Search Engine Optimization Masterclass</p>
           </div>
           <div className="text-right">
             <div className="text-2xl font-bold">{overallProgress}%</div>
