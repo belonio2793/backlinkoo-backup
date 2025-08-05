@@ -209,22 +209,8 @@ export function BlogListing() {
     });
   };
 
-  const getExcerpt = (content: string, maxLength: number = 150) => {
-    // Remove HTML tags first
-    let plainText = content.replace(/<[^>]*>/g, '');
-
-    // Remove **Title:** patterns at the beginning
-    plainText = plainText.replace(/^\s*\*\*Title:\s*[^*]*\*\*\s*/i, '');
-
-    // Remove any remaining Title: patterns
-    plainText = plainText.replace(/^\s*Title:\s*[^\n]*/gi, '');
-
-    // Remove excessive whitespace
-    plainText = plainText.replace(/\s+/g, ' ').trim();
-
-    return plainText.length > maxLength
-      ? plainText.substring(0, maxLength) + '...'
-      : plainText;
+  const getExcerpt = (content: string, title?: string, maxLength: number = 150) => {
+    return ExcerptCleaner.getCleanExcerpt(content, title, maxLength);
   };
 
   const isExpiringSoon = (post: BlogPost) => {
