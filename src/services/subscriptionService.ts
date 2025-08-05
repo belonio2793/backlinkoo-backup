@@ -86,10 +86,11 @@ export class SubscriptionService {
 
     try {
       // Validate Stripe configuration
-      if (!import.meta.env.VITE_STRIPE_PRICE_ID) {
+      const stripeConfig = this.validateStripeConfiguration();
+      if (!stripeConfig.isValid) {
         return {
           success: false,
-          error: 'Payment system not configured. Please contact support.'
+          error: stripeConfig.error
         };
       }
 
