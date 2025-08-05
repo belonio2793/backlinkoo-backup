@@ -218,7 +218,7 @@ export function PremiumPlanPopup({
     setCurrentStep('processing');
 
     try {
-      const result = await createSubscriptionWithFallback(
+      const result = await SubscriptionService.createSubscription(
         user,
         !user, // isGuest if no user
         !user ? paymentData.email : undefined // guestEmail if no user

@@ -87,7 +87,7 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
 
     try {
       // Use subscription service with fallback support
-      const result = await createSubscriptionWithFallback(
+      const result = await SubscriptionService.createSubscription(
         user,
         !user, // isGuest if no user
         !user ? formData.email : undefined // guestEmail if no user
