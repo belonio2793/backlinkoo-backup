@@ -285,7 +285,9 @@ export function BlogPostViewer() {
                 prose-a:text-blue-600 prose-a:font-medium prose-a:no-underline hover:prose-a:underline
                 prose-strong:font-bold prose-headings:font-bold
                 [&_a]:text-blue-600 [&_a]:opacity-100 [&_a]:font-medium [&_a]:no-underline hover:[&_a]:underline"
-              dangerouslySetInnerHTML={{ __html: blogPost.content }}
+              dangerouslySetInnerHTML={{
+                __html: ContentFormatter.formatBlogContent(blogPost.content || '', blogPost.title)
+              }}
             />
 
             <Separator className="my-8" />
