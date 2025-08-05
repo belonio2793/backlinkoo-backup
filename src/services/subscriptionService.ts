@@ -159,7 +159,7 @@ export class SubscriptionService {
       return { success: true, url: data.url };
 
     } catch (error: any) {
-      console.error('❌ Exception creating subscription:', error);
+      console.error('Exception creating subscription:', error);
 
       let errorMessage = 'An unexpected error occurred';
 
