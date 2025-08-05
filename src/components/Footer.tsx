@@ -76,12 +76,19 @@ export const Footer = () => {
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Merchant Tools</h3>
             <div className="space-y-2">
-              <Link
-                to="/backlink-report"
-                className="block text-gray-600 hover:text-gray-900 text-sm"
+              <button
+                onClick={() => {
+                  if (user) {
+                    window.location.href = '/backlink-report';
+                  } else {
+                    setPendingNavigation({ route: '/backlink-report' });
+                    setShowLoginModal(true);
+                  }
+                }}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
               >
                 Backlink Reports
-              </Link>
+              </button>
             </div>
           </div>
 
