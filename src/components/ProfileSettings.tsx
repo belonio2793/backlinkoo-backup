@@ -942,6 +942,27 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                         >
                           Toggle Fallback
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={async () => {
+                            console.log('🔄 Force direct query');
+                            try {
+                              const { data: profile, error } = await supabase
+                                .from('profiles')
+                                .select('*')
+                                .eq('user_id', user?.id)
+                                .single();
+
+                              console.log('Direct query result:', { profile, error });
+                              if (profile) setDirectProfileData(profile);
+                            } catch (err) {
+                              console.error('Direct query failed:', err);
+                            }
+                          }}
+                        >
+                          Direct Query
+                        </Button>
                       </div>
                     </div>
                   )}
