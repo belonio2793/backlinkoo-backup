@@ -224,25 +224,80 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     }
   }, [user, refreshPremium]);
 
-  // Add timeout fallback for premium loading
+  // Aggressive fallback - use auth data immediately if premium hook is loading
   const [useFallbackData, setUseFallbackData] = useState(false);
+  const [directProfileData, setDirectProfileData] = useState<any>(null);
 
+  // Start with fallback if loading takes more than 2 seconds
   useEffect(() => {
     if (premiumLoading) {
       const timeout = setTimeout(() => {
-        console.warn('⚠️ Premium loading timeout - using fallback auth data');
+        console.warn('⚠️ Premium loading timeout - using immediate fallback');
         setUseFallbackData(true);
-      }, 5000); // 5 second timeout, then use fallback
+      }, 2000); // Reduced to 2 seconds
 
       return () => clearTimeout(timeout);
     } else {
       setUseFallbackData(false);
     }
-  }, [premiumLoading, refreshPremium]);
+  }, [premiumLoading]);
 
-  // Use fallback data from useAuth if usePremium is stuck
-  const effectiveIsPremium = useFallbackData ? authIsPremium : isPremium;
-  const effectiveSubscriptionTier = useFallbackData ? authSubscriptionTier : (userProfile?.subscription_tier || null);
+  // Direct Supabase query as ultimate fallback
+  useEffect(() => {
+    const getDirectProfileData = async () => {
+      if (user && (premiumLoading || useFallbackData)) {
+        try {
+          console.log('🔄 Direct profile query fallback...');
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('subscription_tier, role, subscription_status')
+            .eq('user_id', user.id)
+            .single();
+
+          if (!error && profile) {
+            console.log('✅ Direct profile data loaded:', profile);
+            setDirectProfileData(profile);
+          }
+        } catch (error) {
+          console.warn('❌ Direct profile query failed:', error);
+        }
+      }
+    };
+
+    getDirectProfileData();
+  }, [user, premiumLoading, useFallbackData]);
+
+  // Use most reliable data source available
+  const getEffectiveData = () => {
+    // Priority: Direct profile data > Auth data > usePremium data
+    if (directProfileData) {
+      return {
+        isPremium: directProfileData.subscription_tier === 'premium' ||
+                  directProfileData.subscription_tier === 'monthly' ||
+                  directProfileData.role === 'admin',
+        subscriptionTier: directProfileData.subscription_tier,
+        source: 'direct'
+      };
+    }
+
+    if (useFallbackData || premiumLoading) {
+      return {
+        isPremium: authIsPremium,
+        subscriptionTier: authSubscriptionTier,
+        source: 'auth'
+      };
+    }
+
+    return {
+      isPremium: isPremium,
+      subscriptionTier: userProfile?.subscription_tier || null,
+      source: 'premium'
+    };
+  };
+
+  const effectiveData = getEffectiveData();
+  const effectiveIsPremium = effectiveData.isPremium;
+  const effectiveSubscriptionTier = effectiveData.subscriptionTier;
 
   const handleSaveProfile = async () => {
     setSaving(true);
