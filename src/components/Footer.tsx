@@ -11,7 +11,7 @@ export const Footer = () => {
   const [pendingNavigation, setPendingNavigation] = useState<any>(null);
   const [pendingActionDescription, setPendingActionDescription] = useState<string>("");
 
-  const handleSmartNavigation = (config: any) => {
+  const handleSmartNavigation = (config: any, actionDescription?: string) => {
     if (isLoading) return;
 
     FooterNavigationService.handleNavigation({
@@ -20,6 +20,7 @@ export const Footer = () => {
       navigate,
       onAuthRequired: (pendingNav) => {
         setPendingNavigation(pendingNav);
+        setPendingActionDescription(actionDescription || "this feature");
         setShowLoginModal(true);
       }
     });
