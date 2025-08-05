@@ -224,6 +224,20 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     }
   }, [user, refreshPremium]);
 
+  // Add timeout fallback for premium loading
+  useEffect(() => {
+    if (premiumLoading) {
+      const timeout = setTimeout(() => {
+        console.warn('⚠️ Premium loading timeout - forcing refresh');
+        if (refreshPremium) {
+          refreshPremium();
+        }
+      }, 10000); // 10 second timeout
+
+      return () => clearTimeout(timeout);
+    }
+  }, [premiumLoading, refreshPremium]);
+
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
