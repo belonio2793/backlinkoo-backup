@@ -88,7 +88,12 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
     loading,
     hasUserProfile: !!userProfile,
     profileData: profileData,
-    emailDisplay: user?.email || profileData.email || 'No email available'
+    emailDisplay: user?.email || profileData.email || 'No email available',
+    // Premium status debugging
+    isPremium,
+    isAdmin,
+    premiumLoading,
+    userLimits
   });
 
   // If we have user data from context but no profile data yet, initialize immediately
