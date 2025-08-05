@@ -1463,7 +1463,7 @@ const Dashboard = () => {
                 </Card>
               )}
 
-              {campaigns.length === 0 && credits > 0 && (
+              {campaigns.length === 0 && credits > 0 && !isPremiumSubscriber && (
                 <Card className="border-green-200 bg-green-50">
                   <CardHeader>
                     <CardTitle className="text-green-800">Ready to Create Your First Campaign?</CardTitle>
@@ -1479,6 +1479,31 @@ const Dashboard = () => {
                     }}>
                       <Plus className="h-4 w-4 mr-2" />
                       Create Your First Campaign
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
+              {campaigns.length === 0 && isPremiumSubscriber && (
+                <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50">
+                  <CardHeader>
+                    <CardTitle className="text-purple-800 flex items-center gap-2">
+                      <Infinity className="h-5 w-5" />
+                      Ready to Create Unlimited Campaigns?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-purple-700 mb-4">
+                      As a Premium member, you have unlimited access to create backlink campaigns.
+                      Start building authority for your website with no credit restrictions.
+                    </p>
+                    <Button onClick={() => {
+                      console.log('Navigating to campaigns tab...');
+                      setActiveTab('campaigns');
+                      setShowCampaignForm(true);
+                    }} className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+                      <Infinity className="h-4 w-4 mr-2" />
+                      Create Unlimited Campaign
                     </Button>
                   </CardContent>
                 </Card>
