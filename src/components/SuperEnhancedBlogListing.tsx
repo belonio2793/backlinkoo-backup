@@ -300,6 +300,16 @@ export function SuperEnhancedBlogListing() {
     return hoursLeft < 2;
   };
 
+  const handlePreviewPost = (post: BlogPost) => {
+    setPreviewPost(post);
+    setShowPreviewModal(true);
+  };
+
+  const handleClosePreview = () => {
+    setPreviewPost(null);
+    setShowPreviewModal(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 relative overflow-hidden">
       {/* Animated background elements */}
