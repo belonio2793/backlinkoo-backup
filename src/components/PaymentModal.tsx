@@ -16,7 +16,7 @@ interface PaymentModalProps {
 }
 
 export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalProps) => {
-  const CREDIT_PRICE = 0.70;
+  const CREDIT_PRICE = 1.40;
   
   const [paymentType, setPaymentType] = useState<"payment" | "subscription">("payment");
   const [paymentMethod, setPaymentMethod] = useState<"stripe" | "paypal">("stripe");
