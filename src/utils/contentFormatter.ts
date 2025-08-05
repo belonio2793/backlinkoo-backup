@@ -116,6 +116,11 @@ export class ContentFormatter {
    */
   private static convertMarkdownToHtml(content: string): string {
     return content
+      // Remove markdown frontmatter separators (triple hyphens)
+      .replace(/^---[\s\S]*?---/gm, '')
+      .replace(/^---.*$/gm, '')
+      .replace(/\n---\n/g, '\n')
+      .replace(/\n---$/gm, '')
       // Remove any "Title:" patterns at the very beginning of content (most aggressive)
       .replace(/^[\s\n]*Title:\s*[^\n]*\n?/i, '')
       // Convert markdown links [text](url) to <a> tags
@@ -124,8 +129,23 @@ export class ContentFormatter {
       .replace(/\*\*H1\*\*:\s*(.+?)(?=\n|$)/gi, '<h1>$1</h1>')
       // Convert **Title**: patterns to nothing (remove completely since it's duplicate)
       .replace(/^\*\*Title\*\*:\s*(.+?)(?=\n|$)/gmi, '')
+      // Fix malformed headings like "## P. Assessment" - only create proper headings from meaningful text
+      .replace(/^##?\s+([A-Z])\.\s*([A-Za-z\s]{0,15})\s*$/gmi, (match, letter, rest) => {
+        // If it's a single letter followed by a short word, it's likely malformed - convert to paragraph
+        if (rest.trim().length < 3 || /^(Assessment|needed|required)$/i.test(rest.trim())) {
+          return `<p><strong>${letter}. ${rest}</strong></p>`;
+        }
+        return `<h2>${letter}. ${rest}</h2>`;
+      })
       // Convert **text**: patterns at start of line to <h2> tags (common heading pattern)
-      .replace(/^\*\*([^*]+?)\*\*:\s*(.+?)(?=\n|$)/gmi, '<h2>$1: $2</h2>')
+      // But avoid single letters with colons that create malformed headings
+      .replace(/^\*\*([^*]+?)\*\*:\s*(.+?)(?=\n|$)/gmi, (match, prefix, content) => {
+        // If prefix is just a single letter, treat as regular text
+        if (prefix.trim().length === 1) {
+          return `<p><strong>${prefix}:</strong> ${content}</p>`;
+        }
+        return `<h2>${prefix}: ${content}</h2>`;
+      })
       // Convert **text** patterns at start of line to <h2> tags (standalone bold headings)
       .replace(/^\*\*([^*]+?)\*\*(?=\s*\n|$)/gmi, '<h2>$1</h2>')
       // Convert remaining **text** to <strong> tags (inline bold)
@@ -134,12 +154,20 @@ export class ContentFormatter {
       .replace(/\*([^*]+?)\*/g, '<em>$1</em>')
       // Convert ### headings to h3
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-      // Convert ## headings to h2
-      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      // Convert ## headings to h2, but filter out malformed ones
+      .replace(/^## (.+)$/gm, (match, content) => {
+        // Skip if it's a malformed heading like "P. Assessment"
+        if (/^[A-Z]\.\s*[A-Za-z\s]{0,15}$/.test(content.trim())) {
+          return `<p><strong>${content}</strong></p>`;
+        }
+        return `<h2>${content}</h2>`;
+      })
       // Convert # headings to h1
       .replace(/^# (.+)$/gm, '<h1>$1</h1>')
       // Remove any remaining standalone "Title:" patterns at start of lines
-      .replace(/^Title:\s*[^\n]*\n?/gmi, '');
+      .replace(/^Title:\s*[^\n]*\n?/gmi, '')
+      // Clean up any remaining triple hyphens that might be inline
+      .replace(/---+/g, '');
   }
 
   /**
