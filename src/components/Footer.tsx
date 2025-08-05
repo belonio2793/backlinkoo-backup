@@ -1,7 +1,36 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import { navigateToSection, NAVIGATION_CONFIGS } from "@/utils/navigationUtils";
+import { useAuth } from "@/hooks/useAuth";
+import { LoginModal } from "@/components/LoginModal";
 
 export const Footer = () => {
+  const { user } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<any>(null);
+
+  const handleProtectedNavigation = (config: any) => {
+    if (user) {
+      // User is authenticated, navigate directly
+      navigateToSection(config);
+    } else {
+      // User is not authenticated, store pending navigation and show login modal
+      setPendingNavigation(config);
+      setShowLoginModal(true);
+    }
+  };
+
+  const handleAuthSuccess = (authenticatedUser: any) => {
+    setShowLoginModal(false);
+
+    // If there's a pending navigation, execute it after successful auth
+    if (pendingNavigation) {
+      setTimeout(() => {
+        navigateToSection(pendingNavigation);
+        setPendingNavigation(null);
+      }, 500); // Small delay to ensure user state is updated
+    }
+  };
   return (
     <footer className="bg-gray-50 border-t border-gray-200 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -11,26 +40,26 @@ export const Footer = () => {
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Features</h3>
             <div className="space-y-2">
               <button
-                onClick={() => navigateToSection(NAVIGATION_CONFIGS.CAMPAIGNS)}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full"
+                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.CAMPAIGNS)}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
               >
                 Campaign Management
               </button>
               <button
-                onClick={() => navigateToSection(NAVIGATION_CONFIGS.BACKLINK_AUTOMATION)}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full"
+                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.BACKLINK_AUTOMATION)}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
               >
                 Backlink ∞ Automation Link Building (beta)
               </button>
               <button
-                onClick={() => navigateToSection(NAVIGATION_CONFIGS.KEYWORD_RESEARCH)}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full"
+                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.KEYWORD_RESEARCH)}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
               >
                 Keyword Research
               </button>
               <button
-                onClick={() => navigateToSection(NAVIGATION_CONFIGS.RANK_TRACKER)}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full"
+                onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.RANK_TRACKER)}
+                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
               >
                 Rank Tracker
               </button>
@@ -112,6 +141,17 @@ export const Footer = () => {
           </div>
         </div>
       </div>
+
+      {/* Login Modal for Authentication */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => {
+          setShowLoginModal(false);
+          setPendingNavigation(null);
+        }}
+        onAuthSuccess={handleAuthSuccess}
+        defaultTab="login"
+      />
     </footer>
   );
 };
