@@ -37,6 +37,7 @@ export const Footer = () => {
       }, 300); // Quick redirect for seamless experience
     }
   };
+
   return (
     <footer className="bg-gray-50 border-t border-gray-200 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -57,7 +58,6 @@ export const Footer = () => {
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
               >
                 Backlink ∞ Automation Link Building (beta)
-
               </button>
               <button
                 onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.KEYWORD_RESEARCH)}
@@ -69,26 +69,8 @@ export const Footer = () => {
                 onClick={() => handleProtectedNavigation(NAVIGATION_CONFIGS.RANK_TRACKER)}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer"
               >
-              </Link>
-              <Link
-                to="/dashboard#keyword-research"
-                className="block text-gray-600 hover:text-gray-900 text-sm"
-              >
-                Keyword Research
-              </Link>
-              <Link
-                to="/dashboard#rank-tracker"
-                className="block text-gray-600 hover:text-gray-900 text-sm"
-
-              >
                 Rank Tracker
               </button>
-              <Link
-                to="/dashboard#backlink-automation"
-                className="block text-gray-600 hover:text-gray-900 text-sm"
-              >
-                Backlink Automation
-              </Link>
               <Link
                 to="/blog"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
@@ -173,7 +155,6 @@ export const Footer = () => {
         <div className="border-t border-gray-200 pt-8">
           <div className="flex flex-col items-center gap-4">
             <div className="flex items-center gap-4">
-
             </div>
             <div className="text-center text-gray-600 text-sm">
               Copyright © Backlink ∞ - All rights reserved.
