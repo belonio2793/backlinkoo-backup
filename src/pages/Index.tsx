@@ -1050,17 +1050,9 @@ const Index = () => {
           // Update user state
           setUser(user);
 
-          // Show success message
-          toast({
-            title: "Welcome!",
-            description: "You have been successfully signed in.",
-          });
-
-          // Navigate to dashboard after a brief delay to ensure state updates
-          setTimeout(() => {
-            console.log('🚀 Index: Navigating to dashboard');
-            navigate('/dashboard');
-          }, 100);
+          // Navigate to dashboard instantly
+          console.log('🚀 Index: Navigating to dashboard instantly');
+          navigate('/dashboard');
         }}
         defaultTab={loginModalTab}
       />
