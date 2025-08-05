@@ -671,6 +671,7 @@ interface SuperPostCardProps {
   isExpiringSoon: (post: BlogPost) => boolean;
   onClaim: () => void;
   onDelete: () => void;
+  onPreview: () => void;
   claiming: boolean;
   deleting: boolean;
   index: number;
