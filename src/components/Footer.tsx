@@ -19,6 +19,16 @@ export const Footer = () => {
     userId: user?.id
   });
 
+  // Close login modal if user becomes authenticated
+  React.useEffect(() => {
+    if (user && showLoginModal) {
+      console.log('🔒 Footer: User authenticated, closing login modal');
+      setShowLoginModal(false);
+      setPendingNavigation(null);
+      setPendingActionDescription("");
+    }
+  }, [user, showLoginModal]);
+
   const handleSmartNavigation = (config: any, actionDescription?: string) => {
     // Don't block navigation based on isLoading - let the smart nav handle auth state
     FooterNavigationService.handleNavigation({
