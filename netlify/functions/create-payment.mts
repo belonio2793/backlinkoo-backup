@@ -150,8 +150,8 @@ export default async (req: Request, context: Context) => {
       throw new Error('Invalid product name');
     }
 
-    if (!['stripe', 'paypal'].includes(body.paymentMethod)) {
-      throw new Error('Invalid payment method');
+    if (body.paymentMethod !== 'stripe') {
+      throw new Error('Only Stripe payments are supported');
     }
     
     const { amount, isGuest = false, paymentMethod } = body;
