@@ -21,7 +21,7 @@ export const Footer = () => {
   });
 
   // Close login modal if user becomes authenticated
-  React.useEffect(() => {
+  useEffect(() => {
     if (user && showLoginModal) {
       console.log('🔒 Footer: User authenticated, closing login modal');
       setShowLoginModal(false);
