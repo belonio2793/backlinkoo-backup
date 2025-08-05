@@ -82,7 +82,7 @@ const createMockSupabaseClient = () => {
       });
     },
     signOut: () => {
-      console.log('��️ Mock auth signOut called');
+      console.log('⚠️ Mock auth signOut called');
       return Promise.resolve({ error: null });
     },
     resend: () => {

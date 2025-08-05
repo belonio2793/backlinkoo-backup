@@ -257,7 +257,7 @@ export function Blog() {
                 Expert Content Hub
               </Badge>
               <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight">
-                Backlink ��
+                Backlink ∞
                 <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
                   {" "}Blog
                 </span>
@@ -385,7 +385,7 @@ export function Blog() {
           <div className="relative z-10">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-3xl font-bold mb-2">�� Save Blog Posts to Dashboard</h2>
+                <h2 className="text-3xl font-bold mb-2">💾 Save Blog Posts to Dashboard</h2>
                 <p className="text-blue-100 text-lg mb-4">
                   Save your favorite blog posts to your personal dashboard! Access them anytime and prevent auto-deletion.
                 </p>
