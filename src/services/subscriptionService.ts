@@ -27,9 +27,14 @@ export class SubscriptionService {
     const planName = planType === 'yearly' ? 'annual' : 'monthly';
 
     if (!priceId || priceId.trim() === '') {
+      const isDevelopment = import.meta.env.DEV;
+      const errorMessage = isDevelopment
+        ? `Local development: Stripe ${planName} price ID not available. This is expected in local development for security. The checkout will work in production where environment variables are properly configured on Netlify.`
+        : `Stripe ${planName} price ID not configured. Please set VITE_STRIPE_PREMIUM_PLAN_${planType.toUpperCase()} environment variable.`;
+
       return {
         isValid: false,
-        error: `Stripe ${planName} price ID not configured. Please set VITE_STRIPE_PREMIUM_PLAN_${planType.toUpperCase()} environment variable on Netlify.`
+        error: errorMessage
       };
     }
 
