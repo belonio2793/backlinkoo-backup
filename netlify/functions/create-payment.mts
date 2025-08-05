@@ -172,13 +172,7 @@ export default async (req: Request, context: Context) => {
 
     const originUrl = req.headers.get("origin") || "https://backlinkoo.com";
     
-    let result;
-    
-    if (paymentMethod === 'stripe') {
-      result = await createStripePayment(body, email, originUrl);
-    } else {
-      result = await createPayPalPayment(body, email, originUrl);
-    }
+    const result = await createStripePayment(body, email, originUrl);
 
     // TODO: Store order in database for tracking
     console.log(`Payment initiated: ${paymentMethod} - ${email} - $${amount}`);
