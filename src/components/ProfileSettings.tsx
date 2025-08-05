@@ -798,7 +798,7 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                     </div>
                   </div>
 
-                  {!isPremium && (
+                  {!effectiveIsPremium && (
                     <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <Crown className="h-5 w-5 text-purple-600" />
