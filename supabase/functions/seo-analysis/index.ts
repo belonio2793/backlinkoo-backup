@@ -442,9 +442,13 @@ async function handleKeywordResearch(data: { keyword: string }) {
 
 async function handleRankingCheck(data: { url: string; keyword: string; searchEngine: string }) {
   const { url, keyword, searchEngine } = data;
-  
-  // Normalize the search engine (Yahoo uses Bing's results)
-  const actualEngine = searchEngine === 'yahoo' ? 'bing' : searchEngine;
+
+  // Only support Google
+  if (searchEngine !== 'google') {
+    throw new Error('Only Google search engine is supported');
+  }
+
+  const actualEngine = 'google';
   
   try {
     // First check if the website is indexed on this search engine
