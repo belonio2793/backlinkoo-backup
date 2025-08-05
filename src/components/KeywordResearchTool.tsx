@@ -215,7 +215,7 @@ export const KeywordResearchTool = () => {
     { code: "AZ", name: "Azerbaijan", flag: "🇦🇿" },
     { code: "BA", name: "Bosnia and Herzegovina", flag: "🇧🇦" },
     { code: "BB", name: "Barbados", flag: "🇧🇧" },
-    { code: "BD", name: "Bangladesh", flag: "🇧🇩" },
+    { code: "BD", name: "Bangladesh", flag: "����🇩" },
     { code: "BE", name: "Belgium", flag: "🇧🇪" },
     { code: "BF", name: "Burkina Faso", flag: "🇧🇫" },
     { code: "BG", name: "Bulgaria", flag: "🇧🇬" },
@@ -275,7 +275,7 @@ export const KeywordResearchTool = () => {
     { code: "GA", name: "Gabon", flag: "🇬🇦" },
     { code: "GB", name: "United Kingdom", flag: "🇬🇧" },
     { code: "GD", name: "Grenada", flag: "🇬🇩" },
-    { code: "GE", name: "Georgia", flag: "��🇪" },
+    { code: "GE", name: "Georgia", flag: "🇬🇪" },
     { code: "GF", name: "French Guiana", flag: "🇬🇫" },
     { code: "GG", name: "Guernsey", flag: "🇬🇬" },
     { code: "GH", name: "Ghana", flag: "🇬🇭" },
@@ -298,7 +298,7 @@ export const KeywordResearchTool = () => {
     { code: "HT", name: "Haiti", flag: "🇭🇹" },
     { code: "HU", name: "Hungary", flag: "🇭🇺" },
     { code: "ID", name: "Indonesia", flag: "🇮🇩" },
-    { code: "IE", name: "Ireland", flag: "🇮🇪" },
+    { code: "IE", name: "Ireland", flag: "🇮����" },
     { code: "IL", name: "Israel", flag: "🇮🇱" },
     { code: "IM", name: "Isle of Man", flag: "🇮🇲" },
     { code: "IN", name: "India", flag: "🇮🇳" },
@@ -441,7 +441,7 @@ export const KeywordResearchTool = () => {
     { code: "VU", name: "Vanuatu", flag: "🇻🇺" },
     { code: "WF", name: "Wallis and Futuna", flag: "🇼🇫" },
     { code: "WS", name: "Samoa", flag: "🇼🇸" },
-    { code: "YE", name: "Yemen", flag: "��🇪" },
+    { code: "YE", name: "Yemen", flag: "🇾🇪" },
     { code: "YT", name: "Mayotte", flag: "🇾🇹" },
     { code: "ZA", name: "South Africa", flag: "🇿🇦" },
     { code: "ZM", name: "Zambia", flag: "🇿🇲" },
@@ -698,7 +698,7 @@ export const KeywordResearchTool = () => {
                               <div className="flex items-center gap-2 mt-1">
                                 <Badge variant="outline" className="text-xs">
                                   <img 
-                                    src={keyword.searchEngine === 'google' ? googleLogo : bingLogo} 
+                                    src={googleLogo} 
                                     alt={keyword.searchEngine} 
                                     className="w-3 h-3 mr-1"
                                   />
