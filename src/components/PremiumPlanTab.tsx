@@ -271,7 +271,7 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
         </TabsContent>
       </Tabs>
 
-      {/* Bottom CTA */}
+      {/* Bottom CTA - Hidden for premium users */}
       {!isSubscribed && (
         <Card className="bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0">
           <CardContent className="p-8 text-center">
@@ -279,9 +279,9 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
             <p className="text-purple-100 mb-6 max-w-2xl mx-auto">
               Join thousands of successful marketers who've upgraded their SEO game with our Premium Plan.
             </p>
-            <Button 
+            <Button
               onClick={handleUpgrade}
-              size="lg" 
+              size="lg"
               className="bg-yellow-400 hover:bg-yellow-300 text-purple-900 font-semibold px-8 py-4"
             >
               <Crown className="mr-2 h-5 w-5" />
