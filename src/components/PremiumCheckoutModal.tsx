@@ -8,7 +8,6 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import SubscriptionService from '@/services/subscriptionService';
-import { createSubscriptionWithFallback } from '@/services/fallbackSubscriptionService';
 import { useAuth } from '@/hooks/useAuth';
 import {
   Crown,

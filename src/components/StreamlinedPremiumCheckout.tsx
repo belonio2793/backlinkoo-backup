@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { createSubscriptionWithFallback } from '@/services/fallbackSubscriptionService';
+import SubscriptionService from '@/services/subscriptionService';
 import { EnhancedSubscriptionService } from '@/services/enhancedSubscriptionService';
 import { PremiumUpgradeService } from '@/services/premiumUpgradeService';
 import { userService } from '@/services/userService';
