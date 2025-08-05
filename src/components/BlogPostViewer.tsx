@@ -279,8 +279,11 @@ export function BlogPostViewer() {
             <Separator className="mb-8" />
 
             {/* Blog Content */}
-            <div 
-              className="prose prose-lg max-w-none"
+            <div
+              className="prose prose-lg max-w-none
+                prose-a:text-blue-600 prose-a:font-medium prose-a:no-underline hover:prose-a:underline
+                prose-strong:font-bold prose-headings:font-bold
+                [&_a]:text-blue-600 [&_a]:opacity-100 [&_a]:font-medium [&_a]:no-underline hover:[&_a]:underline"
               dangerouslySetInnerHTML={{ __html: blogPost.content }}
             />
 
