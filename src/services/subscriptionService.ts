@@ -150,17 +150,13 @@ export class SubscriptionService {
           errorMessage = 'Server configuration error. The payment system returned an error response.';
         }
 
-        console.error('❌ Formatted error message:', errorMessage);
         logError('Subscription creation error', error);
         return { success: false, error: errorMessage };
       }
 
       if (!data || !data.url) {
-        console.error('❌ No checkout URL returned from edge function');
         return { success: false, error: 'Payment system did not return a checkout URL' };
       }
-
-      console.log('✅ Subscription creation successful, URL:', data.url);
       return { success: true, url: data.url };
 
     } catch (error: any) {
