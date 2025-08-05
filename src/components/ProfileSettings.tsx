@@ -908,14 +908,17 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                     <div className="p-4 bg-gray-50 border rounded-lg">
                       <h4 className="font-medium mb-2">Debug Information</h4>
                       <div className="text-xs space-y-1">
+                        <p><strong>Data Source:</strong> {effectiveData.source}</p>
                         <p><strong>Premium Loading:</strong> {premiumLoading.toString()}</p>
                         <p><strong>Using Fallback Data:</strong> {useFallbackData.toString()}</p>
+                        <p><strong>Direct Profile Data:</strong> {directProfileData ? 'Yes' : 'No'}</p>
                         <p><strong>UsePremium isPremium:</strong> {isPremium.toString()}</p>
                         <p><strong>UseAuth isPremium:</strong> {authIsPremium.toString()}</p>
                         <p><strong>Effective isPremium:</strong> {effectiveIsPremium.toString()}</p>
                         <p><strong>Effective Subscription Tier:</strong> {effectiveSubscriptionTier || 'null'}</p>
                         <p><strong>Is Admin:</strong> {isAdmin.toString()}</p>
                         <p><strong>User Profile:</strong> {userProfile ? JSON.stringify(userProfile, null, 2) : 'null'}</p>
+                        <p><strong>Direct Profile:</strong> {directProfileData ? JSON.stringify(directProfileData, null, 2) : 'null'}</p>
                         <p><strong>User Limits:</strong> {JSON.stringify(userLimits, null, 2)}</p>
                       </div>
                       <div className="flex gap-2 mt-2">
