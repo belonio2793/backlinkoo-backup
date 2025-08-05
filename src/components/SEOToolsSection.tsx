@@ -673,6 +673,19 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
         </DialogContent>
       </Dialog>
 
+      {/* Premium Checkout Modal */}
+      <PremiumCheckoutModal
+        isOpen={isPremiumCheckoutOpen}
+        onClose={() => setIsPremiumCheckoutOpen(false)}
+        onSuccess={() => {
+          setIsPremiumCheckoutOpen(false);
+          checkSubscriptionStatus(); // Refresh subscription status
+          toast({
+            title: "Premium Activated!",
+            description: "Welcome to Premium! All SEO tools are now available.",
+          });
+        }}
+      />
 
     </div>
   );
