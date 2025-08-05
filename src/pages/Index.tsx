@@ -113,9 +113,14 @@ const Index = () => {
       // Clear user state immediately for better UX
       setUser(null);
 
-      // Do actual sign out first
-      const result = await AuthService.signOut();
-      console.log('🚪 Sign out result:', result);
+      // Do actual sign out using direct Supabase call for reliability
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+
+      if (error) {
+        console.error('🚪 Sign out error:', error);
+      } else {
+        console.log('🚪 Sign out successful');
+      }
 
       // Force page refresh after sign out completes
       window.location.reload();
