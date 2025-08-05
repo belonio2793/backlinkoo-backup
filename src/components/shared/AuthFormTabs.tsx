@@ -31,6 +31,7 @@ export function AuthFormTabs({
 }: AuthFormTabsProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
   const [activeTab, setActiveTab] = useState<"login" | "signup">(
     defaultTab || "login"
   );
