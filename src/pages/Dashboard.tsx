@@ -775,14 +775,33 @@ const Dashboard = () => {
       }
     };
 
+    const handleCustomTabChange = (event: CustomEvent) => {
+      const { tab } = event.detail;
+      if (tab && user) {
+        setActiveTab(tab);
+
+        // Scroll to the tab content after a brief delay to ensure render
+        setTimeout(() => {
+          const element = document.querySelector(`[data-section="${tab}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      }
+    };
+
     // Handle initial hash on page load
     handleHashNavigation();
 
     // Listen for hash changes
     window.addEventListener('hashchange', handleHashNavigation);
 
+    // Listen for custom tab change events
+    window.addEventListener('dashboardTabChange', handleCustomTabChange as EventListener);
+
     return () => {
       window.removeEventListener('hashchange', handleHashNavigation);
+      window.removeEventListener('dashboardTabChange', handleCustomTabChange as EventListener);
     };
   }, [user]);
 
