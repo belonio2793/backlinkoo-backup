@@ -112,13 +112,8 @@ export class SubscriptionService {
         body: requestBody
       });
 
-      console.log('📨 Edge function response:', { data, error });
-      console.log('📨 Raw error object:', JSON.stringify(error, null, 2));
-
       if (error) {
-        console.error('❌ Edge function error:', error);
-        console.error('❌ Error type:', typeof error);
-        console.error('❌ Error constructor:', error?.constructor?.name);
+        console.error('Edge function error:', error);
 
         // Provide more specific error messages
         let errorMessage = 'Failed to create subscription';
