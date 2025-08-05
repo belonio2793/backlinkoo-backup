@@ -754,23 +754,6 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                 </div>
               ) : (
                 <>
-                  {effectiveData.source !== 'premium' && (
-                    <div className={`p-3 border rounded-lg ${
-                      effectiveData.source === 'direct' ? 'bg-blue-50 border-blue-200' :
-                      effectiveData.source === 'auth' ? 'bg-yellow-50 border-yellow-200' :
-                      'bg-gray-50 border-gray-200'
-                    }`}>
-                      <p className={`text-sm ${
-                        effectiveData.source === 'direct' ? 'text-blue-800' :
-                        effectiveData.source === 'auth' ? 'text-yellow-800' :
-                        'text-gray-800'
-                      }`}>
-                        <AlertCircle className="h-4 w-4 inline mr-1" />
-                        {effectiveData.source === 'direct' && 'Using direct database query (premium service bypassed)'}
-                        {effectiveData.source === 'auth' && 'Using cached authentication data (premium service unavailable)'}
-                      </p>
-                    </div>
-                  )}
 
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
