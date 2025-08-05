@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { AuthFormTabs } from '@/components/shared/AuthFormTabs';
 import SubscriptionService from '@/services/subscriptionService';
+import { userService } from '@/services/userService';
 import { createSubscriptionWithFallback } from '@/services/fallbackSubscriptionService';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
