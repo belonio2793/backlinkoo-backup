@@ -19,13 +19,17 @@ export class SubscriptionService {
   /**
    * Validate Stripe configuration
    */
-  static validateStripeConfiguration(): { isValid: boolean; error?: string } {
-    const priceId = import.meta.env.VITE_STRIPE_PRICE_ID;
+  static validateStripeConfiguration(planType: 'monthly' | 'yearly' = 'monthly'): { isValid: boolean; error?: string; priceId?: string } {
+    const monthlyPriceId = import.meta.env.VITE_STRIPE_PREMIUM_PLAN_MONTHLY;
+    const annualPriceId = import.meta.env.VITE_STRIPE_PREMIUM_PLAN_ANNUAL;
+
+    const priceId = planType === 'yearly' ? annualPriceId : monthlyPriceId;
+    const planName = planType === 'yearly' ? 'annual' : 'monthly';
 
     if (!priceId || priceId.trim() === '') {
       return {
         isValid: false,
-        error: 'Stripe price ID not configured. Please add your Stripe price ID to the VITE_STRIPE_PRICE_ID environment variable in your .env file.'
+        error: `Stripe ${planName} price ID not configured. Please set VITE_STRIPE_PREMIUM_PLAN_${planType.toUpperCase()} environment variable on Netlify.`
       };
     }
 
@@ -33,7 +37,7 @@ export class SubscriptionService {
     if (priceId.includes('test_placeholder') || priceId === 'price_premium_monthly') {
       return {
         isValid: false,
-        error: 'Stripe is configured with placeholder values. Please set up real Stripe price IDs.'
+        error: `Stripe ${planName} plan is configured with placeholder values. Please set up real Stripe price IDs.`
       };
     }
 
@@ -41,11 +45,11 @@ export class SubscriptionService {
     if (!priceId.startsWith('price_')) {
       return {
         isValid: false,
-        error: 'Invalid Stripe price ID format. Price IDs should start with "price_".'
+        error: `Invalid Stripe ${planName} price ID format. Price IDs should start with "price_".`
       };
     }
 
-    return { isValid: true };
+    return { isValid: true, priceId };
   }
 
   /**
