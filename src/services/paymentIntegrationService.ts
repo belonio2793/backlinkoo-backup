@@ -74,7 +74,7 @@ class PaymentIntegrationService {
    * Check if payment system is properly configured
    */
   isConfigured(): boolean {
-    return this.config.stripe.enabled || this.config.paypal.enabled;
+    return this.config.stripe.enabled;
   }
 
   /**
