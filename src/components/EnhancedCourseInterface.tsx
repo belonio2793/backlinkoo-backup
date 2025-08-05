@@ -887,15 +887,17 @@ Users ready to make a purchase or take action.
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {courseView === 'overview' ? (
-        <div className="max-w-6xl mx-auto p-6">
-          {renderCourseOverview()}
-        </div>
-      ) : (
-        renderLessonView()
-      )}
-    </div>
+    <TooltipProvider>
+      <div className="min-h-screen bg-gray-50">
+        {courseView === 'overview' ? (
+          <div className="max-w-6xl mx-auto p-6">
+            {renderCourseOverview()}
+          </div>
+        ) : (
+          renderLessonView()
+        )}
+      </div>
+    </TooltipProvider>
   );
 }
 
