@@ -116,13 +116,18 @@ export class SubscriptionService {
   }
 
   /**
-   * Create subscription for $29/month plan
+   * Create subscription for premium plans
    */
-  static async createSubscription(user: User | null, isGuest: boolean = false, guestEmail?: string): Promise<{ success: boolean; url?: string; error?: string }> {
+  static async createSubscription(
+    user: User | null,
+    isGuest: boolean = false,
+    guestEmail?: string,
+    planType: 'monthly' | 'yearly' = 'monthly'
+  ): Promise<{ success: boolean; url?: string; error?: string }> {
 
     try {
-      // Validate Stripe configuration
-      const stripeConfig = this.validateStripeConfiguration();
+      // Validate Stripe configuration for the selected plan
+      const stripeConfig = this.validateStripeConfiguration(planType);
       if (!stripeConfig.isValid) {
         return {
           success: false,
