@@ -11,7 +11,7 @@ import { BlogClaimService } from '@/services/blogClaimService';
 import { supabase } from '@/integrations/supabase/client';
 import { Footer } from '@/components/Footer';
 
-import { PricingModal } from '@/components/PricingModal';
+import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
 import { ClaimStatusIndicator } from '@/components/ClaimStatusIndicator';
 import { ClaimSystemStatus } from '@/components/ClaimSystemStatus';
 import { useToast } from '@/hooks/use-toast';
