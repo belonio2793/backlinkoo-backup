@@ -12,12 +12,21 @@ export class ContentFormatter {
 
     // VERY EARLY preprocessing to fix critical issues before any HTML processing
     content = content
+      // Fix malformed HTML entities first
+      .replace(/&lt;\s*\/\s*[a-zA-Z]+\s*&gt;/g, '') // Remove &lt;/tag&gt; patterns
+      .replace(/&lt;\s*[a-zA-Z]+[^&]*&gt;/g, '') // Remove &lt;tag&gt; patterns
+
       // Fix Pro Tip issue immediately - most aggressive patterns
+      .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*P\s*[\n\r\s]*ro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*P\s*<[^>]*>\s*ro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*P\s*(?:<[^>]*>)?\s*ro\s*(?:<[^>]*>)?\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*P\s*\n?\s*ro\s*Tip/gi, '## Pro Tip')
-      .replace(/##\s*P\s+ro\s*Tip/gi, '## Pro Tip');
+      .replace(/##\s*P\s+ro\s*Tip/gi, '## Pro Tip')
+
+      // Clean up malformed sentences and links
+      .replace(/([A-Za-z])\s*&lt;[^&]*&gt;\s*([A-Za-z])/g, '$1 $2') // Remove HTML entities between words
+      .replace(/\.\s*&lt;[^&]*&gt;\s*([A-Z])/g, '. $1'); // Clean sentence breaks
 
     // Split content into lines and clean up
     let formattedContent = content
@@ -168,6 +177,10 @@ export class ContentFormatter {
       .replace(/##\s*P\s*<p[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2>')
       .replace(/##\s*P\s*<p[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2><p>')
 
+      // Fix malformed HTML entity patterns in headings
+      .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*([^&<]+)/gi, '## $1')
+      .replace(/##\s*&lt;\s*\/\s*h[1-6]\s*&gt;\s*([^&<]+)/gi, '## $1')
+
       // Remove markdown frontmatter separators (triple hyphens)
       .replace(/^---[\s\S]*?---/gm, '')
       .replace(/^---.*$/gm, '')
@@ -183,6 +196,10 @@ export class ContentFormatter {
 
       // Handle specific case: "Play now at Runescape.com" pattern
       .replace(/(Play now at\s+)([a-zA-Z0-9.-]+\.com)/gi, '$1<a href="https://$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$2</a>')
+
+      // Handle malformed "Claim your place" patterns that may be broken by HTML entities
+      .replace(/Claim\s+your\s+place\s+among\s+the\s+legends[^.]*\.\s*Play\s+now\s+at\s+([a-zA-Z0-9.-]+\.com)/gi,
+        'Claim your place among the legends. Play now at <a href="https://$1" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$1</a>.')
       // Convert **H1**: patterns to <h1> tags
       .replace(/\*\*H1\*\*:\s*(.+?)(?=\n|$)/gi, '<h1>$1</h1>')
       // Convert **Title**: patterns to nothing (remove completely since it's duplicate)
