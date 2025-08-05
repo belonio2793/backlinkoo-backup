@@ -415,33 +415,163 @@ const WebhookTest: React.FC = () => {
         </Card>
       </div>
 
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Test Controls</CardTitle>
-          <CardDescription>
-            Run comprehensive tests on your Stripe webhook implementation
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button 
-            onClick={runAllTests} 
-            disabled={isRunning}
-            className="w-full sm:w-auto"
-          >
-            {isRunning ? (
-              <>
-                <Clock className="h-4 w-4 mr-2 animate-spin" />
-                Running Tests...
-              </>
-            ) : (
-              <>
-                <Webhook className="h-4 w-4 mr-2" />
-                Run All Webhook Tests
-              </>
-            )}
-          </Button>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="basic" className="mb-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="basic">Basic Tests</TabsTrigger>
+          <TabsTrigger value="credits">Credits Tests</TabsTrigger>
+          <TabsTrigger value="premium">Premium Tests</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="basic">
+          <Card>
+            <CardHeader>
+              <CardTitle>Basic Webhook Tests</CardTitle>
+              <CardDescription>
+                Test general webhook functionality and event processing
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={runAllTests}
+                disabled={isRunning}
+                className="w-full sm:w-auto"
+              >
+                {isRunning ? (
+                  <>
+                    <Clock className="h-4 w-4 mr-2 animate-spin" />
+                    Running Tests...
+                  </>
+                ) : (
+                  <>
+                    <Webhook className="h-4 w-4 mr-2" />
+                    Run Basic Webhook Tests
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="credits">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-blue-600" />
+                Credits Purchase Tests
+              </CardTitle>
+              <CardDescription>
+                Test webhook processing for buying credits across all payment modals
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Button
+                  onClick={runQuickCreditsTest}
+                  disabled={isRunningComprehensive}
+                  variant="outline"
+                >
+                  {isRunningComprehensive ? (
+                    <Clock className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <CreditCard className="h-4 w-4 mr-2" />
+                  )}
+                  Quick Credits Test
+                </Button>
+
+                <Button
+                  onClick={() => tester.testAllCreditsPurchases().then(results =>
+                    setCreditsAndPremiumResults(prev => ({ ...prev, credits: results }))
+                  )}
+                  disabled={isRunningComprehensive}
+                >
+                  {isRunningComprehensive ? (
+                    <Clock className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <CreditCard className="h-4 w-4 mr-2" />
+                  )}
+                  Test All Credit Packages
+                </Button>
+              </div>
+
+              <Alert>
+                <CreditCard className="h-4 w-4" />
+                <AlertDescription>
+                  Tests 50, 100, 250, and 500 credit packages for both authenticated users and guest checkout
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="premium">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Crown className="h-5 w-5 text-purple-600" />
+                Premium Subscription Tests
+              </CardTitle>
+              <CardDescription>
+                Test webhook processing for premium subscriptions across all modals
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Button
+                  onClick={runQuickPremiumTest}
+                  disabled={isRunningComprehensive}
+                  variant="outline"
+                >
+                  {isRunningComprehensive ? (
+                    <Clock className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Crown className="h-4 w-4 mr-2" />
+                  )}
+                  Quick Premium Test
+                </Button>
+
+                <Button
+                  onClick={() => tester.testAllPremiumSubscriptions().then(results =>
+                    setCreditsAndPremiumResults(prev => ({ ...prev, premium: results }))
+                  )}
+                  disabled={isRunningComprehensive}
+                >
+                  {isRunningComprehensive ? (
+                    <Clock className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Crown className="h-4 w-4 mr-2" />
+                  )}
+                  Test All Premium Plans
+                </Button>
+              </div>
+
+              <Button
+                onClick={runCreditsAndPremiumTests}
+                disabled={isRunningComprehensive}
+                className="w-full"
+              >
+                {isRunningComprehensive ? (
+                  <>
+                    <Clock className="h-4 w-4 mr-2 animate-spin" />
+                    Running Comprehensive Tests...
+                  </>
+                ) : (
+                  <>
+                    <Users className="h-4 w-4 mr-2" />
+                    Run All Credits & Premium Tests
+                  </>
+                )}
+              </Button>
+
+              <Alert>
+                <Crown className="h-4 w-4" />
+                <AlertDescription>
+                  Tests monthly and yearly premium subscriptions with all webhook scenarios
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {testResults.length > 0 && (
         <Card>
