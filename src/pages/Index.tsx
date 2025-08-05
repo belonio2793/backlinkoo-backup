@@ -21,7 +21,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { PricingModal } from "@/components/PricingModal";
 import { EnhancedUnifiedPaymentModal } from "@/components/EnhancedUnifiedPaymentModal";
-import { BuyCreditsButton, UpgradeToPremiumButton } from "@/components/UniversalPaymentTrigger\";tTrigger\";rigger";
+import { BuyCreditsButton, UpgradeToPremiumButton } from "@/components/UniversalPaymentTrigger\";ntTrigger\";tTrigger";
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
 import { HomepageBlogGenerator } from "@/components/HomepageBlogGenerator";
 import { ProductionBlogGenerator } from "@/components/ProductionBlogGenerator";
