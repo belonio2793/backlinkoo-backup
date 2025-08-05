@@ -214,8 +214,8 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
     return ExcerptCleaner.cleanTitle(title);
   };
 
-  const getExcerpt = (content: string, title?: string, maxLength: number = 150) => {
-    return ExcerptCleaner.getCleanExcerpt(content, title, maxLength);
+  const getExcerpt = (content: string, maxLength: number = 150) => {
+    return ExcerptCleaner.getCleanExcerpt(content, undefined, maxLength);
   };
 
   const getTimeRemaining = (expiresAt: string) => {
