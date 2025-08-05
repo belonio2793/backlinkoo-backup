@@ -95,6 +95,56 @@ export function BeautifulBlogPost() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Client-side cleanup of malformed content after rendering
+  useEffect(() => {
+    const cleanupMalformedContent = () => {
+      // Find and fix the exact pattern: <h2>&lt;</h2> followed by <p> h2&gt;Pro Tip </p>
+      const headings = document.querySelectorAll('h2, h3, h4, h5, h6');
+
+      headings.forEach(heading => {
+        if (heading.textContent?.trim() === '<') {
+          const nextElement = heading.nextElementSibling;
+          if (nextElement?.tagName === 'P' && nextElement.textContent?.includes('h2>Pro Tip')) {
+            // Replace both elements with a proper Pro Tip heading
+            const newHeading = document.createElement('h2');
+            newHeading.textContent = 'Pro Tip';
+            heading.parentNode?.replaceChild(newHeading, heading);
+            nextElement.remove();
+          } else if (nextElement?.tagName === 'P' && nextElement.textContent?.match(/h[1-6]>/)) {
+            // Handle other similar patterns
+            const text = nextElement.textContent.replace(/h[1-6]>/, '').trim();
+            if (text) {
+              const newHeading = document.createElement('h2');
+              newHeading.textContent = text;
+              heading.parentNode?.replaceChild(newHeading, heading);
+              nextElement.remove();
+            } else {
+              // Remove empty malformed elements
+              heading.remove();
+              nextElement.remove();
+            }
+          } else {
+            // Remove standalone < headings
+            heading.remove();
+          }
+        }
+      });
+
+      // Clean up corrupted style attributes
+      const elementsWithStyle = document.querySelectorAll('[style*="&lt;"]');
+      elementsWithStyle.forEach(element => {
+        if (element instanceof HTMLElement) {
+          element.style.cssText = 'color:#2563eb;font-weight:500;';
+        }
+      });
+    };
+
+    // Run cleanup after content loads
+    if (blogPost) {
+      setTimeout(cleanupMalformedContent, 100);
+    }
+  }, [blogPost]);
+
   const processClaimIntent = async () => {
     // Only process claim intents for signed-in users
     if (!user) {
