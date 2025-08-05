@@ -1723,10 +1723,11 @@ const Dashboard = () => {
         )}
       </div>
 
-      <PricingModal
-        isOpen={isPricingModalOpen}
-        onClose={() => setIsPricingModalOpen(false)}
-        onAuthSuccess={(user) => {
+      <EnhancedUnifiedPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        defaultTab={paymentDefaultTab}
+        onSuccess={() => {
           setUser(user);
         }}
       />
