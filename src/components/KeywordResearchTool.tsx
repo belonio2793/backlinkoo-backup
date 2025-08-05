@@ -279,7 +279,7 @@ export const KeywordResearchTool = () => {
     { code: "GF", name: "French Guiana", flag: "🇬🇫" },
     { code: "GG", name: "Guernsey", flag: "🇬🇬" },
     { code: "GH", name: "Ghana", flag: "🇬🇭" },
-    { code: "GI", name: "Gibraltar", flag: "🇬🇮" },
+    { code: "GI", name: "Gibraltar", flag: "🇬����" },
     { code: "GL", name: "Greenland", flag: "🇬🇱" },
     { code: "GM", name: "Gambia", flag: "🇬🇲" },
     { code: "GN", name: "Guinea", flag: "🇬🇳" },
@@ -324,7 +324,7 @@ export const KeywordResearchTool = () => {
     { code: "KZ", name: "Kazakhstan", flag: "🇰🇿" },
     { code: "LA", name: "Laos", flag: "🇱🇦" },
     { code: "LB", name: "Lebanon", flag: "🇱🇧" },
-    { code: "LC", name: "Saint Lucia", flag: "🇱🇨" },
+    { code: "LC", name: "Saint Lucia", flag: "���🇨" },
     { code: "LI", name: "Liechtenstein", flag: "🇱🇮" },
     { code: "LK", name: "Sri Lanka", flag: "🇱🇰" },
     { code: "LR", name: "Liberia", flag: "🇱🇷" },
@@ -678,8 +678,16 @@ export const KeywordResearchTool = () => {
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl">Keyword Opportunities</CardTitle>
-                  <Badge variant="outline" className="text-sm">{keywords.length} results</Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-sm bg-green-50 text-green-700 border-green-200">
+                      Google Ads API
+                    </Badge>
+                    <Badge variant="outline" className="text-sm">{keywords.length} results</Badge>
+                  </div>
                 </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Official search volume data from Google's Keyword Planner API
+                </p>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-6">
