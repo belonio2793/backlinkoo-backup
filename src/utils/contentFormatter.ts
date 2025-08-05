@@ -12,12 +12,22 @@ export class ContentFormatter {
 
     // VERY EARLY preprocessing to fix critical issues before any HTML processing
     content = content
-      // Fix malformed HTML entities first
+      // Fix the specific issue: ## &lt; h2&gt;Pro Tip pattern
+      .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*&lt;\s*\/\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*&lt;\s*$/gm, '') // Remove lines that are just ## &lt;
+
+      // Remove empty heading lines (just ##)
+      .replace(/^\s*##\s*$/gm, '')
+      .replace(/^\s*###\s*$/gm, '')
+      .replace(/^\s*####\s*$/gm, '')
+
+      // Fix malformed HTML entities that break headings
+      .replace(/##\s*&lt;[^&]*&gt;\s*([A-Za-z][^\n]*)/gi, '## $1')
       .replace(/&lt;\s*\/\s*[a-zA-Z]+\s*&gt;/g, '') // Remove &lt;/tag&gt; patterns
       .replace(/&lt;\s*[a-zA-Z]+[^&]*&gt;/g, '') // Remove &lt;tag&gt; patterns
 
       // Fix Pro Tip issue immediately - most aggressive patterns
-      .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*P\s*[\n\r\s]*ro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*P\s*<[^>]*>\s*ro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*P\s*(?:<[^>]*>)?\s*ro\s*(?:<[^>]*>)?\s*Tip/gi, '## Pro Tip')
@@ -510,6 +520,14 @@ export class ContentFormatter {
    */
   private static cleanMalformedLinks(content: string): string {
     return content
+      // Fix the specific ## &lt; h2&gt;Pro Tip issue that gets split
+      .replace(/##\s*&lt;\s*[\n\r]*\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*&lt;\s*[\n\r]*\s*([A-Za-z][^\n]*)/gi, '## $1')
+
+      // Remove standalone ## &lt; patterns
+      .replace(/^\s*##\s*&lt;\s*$/gm, '')
+      .replace(/^\s*##\s*&lt;[^&>]*&gt;\s*$/gm, '')
+
       // Fix text with malformed HTML entities breaking up words
       .replace(/([A-Za-z])\s*&lt;[^&]*&gt;\s*([a-zA-Z0-9.-]+\.com)/g, '$1 $2')
       .replace(/([A-Za-z])\s*&lt;[^&]*&gt;\s*([A-Za-z])/g, '$1$2')
@@ -528,6 +546,10 @@ export class ContentFormatter {
 
       // Fix broken sentences caused by HTML entities
       .replace(/\.\s*&lt;[^&]*&gt;\s*([A-Z])/g, '. $1')
-      .replace(/([.!?])\s*&lt;[^&]*&gt;\s*([A-Z])/g, '$1 $2');
+      .replace(/([.!?])\s*&lt;[^&]*&gt;\s*([A-Z])/g, '$1 $2')
+
+      // Final cleanup: remove any remaining empty headings
+      .replace(/^\s*#{1,6}\s*$/gm, '')
+      .replace(/\n\s*\n\s*\n/g, '\n\n'); // Clean up multiple line breaks
   }
 }
