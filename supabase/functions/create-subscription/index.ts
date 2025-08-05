@@ -91,13 +91,30 @@ serve(async (req) => {
       );
     }
     
+    // Handle test requests
+    if (body.test === true) {
+      console.log("Test request received");
+      return new Response(
+        JSON.stringify({ success: true, message: "Edge Function is working" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
+      );
+    }
+
     // Input validation
     if (!body.priceId || typeof body.priceId !== 'string' || body.priceId.length > 100) {
-      throw new Error('Invalid price ID');
+      console.error("Invalid price ID:", body.priceId);
+      return new Response(
+        JSON.stringify({ error: 'Invalid price ID' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
-    
+
     if (!body.tier || body.tier.length > 50) {
-      throw new Error('Invalid tier');
+      console.error("Invalid tier:", body.tier);
+      return new Response(
+        JSON.stringify({ error: 'Invalid tier' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
     
     const { priceId, isGuest = false } = body;
