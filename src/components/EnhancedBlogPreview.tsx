@@ -197,7 +197,6 @@ export function EnhancedBlogPreview({
                 {/* Blog Post Preview */}
                 <article className="prose prose-lg max-w-none">
                   <header className="not-prose mb-8">
-                    <h1 className="text-3xl font-bold mb-4">{content.title}</h1>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
@@ -413,7 +412,7 @@ export function EnhancedBlogPreview({
                           
                           <div className="flex items-center gap-4 text-xs text-muted-foreground">
                             <span>Position: Character {link.position}</span>
-                            <span>��</span>
+                            <span>•</span>
                             <span>Natural placement</span>
                             <span>•</span>
                             <span>DoFollow link</span>
