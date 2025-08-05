@@ -37,11 +37,11 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
   const toolsDropdown = [
     {
       name: "Backlink ∞ Automation Link Building (beta)",
-      path: "/no-hands-seo",
+      path: "/automation-link-building",
       icon: Zap,
       description: "Automated link building",
       status: "Active",
-      isActive: currentTool === "no-hands-seo"
+      isActive: currentTool === "automation-link-building"
     },
     {
       name: "Content Generator",

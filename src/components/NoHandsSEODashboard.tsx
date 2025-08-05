@@ -467,7 +467,7 @@ const NoHandsSEODashboard = () => {
                     : `No campaigns found with status: ${statusFilter}`
                   }
                 </p>
-                <Button onClick={() => window.location.href = '/no-hands-seo'}>
+                <Button onClick={() => window.location.href = '/automation-link-building'}>
                   <Zap className="h-4 w-4 mr-2" />
                   Create Backlink ∞ Automation Link Building (beta) Campaign
                 </Button>
