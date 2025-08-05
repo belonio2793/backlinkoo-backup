@@ -673,12 +673,14 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
         </DialogContent>
       </Dialog>
 
-      {/* Premium Checkout Modal */}
-      <PremiumCheckoutModal
-        isOpen={isPremiumCheckoutOpen}
-        onClose={() => setIsPremiumCheckoutOpen(false)}
+      {/* Enhanced Unified Payment Modal */}
+      <EnhancedUnifiedPaymentModal
+        isOpen={isEnhancedPaymentOpen}
+        onClose={() => setIsEnhancedPaymentOpen(false)}
+        defaultTab="premium"
+        redirectAfterSuccess="/dashboard"
         onSuccess={() => {
-          setIsPremiumCheckoutOpen(false);
+          setIsEnhancedPaymentOpen(false);
           checkSubscriptionStatus(); // Refresh subscription status
           toast({
             title: "Premium Activated!",
