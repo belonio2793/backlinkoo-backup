@@ -221,7 +221,8 @@ export function PremiumPlanPopup({
       const result = await SubscriptionService.createSubscription(
         user,
         !user, // isGuest if no user
-        !user ? paymentData.email : undefined // guestEmail if no user
+        !user ? paymentData.email : undefined, // guestEmail if no user
+        'monthly' // Default to monthly plan
       );
 
       if (result.success) {
