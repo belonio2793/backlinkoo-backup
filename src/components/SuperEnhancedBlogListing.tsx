@@ -818,9 +818,7 @@ function SuperPostCard({
       </CardHeader>
       
       <CardContent className="relative z-10 pt-0">
-        <p className="text-gray-600 text-sm mb-6 line-clamp-3 leading-relaxed">
-          {ExcerptCleaner.getCleanExcerpt(post.content, undefined, 150)}
-        </p>
+        {/* Excerpt section hidden to prevent duplicate title display */}
 
         {/* Expiration Timer with beautiful styling */}
         {!post.claimed && post.expires_at && (
