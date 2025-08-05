@@ -62,7 +62,8 @@ import {
   LazyClaimSystemDebug,
   LazySEOOptimizedBlogGenerator,
   LazyOpenAITest,
-  LazySystemTest
+  LazySystemTest,
+  LazyPaymentTest
 } from './LazyComponents';
 
 // Loading component for better UX
