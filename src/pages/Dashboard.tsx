@@ -1077,17 +1077,15 @@ const Dashboard = () => {
                 <span className="hidden sm:inline">Trial</span>
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
               </Button>
-              {!isPremiumSubscriber && (
-                <Button
-                  variant={activeSection === "premium-plan" ? "secondary" : "ghost"}
-                  onClick={() => setActiveSection("premium-plan")}
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3 relative"
-                >
-                  <Crown className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Premium Plan</span>
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full"></div>
-                </Button>
-              )}
+              <Button
+                variant={activeSection === "premium-plan" ? "secondary" : "ghost"}
+                onClick={() => setActiveSection("premium-plan")}
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3 relative"
+              >
+                <Crown className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Premium Plan</span>
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full"></div>
+              </Button>
 
             </nav>
           </div>
@@ -1553,38 +1551,16 @@ const Dashboard = () => {
                 <DashboardTrialPosts user={user} />
               </div>
             ) : activeSection === "premium-plan" ? (
-              <div className="space-y-6 relative">
-                {/* Coming Soon Overlay */}
-                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
-                  <div className="text-center p-8">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                      <Crown className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                      Premium Features Coming Soon
-                    </h3>
-                    <p className="text-muted-foreground mb-4 max-w-md">
-                      We're working hard to bring you advanced premium features. This system is currently under development.
-                    </p>
-                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-                      <span>Stay tuned for updates</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Blurred Premium Content */}
-                <div className="opacity-30 pointer-events-none">
-                  <StreamlinedPremiumProvider>
-                    <PremiumPlanTab
-                      isSubscribed={isPremiumSubscriber}
-                      onUpgrade={() => {
-                        // Refresh premium status after successful upgrade
-                        PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
-                      }}
-                    />
-                  </StreamlinedPremiumProvider>
-                </div>
+              <div className="space-y-6">
+                <StreamlinedPremiumProvider>
+                  <PremiumPlanTab
+                    isSubscribed={isPremiumSubscriber}
+                    onUpgrade={() => {
+                      // Refresh premium status after successful upgrade
+                      PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
+                    }}
+                  />
+                </StreamlinedPremiumProvider>
               </div>
             ) : null}
           </>

@@ -363,11 +363,30 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
               <div className="text-3xl font-bold text-primary mb-1">$29</div>
               <div className="text-sm text-muted-foreground mb-4">per month</div>
               <Button onClick={() => {
-                console.log('SEO Tools Start Subscription clicked, opening premium popup');
+                console.log('SEO Tools Start Subscription clicked');
+                if (isPremium) {
+                  toast({
+                    title: "Already Premium",
+                    description: "You already have an active premium subscription. Enjoy all premium features!",
+                    variant: "default",
+                  });
+                  console.log('User is already premium, showing notification');
+                  return;
+                }
+                console.log('Opening premium popup for non-premium user');
                 openPremiumPopup(user?.email);
-              }} size="lg" className="w-full">
-                <CreditCard className="h-4 w-4 mr-2" />
-                Start Subscription
+              }} size="lg" className="w-full" variant={isPremium ? "outline" : "default"}>
+                {isPremium ? (
+                  <>
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Premium Active
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Start Subscription
+                  </>
+                )}
               </Button>
               <p className="text-xs text-muted-foreground mt-2">
                 Cancel anytime • No setup fees • 30-day money back guarantee
