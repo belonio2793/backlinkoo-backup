@@ -24,7 +24,8 @@ import {
   Award,
   ChevronRight,
   Download,
-  MessageSquare
+  MessageSquare,
+  Crown
 } from 'lucide-react';
 
 interface SEOAcademyTabProps {
