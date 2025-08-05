@@ -144,12 +144,20 @@ class PaymentIntegrationService {
         })
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        return {
+          success: false,
+          error: `Invalid response from payment service: ${response.status} ${response.statusText}`
+        };
+      }
 
       if (!response.ok) {
         return {
           success: false,
-          error: data.error || 'Payment creation failed'
+          error: data.error || `Payment creation failed: ${response.status} ${response.statusText}`
         };
       }
 
