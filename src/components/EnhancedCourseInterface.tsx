@@ -73,6 +73,50 @@ interface EnhancedCourseInterfaceProps {
   onUpgrade?: () => void;
 }
 
+// Simple markdown to HTML converter
+const formatMarkdownContent = (content: string): string => {
+  // Helper function to process inline markdown in text
+  const processInlineMarkdown = (text: string): string => {
+    return text
+      // Bold text **text**
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
+      // Italic text *text*
+      .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em class="italic">$1</em>')
+      // Inline code `code`
+      .replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-2 py-1 rounded text-sm font-mono">$1</code>');
+  };
+
+  const lines = content.split('\n');
+  const formattedLines = lines.map(line => {
+    // Headers (process inline formatting in headers too)
+    if (line.startsWith('### ')) {
+      return `<h3 class="text-lg font-semibold mt-6 mb-3 text-gray-800">${processInlineMarkdown(line.substring(4))}</h3>`;
+    }
+    if (line.startsWith('## ')) {
+      return `<h2 class="text-xl font-semibold mt-8 mb-4 text-gray-800">${processInlineMarkdown(line.substring(3))}</h2>`;
+    }
+    if (line.startsWith('# ')) {
+      return `<h1 class="text-2xl font-bold mt-8 mb-6 text-gray-900">${processInlineMarkdown(line.substring(2))}</h1>`;
+    }
+    // List items (process inline formatting in list items)
+    if (line.startsWith('- ')) {
+      return `<div class="ml-4 mb-2">• ${processInlineMarkdown(line.substring(2))}</div>`;
+    }
+    // Numbered lists (process inline formatting in numbered lists)
+    if (/^\d+\./.test(line)) {
+      return `<div class="ml-4 mb-2">${processInlineMarkdown(line)}</div>`;
+    }
+    // Empty lines
+    if (line.trim() === '') {
+      return '<div class="mb-4"></div>';
+    }
+    // Regular paragraphs (process inline formatting)
+    return `<p class="mb-4">${processInlineMarkdown(line)}</p>`;
+  });
+
+  return formattedLines.join('');
+};
+
 export function EnhancedCourseInterface({ isPremium = false, onUpgrade }: EnhancedCourseInterfaceProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -496,8 +540,8 @@ Users ready to make a purchase or take action.
 
   const markLessonComplete = (lessonId: string) => {
     setUserProgress(prev => ({ ...prev, [lessonId]: true }));
-    
-    // Update lesson completed status
+
+    // Update lesson completed status in course modules
     courseModules.forEach(module => {
       const lesson = module.lessons.find(l => l.id === lessonId);
       if (lesson) {
@@ -505,6 +549,14 @@ Users ready to make a purchase or take action.
         module.completedLessons += 1;
       }
     });
+
+    // Update current lesson state if it's the one being completed
+    if (currentLesson && currentLesson.id === lessonId) {
+      setCurrentLesson({
+        ...currentLesson,
+        completed: true
+      });
+    }
 
     toast({
       title: "Lesson Completed! 🎉",
@@ -789,57 +841,17 @@ Users ready to make a purchase or take action.
         {/* Lesson Content */}
         <div className="max-w-4xl mx-auto px-6 py-8">
           <div className="bg-white rounded-lg shadow-sm p-8">
-            {/* Video placeholder */}
-            <div className="aspect-video bg-gray-900 rounded-lg mb-8 flex items-center justify-center">
-              <div className="text-center text-white">
-                <Video className="h-16 w-16 mx-auto mb-4 opacity-60" />
-                <p className="text-lg">Video Content</p>
-                <p className="text-sm opacity-60">Duration: {currentLesson.duration}</p>
-              </div>
-            </div>
-
             {/* Lesson Content */}
             <div className="prose max-w-none">
-              <div className="whitespace-pre-line text-gray-700 leading-relaxed">
-                {currentLesson.content || 'Lesson content will be available here...'}
-              </div>
+              <div
+                className="text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: formatMarkdownContent(currentLesson.content || 'Lesson content will be available here...')
+                }}
+              />
             </div>
 
-            {/* Resources */}
-            {currentLesson.resources && currentLesson.resources.length > 0 && (
-              <div className="mt-8 p-6 bg-blue-50 rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <Download className="h-5 w-5" />
-                  Lesson Resources
-                </h3>
-                <div className="grid gap-2">
-                  {currentLesson.resources.map((resource, index) => (
-                    <div key={index} className="flex items-center gap-2 text-blue-700 hover:text-blue-800">
-                      <FileText className="h-4 w-4" />
-                      <span className="text-sm cursor-pointer hover:underline">{resource}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {/* Quiz Info */}
-            {currentLesson.quiz && (
-              <div className="mt-8 p-6 bg-yellow-50 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                  <Award className="h-5 w-5" />
-                  Quiz Available
-                </h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Test your knowledge with {currentLesson.quiz.questions} questions. 
-                  Passing score: {currentLesson.quiz.passingScore}%
-                </p>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Zap className="h-4 w-4" />
-                  Take Quiz
-                </Button>
-              </div>
-            )}
           </div>
 
           {/* Navigation */}

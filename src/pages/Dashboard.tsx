@@ -958,6 +958,7 @@ const Dashboard = () => {
               </Button>
               {(activeSection === "dashboard" || activeSection === "seo-tools" || activeSection === "trial") && (
                 <>
+                  {/* Credit system - visible to all users (separate from premium subscription) */}
                   <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
                     <CreditCard className="h-3 w-3" />
                     <span className="hidden xs:inline">{credits}</span>
@@ -968,6 +969,15 @@ const Dashboard = () => {
                     <Plus className="h-4 w-4 sm:mr-1" />
                     <span className="hidden sm:inline">Buy Credits</span>
                   </Button>
+
+                  {/* Premium subscription status - separate from credits */}
+                  {isPremiumSubscriber && (
+                    <Badge variant="default" className="gap-1 text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-blue-600">
+                      <Crown className="h-3 w-3" />
+                      <span className="hidden sm:inline">Premium Active</span>
+                      <span className="sm:hidden">Premium</span>
+                    </Badge>
+                  )}
                 </>
               )}
               <AlertDialog>
@@ -1083,8 +1093,18 @@ const Dashboard = () => {
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3 relative"
               >
                 <Crown className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Premium Plan</span>
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full"></div>
+                <span className="hidden sm:inline">
+                  {isPremiumSubscriber ? "Premium Dashboard" : "Premium Plan"}
+                </span>
+                <span className="sm:hidden">
+                  {isPremiumSubscriber ? "Premium" : "Upgrade"}
+                </span>
+                {!isPremiumSubscriber && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full"></div>
+                )}
+                {isPremiumSubscriber && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></div>
+                )}
               </Button>
 
             </nav>
@@ -1117,20 +1137,47 @@ const Dashboard = () => {
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              {isFirstTimeUser && credits === 0 && (
+              {isFirstTimeUser && credits === 0 && !isPremiumSubscriber && (
                 <Card className="border-blue-200 bg-blue-50">
                   <CardHeader>
                     <CardTitle className="text-blue-800">Welcome to Backlink ∞!</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-blue-700 mb-4">
-                      Get started by purchasing credits to create your first backlink campaign. 
+                      Get started by purchasing credits to create your first backlink campaign.
                       Our high-quality backlinks will help improve your website's search engine rankings.
                     </p>
                     <Button onClick={() => setIsPricingModalOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
                       Buy Your First Credits
                     </Button>
+                  </CardContent>
+                </Card>
+              )}
+
+              {isPremiumSubscriber && (
+                <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50">
+                  <CardHeader>
+                    <CardTitle className="text-purple-800 flex items-center gap-2">
+                      <Crown className="h-5 w-5" />
+                      Welcome back, Premium Member!
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-purple-700 mb-4">
+                      <strong>Premium Benefits:</strong> Unlimited backlinks, complete SEO Academy, and priority support.<br/>
+                      <strong>Credits:</strong> Use for premium services and additional features. Credits work alongside your premium subscription.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button onClick={() => setActiveSection("premium-plan")} variant="outline">
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        SEO Academy
+                      </Button>
+                      <Button onClick={() => setActiveTab('campaigns')}>
+                        <Infinity className="h-4 w-4 mr-2" />
+                        Unlimited Campaigns
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               )}
@@ -1143,7 +1190,13 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{credits}</div>
-                    <p className="text-xs text-muted-foreground">$0.70 per credit</p>
+                    <p className="text-xs text-muted-foreground">
+                      {isPremiumSubscriber ? (
+                        <>$0.70 per credit • Premium subscriber</>
+                      ) : (
+                        <>$0.70 per credit</>
+                      )}
+                    </p>
                   </CardContent>
                 </Card>
                 
@@ -1173,20 +1226,33 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
                 
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
-                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {campaigns.length > 0 
-                        ? Math.round((campaigns.filter(c => c.status === 'completed').length / campaigns.length) * 100)
-                        : 0}%
-                    </div>
-                    <p className="text-xs text-muted-foreground">Campaign completion</p>
-                  </CardContent>
-                </Card>
+{isPremiumSubscriber ? (
+                  <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-purple-800">Premium Benefits</CardTitle>
+                      <Crown className="h-4 w-4 text-purple-600" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-purple-600">Unlimited</div>
+                      <p className="text-xs text-purple-600">Backlinks & SEO Academy</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {campaigns.length > 0
+                          ? Math.round((campaigns.filter(c => c.status === 'completed').length / campaigns.length) * 100)
+                          : 0}%
+                      </div>
+                      <p className="text-xs text-muted-foreground">Campaign completion</p>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
               {campaigns.length > 0 && (
@@ -1415,7 +1481,7 @@ const Dashboard = () => {
                 </Card>
               )}
 
-              {campaigns.length === 0 && credits > 0 && (
+              {campaigns.length === 0 && credits > 0 && !isPremiumSubscriber && (
                 <Card className="border-green-200 bg-green-50">
                   <CardHeader>
                     <CardTitle className="text-green-800">Ready to Create Your First Campaign?</CardTitle>
@@ -1431,6 +1497,31 @@ const Dashboard = () => {
                     }}>
                       <Plus className="h-4 w-4 mr-2" />
                       Create Your First Campaign
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
+              {campaigns.length === 0 && isPremiumSubscriber && (
+                <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50">
+                  <CardHeader>
+                    <CardTitle className="text-purple-800 flex items-center gap-2">
+                      <Infinity className="h-5 w-5" />
+                      Ready to Create Your First Campaign?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-purple-700 mb-4">
+                      <strong>Premium Benefits:</strong> Access unlimited campaign features and premium tools.<br/>
+                      <strong>Credits Available:</strong> {credits} credits for premium services and enhanced features.
+                    </p>
+                    <Button onClick={() => {
+                      console.log('Navigating to campaigns tab...');
+                      setActiveTab('campaigns');
+                      setShowCampaignForm(true);
+                    }} className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Premium Campaign
                     </Button>
                   </CardContent>
                 </Card>

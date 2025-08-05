@@ -24,7 +24,8 @@ import {
   Award,
   ChevronRight,
   Download,
-  MessageSquare
+  MessageSquare,
+  Crown
 } from 'lucide-react';
 
 interface SEOAcademyTabProps {
@@ -465,7 +466,13 @@ export function SEOAcademyTab({ isSubscribed, onUpgrade }: SEOAcademyTabProps) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-2xl text-blue-800">Your SEO Journey</CardTitle>
+              <CardTitle className="text-2xl text-blue-800 flex items-center gap-3">
+                Your SEO Journey
+                <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+                  <Crown className="h-3 w-3 mr-1" />
+                  Premium Active
+                </Badge>
+              </CardTitle>
               <p className="text-blue-600 mt-1">Track your progress through the complete SEO curriculum</p>
             </div>
             <Award className="h-12 w-12 text-yellow-500" />
