@@ -368,6 +368,13 @@ export class ContentFormatter {
       .replace(/<script[^>]*>.*?<\/script>/gi, '')
       .replace(/<style[^>]*>.*?<\/style>/gi, '')
       .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+      // Remove any remaining markdown artifacts
+      .replace(/---+/g, '')
+      .replace(/^\s*---\s*$/gm, '')
+      // Remove malformed HTML headings with single letters
+      .replace(/<h[1-6][^>]*>\s*[A-Z]\.\s*(Assessment|needed|required|evaluation)\s*<\/h[1-6]>/gi, '')
+      // Remove empty headings
+      .replace(/<h[1-6][^>]*>\s*<\/h[1-6]>/gi, '')
       // Fix common HTML issues
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
@@ -376,8 +383,9 @@ export class ContentFormatter {
       // Normalize quotes
       .replace(/[\u2018\u2019]/g, "'")
       .replace(/[\u201C\u201D]/g, '"')
-      // Remove excessive whitespace
-      .replace(/\s+/g, ' ')
+      // Remove excessive whitespace but preserve paragraph structure
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n\s*\n\s*\n/g, '\n\n')
       .trim();
   }
 }
