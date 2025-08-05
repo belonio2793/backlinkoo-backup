@@ -108,6 +108,66 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
 
   return (
     <div className="space-y-8">
+      {/* Premium Active Dashboard for subscribed users */}
+      {isSubscribed && (
+        <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-3xl p-8 text-white">
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-white/10 to-transparent rounded-full -mr-32 -mt-32"></div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-4">
+              <Crown className="h-8 w-8 text-yellow-300" />
+              <Badge className="bg-green-500 text-white px-3 py-1">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Premium Active
+              </Badge>
+            </div>
+
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Premium Dashboard
+            </h1>
+
+            <p className="text-xl text-purple-100 mb-6 max-w-2xl">
+              You're all set! Enjoy unlimited backlinks, complete SEO Academy access, and all premium features.
+            </p>
+
+            <div className="flex items-center gap-6 mb-8">
+              <div className="text-center">
+                <div className="text-3xl font-bold">∞</div>
+                <div className="text-purple-200">backlinks</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold">50+</div>
+                <div className="text-purple-200">SEO lessons</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold">24/7</div>
+                <div className="text-purple-200">support</div>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <Button
+                onClick={() => setActiveFeature('seo-academy')}
+                size="lg"
+                className="bg-white hover:bg-gray-100 text-purple-900 font-semibold px-6 py-3"
+              >
+                <BookOpen className="mr-2 h-5 w-5" />
+                Access SEO Academy
+              </Button>
+              <Button
+                onClick={() => window.location.href = '/dashboard?tab=campaigns'}
+                size="lg"
+                variant="outline"
+                className="border-white text-white hover:bg-white hover:text-purple-900 font-semibold px-6 py-3"
+              >
+                <Infinity className="mr-2 h-5 w-5" />
+                Create Campaigns
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section - Hidden for premium users */}
       {!isSubscribed && (
         <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-3xl p-8 text-white">
