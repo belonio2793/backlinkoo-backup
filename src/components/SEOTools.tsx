@@ -139,7 +139,7 @@ export const SEOTools = () => {
       
       const newResult: IndexStatus = {
         url: indexUrl.trim(),
-        isIndexed: results.google.indexed || results.bing.indexed,
+        isIndexed: results.google.indexed,
         lastCrawled: new Date(results.lastChecked).toLocaleDateString(),
         status: results.google.indexed ? 'indexed' : 'not-indexed'
       };
@@ -150,7 +150,7 @@ export const SEOTools = () => {
       
       toast({
         title: "Index Check Complete",
-        description: `Google: ${results.google.indexed ? 'Indexed' : 'Not Indexed'}, Bing: ${results.bing.indexed ? 'Indexed' : 'Not Indexed'}`,
+        description: `Google: ${results.google.indexed ? 'Indexed' : 'Not Indexed'}`,
       });
     } catch (error) {
       console.error('Index check failed:', error);

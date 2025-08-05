@@ -106,29 +106,62 @@ class UserService {
         return { success: false, message: 'User not authenticated' };
       }
 
-      // Update user profile to premium role
-      const { error: updateError } = await supabase
+      // First check if profile exists, create if it doesn't
+      const { data: existingProfile, error: fetchError } = await supabase
         .from('profiles')
-        .update({
-          role: 'premium',
-          subscription_status: 'active',
-          subscription_tier: 'premium',
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', user.id);
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
 
-      if (updateError) {
-        console.error('Error upgrading to premium:', updateError);
-        return { success: false, message: 'Failed to upgrade account' };
+      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 = no rows returned
+        return { success: false, message: `Database error: ${fetchError.message}` };
       }
 
-      // Log the upgrade for audit purposes
-      await this.logUserAction(user.id, 'upgrade_to_premium', 'User upgraded to premium role');
+      let updateResult;
+
+      if (!existingProfile) {
+        // Create new profile
+        updateResult = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user.id,
+            role: 'premium',
+            subscription_status: 'active',
+            subscription_tier: 'premium',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+      } else {
+        // Update existing profile
+        updateResult = await supabase
+          .from('profiles')
+          .update({
+            role: 'premium',
+            subscription_status: 'active',
+            subscription_tier: 'premium',
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id);
+      }
+
+      if (updateResult.error) {
+        return {
+          success: false,
+          message: `Failed to upgrade account: ${updateResult.error.message}`
+        };
+      }
+
+      // Log the upgrade for audit purposes (don't fail upgrade if logging fails)
+      try {
+        await this.logUserAction(user.id, 'upgrade_to_premium', 'User upgraded to premium role');
+      } catch (logError: any) {
+        // Logging failure shouldn't prevent upgrade success
+      }
 
       return { success: true, message: 'Successfully upgraded to premium' };
     } catch (error: any) {
-      console.error('Error in upgradeToPremium:', error.message || error);
-      return { success: false, message: 'Unexpected error during upgrade' };
+      console.error('Exception in upgradeToPremium:', error.message || error);
+      return { success: false, message: `Unexpected error during upgrade: ${error.message}` };
     }
   }
 

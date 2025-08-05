@@ -286,8 +286,29 @@
   border-radius: 4px;
 }
 
-.modern-blog-content a:hover,
-.article-content .prose a:hover {
+/* Remove hover effects from headline links */
+.modern-blog-content h1 a:hover,
+.modern-blog-content h2 a:hover,
+.modern-blog-content h3 a:hover,
+.modern-blog-content h4 a:hover,
+.modern-blog-content h5 a:hover,
+.modern-blog-content h6 a:hover,
+.article-content .prose h1 a:hover,
+.article-content .prose h2 a:hover,
+.article-content .prose h3 a:hover,
+.article-content .prose h4 a:hover,
+.article-content .prose h5 a:hover,
+.article-content .prose h6 a:hover {
+  border-bottom-color: transparent;
+  background: none;
+  transform: none;
+}
+
+/* Keep hover effects only for paragraph and list links */
+.modern-blog-content p a:hover,
+.modern-blog-content li a:hover,
+.article-content .prose p a:hover,
+.article-content .prose li a:hover {
   border-bottom-color: rgb(59 130 246);
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
   transform: translateY(-1px);

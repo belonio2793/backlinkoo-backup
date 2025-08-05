@@ -111,7 +111,7 @@ export function EnhancedUnifiedPaymentModal({
   // Payment method availability
   const [availablePaymentMethods, setAvailablePaymentMethods] = useState<('stripe' | 'paypal')[]>([]);
 
-  const CREDIT_PRICE = 0.70;
+  const CREDIT_PRICE = 1.40;
 
   // Premium plans configuration
   const premiumPlans: Record<'monthly' | 'yearly', PremiumPlan> = {
@@ -142,15 +142,15 @@ export function EnhancedUnifiedPaymentModal({
       id: 'starter_100',
       name: 'Starter 100',
       credits: 100,
-      price: 70,
-      pricePerCredit: 0.70
+      price: 140,
+      pricePerCredit: 1.40
     },
     {
       id: 'starter_200',
       name: 'Starter 200',
       credits: 200,
-      price: 140,
-      pricePerCredit: 0.70,
+      price: 280,
+      pricePerCredit: 1.40,
       popular: true,
       savings: 'Most Popular'
     },
@@ -158,8 +158,8 @@ export function EnhancedUnifiedPaymentModal({
       id: 'starter_300',
       name: 'Starter 300',
       credits: 300,
-      price: 210,
-      pricePerCredit: 0.70,
+      price: 420,
+      pricePerCredit: 1.40,
       savings: 'Best Value'
     }
   ];
@@ -538,7 +538,7 @@ export function EnhancedUnifiedPaymentModal({
                         ${calculateCustomPrice(customCredits)}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {customCredits} × $0.70 = ${calculateCustomPrice(customCredits)}
+                        {customCredits} × $1.40 = ${calculateCustomPrice(customCredits)}
                       </div>
                     </div>
                   </div>
@@ -676,7 +676,7 @@ export function EnhancedUnifiedPaymentModal({
                   </div>
                   <div className="flex justify-between">
                     <span>Price per credit:</span>
-                    <span>$0.70</span>
+                    <span>$1.40</span>
                   </div>
                 </>
               )}

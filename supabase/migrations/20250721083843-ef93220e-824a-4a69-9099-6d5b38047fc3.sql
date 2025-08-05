@@ -104,31 +104,9 @@ SELECT
   google.found as google_found,
   google.checked_at as google_checked_at,
   google.backlinks_count as google_backlinks,
-  -- Bing results  
-  bing.position as bing_position,
-  bing.found as bing_found,
-  bing.checked_at as bing_checked_at,
-  bing.backlinks_count as bing_backlinks,
-  -- Yahoo results
-  yahoo.position as yahoo_position,
-  yahoo.found as yahoo_found,
-  yahoo.checked_at as yahoo_checked_at,
-  yahoo.backlinks_count as yahoo_backlinks,
   -- Overall metrics
-  LEAST(
-    COALESCE(google.position, 999),
-    COALESCE(bing.position, 999),
-    COALESCE(yahoo.position, 999)
-  ) as best_position,
-  (
-    COALESCE(google.position, 0) + 
-    COALESCE(bing.position, 0) + 
-    COALESCE(yahoo.position, 0)
-  ) / NULLIF(
-    (CASE WHEN google.position IS NOT NULL THEN 1 ELSE 0 END +
-     CASE WHEN bing.position IS NOT NULL THEN 1 ELSE 0 END +
-     CASE WHEN yahoo.position IS NOT NULL THEN 1 ELSE 0 END), 0
-  ) as average_position
+  COALESCE(google.position, 999) as best_position,
+  COALESCE(google.position, 0) as average_position
 FROM public.ranking_targets rt
 LEFT JOIN LATERAL (
   SELECT DISTINCT ON (target_id) 
@@ -137,18 +115,4 @@ LEFT JOIN LATERAL (
   WHERE target_id = rt.id AND search_engine = 'google'
   ORDER BY target_id, checked_at DESC
 ) google ON true
-LEFT JOIN LATERAL (
-  SELECT DISTINCT ON (target_id)
-    position, found, checked_at, backlinks_count, error_details
-  FROM public.ranking_results 
-  WHERE target_id = rt.id AND search_engine = 'bing'
-  ORDER BY target_id, checked_at DESC  
-) bing ON true
-LEFT JOIN LATERAL (
-  SELECT DISTINCT ON (target_id)
-    position, found, checked_at, backlinks_count, error_details
-  FROM public.ranking_results 
-  WHERE target_id = rt.id AND search_engine = 'yahoo'
-  ORDER BY target_id, checked_at DESC
-) yahoo ON true
 WHERE rt.is_active = true;

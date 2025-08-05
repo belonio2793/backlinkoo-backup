@@ -775,7 +775,7 @@ const Dashboard = () => {
       console.log('🔄 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
 
       if (event === 'SIGNED_OUT' || !session) {
-        console.log('🏠 Dashboard - User signed out, redirecting to home...');
+        console.log('�� Dashboard - User signed out, redirecting to home...');
         navigate('/');
       } else if (event === 'SIGNED_IN' && session) {
         console.log('🏠 Dashboard - User signed in, updating user state');
@@ -1322,9 +1322,9 @@ const Dashboard = () => {
                     <div className="text-2xl font-bold">{credits}</div>
                     <p className="text-xs text-muted-foreground">
                       {isPremiumSubscriber ? (
-                        <>$0.70 per credit • Premium subscriber</>
+                        <>$1.40 per credit • Premium subscriber</>
                       ) : (
-                        <>$0.70 per credit</>
+                        <>$1.40 per credit</>
                       )}
                     </p>
                   </CardContent>
@@ -1537,7 +1537,7 @@ const Dashboard = () => {
                                   {campaign.credits_used || campaign.links_requested} credits
                                 </div>
                                 <span className="text-xs text-muted-foreground">
-                                  ${((campaign.credits_used || campaign.links_requested) * 0.70).toFixed(2)} value
+                                  ${((campaign.credits_used || campaign.links_requested) * 1.40).toFixed(2)} value
                                 </span>
                               </div>
                             </div>

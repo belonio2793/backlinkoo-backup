@@ -12,12 +12,31 @@ export class ContentFormatter {
 
     // VERY EARLY preprocessing to fix critical issues before any HTML processing
     content = content
+      // Fix the specific issue: ## &lt; h2&gt;Pro Tip pattern
+      .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*&lt;\s*\/\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*&lt;\s*$/gm, '') // Remove lines that are just ## &lt;
+
+      // Remove empty heading lines (just ##)
+      .replace(/^\s*##\s*$/gm, '')
+      .replace(/^\s*###\s*$/gm, '')
+      .replace(/^\s*####\s*$/gm, '')
+
+      // Fix malformed HTML entities that break headings
+      .replace(/##\s*&lt;[^&]*&gt;\s*([A-Za-z][^\n]*)/gi, '## $1')
+      .replace(/&lt;\s*\/\s*[a-zA-Z]+\s*&gt;/g, '') // Remove &lt;/tag&gt; patterns
+      .replace(/&lt;\s*[a-zA-Z]+[^&]*&gt;/g, '') // Remove &lt;tag&gt; patterns
+
       // Fix Pro Tip issue immediately - most aggressive patterns
       .replace(/##\s*P\s*[\n\r\s]*ro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*P\s*<[^>]*>\s*ro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*P\s*(?:<[^>]*>)?\s*ro\s*(?:<[^>]*>)?\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*P\s*\n?\s*ro\s*Tip/gi, '## Pro Tip')
-      .replace(/##\s*P\s+ro\s*Tip/gi, '## Pro Tip');
+      .replace(/##\s*P\s+ro\s*Tip/gi, '## Pro Tip')
+
+      // Clean up malformed sentences and links
+      .replace(/([A-Za-z])\s*&lt;[^&]*&gt;\s*([A-Za-z])/g, '$1 $2') // Remove HTML entities between words
+      .replace(/\.\s*&lt;[^&]*&gt;\s*([A-Z])/g, '. $1'); // Clean sentence breaks
 
     // Split content into lines and clean up
     let formattedContent = content
@@ -29,10 +48,12 @@ export class ContentFormatter {
       .trim();
 
     // Process the content in correct order - add comprehensive cleanup first
+    formattedContent = this.removeSpecificMalformedPatterns(formattedContent);
     formattedContent = this.cleanupMarkdownArtifacts(formattedContent);
     formattedContent = this.convertMarkdownToHtml(formattedContent);
     formattedContent = this.removeDuplicateTitle(formattedContent, title);
     formattedContent = this.fixContentIssues(formattedContent);
+    formattedContent = this.cleanMalformedLinks(formattedContent);
     formattedContent = this.processHeadings(formattedContent);
     formattedContent = this.processParagraphs(formattedContent);
     formattedContent = this.processLists(formattedContent);
@@ -168,6 +189,10 @@ export class ContentFormatter {
       .replace(/##\s*P\s*<p[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2>')
       .replace(/##\s*P\s*<p[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2><p>')
 
+      // Fix malformed HTML entity patterns in headings
+      .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*([^&<]+)/gi, '## $1')
+      .replace(/##\s*&lt;\s*\/\s*h[1-6]\s*&gt;\s*([^&<]+)/gi, '## $1')
+
       // Remove markdown frontmatter separators (triple hyphens)
       .replace(/^---[\s\S]*?---/gm, '')
       .replace(/^---.*$/gm, '')
@@ -183,6 +208,10 @@ export class ContentFormatter {
 
       // Handle specific case: "Play now at Runescape.com" pattern
       .replace(/(Play now at\s+)([a-zA-Z0-9.-]+\.com)/gi, '$1<a href="https://$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$2</a>')
+
+      // Handle malformed "Claim your place" patterns that may be broken by HTML entities
+      .replace(/Claim\s+your\s+place\s+among\s+the\s+legends[^.]*\.\s*Play\s+now\s+at\s+([a-zA-Z0-9.-]+\.com)/gi,
+        'Claim your place among the legends. Play now at <a href="https://$1" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$1</a>.')
       // Convert **H1**: patterns to <h1> tags
       .replace(/\*\*H1\*\*:\s*(.+?)(?=\n|$)/gi, '<h1>$1</h1>')
       // Convert **Title**: patterns to nothing (remove completely since it's duplicate)
@@ -402,6 +431,31 @@ export class ContentFormatter {
       .replace(/<script[^>]*>.*?<\/script>/gi, '')
       .replace(/<style[^>]*>.*?<\/style>/gi, '')
       .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+
+      // FIRST: Decode all levels of HTML entity encoding immediately
+      .replace(/&amp;lt;/g, '<')
+      .replace(/&amp;gt;/g, '>')
+      .replace(/&amp;amp;/g, '&')
+      .replace(/&amp;quot;/g, '"')
+
+      // EARLIEST CATCH: Fix specific Pro Tip pattern before any other processing
+      .replace(/<h2[^>]*>\s*&lt;\s*<\/h2>\s*<p[^>]*>\s*h2&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
+      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
+
+      // AGGRESSIVE removal of the specific malformed pattern first
+      .replace(/##\s*(&amp;lt;|&lt;)[\s\S]*?h[1-6]\s*(&amp;gt;|&gt;)\s*Pro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*(&amp;lt;|&lt;).*$/gm, '') // Remove any line starting with ## <
+
+      // Fix malformed HTML entities first (most critical)
+      .replace(/&lt;\s*\/\s*[a-zA-Z]+\s*&gt;/g, '') // Remove &lt;/tag&gt; patterns
+      .replace(/&lt;\s*[a-zA-Z]+[^&]*&gt;/g, '') // Remove &lt;tag&gt; patterns
+      .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*(Pro\s*Tip|[^<]*)/gi, '## $1') // Fix ## &lt;h2&gt;Pro Tip patterns
+      .replace(/&lt;\s*\/\s*p\s*&gt;\s*#\s*\d+\s*&lt;\s*p\s*&gt;/g, '') // Remove malformed p tag patterns
+
+      // Clean up corrupted style attributes with malformed content
+      .replace(/style="[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      .replace(/style="[^"]*color:[^#]*#[^0-9a-f]*([0-9a-f]{6})[^"]*"/gi, 'style="color:#$1;font-weight:500;"')
+
       // Remove any remaining markdown artifacts
       .replace(/---+/g, '')
       .replace(/^\s*---\s*$/gm, '')
@@ -409,14 +463,23 @@ export class ContentFormatter {
       .replace(/<h[1-6][^>]*>\s*[A-Z]\.\s*(Assessment|needed|required|evaluation)\s*<\/h[1-6]>/gi, '')
       // Remove empty headings
       .replace(/<h[1-6][^>]*>\s*<\/h[1-6]>/gi, '')
+
+      // Final cleanup for remaining malformed markdown headings
+      .replace(/^\s*#{1,6}\s*&lt;[^&>]*&gt;\s*$/gm, '') // Remove headings that are just ## &lt;tag&gt;
+      .replace(/^\s*#{1,6}\s*$/gm, '') // Remove empty headings like just ##
+
       // Fix common HTML issues
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+
       // Normalize quotes
       .replace(/[\u2018\u2019]/g, "'")
       .replace(/[\u201C\u201D]/g, '"')
+
       // Remove excessive whitespace but preserve paragraph structure
       .replace(/[ \t]+/g, ' ')
       .replace(/\n\s*\n\s*\n/g, '\n\n')
@@ -428,7 +491,11 @@ export class ContentFormatter {
    */
   private static fixContentIssues(content: string): string {
     return content
-      // Fix Pro Tip heading issues first
+      // Fix malformed HTML entities in headings first
+      .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*(Pro\s*Tip|[^<]*)/gi, '## $1')
+      .replace(/##\s*&lt;\s*\/\s*h[1-6]\s*&gt;\s*(Pro\s*Tip|[^<]*)/gi, '## $1')
+
+      // Fix Pro Tip heading issues
       .replace(/##\s*P\s*<p[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2><p>')
       .replace(/##\s*P\s*<p[^>]*data-[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2><p>')
       .replace(/##\s*P\s*(?:<[^>]*>)?\s*ro\s*(?:<[^>]*>)?\s*Tip/gi, '<h2>Pro Tip</h2>')
@@ -438,11 +505,20 @@ export class ContentFormatter {
 
       // Fix corrupted color styles (e.g., "color:&lt;/p&gt; # 2 &lt;p&gt; 563eb;")
       .replace(/style="[^"]*color:[^#]*#[^0-9a-f]*([0-9a-f]{6})[^"]*"/gi, 'style="color:#$1;font-weight:500;"')
+      .replace(/style="[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
 
       // Remove unwanted text-decoration and hover events from existing links
       .replace(/(<a[^>]*) onmouseover="[^"]*"/gi, '$1')
       .replace(/(<a[^>]*) onmouseout="[^"]*"/gi, '$1')
+      .replace(/(<a[^>]*) onmouseenter="[^"]*"/gi, '$1')
+      .replace(/(<a[^>]*) onmouseleave="[^"]*"/gi, '$1')
       .replace(/(<a[^>]*style="[^"]*);?\s*text-decoration:[^;"]*;?([^"]*"[^>]*>)/gi, '$1$2')
+
+      // Clean up link text that contains malformed HTML entities
+      .replace(/>([^<]*&lt;[^<]*&gt;[^<]*)</g, (match, linkText) => {
+        const cleanText = linkText.replace(/&lt;[^&]*&gt;/g, '').trim();
+        return `>${cleanText}<`;
+      })
 
       // Fix links missing color entirely
       .replace(/<a([^>]*href[^>]*)style="([^"]*)"([^>]*)>/gi, (match, beforeStyle, styleContent, afterStyle) => {
@@ -454,7 +530,192 @@ export class ContentFormatter {
         return match;
       })
 
-      // Ensure all links without any style have proper styling
+      // Ensure all links without any style have proper styling and remove hover attributes
       .replace(/<a([^>]*href[^>]*)(?!.*style=)([^>]*)>/gi, '<a$1 style="color:#2563eb;font-weight:500;"$2>');
+  }
+
+  /**
+   * Clean malformed links, especially gaming site patterns
+   */
+  private static cleanMalformedLinks(content: string): string {
+    return content
+      // Fix the specific ## &lt; h2&gt;Pro Tip issue that gets split
+      .replace(/##\s*&lt;\s*[\n\r]*\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*&lt;\s*[\n\r]*\s*([A-Za-z][^\n]*)/gi, '## $1')
+
+      // Remove standalone ## &lt; patterns
+      .replace(/^\s*##\s*&lt;\s*$/gm, '')
+      .replace(/^\s*##\s*&lt;[^&>]*&gt;\s*$/gm, '')
+
+      // Fix text with malformed HTML entities breaking up words
+      .replace(/([A-Za-z])\s*&lt;[^&]*&gt;\s*([a-zA-Z0-9.-]+\.com)/g, '$1 $2')
+      .replace(/([A-Za-z])\s*&lt;[^&]*&gt;\s*([A-Za-z])/g, '$1$2')
+
+      // Fix specific gaming site patterns like "Play now at Runescape.com"
+      .replace(/(Play\s+now\s+at)\s*&lt;[^&]*&gt;\s*([a-zA-Z0-9.-]+\.com)/gi,
+        '$1 <a href="https://$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$2</a>')
+
+      // Fix "Claim your place among the legends" patterns
+      .replace(/Claim\s+your\s+place\s+among\s+the\s+legends[^.]*\.\s*Play\s+now\s+at\s+([a-zA-Z0-9.-]+\.com)/gi,
+        'Claim your place among the legends. Play now at <a href="https://$1" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$1</a>.')
+
+      // General cleanup of malformed HTML entities in text
+      .replace(/&lt;\s*\/\s*[a-zA-Z]+\s*&gt;/g, '') // Remove &lt;/tag&gt; patterns
+      .replace(/&lt;\s*[a-zA-Z]+[^&]*&gt;/g, '') // Remove &lt;tag&gt; patterns
+
+      // Fix broken sentences caused by HTML entities
+      .replace(/\.\s*&lt;[^&]*&gt;\s*([A-Z])/g, '. $1')
+      .replace(/([.!?])\s*&lt;[^&]*&gt;\s*([A-Z])/g, '$1 $2')
+
+      // Final cleanup: remove any remaining empty headings
+      .replace(/^\s*#{1,6}\s*$/gm, '')
+      .replace(/\n\s*\n\s*\n/g, '\n\n'); // Clean up multiple line breaks
+  }
+
+  /**
+   * Remove specific malformed patterns that cause rendering issues
+   */
+  private static removeSpecificMalformedPatterns(content: string): string {
+    return content
+      // FIRST: Decode all levels of HTML entity encoding
+      .replace(/&amp;lt;/g, '<')
+      .replace(/&amp;gt;/g, '>')
+      .replace(/&amp;amp;/g, '&')
+      .replace(/&amp;quot;/g, '"')
+
+      // ULTIMATE AGGRESSIVE: Remove the exact pattern that persists
+      // Pattern: ## &lt; <p>h2&gt;Pro Tip </p>
+      .replace(/##\s*(&amp;lt;|&lt;)\s*<p[^>]*>\s*h[1-6]\s*(&amp;gt;|&gt;)\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '## Pro Tip')
+      .replace(/##\s*(&amp;lt;|&lt;)\s*h[1-6]\s*(&amp;gt;|&gt;)\s*Pro\s*Tip/gi, '## Pro Tip')
+
+      // Remove any standalone ## with encoded entities
+      .replace(/^\s*##\s*(&amp;lt;|&lt;)\s*$/gm, '')
+      .replace(/##\s*(&amp;lt;|&lt;)(?!.*Pro\s*Tip).*$/gm, '') // Remove ## < lines that don't contain Pro Tip
+
+      // MOST AGGRESSIVE: Remove any ## followed by encoded HTML
+      .replace(/##\s*(&amp;lt;|&lt;)[\s\S]*?h[1-6]\s*(&amp;gt;|&gt;)\s*Pro\s*Tip[\s\S]*?$/gm, '## Pro Tip')
+      .replace(/##\s*(&amp;lt;|&lt;).*$/gm, '') // Remove any line starting with ## <
+
+      // Remove any content that looks like HTML entities after ##
+      .replace(/##\s*(&amp;lt;|&lt;)[^&>]*(&amp;gt;|&gt;)[^\n]*/g, '')
+
+      // Clean up corrupted inline styles with any level of encoding
+      .replace(/style="[^"]*(&amp;lt;|&lt;)[^"]*(&amp;gt;|&gt;)[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+
+      // Remove orphaned HTML entity fragments (all encoding levels)
+      .replace(/(&amp;lt;|&lt;)\s*\/?\s*[a-zA-Z]+[^&>]*(&amp;gt;|&gt;)/g, '')
+
+      // Clean up any remaining malformed heading patterns
+      .replace(/^\s*##\s*(&amp;lt;|&lt;).*$/gm, '')
+      .replace(/^\s*##\s*$/gm, '');
+  }
+
+  /**
+   * Final post-processing cleanup to catch patterns that slip through
+   */
+  static postProcessCleanup(content: string): string {
+    return content
+      // ULTIMATE FIX: Handle double-encoded HTML entities first
+      .replace(/&amp;lt;/g, '<')
+      .replace(/&amp;gt;/g, '>')
+      .replace(/&amp;amp;/g, '&')
+
+      // Handle the exact pattern showing in DOM: ## &lt; <p>h2&gt;Pro Tip</p>
+      .replace(/##\s*&lt;\s*<p[^>]*>\s*h[1-6]\s*&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
+
+      // Remove specific malformed heading patterns from DOM: <h2>&lt;</h2> <p> h2&gt;Pro Tip </p>
+      .replace(/<h[1-6][^>]*>&lt;<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
+      .replace(/<h[1-6][^>]*>&lt;<\/h[1-6]>/gi, '') // Remove headings that just contain &lt;
+
+      // Fix pattern where content is split: <h2>&lt;</h2> followed by <p> h2&gt;content </p>
+      .replace(/<h[1-6][^>]*>&lt;<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;([^<]*)<\/p>/gi, '<h2>$1</h2>')
+
+      // Handle all variations of the malformed pattern
+      .replace(/##\s*&amp;lt;[\s\S]*?h[1-6]\s*&amp;gt;[\s\S]*?Pro\s*Tip[\s\S]*?/gi, '<h2>Pro Tip</h2>')
+      .replace(/##\s*&lt;[\s\S]*?h[1-6]\s*&gt;[\s\S]*?Pro\s*Tip[\s\S]*?/gi, '<h2>Pro Tip</h2>')
+
+      // Remove any line starting with ## and containing HTML entities
+      .replace(/^\s*##\s*&amp;lt;.*$/gm, '')
+      .replace(/^\s*##\s*&lt;.*$/gm, '')
+
+      // Ultimate pattern removal - any ## followed by encoded tags
+      .replace(/##\s*(&amp;lt;|&lt;)[^\n]*/g, '')
+
+      // Fix corrupted style attributes with multiple encoding levels
+      .replace(/style="[^"]*(&amp;lt;|&lt;)[^"]*(&amp;gt;|&gt;)[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+
+      // Fix highly corrupted style attributes with embedded HTML
+      .replace(/style="[^"]*&lt;\/p&gt;[^"]*&lt;h[1-6]&gt;[^"]*&lt;\/h[1-6]&gt;[^"]*&lt;p&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      .replace(/style="[^"]*color:[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+
+      // Clean up any remaining double-encoded entities
+      .replace(/&amp;lt;\s*\/?\s*[a-zA-Z]+[^&]*&amp;gt;/g, '')
+      .replace(/&lt;\s*\/?\s*[a-zA-Z]+[^&]*&gt;/g, '')
+
+      // Remove empty paragraphs and malformed content
+      .replace(/<p[^>]*>\s*<\/p>/gi, '') // Empty paragraphs
+      .replace(/<p[^>]*>\s*&lt;[^&>]*&gt;\s*<\/p>/gi, '') // Paragraphs with only HTML entities
+      .replace(/<p[^>]*>\s*h[1-6]&gt;\s*<\/p>/gi, '') // Paragraphs with malformed heading fragments
+      .replace(/\n{3,}/g, '\n\n')
+
+      // Clean up any remaining malformed headings that contain only symbols
+      .replace(/<h[1-6][^>]*>\s*[&<>]+\s*<\/h[1-6]>/gi, '')
+
+      // REMOVE DISPLAYED HTML ENTITY TEXT - no code should be visible
+      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>/gi, '') // Remove headings showing just &lt;
+      .replace(/<p[^>]*>\s*h[1-6]&gt;[^<]*<\/p>/gi, '') // Remove paragraphs showing h2&gt; text
+      .replace(/<[^>]*>\s*&lt;\s*<\/[^>]*>/gi, '') // Remove any tag containing just &lt;
+      .replace(/<[^>]*>\s*&gt;\s*<\/[^>]*>/gi, '') // Remove any tag containing just &gt;
+
+      // ULTIMATE REMOVAL: The exact pattern from the image/DOM
+      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip\s*<\/p>/gi, '<h2>Pro Tip</h2>')
+      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;[^<]*<\/p>/gi, '') // Remove any similar pattern
+
+      // SPECIFIC FIX: Remove broken <h2>&lt;</h2> and reformat following Pro Tip paragraph
+      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip[^<]*<\/p>/gi, '<h2>Pro Tip</h2>')
+      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;([^<]*)<\/p>/gi, '<h2>$1</h2>')
+
+      // Handle the exact pattern with data-loc attributes from the DOM
+      .replace(/<h[1-6][^>]*data-loc[^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*data-loc[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip[^<]*<\/p>/gi, '<h2>Pro Tip</h2>')
+      .replace(/<h[1-6][^>]*data-loc[^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*data-loc[^>]*>\s*h[1-6]&gt;([^<]*)<\/p>/gi, '<h2>$1</h2>')
+
+      // MOST AGGRESSIVE: Catch any h2 containing just &lt; followed by p containing h2&gt;
+      .replace(/<h2[^>]*>\s*&lt;\s*<\/h2>\s*<p[^>]*>\s*h2&gt;\s*Pro\s*Tip[^<]*<\/p>/gi, '<h2>Pro Tip</h2>')
+      .replace(/<h2[^>]*>\s*&lt;\s*<\/h2>\s*<p[^>]*>\s*h2&gt;([^<]*)<\/p>/gi, '<h2>$1</h2>')
+
+      // Ultra specific for the exact DOM pattern visible
+      .replace(/<h2[^>]*>&lt;<\/h2>\s*<p[^>]*>\s*h2&gt;Pro\s*Tip\s*<\/p>/gi, '<h2>Pro Tip</h2>')
+
+      // Remove standalone malformed heading + paragraph combinations
+      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>[^<]*h[1-6]&gt;[^<]*<\/p>/gi, '')
+
+      // Remove text fragments that are HTML entities being displayed
+      .replace(/&lt;\s*h[1-6]\s*&gt;/gi, '') // Remove &lt; h2&gt; type patterns
+      .replace(/&lt;\s*\/\s*h[1-6]\s*&gt;/gi, '') // Remove &lt;/h2&gt; type patterns
+      .replace(/&lt;\s*p\s*&gt;/gi, '') // Remove &lt;p&gt; patterns
+      .replace(/&lt;\s*\/\s*p\s*&gt;/gi, '') // Remove &lt;/p&gt; patterns
+
+      // Final pass: ensure any remaining ## patterns become proper headings
+      .replace(/^\s*##\s+([A-Za-z][^\n]*)/gm, '<h2>$1</h2>')
+
+      // COMPREHENSIVE HEADLINE PROTOCOL ENFORCEMENT
+      // Ensure all headings follow proper HTML structure
+      .replace(/<h([1-6])[^>]*>\s*([^<]*?)\s*<\/h[1-6]>/gi, (match, level, text) => {
+        const cleanText = text.trim().replace(/[*#]+/g, '').trim();
+        if (cleanText) {
+          return `<h${level}>${cleanText}</h${level}>`;
+        }
+        return ''; // Remove empty headings
+      })
+
+      // Convert any remaining markdown-style headings to HTML
+      .replace(/^\s*(#{1,6})\s+(.+?)\s*$/gm, (match, hashes, text) => {
+        const level = Math.min(hashes.length, 6);
+        const cleanText = text.trim().replace(/[*#]+/g, '').trim();
+        if (cleanText) {
+          return `<h${level}>${cleanText}</h${level}>`;
+        }
+        return ''; // Remove empty headings
+      });
   }
 }

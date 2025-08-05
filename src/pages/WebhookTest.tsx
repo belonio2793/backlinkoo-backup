@@ -305,7 +305,7 @@ const WebhookTest: React.FC = () => {
       // Test just the popular 100 credits package
       const result = await tester.testCreditsPurchase({
         credits: 100,
-        amount: 70.00,
+        amount: 140.00,
         description: 'Quick Credits Test (100 credits)',
         testEmail: 'quick.test@example.com'
       });
@@ -800,9 +800,9 @@ const WebhookTest: React.FC = () => {
 
               <p><strong>Credit Packages Tested:</strong></p>
               <ul className="list-disc list-inside ml-4 space-y-1">
-                <li>50 credits - $35.00</li>
-                <li>100 credits - $70.00 (Popular)</li>
-                <li>250 credits - $175.00</li>
+                <li>50 credits - $70.00</li>
+                <li>100 credits - $140.00 (Popular)</li>
+                <li>250 credits - $350.00</li>
                 <li>500 credits - $350.00 (Enterprise)</li>
               </ul>
 

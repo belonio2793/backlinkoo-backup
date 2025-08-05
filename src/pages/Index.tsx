@@ -161,8 +161,8 @@ const Index = () => {
       id: 'starter_100' as const,
       name: 'Starter 100',
       credits: 100,
-      price: 70,
-      pricePerLink: 0.70,
+      price: 140,
+      pricePerLink: 1.40,
       description: 'Perfect for testing our platform',
       features: [
         'High DA backlinks',
@@ -175,8 +175,8 @@ const Index = () => {
       id: 'starter_200' as const,
       name: 'Starter 200',
       credits: 200,
-      price: 140,
-      pricePerLink: 0.70,
+      price: 280,
+      pricePerLink: 1.40,
       description: 'Most popular starting package',
       features: [
         'High DA backlinks',
@@ -190,8 +190,8 @@ const Index = () => {
       id: 'starter_300' as const,
       name: 'Starter 300',
       credits: 300,
-      price: 210,
-      pricePerLink: 0.70,
+      price: 420,
+      pricePerLink: 1.40,
       description: 'Maximum starter value',
       features: [
         'High DA backlinks',
@@ -649,7 +649,7 @@ const Index = () => {
               </Badge>
               <h2 className="text-4xl font-light mb-6 tracking-tight">Performance Monitor</h2>
               <p className="text-xl text-muted-foreground mb-8 leading-relaxed font-light">
-                Track keyword rankings across Google and Bing with precision monitoring and instant alerts.
+                Track keyword rankings on Google with precision monitoring and instant alerts.
               </p>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3">
@@ -839,10 +839,10 @@ const Index = () => {
                 <div className="text-center">
                   <div className="text-3xl font-semibold text-gray-900 mb-2">
                     <span className="text-xl font-mono">Total: </span>
-                    <span>${customCredits > 0 ? (customCredits * 0.70).toFixed(2) : '0.00'}</span>
+                    <span>${customCredits > 0 ? (customCredits * 1.40).toFixed(2) : '0.00'}</span>
                   </div>
                   <div className="text-sm text-gray-500 font-mono">
-                    $0.70 per credit
+                    $1.40 per credit
                   </div>
                 </div>
 

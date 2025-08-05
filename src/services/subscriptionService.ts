@@ -17,6 +17,47 @@ export interface SubscriptionStatus {
 
 export class SubscriptionService {
   /**
+   * Validate Stripe configuration
+   */
+  static validateStripeConfiguration(planType: 'monthly' | 'yearly' = 'monthly'): { isValid: boolean; error?: string; priceId?: string } {
+    const monthlyPriceId = import.meta.env.VITE_STRIPE_PREMIUM_PLAN_MONTHLY;
+    const annualPriceId = import.meta.env.VITE_STRIPE_PREMIUM_PLAN_ANNUAL;
+
+    const priceId = planType === 'yearly' ? annualPriceId : monthlyPriceId;
+    const planName = planType === 'yearly' ? 'annual' : 'monthly';
+
+    if (!priceId || priceId.trim() === '') {
+      const isDevelopment = import.meta.env.DEV;
+      const errorMessage = isDevelopment
+        ? `Local development: Stripe ${planName} price ID not available. This is expected in local development for security. The checkout will work in production where environment variables are properly configured on Netlify.`
+        : `Stripe ${planName} price ID not configured. Please set VITE_STRIPE_PREMIUM_PLAN_${planType.toUpperCase()} environment variable.`;
+
+      return {
+        isValid: false,
+        error: errorMessage
+      };
+    }
+
+    // Check if using placeholder/test values
+    if (priceId.includes('test_placeholder') || priceId === 'price_premium_monthly') {
+      return {
+        isValid: false,
+        error: `Stripe ${planName} plan is configured with placeholder values. Please set up real Stripe price IDs.`
+      };
+    }
+
+    // Basic format validation for Stripe price IDs
+    if (!priceId.startsWith('price_')) {
+      return {
+        isValid: false,
+        error: `Invalid Stripe ${planName} price ID format. Price IDs should start with "price_".`
+      };
+    }
+
+    return { isValid: true, priceId };
+  }
+
+  /**
    * Check if user has active subscription
    */
   static async getSubscriptionStatus(user: User | null): Promise<SubscriptionStatus> {
@@ -80,12 +121,25 @@ export class SubscriptionService {
   }
 
   /**
-   * Create subscription for $29/month plan
+   * Create subscription for premium plans
    */
-  static async createSubscription(user: User | null, isGuest: boolean = false, guestEmail?: string): Promise<{ success: boolean; url?: string; error?: string }> {
-    console.log('🚀 Creating subscription...', { user: !!user, isGuest, guestEmail });
+  static async createSubscription(
+    user: User | null,
+    isGuest: boolean = false,
+    guestEmail?: string,
+    planType: 'monthly' | 'yearly' = 'monthly'
+  ): Promise<{ success: boolean; url?: string; error?: string }> {
 
     try {
+      // Validate Stripe configuration for the selected plan
+      const stripeConfig = this.validateStripeConfiguration(planType);
+      if (!stripeConfig.isValid) {
+        return {
+          success: false,
+          error: stripeConfig.error
+        };
+      }
+
       // Validate inputs
       if (isGuest && !guestEmail) {
         return { success: false, error: 'Guest email is required for guest checkout' };
@@ -95,31 +149,24 @@ export class SubscriptionService {
         return { success: false, error: 'User authentication required' };
       }
 
-      // Use environment variable for price ID or fallback to default
-      const priceId = import.meta.env.VITE_STRIPE_PRICE_ID || 'price_premium_monthly';
+      const priceId = stripeConfig.priceId!;
 
       const requestBody = {
         priceId,
-        tier: 'premium',
+        tier: planType === 'yearly' ? 'premium-annual' : 'premium-monthly',
         isGuest,
         guestEmail: isGuest ? guestEmail : undefined
       };
 
-      console.log('📝 Request body:', requestBody);
-
       // Get current session to ensure we have auth token
       const { data: session } = await supabase.auth.getSession();
-      console.log('🔑 Session available:', !!session?.session);
 
       const { data, error } = await supabase.functions.invoke('create-subscription', {
         body: requestBody
       });
 
-      console.log('📨 Edge function response:', { data, error });
-      console.log('📨 Raw error object:', JSON.stringify(error, null, 2));
-
       if (error) {
-        console.error('❌ Edge function error:', error);
+        console.error('Edge function error:', error);
 
         // Provide more specific error messages
         let errorMessage = 'Failed to create subscription';
@@ -133,6 +180,8 @@ export class SubscriptionService {
             errorMessage = error.message;
           } else if (error.details) {
             errorMessage = error.details;
+          } else if (error.msg) {
+            errorMessage = error.msg;
           } else {
             // If it's an object but no clear message, stringify it
             errorMessage = `API Error: ${JSON.stringify(error)}`;
@@ -150,6 +199,10 @@ export class SubscriptionService {
           errorMessage = 'Authentication error. Please sign in and try again.';
         } else if (errorMessage.includes('price') || errorMessage.includes('priceId')) {
           errorMessage = 'Invalid pricing configuration. Please contact support.';
+        } else if (errorMessage.includes('non-2xx')) {
+          errorMessage = 'Server configuration error. The payment system returned an error response. Please verify Stripe webhook configuration.';
+        } else if (errorMessage.includes('No such price')) {
+          errorMessage = 'Invalid Stripe price ID. Please verify your Stripe configuration and ensure the price exists.';
         }
 
         logError('Subscription creation error', error);
@@ -157,15 +210,12 @@ export class SubscriptionService {
       }
 
       if (!data || !data.url) {
-        console.error('❌ No checkout URL returned from edge function');
         return { success: false, error: 'Payment system did not return a checkout URL' };
       }
-
-      console.log('✅ Subscription creation successful, URL:', data.url);
       return { success: true, url: data.url };
 
     } catch (error: any) {
-      console.error('❌ Exception creating subscription:', error);
+      console.error('Exception creating subscription:', error);
 
       let errorMessage = 'An unexpected error occurred';
 

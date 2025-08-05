@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { AuthFormTabs } from '@/components/shared/AuthFormTabs';
 import SubscriptionService from '@/services/subscriptionService';
-import { createSubscriptionWithFallback } from '@/services/fallbackSubscriptionService';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -119,46 +118,33 @@ export function EnhancedPremiumCheckoutModal({
         redirectUrl: redirectAfterSuccess
       }));
 
-      // Use subscription service with fallback support
-      const result = await createSubscriptionWithFallback(
+      // Create subscription using Stripe checkout
+      const result = await SubscriptionService.createSubscription(
         user,
         checkoutMode === 'guest', // isGuest
-        checkoutMode === 'guest' ? guestEmail : undefined
+        checkoutMode === 'guest' ? guestEmail : undefined,
+        selectedPlan // Pass the selected plan (monthly or yearly)
       );
 
       if (result.success && result.url) {
-        if (result.usedFallback) {
-          // Fallback was used - upgrade successful
-          setCurrentStep('success');
-          toast({
-            title: "Premium Activated!",
-            description: "Your account has been upgraded to Premium.",
-          });
+        // Redirect to Stripe checkout
+        toast({
+          title: "Redirecting to Payment",
+          description: "You'll be redirected to complete your payment securely.",
+        });
 
-          // Trigger success callback and redirect after delay
-          setTimeout(() => {
-            onClose();
-            if (onSuccess) {
-              onSuccess();
-            }
-            navigate(redirectAfterSuccess);
-          }, 2000);
-        } else {
-          // Real Stripe checkout - redirect
-          toast({
-            title: "Redirecting to Payment",
-            description: "You'll be redirected to complete your payment securely.",
-          });
-          
-          // Open Stripe checkout
+        // Small delay to show the toast before redirect
+        setTimeout(() => {
           window.location.href = result.url;
-        }
+        }, 1000);
       } else {
         throw new Error(result.error || 'Failed to create subscription');
       }
     } catch (error: any) {
-      console.error('Checkout error:', error);
+      console.error('❌ Checkout error:', error);
+
       setCurrentStep('checkout');
+
       toast({
         title: "Payment Setup Failed",
         description: error.message || "There was an issue setting up your payment. Please try again.",
@@ -183,6 +169,7 @@ export function EnhancedPremiumCheckoutModal({
     setCheckoutMode('guest');
     await handleCheckout();
   };
+
 
   const renderAuthStep = () => (
     <div className="space-y-6">
@@ -394,10 +381,10 @@ export function EnhancedPremiumCheckoutModal({
         <Button
           onClick={handleCheckout}
           className="w-full h-12 text-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-          disabled={isProcessing}
+          disabled={isProcessing || (!user && checkoutMode !== 'guest')}
         >
           <Lock className="h-4 w-4 mr-2" />
-          Complete Secure Checkout
+          {isProcessing ? 'Setting up checkout...' : 'Complete Secure Checkout'}
         </Button>
 
         <Button
@@ -417,6 +404,7 @@ export function EnhancedPremiumCheckoutModal({
         </div>
         <p>Your payment information is secure and encrypted.</p>
       </div>
+
     </div>
   );
 
@@ -426,8 +414,9 @@ export function EnhancedPremiumCheckoutModal({
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
       <div>
-        <h3 className="text-2xl font-bold mb-2">Processing Your Upgrade</h3>
-        <p className="text-gray-600">Please wait while we set up your premium account...</p>
+        <h3 className="text-2xl font-bold mb-2">Setting Up Your Checkout</h3>
+        <p className="text-gray-600">Creating secure payment session with Stripe...</p>
+        <p className="text-sm text-gray-500 mt-2">This usually takes just a few seconds</p>
       </div>
     </div>
   );

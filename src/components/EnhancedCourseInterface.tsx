@@ -157,7 +157,7 @@ Search Engine Optimization (SEO) is the practice of increasing the quantity and 
 
 ## Key Concepts
 - **Organic Traffic**: Visitors who find your website through unpaid search results
-- **Search Engines**: Google, Bing, Yahoo, and other platforms that index web content
+- **Search Engines**: Google and other platforms that index web content
 - **Rankings**: Position of your pages in search engine results pages (SERPs)
 
 ## Why SEO Matters

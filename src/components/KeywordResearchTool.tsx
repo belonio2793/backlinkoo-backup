@@ -10,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SearchableSelect } from "@/components/SearchableSelect";
 import googleLogo from "@/assets/google-g-logo.png";
-import bingLogo from "@/assets/bing-logo.png";
 
 interface KeywordData {
   keyword: string;
@@ -19,7 +18,7 @@ interface KeywordData {
   cpc: number;
   trend: 'up' | 'down' | 'stable';
   competition: 'low' | 'medium' | 'high';
-  searchEngine: 'google' | 'bing';
+  searchEngine: 'google';
   location?: string;
   competitorCount?: number;
   topCompetitors?: string[];
@@ -216,7 +215,7 @@ export const KeywordResearchTool = () => {
     { code: "AZ", name: "Azerbaijan", flag: "🇦🇿" },
     { code: "BA", name: "Bosnia and Herzegovina", flag: "🇧🇦" },
     { code: "BB", name: "Barbados", flag: "🇧🇧" },
-    { code: "BD", name: "Bangladesh", flag: "🇧🇩" },
+    { code: "BD", name: "Bangladesh", flag: "����🇩" },
     { code: "BE", name: "Belgium", flag: "🇧🇪" },
     { code: "BF", name: "Burkina Faso", flag: "🇧🇫" },
     { code: "BG", name: "Bulgaria", flag: "🇧🇬" },
@@ -299,7 +298,7 @@ export const KeywordResearchTool = () => {
     { code: "HT", name: "Haiti", flag: "🇭🇹" },
     { code: "HU", name: "Hungary", flag: "🇭🇺" },
     { code: "ID", name: "Indonesia", flag: "🇮🇩" },
-    { code: "IE", name: "Ireland", flag: "🇮🇪" },
+    { code: "IE", name: "Ireland", flag: "🇮����" },
     { code: "IL", name: "Israel", flag: "🇮🇱" },
     { code: "IM", name: "Isle of Man", flag: "🇮🇲" },
     { code: "IN", name: "India", flag: "🇮🇳" },
@@ -486,7 +485,7 @@ export const KeywordResearchTool = () => {
           cpc: kw.cpc || (Math.random() * 5 + 0.1),
           trend: kw.trend || (['up', 'down', 'stable'][Math.floor(Math.random() * 3)] as 'up' | 'down' | 'stable'),
           competition: kw.competition || (['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high'),
-          searchEngine: selectedEngine as 'google' | 'bing',
+          searchEngine: 'google',
           location: selectedCity || countries.find(c => c.code === selectedCountry)?.name || 'Global',
           competitorCount: kw.competitorCount || Math.floor(Math.random() * 100) + 10,
           topCompetitors: kw.topCompetitors || []
@@ -502,7 +501,7 @@ export const KeywordResearchTool = () => {
           cpc: Math.random() * 5 + 0.1,
           trend: ['up', 'down', 'stable'][Math.floor(Math.random() * 3)] as 'up' | 'down' | 'stable',
           competition: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high',
-          searchEngine: selectedEngine as 'google' | 'bing',
+          searchEngine: 'google',
           location: selectedCity || countries.find(c => c.code === selectedCountry)?.name || 'Global',
           competitorCount: Math.floor(Math.random() * 100) + 10,
           topCompetitors: []
@@ -628,12 +627,6 @@ export const KeywordResearchTool = () => {
                           Google
                         </div>
                       </SelectItem>
-                      <SelectItem value="bing">
-                        <div className="flex items-center gap-2">
-                          <img src={bingLogo} alt="Bing" className="w-4 h-4" />
-                          Bing
-                        </div>
-                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -705,7 +698,7 @@ export const KeywordResearchTool = () => {
                               <div className="flex items-center gap-2 mt-1">
                                 <Badge variant="outline" className="text-xs">
                                   <img 
-                                    src={keyword.searchEngine === 'google' ? googleLogo : bingLogo} 
+                                    src={googleLogo} 
                                     alt={keyword.searchEngine} 
                                     className="w-3 h-3 mr-1"
                                   />

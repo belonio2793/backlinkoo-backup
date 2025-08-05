@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { createSubscriptionWithFallback } from '@/services/fallbackSubscriptionService';
+import SubscriptionService from '@/services/subscriptionService';
 import { EnhancedSubscriptionService } from '@/services/enhancedSubscriptionService';
 import { PremiumUpgradeService } from '@/services/premiumUpgradeService';
 import { userService } from '@/services/userService';
@@ -148,7 +148,7 @@ export function StreamlinedPremiumCheckout({
       if (!result.success) {
         console.warn('Enhanced service failed, trying fallback...', result.error);
 
-        const fallbackResult = await createSubscriptionWithFallback(user, false);
+        const fallbackResult = await SubscriptionService.createSubscription(user, false, undefined, 'monthly');
 
         if (fallbackResult.success) {
           if (fallbackResult.url && !fallbackResult.usedFallback) {

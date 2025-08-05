@@ -41,6 +41,8 @@ function sanitizeInput(input: string): string {
 }
 
 serve(async (req) => {
+  console.log(`🚀 Edge function called: ${req.method} ${req.url}`);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -49,6 +51,12 @@ serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+
+  console.log("🔧 Environment check:", {
+    supabaseUrl: !!supabaseUrl,
+    supabaseServiceKey: !!supabaseServiceKey,
+    stripeSecretKey: !!stripeSecretKey
+  });
 
   if (!supabaseUrl || !supabaseServiceKey) {
     console.error("Missing Supabase configuration");
@@ -82,23 +90,18 @@ serve(async (req) => {
 
     let body: SubscriptionRequest;
     try {
-      body = await req.json();
+      const rawBody = await req.text();
+      console.log("📝 Raw request body:", rawBody);
+      body = JSON.parse(rawBody);
+      console.log("📋 Parsed request body:", body);
     } catch (parseError) {
-      console.error("JSON parse error:", parseError);
+      console.error("❌ JSON parse error:", parseError);
       return new Response(
-        JSON.stringify({ error: "Invalid request format" }),
+        JSON.stringify({ error: "Invalid request format", details: parseError.message }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
-    // Handle test requests
-    if (body.test === true) {
-      console.log("Test request received");
-      return new Response(
-        JSON.stringify({ success: true, message: "Edge Function is working" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
-      );
-    }
 
     // Input validation
     if (!body.priceId || typeof body.priceId !== 'string' || body.priceId.length > 100) {
@@ -235,8 +238,19 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error("Error in create-subscription:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("❌ Unhandled error in create-subscription:", error);
+    console.error("❌ Error stack:", error.stack);
+
+    let errorMessage = "Internal server error";
+    if (error.message) {
+      errorMessage = error.message;
+    }
+
+    return new Response(JSON.stringify({
+      error: errorMessage,
+      details: "Check server logs for more information",
+      timestamp: new Date().toISOString()
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

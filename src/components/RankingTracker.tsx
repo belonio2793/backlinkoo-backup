@@ -16,8 +16,6 @@ interface RankingResult {
   domain: string;
   searchEngines: {
     google: { position: number | null; found: boolean; lastChecked: string; backlinks: number; errors?: string[] };
-    bing: { position: number | null; found: boolean; lastChecked: string; backlinks: number; errors?: string[] };
-    yahoo: { position: number | null; found: boolean; lastChecked: string; backlinks: number; errors?: string[] };
   };
   overallBest: number | null;
   averagePosition: number | null;
@@ -34,14 +32,6 @@ interface SavedTarget {
   google_found: boolean;
   google_checked_at: string;
   google_backlinks: number;
-  bing_position: number | null;
-  bing_found: boolean;
-  bing_checked_at: string;
-  bing_backlinks: number;
-  yahoo_position: number | null;
-  yahoo_found: boolean;
-  yahoo_checked_at: string;
-  yahoo_backlinks: number;
   best_position: number;
   average_position: number;
   target_created_at?: string;
@@ -153,7 +143,7 @@ export const RankingTracker = () => {
 
   // Enhanced ranking check with comprehensive analysis
   const performEnhancedRankingCheck = async (url: string, keyword: string) => {
-    const searchEngines = ['google', 'bing', 'yahoo'];
+    const searchEngines = ['google'];
     const results: { [key: string]: any } = {};
     const technicalIssues: string[] = [];
     
@@ -286,8 +276,6 @@ export const RankingTracker = () => {
 
       const resultsData = analysisData.results || {};
       const googleData = (resultsData as any)['google'] || {};
-      const bingData = (resultsData as any)['bing'] || {};
-      const yahooData = (resultsData as any)['yahoo'] || {};
 
       const newResult: RankingResult = {
         keyword: keyword.trim(),
@@ -300,20 +288,6 @@ export const RankingTracker = () => {
             lastChecked: new Date().toLocaleString(),
             backlinks: googleData.backlinks || 0,
             errors: googleData.errors || []
-          },
-          bing: {
-            position: bingData.position || null,
-            found: bingData.found || false,
-            lastChecked: new Date().toLocaleString(),
-            backlinks: bingData.backlinks || 0,
-            errors: bingData.errors || []
-          },
-          yahoo: {
-            position: yahooData.position || null,
-            found: yahooData.found || false,
-            lastChecked: new Date().toLocaleString(),
-            backlinks: yahooData.backlinks || 0,
-            errors: yahooData.errors || []
           }
         },
         overallBest,
@@ -489,7 +463,7 @@ export const RankingTracker = () => {
                         {checkingProgress[0]}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Checking Google, Bing, and Yahoo rankings with technical analysis...
+                        Checking Google rankings with technical analysis...
                       </div>
                     </div>
                   </div>
@@ -724,71 +698,6 @@ export const RankingTracker = () => {
                             </CardContent>
                           </Card>
 
-                          {/* Bing */}
-                          <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-800">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                                    <span className="text-xs font-bold text-white">B</span>
-                                  </div>
-                                  <span className="text-sm font-medium">Bing</span>
-                                </div>
-                                {getTrendIcon(target.bing_position, target.best_position)}
-                              </div>
-                              
-                              <div className="space-y-1">
-                                {target.bing_found ? (
-                                  <div className="text-lg font-bold text-blue-600">
-                                    #{target.bing_position}
-                                  </div>
-                                ) : (
-                                  <div className="text-sm text-muted-foreground">
-                                    Not in top 100
-                                  </div>
-                                )}
-                                <div className="text-xs text-muted-foreground">
-                                  {target.bing_backlinks?.toLocaleString() || 0} backlinks
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                  {target.bing_checked_at ? formatDate(target.bing_checked_at) : 'Never'}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-
-                          {/* Yahoo */}
-                          <Card className="border-purple-200 bg-purple-50/50 dark:bg-purple-900/10 dark:border-purple-800">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
-                                    <span className="text-xs font-bold text-white">Y</span>
-                                  </div>
-                                  <span className="text-sm font-medium">Yahoo</span>
-                                </div>
-                                {getTrendIcon(target.yahoo_position, target.best_position)}
-                              </div>
-                              
-                              <div className="space-y-1">
-                                {target.yahoo_found ? (
-                                  <div className="text-lg font-bold text-purple-600">
-                                    #{target.yahoo_position}
-                                  </div>
-                                ) : (
-                                  <div className="text-sm text-muted-foreground">
-                                    Not in top 100
-                                  </div>
-                                )}
-                                <div className="text-xs text-muted-foreground">
-                                  {target.yahoo_backlinks?.toLocaleString() || 0} backlinks
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                  {target.yahoo_checked_at ? formatDate(target.yahoo_checked_at) : 'Never'}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
                         </div>
 
                         {/* Summary Stats */}

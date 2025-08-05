@@ -95,6 +95,56 @@ export function BeautifulBlogPost() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Client-side cleanup of malformed content after rendering
+  useEffect(() => {
+    const cleanupMalformedContent = () => {
+      // Find and fix the exact pattern: <h2>&lt;</h2> followed by <p> h2&gt;Pro Tip </p>
+      const headings = document.querySelectorAll('h2, h3, h4, h5, h6');
+
+      headings.forEach(heading => {
+        if (heading.textContent?.trim() === '<') {
+          const nextElement = heading.nextElementSibling;
+          if (nextElement?.tagName === 'P' && nextElement.textContent?.includes('h2>Pro Tip')) {
+            // Replace both elements with a proper Pro Tip heading
+            const newHeading = document.createElement('h2');
+            newHeading.textContent = 'Pro Tip';
+            heading.parentNode?.replaceChild(newHeading, heading);
+            nextElement.remove();
+          } else if (nextElement?.tagName === 'P' && nextElement.textContent?.match(/h[1-6]>/)) {
+            // Handle other similar patterns
+            const text = nextElement.textContent.replace(/h[1-6]>/, '').trim();
+            if (text) {
+              const newHeading = document.createElement('h2');
+              newHeading.textContent = text;
+              heading.parentNode?.replaceChild(newHeading, heading);
+              nextElement.remove();
+            } else {
+              // Remove empty malformed elements
+              heading.remove();
+              nextElement.remove();
+            }
+          } else {
+            // Remove standalone < headings
+            heading.remove();
+          }
+        }
+      });
+
+      // Clean up corrupted style attributes
+      const elementsWithStyle = document.querySelectorAll('[style*="&lt;"]');
+      elementsWithStyle.forEach(element => {
+        if (element instanceof HTMLElement) {
+          element.style.cssText = 'color:#2563eb;font-weight:500;';
+        }
+      });
+    };
+
+    // Run cleanup after content loads
+    if (blogPost) {
+      setTimeout(cleanupMalformedContent, 100);
+    }
+  }, [blogPost]);
+
   const processClaimIntent = async () => {
     // Only process claim intents for signed-in users
     if (!user) {
@@ -773,9 +823,11 @@ export function BeautifulBlogPost() {
                 <div
                   className="beautiful-blog-content beautiful-prose prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic"
                   dangerouslySetInnerHTML={{
-                    __html: ContentFormatter.addSectionSpacing(
-                      ContentFormatter.sanitizeContent(
-                        ContentFormatter.formatBlogContent(blogPost.content || '', blogPost.title)
+                    __html: ContentFormatter.postProcessCleanup(
+                      ContentFormatter.addSectionSpacing(
+                        ContentFormatter.sanitizeContent(
+                          ContentFormatter.formatBlogContent(blogPost.content || '', blogPost.title)
+                        )
                       )
                     )
                   }}

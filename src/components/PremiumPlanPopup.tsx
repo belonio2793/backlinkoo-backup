@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthService } from '@/services/authService';
-import { createSubscriptionWithFallback } from '@/services/fallbackSubscriptionService';
+import SubscriptionService from '@/services/subscriptionService';
 import { useNavigate } from 'react-router-dom';
 import {
   Crown,
@@ -218,10 +218,11 @@ export function PremiumPlanPopup({
     setCurrentStep('processing');
 
     try {
-      const result = await createSubscriptionWithFallback(
+      const result = await SubscriptionService.createSubscription(
         user,
         !user, // isGuest if no user
-        !user ? paymentData.email : undefined // guestEmail if no user
+        !user ? paymentData.email : undefined, // guestEmail if no user
+        'monthly' // Default to monthly plan
       );
 
       if (result.success) {

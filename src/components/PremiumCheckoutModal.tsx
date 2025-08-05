@@ -8,7 +8,6 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import SubscriptionService from '@/services/subscriptionService';
-import { createSubscriptionWithFallback } from '@/services/fallbackSubscriptionService';
 import { useAuth } from '@/hooks/useAuth';
 import {
   Crown,
@@ -88,10 +87,11 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
 
     try {
       // Use subscription service with fallback support
-      const result = await createSubscriptionWithFallback(
+      const result = await SubscriptionService.createSubscription(
         user,
         !user, // isGuest if no user
-        !user ? formData.email : undefined // guestEmail if no user
+        !user ? formData.email : undefined, // guestEmail if no user
+        'monthly' // Default to monthly plan
       );
 
       if (result.success && result.url) {
