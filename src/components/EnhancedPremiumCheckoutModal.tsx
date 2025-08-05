@@ -466,6 +466,37 @@ export function EnhancedPremiumCheckoutModal({
         </div>
         <p>Your payment information is secure and encrypted.</p>
       </div>
+
+      {/* Development Debug Tools */}
+      {(import.meta.env.DEV || import.meta.env.VITE_SHOW_DEBUG_TOOLS === 'true') && (
+        <div className="border-t pt-6 mt-6">
+          <div className="text-center mb-4">
+            <h4 className="text-sm font-medium text-gray-600">🛠️ Development Tools</h4>
+          </div>
+          <div className="flex gap-2 flex-wrap justify-center">
+            <Button
+              onClick={testEdgeFunction}
+              variant="outline"
+              size="sm"
+              className="text-xs"
+            >
+              🧪 Test Edge Function
+            </Button>
+            <Button
+              onClick={testPremiumUpgrade}
+              variant="outline"
+              size="sm"
+              className="text-xs"
+              disabled={!user}
+            >
+              🧪 Test Premium Upgrade
+            </Button>
+          </div>
+          <p className="text-xs text-gray-500 text-center mt-2">
+            Debug tools visible in development mode
+          </p>
+        </div>
+      )}
     </div>
   );
 
