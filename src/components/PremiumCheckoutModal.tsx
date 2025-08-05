@@ -117,8 +117,8 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
           window.open(result.url, '_blank');
 
           toast({
-            title: `Redirecting to ${method === 'stripe' ? 'Stripe' : 'PayPal'}`,
-            description: `You'll be redirected to ${method === 'stripe' ? 'Stripe' : 'PayPal'} to complete your payment securely.`,
+            title: "Redirecting to Stripe",
+            description: "You'll be redirected to Stripe to complete your payment securely.",
           });
         }
       } else {
