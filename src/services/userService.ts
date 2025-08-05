@@ -44,9 +44,10 @@ class UserService {
         return null;
       }
 
+      console.log('✅ userService: Profile loaded successfully:', profile);
       return profile;
     } catch (error: any) {
-      console.error('Error getting current user profile:', error.message || error);
+      console.error('❌ userService: Error getting current user profile:', error.message || error);
       return null;
     }
   }
