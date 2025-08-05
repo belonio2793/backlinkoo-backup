@@ -1110,14 +1110,24 @@ const Index = () => {
                   <p className="text-sm text-gray-600 mb-3">
                     Test webhook functionality and payment processing backend
                   </p>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => navigate('/test-webhooks')}
-                  >
-                    <Search className="h-4 w-4 mr-2" />
-                    Test Stripe Webhooks
-                  </Button>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => navigate('/test-webhooks')}
+                    >
+                      <Search className="h-4 w-4 mr-2" />
+                      Test Webhooks
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => navigate('/payment-diagnostic')}
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      Payment Diagnostic
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
