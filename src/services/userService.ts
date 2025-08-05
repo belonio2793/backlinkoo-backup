@@ -57,13 +57,28 @@ class UserService {
    */
   async isPremiumUser(): Promise<boolean> {
     try {
+      console.log('🔄 userService: Checking premium status...');
       const profile = await this.getCurrentUserProfile();
+
+      if (!profile) {
+        console.log('❌ userService: No profile found for premium check');
+        return false;
+      }
+
       // Check subscription_tier instead of role for premium status
-      return profile?.subscription_tier === 'premium' ||
-             profile?.subscription_tier === 'monthly' ||
-             profile?.role === 'admin'; // Admin also gets premium access
+      const isPremium = profile?.subscription_tier === 'premium' ||
+                       profile?.subscription_tier === 'monthly' ||
+                       profile?.role === 'admin'; // Admin also gets premium access
+
+      console.log('✅ userService: Premium check result:', {
+        subscription_tier: profile.subscription_tier,
+        role: profile.role,
+        isPremium
+      });
+
+      return isPremium;
     } catch (error: any) {
-      console.error('Error checking premium status:', error.message || error);
+      console.error('❌ userService: Error checking premium status:', error.message || error);
       return false;
     }
   }
