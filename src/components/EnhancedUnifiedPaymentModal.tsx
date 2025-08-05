@@ -52,7 +52,7 @@ interface EnhancedUnifiedPaymentModalProps {
 
 type FlowStep = 'selection' | 'auth' | 'payment' | 'processing' | 'success';
 type PaymentType = 'credits' | 'premium';
-type PaymentMethod = 'stripe' | 'paypal';
+type PaymentMethod = 'stripe';
 type CheckoutType = 'user' | 'guest';
 
 interface PremiumPlan {
