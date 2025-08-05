@@ -329,10 +329,6 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
                     <span>Cards</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-blue-600 rounded"></div>
-                    <span>PayPal</span>
-                  </div>
-                  <div className="flex items-center gap-1">
                     <div className="w-3 h-3 bg-green-600 rounded"></div>
                     <span>Apple Pay</span>
                   </div>
