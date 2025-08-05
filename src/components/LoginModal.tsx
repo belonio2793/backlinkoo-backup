@@ -15,6 +15,7 @@ interface LoginModalProps {
   onClose: () => void;
   onAuthSuccess?: (user: any) => void;
   defaultTab?: "login" | "signup";
+  pendingAction?: string; // Description of what user was trying to access
 }
 
 export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login" }: LoginModalProps) {
