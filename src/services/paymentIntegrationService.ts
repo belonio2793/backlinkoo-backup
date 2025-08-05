@@ -34,11 +34,16 @@ class PaymentIntegrationService {
 
   private loadConfiguration(): PaymentConfig {
     const environment = this.getEnvironment();
-    
+    const isDevelopment = environment === 'development';
+
+    // In development, we enable Stripe if we have pricing configured (indicating setup is complete)
+    const hasStripePricing = !!(import.meta.env.VITE_STRIPE_PREMIUM_PLAN_MONTHLY || import.meta.env.VITE_STRIPE_PREMIUM_PLAN_ANNUAL);
+    const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+
     return {
       stripe: {
-        enabled: !!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
-        hasPublicKey: !!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
+        enabled: !!stripePublicKey || (isDevelopment && hasStripePricing),
+        hasPublicKey: !!stripePublicKey,
         hasSecretKey: true // We assume secret key is configured on server
       },
       paypal: {
