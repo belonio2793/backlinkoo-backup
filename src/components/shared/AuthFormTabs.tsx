@@ -384,7 +384,7 @@ export function AuthFormTabs({
             ) : (
               <Shield className="h-4 w-4 mr-2" />
             )}
-            {isLoading ? "Signing In..." : "Sign In"}
+            {isLoading ? (loadingMessage || "Signing In...") : "Sign In"}
           </Button>
 
           <div className="space-y-2">
