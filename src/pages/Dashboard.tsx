@@ -874,7 +874,7 @@ const Dashboard = () => {
       }
 
       if (error || !campaignsData) {
-        console.warn('📊 Error fetching campaigns:', error);
+        console.warn('��� Error fetching campaigns:', error);
         setCampaigns([]);
         return;
       }
@@ -1165,8 +1165,8 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-purple-700 mb-4">
-                      You have unlimited access to all premium features including unlimited backlinks,
-                      complete SEO Academy, and priority support. Make the most of your premium benefits!
+                      <strong>Premium Benefits:</strong> Unlimited backlinks, complete SEO Academy, and priority support.<br/>
+                      <strong>Credits:</strong> Use for premium services and additional features. Credits work alongside your premium subscription.
                     </p>
                     <div className="flex gap-2">
                       <Button onClick={() => setActiveSection("premium-plan")} variant="outline">
