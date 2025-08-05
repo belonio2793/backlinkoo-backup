@@ -275,7 +275,7 @@ export const KeywordResearchTool = () => {
     { code: "GA", name: "Gabon", flag: "🇬🇦" },
     { code: "GB", name: "United Kingdom", flag: "🇬🇧" },
     { code: "GD", name: "Grenada", flag: "🇬🇩" },
-    { code: "GE", name: "Georgia", flag: "🇬🇪" },
+    { code: "GE", name: "Georgia", flag: "��🇪" },
     { code: "GF", name: "French Guiana", flag: "🇬🇫" },
     { code: "GG", name: "Guernsey", flag: "🇬🇬" },
     { code: "GH", name: "Ghana", flag: "🇬🇭" },
@@ -376,7 +376,7 @@ export const KeywordResearchTool = () => {
     { code: "PH", name: "Philippines", flag: "🇵🇭" },
     { code: "PK", name: "Pakistan", flag: "🇵🇰" },
     { code: "PL", name: "Poland", flag: "🇵🇱" },
-    { code: "PM", name: "Saint Pierre and Miquelon", flag: "🇵���" },
+    { code: "PM", name: "Saint Pierre and Miquelon", flag: "🇵🇲" },
     { code: "PN", name: "Pitcairn", flag: "🇵🇳" },
     { code: "PR", name: "Puerto Rico", flag: "🇵🇷" },
     { code: "PS", name: "Palestine", flag: "🇵🇸" },
@@ -441,7 +441,7 @@ export const KeywordResearchTool = () => {
     { code: "VU", name: "Vanuatu", flag: "🇻🇺" },
     { code: "WF", name: "Wallis and Futuna", flag: "🇼🇫" },
     { code: "WS", name: "Samoa", flag: "🇼🇸" },
-    { code: "YE", name: "Yemen", flag: "🇾🇪" },
+    { code: "YE", name: "Yemen", flag: "��🇪" },
     { code: "YT", name: "Mayotte", flag: "🇾🇹" },
     { code: "ZA", name: "South Africa", flag: "🇿🇦" },
     { code: "ZM", name: "Zambia", flag: "🇿🇲" },
@@ -625,12 +625,6 @@ export const KeywordResearchTool = () => {
                         <div className="flex items-center gap-2">
                           <img src={googleLogo} alt="Google" className="w-4 h-4" />
                           Google
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="bing">
-                        <div className="flex items-center gap-2">
-                          <img src={bingLogo} alt="Bing" className="w-4 h-4" />
-                          Bing
                         </div>
                       </SelectItem>
                     </SelectContent>
