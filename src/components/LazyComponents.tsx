@@ -50,3 +50,6 @@ export const LazyPaymentTest = lazy(() => import('@/pages/PaymentTest'));
 
 // Webhook Testing component
 export const LazyWebhookTest = lazy(() => import('@/pages/WebhookTest'));
+
+// Payment Diagnostic component
+export const LazyPaymentDiagnostic = lazy(() => import('@/pages/PaymentDiagnostic'));
