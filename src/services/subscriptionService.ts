@@ -144,7 +144,7 @@ export class SubscriptionService {
         return { success: false, error: 'User authentication required' };
       }
 
-      const priceId = import.meta.env.VITE_STRIPE_PRICE_ID;
+      const priceId = stripeConfig.priceId!;
 
       const requestBody = {
         priceId,
