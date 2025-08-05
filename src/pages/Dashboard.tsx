@@ -440,7 +440,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
             <div>
               <div className="text-yellow-400 mb-2">System Status:</div>
               <div>• Status: {debugInfo.loadingStatus}</div>
-              <div>• Online: {debugInfo.connectionOnline ? '✅' : '����'}</div>
+              <div>• Online: {debugInfo.connectionOnline ? '✅' : '���'}</div>
               <div>• Last Update: {debugInfo.timestamp}</div>
               <div>• User Auth: {debugInfo.userAuthenticated ? '✅' : '❌'}</div>
               <div>• User ID: {debugInfo.userId || 'None'}</div>
@@ -1185,27 +1185,18 @@ const Dashboard = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      {isPremiumSubscriber ? "Premium Access" : "Available Credits"}
-                    </CardTitle>
-                    {isPremiumSubscriber ? (
-                      <Crown className="h-4 w-4 text-purple-600" />
-                    ) : (
-                      <CreditCard className="h-4 w-4 text-muted-foreground" />
-                    )}
+                    <CardTitle className="text-sm font-medium">Available Credits</CardTitle>
+                    <CreditCard className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    {isPremiumSubscriber ? (
-                      <>
-                        <div className="text-2xl font-bold text-purple-600">Unlimited</div>
-                        <p className="text-xs text-purple-600">Premium subscriber</p>
-                      </>
-                    ) : (
-                      <>
-                        <div className="text-2xl font-bold">{credits}</div>
-                        <p className="text-xs text-muted-foreground">$0.70 per credit</p>
-                      </>
-                    )}
+                    <div className="text-2xl font-bold">{credits}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {isPremiumSubscriber ? (
+                        <>$0.70 per credit • Premium subscriber</>
+                      ) : (
+                        <>$0.70 per credit</>
+                      )}
+                    </p>
                   </CardContent>
                 </Card>
                 
