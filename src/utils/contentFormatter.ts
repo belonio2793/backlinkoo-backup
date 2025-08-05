@@ -423,6 +423,11 @@ export class ContentFormatter {
    */
   private static fixContentIssues(content: string): string {
     return content
+      // Fix Pro Tip heading issues first
+      .replace(/##\s*P\s*<p[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2><p>')
+      .replace(/##\s*P\s*<p[^>]*data-[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2><p>')
+      .replace(/##\s*P\s*(?:<[^>]*>)?\s*ro\s*(?:<[^>]*>)?\s*Tip/gi, '<h2>Pro Tip</h2>')
+
       // Fix corrupted color styles (e.g., "color:&lt;/p&gt; # 2 &lt;p&gt; 563eb;")
       .replace(/style="[^"]*color:[^#]*#[^0-9a-f]*([0-9a-f]{6})[^"]*"/gi, 'style="color:#$1;font-weight:500;"')
 
