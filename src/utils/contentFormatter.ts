@@ -431,6 +431,10 @@ export class ContentFormatter {
       .replace(/<style[^>]*>.*?<\/style>/gi, '')
       .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
 
+      // AGGRESSIVE removal of the specific malformed pattern first
+      .replace(/##\s*&lt;[\s\S]*?h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*&lt;.*$/gm, '') // Remove any line starting with ## &lt;
+
       // Fix malformed HTML entities first (most critical)
       .replace(/&lt;\s*\/\s*[a-zA-Z]+\s*&gt;/g, '') // Remove &lt;/tag&gt; patterns
       .replace(/&lt;\s*[a-zA-Z]+[^&]*&gt;/g, '') // Remove &lt;tag&gt; patterns
