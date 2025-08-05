@@ -85,6 +85,14 @@ export class SubscriptionService {
   static async createSubscription(user: User | null, isGuest: boolean = false, guestEmail?: string): Promise<{ success: boolean; url?: string; error?: string }> {
 
     try {
+      // Validate Stripe configuration
+      if (!import.meta.env.VITE_STRIPE_PRICE_ID) {
+        return {
+          success: false,
+          error: 'Payment system not configured. Please contact support.'
+        };
+      }
+
       // Validate inputs
       if (isGuest && !guestEmail) {
         return { success: false, error: 'Guest email is required for guest checkout' };
@@ -94,8 +102,7 @@ export class SubscriptionService {
         return { success: false, error: 'User authentication required' };
       }
 
-      // Use environment variable for price ID or fallback to default
-      const priceId = import.meta.env.VITE_STRIPE_PRICE_ID || 'price_premium_monthly';
+      const priceId = import.meta.env.VITE_STRIPE_PRICE_ID;
 
       const requestBody = {
         priceId,
