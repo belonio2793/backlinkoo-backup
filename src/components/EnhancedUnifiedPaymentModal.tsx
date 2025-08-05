@@ -698,33 +698,49 @@ export function EnhancedUnifiedPaymentModal({
         {/* Payment Method */}
         <div className="space-y-4">
           <Label className="text-base font-medium">Payment Method</Label>
-          <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                   onClick={() => setPaymentMethod('stripe')}>
-                <RadioGroupItem value="stripe" id="stripe" />
-                <Label htmlFor="stripe" className="flex items-center gap-3 cursor-pointer flex-1">
-                  <CreditCard className="w-5 h-5" />
-                  <div>
-                    <div className="font-medium">Credit Card (Stripe)</div>
-                    <div className="text-sm text-gray-500">Secure payment with cards, Apple Pay, Google Pay</div>
-                  </div>
-                </Label>
+          {availablePaymentMethods.length === 0 ? (
+            <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+              <div className="flex items-center gap-2 text-red-800">
+                <Info className="h-5 w-5" />
+                <span className="font-medium">Payment methods not configured</span>
               </div>
-              
-              <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                   onClick={() => setPaymentMethod('paypal')}>
-                <RadioGroupItem value="paypal" id="paypal" />
-                <Label htmlFor="paypal" className="flex items-center gap-3 cursor-pointer flex-1">
-                  <Wallet className="w-5 h-5" />
-                  <div>
-                    <div className="font-medium">PayPal</div>
-                    <div className="text-sm text-gray-500">Pay with your PayPal account</div>
-                  </div>
-                </Label>
-              </div>
+              <p className="text-sm text-red-600 mt-1">
+                Please contact support to enable payment processing.
+              </p>
             </div>
-          </RadioGroup>
+          ) : (
+            <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
+              <div className="space-y-3">
+                {availablePaymentMethods.includes('stripe') && (
+                  <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                       onClick={() => setPaymentMethod('stripe')}>
+                    <RadioGroupItem value="stripe" id="stripe" />
+                    <Label htmlFor="stripe" className="flex items-center gap-3 cursor-pointer flex-1">
+                      <CreditCard className="w-5 h-5" />
+                      <div>
+                        <div className="font-medium">Credit Card (Stripe)</div>
+                        <div className="text-sm text-gray-500">Secure payment with cards, Apple Pay, Google Pay</div>
+                      </div>
+                    </Label>
+                  </div>
+                )}
+
+                {availablePaymentMethods.includes('paypal') && (
+                  <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                       onClick={() => setPaymentMethod('paypal')}>
+                    <RadioGroupItem value="paypal" id="paypal" />
+                    <Label htmlFor="paypal" className="flex items-center gap-3 cursor-pointer flex-1">
+                      <Wallet className="w-5 h-5" />
+                      <div>
+                        <div className="font-medium">PayPal</div>
+                        <div className="text-sm text-gray-500">Pay with your PayPal account</div>
+                      </div>
+                    </Label>
+                  </div>
+                )}
+              </div>
+            </RadioGroup>
+          )}
         </div>
 
         {/* Security Notice */}
