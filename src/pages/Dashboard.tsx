@@ -11,7 +11,6 @@ import { Footer } from "@/components/Footer";
 
 import { PremiumService } from "@/services/premiumService";
 import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
-import { Footer } from "@/components/Footer";
 import {
   DropdownMenu,
   DropdownMenuContent,
