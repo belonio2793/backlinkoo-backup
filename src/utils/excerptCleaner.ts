@@ -18,13 +18,17 @@ export class ExcerptCleaner {
     // Remove the title from the beginning of content if it appears
     if (title) {
       const cleanTitle = this.cleanTitle(title);
-      // Create multiple patterns to match title variations
+      // Create multiple patterns to match title variations and partial matches
       const titlePatterns = [
         new RegExp(`^\\s*#\\s*${this.escapeRegex(cleanTitle)}\\s*`, 'i'),
         new RegExp(`^\\s*${this.escapeRegex(cleanTitle)}\\s*`, 'i'),
         new RegExp(`^\\s*\\*\\*H1\\*\\*:\\s*${this.escapeRegex(cleanTitle)}\\s*`, 'i'),
         new RegExp(`^\\s*\\*\\*Title\\*\\*:\\s*${this.escapeRegex(cleanTitle)}\\s*`, 'i'),
         new RegExp(`^\\s*Title:\\s*${this.escapeRegex(cleanTitle)}\\s*`, 'i'),
+        // Catch partial title matches (first 20+ characters)
+        new RegExp(`^\\s*${this.escapeRegex(cleanTitle.substring(0, Math.min(cleanTitle.length, 30)))}`, 'i'),
+        // Catch title fragments at sentence start
+        new RegExp(`^[^.!?]*?${this.escapeRegex(cleanTitle.split(' ').slice(0, 4).join(' '))}[^.!?]*?[.!?]\\s*`, 'i'),
       ];
 
       for (const pattern of titlePatterns) {
