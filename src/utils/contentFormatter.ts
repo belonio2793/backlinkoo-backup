@@ -402,6 +402,17 @@ export class ContentFormatter {
       .replace(/<script[^>]*>.*?<\/script>/gi, '')
       .replace(/<style[^>]*>.*?<\/style>/gi, '')
       .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+
+      // Fix malformed HTML entities first (most critical)
+      .replace(/&lt;\s*\/\s*[a-zA-Z]+\s*&gt;/g, '') // Remove &lt;/tag&gt; patterns
+      .replace(/&lt;\s*[a-zA-Z]+[^&]*&gt;/g, '') // Remove &lt;tag&gt; patterns
+      .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*(Pro\s*Tip|[^<]*)/gi, '## $1') // Fix ## &lt;h2&gt;Pro Tip patterns
+      .replace(/&lt;\s*\/\s*p\s*&gt;\s*#\s*\d+\s*&lt;\s*p\s*&gt;/g, '') // Remove malformed p tag patterns
+
+      // Clean up corrupted style attributes with malformed content
+      .replace(/style="[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      .replace(/style="[^"]*color:[^#]*#[^0-9a-f]*([0-9a-f]{6})[^"]*"/gi, 'style="color:#$1;font-weight:500;"')
+
       // Remove any remaining markdown artifacts
       .replace(/---+/g, '')
       .replace(/^\s*---\s*$/gm, '')
@@ -409,14 +420,19 @@ export class ContentFormatter {
       .replace(/<h[1-6][^>]*>\s*[A-Z]\.\s*(Assessment|needed|required|evaluation)\s*<\/h[1-6]>/gi, '')
       // Remove empty headings
       .replace(/<h[1-6][^>]*>\s*<\/h[1-6]>/gi, '')
+
       // Fix common HTML issues
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+
       // Normalize quotes
       .replace(/[\u2018\u2019]/g, "'")
       .replace(/[\u201C\u201D]/g, '"')
+
       // Remove excessive whitespace but preserve paragraph structure
       .replace(/[ \t]+/g, ' ')
       .replace(/\n\s*\n\s*\n/g, '\n\n')
@@ -428,7 +444,11 @@ export class ContentFormatter {
    */
   private static fixContentIssues(content: string): string {
     return content
-      // Fix Pro Tip heading issues first
+      // Fix malformed HTML entities in headings first
+      .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*(Pro\s*Tip|[^<]*)/gi, '## $1')
+      .replace(/##\s*&lt;\s*\/\s*h[1-6]\s*&gt;\s*(Pro\s*Tip|[^<]*)/gi, '## $1')
+
+      // Fix Pro Tip heading issues
       .replace(/##\s*P\s*<p[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2><p>')
       .replace(/##\s*P\s*<p[^>]*data-[^>]*>\s*ro\s*Tip/gi, '<h2>Pro Tip</h2><p>')
       .replace(/##\s*P\s*(?:<[^>]*>)?\s*ro\s*(?:<[^>]*>)?\s*Tip/gi, '<h2>Pro Tip</h2>')
@@ -438,11 +458,20 @@ export class ContentFormatter {
 
       // Fix corrupted color styles (e.g., "color:&lt;/p&gt; # 2 &lt;p&gt; 563eb;")
       .replace(/style="[^"]*color:[^#]*#[^0-9a-f]*([0-9a-f]{6})[^"]*"/gi, 'style="color:#$1;font-weight:500;"')
+      .replace(/style="[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
 
       // Remove unwanted text-decoration and hover events from existing links
       .replace(/(<a[^>]*) onmouseover="[^"]*"/gi, '$1')
       .replace(/(<a[^>]*) onmouseout="[^"]*"/gi, '$1')
+      .replace(/(<a[^>]*) onmouseenter="[^"]*"/gi, '$1')
+      .replace(/(<a[^>]*) onmouseleave="[^"]*"/gi, '$1')
       .replace(/(<a[^>]*style="[^"]*);?\s*text-decoration:[^;"]*;?([^"]*"[^>]*>)/gi, '$1$2')
+
+      // Clean up link text that contains malformed HTML entities
+      .replace(/>([^<]*&lt;[^<]*&gt;[^<]*)</g, (match, linkText) => {
+        const cleanText = linkText.replace(/&lt;[^&]*&gt;/g, '').trim();
+        return `>${cleanText}<`;
+      })
 
       // Fix links missing color entirely
       .replace(/<a([^>]*href[^>]*)style="([^"]*)"([^>]*)>/gi, (match, beforeStyle, styleContent, afterStyle) => {
@@ -454,7 +483,7 @@ export class ContentFormatter {
         return match;
       })
 
-      // Ensure all links without any style have proper styling
+      // Ensure all links without any style have proper styling and remove hover attributes
       .replace(/<a([^>]*href[^>]*)(?!.*style=)([^>]*)>/gi, '<a$1 style="color:#2563eb;font-weight:500;"$2>');
   }
 }
