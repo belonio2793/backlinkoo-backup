@@ -561,4 +561,31 @@ export class ContentFormatter {
       .replace(/^\s*#{1,6}\s*$/gm, '')
       .replace(/\n\s*\n\s*\n/g, '\n\n'); // Clean up multiple line breaks
   }
+
+  /**
+   * Remove specific malformed patterns that cause rendering issues
+   */
+  private static removeSpecificMalformedPatterns(content: string): string {
+    return content
+      // MOST AGGRESSIVE: Remove the exact ## &lt; h2&gt;Pro Tip pattern completely
+      .replace(/##\s*&lt;[\s\S]*?h[1-6]\s*&gt;\s*Pro\s*Tip[\s\S]*?$/gm, '## Pro Tip')
+      .replace(/##\s*&lt;.*$/gm, '') // Remove any line starting with ## &lt;
+
+      // Remove the specific malformed pattern across multiple lines
+      .replace(/##\s*&lt;\s*[\n\r]+\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
+
+      // Remove any content that looks like HTML entities after ##
+      .replace(/##\s*&lt;[^&>]*&gt;[^\n]*/g, '')
+
+      // Clean up corrupted inline styles with HTML entities
+      .replace(/style="[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+
+      // Remove orphaned HTML entity fragments
+      .replace(/&lt;\s*\/\s*p\s*&gt;\s*#\s*\d+\s*&lt;\s*p\s*&gt;/g, '')
+      .replace(/&lt;[^&>]*&gt;/g, '') // Remove any remaining HTML entities
+
+      // Clean up any remaining malformed heading patterns
+      .replace(/^\s*##\s*&lt;.*$/gm, '')
+      .replace(/^\s*##\s*$/gm, '');
+  }
 }
