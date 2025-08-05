@@ -11,6 +11,14 @@ export const Footer = () => {
   const [pendingNavigation, setPendingNavigation] = useState<any>(null);
   const [pendingActionDescription, setPendingActionDescription] = useState<string>("");
 
+  // Debug logging for user state
+  console.log('🦶 Footer: User state:', {
+    userEmail: user?.email,
+    isAuthenticated: !!user,
+    isLoading,
+    userId: user?.id
+  });
+
   const handleSmartNavigation = (config: any, actionDescription?: string) => {
     // Don't block navigation based on isLoading - let the smart nav handle auth state
     FooterNavigationService.handleNavigation({
