@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 import type { User } from '@supabase/supabase-js';
+import { ExcerptCleaner } from '@/utils/excerptCleaner';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -210,35 +211,11 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
   };
 
   const cleanTitle = (title: string) => {
-    if (!title) return '';
-    return title
-      .replace(/^\s*\*\*Title:\s*([^*]*)\*\*\s*/i, '$1') // Remove **Title:** wrapper and extract content
-      .replace(/^\s*Title:\s*/gi, '') // Remove Title: prefix
-      .replace(/^\*\*H1\*\*:\s*/i, '')
-      .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
-      .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
-      .replace(/\*\*/g, '') // Remove any remaining ** symbols
-      .replace(/\*/g, '') // Remove any remaining * symbols
-      .replace(/^#{1,6}\s+/, '') // Remove markdown headers
-      .trim();
+    return ExcerptCleaner.cleanTitle(title);
   };
 
-  const getExcerpt = (content: string, maxLength: number = 150) => {
-    // Remove HTML tags first
-    let plainText = content.replace(/<[^>]*>/g, '');
-
-    // Remove **Title:** patterns at the beginning
-    plainText = plainText.replace(/^\s*\*\*Title:\s*[^*]*\*\*\s*/i, '');
-
-    // Remove any remaining Title: patterns
-    plainText = plainText.replace(/^\s*Title:\s*[^\n]*/gi, '');
-
-    // Remove excessive whitespace
-    plainText = plainText.replace(/\s+/g, ' ').trim();
-
-    return plainText.length > maxLength
-      ? plainText.substring(0, maxLength) + '...'
-      : plainText;
+  const getExcerpt = (content: string, title?: string, maxLength: number = 150) => {
+    return ExcerptCleaner.getCleanExcerpt(content, title, maxLength);
   };
 
   const getTimeRemaining = (expiresAt: string) => {
