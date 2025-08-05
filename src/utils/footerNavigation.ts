@@ -74,6 +74,7 @@ export class FooterNavigationService {
   }) {
     if (config.hash) {
       // Section navigation with hash
+      console.log('📍 FooterNav: Navigating to section with hash:', config.route + '#' + config.hash);
       const navConfig: NavigationConfig = {
         route: config.route,
         hash: config.hash,
@@ -82,6 +83,7 @@ export class FooterNavigationService {
       navigateToSection(navConfig);
     } else {
       // Simple route navigation
+      console.log('🔗 FooterNav: Navigating to route:', config.route);
       navigate(config.route);
     }
   }
