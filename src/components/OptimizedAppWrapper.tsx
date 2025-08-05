@@ -159,6 +159,12 @@ export const OptimizedAppWrapper = () => {
             </Suspense>
           } />
 
+          <Route path="/admin/payment-test" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyPaymentTest />
+            </Suspense>
+          } />
+
           {/* Emergency fix routes - accessible in all environments */}
           <Route path="/emergency/rls-fix" element={
             <Suspense fallback={<PageLoader />}>
