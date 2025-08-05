@@ -46,4 +46,4 @@ export const LazyOpenAITest = lazy(() => import('@/pages/OpenAITest'));
 export const LazySystemTest = lazy(() => import('@/components/SystemTest').then(module => ({ default: module.SystemTest })));
 
 // Payment Testing component
-export const LazyPaymentTest = lazy(() => import('@/pages/PaymentTest\'));est\'));s/PaymentTest\'));t'));
+export const LazyPaymentTest = lazy(() => import('@/pages/PaymentTest\'));mentTest\'));t\'));est'));
