@@ -419,9 +419,9 @@ export class ContentFormatter {
   }
 
   /**
-   * Fix link styling to ensure all links are visible with proper blue color
+   * Fix content issues including Pro Tip headings and link styling
    */
-  private static fixLinkStyling(content: string): string {
+  private static fixContentIssues(content: string): string {
     return content
       // Fix corrupted color styles (e.g., "color:&lt;/p&gt; # 2 &lt;p&gt; 563eb;")
       .replace(/style="[^"]*color:[^#]*#[^0-9a-f]*([0-9a-f]{6})[^"]*"/gi, 'style="color:#$1;font-weight:500;"')
