@@ -27,14 +27,20 @@ export class FallbackSubscriptionService {
       console.log('👤 User authenticated:', user.email);
 
       // Simulate the upgrade process
+      console.log('🔄 Calling userService.upgradeToPremium()...');
       const result = await userService.upgradeToPremium();
+
+      console.log('📊 Upgrade result:', result);
 
       if (result.success) {
         console.log('✅ Test subscription created successfully');
         return { success: true };
       } else {
         console.error('❌ Failed to create test subscription:', result.message);
-        return { success: false, error: result.message };
+        return {
+          success: false,
+          error: `Failed to upgrade account: ${result.message}`
+        };
       }
     } catch (error: any) {
       console.error('❌ Exception in test subscription:', error);
