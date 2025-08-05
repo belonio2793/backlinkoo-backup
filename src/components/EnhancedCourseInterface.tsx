@@ -920,25 +920,39 @@ Users ready to make a purchase or take action.
           <div className="flex justify-between mt-8">
             <div>
               {prevLesson && (
-                <Button 
-                  variant="outline" 
-                  onClick={() => setCurrentLesson(prevLesson)}
-                  className="flex items-center gap-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Previous: {prevLesson.title}
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      onClick={() => setCurrentLesson(prevLesson)}
+                      className="flex items-center gap-2"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      Previous: {prevLesson.title}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Go to the previous lesson: {prevLesson.title}</p>
+                  </TooltipContent>
+                </Tooltip>
               )}
             </div>
             <div>
               {nextLesson && (
-                <Button 
-                  onClick={() => setCurrentLesson(nextLesson)}
-                  className="flex items-center gap-2"
-                >
-                  Next: {nextLesson.title}
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={() => setCurrentLesson(nextLesson)}
+                      className="flex items-center gap-2"
+                    >
+                      Next: {nextLesson.title}
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Continue to the next lesson: {nextLesson.title}</p>
+                  </TooltipContent>
+                </Tooltip>
               )}
             </div>
           </div>
