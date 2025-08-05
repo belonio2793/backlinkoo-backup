@@ -9,11 +9,6 @@ interface PaymentConfig {
     hasPublicKey: boolean;
     hasSecretKey: boolean;
   };
-  paypal: {
-    enabled: boolean;
-    hasClientId: boolean;
-    hasSecretKey: boolean;
-  };
   environment: 'development' | 'production' | 'preview';
 }
 
