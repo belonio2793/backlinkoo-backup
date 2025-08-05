@@ -184,7 +184,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           setError('NOT_FOUND');
         }
       } else {
-        console.log(`��� Successfully loaded ${finalPosts.length} blog posts`);
+        console.log(`✅ Successfully loaded ${finalPosts.length} blog posts`);
         setError(null);
 
         // Show success notification on first load
@@ -345,7 +345,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           <div className="text-xs text-gray-600 space-y-1">
             <div>🔧 Status: {loadingStatus}</div>
             <div>⏰ Last check: {lastRefresh?.toLocaleTimeString() || 'Never'}</div>
-            <div>�� Auto-refresh: Every 30 seconds</div>
+            <div>🔄 Auto-refresh: Every 30 seconds</div>
             <div>📡 Connection: {navigator.onLine ? 'Online' : 'Offline'}</div>
           </div>
         </div>
@@ -440,7 +440,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
             <div>
               <div className="text-yellow-400 mb-2">System Status:</div>
               <div>• Status: {debugInfo.loadingStatus}</div>
-              <div>• Online: {debugInfo.connectionOnline ? '✅' : '���'}</div>
+              <div>• Online: {debugInfo.connectionOnline ? '✅' : '❌'}</div>
               <div>• Last Update: {debugInfo.timestamp}</div>
               <div>• User Auth: {debugInfo.userAuthenticated ? '✅' : '❌'}</div>
               <div>• User ID: {debugInfo.userId || 'None'}</div>
@@ -450,7 +450,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div>• Database Posts: {debugInfo.dbPosts}</div>
               <div>• Local Storage: {debugInfo.localPosts}</div>
               <div>• Combined Total: {debugInfo.combinedPosts}</div>
-              <div>���� Displayed: {debugInfo.displayedPosts}</div>
+              <div>📊 Displayed: {debugInfo.displayedPosts}</div>
               <div>• Has Errors: {debugInfo.hasError ? '⚠️' : '✅'}</div>
             </div>
           </div>
