@@ -807,9 +807,6 @@ export const ProfileSettings = ({ onClose }: ProfileSettingsProps) => {
                       <p className="text-xs text-muted-foreground mt-1">
                         Subscription tier: {effectiveSubscriptionTier || 'Not set'}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        Data source: {effectiveData.source}
-                      </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <Badge variant="default" className={`${effectiveIsPremium ? 'bg-purple-500' : 'bg-gray-500'} text-white`}>
