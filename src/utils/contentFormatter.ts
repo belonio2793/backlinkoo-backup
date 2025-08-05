@@ -171,7 +171,10 @@ export class ContentFormatter {
       .replace(/^\*\*Title\*\*:\s*(.+?)(?=\n|$)/gmi, '')
       // Fix specific case: "## P" should be "## Pro Tip"
       .replace(/^##\s*P\s*$/gmi, '## Pro Tip')
-      .replace(/^##\s*P(?:\s*ro\s*Tip)?.*$/gmi, '## Pro Tip')
+      .replace(/^##\s*P\s*ro\s*Tip.*$/gmi, '## Pro Tip')
+      .replace(/##\s*P\s*\n?\s*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P\s*<[^>]*>\s*ro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*P[\s\n\r]*ro\s*Tip/gi, '## Pro Tip')
 
       // Fix malformed headings like "## P. Assessment" - only create proper headings from meaningful text
       .replace(/^##?\s+([A-Z])\.\s*([A-Za-z\s]{0,15})\s*$/gmi, (match, letter, rest) => {
