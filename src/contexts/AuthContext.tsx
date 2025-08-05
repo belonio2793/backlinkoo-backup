@@ -2,6 +2,8 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import type { User } from '@supabase/supabase-js';
 
+// Legacy context for backward compatibility - use InstantAuth for new code
+
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
