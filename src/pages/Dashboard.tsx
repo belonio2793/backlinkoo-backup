@@ -440,7 +440,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
             <div>
               <div className="text-yellow-400 mb-2">System Status:</div>
               <div>• Status: {debugInfo.loadingStatus}</div>
-              <div>• Online: {debugInfo.connectionOnline ? '✅' : '���'}</div>
+              <div>• Online: {debugInfo.connectionOnline ? '✅' : '����'}</div>
               <div>• Last Update: {debugInfo.timestamp}</div>
               <div>• User Auth: {debugInfo.userAuthenticated ? '✅' : '❌'}</div>
               <div>• User ID: {debugInfo.userId || 'None'}</div>
@@ -958,20 +958,19 @@ const Dashboard = () => {
               </Button>
               {(activeSection === "dashboard" || activeSection === "seo-tools" || activeSection === "trial") && (
                 <>
-                  {!isPremiumSubscriber && (
-                    <>
-                      <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
-                        <CreditCard className="h-3 w-3" />
-                        <span className="hidden xs:inline">{credits}</span>
-                        <span className="xs:hidden">{credits}</span>
-                        <span className="hidden sm:inline">Credits</span>
-                      </Badge>
-                      <Button variant="outline" size="sm" onClick={() => setIsPricingModalOpen(true)} className="px-2 sm:px-4">
-                        <Plus className="h-4 w-4 sm:mr-1" />
-                        <span className="hidden sm:inline">Buy Credits</span>
-                      </Button>
-                    </>
-                  )}
+                  {/* Credit system - visible to all users (separate from premium subscription) */}
+                  <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
+                    <CreditCard className="h-3 w-3" />
+                    <span className="hidden xs:inline">{credits}</span>
+                    <span className="xs:hidden">{credits}</span>
+                    <span className="hidden sm:inline">Credits</span>
+                  </Badge>
+                  <Button variant="outline" size="sm" onClick={() => setIsPricingModalOpen(true)} className="px-2 sm:px-4">
+                    <Plus className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Buy Credits</span>
+                  </Button>
+
+                  {/* Premium subscription status - separate from credits */}
                   {isPremiumSubscriber && (
                     <Badge variant="default" className="gap-1 text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-blue-600">
                       <Crown className="h-3 w-3" />
