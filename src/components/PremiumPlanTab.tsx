@@ -108,62 +108,55 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
 
   return (
     <div className="space-y-8">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-3xl p-8 text-white">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-white/10 to-transparent rounded-full -mr-32 -mt-32"></div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <Crown className="h-8 w-8 text-yellow-300" />
-            <Badge className="bg-yellow-300 text-purple-900 px-3 py-1">
-              <Sparkles className="h-3 w-3 mr-1" />
-              Premium Plan
-            </Badge>
-          </div>
-          
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Unlock Your SEO Potential
-          </h1>
-          
-          <p className="text-xl text-purple-100 mb-6 max-w-2xl">
-            Get unlimited backlinks, exclusive SEO training, and premium tools to dominate search rankings.
-          </p>
-          
-          <div className="flex items-center gap-6 mb-8">
-            <div className="text-center">
-              <div className="text-3xl font-bold">$29</div>
-              <div className="text-purple-200">per month</div>
+      {/* Hero Section - Hidden for premium users */}
+      {!isSubscribed && (
+        <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-3xl p-8 text-white">
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-white/10 to-transparent rounded-full -mr-32 -mt-32"></div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-4">
+              <Crown className="h-8 w-8 text-yellow-300" />
+              <Badge className="bg-yellow-300 text-purple-900 px-3 py-1">
+                <Sparkles className="h-3 w-3 mr-1" />
+                Premium Plan
+              </Badge>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold">∞</div>
-              <div className="text-purple-200">backlinks</div>
+
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Unlock Your SEO Potential
+            </h1>
+
+            <p className="text-xl text-purple-100 mb-6 max-w-2xl">
+              Get unlimited backlinks, exclusive SEO training, and premium tools to dominate search rankings.
+            </p>
+
+            <div className="flex items-center gap-6 mb-8">
+              <div className="text-center">
+                <div className="text-3xl font-bold">$29</div>
+                <div className="text-purple-200">per month</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold">∞</div>
+                <div className="text-purple-200">backlinks</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold">50+</div>
+                <div className="text-purple-200">SEO lessons</div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold">50+</div>
-              <div className="text-purple-200">SEO lessons</div>
-            </div>
-          </div>
-          
-          {!isSubscribed ? (
-            <Button 
+
+            <Button
               onClick={handleUpgrade}
-              size="lg" 
+              size="lg"
               className="bg-yellow-400 hover:bg-yellow-300 text-purple-900 font-semibold px-8 py-4 text-lg"
             >
               <Crown className="mr-2 h-5 w-5" />
               Upgrade to Premium
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-          ) : (
-            <div className="flex items-center gap-3">
-              <Badge className="bg-green-400 text-green-900 px-4 py-2 text-lg">
-                <CheckCircle className="mr-2 h-4 w-4" />
-                Premium Active
-              </Badge>
-            </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       <Tabs value={activeFeature} onValueChange={setActiveFeature} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
