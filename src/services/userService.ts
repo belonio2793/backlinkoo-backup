@@ -160,7 +160,7 @@ class UserService {
 
       return { success: true, message: 'Successfully upgraded to premium' };
     } catch (error: any) {
-      console.error('❌ userService: Exception in upgradeToPremium:', error.message || error);
+      console.error('Exception in upgradeToPremium:', error.message || error);
       return { success: false, message: `Unexpected error during upgrade: ${error.message}` };
     }
   }
