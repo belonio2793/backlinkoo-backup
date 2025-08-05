@@ -101,14 +101,10 @@ class UserService {
    */
   async upgradeToPremium(): Promise<{ success: boolean; message: string }> {
     try {
-      console.log('🚀 userService: Starting premium upgrade...');
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.error('❌ userService: No authenticated user found');
         return { success: false, message: 'User not authenticated' };
       }
-
-      console.log('👤 userService: Upgrading user:', user.email);
 
       // First check if profile exists, create if it doesn't
       const { data: existingProfile, error: fetchError } = await supabase
