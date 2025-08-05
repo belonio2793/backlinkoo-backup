@@ -11,7 +11,6 @@ import { Footer } from "@/components/Footer";
 
 import { PremiumService } from "@/services/premiumService";
 import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
-import { Footer } from "@/components/Footer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -186,12 +185,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           setError('NOT_FOUND');
         }
       } else {
-        console.log(`⭐ Successfully loaded ${finalPosts.length} blog posts`);
-      >
         console.log(`✅ Successfully loaded ${finalPosts.length} blog posts`);
-
-        
-        >
         setError(null);
 
         // Show success notification on first load
