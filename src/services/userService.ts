@@ -145,20 +145,17 @@ class UserService {
       }
 
       if (updateResult.error) {
-        console.error('❌ userService: Error upgrading to premium:', updateResult.error);
         return {
           success: false,
           message: `Failed to upgrade account: ${updateResult.error.message}`
         };
       }
 
-      console.log('✅ userService: Premium upgrade successful');
-
       // Log the upgrade for audit purposes (don't fail upgrade if logging fails)
       try {
         await this.logUserAction(user.id, 'upgrade_to_premium', 'User upgraded to premium role');
       } catch (logError: any) {
-        console.warn('⚠️ userService: Failed to log upgrade action:', logError.message);
+        // Logging failure shouldn't prevent upgrade success
       }
 
       return { success: true, message: 'Successfully upgraded to premium' };
