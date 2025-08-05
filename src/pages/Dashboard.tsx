@@ -1220,9 +1220,9 @@ const Dashboard = () => {
               <Button
                 variant={activeSection === "premium-plan" ? "secondary" : "ghost"}
                 onClick={() => setActiveSection("premium-plan")}
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3 relative"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3 relative flex items-center gap-2"
               >
-                <Crown className="h-4 w-4 sm:mr-2" />
+                <Crown className="h-4 w-4" />
                 <span className="hidden sm:inline">
                   {isPremiumSubscriber ? "Premium Dashboard" : "Premium Plan"}
                 </span>
