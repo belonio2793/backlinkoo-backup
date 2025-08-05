@@ -10,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SearchableSelect } from "@/components/SearchableSelect";
 import googleLogo from "@/assets/google-g-logo.png";
-import bingLogo from "@/assets/bing-logo.png";
 
 interface KeywordData {
   keyword: string;
@@ -218,7 +217,7 @@ export const KeywordResearchTool = () => {
     { code: "BB", name: "Barbados", flag: "🇧🇧" },
     { code: "BD", name: "Bangladesh", flag: "🇧🇩" },
     { code: "BE", name: "Belgium", flag: "🇧🇪" },
-    { code: "BF", name: "Burkina Faso", flag: "🇧🇫" },
+    { code: "BF", name: "Burkina Faso", flag: "🇧����" },
     { code: "BG", name: "Bulgaria", flag: "🇧🇬" },
     { code: "BH", name: "Bahrain", flag: "🇧🇭" },
     { code: "BI", name: "Burundi", flag: "🇧🇮" },
