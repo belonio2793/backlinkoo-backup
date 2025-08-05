@@ -151,33 +151,64 @@ serve(async (req) => {
     });
 
     // Check if customer exists
-    const customers = await stripe.customers.list({ email, limit: 1 });
-    let customerId;
-    
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-    } else if (!isGuest) {
-      // Create customer for authenticated users
-      const customer = await stripe.customers.create({
-        email,
-        metadata: { user_id: user?.id || '' }
-      });
-      customerId = customer.id;
+    let customers;
+    try {
+      customers = await stripe.customers.list({ email, limit: 1 });
+    } catch (stripeError) {
+      console.error("Stripe customer list error:", stripeError);
+      return new Response(
+        JSON.stringify({ error: "Payment system error" }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      customer_email: customerId ? undefined : email,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      mode: "subscription",
-      success_url: `${req.headers.get("origin")}/subscription-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/subscription-cancelled`,
-    });
+    let customerId;
+
+    if (customers.data.length > 0) {
+      customerId = customers.data[0].id;
+      console.log("Found existing customer:", customerId);
+    } else if (!isGuest) {
+      // Create customer for authenticated users
+      try {
+        const customer = await stripe.customers.create({
+          email,
+          metadata: { user_id: user?.id || '' }
+        });
+        customerId = customer.id;
+        console.log("Created new customer:", customerId);
+      } catch (stripeError) {
+        console.error("Stripe customer creation error:", stripeError);
+        return new Response(
+          JSON.stringify({ error: "Failed to create customer" }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    console.log("Creating checkout session for:", { customerId, email, priceId });
+
+    let session;
+    try {
+      session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        customer_email: customerId ? undefined : email,
+        line_items: [
+          {
+            price: priceId,
+            quantity: 1,
+          },
+        ],
+        mode: "subscription",
+        success_url: `${req.headers.get("origin")}/subscription-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${req.headers.get("origin")}/subscription-cancelled`,
+      });
+    } catch (stripeError) {
+      console.error("Stripe session creation error:", stripeError);
+      return new Response(
+        JSON.stringify({ error: "Failed to create checkout session" }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Update or create subscriber record
     await supabaseClient.from("subscribers").upsert({
