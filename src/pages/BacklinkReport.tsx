@@ -515,18 +515,6 @@ export default function BacklinkReport() {
                     <p className="text-sm text-gray-600">
                       Access and manage your previously saved backlink verification reports.
                     </p>
-                    {/* Test Button - Only in development */}
-                    {import.meta.env.DEV && (
-                      <button
-                        onClick={() => {
-                          console.log('🧪 Running saved reports test...');
-                          runSavedReportsTest();
-                        }}
-                        className="w-full mt-2 inline-flex items-center justify-center px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors font-medium text-sm"
-                      >
-                        🧪 Test Database
-                      </button>
-                    )}
                   </div>
                 </div>
               )}
