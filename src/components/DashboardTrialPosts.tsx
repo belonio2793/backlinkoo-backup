@@ -11,11 +11,11 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { blogService } from '@/services/blogService';
-import { 
-  Clock, 
-  Eye, 
-  Calendar, 
-  Plus, 
+import {
+  Clock,
+  Eye,
+  Calendar,
+  Plus,
   Search,
   Crown,
   CheckCircle,
@@ -33,7 +33,8 @@ import {
   Sparkles,
   CheckCircle2,
   Grid3X3,
-  LayoutList
+  LayoutList,
+  XCircle
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 import type { User } from '@supabase/supabase-js';
