@@ -24,8 +24,8 @@ interface RotatingNotificationBannerProps {
   className?: string;
 }
 
-export const RotatingNotificationBanner = ({ 
-  autoRotateInterval = 4000,
+export const RotatingNotificationBanner = ({
+  autoRotateInterval = 5000,
   showCloseButton = true,
   className = ""
 }: RotatingNotificationBannerProps) => {
@@ -38,11 +38,11 @@ export const RotatingNotificationBanner = ({
 
     const interval = setInterval(() => {
       setIsAnimating(true);
-      
+
       setTimeout(() => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % notifications.length);
-        setIsAnimating(false);
-      }, 200);
+        setTimeout(() => setIsAnimating(false), 100);
+      }, 300);
     }, autoRotateInterval);
 
     return () => clearInterval(interval);
