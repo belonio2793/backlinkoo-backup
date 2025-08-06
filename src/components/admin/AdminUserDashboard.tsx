@@ -263,7 +263,7 @@ export function AdminUserDashboard() {
       // Transform data to match expected format
       const transformedUsers: RealUserDetails[] = (profilesData || []).map(profile => ({
         ...profile,
-        subscription: profile.premium_subscriptions?.[0] || null,
+        subscription: profile.subscribers?.[0] || null,
         campaignCount: 0, // Will be loaded separately if needed
         totalCreditsUsed: 0,
         totalRevenue: 0,
