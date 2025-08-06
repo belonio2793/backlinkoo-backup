@@ -38,9 +38,38 @@ export class SavedBacklinkReportsService {
     }
 
     // Check table access first
-    const hasAccess = await checkSavedReportsTableAccess();
+    let hasAccess = await checkSavedReportsTableAccess();
+
     if (!hasAccess) {
-      throw new Error('Saved reports feature is not available yet. Please contact support if this issue persists.');
+      console.log('🔧 Table not accessible, attempting to initialize...');
+
+      // Try to call the initialization function
+      try {
+        const response = await fetch('/api/initialize-saved-reports-table', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          console.log('✅ Table initialization API called successfully');
+          // Wait a moment for the table to be created
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Check access again
+          hasAccess = await checkSavedReportsTableAccess();
+        } else {
+          console.warn('⚠️ Table initialization API failed:', await response.text());
+        }
+      } catch (error) {
+        console.warn('⚠️ Could not call table initialization API:', error);
+      }
+
+      // If still no access, provide helpful error message
+      if (!hasAccess) {
+        await initializeSavedReportsTable(); // This will log the SQL commands needed
+        throw new Error('Database table not ready. The saved reports feature requires database setup. Please contact support for assistance.');
+      }
     }
 
     // Calculate summary statistics
