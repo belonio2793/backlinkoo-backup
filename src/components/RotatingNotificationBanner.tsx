@@ -53,10 +53,12 @@ export const RotatingNotificationBanner = ({
   return (
     <div className={`relative bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_100%] animate-gradient-shift text-white py-2 px-4 min-h-[64px] flex flex-col justify-center ${className}`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between w-full">
-        <div className="flex-1 text-center">
+        <div className="flex-1 text-center overflow-hidden">
           <p
-            className={`text-sm md:text-base font-medium transition-all duration-200 leading-relaxed ${
-              isAnimating ? 'opacity-0 transform translate-y-2' : 'opacity-100 transform translate-y-0'
+            className={`text-sm md:text-base font-medium transition-all duration-300 ease-in-out leading-relaxed ${
+              isAnimating
+                ? 'opacity-0 transform translate-y-4 scale-95'
+                : 'opacity-100 transform translate-y-0 scale-100'
             }`}
           >
             {notifications[currentIndex]}
