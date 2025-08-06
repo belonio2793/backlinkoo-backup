@@ -23,6 +23,7 @@ import BlogSystemDiagnostic from '@/pages/BlogSystemDiagnostic';
 import { BlogPostDiagnostic } from '@/components/BlogPostDiagnostic';
 import EmergencyRLSFix from '@/pages/EmergencyRLSFix';
 import AuthDiagnostic from '@/pages/AuthDiagnostic';
+import { EmailDiagnosticPage } from '@/pages/EmailDiagnosticPage';
 
 // Import optimized instant authentication components
 import { InstantEmailVerificationGuard } from '@/components/InstantEmailVerificationGuard';
