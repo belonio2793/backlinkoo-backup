@@ -466,7 +466,7 @@ const Index = () => {
             className="text-5xl md:text-7xl font-light mb-8 text-gray-900 tracking-tight"
           />
           
-          <p className="text-xl md:text-2xl text-gray-700 mb-6 max-w-4xl mx-auto leading-relaxed font-light">
+          <p className="text-xl md:text-2xl text-gray-700 mb-6 max-w-6xl mx-auto leading-relaxed font-light">
             The backlink platform that SEO professionals rely on for consistent, measurable results.
           </p>
           
