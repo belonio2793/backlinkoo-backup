@@ -144,13 +144,20 @@ export function preserveOriginalFetch(): void {
  * Safe wrapper for any fetch request that automatically handles FullStory interference
  */
 export async function safeFetch(url: string | URL, init?: RequestInit): Promise<Response> {
+  // If FullStory is detected, use bypass method immediately
+  if (isFullStoryPresent()) {
+    console.log('🔧 FullStory detected - using XMLHttpRequest bypass for:', url.toString());
+    const bypassFetch = createBypassFetch();
+    return await bypassFetch(url, init);
+  }
+
   try {
-    // Try normal fetch first
+    // Try normal fetch first only if FullStory is not present
     return await window.fetch(url, init);
   } catch (error) {
-    // If it fails and FullStory is present, use bypass method
-    if (isFullStoryError(error) && isFullStoryPresent()) {
-      console.log('🔄 Retrying request with FullStory bypass');
+    // If it fails, check if it could be FullStory interference and retry
+    if (isFullStoryError(error)) {
+      console.log('🔄 Fetch failed with FullStory error - retrying with bypass');
       const bypassFetch = createBypassFetch();
       return await bypassFetch(url, init);
     }
