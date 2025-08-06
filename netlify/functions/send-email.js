@@ -27,15 +27,60 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { to, subject, message, from } = JSON.parse(event.body);
+    let requestBody;
+
+    try {
+      requestBody = JSON.parse(event.body || '{}');
+    } catch (parseError) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          error: 'Invalid JSON in request body',
+          details: parseError.message
+        }),
+      };
+    }
+
+    const { to, subject, message, from, test = false } = requestBody;
+
+    // Handle test requests
+    if (test === true) {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          message: 'Netlify email function is available',
+          provider: 'netlify_resend',
+          hasResendKey: !!process.env.RESEND_API_KEY,
+          timestamp: new Date().toISOString(),
+          testMode: true
+        }),
+      };
+    }
 
     // Validate required fields
     if (!to || !subject || !message) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ 
-          error: 'Missing required fields: to, subject, message' 
+        body: JSON.stringify({
+          error: 'Missing required fields: to, subject, message',
+          received: { to: !!to, subject: !!subject, message: !!message }
+        }),
+      };
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(to)) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          error: 'Invalid email address format',
+          email: to
         }),
       };
     }
