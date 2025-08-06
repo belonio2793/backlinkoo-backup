@@ -154,8 +154,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             {/* Anchor Text Field */}
             <div className="space-y-3">
               <Label htmlFor="anchorText" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <div className="p-2 bg-white rounded-lg shadow-sm border border-amber-200 overflow-hidden">
-                  <img src="https://images.pexels.com/photos/2381712/pexels-photo-2381712.jpeg" alt="Link Building" className="h-6 w-6 object-cover rounded-sm" />
+                <div className="p-2 bg-white rounded-lg shadow-sm border border-amber-200">
+                  <Link className="h-6 w-6 text-amber-600" />
                 </div>
                 Anchor Text
               </Label>
