@@ -3,6 +3,8 @@
  * Handles payment processing coordination and environment validation
  */
 
+import { mockPaymentService } from './mockPaymentService';
+
 interface PaymentConfig {
   stripe: {
     enabled: boolean;
