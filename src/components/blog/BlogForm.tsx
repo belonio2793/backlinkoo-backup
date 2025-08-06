@@ -128,8 +128,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             {/* Keyword Field */}
             <div className="space-y-3">
               <Label htmlFor="keyword" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <div className="p-1.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
-                  <Hash className="h-4 w-4 text-white" />
+                <div className="p-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg">
+                  <Search className="h-4 w-4 text-white" />
                 </div>
                 Keyword
               </Label>
@@ -139,12 +139,12 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                   placeholder="e.g., best SEO practices, digital marketing tips"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
-                  className="h-14 pl-4 pr-4 text-lg border-2 border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 rounded-xl transition-all duration-300 bg-white/80 backdrop-blur-sm group-hover:shadow-lg"
+                  className="h-14 pl-4 pr-4 text-lg border-2 border-gray-200 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 rounded-xl transition-all duration-300 bg-white/80 backdrop-blur-sm group-hover:shadow-lg"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
               <p className="text-xs text-gray-500 flex items-center gap-1">
-                <Star className="h-3 w-3 text-yellow-500" />
+                <Search className="h-3 w-3 text-emerald-500" />
                 The main topic your blog post will focus on
               </p>
             </div>
@@ -152,8 +152,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             {/* Anchor Text Field */}
             <div className="space-y-3">
               <Label htmlFor="anchorText" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <div className="p-1.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
-                  <Target className="h-4 w-4 text-white" />
+                <div className="p-1.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg">
+                  <MousePointer className="h-4 w-4 text-white" />
                 </div>
                 Anchor Text
               </Label>
@@ -163,12 +163,12 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                   placeholder="e.g., professional SEO services, learn more here"
                   value={anchorText}
                   onChange={(e) => setAnchorText(e.target.value)}
-                  className="h-14 pl-4 pr-4 text-lg border-2 border-gray-200 focus:border-purple-400 focus:ring-4 focus:ring-purple-100 rounded-xl transition-all duration-300 bg-white/80 backdrop-blur-sm group-hover:shadow-lg"
+                  className="h-14 pl-4 pr-4 text-lg border-2 border-gray-200 focus:border-amber-400 focus:ring-4 focus:ring-amber-100 rounded-xl transition-all duration-300 bg-white/80 backdrop-blur-sm group-hover:shadow-lg"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
               <p className="text-xs text-gray-500 flex items-center gap-1">
-                <Target className="h-3 w-3 text-purple-500" />
+                <MousePointer className="h-3 w-3 text-amber-500" />
                 The clickable text that will link to your URL
               </p>
             </div>
@@ -179,8 +179,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
           {/* Bottom row: Target URL (full width for better UX) */}
           <div className="space-y-3">
             <Label htmlFor="targetUrl" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <div className="p-1.5 bg-gradient-to-r from-green-500 to-teal-500 rounded-lg">
-                <Link className="h-4 w-4 text-white" />
+              <div className="p-1.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg">
+                <Globe className="h-4 w-4 text-white" />
               </div>
               Target URL
             </Label>
@@ -191,13 +191,13 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                 value={targetUrl}
                 onChange={handleTargetUrlChange}
                 onBlur={handleTargetUrlBlur}
-                className="h-14 pl-4 pr-4 text-lg border-2 border-gray-200 focus:border-green-400 focus:ring-4 focus:ring-green-100 rounded-xl transition-all duration-300 bg-white/80 backdrop-blur-sm group-hover:shadow-lg"
+                className="h-14 pl-4 pr-4 text-lg border-2 border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 rounded-xl transition-all duration-300 bg-white/80 backdrop-blur-sm group-hover:shadow-lg"
                 type="url"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-teal-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             </div>
             <p className="text-xs text-gray-500 flex items-center gap-1">
-              <Link className="h-3 w-3 text-green-500" />
+              <Globe className="h-3 w-3 text-blue-500" />
               The destination URL where the anchor text will link to.
             </p>
           </div>
