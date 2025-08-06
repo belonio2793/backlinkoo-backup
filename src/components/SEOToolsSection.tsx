@@ -311,7 +311,11 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
     }
   };
 
-  if (!subscriptionStatus.isSubscribed) {
+  console.log('SEOToolsSection render - subscriptionStatus:', subscriptionStatus);
+  console.log('SEOToolsSection render - isPremium:', isPremium);
+
+  // Show the subscription CTA if user is not premium
+  if (!isPremium && !subscriptionStatus.isSubscribed) {
     return (
       <div className="space-y-6">
         {/* Subscription CTA */}
