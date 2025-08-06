@@ -54,6 +54,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('unclaimed');
   const [claiming, setClaiming] = useState<string | null>(null);
+  const [unclaiming, setUnclaiming] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
@@ -166,6 +167,44 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
       });
     } finally {
       setClaiming(null);
+    }
+  };
+
+  const handleUnclaimPost = async (slug: string) => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please sign in to unclaim posts",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setUnclaiming(slug);
+      const result = await EnhancedBlogClaimService.unclaimPost(slug, user);
+
+      if (result.success) {
+        toast({
+          title: "Post Unclaimed",
+          description: result.message,
+        });
+        await loadPosts();
+      } else {
+        toast({
+          title: "Unclaim Failed",
+          description: result.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setUnclaiming(null);
     }
   };
 
@@ -375,7 +414,27 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
               View
             </Button>
             
-            {!isUserPost && !post.claimed && (
+            {/* Claim/Unclaim Button Logic */}
+            {isUserPost ? (
+              // Show Unclaim button for user's claimed posts
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleUnclaimPost(post.slug)}
+                disabled={unclaiming === post.slug}
+                className="border-orange-300 text-orange-700 hover:bg-orange-50"
+              >
+                {unclaiming === post.slug ? (
+                  <div className="w-3 h-3 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Crown className="h-3 w-3 mr-1" />
+                    Unclaim
+                  </>
+                )}
+              </Button>
+            ) : !post.claimed ? (
+              // Show Claim button for unclaimed posts
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -406,7 +465,9 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
                   )}
                 </Tooltip>
               </TooltipProvider>
-            )}
+            ) : null
+            // Don't show any claim/unclaim button for posts claimed by others
+            }
 
             {canDelete && (
               <Button
