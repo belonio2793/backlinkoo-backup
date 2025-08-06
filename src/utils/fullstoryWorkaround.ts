@@ -56,7 +56,7 @@ export function createBypassFetch(): typeof fetch {
     return originalFetch;
   }
   
-  console.log('🔧 Creating FullStory bypass fetch using XMLHttpRequest');
+  console.log('�� Creating FullStory bypass fetch using XMLHttpRequest');
   
   // Create XMLHttpRequest-based fetch replacement
   return async function bypassFetch(url: string | URL, init?: RequestInit): Promise<Response> {
@@ -79,24 +79,41 @@ export function createBypassFetch(): typeof fetch {
         // Handle response
         xhr.onload = () => {
           try {
-            // Parse response headers
+            // Parse response headers safely
             const headers = new Headers();
-            xhr.getAllResponseHeaders()
-              .split('\r\n')
-              .forEach(line => {
-                const [key, value] = line.split(': ');
-                if (key && value) {
-                  headers.set(key, value);
-                }
-              });
-            
+            try {
+              const responseHeaders = xhr.getAllResponseHeaders();
+              if (responseHeaders) {
+                responseHeaders
+                  .split('\r\n')
+                  .forEach(line => {
+                    const colonIndex = line.indexOf(': ');
+                    if (colonIndex > 0) {
+                      const key = line.substring(0, colonIndex);
+                      const value = line.substring(colonIndex + 2);
+                      if (key && value) {
+                        headers.set(key, value);
+                      }
+                    }
+                  });
+              }
+            } catch (headerError) {
+              console.warn('Failed to parse response headers:', headerError);
+            }
+
+            // Handle different response types
+            let responseBody = null;
+            if (xhr.status !== 204 && xhr.status !== 205 && xhr.status !== 304) {
+              responseBody = xhr.responseText;
+            }
+
             // Create Response object
-            const response = new Response(xhr.responseText, {
+            const response = new Response(responseBody, {
               status: xhr.status,
-              statusText: xhr.statusText,
+              statusText: xhr.statusText || 'OK',
               headers
             });
-            
+
             resolve(response);
           } catch (responseError) {
             reject(new Error(`Failed to create response: ${responseError}`));
