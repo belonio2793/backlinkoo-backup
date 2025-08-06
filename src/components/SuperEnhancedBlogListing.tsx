@@ -534,6 +534,36 @@ export function SuperEnhancedBlogListing() {
 
           {/* Enhanced Search and Discovery Section - Moved Below Blog Listings */}
           <div className="mt-16 space-y-6">
+            {/* Hero Content Section - Moved from top */}
+            <div className="text-center mb-12 space-y-6">
+              <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                Create unlimited original blog posts for free to learn how our backlinks work. Experience our power, then buy credits to and create
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-semibold"> ∞ Backlink campaigns</span> to get backlinks from different established domains proven to drive top rankings on Google.
+              </p>
+
+              {/* Stats Row */}
+              <div className="flex flex-wrap justify-center gap-8 mt-8">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg">
+                    <Award className="h-5 w-5 text-white" />
+                  </div>
+                  <span className="font-semibold">{posts.length}+ Posts Available</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg">
+                    <Users className="h-5 w-5 text-white" />
+                  </div>
+                  <span className="font-semibold">1000+ Active Users</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
+                    <TrendingUp className="h-5 w-5 text-white" />
+                  </div>
+                  <span className="font-semibold">99% Success Rate</span>
+                </div>
+              </div>
+            </div>
+
             {/* Modern Search Design */}
             <form onSubmit={handleSearch} className="relative max-w-5xl mx-auto">
               <div className="relative">
