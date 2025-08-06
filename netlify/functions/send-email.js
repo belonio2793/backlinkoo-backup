@@ -91,13 +91,26 @@ exports.handler = async (event, context) => {
   } catch (error) {
     console.error('Netlify email function error:', error);
 
+    // More detailed error information
+    const errorDetails = {
+      message: error.message || 'Unknown error',
+      name: error.name || 'Error',
+      stack: error.stack ? error.stack.split('\n').slice(0, 3).join('\n') : undefined,
+      hasResendKey: !!process.env.RESEND_API_KEY,
+      timestamp: new Date().toISOString()
+    };
+
+    console.error('Detailed error information:', errorDetails);
+
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
         success: false,
-        error: error.message,
-        provider: 'netlify_resend'
+        error: error.message || 'Internal server error',
+        provider: 'netlify_resend',
+        errorCode: error.name || 'UNKNOWN_ERROR',
+        timestamp: new Date().toISOString()
       }),
     };
   }
