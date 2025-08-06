@@ -218,7 +218,7 @@ export function TrialPostCleanupManager() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
                         {getStatusIcon(post.status)}
-                        <h3 className="font-semibold text-gray-900 truncate">{post.title}</h3>
+                        <h3 className="font-semibold text-gray-900 truncate">{ExcerptCleaner.cleanTitle(post.title)}</h3>
                         <Badge className={getStatusColor(post.status)}>
                           {post.status.toUpperCase()}
                         </Badge>
