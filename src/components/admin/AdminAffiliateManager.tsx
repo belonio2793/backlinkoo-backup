@@ -590,7 +590,145 @@ export const AdminAffiliateManager: React.FC<AdminAffiliateManagerProps> = ({ is
         </TabsContent>
       </Tabs>
 
-      {/* Affiliate Details Modal would go here */}
+      {/* Affiliate Details Modal */}
+      {showingDetails && selectedAffiliate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-semibold">Affiliate Details</h3>
+                  <p className="text-gray-600">{selectedAffiliate.affiliate_id}</p>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowingDetails(false)}
+                >
+                  <XCircle className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Basic Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold mb-3">Basic Information</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Email:</span>
+                      <span>{selectedAffiliate.userEmail}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Status:</span>
+                      <Badge className={getStatusColor(selectedAffiliate.status)}>
+                        {selectedAffiliate.status}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Tier:</span>
+                      <Badge className={getTierColor(selectedAffiliate.tier)}>
+                        {selectedAffiliate.tier}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Commission Rate:</span>
+                      <span>{(selectedAffiliate.commission_rate * 100).toFixed(1)}%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Joined:</span>
+                      <span>{new Date(selectedAffiliate.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-3">Performance Metrics</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total Clicks:</span>
+                      <span>{selectedAffiliate.stats.total_clicks.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Conversions:</span>
+                      <span>{selectedAffiliate.stats.total_conversions}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Conversion Rate:</span>
+                      <span>{selectedAffiliate.stats.conversion_rate.toFixed(2)}%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">EPC:</span>
+                      <span>{formatCurrency(selectedAffiliate.stats.epc)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total Earnings:</span>
+                      <span className="font-semibold">{formatCurrency(selectedAffiliate.stats.total_earnings)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Commission Rate Update */}
+              <div className="border-t pt-6">
+                <h4 className="font-semibold mb-3">Update Commission Rate</h4>
+                <div className="flex items-center gap-4">
+                  <Input
+                    type="number"
+                    min="0"
+                    max="50"
+                    step="0.1"
+                    placeholder="New rate (%)"
+                    className="w-32"
+                  />
+                  <Button
+                    onClick={() => {
+                      // Implementation would go here
+                      toast.success('Commission rate updated');
+                    }}
+                  >
+                    Update Rate
+                  </Button>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="border-t pt-6">
+                <h4 className="font-semibold mb-3">Actions</h4>
+                <div className="flex gap-3">
+                  {selectedAffiliate.status === 'pending' && (
+                    <Button
+                      onClick={() => handleApproveAffiliate(selectedAffiliate.affiliate_id)}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Approve
+                    </Button>
+                  )}
+
+                  <Button
+                    variant="outline"
+                    onClick={() => handleSuspendAffiliate(selectedAffiliate.affiliate_id)}
+                  >
+                    <Ban className="w-4 h-4 mr-2" />
+                    Suspend
+                  </Button>
+
+                  <Button variant="outline">
+                    <Mail className="w-4 h-4 mr-2" />
+                    Send Email
+                  </Button>
+
+                  <Button variant="outline">
+                    <Eye className="w-4 h-4 mr-2" />
+                    View Activity Log
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
