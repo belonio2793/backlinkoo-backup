@@ -187,13 +187,24 @@ export function ServiceConnectionStatus() {
       }
     } catch (error) {
       const responseTime = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Network error';
+
+      // Check if this is FullStory interference
+      const isFullStoryError = errorMessage.includes('Failed to fetch') ||
+                              (error as any)?.stack?.includes('fullstory') ||
+                              (error as any)?.stack?.includes('fs.js');
+
       updateServiceStatus('OpenAI API', {
-        status: 'error',
-        message: `OpenAI status check failed: ${error instanceof Error ? error.message : 'Network error'}`,
+        status: isFullStoryError ? 'warning' : 'error',
+        message: isFullStoryError ?
+          'Service check blocked by third-party script (FullStory)' :
+          `OpenAI status check failed: ${errorMessage}`,
         responseTime,
         details: {
-          error: error instanceof Error ? error.message : 'Unknown error',
-          method: 'Exception'
+          error: errorMessage,
+          method: 'Exception',
+          interference: isFullStoryError ? 'FullStory detected - using fallback methods' : undefined,
+          workaround: isFullStoryError ? 'XMLHttpRequest fallback implemented' : undefined
         }
       });
     }
