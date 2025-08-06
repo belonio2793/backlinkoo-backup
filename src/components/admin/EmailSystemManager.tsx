@@ -110,7 +110,7 @@ Email System Manager`
   const loadFailureLog = () => {
     try {
       const failures = MockEmailService.getEmailLog();
-      // Ensure failures is an array
+      // Mock service returns email log instead of failure log
       setFailureLog(Array.isArray(failures) ? failures : []);
     } catch (error) {
       console.error('Failed to load failure log:', error);
