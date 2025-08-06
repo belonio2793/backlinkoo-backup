@@ -231,23 +231,15 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
               onClick={generateContent}
               disabled={isGenerating || !keyword || !anchorText || !targetUrl}
               size="lg"
-              className="w-full h-16 text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 border-0 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-[1.02] transition-all duration-300 relative overflow-hidden group"
+              className="w-full h-16 text-xl font-bold bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 border-0 rounded-lg text-white"
             >
-              {/* Button shine effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              
               {isGenerating ? (
                 <div className="flex items-center gap-3">
                   <Loader2 className="h-6 w-6 animate-spin" />
                   <span>Generating Your Backlink...</span>
-                  <Sparkles className="h-5 w-5 animate-pulse" />
                 </div>
               ) : (
-                <div className="flex items-center gap-3">
-                  <Rocket className="h-6 w-6" />
-                  <span>Claim Now For Free</span>
-                  <Zap className="h-5 w-5" />
-                </div>
+                <span>Claim Now For Free</span>
               )}
             </Button>
           </div>
