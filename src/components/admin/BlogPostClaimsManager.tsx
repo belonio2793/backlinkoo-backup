@@ -222,7 +222,7 @@ export function BlogPostClaimsManager() {
                 <div key={post.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
-                      <h4 className="font-medium text-gray-900 mb-1">{post.title}</h4>
+                      <h4 className="font-medium text-gray-900 mb-1">{ExcerptCleaner.cleanTitle(post.title)}</h4>
                       <p className="text-sm text-gray-500">/{post.slug}</p>
                     </div>
                     
