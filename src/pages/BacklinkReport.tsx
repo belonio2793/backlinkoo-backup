@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { LoginModal } from '@/components/LoginModal';
 import { useAuth } from '@/hooks/useAuth';
 import { SavedBacklinkReportsService, type BacklinkReportData } from '@/services/savedBacklinkReportsService';
+import { useReportSync, useReportFormData } from '@/contexts/ReportSyncContext';
 
 interface BacklinkEntry {
   id: string;
@@ -19,20 +20,26 @@ interface BacklinkEntry {
 
 export default function BacklinkReport() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  
-  const [urlList, setUrlList] = useState('');
-  const [keyword, setKeyword] = useState('');
-  const [anchorText, setAnchorText] = useState('');
-  const [destinationUrl, setDestinationUrl] = useState('');
+
+  // Use report sync context for form data
+  const { state, setGeneratedReport, setIsGenerating, navigateToReportView } = useReportSync();
+  const { formData, updateFormData } = useReportFormData();
+
+  // Local state for non-synced data
   const [reportUrl, setReportUrl] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isPreviewSectionCollapsed, setIsPreviewSectionCollapsed] = useState(false);
   const [isInstructionsSectionCollapsed, setIsInstructionsSectionCollapsed] = useState(false);
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [reportData, setReportData] = useState<BacklinkReportData | null>(null);
+
+  // Extract form values from context
+  const { keyword, anchorText, destinationUrl, urlList } = formData;
+  const isGenerating = state.isGenerating;
 
   const { user, isAuthenticated } = useAuth();
 
