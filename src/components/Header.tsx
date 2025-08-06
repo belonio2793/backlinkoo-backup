@@ -110,13 +110,13 @@ export function Header({ showHomeLink = true }: HeaderProps) {
 
   return (
     <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-      <div className="container mx-auto px-6 py-4">
+      <div className="container mx-auto px-4 sm:px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
             <Infinity className="h-7 w-7 text-primary" />
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
+            <h1 className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* Home Link - Show only on non-home pages */}
             {showHomeLink && location.pathname !== '/' && (
               <Button
