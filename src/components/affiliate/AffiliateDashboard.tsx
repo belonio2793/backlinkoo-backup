@@ -281,10 +281,11 @@ export const AffiliateDashboard: React.FC<AffiliateDashboardProps> = ({ userId }
       )}
 
       <Tabs defaultValue="links" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-1 md:grid-cols-4">
+        <TabsList className="grid w-full grid-cols-1 md:grid-cols-5">
           <TabsTrigger value="links">Referral Links</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="commissions">Commissions</TabsTrigger>
+          <TabsTrigger value="achievements">Achievements</TabsTrigger>
           <TabsTrigger value="resources">Resources</TabsTrigger>
         </TabsList>
 
