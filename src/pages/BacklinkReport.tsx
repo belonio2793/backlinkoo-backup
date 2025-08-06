@@ -141,25 +141,45 @@ export default function BacklinkReport() {
       <div className="max-w-5xl mx-auto p-8">
         {/* Preview Link Section */}
         <div className="mb-8 p-6 bg-green-50 border border-green-200 rounded-xl">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsPreviewSectionCollapsed(!isPreviewSectionCollapsed)}
+                className="p-1 hover:bg-green-100 rounded-full transition-colors"
+                title={isPreviewSectionCollapsed ? 'Expand preview section' : 'Minimize preview section'}
+              >
+                <svg
+                  className={`w-5 h-5 text-green-700 transition-transform ${isPreviewSectionCollapsed ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <h2 className="text-lg font-semibold text-green-900">Preview Sample Report</h2>
+            </div>
+            {!isPreviewSectionCollapsed && (
+              <Button
+                onClick={() => window.open('/report/demo_preview_12345', '_blank')}
+                variant="outline"
+                className="bg-white border-green-300 text-green-700 hover:bg-green-50"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                View Sample Report
+              </Button>
+            )}
+          </div>
+          {!isPreviewSectionCollapsed && (
             <div>
-              <h2 className="text-lg font-semibold text-green-900 mb-2">Preview Sample Report</h2>
               <p className="text-green-800">
                 See what your backlink reports will look like before creating your own.
               </p>
             </div>
-            <Button
-              onClick={() => window.open('/report/demo_preview_12345', '_blank')}
-              variant="outline"
-              className="bg-white border-green-300 text-green-700 hover:bg-green-50"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              View Sample Report
-            </Button>
-          </div>
+          )}
         </div>
 
         {/* Instructions */}
