@@ -23,6 +23,13 @@ import { queryClient } from "@/lib/queryClient";
 if (typeof window !== 'undefined') {
   console.log('⚡ Instant app initialization');
 
+  // Initialize affiliate tracking
+  setTimeout(() => {
+    affiliateService.initializeTracking().catch(() => {
+      // Silent fail for affiliate tracking to not impact user experience
+    });
+  }, 1000);
+
   // Defer heavy operations to after app mount
   setTimeout(() => {
     // Import cleanup utilities only when needed
