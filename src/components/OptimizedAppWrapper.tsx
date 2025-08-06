@@ -3,6 +3,8 @@ import { Suspense, useEffect } from 'react';
 import { useReferralTracking } from '@/hooks/useReferralTracking';
 import { Skeleton } from '@/components/ui/skeleton';
 import { scrollToTop } from '@/utils/scrollToTop';
+import { ReportSyncProvider } from '@/contexts/ReportSyncContext';
+import { RouteSync } from '@/components/RouteSync';
 
 // Import lightweight page components directly
 import Index from '@/pages/Index';
@@ -104,7 +106,8 @@ export const OptimizedAppWrapper = () => {
   useReferralTracking();
 
   return (
-    <>
+    <ReportSyncProvider>
+      <RouteSync />
       <TrialNotificationBanner />
       <ScrollToTop />
       <Suspense fallback={<PageLoader />}>
@@ -247,6 +250,7 @@ export const OptimizedAppWrapper = () => {
             </InstantEmailVerificationGuard>
           } />
           <Route path="/backlink-report" element={<LazyBacklinkReport />} />
+          <Route path="/report" element={<LazyBacklinkReport />} />
           <Route path="/saved-reports" element={
             <InstantEmailVerificationGuard>
               <LazySavedReports />
@@ -311,6 +315,6 @@ export const OptimizedAppWrapper = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
-    </>
+    </ReportSyncProvider>
   );
 };
