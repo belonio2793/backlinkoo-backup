@@ -9,65 +9,7 @@ export interface NetlifyFunctionResponse<T = any> {
   isLocal?: boolean;
 }
 
-/**
- * FullStory-safe fetch function to avoid third-party interference
- */
-function createSafeFetch(): typeof fetch {
-  // Store original fetch before any third-party scripts modify it
-  const originalFetch = (globalThis as any).__originalFetch__ || window.fetch;
-
-  // Check if FullStory is interfering
-  const isFullStoryPresent = !!(window as any).FS ||
-                            document.querySelector('script[src*="fullstory"]') ||
-                            document.querySelector('script[src*="fs.js"]');
-
-  if (isFullStoryPresent) {
-    console.log('🔍 FullStory detected - using XMLHttpRequest fallback for Netlify functions');
-
-    // Use XMLHttpRequest as fallback
-    return async (url: string, init?: RequestInit): Promise<Response> => {
-      return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        const method = init?.method || 'GET';
-
-        xhr.open(method, url);
-
-        // Set headers
-        if (init?.headers) {
-          const headers = new Headers(init.headers);
-          headers.forEach((value, key) => {
-            xhr.setRequestHeader(key, value);
-          });
-        }
-
-        xhr.onload = () => {
-          const response = new Response(xhr.responseText, {
-            status: xhr.status,
-            statusText: xhr.statusText,
-            headers: new Headers(
-              xhr.getAllResponseHeaders()
-                .split('\r\n')
-                .reduce((acc, line) => {
-                  const [key, value] = line.split(': ');
-                  if (key && value) acc[key] = value;
-                  return acc;
-                }, {} as Record<string, string>)
-            )
-          });
-          resolve(response);
-        };
-
-        xhr.onerror = () => reject(new Error('Network request failed'));
-        xhr.ontimeout = () => reject(new Error('Request timeout'));
-
-        xhr.timeout = 30000;
-        xhr.send(init?.body as any);
-      });
-    };
-  }
-
-  return originalFetch;
-}
+import { safeFetch, isFullStoryError, getFullStoryErrorMessage } from './fullstoryWorkaround';
 
 /**
  * Safe fetch wrapper for Netlify functions that handles development mode gracefully
@@ -77,7 +19,6 @@ export async function safeNetlifyFetch<T = any>(
   options?: RequestInit
 ): Promise<NetlifyFunctionResponse<T>> {
   try {
-    const safeFetch = createSafeFetch();
     const response = await safeFetch(`/.netlify/functions/${functionPath}`, options);
     
     // Check if response is HTML (likely a 404 page in dev mode)
@@ -107,12 +48,10 @@ export async function safeNetlifyFetch<T = any>(
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     // Check if this is FullStory interference
-    if (errorMessage.includes('Failed to fetch') ||
-        (error as any)?.stack?.includes('fullstory') ||
-        (error as any)?.stack?.includes('fs.js')) {
+    if (isFullStoryError(error)) {
       return {
         success: false,
-        error: 'Third-party script interference detected (FullStory). Using fallback method.',
+        error: getFullStoryErrorMessage('Netlify function call blocked by third-party script'),
         isLocal: true
       };
     }
