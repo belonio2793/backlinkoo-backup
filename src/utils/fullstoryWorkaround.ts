@@ -48,14 +48,14 @@ export function isFullStoryError(error: any): boolean {
  */
 export function createBypassFetch(): typeof fetch {
   // Try to get the original fetch before FullStory modified it
-  const originalFetch = (globalThis as any).__originalFetch__ || 
-                       (window as any).__originalFetch__ ||
-                       window.fetch;
-  
-  if (!isFullStoryPresent()) {
+  const originalFetch = (globalThis as any).__originalFetch__ ||
+                       (window as any).__originalFetch__;
+
+  // If we have an unmodified original fetch and FullStory isn't interfering badly, try it first
+  if (originalFetch && !isFullStoryPresent()) {
     return originalFetch;
   }
-  
+
   console.log('🔧 Creating FullStory bypass fetch using XMLHttpRequest');
   
   // Create XMLHttpRequest-based fetch replacement
