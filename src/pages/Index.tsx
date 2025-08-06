@@ -539,13 +539,13 @@ const Index = () => {
         <div className="w-full space-y-16 sm:space-y-24 md:space-y-32">
           
           {/* Dashboard Overview */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             <div>
               <Badge variant="outline" className="mb-6 bg-blue-50 text-blue-600 border-blue-200 font-mono text-xs">
                 DASHBOARD OVERVIEW
               </Badge>
-              <h2 className="text-4xl font-light mb-6 tracking-tight">Command Center</h2>
-              <p className="text-xl text-muted-foreground mb-8 leading-relaxed font-light">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-6 tracking-tight">Command Center</h2>
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed font-light">
                 Comprehensive campaign management with real-time performance metrics and competitive intelligence.
               </p>
               <ul className="space-y-4 mb-8">
