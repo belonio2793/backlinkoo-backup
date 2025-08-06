@@ -422,7 +422,7 @@ export default function BacklinkReport() {
               {(keyword || anchorText || destinationUrl) && (
                 <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
                   <h3 className="font-medium text-gray-900 mb-2">Verification Setup Status:</h3>
-                  <div className="flex flex-wrap gap-4 text-sm">
+                  <div className="flex flex-wrap gap-4 text-sm mb-3">
                     <span className={`flex items-center ${keyword ? 'text-green-600' : 'text-gray-400'}`}>
                       <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={keyword ? "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" : "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"} />
@@ -442,6 +442,11 @@ export default function BacklinkReport() {
                       Destination URL {destinationUrl ? '✓' : '(required)'}
                     </span>
                   </div>
+                  {keyword && anchorText && destinationUrl && !isAuthenticated && (
+                    <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded border border-blue-200">
+                      💡 <strong>Tip:</strong> Sign in after generating your report to save it to your account for future access.
+                    </div>
+                  )}
                 </div>
               )}
             </div>
