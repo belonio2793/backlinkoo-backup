@@ -8,6 +8,7 @@ import { publishedBlogService, type PublishedBlogPost } from '@/services/publish
 import { contentFilterService } from '@/services/contentFilterService';
 import { contentModerationService } from '@/services/contentModerationService';
 import { adminAuditLogger } from '@/services/adminAuditLogger';
+import { adminBlogOverrideService } from '@/services/adminBlogOverrideService';
 import {
   Calendar,
   Clock,
@@ -24,7 +25,8 @@ import {
   Download,
   RefreshCw,
   Shield,
-  AlertTriangle
+  AlertTriangle,
+  Zap
 } from 'lucide-react';
 
 export function AdminBlogManager() {
