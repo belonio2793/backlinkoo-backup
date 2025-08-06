@@ -417,11 +417,11 @@ Users ready to make a purchase or take action.
           locked: false,
           content: `# Advanced Keyword Research Tools
 
-## Google Keyword Planner
-- Free tool from Google Ads
-- Search volume data
+## Professional SEO Tools
+- Multiple data sources for accuracy
+- Search volume analysis
 - Competition insights
-- Bid suggestions
+- Commercial intent analysis
 
 ## Professional Tools
 
