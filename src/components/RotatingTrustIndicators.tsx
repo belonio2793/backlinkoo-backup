@@ -56,12 +56,12 @@ export const RotatingTrustIndicators = ({ className }: RotatingTrustIndicatorsPr
   const currentTrustIndicators = trustCombinations[currentIndex];
 
   return (
-    <div className={`grid grid-cols-3 gap-4 text-center transition-opacity duration-500 ${
+    <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-4 text-center transition-opacity duration-500 ${
       isVisible ? 'opacity-100' : 'opacity-0'
     } ${className}`}>
       {currentTrustIndicators.map((indicator, index) => (
-        <div key={index}>
-          <div className="text-2xl font-semibold text-primary mb-1">{indicator.value}</div>
+        <div key={index} className="flex flex-col items-center justify-center py-4 md:py-0">
+          <div className="text-2xl md:text-2xl font-semibold text-primary mb-2">{indicator.value}</div>
           <div className="text-sm text-muted-foreground">{indicator.label}</div>
         </div>
       ))}
