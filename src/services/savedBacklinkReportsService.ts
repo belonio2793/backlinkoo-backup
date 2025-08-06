@@ -77,9 +77,16 @@ export class SavedBacklinkReportsService {
    */
   static async getUserReports(): Promise<SavedBacklinkReport[]> {
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) {
       throw new Error('User must be authenticated to fetch reports');
+    }
+
+    // Check table access and provide helpful error message
+    const hasAccess = await checkSavedReportsTableAccess();
+    if (!hasAccess) {
+      console.warn('⚠️ saved_backlink_reports table not accessible - feature may not be available yet');
+      return []; // Return empty array instead of throwing error
     }
 
     const { data, error } = await supabase
@@ -90,6 +97,13 @@ export class SavedBacklinkReportsService {
 
     if (error) {
       console.error('Error fetching saved reports:', error);
+
+      // If table doesn't exist, return empty array instead of error
+      if (error.code === '42P01') {
+        console.warn('⚠️ saved_backlink_reports table does not exist yet');
+        return [];
+      }
+
       throw new Error(`Failed to fetch reports: ${error.message}`);
     }
 
