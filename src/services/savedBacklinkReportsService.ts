@@ -21,6 +21,68 @@ export interface BacklinkReportData {
 }
 
 export class SavedBacklinkReportsService {
+
+  // Fallback storage keys
+  private static readonly STORAGE_KEY = 'saved_backlink_reports';
+  private static readonly STORAGE_VERSION = '1.0';
+
+  /**
+   * Save report to localStorage as fallback
+   */
+  private static saveToLocalStorage(report: any): void {
+    try {
+      const existingReports = this.getFromLocalStorage();
+      const newReport = {
+        ...report,
+        id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      existingReports.push(newReport);
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify({
+        version: this.STORAGE_VERSION,
+        reports: existingReports
+      }));
+
+      console.log('📱 Report saved to localStorage as fallback');
+    } catch (error) {
+      console.error('Failed to save to localStorage:', error);
+    }
+  }
+
+  /**
+   * Get reports from localStorage
+   */
+  private static getFromLocalStorage(): any[] {
+    try {
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      if (!stored) return [];
+
+      const parsed = JSON.parse(stored);
+      return parsed.reports || [];
+    } catch (error) {
+      console.error('Failed to get from localStorage:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Remove report from localStorage
+   */
+  private static removeFromLocalStorage(reportId: string): void {
+    try {
+      const existingReports = this.getFromLocalStorage();
+      const filteredReports = existingReports.filter(report => report.id !== reportId);
+
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify({
+        version: this.STORAGE_VERSION,
+        reports: filteredReports
+      }));
+    } catch (error) {
+      console.error('Failed to remove from localStorage:', error);
+    }
+  }
   /**
    * Save a backlink report for the authenticated user
    */
