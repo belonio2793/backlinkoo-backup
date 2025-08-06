@@ -112,19 +112,41 @@ export default function BacklinkReport() {
 
       const reportData = {
         id: reportId,
-        campaignName: `Report Generated ${formattedDate}`,
+        campaignName: `Backlink Verification Report - ${formattedDate}`,
+        verificationParams: {
+          keyword: keyword.trim(),
+          anchorText: anchorText.trim(),
+          destinationUrl: destinationUrl.trim()
+        },
         backlinks: backlinks,
         createdAt: createdDate.toISOString(),
         totalBacklinks: backlinks.length,
-        // Mock verification results
-        results: backlinks.map(bl => ({
-          ...bl,
-          status: Math.random() > 0.3 ? 'found' : 'not_found',
-          domainAuthority: Math.floor(Math.random() * 40) + 40,
-          pageAuthority: Math.floor(Math.random() * 50) + 20,
-          responseTime: Math.floor(Math.random() * 2000) + 500,
-          lastChecked: new Date().toISOString()
-        }))
+        // Mock verification results with detailed checks
+        results: backlinks.map(bl => {
+          const hasKeyword = Math.random() > 0.4;
+          const hasAnchorText = Math.random() > 0.3;
+          const hasCorrectDestination = Math.random() > 0.25;
+          const isReachable = Math.random() > 0.1;
+
+          return {
+            ...bl,
+            isReachable,
+            pageTitle: isReachable ? `Sample Page Title ${Math.floor(Math.random() * 1000)}` : null,
+            verification: {
+              keywordFound: hasKeyword,
+              anchorTextFound: hasAnchorText,
+              destinationUrlMatches: hasCorrectDestination,
+              isVerified: hasKeyword && hasAnchorText && hasCorrectDestination,
+              keywordCount: hasKeyword ? Math.floor(Math.random() * 5) + 1 : 0,
+              anchorTextContext: hasAnchorText ? `...some text before ${anchorText.trim()} and some text after...` : null
+            },
+            domainAuthority: Math.floor(Math.random() * 40) + 40,
+            pageAuthority: Math.floor(Math.random() * 50) + 20,
+            responseTime: isReachable ? Math.floor(Math.random() * 2000) + 500 : null,
+            lastChecked: new Date().toISOString(),
+            statusCode: isReachable ? 200 : Math.random() > 0.5 ? 404 : 500
+          };
+        })
       };
 
       localStorage.setItem(`report_${reportId}`, JSON.stringify(reportData));
