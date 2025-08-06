@@ -53,6 +53,23 @@ export const EmailAuthDiagnosticPanel = () => {
     }
   };
 
+  const runRegistrationTest = async () => {
+    setIsTestingRegistration(true);
+    try {
+      const results = await testUserRegistrationEmail.testRegistrationFlow();
+      setRegistrationResults(results);
+    } catch (error) {
+      console.error('Registration test failed:', error);
+      toast({
+        title: "Test failed",
+        description: "Failed to run registration test",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTestingRegistration(false);
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pass':
