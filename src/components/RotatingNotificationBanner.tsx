@@ -32,9 +32,10 @@ export const RotatingNotificationBanner = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    if (!isVisible) return;
+    if (!isVisible || isPaused) return;
 
     const interval = setInterval(() => {
       setIsAnimating(true);
@@ -46,7 +47,7 @@ export const RotatingNotificationBanner = ({
     }, autoRotateInterval);
 
     return () => clearInterval(interval);
-  }, [autoRotateInterval, isVisible]);
+  }, [autoRotateInterval, isVisible, isPaused]);
 
   if (!isVisible) return null;
 
