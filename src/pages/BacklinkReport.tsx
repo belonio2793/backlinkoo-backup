@@ -622,8 +622,8 @@ export default function BacklinkReport() {
             </div>
           </div>
 
-          {/* Right Sidebar */}
-          <div className="w-80 flex-shrink-0">
+          {/* Right Sidebar - Hidden on mobile */}
+          <div className="hidden lg:block w-80 flex-shrink-0">
             <div className="sticky top-8 space-y-6">
               {/* Your Reports Section */}
               {isAuthenticated && (
