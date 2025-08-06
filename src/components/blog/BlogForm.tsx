@@ -216,9 +216,16 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                   <span>Generating Your Backlink...</span>
                 </div>
               ) : (
-                <span>Claim Now For Free</span>
+                <span>Claim Permanent Link</span>
               )}
             </Button>
+          </div>
+
+          {/* Agreement Text */}
+          <div className="text-center">
+            <p className="text-xs text-gray-600 max-w-md mx-auto leading-relaxed">
+              I agree to create an account to prevent this post from automatic deletion in 24 hours to help prevent spam.
+            </p>
           </div>
 
           {/* Estimated Time and Account Prompt - Moved below button */}
