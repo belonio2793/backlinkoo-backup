@@ -27,6 +27,7 @@ import { ProductionBlogGenerator } from "@/components/ProductionBlogGenerator";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 import { OpenAIGenerator } from "@/components/OpenAIGenerator";
 import { BlogForm } from "@/components/blog/BlogForm";
+import { RotatingTagline } from "@/components/RotatingTagline";
 
 
 import { supabase } from "@/integrations/supabase/client";
@@ -481,9 +482,7 @@ const Index = () => {
         style={{ backgroundColor: '#ffffff' }}
       >
         <div className="w-full text-center relative z-10 px-6">
-          <Badge variant="outline" className="mb-8 bg-gray-100 border-gray-300 text-gray-900 font-mono text-xs px-4 py-2">
-            THE NUMBER ONE PLACE TO BUY BACKLINKS
-          </Badge>
+          <RotatingTagline />
           
           <AnimatedHeadline
             baseText="Professional SEO with"
@@ -496,7 +495,7 @@ const Index = () => {
           </p>
           
           <p className="text-lg text-gray-600 mb-12 font-medium max-w-3xl mx-auto">
-            High-authority links ��� Competitive intelligence
+            High-authority links • Competitive intelligence
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12">
