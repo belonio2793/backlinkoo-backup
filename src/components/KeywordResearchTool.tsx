@@ -622,8 +622,7 @@ export const KeywordResearchTool = () => {
                     <SelectContent className="bg-background border shadow-lg z-50">
                       <SelectItem value="google">
                         <div className="flex items-center gap-2">
-                          <img src={googleLogo} alt="Google" className="w-4 h-4" />
-                          Google
+                          🔍 Google
                         </div>
                       </SelectItem>
                     </SelectContent>
@@ -654,7 +653,7 @@ export const KeywordResearchTool = () => {
                       {statusMessages[currentStatusMessage]}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Using Google Ads API for official search volume data...
+                      Analyzing search data using alternative APIs...
                     </div>
                   </div>
                 </div>
@@ -678,14 +677,14 @@ export const KeywordResearchTool = () => {
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl">Keyword Opportunities</CardTitle>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-sm bg-green-50 text-green-700 border-green-200">
-                      Google Ads API
+                    <Badge variant="outline" className="text-sm bg-blue-50 text-blue-700 border-blue-200">
+                      Multi-API Data
                     </Badge>
                     <Badge variant="outline" className="text-sm">{keywords.length} results</Badge>
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Official search volume data from Google's Keyword Planner API
+                  Search volume data from multiple reliable SEO data sources
                 </p>
               </CardHeader>
               <CardContent>
@@ -704,12 +703,7 @@ export const KeywordResearchTool = () => {
                               </h3>
                               <div className="flex items-center gap-2 mt-1">
                                 <Badge variant="outline" className="text-xs">
-                                  <img 
-                                    src={googleLogo} 
-                                    alt={keyword.searchEngine} 
-                                    className="w-3 h-3 mr-1"
-                                  />
-                                  {keyword.searchEngine}
+                                  🔍 {keyword.searchEngine}
                                 </Badge>
                                 {keyword.location && (
                                   <Badge variant="outline" className="text-xs">
