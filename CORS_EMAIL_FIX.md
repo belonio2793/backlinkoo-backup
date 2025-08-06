@@ -19,7 +19,7 @@
 ```
 Browser → Direct API Call → Resend API ❌ (CORS blocked)
 Browser → XMLHttpRequest → Resend API ❌ (CORS blocked)
-Browser → Server Proxy → Resend API ��� (CORS bypassed)
+Browser → Server Proxy → Resend API ✅ (CORS bypassed)
 ```
 
 ## 🛠️ Solutions Implemented
