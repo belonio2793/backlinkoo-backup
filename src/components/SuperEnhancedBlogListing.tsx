@@ -336,6 +336,115 @@ export function SuperEnhancedBlogListing() {
             </div>
           </div>
 
+          {/* How It Works Guide */}
+          <div className="mb-16 max-w-4xl mx-auto">
+            <div className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 rounded-3xl border border-blue-100/50 shadow-xl overflow-hidden">
+              {/* Decorative background elements */}
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full -translate-y-20 translate-x-20 blur-2xl"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-emerald-400/10 to-cyan-400/10 rounded-full translate-y-16 -translate-x-16 blur-xl"></div>
+
+              <div className="relative p-8 md:p-12">
+                {/* Header */}
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    How Community Blog Posts Work on
+                    <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Backlink∞</span>
+                  </h2>
+                </div>
+
+                {/* Steps */}
+                <div className="space-y-6 mb-8">
+                  {/* Step 1 */}
+                  <div className="flex items-start gap-4 p-4 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50 hover:bg-white/90 transition-all duration-300">
+                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                      1
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-1">Enter a keyword</h3>
+                      <p className="text-gray-700 leading-relaxed">We'll create original, high quality content tailored to your topic.</p>
+                    </div>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="flex items-start gap-4 p-4 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50 hover:bg-white/90 transition-all duration-300">
+                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                      2
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-1">Set your anchor text</h3>
+                      <p className="text-gray-700 leading-relaxed">Choose the exact term you want to rank for.</p>
+                    </div>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="flex items-start gap-4 p-4 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50 hover:bg-white/90 transition-all duration-300">
+                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                      3
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-1">Add your destination URL</h3>
+                      <p className="text-gray-700 leading-relaxed">This is the page you want to boost in Google search results. Your blog post is created instantly and published with a contextual backlink.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Important Notes */}
+                <div className="space-y-4">
+                  {/* Expiration Note */}
+                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        !
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-amber-900 mb-1">Note:</h4>
+                        <p className="text-amber-800 text-sm leading-relaxed">
+                          Posts are unclaimed by default and will expire after 24 hours.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Free Account Benefits */}
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-green-900 mb-1">Free Account</h4>
+                        <p className="text-green-800 text-sm leading-relaxed">
+                          Create a free account to claim up to 3 posts permanently and secure long lasting improved search engine optimization scores through our Community Blog network.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Premium Benefits */}
+                  <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full flex items-center justify-center">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold bg-gradient-to-r from-purple-700 to-blue-700 bg-clip-text text-transparent mb-1">
+                          Premium Upgrade
+                        </h4>
+                        <p className="text-gray-700 text-sm leading-relaxed">
+                          Upgrade to Premium to unlock unlimited posts, unlimited claims, and full access to our SEO Academy, tools, and more!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Enhanced Filter Buttons - Distinct Gradient Colors */}
           <div className="mb-12 space-y-6">
             <div className="flex flex-wrap justify-center gap-4 p-2">
