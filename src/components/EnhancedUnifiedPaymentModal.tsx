@@ -561,36 +561,6 @@ export function EnhancedUnifiedPaymentModal({
         </TabsContent>
       </Tabs>
 
-      {/* Checkout Type Selection */}
-      <Card className="p-4">
-        <div className="space-y-3">
-          <Label className="text-base font-medium">Checkout Type</Label>
-          <RadioGroup value={checkoutType} onValueChange={(value) => setCheckoutType(value as CheckoutType)}>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="user" id="user" />
-              <Label htmlFor="user">Account Checkout {!isAuthenticated && "(Sign in required)"}</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="guest" id="guest" />
-              <Label htmlFor="guest">Guest Checkout</Label>
-            </div>
-          </RadioGroup>
-          
-          {checkoutType === 'guest' && (
-            <div className="space-y-2">
-              <Label htmlFor="guestEmail">Email Address</Label>
-              <Input
-                id="guestEmail"
-                type="email"
-                value={guestEmail}
-                onChange={(e) => setGuestEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-          )}
-        </div>
-      </Card>
 
       {/* Continue Button */}
       <Button 
