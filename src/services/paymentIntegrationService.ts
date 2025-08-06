@@ -167,6 +167,16 @@ class PaymentIntegrationService {
 
           if (response.status === 404) {
             console.error('❌ Both payment endpoints failed with 404. Check Netlify function deployment.');
+            // Try waiting a moment and retrying once more in case of deployment delay
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            console.log('🔄 Retrying fallback endpoint after delay...');
+            response = await fetch('/.netlify/functions/create-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: requestBody
+            });
           } else {
             console.log('✅ Fallback payment endpoint worked');
           }
