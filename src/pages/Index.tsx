@@ -455,7 +455,7 @@ const Index = () => {
         className="relative py-32 px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
-        <div className="container mx-auto text-center relative z-10">
+        <div className="w-full text-center relative z-10 px-6">
           <Badge variant="outline" className="mb-8 bg-gray-100 border-gray-300 text-gray-900 font-mono text-xs px-4 py-2">
             THE NUMBER ONE PLACE TO BUY BACKLINKS
           </Badge>
