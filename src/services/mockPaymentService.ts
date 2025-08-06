@@ -103,6 +103,13 @@ export class MockPaymentService {
   ): Promise<SubscriptionResult> {
     console.log('🔄 MockPaymentService: Creating subscription simulation');
 
+    // Show user-friendly notification
+    if (window.alert) {
+      setTimeout(() => {
+        alert('🚧 Development Mode: Using simulated subscription system.\n\nThis is a mock subscription that will simulate the signup process without actual charges.\n\nClick OK to continue with the simulation.');
+      }, 100);
+    }
+
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
