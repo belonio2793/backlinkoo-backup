@@ -61,7 +61,12 @@ export class ResendEmailService {
           });
 
           if (!altResponse.ok) {
-            throw new Error(`Email service unavailable - Netlify function not deployed or accessible (${altResponse.status})`);
+            console.warn('Alternative Netlify function also failed:', altResponse.status);
+            return {
+              success: false,
+              error: `Netlify functions unavailable (${response.status}, ${altResponse.status}) - will try direct API`,
+              provider: 'resend'
+            };
           }
 
           const altResult = await altResponse.json();
@@ -72,8 +77,12 @@ export class ResendEmailService {
           };
         }
 
-        console.error('Netlify function error:', response.status, responseData);
-        throw new Error(`Email service error: ${responseData.error || response.statusText}`);
+        console.warn('Netlify function error:', response.status, responseData);
+        return {
+          success: false,
+          error: `Netlify function error (${response.status}): ${responseData.error || response.statusText}`,
+          provider: 'resend'
+        };
       }
 
       console.log('Email sent successfully via Netlify:', responseData.emailId);
