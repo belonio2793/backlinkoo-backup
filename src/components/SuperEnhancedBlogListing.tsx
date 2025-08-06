@@ -327,14 +327,6 @@ export function SuperEnhancedBlogListing() {
 
       <div className="relative container mx-auto px-6 py-12">
         <div className="max-w-7xl mx-auto">
-          {/* Simplified Hero Section */}
-          <div className="text-center mb-16 space-y-6">
-            <div className="relative inline-block">
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
-                Community Blog Posts
-              </h1>
-            </div>
-          </div>
 
           {/* How It Works Guide */}
           <div className="mb-16">
