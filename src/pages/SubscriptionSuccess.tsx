@@ -16,7 +16,21 @@ const SubscriptionSuccess = () => {
   useEffect(() => {
     const verifySubscription = async () => {
       const sessionId = searchParams.get('session_id');
-      
+      const isMock = searchParams.get('mock');
+      const plan = searchParams.get('plan');
+
+      // Handle mock subscriptions
+      if (isMock === 'true') {
+        console.log('🚧 Mock subscription success:', { sessionId, plan });
+        setSubscriptionVerified(true);
+        setIsLoading(false);
+        toast({
+          title: '🚧 Mock Subscription Activated!',
+          description: `Mock mode: ${plan} subscription has been simulated for your account.`,
+        });
+        return;
+      }
+
       if (!sessionId) {
         toast({
           title: 'Invalid Session',
