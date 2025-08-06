@@ -21,6 +21,7 @@ import { blogAutoDeleteService } from '@/services/blogAutoDeleteService';
 import { supabase } from '@/integrations/supabase/client';
 import { databaseDiagnostic } from '@/utils/databaseDiagnostic';
 import ErrorReproductionTest from '@/utils/errorReproductionTest';
+import { cleanTitle } from '@/utils/titleCleaner';
 import {
   FileText,
   Trash2,
