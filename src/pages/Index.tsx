@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Infinity, 
-  TrendingUp, 
-  Shield, 
-  Globe, 
+import {
+  Infinity,
+  TrendingUp,
+  Shield,
+  Globe,
   Search,
   Link,
   BarChart3,
@@ -16,7 +16,8 @@ import {
   Users,
   Target,
   Zap,
-  Sparkles
+  Sparkles,
+  Activity
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PricingModal } from "@/components/PricingModal";
