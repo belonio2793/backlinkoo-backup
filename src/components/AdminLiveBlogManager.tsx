@@ -29,6 +29,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { liveBlogPublisher, type LiveBlogPost } from '@/services/liveBlogPublisher';
 import { format, formatDistanceToNow } from 'date-fns';
+import { ExcerptCleaner } from '@/utils/excerptCleaner';
 
 export function AdminLiveBlogManager() {
   const [blogPosts, setBlogPosts] = useState<LiveBlogPost[]>([]);
