@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { DirectOpenAIService } from '@/services/directOpenAI';
 import { AnimatedBlogHeadline } from '@/components/AnimatedBlogHeadline';
 import { RealTimeBlogStatus } from '@/components/blog/RealTimeBlogStatus';
-import { Loader2, Link, Target, Hash, Sparkles, Zap, Star, Rocket } from 'lucide-react';
+import { Loader2, Link, Target, Hash, Sparkles, Zap, Star, Rocket, Search, MousePointer, ExternalLink, Key, Crosshair, Globe } from 'lucide-react';
 
 interface BlogFormProps {
   onContentGenerated: (content: any) => void;
