@@ -8,7 +8,6 @@ import { LoginModal } from '@/components/LoginModal';
 import { useAuth } from '@/hooks/useAuth';
 import { SavedBacklinkReportsService, type BacklinkReportData } from '@/services/savedBacklinkReportsService';
 import { runSavedReportsTest } from '@/utils/testSavedReports';
-import { SavedReportsStatus } from '@/components/SavedReportsStatus';
 
 interface BacklinkEntry {
   id: string;
