@@ -468,6 +468,17 @@ export const AffiliateDashboard: React.FC<AffiliateDashboardProps> = ({ userId }
           )}
         </TabsContent>
 
+        {/* Achievements Tab */}
+        <TabsContent value="achievements" className="space-y-6">
+          <AffiliateGamification
+            affiliateId={affiliate.affiliate_id}
+            currentTier={affiliate.tier}
+            totalEarnings={stats.total_earnings}
+            totalConversions={stats.total_conversions}
+            totalReferrals={stats.total_referrals}
+          />
+        </TabsContent>
+
         {/* Commissions Tab */}
         <TabsContent value="commissions" className="space-y-6">
           <Card>
