@@ -249,7 +249,7 @@ const Index = () => {
       <RotatingNotificationBanner className="sticky top-0 z-[60]" />
 
       {/* Header */}
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-16 z-50">
         <div className="w-full px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
