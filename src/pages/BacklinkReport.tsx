@@ -153,9 +153,10 @@ export default function BacklinkReport() {
       
       setReportUrl(generatedUrl);
       
+      const verifiedCount = reportData.results.filter(r => r.verification.isVerified).length;
       toast({
-        title: 'Report Generated',
-        description: 'Your backlink verification report is ready.',
+        title: 'Verification Complete',
+        description: `Found ${verifiedCount} verified backlinks out of ${backlinks.length} URLs checked.`,
       });
 
     } catch (error) {
