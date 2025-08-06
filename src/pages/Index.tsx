@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Infinity, 
-  TrendingUp, 
-  Shield, 
-  Globe, 
+import {
+  Infinity,
+  TrendingUp,
+  Shield,
+  Globe,
   Search,
   Link,
   BarChart3,
@@ -16,7 +16,8 @@ import {
   Users,
   Target,
   Zap,
-  Sparkles
+  Sparkles,
+  Activity
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PricingModal } from "@/components/PricingModal";
@@ -246,13 +247,13 @@ const Index = () => {
     <div className="min-h-screen bg-background font-light">
       {/* Header */}
       <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="w-full px-6 py-4">
+        <div className="w-full px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
               <Infinity className="h-7 w-7 text-primary" />
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
+              <h1 className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
 
               {!authChecked ? (
                 <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
@@ -325,7 +326,7 @@ const Index = () => {
       </header>
 
       {/* Free Blog Generator - Top Feature */}
-      <section id="blog-generator" className="py-24 px-0 md:px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
+      <section id="blog-generator" className="py-12 sm:py-16 md:py-24 px-4 md:px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
         <div className="w-full px-4 md:px-0">
           {/* Optional: Advanced Generator Toggle (Hidden by default) */}
 
@@ -397,13 +398,13 @@ const Index = () => {
       {(!user && authChecked) || showInlineAuth ? (
         <section className="py-16 px-6 bg-gradient-to-br from-blue-50 to-indigo-50" id="inline-auth">
           <div className="w-full px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
               {/* Left side - Value proposition */}
               <div>
-                <h2 className="text-3xl md:text-4xl font-light mb-6 tracking-tight">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-6 tracking-tight">
                   {showTrialUpgrade ? "Upgrade Your Trial" : "Start Building Authority Today"}
                 </h2>
-                <p className="text-xl text-muted-foreground mb-8 leading-relaxed font-light">
+                <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed font-light">
                   {showTrialUpgrade
                     ? "Convert your trial backlinks to permanent ones and unlock the full power of our platform."
                     : "Join thousands of professionals who trust our platform for their most important SEO campaigns."
@@ -462,8 +463,8 @@ const Index = () => {
       ) : null}
 
       {/* Hero Section */}
-      <section 
-        className="relative py-32 px-6 bg-white"
+      <section
+        className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
         <div className="w-full text-center relative z-10 px-6">
@@ -472,18 +473,18 @@ const Index = () => {
           <AnimatedHeadline
             baseText="Professional SEO with"
             animatedTexts={headlineVariations}
-            className="text-5xl md:text-7xl font-light mb-8 text-gray-900 tracking-tight"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light mb-8 text-gray-900 tracking-tight"
           />
           
-          <p className="text-xl md:text-2xl text-gray-700 mb-6 max-w-6xl mx-auto leading-relaxed font-light">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-700 mb-6 max-w-6xl mx-auto leading-relaxed font-light">
             The backlink platform that SEO professionals rely on for consistent, measurable results.
           </p>
           
-          <p className="text-lg text-gray-600 mb-12 font-medium max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg text-gray-600 mb-8 sm:mb-12 font-medium max-w-3xl mx-auto">
             High-authority links • Competitive intelligence
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-8 sm:mb-12">
             <Button
               size="lg"
               className="text-base px-8 py-6 font-medium"
@@ -510,16 +511,16 @@ const Index = () => {
       </section>
 
       {/* Features Grid */}
-      <section className="py-24 px-0 md:px-6 bg-muted/30">
+      <section className="py-12 sm:py-16 md:py-24 px-4 md:px-6 bg-muted/30">
         <div className="w-full px-4 md:px-0">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight">Why Professionals Choose Us</h2>
-            <p className="text-xl text-muted-foreground max-w-6xl mx-auto leading-relaxed font-light">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light mb-6 tracking-tight">Why Professionals Choose Us</h2>
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-6xl mx-auto leading-relaxed font-light">
               We provide the infrastructure and intelligence that SEO teams need to deliver consistent results at scale.
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
             {features.map((feature, index) => (
               <Card key={index} className="p-8 text-center border-0 bg-background shadow-sm hover:shadow-md transition-all">
                 <feature.icon className="h-12 w-12 text-primary mx-auto mb-6" />
@@ -534,17 +535,17 @@ const Index = () => {
       </section>
 
       {/* Service Sections */}
-      <section className="py-20 px-6">
-        <div className="w-full space-y-32">
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6">
+        <div className="w-full space-y-16 sm:space-y-24 md:space-y-32">
           
           {/* Dashboard Overview */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             <div>
               <Badge variant="outline" className="mb-6 bg-blue-50 text-blue-600 border-blue-200 font-mono text-xs">
                 DASHBOARD OVERVIEW
               </Badge>
-              <h2 className="text-4xl font-light mb-6 tracking-tight">Command Center</h2>
-              <p className="text-xl text-muted-foreground mb-8 leading-relaxed font-light">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-6 tracking-tight">Command Center</h2>
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed font-light">
                 Comprehensive campaign management with real-time performance metrics and competitive intelligence.
               </p>
               <ul className="space-y-4 mb-8">
@@ -577,7 +578,7 @@ const Index = () => {
           </div>
 
           {/* Campaign Management */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             <div className="bg-gradient-to-br from-green-500/5 to-primary/5 p-12 rounded-2xl order-2 lg:order-1 overflow-hidden">
               <div className="h-32 w-32 mx-auto bg-white rounded-xl shadow-lg flex items-center justify-center">
                 <Activity className="h-16 w-16 text-green-600" />
@@ -587,8 +588,8 @@ const Index = () => {
               <Badge variant="outline" className="mb-6 bg-green-50 text-green-600 border-green-200 font-mono text-xs">
                 CAMPAIGN MANAGEMENT
               </Badge>
-              <h2 className="text-4xl font-light mb-6 tracking-tight">Automated Excellence</h2>
-              <p className="text-xl text-muted-foreground mb-8 leading-relaxed font-light">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-6 tracking-tight">Automated Excellence</h2>
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed font-light">
                 Create and deploy sophisticated backlink campaigns in minutes with intelligent optimization.
               </p>
               <ul className="space-y-4 mb-8">
@@ -780,13 +781,13 @@ const Index = () => {
       >
         <div className="w-full relative z-10 px-4 md:px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">Starter Packages</h2>
-            <p className="text-xl text-gray-700 max-w-6xl mx-auto leading-relaxed font-light">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light mb-6 tracking-tight text-gray-900">Starter Packages</h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-700 max-w-6xl mx-auto leading-relaxed font-light">
               Begin your journey with our proven backlink platform. All starter packages include full access to our professional tools.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mx-auto max-w-6xl">
             {pricingPlans.map((plan) => (
               <Card 
                 key={plan.id} 

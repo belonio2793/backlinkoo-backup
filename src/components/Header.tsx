@@ -110,23 +110,23 @@ export function Header({ showHomeLink = true }: HeaderProps) {
 
   return (
     <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-      <div className="container mx-auto px-6 py-4">
+      <div className="container mx-auto px-4 sm:px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
             <Infinity className="h-7 w-7 text-primary" />
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
+            <h1 className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* Home Link - Show only on non-home pages */}
             {showHomeLink && location.pathname !== '/' && (
               <Button
                 onClick={() => navigate('/')}
                 variant="outline"
                 size="sm"
-                className="bg-transparent hover:bg-green-50/50 border border-green-200/60 text-green-600 hover:text-green-700 hover:border-green-300/80 transition-all duration-200 font-medium px-4 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+                className="bg-transparent hover:bg-green-50/50 border border-green-200/60 text-green-600 hover:text-green-700 hover:border-green-300/80 transition-all duration-200 font-medium px-2 sm:px-4 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
               >
-                <Home className="h-4 w-4 mr-2" />
-                Home
+                <Home className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Home</span>
               </Button>
             )}
 

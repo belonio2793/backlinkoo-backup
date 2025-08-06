@@ -3,6 +3,9 @@
  * Handles payment processing coordination and environment validation
  */
 
+import { mockPaymentService } from './mockPaymentService';
+import { supabase } from '@/integrations/supabase/client';
+
 interface PaymentConfig {
   stripe: {
     enabled: boolean;
@@ -133,21 +136,74 @@ class PaymentIntegrationService {
         };
       }
 
-      // Call Netlify function
-      const response = await fetch('/api/create-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          amount,
-          productName: `${credits} Backlink Credits`,
-          credits,
-          isGuest,
-          guestEmail,
-          paymentMethod
-        })
+      // Call Netlify function with fallback
+      let response: Response;
+      const requestBody = JSON.stringify({
+        amount,
+        productName: `${credits} Backlink Credits`,
+        credits,
+        isGuest,
+        guestEmail,
+        paymentMethod
       });
+
+      try {
+        // Try primary endpoint first
+        response = await fetch('/api/create-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: requestBody
+        });
+
+        // If 404, try fallback endpoint
+        if (response.status === 404) {
+          console.warn('🔄 Payment endpoint /api/create-payment returned 404, trying fallback /.netlify/functions/create-payment');
+          response = await fetch('/.netlify/functions/create-payment', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: requestBody
+          });
+
+          if (response.status === 404) {
+            console.error('❌ Both payment endpoints failed with 404. Check Netlify function deployment.');
+            // Try waiting a moment and retrying once more in case of deployment delay
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            console.log('🔄 Retrying fallback endpoint after delay...');
+            response = await fetch('/.netlify/functions/create-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: requestBody
+            });
+
+            // If still 404, use mock service
+            if (response.status === 404 && mockPaymentService.isAvailable()) {
+              console.log('🔄 All endpoints failed, using mock payment service...');
+              return await mockPaymentService.createPayment(amount, credits, paymentMethod, isGuest, guestEmail);
+            }
+          } else {
+            console.log('✅ Fallback payment endpoint worked');
+          }
+        }
+      } catch (fetchError) {
+        console.error('Payment endpoint fetch error:', fetchError);
+
+        // Use mock service as final fallback
+        if (mockPaymentService.isAvailable()) {
+          console.log('🔄 Network error, falling back to mock payment service...');
+          return await mockPaymentService.createPayment(amount, credits, paymentMethod, isGuest, guestEmail);
+        }
+
+        return {
+          success: false,
+          error: 'Network error: Unable to connect to payment service'
+        };
+      }
 
       let data;
       try {
@@ -163,7 +219,7 @@ class PaymentIntegrationService {
 
         return {
           success: false,
-          error: `Invalid response from payment service: ${response.status} ${response.statusText}`
+          error: `Invalid response from payment service: ${response.status} ${response.statusText}. ${response.status === 404 ? 'Payment endpoint not found. Please check deployment.' : ''}`
         };
       }
 
@@ -241,19 +297,61 @@ class PaymentIntegrationService {
         };
       }
 
-      // Call Netlify function
-      const response = await fetch('/api/create-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          plan,
-          isGuest,
-          guestEmail,
-          paymentMethod: 'stripe'
-        })
+      // Call Netlify function with fallback
+      let response: Response;
+      const requestBody = JSON.stringify({
+        plan,
+        isGuest,
+        guestEmail,
+        paymentMethod: 'stripe'
       });
+
+      try {
+        // Try primary endpoint first
+        response = await fetch('/api/create-subscription', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: requestBody
+        });
+
+        // If 404, try fallback endpoint
+        if (response.status === 404) {
+          console.warn('🔄 Subscription endpoint /api/create-subscription returned 404, trying fallback /.netlify/functions/create-subscription');
+          response = await fetch('/.netlify/functions/create-subscription', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: requestBody
+          });
+
+          if (response.status === 404) {
+            console.error('❌ Both subscription endpoints failed with 404. Check Netlify function deployment.');
+            // Use mock service if available
+            if (mockPaymentService.isAvailable()) {
+              console.log('🔄 All subscription endpoints failed, using mock service...');
+              return await mockPaymentService.createSubscription(plan, isGuest, guestEmail);
+            }
+          } else {
+            console.log('✅ Fallback subscription endpoint worked');
+          }
+        }
+      } catch (fetchError) {
+        console.error('Subscription endpoint fetch error:', fetchError);
+
+        // Use mock service as final fallback
+        if (mockPaymentService.isAvailable()) {
+          console.log('🔄 Network error, falling back to mock subscription service...');
+          return await mockPaymentService.createSubscription(plan, isGuest, guestEmail);
+        }
+
+        return {
+          success: false,
+          error: 'Network error: Unable to connect to subscription service'
+        };
+      }
 
       let data;
       try {

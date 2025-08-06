@@ -391,7 +391,7 @@ export default function BacklinkReport() {
       </div>
 
       <div className="max-w-7xl mx-auto p-8">
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-8">
 
           {/* Main Content */}
           <div className="flex-1 min-w-0">
@@ -622,8 +622,8 @@ export default function BacklinkReport() {
             </div>
           </div>
 
-          {/* Right Sidebar */}
-          <div className="w-80 flex-shrink-0">
+          {/* Right Sidebar - Hidden on mobile */}
+          <div className="hidden lg:block w-80 flex-shrink-0">
             <div className="sticky top-8 space-y-6">
               {/* Your Reports Section */}
               {isAuthenticated && (

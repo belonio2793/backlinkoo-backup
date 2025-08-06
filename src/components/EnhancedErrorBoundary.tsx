@@ -26,11 +26,17 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // Prevent infinite loops - if already in error state, don't process again
+    if (this.state.hasError) {
+      console.warn('Error boundary already in error state, ignoring additional error:', error.message);
+      return;
+    }
+
     logError('Application error caught by boundary', {
       ...error,
       componentStack: errorInfo.componentStack
     });
-    
+
     // Filter out browser extension errors and other non-critical errors
     const isExtensionError = error.message.includes('Cannot redefine property: ethereum') ||
                             error.stack?.includes('chrome-extension://') ||
@@ -73,22 +79,15 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
                        error.message.includes('claim') ||
                        error.stack?.includes('blog');
 
-    if (isExtensionError || isAuthError || isDatabaseError || isComponentError) {
-      console.warn('Non-critical error filtered and recovered:', error.message);
-      // Reset error state to prevent app crash
-      this.setState({ hasError: false, error: undefined });
-      return;
-    }
-
-    if (isRouteError || isBlogError) {
-      console.warn('Route/Blog error - redirecting to 404:', error.message);
-      this.redirectTo404();
+    // For recoverable errors, don't show error state
+    if (isExtensionError || isAuthError || isDatabaseError || isComponentError || isRouteError || isBlogError) {
+      console.warn('Recoverable error - not showing error UI:', error.message);
       return;
     }
 
     // For all other errors, set error state
+    console.warn('Critical application error - showing fallback UI:', error.message);
     this.setState({ hasError: true, error, errorInfo });
-    this.redirectTo404();
   }
 
   componentWillUnmount() {
@@ -112,13 +111,19 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
         return <Fallback error={this.state.error} />;
       }
 
-      // If we get here, redirect to 404 immediately
-      this.redirectTo404();
-      
-      // Show minimal loading while redirecting
+      // Show error UI instead of auto-redirecting
       return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+          <div className="max-w-md mx-auto text-center p-8">
+            <h1 className="text-xl font-semibold text-gray-900 mb-4">Something went wrong</h1>
+            <p className="text-gray-600 mb-6">We're experiencing a temporary issue. Please try refreshing the page.</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Refresh Page
+            </button>
+          </div>
         </div>
       );
     }

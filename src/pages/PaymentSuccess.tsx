@@ -25,24 +25,26 @@ export default function PaymentSuccess() {
       const orderId = searchParams.get('order_id');
       const paymentMethod = searchParams.get('payment_method') as 'stripe' | 'paypal' | null;
       const isDemo = searchParams.get('demo');
+      const isMock = searchParams.get('mock');
       const credits = searchParams.get('credits');
       const amount = searchParams.get('amount');
 
       try {
         let result;
 
-        // Handle demo mode for development
-        if (isDemo === 'true') {
-          console.log('🚧 Demo mode payment success:', { credits, amount });
+        // Handle demo or mock mode for development
+        if (isDemo === 'true' || isMock === 'true') {
+          const mode = isMock === 'true' ? 'Mock' : 'Demo';
+          console.log(`🚧 ${mode} mode payment success:`, { credits, amount });
           result = {
             success: true,
             redirectUrl: '/dashboard',
-            message: `Demo mode: ${credits} credits purchased for $${amount}`
+            message: `${mode} mode: ${credits} credits purchased for $${amount || 'N/A'}`
           };
 
           toast({
-            title: "🚧 Demo Payment Success",
-            description: `Demo mode: ${credits} credits have been added to your account.`,
+            title: `🚧 ${mode} Payment Success`,
+            description: `${mode} mode: ${credits} credits have been simulated for your account.`,
           });
         } else if (sessionId || orderId || paymentMethod) {
           // Process payment verification with enhanced service

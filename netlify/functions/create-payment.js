@@ -1,21 +1,10 @@
-import type { Context, Config } from "@netlify/functions";
-import Stripe from "stripe";
-import { createClient } from '@supabase/supabase-js';
-
-interface PaymentRequest {
-  amount: number;
-  productName: string;
-  isGuest?: boolean;
-  guestEmail?: string;
-  paymentMethod: 'stripe';
-  credits?: number;
-}
-
+const Stripe = require("stripe");
+const { createClient } = require('@supabase/supabase-js');
 
 // Rate limiting map (in production, use Redis or similar)
-const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
+const rateLimitMap = new Map();
 
-function checkRateLimit(identifier: string): boolean {
+function checkRateLimit(identifier) {
   const now = Date.now();
   const windowMs = 60000; // 1 minute
   const maxRequests = 10;
@@ -34,7 +23,7 @@ function checkRateLimit(identifier: string): boolean {
   return true;
 }
 
-function sanitizeInput(input: string): string {
+function sanitizeInput(input) {
   return input.replace(/[<>'"&]/g, '').trim();
 }
 
@@ -42,30 +31,26 @@ function sanitizeInput(input: string): string {
 function getSupabaseClient() {
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
+  
   if (!supabaseUrl || !supabaseServiceKey) {
     console.warn("Supabase configuration missing - order tracking disabled");
     return null;
   }
-
+  
   return createClient(supabaseUrl, supabaseServiceKey, {
     auth: { persistSession: false }
   });
 }
 
-async function getClientIP(request: Request): Promise<string> {
-  const forwarded = request.headers.get('x-forwarded-for');
-  const realIP = request.headers.get('x-real-ip');
-  const cfConnectingIP = request.headers.get('cf-connecting-ip');
+async function getClientIP(request) {
+  const forwarded = request.headers['x-forwarded-for'];
+  const realIP = request.headers['x-real-ip'];
+  const cfConnectingIP = request.headers['cf-connecting-ip'];
   
   return forwarded?.split(',')[0]?.trim() || realIP || cfConnectingIP || 'unknown';
 }
 
-async function createStripePayment(
-  paymentData: PaymentRequest,
-  email: string,
-  originUrl: string
-): Promise<{ url: string; sessionId: string }> {
+async function createStripePayment(paymentData, email, originUrl) {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
   if (!stripeSecretKey || stripeSecretKey.includes('placeholder')) {
@@ -115,78 +100,87 @@ async function createStripePayment(
     }
   });
 
-  return { url: session.url!, sessionId: session.id };
+  return { url: session.url, sessionId: session.id };
 }
 
+exports.handler = async (event, context) => {
+  // CORS headers
+  const headers = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS"
+  };
 
-export default async (req: Request, context: Context) => {
-  // Handle CORS preflight
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      },
-    });
+  // Handle preflight request
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
   }
 
-  if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: { "Content-Type": "application/json" },
-    });
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      headers,
+      body: JSON.stringify({ error: 'Method not allowed' })
+    };
   }
 
   try {
-    // Rate limiting check
-    const clientIP = await getClientIP(req);
+    // Rate limiting based on IP
+    const clientIP = await getClientIP(event);
     if (!checkRateLimit(clientIP)) {
-      return new Response(
-        JSON.stringify({ error: 'Rate limit exceeded. Please try again in a minute.' }),
-        { 
-          status: 429, 
-          headers: { 
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-          } 
-        }
-      );
+      return {
+        statusCode: 429,
+        headers,
+        body: JSON.stringify({ error: 'Too many requests. Please try again later.' })
+      };
     }
 
-    const body: PaymentRequest = await req.json();
-    
+    const body = JSON.parse(event.body || '{}');
+    const { amount, productName, isGuest, guestEmail, paymentMethod, credits } = body;
+
     // Input validation
-    if (!body.amount || body.amount <= 0 || body.amount > 100000) {
-      throw new Error('Invalid amount. Must be between $0.01 and $100,000');
-    }
-    
-    if (!body.productName || body.productName.length > 200) {
-      throw new Error('Invalid product name');
-    }
-
-    if (body.paymentMethod !== 'stripe') {
-      throw new Error('Only Stripe payments are supported');
-    }
-    
-    const { amount, isGuest = false, paymentMethod } = body;
-    const productName = sanitizeInput(body.productName);
-    let guestEmail = body.guestEmail ? sanitizeInput(body.guestEmail) : '';
-    
-    let email = guestEmail;
-
-    // For authenticated users, we should get email from auth header in production
-    // For now, we'll use the guest email or require it
-    if (!isGuest && !email) {
-      throw new Error("Email is required for payment processing");
+    if (!amount || amount <= 0 || amount > 100000) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Invalid amount. Must be between $0.01 and $100,000.' })
+      };
     }
 
-    if (isGuest && (!guestEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail))) {
-      throw new Error('Valid email address is required');
+    if (!productName || !productName.trim()) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Product name is required.' })
+      };
     }
 
-    const originUrl = req.headers.get("origin") || "https://backlinkoo.com";
+    if (paymentMethod !== 'stripe') {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Only Stripe payments are supported' })
+      };
+    }
+
+    // Email validation
+    let email;
+    if (isGuest) {
+      if (!guestEmail || !guestEmail.includes('@')) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ error: 'Valid email address is required for guest checkout.' })
+        };
+      }
+      email = sanitizeInput(guestEmail);
+    } else {
+      // Get email from context or user data
+      email = context.clientContext?.user?.email || 'user@example.com';
+    }
+
+    const originUrl = event.headers.origin || event.headers.referer?.split('/').slice(0, 3).join('/') || "https://backlinkoo.com";
     
     const result = await createStripePayment(body, email, originUrl);
 
@@ -217,32 +211,22 @@ export default async (req: Request, context: Context) => {
 
     console.log(`Payment initiated: ${paymentMethod} - ${email} - $${amount}`);
 
-    return new Response(JSON.stringify(result), {
-      headers: { 
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
-      },
-    });
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify(result)
+    };
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("Payment creation error:", error);
     
-    return new Response(
-      JSON.stringify({ 
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ 
         error: error.message || 'Payment processing failed. Please try again.',
         details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-      }), 
-      {
-        status: 500,
-        headers: { 
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
-        },
-      }
-    );
+      })
+    };
   }
-};
-
-export const config: Config = {
-  path: "/api/create-payment"
 };

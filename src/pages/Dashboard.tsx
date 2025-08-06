@@ -11,6 +11,7 @@ import { Footer } from "@/components/Footer";
 
 import { PremiumService } from "@/services/premiumService";
 import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
+import { PricingModal } from "@/components/PricingModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,7 +61,6 @@ import {
   BookOpen,
   Star
 } from "lucide-react";
-import { EnhancedUnifiedPaymentModal } from "@/components/EnhancedUnifiedPaymentModal";
 import { CampaignForm } from "@/components/CampaignForm";
 import { KeywordResearchTool } from "@/components/KeywordResearchTool";
 import { RankingTracker } from "@/components/RankingTracker";
@@ -644,7 +644,6 @@ const Dashboard = () => {
   const [credits, setCredits] = useState(0);
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [paymentDefaultTab, setPaymentDefaultTab] = useState<'credits' | 'premium'>('credits');
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
@@ -1094,7 +1093,6 @@ const Dashboard = () => {
                     <span className="hidden sm:inline">Credits</span>
                   </Badge>
                   <Button variant="outline" size="sm" onClick={() => {
-                    setPaymentDefaultTab('credits');
                     setIsPaymentModalOpen(true);
                   }} className="px-2 sm:px-4">
                     <Plus className="h-4 w-4 sm:mr-1" />
@@ -1251,8 +1249,7 @@ const Dashboard = () => {
                 <span className="sm:hidden">Home</span>
               </TabsTrigger>
               <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
-                <span className="hidden sm:inline">Campaigns</span>
-                <span className="sm:hidden">Camps</span>
+                Campaigns
               </TabsTrigger>
               <TabsTrigger value="keyword-research" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Keyword Research</span>
@@ -1289,7 +1286,6 @@ const Dashboard = () => {
                       />
                     </div>
                     <Button onClick={() => {
-                      setPaymentDefaultTab('credits');
                       setIsPaymentModalOpen(true);
                     }}>
                       <Plus className="h-4 w-4 mr-2" />
@@ -1860,18 +1856,17 @@ const Dashboard = () => {
         )}
       </div>
 
-      <EnhancedUnifiedPaymentModal
+      <PricingModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
-        defaultTab={paymentDefaultTab}
-        onSuccess={() => {
+        onAuthSuccess={(user) => {
           setIsPaymentModalOpen(false);
           toast({
             title: "Payment Successful!",
             description: "Your purchase has been completed successfully.",
           });
-          // Refresh user data if needed
-          window.location.reload();
+          // Refresh user data to get new credits
+          fetchUserData();
         }}
       />
 

@@ -143,12 +143,12 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
-              <p className="text-xs text-gray-500 flex items-center gap-1">
+              <div className="text-xs text-gray-500 flex items-center gap-1">
                 <div className="h-4 w-4 rounded-full bg-emerald-50 border border-emerald-300 flex items-center justify-center">
                   <Target className="h-2.5 w-2.5 text-emerald-600" />
                 </div>
                 The main topic your blog post will focus on
-              </p>
+              </div>
             </div>
 
             {/* Anchor Text Field */}
@@ -169,12 +169,12 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
-              <p className="text-xs text-gray-500 flex items-center gap-1">
+              <div className="text-xs text-gray-500 flex items-center gap-1">
                 <div className="h-4 w-4 rounded-full bg-amber-50 border border-amber-300 flex items-center justify-center">
                   <Link className="h-2.5 w-2.5 text-amber-600" />
                 </div>
                 The clickable text that will link to your URL
-              </p>
+              </div>
             </div>
           </div>
 
@@ -200,12 +200,12 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
               />
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             </div>
-            <p className="text-xs text-gray-500 flex items-center gap-1">
+            <div className="text-xs text-gray-500 flex items-center gap-1">
               <div className="h-4 w-4 rounded-full bg-blue-50 border border-blue-300 flex items-center justify-center">
                 <Globe className="h-2.5 w-2.5 text-blue-600" />
               </div>
               The destination URL where the anchor text will link to.
-            </p>
+            </div>
           </div>
 
           {/* Beautiful CTA Button */}

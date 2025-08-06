@@ -65,12 +65,22 @@ async function handlePaymentSuccess(session: any) {
         const user = userData.users.find(u => u.email === email);
         
         if (user) {
+          // Get current credits first
+          const { data: currentCredits, error: fetchError } = await supabase
+            .from('user_credits')
+            .select('credits')
+            .eq('user_id', user.id)
+            .single();
+
+          const existingCredits = (currentCredits?.credits || 0);
+          const newTotalCredits = existingCredits + credits;
+
           // Update user credits
           const { error: creditsError } = await supabase
             .from('user_credits')
             .upsert({
               user_id: user.id,
-              credits: credits,
+              credits: newTotalCredits,
               updated_at: new Date().toISOString()
             }, {
               onConflict: 'user_id',
@@ -79,9 +89,13 @@ async function handlePaymentSuccess(session: any) {
 
           if (creditsError) {
             console.error('Credits update error:', creditsError);
+            throw new Error(`Failed to update credits: ${creditsError.message}`);
           } else {
-            console.log(`Added ${credits} credits to user ${email}`);
+            console.log(`✅ Successfully added ${credits} credits to user ${email} (total: ${newTotalCredits})`);
           }
+        } else {
+          console.error(`❌ User not found with email: ${email}`);
+          throw new Error(`User not found: ${email}`);
         }
       }
     }
