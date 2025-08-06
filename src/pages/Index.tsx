@@ -781,13 +781,13 @@ const Index = () => {
       >
         <div className="w-full relative z-10 px-4 md:px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">Starter Packages</h2>
-            <p className="text-xl text-gray-700 max-w-6xl mx-auto leading-relaxed font-light">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light mb-6 tracking-tight text-gray-900">Starter Packages</h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-700 max-w-6xl mx-auto leading-relaxed font-light">
               Begin your journey with our proven backlink platform. All starter packages include full access to our professional tools.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mx-auto max-w-6xl">
             {pricingPlans.map((plan) => (
               <Card 
                 key={plan.id} 
