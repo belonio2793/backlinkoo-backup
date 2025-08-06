@@ -1,867 +1,487 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { AffiliateService } from '@/services/affiliateService';
-import type { User } from '@supabase/supabase-js';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { useAuth } from '../hooks/useAuth';
+import { affiliateService } from '../services/affiliateService';
+import AffiliateDashboard from '../components/affiliate/AffiliateDashboard';
+import AffiliateRegistration from '../components/affiliate/AffiliateRegistration';
+import AffiliateAssetLibrary from '../components/affiliate/AffiliateAssetLibrary';
 import {
   DollarSign,
-  ArrowRight,
   Users,
   TrendingUp,
+  Clock,
   Shield,
-  Copy,
-  ExternalLink,
-  MousePointer,
-  UserPlus,
-  CreditCard,
-  Calendar,
-  Mail,
+  Award,
   Target,
-  Infinity,
-  Code,
-  BarChart,
+  Zap,
+  Star,
+  CheckCircle,
+  ArrowRight,
   Globe,
-  Share2,
+  BarChart3,
+  Gift,
+  Rocket,
+  Crown,
+  Infinity,
+  ExternalLink,
+  Play,
   Download,
-  Image,
-  MessageSquare
+  Mail,
+  Calendar
 } from 'lucide-react';
 
-const AffiliateProgram = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [affiliate, setAffiliate] = useState<any>(null);
-  const [customId, setCustomId] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [stats, setStats] = useState({
-    total_clicks: 0,
-    total_conversions: 0,
-    conversion_rate: 0,
-    total_commission: 0
-  });
-  const [trackingPixels, setTrackingPixels] = useState<any[]>([]);
-  const [newPixelName, setNewPixelName] = useState('');
-  const [newPixelCode, setNewPixelCode] = useState('');
-  const [referralSources, setReferralSources] = useState<any[]>([]);
-  const [previousStats, setPreviousStats] = useState<any>(null);
+export const AffiliateProgram: React.FC = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const [affiliateProfile, setAffiliateProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showRegistration, setShowRegistration] = useState(false);
 
   useEffect(() => {
-    checkAuthAndLoadData();
-  }, []);
+    if (user) {
+      checkAffiliateStatus();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
-  const checkAuthAndLoadData = async () => {
+  const checkAffiliateStatus = async () => {
     try {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      
-      if (!authUser) {
-        setIsLoading(false);
-        return;
-      }
-
-      setUser(authUser);
-      await loadAffiliateData(authUser.id);
+      setLoading(true);
+      const profile = await affiliateService.getAffiliateProfile(user.id);
+      setAffiliateProfile(profile);
     } catch (error) {
-      console.error('Error checking auth:', error);
+      console.error('Failed to check affiliate status:', error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const loadAffiliateData = async (userId: string) => {
-    try {
-      const affiliateData = await AffiliateService.getAffiliateByUserId(userId);
-      setAffiliate(affiliateData);
-
-      if (affiliateData) {
-        const statsData = await AffiliateService.getAffiliateStats(affiliateData.id);
-        setStats(statsData);
-      }
-    } catch (error) {
-      console.error('Error loading affiliate data:', error);
-    }
+  const handleRegistrationComplete = () => {
+    setShowRegistration(false);
+    checkAffiliateStatus();
   };
 
-  const createAffiliateAccount = async () => {
-    if (!user) return;
-
-    try {
-      const newAffiliate = await AffiliateService.createAffiliateProgram(user.id, customId);
-      setAffiliate(newAffiliate);
-      await loadAffiliateData(user.id);
-      
-      toast({
-        title: 'Welcome to our Affiliate Program!',
-        description: 'Your affiliate account has been created successfully.',
-      });
-    } catch (error) {
-      console.error('Affiliate registration error:', error);
-      toast({
-        title: 'Registration Failed',
-        description: 'Something went wrong. Please try again.',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const copyToClipboard = async (text: string, label: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast({
-        title: 'Copied!',
-        description: `${label} copied to clipboard.`,
-      });
-    } catch (error) {
-      toast({
-        title: 'Copy Failed',
-        description: 'Could not copy to clipboard.',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const addTrackingPixel = () => {
-    if (!newPixelName.trim() || !newPixelCode.trim()) {
-      toast({
-        title: 'Missing Information',
-        description: 'Please provide both name and pixel code.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    const newPixel = {
-      id: Date.now().toString(),
-      name: newPixelName,
-      code: newPixelCode,
-      platform: detectPlatform(newPixelCode),
-      created_at: new Date().toISOString()
-    };
-
-    setTrackingPixels([...trackingPixels, newPixel]);
-    setNewPixelName('');
-    setNewPixelCode('');
-
-    toast({
-      title: 'Pixel Added',
-      description: `${newPixel.name} tracking pixel has been saved.`,
-    });
-  };
-
-  const detectPlatform = (code: string) => {
-    if (code.includes('facebook') || code.includes('fbq')) return 'Facebook';
-    if (code.includes('google') || code.includes('gtag')) return 'Google';
-    if (code.includes('twitter') || code.includes('twq')) return 'Twitter';
-    if (code.includes('tiktok')) return 'TikTok';
-    if (code.includes('linkedin')) return 'LinkedIn';
-    return 'Custom';
-  };
-
-  const removeTrackingPixel = (id: string) => {
-    setTrackingPixels(trackingPixels.filter(pixel => pixel.id !== id));
-    toast({
-      title: 'Pixel Removed',
-      description: 'Tracking pixel has been deleted.',
-    });
-  };
-
-  const resetAnalytics = () => {
-    // Save current stats for undo
-    setPreviousStats({ ...stats });
-
-    // Reset stats to zero
-    setStats({
-      total_clicks: 0,
-      total_conversions: 0,
-      conversion_rate: 0,
-      total_commission: 0
-    });
-
-    toast({
-      title: 'Analytics Reset',
-      description: 'All analytics values have been reset to 0.',
-    });
-  };
-
-  const undoReset = () => {
-    if (previousStats) {
-      setStats(previousStats);
-      setPreviousStats(null);
-
-      toast({
-        title: 'Reset Undone',
-        description: 'Analytics values have been restored.',
-      });
-    }
-  };
-
-  if (isLoading) {
+  // If user is not logged in, show public affiliate program landing
+  if (!user) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background">
+        {/* Hero Section */}
+        <div className="bg-gradient-to-br from-primary/5 via-blue-50 to-purple-50 py-20">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center">
+              <Badge className="mb-6 bg-green-100 text-green-800 border-green-200">
+                🚀 Join 1000+ Successful Affiliates
+              </Badge>
+              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+                Earn <span className="text-primary">$10,000+</span> Monthly
+                <br />
+                with Backlinkoo Affiliate Program
+              </h1>
+              <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                Join the most lucrative affiliate program in the SEO industry. Earn up to 35% 
+                recurring commissions promoting the world's leading backlink building platform.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  size="lg" 
+                  className="text-lg px-8 py-3"
+                  onClick={() => navigate('/auth')}
+                >
+                  Join Now - Free
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+                <Button size="lg" variant="outline" className="text-lg px-8 py-3">
+                  <Play className="w-5 h-5 mr-2" />
+                  Watch Demo
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Benefits Section */}
+        <div className="py-20 max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Why Choose Backlinkoo Affiliate Program?
+            </h2>
+            <p className="text-xl text-gray-600">
+              Industry-leading commissions, premium tools, and dedicated support
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <Card className="border-2 border-green-200 bg-green-50">
+              <CardContent className="p-8 text-center">
+                <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <DollarSign className="w-10 h-10 text-green-600" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4">Up to 35% Commission</h3>
+                <p className="text-gray-600 mb-4">
+                  Start at 20% and earn up to 35% recurring commissions with our tier-based system
+                </p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Bronze:</span>
+                    <span className="font-semibold">20%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Silver:</span>
+                    <span className="font-semibold">25%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Gold:</span>
+                    <span className="font-semibold">30%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Platinum:</span>
+                    <span className="font-semibold">35%</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-blue-200 bg-blue-50">
+              <CardContent className="p-8 text-center">
+                <div className="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Clock className="w-10 h-10 text-blue-600" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4">30-Day Cookies</h3>
+                <p className="text-gray-600 mb-4">
+                  Extended attribution window ensures you get credit for all your referrals
+                </p>
+                <div className="space-y-2 text-sm text-blue-700">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Cross-device tracking</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Session persistence</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>First-click attribution</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-purple-200 bg-purple-50">
+              <CardContent className="p-8 text-center">
+                <div className="bg-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Rocket className="w-10 h-10 text-purple-600" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4">Premium Resources</h3>
+                <p className="text-gray-600 mb-4">
+                  Complete marketing toolkit with proven assets and training materials
+                </p>
+                <div className="space-y-2 text-sm text-purple-700">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Marketing asset library</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>SEO Academy access</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Dedicated support team</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Success Stories */}
+          <div className="bg-gradient-to-r from-primary/5 to-blue-50 rounded-2xl p-8 mb-16">
+            <div className="text-center mb-8">
+              <h3 className="text-3xl font-bold text-gray-900 mb-4">Success Stories</h3>
+              <p className="text-gray-600">Real affiliates, real earnings</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                    SM
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Sarah Martinez</h4>
+                    <p className="text-sm text-gray-600">Digital Marketing Agency</p>
+                  </div>
+                </div>
+                <p className="text-gray-700 mb-4 italic">
+                  "I've earned over $15,000 in my first 6 months. The conversion rates are incredible 
+                  and the support team is amazing!"
+                </p>
+                <div className="flex justify-between text-sm">
+                  <span className="text-green-600 font-semibold">$15,247 earned</span>
+                  <span className="text-gray-500">Platinum Tier</span>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                    MJ
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Mike Johnson</h4>
+                    <p className="text-sm text-gray-600">SEO Consultant</p>
+                  </div>
+                </div>
+                <p className="text-gray-700 mb-4 italic">
+                  "Backlinkoo's affiliate program is the best I've ever joined. High commissions, 
+                  great tools, and the product sells itself."
+                </p>
+                <div className="flex justify-between text-sm">
+                  <span className="text-green-600 font-semibold">$8,932 earned</span>
+                  <span className="text-gray-500">Gold Tier</span>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-bold">
+                    LC
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Lisa Chen</h4>
+                    <p className="text-sm text-gray-600">Content Creator</p>
+                  </div>
+                </div>
+                <p className="text-gray-700 mb-4 italic">
+                  "Perfect for content creators. The asset library saves me hours, and the 
+                  commissions are consistently growing month over month."
+                </p>
+                <div className="flex justify-between text-sm">
+                  <span className="text-green-600 font-semibold">$12,456 earned</span>
+                  <span className="text-gray-500">Gold Tier</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            <div className="text-center p-6">
+              <BarChart3 className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h4 className="font-semibold mb-2">Real-Time Analytics</h4>
+              <p className="text-sm text-gray-600">Track clicks, conversions, and earnings in real-time</p>
+            </div>
+            
+            <div className="text-center p-6">
+              <Shield className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h4 className="font-semibold mb-2">Fraud Protection</h4>
+              <p className="text-sm text-gray-600">Advanced fraud detection keeps your earnings secure</p>
+            </div>
+            
+            <div className="text-center p-6">
+              <Globe className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h4 className="font-semibold mb-2">Global Reach</h4>
+              <p className="text-sm text-gray-600">Promote to customers worldwide with multi-currency support</p>
+            </div>
+            
+            <div className="text-center p-6">
+              <Gift className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h4 className="font-semibold mb-2">Bonus Rewards</h4>
+              <p className="text-sm text-gray-600">Unlock milestone bonuses and special promotions</p>
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="text-center bg-gray-900 text-white rounded-2xl p-12">
+            <Crown className="w-16 h-16 text-yellow-400 mx-auto mb-6" />
+            <h3 className="text-3xl font-bold mb-4">Ready to Start Earning?</h3>
+            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+              Join thousands of successful affiliates who are already earning substantial 
+              monthly income with Backlinkoo's industry-leading affiliate program.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                size="lg" 
+                className="bg-green-600 hover:bg-green-700 text-lg px-8 py-3"
+                onClick={() => navigate('/auth')}
+              >
+                Start Earning Today
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              <Button size="lg" variant="outline" className="text-lg px-8 py-3 border-white text-white hover:bg-white hover:text-gray-900">
+                <Calendar className="w-5 h-5 mr-2" />
+                Schedule Demo
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  // If user is not logged in, show sign up prompt
-  if (!user) {
+  // Show registration if user doesn't have affiliate profile
+  if (!affiliateProfile && !showRegistration) {
     return (
       <div className="min-h-screen bg-background">
-        {/* Header */}
-        <header className="border-b sticky top-0 z-50 bg-background">
-          <div className="container mx-auto px-4">
-            <div className="flex h-16 items-center justify-between">
-              <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-                <Infinity className="h-7 w-7 text-primary" />
-                <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
-              </div>
-              <div className="flex items-center gap-4">
-                <Button variant="ghost" onClick={() => navigate("/login")}>
-                  Sign In
-                </Button>
-                <Button onClick={() => navigate("/login")}>
-                  Get Started
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Marketing Content */}
-        <section className="py-16 px-4 bg-gradient-to-br from-primary/5 to-blue-50/30">
-          <div className="container mx-auto text-center max-w-4xl">
-            <Badge variant="outline" className="mb-4">
-              🔒 Account Required
-            </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-              Earn <span className="text-primary">50% Commission</span>
-              <br />
-              With Detailed Tracking
+        <div className="max-w-4xl mx-auto p-6">
+          <div className="text-center py-12">
+            <Infinity className="w-16 h-16 text-primary mx-auto mb-6" />
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              Welcome to the Backlinkoo Affiliate Program
             </h1>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Create an account to access our comprehensive affiliate dashboard with click tracking, user details, and commission analytics.
+            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+              You're one step away from joining our exclusive affiliate program. 
+              Complete the registration process to start earning commissions.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button size="lg" onClick={() => navigate("/login")} className="text-lg px-8 py-6">
-                Sign Up to Join Program
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="p-6 bg-green-50 rounded-lg border border-green-200">
+                <DollarSign className="w-8 h-8 text-green-600 mx-auto mb-3" />
+                <h3 className="font-semibold mb-2">Earn 20-35%</h3>
+                <p className="text-sm text-gray-600">Recurring commissions on all referrals</p>
+              </div>
+              
+              <div className="p-6 bg-blue-50 rounded-lg border border-blue-200">
+                <Clock className="w-8 h-8 text-blue-600 mx-auto mb-3" />
+                <h3 className="font-semibold mb-2">30-Day Tracking</h3>
+                <p className="text-sm text-gray-600">Extended attribution window</p>
+              </div>
+              
+              <div className="p-6 bg-purple-50 rounded-lg border border-purple-200">
+                <Award className="w-8 h-8 text-purple-600 mx-auto mb-3" />
+                <h3 className="font-semibold mb-2">Premium Support</h3>
+                <p className="text-sm text-gray-600">Dedicated affiliate success team</p>
+              </div>
             </div>
 
-            {/* Features Grid */}
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card className="text-center p-6">
-                <CardContent className="pt-6">
-                  <MousePointer className="h-12 w-12 text-primary mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Click Tracking</h3>
-                  <p className="text-muted-foreground">
-                    Monitor every click on your affiliate links with real-time analytics.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="text-center p-6">
-                <CardContent className="pt-6">
-                  <Users className="h-12 w-12 text-primary mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">User Details</h3>
-                  <p className="text-muted-foreground">
-                    See detailed information about users you refer, including email and spending.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="text-center p-6">
-                <CardContent className="pt-6">
-                  <DollarSign className="h-12 w-12 text-primary mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Commission Tracking</h3>
-                  <p className="text-muted-foreground">
-                    Track your 50% commission on every transaction in real-time.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+            <Button 
+              size="lg" 
+              onClick={() => setShowRegistration(true)}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Complete Registration
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
           </div>
-        </section>
-      </div>
-    );
-  }
-
-  // If user is logged in but not an affiliate
-  if (!affiliate) {
-    return (
-      <div className="min-h-screen bg-background">
-        {/* Header */}
-        <header className="border-b sticky top-0 z-50 bg-background">
-          <div className="container mx-auto px-4">
-            <div className="flex h-16 items-center justify-between">
-              <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-                <Infinity className="h-7 w-7 text-primary" />
-                <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
-              </div>
-              <div className="flex items-center gap-4">
-                <Button variant="ghost" onClick={() => navigate("/dashboard")}>
-                  Dashboard
-                </Button>
-                <Button variant="ghost" onClick={() => {
-                  window.location.href = "/";
-                  // Sign out in background
-                  setTimeout(() => supabase.auth.signOut().catch(console.warn), 0);
-                }}>
-                  Sign Out
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <div className="container mx-auto px-4 py-12">
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
-                Join Our Affiliate Program
-              </CardTitle>
-              <CardDescription>
-                Create your affiliate account to access detailed tracking and analytics
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-primary/5 rounded-lg">
-                  <TrendingUp className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <div className="font-semibold">50% Commission</div>
-                  <div className="text-sm text-muted-foreground">On all referral spending</div>
-                </div>
-                <div className="text-center p-4 bg-primary/5 rounded-lg">
-                  <MousePointer className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <div className="font-semibold">Click Analytics</div>
-                  <div className="text-sm text-muted-foreground">Real-time tracking</div>
-                </div>
-                <div className="text-center p-4 bg-primary/5 rounded-lg">
-                  <Mail className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <div className="font-semibold">User Details</div>
-                  <div className="text-sm text-muted-foreground">Email & spending data</div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="customId">Custom Affiliate ID (Optional)</Label>
-                  <Input
-                    id="customId"
-                    placeholder="Enter your preferred custom ID (8 characters max)"
-                    value={customId}
-                    onChange={(e) => setCustomId(e.target.value.toUpperCase().slice(0, 8))}
-                    maxLength={8}
-                    className="font-mono"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Leave blank to auto-generate. Only letters and numbers allowed.
-                  </p>
-                </div>
-
-                <Button 
-                  onClick={createAffiliateAccount} 
-                  size="lg" 
-                  className="w-full"
-                >
-                  Create Affiliate Account
-                </Button>
-              </div>
-
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">What you'll get:</h4>
-                <ul className="text-sm space-y-1">
-                  <li>✓ Unique affiliate ID and tracking links</li>
-                  <li>✓ Real-time click and conversion analytics</li>
-                  <li>✓ Detailed user information including emails</li>
-                  <li>✓ Lifetime spending tracking per user</li>
-                  <li>✓ 50% commission on all transactions</li>
-                  <li>✓ Monthly payouts when you reach $100</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     );
   }
 
-  // If user is logged in and is an affiliate - show dashboard
+  // Show registration form
+  if (showRegistration) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AffiliateRegistration
+          userId={user.id}
+          userEmail={user.email}
+          onRegistrationComplete={handleRegistrationComplete}
+        />
+      </div>
+    );
+  }
+
+  // Show affiliate dashboard for existing affiliates
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b sticky top-0 z-50 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-              <Infinity className="h-7 w-7 text-primary" />
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={() => navigate("/dashboard")}>
-                Dashboard
-              </Button>
-              <Button variant="ghost" onClick={() => {
-                window.location.href = "/";
-                // Sign out in background
-                setTimeout(() => supabase.auth.signOut().catch(console.warn), 0);
-              }}>
-                Sign Out
-              </Button>
-            </div>
+      <Tabs defaultValue="dashboard" className="max-w-7xl mx-auto">
+        <div className="border-b bg-white sticky top-0 z-40">
+          <div className="px-6 py-4">
+            <TabsList className="grid w-full grid-cols-3 max-w-md">
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="assets">Assets</TabsTrigger>
+              <TabsTrigger value="support">Support</TabsTrigger>
+            </TabsList>
           </div>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <div className="mb-4">
-            <button
-              onClick={() => navigate('/')}
-              className="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
-            >
-              ← Home
-            </button>
-          </div>
-          <h1 className="text-3xl font-bold mb-2">Affiliate Dashboard</h1>
-          <p className="text-muted-foreground">Track your performance and earnings in real-time</p>
-        </div>
+        <TabsContent value="dashboard" className="mt-0">
+          <AffiliateDashboard userId={user.id} />
+        </TabsContent>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="referrals">Referrals</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="tracking">Tracking</TabsTrigger>
-            <TabsTrigger value="payouts">Payouts</TabsTrigger>
-          </TabsList>
+        <TabsContent value="assets" className="mt-0">
+          <AffiliateAssetLibrary 
+            affiliateId={affiliateProfile.affiliate_id}
+            affiliateCode={affiliateProfile.affiliate_id}
+          />
+        </TabsContent>
 
-          <TabsContent value="overview" className="space-y-6">
-            {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Total Earnings</p>
-                      <p className="text-3xl font-bold">${affiliate.total_earnings?.toFixed(2) || '0.00'}</p>
-                    </div>
-                    <DollarSign className="h-8 w-8 text-primary" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                      <p className="text-3xl font-bold text-orange-600">${affiliate.pending_earnings?.toFixed(2) || '0.00'}</p>
-                    </div>
-                    <Calendar className="h-8 w-8 text-orange-600" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Total Clicks</p>
-                      <p className="text-3xl font-bold">{stats.total_clicks}</p>
-                    </div>
-                    <MousePointer className="h-8 w-8 text-blue-600" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Conversions</p>
-                      <p className="text-3xl font-bold">{stats.total_conversions}</p>
-                    </div>
-                    <UserPlus className="h-8 w-8 text-green-600" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Referral Tools */}
+        <TabsContent value="support" className="mt-0">
+          <div className="p-6">
             <Card>
               <CardHeader>
-                <CardTitle>Your Affiliate Links</CardTitle>
-                <CardDescription>Share these links to start earning commissions</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label>Your Affiliate ID</Label>
-                  <div className="flex items-center gap-2">
-                    <Input value={affiliate.custom_id} readOnly className="font-mono" />
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => copyToClipboard(affiliate.custom_id, 'Affiliate ID')}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div>
-                  <Label>Referral URL</Label>
-                  <div className="flex items-center gap-2">
-                    <Input value={affiliate.referral_url} readOnly className="text-sm" />
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => copyToClipboard(affiliate.referral_url, 'Referral URL')}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => window.open(affiliate.referral_url, '_blank')}
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Promotion Materials */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Marketing Resources</CardTitle>
-                <CardDescription>Access professional promotional materials to boost your referrals</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Download className="h-6 w-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">Promotion Materials</h3>
-                      <p className="text-sm text-muted-foreground">Email templates, banners, social media posts & more</p>
-                    </div>
-                  </div>
-                  <Button
-                    onClick={() => navigate('/affiliate/promotion-materials')}
-                    className="ml-4"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Access Materials
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="referrals" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Referred Users</CardTitle>
-                <CardDescription>Detailed information about users you've referred</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground mb-2">No referrals yet</p>
-                  <p className="text-sm text-muted-foreground">
-                    When users sign up through your link, their details will appear here including:
-                  </p>
-                  <div className="mt-4 text-sm space-y-1 text-left max-w-md mx-auto">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-primary" />
-                      <span>Email addresses</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-primary" />
-                      <span>Lifetime expenditure</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4 text-primary" />
-                      <span>Transaction history</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-primary" />
-                      <span>50% commission calculations</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Performance Analytics</CardTitle>
-                    <CardDescription>Detailed tracking of clicks, conversions, and referral sources</CardDescription>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <button
-                      onClick={resetAnalytics}
-                      className="text-primary hover:text-primary/80 hover:underline"
-                    >
-                      Reset to 0
-                    </button>
-                    {previousStats && (
-                      <button
-                        onClick={undoReset}
-                        className="text-primary hover:text-primary/80 hover:underline"
-                      >
-                        Undo Reset
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <MousePointer className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-blue-600">{stats.total_clicks}</div>
-                    <div className="text-sm text-muted-foreground">Total Clicks</div>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <UserPlus className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-green-600">{stats.total_conversions}</div>
-                    <div className="text-sm text-muted-foreground">Conversions</div>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <Target className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-purple-600">{stats.conversion_rate?.toFixed(1) || '0.0'}%</div>
-                    <div className="text-sm text-muted-foreground">Conversion Rate</div>
-                  </div>
-                </div>
-
-
-
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Referral Sources</CardTitle>
-                    <CardDescription>Track exactly where your users are coming from</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold mb-4">Detailed Referral Tracking</h4>
-                        <div className="space-y-2">
-                          <div className="text-sm text-muted-foreground mb-3">
-                            URLs will auto-populate here when users sign up through your referral links:
-                          </div>
-                          <div className="space-y-1 text-sm">
-                            <div className="p-2 bg-muted/30 rounded text-muted-foreground italic">
-                              • https://example.com/signup?ref={affiliate.custom_id} - 0 signups, $0.00 spend
-                            </div>
-                            <div className="p-2 bg-muted/30 rounded text-muted-foreground italic">
-                              • https://social-media.com/link?ref={affiliate.custom_id} - 0 signups, $0.00 spend
-                            </div>
-                            <div className="p-2 bg-muted/30 rounded text-muted-foreground italic">
-                              • https://blog-post.com/article?ref={affiliate.custom_id} - 0 signups, $0.00 spend
-                            </div>
-                          </div>
-                          <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                            <p className="text-sm text-blue-700">
-                              <strong>Auto-Detection:</strong> Each successful signup will automatically detect and list the exact URL where the user clicked your referral link, along with signup count and total spending for that specific URL.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="tracking" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Tracking Pixels & Conversion Codes</CardTitle>
-                <CardDescription>Manage your tracking pixels for ad spend analysis and conversion optimization</CardDescription>
+                <CardTitle>Affiliate Support</CardTitle>
+                <CardDescription>
+                  Get help with your affiliate journey
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Add New Pixel */}
-                <div className="border rounded-lg p-6 bg-gradient-to-br from-primary/5 to-blue-50">
-                  <h3 className="text-lg font-semibold mb-4">Add New Tracking Pixel</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <Label htmlFor="pixelName">Pixel Name</Label>
-                      <Input
-                        id="pixelName"
-                        placeholder="e.g., Facebook Conversion Pixel"
-                        value={newPixelName}
-                        onChange={(e) => setNewPixelName(e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="pixelCode">Platform</Label>
-                      <Input
-                        placeholder="Auto-detected from code"
-                        value={detectPlatform(newPixelCode)}
-                        readOnly
-                        className="bg-muted"
-                      />
-                    </div>
-                  </div>
-                  <div className="mb-4">
-                    <Label htmlFor="pixelCode">Tracking Code</Label>
-                    <textarea
-                      id="pixelCode"
-                      className="w-full p-3 border rounded-lg font-mono text-sm"
-                      rows={4}
-                      placeholder="Paste your tracking pixel code here..."
-                      value={newPixelCode}
-                      onChange={(e) => setNewPixelCode(e.target.value)}
-                    />
-                  </div>
-                  <Button onClick={addTrackingPixel} className="w-full">
-                    <Code className="h-4 w-4 mr-2" />
-                    Save Tracking Pixel
-                  </Button>
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardContent className="p-6">
+                      <h4 className="font-semibold mb-3 flex items-center gap-2">
+                        <ExternalLink className="w-5 h-5" />
+                        Training Resources
+                      </h4>
+                      <div className="space-y-2">
+                        <Button variant="outline" className="w-full justify-start">
+                          <Play className="w-4 h-4 mr-2" />
+                          Affiliate Marketing Masterclass
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start">
+                          <Download className="w-4 h-4 mr-2" />
+                          Best Practices Guide
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start">
+                          <BarChart3 className="w-4 h-4 mr-2" />
+                          Analytics Deep Dive
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                {/* Saved Pixels */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Your Tracking Pixels</h3>
-                  {trackingPixels.length === 0 ? (
-                    <Card>
-                      <CardContent className="text-center py-8">
-                        <Code className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground mb-2">No tracking pixels added yet</p>
-                        <p className="text-sm text-muted-foreground">
-                          Add tracking pixels from platforms like Facebook, Google, Twitter, TikTok, etc.
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <div className="space-y-4">
-                      {trackingPixels.map((pixel) => (
-                        <Card key={pixel.id}>
-                          <CardContent className="p-4">
-                            <div className="flex items-start justify-between mb-3">
-                              <div>
-                                <h4 className="font-semibold">{pixel.name}</h4>
-                                <Badge variant="outline" className="mt-1">
-                                  {pixel.platform}
-                                </Badge>
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => removeTrackingPixel(pixel.id)}
-                              >
-                                Remove
-                              </Button>
-                            </div>
-                            <div className="bg-muted p-3 rounded font-mono text-xs overflow-x-auto">
-                              {pixel.code}
-                            </div>
-                            <div className="flex items-center gap-2 mt-3">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => copyToClipboard(pixel.code, 'Pixel code')}
-                              >
-                                <Copy className="h-4 w-4 mr-1" />
-                                Copy Code
-                              </Button>
-                              <span className="text-xs text-muted-foreground">
-                                Added {new Date(pixel.created_at).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
+                  <Card>
+                    <CardContent className="p-6">
+                      <h4 className="font-semibold mb-3 flex items-center gap-2">
+                        <Mail className="w-5 h-5" />
+                        Get Help
+                      </h4>
+                      <div className="space-y-2">
+                        <Button variant="outline" className="w-full justify-start">
+                          <Mail className="w-4 h-4 mr-2" />
+                          Contact Affiliate Support
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start">
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          Knowledge Base
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start">
+                          <Users className="w-4 h-4 mr-2" />
+                          Join Community Forum
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-
-                {/* Conversion Tracking Info */}
-                <Card className="bg-gradient-to-br from-green-50 to-emerald-50">
-                  <CardHeader>
-                    <CardTitle className="text-lg text-green-800">💡 Conversion Tracking Tips</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-green-700">
-                    <div className="space-y-2 text-sm">
-                      <p>• Use these pixels to track the effectiveness of your advertising campaigns</p>
-                      <p>• Monitor which traffic sources convert best for affiliate referrals</p>
-                      <p>• Calculate your customer acquisition cost (CAC) vs commission earned</p>
-                      <p>• Optimize ad spend by focusing on highest-converting sources</p>
-                      <p>• Track lifetime value of referred customers for better ROI analysis</p>
-                    </div>
-                  </CardContent>
-                </Card>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="payouts" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Payout Management</CardTitle>
-                <CardDescription>Request payouts and view payment history</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <DollarSign className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-green-600">${affiliate.total_paid?.toFixed(2) || '0.00'}</div>
-                    <div className="text-sm text-muted-foreground">Total Paid</div>
-                  </div>
-                  <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <Calendar className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-orange-600">${affiliate.pending_earnings?.toFixed(2) || '0.00'}</div>
-                    <div className="text-sm text-muted-foreground">Pending</div>
-                  </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <CreditCard className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-blue-600">Monthly</div>
-                    <div className="text-sm text-muted-foreground">Payout Schedule</div>
-                  </div>
-                </div>
-
-                {affiliate.pending_earnings >= 100 ? (
-                  <div className="text-center">
-                    <Button size="lg">
-                      Request Payout (${affiliate.pending_earnings.toFixed(2)})
-                    </Button>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Minimum payout threshold reached
-                    </p>
-                  </div>
-                ) : (
-                  <div className="text-center text-muted-foreground">
-                    <p>Minimum payout amount is $100</p>
-                    <p className="text-sm">
-                      You need ${(100 - (affiliate.pending_earnings || 0)).toFixed(2)} more in commissions
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-
-      </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
