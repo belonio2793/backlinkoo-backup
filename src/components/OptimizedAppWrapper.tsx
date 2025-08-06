@@ -302,6 +302,11 @@ export const OptimizedAppWrapper = () => {
               <LazyEdgeFunctionDiagnostic />
             </Suspense>
           } />
+          <Route path="/email-diagnostic" element={
+            <Suspense fallback={<PageLoader />}>
+              <EmailDiagnosticPage />
+            </Suspense>
+          } />
 
           {/* 404 routes */}
           <Route path="/404" element={<NotFound />} />
