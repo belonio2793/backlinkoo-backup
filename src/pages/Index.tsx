@@ -993,7 +993,7 @@ const Index = () => {
         className="relative py-24 px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
-        <div className="container mx-auto text-center relative z-10">
+        <div className="w-full text-center relative z-10 px-6">
           <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">
             Ready to Dominate Search Results?
           </h2>
