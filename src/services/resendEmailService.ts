@@ -1,4 +1,6 @@
-// Direct Resend email service - no Netlify or Supabase dependencies
+// Direct Resend email service - with Netlify function fallback
+
+import { safeFetch } from '../utils/fullstoryWorkaround';
 
 export interface ResendEmailResponse {
   success: boolean;
@@ -18,6 +20,7 @@ export class ResendEmailService {
   private static readonly FROM_EMAIL = 'Backlink ∞ <support@backlinkoo.com>';
   private static failureLog: Array<{ timestamp: Date; error: string; email: string }> = [];
   private static readonly NETLIFY_FUNCTION_URL = '/netlify/functions/send-email';
+  private static readonly RESEND_API_KEY = 're_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq';
 
   private static async sendViaNetlify(emailData: ResendEmailData): Promise<ResendEmailResponse> {
     try {
