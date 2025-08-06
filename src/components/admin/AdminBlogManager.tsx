@@ -767,6 +767,71 @@ export function AdminBlogManager() {
           )}
         </CardContent>
       </Card>
+
+      {/* Confirmation Dialog for Force Delete */}
+      {confirmDeletePost && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-100 rounded-full">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Force Delete Blog Post</h3>
+                <p className="text-sm text-gray-600">This action cannot be undone</p>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-sm text-gray-700 mb-2">
+                You are about to <strong>permanently delete</strong> the following blog post:
+              </p>
+              <div className="bg-gray-50 p-3 rounded border">
+                <p className="font-medium text-gray-900">{confirmDeletePost.title}</p>
+                <p className="text-sm text-gray-600">ID: {confirmDeletePost.id}</p>
+                <p className="text-sm text-gray-600">URL: {confirmDeletePost.published_url}</p>
+              </div>
+              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded">
+                <p className="text-sm text-red-800 font-medium flex items-center gap-2">
+                  <Zap className="h-4 w-4" />
+                  ADMIN OVERRIDE - ALL CONDITIONS BYPASSED
+                </p>
+                <p className="text-xs text-red-700 mt-1">
+                  This will bypass all permission checks, claim statuses, and deletion restrictions.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setConfirmDeletePost(null)}
+                disabled={deletingPostId === confirmDeletePost.id}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmForceDelete}
+                disabled={deletingPostId === confirmDeletePost.id}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                {deletingPostId === confirmDeletePost.id ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-4 w-4 mr-2" />
+                    Force Delete
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
