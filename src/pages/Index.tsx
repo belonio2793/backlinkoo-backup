@@ -510,7 +510,7 @@ const Index = () => {
       </section>
 
       {/* Features Grid */}
-      <section className="py-24 px-6 bg-muted/30">
+      <section className="py-24 px-0 md:px-6 bg-muted/30">
         <div className="w-full">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight">Why Professionals Choose Us</h2>
