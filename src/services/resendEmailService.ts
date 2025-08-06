@@ -141,7 +141,7 @@ export class ResendEmailService {
       }
 
       const result = await response.json();
-      console.log('��� Email sent successfully via direct API:', result.id);
+      console.log('✅ Email sent successfully via direct API:', result.id);
 
       return {
         success: true,
