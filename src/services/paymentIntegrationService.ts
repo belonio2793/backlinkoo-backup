@@ -156,7 +156,7 @@ class PaymentIntegrationService {
 
         // If 404, try fallback endpoint
         if (response.status === 404) {
-          console.log('Primary endpoint failed, trying fallback...');
+          console.warn('🔄 Payment endpoint /api/create-payment returned 404, trying fallback /.netlify/functions/create-payment');
           response = await fetch('/.netlify/functions/create-payment', {
             method: 'POST',
             headers: {
@@ -164,6 +164,12 @@ class PaymentIntegrationService {
             },
             body: requestBody
           });
+
+          if (response.status === 404) {
+            console.error('❌ Both payment endpoints failed with 404. Check Netlify function deployment.');
+          } else {
+            console.log('✅ Fallback payment endpoint worked');
+          }
         }
       } catch (fetchError) {
         console.error('Payment endpoint fetch error:', fetchError);
