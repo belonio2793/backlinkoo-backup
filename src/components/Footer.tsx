@@ -146,12 +146,6 @@ export const Footer = () => {
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Company</h3>
             <div className="space-y-2">
-              <Link
-                to="/affiliate"
-                className="block text-gray-600 hover:text-gray-900 text-sm"
-              >
-                Affiliate Program
-              </Link>
               <button
                 onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.ADMIN, "Admin Dashboard")}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
