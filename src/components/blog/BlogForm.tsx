@@ -201,8 +201,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             </div>
             <p className="text-xs text-gray-500 flex items-center gap-1">
-              <div className="h-4 w-4 rounded-full overflow-hidden border border-blue-300">
-                <img src="https://images.pexels.com/photos/7793740/pexels-photo-7793740.jpeg" alt="SEO Technology" className="h-4 w-4 object-cover" />
+              <div className="h-4 w-4 rounded-full bg-blue-50 border border-blue-300 flex items-center justify-center">
+                <Globe className="h-2.5 w-2.5 text-blue-600" />
               </div>
               The destination URL where the anchor text will link to.
             </p>
