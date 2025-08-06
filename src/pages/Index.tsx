@@ -345,9 +345,24 @@ const Index = () => {
                 // Navigate to the specific blog post after a short delay
                 setTimeout(() => {
                   if (blogPost.blogUrl) {
-                    // Extract the path from the full URL and navigate to it
-                    const blogPath = new URL(blogPost.blogUrl).pathname;
-                    navigate(blogPath);
+                    try {
+                      // Check if it's already a relative path
+                      if (blogPost.blogUrl.startsWith('/')) {
+                        navigate(blogPost.blogUrl);
+                      } else {
+                        // Try to extract the path from absolute URL
+                        const blogPath = new URL(blogPost.blogUrl).pathname;
+                        navigate(blogPath);
+                      }
+                    } catch (error) {
+                      console.warn('Invalid blogUrl format:', blogPost.blogUrl, error);
+                      // Fallback to slug if URL parsing fails
+                      if (blogPost.metadata?.slug) {
+                        navigate(`/blog/${blogPost.metadata.slug}`);
+                      } else {
+                        navigate('/blog');
+                      }
+                    }
                   } else if (blogPost.metadata?.slug) {
                     // Fallback to slug-based navigation
                     navigate(`/blog/${blogPost.metadata.slug}`);
