@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { affiliateService } from '../../services/affiliateService';
 import type { AffiliateProfile, AffiliateStats, AffiliateAnalytics } from '../../integrations/supabase/affiliate-types';
+import AffiliateGamification from './AffiliateGamification';
 
 interface AffiliateDashboardProps {
   userId: string;
