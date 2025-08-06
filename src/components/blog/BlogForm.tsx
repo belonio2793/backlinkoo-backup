@@ -216,7 +216,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                   <span>Generating Your Backlink...</span>
                 </div>
               ) : (
-                <span>Create a Permanent Backlink</span>
+                <span>Claim Now</span>
               )}
             </Button>
           </div>
