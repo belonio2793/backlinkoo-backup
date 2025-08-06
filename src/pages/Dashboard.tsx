@@ -78,6 +78,7 @@ import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 
 import { AIPostsManager } from "@/components/admin/AIPostsManager";
+import { RotatingText } from "@/components/ui/rotating-text";
 import { PremiumUserAdmin } from "@/components/admin/PremiumUserAdmin";
 
 import { supabase } from "@/integrations/supabase/client";
