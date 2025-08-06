@@ -115,7 +115,11 @@ export class ResendEmailService {
    */
   private static async sendMockEmail(emailData: ResendEmailData): Promise<ResendEmailResponse> {
     try {
-      console.log('🔗 Sending email directly via Resend API:', { to: emailData.to, subject: emailData.subject });
+      console.log('📧 Using mock email service (development mode):', {
+        to: emailData.to,
+        subject: emailData.subject,
+        reason: 'Netlify functions unavailable, direct API blocked by CORS'
+      });
 
       const response = await safeFetch('https://api.resend.com/emails', {
         method: 'POST',
