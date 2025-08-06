@@ -22,8 +22,31 @@ export class EmailConfigurationTest {
   private config: EmailConfig;
 
   constructor() {
+    // Get API key from multiple sources
+    const getApiKey = (): string => {
+      // Check environment variables first
+      const envKey = import.meta.env.VITE_RESEND_API_KEY ||
+                     import.meta.env.RESEND_API_KEY;
+      if (envKey && envKey.startsWith('re_')) {
+        return envKey;
+      }
+
+      // Check localStorage configs
+      try {
+        const adminConfigs = JSON.parse(localStorage.getItem('admin_api_configs') || '{}');
+        if (adminConfigs.RESEND_API_KEY && adminConfigs.RESEND_API_KEY.startsWith('re_')) {
+          return adminConfigs.RESEND_API_KEY;
+        }
+      } catch (error) {
+        console.warn('Failed to parse admin configs from localStorage');
+      }
+
+      // Fallback to hardcoded key
+      return 're_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq';
+    };
+
     this.config = {
-      apiKey: 're_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq',
+      apiKey: getApiKey(),
       fromEmail: 'Backlink ∞ <noreply@backlinkoo.com>',
       testEmail: 'support@backlinkoo.com'
     };
