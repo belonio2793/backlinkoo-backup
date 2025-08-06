@@ -1286,7 +1286,6 @@ const Dashboard = () => {
                       />
                     </div>
                     <Button onClick={() => {
-                      setPaymentDefaultTab('credits');
                       setIsPaymentModalOpen(true);
                     }}>
                       <Plus className="h-4 w-4 mr-2" />
