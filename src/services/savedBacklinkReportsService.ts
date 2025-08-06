@@ -320,20 +320,35 @@ export class SavedBacklinkReportsService {
    */
   static async deleteReport(reportId: string): Promise<void> {
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) {
       throw new Error('User must be authenticated to delete reports');
     }
 
-    const { error } = await supabase
-      .from('saved_backlink_reports')
-      .delete()
-      .eq('id', reportId)
-      .eq('user_id', user.id);
+    // Check if it's a local report
+    if (reportId.startsWith('local_')) {
+      this.removeFromLocalStorage(reportId);
+      console.log('📱 Report removed from localStorage');
+      return;
+    }
 
-    if (error) {
-      console.error('Error deleting saved report:', error);
-      throw new Error(`Failed to delete report: ${error.message}`);
+    // Try to delete from database
+    const hasAccess = await checkSavedReportsTableAccess();
+    if (hasAccess) {
+      const { error } = await supabase
+        .from('saved_backlink_reports')
+        .delete()
+        .eq('id', reportId)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error deleting saved report:', error);
+        throw new Error(`Failed to delete report: ${error.message}`);
+      }
+    } else {
+      // Also try to remove from localStorage in case it was saved there
+      this.removeFromLocalStorage(reportId);
+      console.log('📱 Database not available, removed from localStorage if it existed');
     }
   }
 
