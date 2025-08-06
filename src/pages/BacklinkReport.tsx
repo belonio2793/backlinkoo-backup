@@ -43,6 +43,38 @@ export default function BacklinkReport() {
 
   const { user, isAuthenticated } = useAuth();
 
+  // Handle URL parameters and initialize form data from URL or context
+  useEffect(() => {
+    const urlKeyword = searchParams.get('keyword');
+    const urlAnchorText = searchParams.get('anchorText');
+    const urlDestinationUrl = searchParams.get('destinationUrl');
+    const urlList = searchParams.get('urls');
+    const reportId = searchParams.get('reportId');
+
+    // If there's a reportId in URL params, navigate to that report
+    if (reportId) {
+      navigateToReportView(reportId);
+      return;
+    }
+
+    // Initialize form data from URL parameters if available
+    const urlParams: any = {};
+    if (urlKeyword) urlParams.keyword = urlKeyword;
+    if (urlAnchorText) urlParams.anchorText = urlAnchorText;
+    if (urlDestinationUrl) urlParams.destinationUrl = urlDestinationUrl;
+    if (urlList) urlParams.urlList = decodeURIComponent(urlList);
+
+    if (Object.keys(urlParams).length > 0) {
+      updateFormData(urlParams);
+    }
+  }, [searchParams, navigateToReportView, updateFormData]);
+
+  // Update form data handlers
+  const handleKeywordChange = (value: string) => updateFormData({ keyword: value });
+  const handleAnchorTextChange = (value: string) => updateFormData({ anchorText: value });
+  const handleDestinationUrlChange = (value: string) => updateFormData({ destinationUrl: value });
+  const handleUrlListChange = (value: string) => updateFormData({ urlList: value });
+
   const parseUrls = (text: string): BacklinkEntry[] => {
     const lines = text.split('\n').filter(line => line.trim());
     const backlinks: BacklinkEntry[] = [];
