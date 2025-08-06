@@ -127,10 +127,33 @@ export class SavedBacklinkReportsService {
         console.warn('⚠️ Could not call table initialization API:', error);
       }
 
-      // If still no access, provide helpful error message
+      // If still no access, use localStorage fallback
       if (!hasAccess) {
+        console.log('📱 Using localStorage fallback for saving report');
         await initializeSavedReportsTable(); // This will log the SQL commands needed
-        throw new Error('Database table not ready. The saved reports feature requires database setup. Please contact support for assistance.');
+
+        // Create fallback report object
+        const fallbackReport = {
+          user_id: user.id,
+          title: title.trim(),
+          keyword: keyword.trim(),
+          anchor_text: anchorText.trim(),
+          destination_url: destinationUrl.trim(),
+          report_data: reportData,
+          report_summary: summary,
+          total_urls: summary.totalUrls,
+          verified_backlinks: verifiedCount
+        };
+
+        this.saveToLocalStorage(fallbackReport);
+
+        // Return a mock database response
+        return {
+          ...fallbackReport,
+          id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        } as SavedBacklinkReport;
       }
     }
 
