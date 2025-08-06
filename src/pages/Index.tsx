@@ -535,8 +535,8 @@ const Index = () => {
       </section>
 
       {/* Service Sections */}
-      <section className="py-20 px-6">
-        <div className="w-full space-y-32">
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6">
+        <div className="w-full space-y-16 sm:space-y-24 md:space-y-32">
           
           {/* Dashboard Overview */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
