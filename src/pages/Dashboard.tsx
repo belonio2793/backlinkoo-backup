@@ -1856,18 +1856,17 @@ const Dashboard = () => {
         )}
       </div>
 
-      <EnhancedUnifiedPaymentModal
+      <PricingModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
-        defaultTab={paymentDefaultTab}
-        onSuccess={() => {
+        onAuthSuccess={(user) => {
           setIsPaymentModalOpen(false);
           toast({
             title: "Payment Successful!",
             description: "Your purchase has been completed successfully.",
           });
-          // Refresh user data if needed
-          window.location.reload();
+          // Refresh user data to get new credits
+          fetchUserData();
         }}
       />
 
