@@ -265,6 +265,15 @@ export const supabase = hasValidCredentials ?
             throw new Error('Request timeout - please try again');
           }
 
+          // Enhanced FullStory error handling
+          if (error.message?.includes('Failed to fetch') ||
+              error.stack?.includes('fullstory') ||
+              error.stack?.includes('edge.fullstory.com')) {
+            console.warn('🔍 FullStory interference detected in Supabase request:', url);
+            // Don't throw - let the calling code handle gracefully
+            throw new Error('Third-party script interference - request may have been blocked');
+          }
+
           console.warn('Supabase fetch error:', error);
           throw new Error(`Network request failed: ${error.message || 'Unknown network error'}`);
         });
