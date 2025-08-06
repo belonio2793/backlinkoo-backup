@@ -88,6 +88,20 @@ class PaymentIntegrationService {
     guestEmail?: string
   ): Promise<PaymentResult> {
     try {
+      // Development mode fallback
+      if (this.config.environment === 'development' && !this.config.stripe.hasPublicKey) {
+        console.warn('🚧 Development mode: Stripe not configured, using demo flow');
+        // Simulate payment processing
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        return {
+          success: true,
+          url: `/payment-success?demo=true&credits=${credits}&amount=${amount}`,
+          sessionId: 'demo_session_' + Date.now(),
+          orderId: 'demo_order_' + Date.now()
+        };
+      }
+
       // Validate payment method is available
       const availableMethods = this.getAvailablePaymentMethods();
       if (!availableMethods.includes(paymentMethod)) {
@@ -139,6 +153,14 @@ class PaymentIntegrationService {
       try {
         data = await response.json();
       } catch (parseError) {
+        // If it's a 502 error in development, provide helpful message
+        if (response.status === 502 && this.config.environment === 'development') {
+          return {
+            success: false,
+            error: 'Development mode: Stripe configuration required. Using demo mode instead. Set STRIPE_SECRET_KEY environment variable for full functionality.'
+          };
+        }
+
         return {
           success: false,
           error: `Invalid response from payment service: ${response.status} ${response.statusText}`
@@ -146,6 +168,16 @@ class PaymentIntegrationService {
       }
 
       if (!response.ok) {
+        // Better error handling for 502 errors
+        if (response.status === 502) {
+          return {
+            success: false,
+            error: this.config.environment === 'development'
+              ? 'Development mode: Payment service unavailable. Please check your Stripe configuration or use demo mode.'
+              : 'Payment service temporarily unavailable. Please try again in a moment.'
+          };
+        }
+
         return {
           success: false,
           error: data.error || `Payment creation failed: ${response.status} ${response.statusText}`
@@ -161,6 +193,15 @@ class PaymentIntegrationService {
 
     } catch (error: any) {
       console.error('Payment creation error:', error);
+
+      // In development, provide more helpful error messages
+      if (this.config.environment === 'development') {
+        return {
+          success: false,
+          error: 'Development mode: Payment system error. Check console for details or contact support.'
+        };
+      }
+
       return {
         success: false,
         error: error.message || 'An unexpected error occurred during payment creation'
