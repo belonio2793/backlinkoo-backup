@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { ResendEmailService, ResendEmailResponse, ResendEmailData } from '@/services/resendEmailService';
+import { MockEmailService, MockEmailResponse, MockEmailData } from '@/services/mockEmailService';
 import { directEmailService } from '@/services/directEmailService';
 import {
   Mail,
@@ -37,7 +37,7 @@ This is a comprehensive test of our multi-provider email delivery system.
 🔧 Test Details:
 - Timestamp: ${new Date().toISOString()}
 - Source: Admin Email System Manager
-- Providers: Resend → Supabase → Netlify → Admin Config
+- Providers: Resend �� Supabase → Netlify → Admin Config
 
 📊 This test validates:
 ✅ Primary delivery via Resend
