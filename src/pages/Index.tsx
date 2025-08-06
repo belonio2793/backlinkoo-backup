@@ -763,9 +763,9 @@ const Index = () => {
       </section>
 
       {/* Pricing Section */}
-      <section 
-        id="pricing" 
-        className="relative py-24 px-6 bg-white"
+      <section
+        id="pricing"
+        className="relative py-24 px-0 md:px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
         <div className="w-full relative z-10 px-6">
