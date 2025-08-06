@@ -19,6 +19,7 @@ export default function BacklinkReport() {
   const [urlList, setUrlList] = useState('');
   const [reportUrl, setReportUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isPreviewSectionCollapsed, setIsPreviewSectionCollapsed] = useState(false);
 
   const parseUrls = (text: string): BacklinkEntry[] => {
     const lines = text.split('\n').filter(line => line.trim());
