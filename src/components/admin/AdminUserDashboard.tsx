@@ -348,14 +348,13 @@ export function AdminUserDashboard() {
         periodEnd.setFullYear(periodEnd.getFullYear() + 1); // 1 year from now
 
         const { error: subError } = await supabase
-          .from('subscribers')
-          .upsert({
-            user_id: user.user_id,
-            plan_type: 'premium',
-            status: 'active',
-            current_period_start: new Date().toISOString(),
-            current_period_end: periodEnd.toISOString()
-          });
+        const { error: subError } = await SchemaCompatibility.upsertSubscription({
+          user_id: user.user_id,
+          plan_type: 'premium',
+          status: 'active',
+          current_period_start: new Date().toISOString(),
+          current_period_end: periodEnd.toISOString()
+        });
 
         if (subError) {
           console.warn('⚠️ Subscription record warning:', subError.message);
