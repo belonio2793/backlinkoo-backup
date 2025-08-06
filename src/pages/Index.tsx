@@ -28,6 +28,7 @@ import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 import { OpenAIGenerator } from "@/components/OpenAIGenerator";
 import { BlogForm } from "@/components/blog/BlogForm";
 import { RotatingTagline } from "@/components/RotatingTagline";
+import { RotatingStats } from "@/components/RotatingStats";
 
 
 import { supabase } from "@/integrations/supabase/client";
@@ -216,10 +217,6 @@ const Index = () => {
     setPricingModalOpen(true);
   };
 
-  const stats = [
-    { value: "High Quality", label: "Link Quality", description: "Premium domain sources" },
-    { value: "Tracked", label: "Results", description: "Monitored performance" }
-  ];
 
   const features = [
     {
@@ -519,16 +516,8 @@ const Index = () => {
 
 
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2">{stat.value}</div>
-                <div className="text-sm font-medium text-gray-700 mb-1">{stat.label}</div>
-                <div className="text-xs text-gray-500">{stat.description}</div>
-              </div>
-            ))}
-          </div>
+          {/* Rotating Stats Grid */}
+          <RotatingStats />
         </div>
       </section>
 
