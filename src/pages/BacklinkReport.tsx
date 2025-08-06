@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { LoginModal } from '@/components/LoginModal';
+import { useAuth } from '@/hooks/useAuth';
+import { SavedBacklinkReportsService, type BacklinkReportData } from '@/services/savedBacklinkReportsService';
 
 interface BacklinkEntry {
   id: string;
@@ -25,6 +28,11 @@ export default function BacklinkReport() {
   const [isPreviewSectionCollapsed, setIsPreviewSectionCollapsed] = useState(false);
   const [isInstructionsSectionCollapsed, setIsInstructionsSectionCollapsed] = useState(false);
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [reportData, setReportData] = useState<BacklinkReportData | null>(null);
+
+  const { user, isAuthenticated } = useAuth();
 
   const parseUrls = (text: string): BacklinkEntry[] => {
     const lines = text.split('\n').filter(line => line.trim());
@@ -152,7 +160,9 @@ export default function BacklinkReport() {
       };
 
       localStorage.setItem(`report_${reportId}`, JSON.stringify(reportData));
-      
+
+      // Store report data for potential saving
+      setReportData(reportData);
       setReportUrl(generatedUrl);
       
       const verifiedCount = reportData.results.filter(r => r.verification.isVerified).length;
@@ -178,6 +188,55 @@ export default function BacklinkReport() {
       title: 'URL Copied',
       description: 'Report URL copied to clipboard.',
     });
+  };
+
+  const handleSaveReport = async () => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    if (!reportData) {
+      toast({
+        title: 'No Report to Save',
+        description: 'Please generate a report first.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await SavedBacklinkReportsService.saveReport(
+        reportData.campaignName,
+        keyword.trim(),
+        anchorText.trim(),
+        destinationUrl.trim(),
+        reportData
+      );
+
+      toast({
+        title: 'Report Saved Successfully',
+        description: 'Your backlink report has been saved to your account.',
+      });
+    } catch (error) {
+      console.error('Error saving report:', error);
+      toast({
+        title: 'Save Failed',
+        description: error instanceof Error ? error.message : 'Failed to save report. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleAuthSuccess = (user: any) => {
+    setShowLoginModal(false);
+    // Automatically save the report after successful authentication
+    if (reportData) {
+      handleSaveReport();
+    }
   };
 
   return (
@@ -479,6 +538,28 @@ export default function BacklinkReport() {
                     </svg>
                     View Report
                   </button>
+                  <button
+                    onClick={handleSaveReport}
+                    disabled={isSaving}
+                    className="inline-flex items-center px-4 py-2 bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-300 disabled:text-gray-500 rounded-lg transition-colors font-medium"
+                  >
+                    {isSaving ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                        </svg>
+                        {isAuthenticated ? 'Save Report' : 'Sign in to Save'}
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
             )}
@@ -503,6 +584,14 @@ export default function BacklinkReport() {
       </div>
 
       <Footer />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onAuthSuccess={handleAuthSuccess}
+        defaultTab="login"
+      />
     </div>
   );
 }
