@@ -471,7 +471,7 @@ const Index = () => {
           </p>
           
           <p className="text-lg text-gray-600 mb-12 font-medium max-w-3xl mx-auto">
-            High-authority links • Competitive intelligence
+            High-authority links ��� Competitive intelligence
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12">
@@ -997,7 +997,7 @@ const Index = () => {
           <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">
             Ready to Dominate Search Results?
           </h2>
-          <p className="text-xl text-gray-700 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
+          <p className="text-xl text-gray-700 mb-12 max-w-6xl mx-auto leading-relaxed font-light">
             Join the professionals who trust Backlink ∞ for their most important SEO campaigns. 
             Start with our risk-free guarantee today.
           </p>
