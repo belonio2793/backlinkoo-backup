@@ -383,8 +383,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
               <div className="text-sm text-muted-foreground mb-4">per month</div>
 
 
-              <Button onClick={(e) => {
-                alert(`Button clicked! isPremium: ${isPremium}, isSubscribed: ${subscriptionStatus.isSubscribed}`);
+              <Button onClick={() => {
                 console.log('SEO Tools Start Subscription clicked');
                 console.log('isPremium value:', isPremium);
                 console.log('subscriptionStatus.isSubscribed:', subscriptionStatus.isSubscribed);
