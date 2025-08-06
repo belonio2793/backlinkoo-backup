@@ -3,6 +3,8 @@
  * Comprehensive testing for email delivery and configuration
  */
 
+import { safeFetch } from '../utils/fullstoryWorkaround';
+
 interface EmailTestResult {
   success: boolean;
   message: string;
@@ -32,7 +34,17 @@ export class EmailConfigurationTest {
    */
   async testResendAPI(): Promise<EmailTestResult> {
     try {
-      const response = await fetch('https://api.resend.com/domains', {
+      // Check if API key is valid format
+      if (!this.config.apiKey || !this.config.apiKey.startsWith('re_')) {
+        return {
+          success: false,
+          message: 'Invalid Resend API key format',
+          error: 'API key should start with "re_"'
+        };
+      }
+
+      const response = await safeFetch('https://api.resend.com/domains', {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${this.config.apiKey}`,
           'Content-Type': 'application/json'
@@ -46,22 +58,45 @@ export class EmailConfigurationTest {
           message: 'Resend API is accessible',
           details: {
             domains: data.data?.length || 0,
-            domainList: data.data?.map((d: any) => ({ name: d.name, status: d.status })) || []
+            domainList: data.data?.map((d: any) => ({ name: d.name, status: d.status })) || [],
+            apiKeyFormat: 'Valid',
+            responseStatus: response.status
           }
         };
       } else {
         const errorText = await response.text();
+        let errorMessage = 'Resend API connection failed';
+
+        // Parse common error responses
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch {
+          // Keep original error text if not JSON
+        }
+
         return {
           success: false,
-          message: 'Resend API connection failed',
-          error: `${response.status}: ${errorText}`
+          message: errorMessage,
+          error: `HTTP ${response.status}: ${errorText}`,
+          details: {
+            status: response.status,
+            statusText: response.statusText,
+            apiKeyUsed: this.config.apiKey.substring(0, 8) + '...'
+          }
         };
       }
     } catch (error: any) {
       return {
         success: false,
         message: 'Network error connecting to Resend',
-        error: error.message
+        error: error.message,
+        details: {
+          errorType: error.constructor.name,
+          stack: error.stack?.split('\n')[0]
+        }
       };
     }
   }
