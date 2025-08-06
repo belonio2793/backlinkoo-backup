@@ -89,9 +89,13 @@ async function handlePaymentSuccess(session: any) {
 
           if (creditsError) {
             console.error('Credits update error:', creditsError);
+            throw new Error(`Failed to update credits: ${creditsError.message}`);
           } else {
-            console.log(`Added ${credits} credits to user ${email} (total: ${newTotalCredits})`);
+            console.log(`✅ Successfully added ${credits} credits to user ${email} (total: ${newTotalCredits})`);
           }
+        } else {
+          console.error(`❌ User not found with email: ${email}`);
+          throw new Error(`User not found: ${email}`);
         }
       }
     }
