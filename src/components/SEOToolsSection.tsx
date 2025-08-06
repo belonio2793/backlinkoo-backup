@@ -388,8 +388,11 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
               {/* Test Button */}
               <Button
                 onClick={() => {
+                  alert('Test button clicked!');
                   console.log('TEST BUTTON: Direct modal open');
+                  console.log('Current isPaymentModalOpen:', isPaymentModalOpen);
                   setIsPaymentModalOpen(true);
+                  console.log('After setting, isPaymentModalOpen should be true');
                 }}
                 size="sm"
                 variant="outline"
