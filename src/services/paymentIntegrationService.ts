@@ -328,6 +328,11 @@ class PaymentIntegrationService {
 
           if (response.status === 404) {
             console.error('❌ Both subscription endpoints failed with 404. Check Netlify function deployment.');
+            // Use mock service if available
+            if (mockPaymentService.isAvailable()) {
+              console.log('🔄 All subscription endpoints failed, using mock service...');
+              return await mockPaymentService.createSubscription(plan, isGuest, guestEmail);
+            }
           } else {
             console.log('✅ Fallback subscription endpoint worked');
           }
