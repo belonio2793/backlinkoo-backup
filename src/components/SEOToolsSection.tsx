@@ -402,6 +402,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
               </Button>
 
               <Button onClick={() => {
+                alert('Start Subscription button clicked!');
                 console.log('SEO Tools Start Subscription clicked');
                 console.log('isPremium value:', isPremium);
                 console.log('subscriptionStatus.isSubscribed:', subscriptionStatus.isSubscribed);
