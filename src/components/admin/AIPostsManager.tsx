@@ -394,7 +394,7 @@ export function AIPostsManager() {
                 <TableRow key={post.id}>
                   <TableCell>
                     <div>
-                      <div className="font-medium">{post.title}</div>
+                      <div className="font-medium">{ExcerptCleaner.cleanTitle(post.title)}</div>
                       <div className="text-sm text-gray-500">/{post.slug}</div>
                       <div className="flex gap-1 mt-1">
                         {post.keywords.slice(0, 3).map((keyword, idx) => (
