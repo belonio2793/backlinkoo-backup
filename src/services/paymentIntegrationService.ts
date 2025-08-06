@@ -133,21 +133,45 @@ class PaymentIntegrationService {
         };
       }
 
-      // Call Netlify function
-      const response = await fetch('/api/create-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          amount,
-          productName: `${credits} Backlink Credits`,
-          credits,
-          isGuest,
-          guestEmail,
-          paymentMethod
-        })
+      // Call Netlify function with fallback
+      let response: Response;
+      const requestBody = JSON.stringify({
+        amount,
+        productName: `${credits} Backlink Credits`,
+        credits,
+        isGuest,
+        guestEmail,
+        paymentMethod
       });
+
+      try {
+        // Try primary endpoint first
+        response = await fetch('/api/create-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: requestBody
+        });
+
+        // If 404, try fallback endpoint
+        if (response.status === 404) {
+          console.log('Primary endpoint failed, trying fallback...');
+          response = await fetch('/.netlify/functions/create-payment', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: requestBody
+          });
+        }
+      } catch (fetchError) {
+        console.error('Payment endpoint fetch error:', fetchError);
+        return {
+          success: false,
+          error: 'Network error: Unable to connect to payment service'
+        };
+      }
 
       let data;
       try {
