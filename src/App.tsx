@@ -5,7 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { GlobalNotifications } from "@/components/GlobalNotifications";
-import { BetaNotification } from "@/components/BetaNotification";
 import { OptimizedAppWrapper } from "@/components/OptimizedAppWrapper";
 import { InstantAuthProvider } from "@/components/InstantAuth";
 import { EnhancedErrorBoundary } from "@/components/EnhancedErrorBoundary";
@@ -49,7 +48,6 @@ const App = () => (
           <Toaster />
           <Sonner />
           <GlobalNotifications />
-          <BetaNotification />
           <BrowserRouter>
             <PremiumPopupProvider>
               <OptimizedAppWrapper />
