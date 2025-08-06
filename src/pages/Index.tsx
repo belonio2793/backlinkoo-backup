@@ -755,7 +755,7 @@ const Index = () => {
         <div className="w-full relative z-10 px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">Starter Packages</h2>
-            <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed font-light">
+            <p className="text-xl text-gray-700 max-w-6xl mx-auto leading-relaxed font-light">
               Begin your journey with our proven backlink platform. All starter packages include full access to our professional tools.
             </p>
           </div>
