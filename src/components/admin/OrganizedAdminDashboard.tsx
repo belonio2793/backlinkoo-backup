@@ -201,6 +201,13 @@ export function OrganizedAdminDashboard() {
                 </Card>
               </div>
             </TabsContent>
+
+            <TabsContent value="network">
+              <div className="space-y-6">
+                <FullStoryTestComponent />
+                <ServiceConnectionStatus />
+              </div>
+            </TabsContent>
           </Tabs>
         )}
 
