@@ -877,7 +877,7 @@ const Index = () => {
 
       {/* Blog Showcase Section */}
       <section className="py-24 px-6 bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
-        <div className="container mx-auto">
+        <div className="w-full">
           <div className="text-center mb-16">
             <Badge variant="outline" className="mb-6 bg-blue-50 text-blue-600 border-blue-200 font-mono text-xs">
               EXPERT CONTENT
