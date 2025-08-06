@@ -43,6 +43,7 @@ import FullStoryTestComponent from "@/components/FullStoryTestComponent";
 import ResendDirectTest from "@/components/ResendDirectTest";
 import EmailServiceDebugger from "@/components/EmailServiceDebugger";
 import CORSEmailAlert from "@/components/CORSEmailAlert";
+import DatabaseSchemaFix from "@/components/DatabaseSchemaFix";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { DatabaseTestComponent } from "../DatabaseTestComponent";
