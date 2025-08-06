@@ -216,16 +216,9 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                   <span>Generating Your Backlink...</span>
                 </div>
               ) : (
-                <span>Create a Permanent Backlink</span>
+                <span>Claim Now</span>
               )}
             </Button>
-          </div>
-
-          {/* Agreement Text */}
-          <div className="text-center">
-            <p className="text-xs text-gray-600 mx-auto whitespace-nowrap">
-              I agree to create an account to prevent this post from being deleted and to help stop spam.
-            </p>
           </div>
 
           {/* Estimated Time and Account Prompt - Moved below button */}
@@ -249,7 +242,6 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
           <span>100% Free</span>
           <div className="w-1 h-1 bg-pink-400 rounded-full"></div>
           <span>No Credit Card</span>
-          <div className="w-1 h-1 bg-orange-400 rounded-full"></div>
         </div>
       </div>
 

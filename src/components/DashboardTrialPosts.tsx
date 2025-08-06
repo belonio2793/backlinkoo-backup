@@ -11,11 +11,11 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { blogService } from '@/services/blogService';
-import { 
-  Clock, 
-  Eye, 
-  Calendar, 
-  Plus, 
+import {
+  Clock,
+  Eye,
+  Calendar,
+  Plus,
   Search,
   Crown,
   CheckCircle,
@@ -33,7 +33,8 @@ import {
   Sparkles,
   CheckCircle2,
   Grid3X3,
-  LayoutList
+  LayoutList,
+  XCircle
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 import type { User } from '@supabase/supabase-js';
@@ -54,6 +55,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('unclaimed');
   const [claiming, setClaiming] = useState<string | null>(null);
+  const [unclaiming, setUnclaiming] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
@@ -169,6 +171,44 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
     }
   };
 
+  const handleUnclaimPost = async (slug: string) => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please sign in to unclaim posts",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setUnclaiming(slug);
+      const result = await EnhancedBlogClaimService.unclaimPost(slug, user);
+
+      if (result.success) {
+        toast({
+          title: "Post Unclaimed",
+          description: result.message,
+        });
+        await loadPosts();
+      } else {
+        toast({
+          title: "Unclaim Failed",
+          description: result.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setUnclaiming(null);
+    }
+  };
+
   const handleDeletePost = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this post?')) {
       return;
@@ -240,17 +280,24 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
     return hoursLeft < 2;
   };
 
+  // Statistics calculations
+  const allClaimedPosts = posts.filter(post => post.claimed && post.user_id !== null);
+  const allUnclaimedPosts = posts.filter(post => !post.claimed || post.user_id === null);
+  const trialPosts = posts.filter(p => p.is_trial_post);
+
   // Get all unclaimed posts for Available tab
-  const unclaimedPosts = posts.filter(post => !post.claimed || post.user_id === null);
+  const unclaimedPosts = allUnclaimedPosts;
 
   // Get user's claimed posts (limited to 3) for Claimed tab
-  const claimedPosts = posts
+  const userClaimedPosts = posts
     .filter(post => post.claimed && post.user_id === user?.id)
     .slice(0, 3); // Maximum of 3 claimed posts
 
+  const claimedPosts = userClaimedPosts;
+
   // Apply filtering based on active tab and search query
   const getFilteredPosts = () => {
-    let postsToFilter = activeTab === 'claimed' ? claimedPosts : unclaimedPosts;
+    let postsToFilter = activeTab === 'claimed' ? userClaimedPosts : unclaimedPosts;
 
     // Apply search filter
     if (searchQuery) {
@@ -375,7 +422,27 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
               View
             </Button>
             
-            {!isUserPost && !post.claimed && (
+            {/* Claim/Unclaim Button Logic */}
+            {isUserPost ? (
+              // Show Unclaim button for user's claimed posts
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleUnclaimPost(post.slug)}
+                disabled={unclaiming === post.slug}
+                className="border-orange-300 text-orange-700 hover:bg-orange-50"
+              >
+                {unclaiming === post.slug ? (
+                  <div className="w-3 h-3 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Crown className="h-3 w-3 mr-1" />
+                    Unclaim
+                  </>
+                )}
+              </Button>
+            ) : !post.claimed ? (
+              // Show Claim button for unclaimed posts
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -406,7 +473,9 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
                   )}
                 </Tooltip>
               </TooltipProvider>
-            )}
+            ) : null
+            // Don't show any claim/unclaim button for posts claimed by others
+            }
 
             {canDelete && (
               <Button
@@ -447,7 +516,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Trial Blog Posts</h2>
-          <p className="text-gray-600">Manage your claimed posts (max 3) and discover new opportunities</p>
+          <p className="text-gray-600">Each account includes free access to up to <strong>three blog posts</strong>, allowing users to explore and experience our private blog post backlink service at no cost. This introductory offer is designed to educate users on how search engine rankings work and demonstrate the impact of high-quality, contextual backlinks. Our platform is partnered with authoritative websites where we publish tailored blog content to strategically improve keyword performance. When you purchase credits and launch campaigns, you receive powerful blog post backlinks from diverse, reputable domains—proven to enhance visibility and boost your rankings in search engine results (SERPs).</p>
         </div>
 
       </div>
@@ -462,19 +531,19 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-emerald-600">{claimedPosts.length}</div>
+            <div className="text-2xl font-bold text-emerald-600">{allClaimedPosts.length}</div>
             <div className="text-sm text-gray-600">Claimed</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{unclaimedPosts.length}</div>
+            <div className="text-2xl font-bold text-blue-600">{allUnclaimedPosts.length}</div>
             <div className="text-sm text-gray-600">Available</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600">{posts.filter(p => p.is_trial_post).length}</div>
+            <div className="text-2xl font-bold text-purple-600">{trialPosts.length}</div>
             <div className="text-sm text-gray-600">Trial Posts</div>
           </CardContent>
         </Card>
@@ -525,7 +594,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
             </TabsTrigger>
             <TabsTrigger value="claimed" className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4" />
-              Claimed ({claimedPosts.length}{canClaimUnlimited ? '' : `/${maxClaimedPosts}`})
+              Claimed ({userClaimedPosts.length}{canClaimUnlimited ? '' : `/${maxClaimedPosts}`})
               {canClaimUnlimited && <Infinity className="h-3 w-3 ml-1 text-yellow-600" />}
             </TabsTrigger>
           </TabsList>

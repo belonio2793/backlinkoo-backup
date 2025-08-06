@@ -56,7 +56,7 @@ export function AnimatedBlogHeadline() {
     };
   }, []);
 
-  const words = ["Create", "a", "Your", "First", "Backlink", "For", "Free"];
+  const words = ["Create", "Your", "First", "Backlink", "For", "Free"];
   const currentGradient = gradientThemes[gradientTheme];
 
   return (
@@ -97,7 +97,7 @@ export function AnimatedBlogHeadline() {
       >
         <p className="text-lg text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
           <span className="relative">
-            Generate a high quality, powerful blog post with your targeted keyword and boost your SEO score and search engine rankings in seconds. Claim this for free, now.
+            Generate a high quality, powerful blog post with your targeted keyword and boost your SEO score and search engine rankings in seconds.
             <span className="absolute -bottom-3 left-0 w-full h-0.5 bg-gradient-to-r from-blue-300 to-purple-300 opacity-30 transform scale-x-0 animate-[scaleX_1s_ease-out_1.8s_forwards] origin-left"></span>
           </span>
         </p>
