@@ -38,6 +38,12 @@ import { AuthEmailTest } from "@/components/AuthEmailTest";
 import { EmailTest } from "@/components/EmailTest";
 import { SupabaseEmailTest } from "@/components/SupabaseEmailTest";
 import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
+import EmailConfigurationTester from "@/components/EmailConfigurationTester";
+import FullStoryTestComponent from "@/components/FullStoryTestComponent";
+import ResendDirectTest from "@/components/ResendDirectTest";
+import EmailServiceDebugger from "@/components/EmailServiceDebugger";
+import CORSEmailAlert from "@/components/CORSEmailAlert";
+import DatabaseSchemaFix from "@/components/DatabaseSchemaFix";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { DatabaseTestComponent } from "../DatabaseTestComponent";
@@ -117,7 +123,10 @@ export function OrganizedAdminDashboard() {
         )}
 
         {activeSection === "users" && (
-          <AdminUserDashboard />
+          <div className="space-y-6">
+            <DatabaseSchemaFix />
+            <AdminUserDashboard />
+          </div>
         )}
 
         {activeSection === "content" && (
@@ -162,11 +171,12 @@ export function OrganizedAdminDashboard() {
 
         {activeSection === "system" && (
           <Tabs defaultValue="assessment" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="assessment">Systems Assessment</TabsTrigger>
               <TabsTrigger value="environment">Environment & API Keys</TabsTrigger>
               <TabsTrigger value="deployment">Deployment</TabsTrigger>
               <TabsTrigger value="database">Database</TabsTrigger>
+              <TabsTrigger value="network">Network</TabsTrigger>
             </TabsList>
 
             <TabsContent value="assessment">
@@ -198,6 +208,13 @@ export function OrganizedAdminDashboard() {
                 </Card>
               </div>
             </TabsContent>
+
+            <TabsContent value="network">
+              <div className="space-y-6">
+                <FullStoryTestComponent />
+                <ServiceConnectionStatus />
+              </div>
+            </TabsContent>
           </Tabs>
         )}
 
@@ -220,6 +237,10 @@ export function OrganizedAdminDashboard() {
 
             <TabsContent value="email-test">
               <div className="space-y-6">
+                <CORSEmailAlert />
+                <EmailServiceDebugger />
+                <ResendDirectTest />
+                <EmailConfigurationTester />
                 <AuthEmailTest />
                 <EmailTest />
                 <SupabaseEmailTest />

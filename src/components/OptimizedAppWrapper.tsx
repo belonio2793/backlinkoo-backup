@@ -23,6 +23,7 @@ import BlogSystemDiagnostic from '@/pages/BlogSystemDiagnostic';
 import { BlogPostDiagnostic } from '@/components/BlogPostDiagnostic';
 import EmergencyRLSFix from '@/pages/EmergencyRLSFix';
 import AuthDiagnostic from '@/pages/AuthDiagnostic';
+import { EmailDiagnosticPage } from '@/pages/EmailDiagnosticPage';
 
 // Import optimized instant authentication components
 import { InstantEmailVerificationGuard } from '@/components/InstantEmailVerificationGuard';
@@ -299,6 +300,11 @@ export const OptimizedAppWrapper = () => {
           <Route path="/edge-function-diagnostic" element={
             <Suspense fallback={<PageLoader />}>
               <LazyEdgeFunctionDiagnostic />
+            </Suspense>
+          } />
+          <Route path="/email-diagnostic" element={
+            <Suspense fallback={<PageLoader />}>
+              <EmailDiagnosticPage />
             </Suspense>
           } />
 

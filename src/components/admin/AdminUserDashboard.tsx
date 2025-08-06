@@ -75,6 +75,7 @@ import {
   type UserUpdatePayload
 } from "@/services/realAdminUserService";
 import { supabase } from "@/integrations/supabase/client";
+import { SchemaCompatibility } from "@/utils/schemaCompatibility";
 
 interface UserStats {
   totalUsers: number;
@@ -223,7 +224,7 @@ export function AdminUserDashboard() {
         .from('profiles')
         .select(`
           *,
-          premium_subscriptions (
+          subscribers (
             id,
             status,
             plan_type,
@@ -263,7 +264,7 @@ export function AdminUserDashboard() {
       // Transform data to match expected format
       const transformedUsers: RealUserDetails[] = (profilesData || []).map(profile => ({
         ...profile,
-        subscription: profile.premium_subscriptions?.[0] || null,
+        subscription: (profile as any).subscribers?.[0] || (profile as any).premium_subscriptions?.[0] || null,
         campaignCount: 0, // Will be loaded separately if needed
         totalCreditsUsed: 0,
         totalRevenue: 0,
@@ -346,15 +347,13 @@ export function AdminUserDashboard() {
         const periodEnd = new Date();
         periodEnd.setFullYear(periodEnd.getFullYear() + 1); // 1 year from now
 
-        const { error: subError } = await supabase
-          .from('premium_subscriptions')
-          .upsert({
-            user_id: user.user_id,
-            plan_type: 'premium',
-            status: 'active',
-            current_period_start: new Date().toISOString(),
-            current_period_end: periodEnd.toISOString()
-          });
+        const { error: subError } = await SchemaCompatibility.upsertSubscription({
+          user_id: user.user_id,
+          plan_type: 'premium',
+          status: 'active',
+          current_period_start: new Date().toISOString(),
+          current_period_end: periodEnd.toISOString()
+        });
 
         if (subError) {
           console.warn('⚠️ Subscription record warning:', subError.message);

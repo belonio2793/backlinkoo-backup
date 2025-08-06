@@ -9,6 +9,8 @@ export interface NetlifyFunctionResponse<T = any> {
   isLocal?: boolean;
 }
 
+import { safeFetch, isFullStoryError, getFullStoryErrorMessage } from './fullstoryWorkaround';
+
 /**
  * Safe fetch wrapper for Netlify functions that handles development mode gracefully
  */
@@ -17,7 +19,7 @@ export async function safeNetlifyFetch<T = any>(
   options?: RequestInit
 ): Promise<NetlifyFunctionResponse<T>> {
   try {
-    const response = await fetch(`/.netlify/functions/${functionPath}`, options);
+    const response = await safeFetch(`/.netlify/functions/${functionPath}`, options);
     
     // Check if response is HTML (likely a 404 page in dev mode)
     const contentType = response.headers.get('content-type');
@@ -43,9 +45,20 @@ export async function safeNetlifyFetch<T = any>(
     };
     
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+    // Check if this is FullStory interference
+    if (isFullStoryError(error)) {
+      return {
+        success: false,
+        error: getFullStoryErrorMessage('Netlify function call blocked by third-party script'),
+        isLocal: true
+      };
+    }
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: errorMessage,
       isLocal: true
     };
   }

@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { ResendEmailService, ResendEmailResponse, ResendEmailData } from '@/services/resendEmailService';
+import { MockEmailService, MockEmailResponse, MockEmailData } from '@/services/mockEmailService';
 import { directEmailService } from '@/services/directEmailService';
 import {
   Mail,
@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 
 export function EmailSystemManager() {
-  const [testEmail, setTestEmail] = useState<ResendEmailData>({
+  const [testEmail, setTestEmail] = useState<MockEmailData>({
     to: 'support@backlinkoo.com',
     subject: 'Multi-Provider Email System Test - ' + new Date().toLocaleString(),
     message: `Hello Support Team,
@@ -52,7 +52,7 @@ Email System Manager`
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [testResults, setTestResults] = useState<ResendEmailResponse | null>(null);
+  const [testResults, setTestResults] = useState<MockEmailResponse | null>(null);
   const [systemHealth, setSystemHealth] = useState<any>({
     status: 'unknown',
     recentFailures: 0,
@@ -76,7 +76,7 @@ Email System Manager`
 
   const loadSystemHealth = async () => {
     try {
-      const health = await ResendEmailService.healthCheck();
+      const health = await MockEmailService.healthCheck();
       // Transform the actual service response to match expected structure
       const safeHealth = {
         status: health?.status || 'unknown',
@@ -109,8 +109,8 @@ Email System Manager`
 
   const loadFailureLog = () => {
     try {
-      const failures = ResendEmailService.getFailureLog();
-      // Ensure failures is an array
+      const failures = MockEmailService.getEmailLog();
+      // Mock service returns email log instead of failure log
       setFailureLog(Array.isArray(failures) ? failures : []);
     } catch (error) {
       console.error('Failed to load failure log:', error);
@@ -124,7 +124,7 @@ Email System Manager`
 
     try {
       console.log('🚀 Running comprehensive email system test...');
-      const result = await ResendEmailService.sendEmail(testEmail);
+      const result = await MockEmailService.sendEmail(testEmail);
       setTestResults(result);
 
       toast({
@@ -174,7 +174,7 @@ Email System Manager`
         if (provider === 'resend' || provider === 'admin') {
           result = await directEmailService.sendEmail(testData);
         } else {
-          result = await ResendEmailService.sendEmail(testData);
+          result = await MockEmailService.sendEmail(testData);
         }
       } catch (error) {
         console.warn(`${provider} service failed, trying direct fallback:`, error);
