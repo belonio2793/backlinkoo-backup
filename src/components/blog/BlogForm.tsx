@@ -128,8 +128,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             {/* Keyword Field */}
             <div className="space-y-3">
               <Label htmlFor="keyword" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <div className="p-2 bg-white rounded-lg shadow-sm border border-emerald-200 overflow-hidden">
-                  <img src="https://images.pexels.com/photos/19056728/pexels-photo-19056728.jpeg" alt="Target Achievement" className="h-6 w-6 object-cover rounded-sm" />
+                <div className="p-2 bg-white rounded-lg shadow-sm border border-emerald-200">
+                  <Target className="h-6 w-6 text-emerald-600" />
                 </div>
                 Keyword
               </Label>
