@@ -885,7 +885,7 @@ const Index = () => {
             <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">
               Explore Our AI Blog
             </h2>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed font-light">
+            <p className="text-xl text-gray-600 mb-8 max-w-6xl mx-auto leading-relaxed font-light">
               Discover high-quality, AI-generated content designed to boost SEO rankings with contextual backlinks.
               See the power of our content generation system in action.
             </p>
