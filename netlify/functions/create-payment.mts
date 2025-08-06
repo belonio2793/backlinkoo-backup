@@ -190,7 +190,31 @@ export default async (req: Request, context: Context) => {
     
     const result = await createStripePayment(body, email, originUrl);
 
-    // TODO: Store order in database for tracking
+    // Store order in database for tracking
+    try {
+      const supabase = getSupabaseClient();
+      if (supabase && result.sessionId) {
+        await supabase
+          .from('orders')
+          .insert({
+            stripe_session_id: result.sessionId,
+            email,
+            amount: body.amount * 100, // Convert to cents
+            status: 'pending',
+            payment_method: 'stripe',
+            product_name: body.productName || `${body.credits || 0} Backlink Credits`,
+            guest_checkout: body.isGuest || false,
+            credits: body.credits || 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+        console.log(`Order created for payment: ${result.sessionId} - ${email} - $${amount}`);
+      }
+    } catch (dbError) {
+      console.error('Database order creation failed:', dbError);
+      // Don't fail the payment creation if database fails
+    }
+
     console.log(`Payment initiated: ${paymentMethod} - ${email} - $${amount}`);
 
     return new Response(JSON.stringify(result), {
