@@ -221,13 +221,6 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             </Button>
           </div>
 
-          {/* Agreement Text */}
-          <div className="text-center">
-            <p className="text-xs text-gray-600 mx-auto whitespace-nowrap">
-              I agree to create an account to prevent this post from being deleted and to help stop spam.
-            </p>
-          </div>
-
           {/* Estimated Time and Account Prompt - Moved below button */}
           <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-inner">
             <div className="text-center">
@@ -249,7 +242,6 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
           <span>100% Free</span>
           <div className="w-1 h-1 bg-pink-400 rounded-full"></div>
           <span>No Credit Card</span>
-          <div className="w-1 h-1 bg-orange-400 rounded-full"></div>
         </div>
       </div>
 
