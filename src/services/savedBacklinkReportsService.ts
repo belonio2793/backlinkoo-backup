@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
-import { checkSavedReportsTableAccess } from '@/utils/initializeDatabase';
+import { checkSavedReportsTableAccess, initializeSavedReportsTable } from '@/utils/initializeDatabase';
 
 export type SavedBacklinkReport = Tables<'saved_backlink_reports'>;
 export type SavedBacklinkReportInsert = TablesInsert<'saved_backlink_reports'>;
