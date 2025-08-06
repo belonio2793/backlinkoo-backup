@@ -240,6 +240,18 @@ Generate content so valuable that readers feel they've discovered insider knowle
       let firstLine = lines[0].trim();
       // Strip HTML tags from the title
       firstLine = firstLine.replace(/<[^>]*>/g, '');
+      // Clean Title: prefixes and markdown artifacts
+      firstLine = firstLine
+        .replace(/^\s*\*\*Title:\s*([^*]*)\*\*\s*/i, '$1') // Remove **Title:** wrapper and extract content
+        .replace(/^\*\*H1\*\*:\s*/i, '')
+        .replace(/^\*\*Title\*\*:\s*/i, '') // Remove **Title**: prefix
+        .replace(/^Title:\s*/gi, '') // Remove Title: prefix (global + case insensitive)
+        .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
+        .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
+        .replace(/\*\*/g, '') // Remove any remaining ** symbols
+        .replace(/\*/g, '') // Remove any remaining * symbols
+        .replace(/^#{1,6}\s+/, '')
+        .trim();
       // Decode HTML entities and normalize special characters
       firstLine = this.decodeHtmlEntities(firstLine);
       // Remove problematic special characters but keep common punctuation
