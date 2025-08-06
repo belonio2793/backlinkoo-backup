@@ -111,9 +111,9 @@ export class ResendEmailService {
   }
 
   /**
-   * Send email directly via Resend API (fallback when Netlify functions unavailable)
+   * Send email via mock service (fallback when Netlify functions unavailable)
    */
-  private static async sendDirectAPI(emailData: ResendEmailData): Promise<ResendEmailResponse> {
+  private static async sendMockEmail(emailData: ResendEmailData): Promise<ResendEmailResponse> {
     try {
       console.log('🔗 Sending email directly via Resend API:', { to: emailData.to, subject: emailData.subject });
 
