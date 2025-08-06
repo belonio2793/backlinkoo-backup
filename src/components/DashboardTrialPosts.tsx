@@ -509,7 +509,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Trial Blog Posts</h2>
-          <p className="text-gray-600">Manage your claimed posts (max 3) and discover new opportunities</p>
+          <p className="text-gray-600">This is a free for a limit of 3 blog posts per account and that allows users to experience our private blog post service. The purpose of this is to educate users on search engine rankings and how we are partnered with high quality, authority websites that we build contextual blog post based backlinks to increase keyword rankings. When you buy credits and create campaigns you are getting blog post backlinks from different domains that are extremely effective for SERPs (search engine ranking positions).</p>
         </div>
 
       </div>
