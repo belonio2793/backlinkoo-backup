@@ -13,6 +13,8 @@ interface BacklinkEntry {
   sourceUrl: string;
   targetUrl: string;
   anchorText: string;
+  destinationUrl?: string;
+  isDestinationChecked?: boolean;
 }
 
 export default function BacklinkReport() {
@@ -45,12 +47,61 @@ export default function BacklinkReport() {
           id: `entry_${Date.now()}_${index}`,
           sourceUrl: url,
           targetUrl: '', // Will be determined during verification
-          anchorText: '' // Will be found during verification
+          anchorText: '', // Will be found during verification
+          destinationUrl: '',
+          isDestinationChecked: false
         });
       }
     });
 
     return backlinks;
+  };
+
+  // Function to fetch destination URL from a source URL
+  const fetchDestinationUrl = async (sourceUrl: string, targetKeyword: string, targetAnchor: string): Promise<{ destinationUrl: string; foundAnchor: boolean; foundKeyword: boolean }> => {
+    try {
+      // In a real implementation, this would use a proxy service to fetch the page content
+      // For demo purposes, we'll simulate different scenarios
+      const mockDestinations = [
+        destinationUrl,
+        'https://example.com/page',
+        'https://another-site.com/article',
+        'https://different-domain.com/content',
+        '# (no link found)',
+        destinationUrl.replace('https://', 'http://'), // HTTP version
+        destinationUrl + '/blog', // Sub-page
+        destinationUrl + '?utm_source=backlink' // With parameters
+      ];
+
+      // Simulate different success rates based on URL patterns
+      const domain = new URL(sourceUrl).hostname;
+      let successRate = 0.7; // Default 70% success rate
+
+      if (domain.includes('techcrunch') || domain.includes('forbes') || domain.includes('mashable')) {
+        successRate = 0.9; // High authority sites more likely to have links
+      } else if (domain.includes('example') || domain.includes('test')) {
+        successRate = 0.3; // Test domains less likely
+      }
+
+      const hasLink = Math.random() < successRate;
+      const foundDestination = hasLink ? mockDestinations[Math.floor(Math.random() * mockDestinations.length)] : '# (no link found)';
+
+      // Simulate anchor text and keyword detection
+      const foundAnchor = hasLink && Math.random() > 0.3;
+      const foundKeyword = hasLink && Math.random() > 0.4;
+
+      return {
+        destinationUrl: foundDestination,
+        foundAnchor,
+        foundKeyword
+      };
+    } catch (error) {
+      return {
+        destinationUrl: '# (error fetching)',
+        foundAnchor: false,
+        foundKeyword: false
+      };
+    }
   };
 
   const generateReport = async () => {
@@ -105,8 +156,30 @@ export default function BacklinkReport() {
     setIsGenerating(true);
 
     try {
-      // Simulate report generation
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Fetch destination URLs for each backlink
+      const backlinksWithDestinations = await Promise.all(
+        backlinks.map(async (backlink, index) => {
+          // Add a small delay to simulate real fetching
+          await new Promise(resolve => setTimeout(resolve, 100 * index));
+
+          const { destinationUrl: fetchedDestination, foundAnchor, foundKeyword } = await fetchDestinationUrl(
+            backlink.sourceUrl,
+            keyword.trim(),
+            anchorText.trim()
+          );
+
+          return {
+            ...backlink,
+            destinationUrl: fetchedDestination,
+            isDestinationChecked: true,
+            foundAnchor,
+            foundKeyword
+          };
+        })
+      );
+
+      // Simulate additional processing time
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Generate unique report URL
       const reportId = `rpt_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
@@ -128,27 +201,27 @@ export default function BacklinkReport() {
           anchorText: anchorText.trim(),
           destinationUrl: destinationUrl.trim()
         },
-        backlinks: backlinks,
+        backlinks: backlinksWithDestinations,
         createdAt: createdDate.toISOString(),
         totalBacklinks: backlinks.length,
-        // Mock verification results with detailed checks
-        results: backlinks.map(bl => {
-          const hasKeyword = Math.random() > 0.4;
-          const hasAnchorText = Math.random() > 0.3;
-          const hasCorrectDestination = Math.random() > 0.25;
+        // Generate verification results with destination URL data
+        results: backlinksWithDestinations.map(bl => {
           const isReachable = Math.random() > 0.1;
-          
+          const hasCorrectDestination = bl.destinationUrl === destinationUrl.trim();
+          const hasPartialDestination = bl.destinationUrl.includes(new URL(destinationUrl.trim()).hostname);
+          const destinationMatches = hasCorrectDestination || (hasPartialDestination && Math.random() > 0.5);
+
           return {
             ...bl,
             isReachable,
             pageTitle: isReachable ? `Sample Page Title ${Math.floor(Math.random() * 1000)}` : null,
             verification: {
-              keywordFound: hasKeyword,
-              anchorTextFound: hasAnchorText,
-              destinationUrlMatches: hasCorrectDestination,
-              isVerified: hasKeyword && hasAnchorText && hasCorrectDestination,
-              keywordCount: hasKeyword ? Math.floor(Math.random() * 5) + 1 : 0,
-              anchorTextContext: hasAnchorText ? `...some text before ${anchorText.trim()} and some text after...` : null
+              keywordFound: bl.foundKeyword || false,
+              anchorTextFound: bl.foundAnchor || false,
+              destinationUrlMatches: destinationMatches,
+              isVerified: (bl.foundKeyword || false) && (bl.foundAnchor || false) && destinationMatches,
+              keywordCount: (bl.foundKeyword || false) ? Math.floor(Math.random() * 5) + 1 : 0,
+              anchorTextContext: (bl.foundAnchor || false) ? `...some text before ${anchorText.trim()} and some text after...` : null
             },
             domainAuthority: Math.floor(Math.random() * 40) + 40,
             pageAuthority: Math.floor(Math.random() * 50) + 20,
@@ -166,9 +239,11 @@ export default function BacklinkReport() {
       setReportUrl(generatedUrl);
       
       const verifiedCount = reportData.results.filter(r => r.verification.isVerified).length;
+      const foundDestinationsCount = reportData.results.filter(r => r.destinationUrl && r.destinationUrl !== '# (no link found)' && r.destinationUrl !== '# (error fetching)').length;
+
       toast({
         title: 'Verification Complete',
-        description: `Found ${verifiedCount} verified backlinks out of ${backlinks.length} URLs checked.`,
+        description: `Found ${verifiedCount} verified backlinks and ${foundDestinationsCount} destination URLs out of ${backlinksWithDestinations.length} URLs checked.`,
       });
 
     } catch (error) {
