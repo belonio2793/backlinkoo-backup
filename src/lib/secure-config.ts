@@ -36,7 +36,6 @@ const SECURE_STORE = {
   // API keys removed for security - OpenAI calls now handled server-side only
   openai_api_key: '', // Removed - use Netlify functions for OpenAI calls
   anthropic_api_key: '', // VITE_ANTHROPIC_API_KEY - Set in Netlify if needed
-  google_api_key: '', // VITE_GOOGLE_API_KEY - Set in Netlify if needed
   
   // Application secrets
   jwt_secret: '',
@@ -152,9 +151,6 @@ export class SecureConfig {
     return decode(SECURE_STORE.anthropic_api_key);
   }
   
-  static get GOOGLE_API_KEY(): string {
-    return decode(SECURE_STORE.google_api_key);
-  }
   
   // Application secrets
   static get JWT_SECRET(): string {

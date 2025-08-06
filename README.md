@@ -12,12 +12,12 @@ To democratize access to professional SEO content creation by providing users wi
 
 ### Core Functionality
 - **AI-Powered Content Generation**: Utilizes OpenAI ChatGPT-3.5-turbo for high-quality content creation
-- **Google Ads API Integration**: Direct access to official Google keyword data for accurate search volume and competition metrics
+- **Multi-API Keyword Research**: Advanced keyword analysis using multiple data sources for comprehensive insights
 - **SEO-Optimized Structure**: Automatically implements SEO best practices including proper heading hierarchy, keyword density, and meta optimization
 - **Natural Backlink Integration**: Seamlessly incorporates user-specified anchor text and destination URLs
 - **Professional Blog Templates**: Multiple premium templates including EliteBlogTemplate with advanced typography and engagement features
 - **Real-time Generation**: Instant content creation with live progress tracking
-- **Advanced Keyword Research**: Comprehensive keyword analysis using Google's official Keyword Planner API
+- **Advanced Keyword Research**: Comprehensive keyword analysis using professional SEO data sources
 
 ### User Input Requirements
 The system captures three essential inputs to generate targeted content:
@@ -33,7 +33,7 @@ The system captures three essential inputs to generate targeted content:
 - **Hosting**: Netlify for reliable, scalable deployment
 - **Database**: Supabase for robust data management and user accounts
 - **AI Engine**: OpenAI ChatGPT-3.5-turbo model
-- **Keyword Research**: Google Ads API for official search volume data
+- **Keyword Research**: Multi-source APIs for comprehensive search volume data
 - **Styling**: TailwindCSS with custom CSS for premium blog templates
 - **Environment**: Netlify Environment Variables for secure API key management
 

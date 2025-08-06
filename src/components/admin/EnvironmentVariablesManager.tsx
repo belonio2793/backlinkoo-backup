@@ -79,12 +79,6 @@ export function EnvironmentVariablesManager() {
       placeholder: 'sk-ant-...'
     },
     {
-      key: 'VITE_GOOGLE_API_KEY',
-      description: 'Google API key for search and analytics',
-      is_secret: true,
-      placeholder: 'AIza...'
-    },
-    {
       key: 'VITE_STRIPE_PUBLISHABLE_KEY',
       description: 'Stripe publishable key for payments',
       is_secret: false,
