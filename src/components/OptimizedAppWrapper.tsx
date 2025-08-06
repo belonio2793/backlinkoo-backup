@@ -310,6 +310,11 @@ export const OptimizedAppWrapper = () => {
               <EmailDiagnosticPage />
             </Suspense>
           } />
+          <Route path="/route-sync-test" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyRouteSyncTest />
+            </Suspense>
+          } />
 
           {/* 404 routes */}
           <Route path="/404" element={<NotFound />} />
