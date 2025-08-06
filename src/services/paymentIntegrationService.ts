@@ -292,7 +292,7 @@ class PaymentIntegrationService {
 
         // If 404, try fallback endpoint
         if (response.status === 404) {
-          console.log('Primary subscription endpoint failed, trying fallback...');
+          console.warn('🔄 Subscription endpoint /api/create-subscription returned 404, trying fallback /.netlify/functions/create-subscription');
           response = await fetch('/.netlify/functions/create-subscription', {
             method: 'POST',
             headers: {
@@ -300,6 +300,12 @@ class PaymentIntegrationService {
             },
             body: requestBody
           });
+
+          if (response.status === 404) {
+            console.error('❌ Both subscription endpoints failed with 404. Check Netlify function deployment.');
+          } else {
+            console.log('✅ Fallback subscription endpoint worked');
+          }
         }
       } catch (fetchError) {
         console.error('Subscription endpoint fetch error:', fetchError);
