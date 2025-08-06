@@ -128,12 +128,10 @@ export const FOOTER_NAV_CONFIGS = {
     requiresAuth: false
   } as SmartNavigationConfig,
 
-  // Merchant Tools - Protected routes with guest options
+  // Merchant Tools - Public routes
   BACKLINK_REPORTS: {
     route: '/backlink-report',
-    requiresAuth: true,
-    allowGuestAccess: true,
-    guestRedirect: '/blog' // Could redirect to demo or info page
+    requiresAuth: false
   } as SmartNavigationConfig,
 
   // Legal - Public routes
