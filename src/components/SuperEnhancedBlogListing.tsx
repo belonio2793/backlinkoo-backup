@@ -327,38 +327,12 @@ export function SuperEnhancedBlogListing() {
 
       <div className="relative container mx-auto px-6 py-12">
         <div className="max-w-7xl mx-auto">
-          {/* Hero Section */}
+          {/* Simplified Hero Section */}
           <div className="text-center mb-16 space-y-6">
             <div className="relative inline-block">
               <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
                 Community Blog Posts
               </h1>
-            </div>
-            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Discover and claim high-quality blog posts with contextual backlinks. 
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-semibold"> Boost your domain authority instantly.</span>
-            </p>
-            
-            {/* Stats Row */}
-            <div className="flex flex-wrap justify-center gap-8 mt-8">
-              <div className="flex items-center gap-2 text-gray-600">
-                <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg">
-                  <Award className="h-5 w-5 text-white" />
-                </div>
-                <span className="font-semibold">{posts.length}+ Posts Available</span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg">
-                  <Users className="h-5 w-5 text-white" />
-                </div>
-                <span className="font-semibold">1000+ Active Users</span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
-                  <TrendingUp className="h-5 w-5 text-white" />
-                </div>
-                <span className="font-semibold">99% Success Rate</span>
-              </div>
             </div>
           </div>
 
