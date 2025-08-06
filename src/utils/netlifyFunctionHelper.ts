@@ -10,6 +10,66 @@ export interface NetlifyFunctionResponse<T = any> {
 }
 
 /**
+ * FullStory-safe fetch function to avoid third-party interference
+ */
+function createSafeFetch(): typeof fetch {
+  // Store original fetch before any third-party scripts modify it
+  const originalFetch = (globalThis as any).__originalFetch__ || window.fetch;
+
+  // Check if FullStory is interfering
+  const isFullStoryPresent = !!(window as any).FS ||
+                            document.querySelector('script[src*="fullstory"]') ||
+                            document.querySelector('script[src*="fs.js"]');
+
+  if (isFullStoryPresent) {
+    console.log('🔍 FullStory detected - using XMLHttpRequest fallback for Netlify functions');
+
+    // Use XMLHttpRequest as fallback
+    return async (url: string, init?: RequestInit): Promise<Response> => {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        const method = init?.method || 'GET';
+
+        xhr.open(method, url);
+
+        // Set headers
+        if (init?.headers) {
+          const headers = new Headers(init.headers);
+          headers.forEach((value, key) => {
+            xhr.setRequestHeader(key, value);
+          });
+        }
+
+        xhr.onload = () => {
+          const response = new Response(xhr.responseText, {
+            status: xhr.status,
+            statusText: xhr.statusText,
+            headers: new Headers(
+              xhr.getAllResponseHeaders()
+                .split('\r\n')
+                .reduce((acc, line) => {
+                  const [key, value] = line.split(': ');
+                  if (key && value) acc[key] = value;
+                  return acc;
+                }, {} as Record<string, string>)
+            )
+          });
+          resolve(response);
+        };
+
+        xhr.onerror = () => reject(new Error('Network request failed'));
+        xhr.ontimeout = () => reject(new Error('Request timeout'));
+
+        xhr.timeout = 30000;
+        xhr.send(init?.body as any);
+      });
+    };
+  }
+
+  return originalFetch;
+}
+
+/**
  * Safe fetch wrapper for Netlify functions that handles development mode gracefully
  */
 export async function safeNetlifyFetch<T = any>(
@@ -17,7 +77,8 @@ export async function safeNetlifyFetch<T = any>(
   options?: RequestInit
 ): Promise<NetlifyFunctionResponse<T>> {
   try {
-    const response = await fetch(`/.netlify/functions/${functionPath}`, options);
+    const safeFetch = createSafeFetch();
+    const response = await safeFetch(`/.netlify/functions/${functionPath}`, options);
     
     // Check if response is HTML (likely a 404 page in dev mode)
     const contentType = response.headers.get('content-type');
