@@ -26,11 +26,17 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // Prevent infinite loops - if already in error state, don't process again
+    if (this.state.hasError) {
+      console.warn('Error boundary already in error state, ignoring additional error:', error.message);
+      return;
+    }
+
     logError('Application error caught by boundary', {
       ...error,
       componentStack: errorInfo.componentStack
     });
-    
+
     // Filter out browser extension errors and other non-critical errors
     const isExtensionError = error.message.includes('Cannot redefine property: ethereum') ||
                             error.stack?.includes('chrome-extension://') ||
@@ -73,22 +79,14 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
                        error.message.includes('claim') ||
                        error.stack?.includes('blog');
 
-    if (isExtensionError || isAuthError || isDatabaseError || isComponentError) {
-      console.warn('Non-critical error filtered and recovered:', error.message);
-      // Reset error state to prevent app crash
-      this.setState({ hasError: false, error: undefined });
+    // For recoverable errors, don't show error state
+    if (isExtensionError || isAuthError || isDatabaseError || isComponentError || isRouteError || isBlogError) {
+      console.warn('Recoverable error - not showing error UI:', error.message);
       return;
     }
 
-    if (isRouteError || isBlogError) {
-      console.warn('Route/Blog error - recovering gracefully:', error.message);
-      // Reset error state instead of redirecting to 404
-      this.setState({ hasError: false, error: undefined });
-      return;
-    }
-
-    // For all other errors, set error state but don't auto-redirect
-    console.warn('Application error - showing fallback UI:', error.message);
+    // For all other errors, set error state
+    console.warn('Critical application error - showing fallback UI:', error.message);
     this.setState({ hasError: true, error, errorInfo });
   }
 
