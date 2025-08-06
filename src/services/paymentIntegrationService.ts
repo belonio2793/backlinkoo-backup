@@ -339,6 +339,13 @@ class PaymentIntegrationService {
         }
       } catch (fetchError) {
         console.error('Subscription endpoint fetch error:', fetchError);
+
+        // Use mock service as final fallback
+        if (mockPaymentService.isAvailable()) {
+          console.log('🔄 Network error, falling back to mock subscription service...');
+          return await mockPaymentService.createSubscription(plan, isGuest, guestEmail);
+        }
+
         return {
           success: false,
           error: 'Network error: Unable to connect to subscription service'
