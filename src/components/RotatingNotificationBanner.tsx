@@ -51,18 +51,18 @@ export const RotatingNotificationBanner = ({
   if (!isVisible) return null;
 
   return (
-    <div className={`relative bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_100%] animate-gradient-shift text-white py-3 px-4 ${className}`}>
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <div className={`relative bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_100%] animate-gradient-shift text-white py-2 px-4 min-h-[64px] flex flex-col justify-center ${className}`}>
+      <div className="max-w-7xl mx-auto flex items-center justify-between w-full">
         <div className="flex-1 text-center">
-          <p 
-            className={`text-sm md:text-base font-medium transition-all duration-200 ${
+          <p
+            className={`text-sm md:text-base font-medium transition-all duration-200 leading-relaxed ${
               isAnimating ? 'opacity-0 transform translate-y-2' : 'opacity-100 transform translate-y-0'
             }`}
           >
             {notifications[currentIndex]}
           </p>
         </div>
-        
+
         {showCloseButton && (
           <Button
             variant="ghost"
@@ -74,16 +74,16 @@ export const RotatingNotificationBanner = ({
           </Button>
         )}
       </div>
-      
+
       {/* Progress indicator dots */}
-      <div className="flex justify-center space-x-2 mt-2">
+      <div className="flex justify-center space-x-1 mt-1">
         {notifications.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-200 ${
-              index === currentIndex 
-                ? 'bg-white' 
+            className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+              index === currentIndex
+                ? 'bg-white'
                 : 'bg-white/40 hover:bg-white/60'
             }`}
           />
