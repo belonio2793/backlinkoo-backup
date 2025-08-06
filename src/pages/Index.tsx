@@ -250,13 +250,13 @@ const Index = () => {
 
       {/* Header */}
       <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-16 z-50 mt-16">
-        <div className="w-full px-4 sm:px-6 py-4">
+        <div className="w-full px-4 sm:px-6 py-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-              <Infinity className="h-7 w-7 text-primary" />
-              <h1 className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+              <Infinity className="h-4 w-4 text-primary" />
+              <h1 className="text-sm sm:text-base md:text-lg font-semibold tracking-tight text-foreground">Backlink</h1>
             </div>
-            <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-1 sm:gap-2">
 
               {!authChecked ? (
                 <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
