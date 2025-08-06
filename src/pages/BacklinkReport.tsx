@@ -255,7 +255,7 @@ export default function BacklinkReport() {
 
       <div className="max-w-7xl mx-auto p-8">
         <div className="flex gap-8">
-          {/* Sidebar */}
+          {/* Left Sidebar */}
           <div className={`transition-all duration-300 ${isSidebarMinimized ? 'w-12' : 'w-80'} flex-shrink-0`}>
             <div className="sticky top-8 space-y-6">
               {/* Sidebar Header */}
