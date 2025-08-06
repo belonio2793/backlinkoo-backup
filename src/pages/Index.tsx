@@ -570,7 +570,7 @@ const Index = () => {
               </Button>
             </div>
             <div className="bg-gradient-to-br from-blue-500/5 to-primary/5 p-12 rounded-2xl overflow-hidden">
-              <img src="https://images.pexels.com/photos/14533601/pexels-photo-14533601.jpeg" alt="Command Center Dashboard" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
+              <img src="https://images.pexels.com/photos/7793740/pexels-photo-7793740.jpeg" alt="SEO Dashboard" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
             </div>
           </div>
 
