@@ -115,7 +115,7 @@ export class ResendEmailService {
    */
   private static async sendDirectAPI(emailData: ResendEmailData): Promise<ResendEmailResponse> {
     try {
-      console.log('Sending email directly via Resend API:', { to: emailData.to, subject: emailData.subject });
+      console.log('🔗 Sending email directly via Resend API:', { to: emailData.to, subject: emailData.subject });
 
       const response = await safeFetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -137,7 +137,7 @@ export class ResendEmailService {
       }
 
       const result = await response.json();
-      console.log('Email sent successfully via direct API:', result.id);
+      console.log('��� Email sent successfully via direct API:', result.id);
 
       return {
         success: true,
