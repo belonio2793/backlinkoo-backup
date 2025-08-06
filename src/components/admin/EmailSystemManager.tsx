@@ -174,7 +174,7 @@ Email System Manager`
         if (provider === 'resend' || provider === 'admin') {
           result = await directEmailService.sendEmail(testData);
         } else {
-          result = await ResendEmailService.sendEmail(testData);
+          result = await MockEmailService.sendEmail(testData);
         }
       } catch (error) {
         console.warn(`${provider} service failed, trying direct fallback:`, error);
