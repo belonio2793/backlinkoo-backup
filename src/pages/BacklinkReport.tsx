@@ -273,7 +273,15 @@ export default function BacklinkReport() {
 
       localStorage.setItem(`report_${reportId}`, JSON.stringify(reportData));
 
-      // Store report data for potential saving
+      // Store report data in context for sharing between routes
+      const generatedReport = {
+        id: reportId,
+        url: generatedUrl,
+        data: reportData,
+        createdAt: new Date().toISOString()
+      };
+
+      setGeneratedReport(generatedReport);
       setReportData(reportData);
       setReportUrl(generatedUrl);
       
