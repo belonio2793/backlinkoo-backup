@@ -25,17 +25,16 @@ const EmailServiceDebugger: React.FC = () => {
     try {
       console.log('🧪 Testing direct API method...');
       
-      // Call the direct API method through reflection
-      const service = ResendEmailService as any;
-      const result = await service.sendDirectAPI({
+      // Call the mock email service directly
+      const result = await MockEmailService.sendEmail({
         to: 'support@backlinkoo.com',
-        subject: '🧪 Direct API Test',
-        message: 'This email was sent using the direct API method to test the fallback system.',
+        subject: '🧪 Mock Service Test',
+        message: 'This email was sent using the mock email service to test functionality without network requests.',
         from: 'Backlink ∞ <noreply@backlinkoo.com>'
       });
       
       setResults(prev => [...prev, {
-        method: 'Direct API',
+        method: 'Mock Service',
         success: result.success,
         message: result.success ? 'Direct API test successful' : `Direct API failed: ${result.error}`,
         details: result,
@@ -45,7 +44,7 @@ const EmailServiceDebugger: React.FC = () => {
     } catch (error: any) {
       console.error('❌ Direct API test error:', error);
       setResults(prev => [...prev, {
-        method: 'Direct API',
+        method: 'Mock Service',
         success: false,
         message: `Direct API test failed: ${error.message}`,
         details: { error: error.message, stack: error.stack?.split('\n').slice(0, 3) },
@@ -122,7 +121,7 @@ const EmailServiceDebugger: React.FC = () => {
             className="flex items-center gap-2"
           >
             <Mail className="h-4 w-4" />
-            Test Direct API
+            Test Mock Service
           </Button>
           
           <Button 
@@ -149,7 +148,7 @@ const EmailServiceDebugger: React.FC = () => {
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            <strong>Direct API Test:</strong> Tests the Resend API directly, bypassing Netlify functions
+            <strong>Mock Service Test:</strong> Tests the mock email service without external network requests
             <br />
             <strong>Fallback System Test:</strong> Tests the complete fallback logic (Netlify → Direct API)
           </AlertDescription>
