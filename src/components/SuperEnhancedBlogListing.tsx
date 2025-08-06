@@ -65,6 +65,8 @@ export function SuperEnhancedBlogListing() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [previewPost, setPreviewPost] = useState<BlogPost | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 10;
 
   // Helper function to randomize keywords on each render
   const getRandomizedKeywords = () => {
@@ -171,7 +173,7 @@ export function SuperEnhancedBlogListing() {
     try {
       setLoading(true);
       const results = await blogService.searchBlogPosts(query);
-      
+
       // Apply current filter to search results
       let filteredResults = results;
       switch (filterType) {
@@ -185,8 +187,9 @@ export function SuperEnhancedBlogListing() {
           filteredResults = results.filter(post => post.claimed && post.user_id === user?.id);
           break;
       }
-      
+
       setPosts(filteredResults);
+      setCurrentPage(1); // Reset to first page when searching
     } catch (error) {
       console.error('Search failed:', error);
     } finally {
@@ -328,7 +331,7 @@ export function SuperEnhancedBlogListing() {
           <div className="text-center mb-16 space-y-6">
             <div className="relative inline-block">
               <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
-                Premium Blog Posts
+                Community Blog Posts
               </h1>
             </div>
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -359,126 +362,8 @@ export function SuperEnhancedBlogListing() {
             </div>
           </div>
 
-          {/* Enhanced Search and Filters */}
+          {/* Enhanced Filter Buttons - Distinct Gradient Colors */}
           <div className="mb-12 space-y-6">
-            {/* Modern Search Design */}
-            <form onSubmit={handleSearch} className="relative max-w-5xl mx-auto">
-              <div className="relative">
-                {/* Redesigned search container with glass morphism */}
-                <div className="relative group">
-                  {/* Background with gradient and glass effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-2xl border border-blue-100/50 backdrop-blur-xl transition-all duration-500 group-focus-within:from-blue-100 group-focus-within:to-blue-50"></div>
-
-                  {/* Animated border glow */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 opacity-0 group-focus-within:opacity-20 rounded-2xl blur-xl transition-all duration-500"></div>
-
-                  {/* Main content container */}
-                  <div className="relative flex items-center p-3 gap-4">
-                    {/* Search icon with animation */}
-                    <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl group-focus-within:scale-110 transition-transform duration-300">
-                      <Search className="h-6 w-6 text-white" />
-                    </div>
-
-                    {/* Input field */}
-                    <div className="flex-1">
-                      <Input
-                        placeholder="Search for trending posts, topics, or keywords..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full text-lg py-4 px-0 border-0 bg-transparent focus:outline-none focus:ring-0 placeholder:text-gray-500 text-gray-800 font-medium"
-                      />
-                    </div>
-
-                    {/* Search button with enhanced design */}
-                    <Button
-                      type="submit"
-                      size="lg"
-                      className="h-12 px-8 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
-                    >
-                      <span className="hidden sm:inline">Search</span>
-                      <div className="relative">
-                        <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
-                      </div>
-                    </Button>
-                  </div>
-
-                  {/* Floating search suggestions indicator */}
-                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 opacity-0 group-focus-within:opacity-100 transition-all duration-300">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-blue-100 text-sm text-gray-600">
-                      <Sparkles className="h-4 w-4 text-blue-500" />
-                      <span>Press Enter to search or browse topics below</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Enhanced Popular searches section */}
-              <div className="mt-8 mb-6">
-                <div className="relative bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/20 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-6 backdrop-blur-sm">
-                  {/* Decorative elements */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full -translate-y-16 translate-x-16 blur-2xl"></div>
-                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-400/10 to-blue-400/10 rounded-full translate-y-12 -translate-x-12 blur-xl"></div>
-
-                  <div className="relative flex flex-col items-center gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-                        <TrendingUp className="h-4 w-4 text-white" />
-                      </div>
-                      <h3 className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-white bg-clip-text text-transparent">
-                        Trending Topics
-                      </h3>
-                    </div>
-
-                    <p className="text-sm text-slate-600 dark:text-slate-400 text-center max-w-md">
-                      Discover what's popular right now or explore these trending categories
-                    </p>
-
-                    <div className="flex flex-wrap gap-3 justify-center max-w-2xl">
-                      {getRandomizedKeywords().map((term, index) => (
-                        <button
-                          key={term}
-                          type="button"
-                          onClick={() => {
-                            setSearchQuery(term);
-                            searchPosts(term);
-                          }}
-                          className="group relative px-6 py-3 text-sm font-medium bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/70 dark:border-slate-700/70 rounded-xl transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
-                          style={{
-                            animation: `fade-in 0.6s ease-out forwards ${index * 100}ms`
-                          }}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-blue-500/10 group-hover:via-purple-500/10 group-hover:to-pink-500/10 rounded-xl transition-all duration-300"></div>
-                          <div className="relative flex items-center gap-2">
-                            <span className="capitalize text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                              {term}
-                            </span>
-                            <ArrowRight className="h-3 w-3 text-slate-400 group-hover:text-blue-500 transition-all duration-300 group-hover:translate-x-0.5 opacity-0 group-hover:opacity-100" />
-                          </div>
-
-                          {/* Subtle glow effect */}
-                          <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-xl transition-opacity duration-300 -z-10"></div>
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Stats or additional info */}
-                    <div className="flex items-center gap-4 mt-2 text-xs text-slate-500 dark:text-slate-400">
-                      <div className="flex items-center gap-1">
-                        <Activity className="h-3 w-3" />
-                        <span>Live trending</span>
-                      </div>
-                      <div className="w-1 h-1 bg-slate-300 dark:bg-slate-600 rounded-full"></div>
-                      <div className="flex items-center gap-1">
-                        <Users className="h-3 w-3" />
-                        <span>Most searched</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </form>
-
-            {/* Enhanced Filter Buttons - Distinct Gradient Colors */}
             <div className="flex flex-wrap justify-center gap-4 p-2">
               {[
                 { key: 'all', label: 'All Posts', icon: BookOpen, color: 'from-blue-500 to-cyan-600', hoverColor: 'from-blue-600 to-cyan-700', accent: 'blue', activeIndicator: 'from-blue-400 to-cyan-500' },
@@ -488,7 +373,10 @@ export function SuperEnhancedBlogListing() {
               ].map(({ key, label, icon: Icon, color, hoverColor, accent, activeIndicator }, index) => (
                 <button
                   key={key}
-                  onClick={() => setFilterType(key as any)}
+                  onClick={() => {
+                    setFilterType(key as any);
+                    setCurrentPage(1); // Reset to first page when changing filter
+                  }}
                   className={`
                     group relative px-8 py-4 rounded-2xl font-semibold text-sm tracking-wide
                     transition-all duration-500 ease-out transform
@@ -590,9 +478,9 @@ export function SuperEnhancedBlogListing() {
                   </div>
                   <h3 className="text-3xl font-bold text-gray-900 mb-4">No posts found</h3>
                   <p className="text-xl text-gray-600 mb-8 max-w-md mx-auto">
-                    {searchQuery 
-                      ? 'Try a different search term or filter.' 
-                      : filterType === 'my-posts' 
+                    {searchQuery
+                      ? 'Try a different search term or filter.'
+                      : filterType === 'my-posts'
                         ? "You haven't claimed any posts yet."
                         : 'Be the first to create a blog post!'
                     }
@@ -600,30 +488,196 @@ export function SuperEnhancedBlogListing() {
 
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {posts.map((post, index) => (
-                    <SuperPostCard
-                      key={post.id}
-                      post={post}
-                      user={user}
-                      navigate={navigate}
-                      formatDate={formatDate}
-                      getExcerpt={getExcerpt}
-                      getTimeRemaining={getTimeRemaining}
-                      cleanTitle={cleanTitle}
-                      isExpiringSoon={isExpiringSoon}
-                      onClaim={() => handleClaimPost(post)}
-                      onDelete={() => handleDeletePost(post)}
-                      onPreview={() => handlePreviewPost(post)}
-                      claiming={claiming === post.id}
-                      deleting={deleting === post.id}
-                      index={index}
-                    />
-                  ))}
-                </div>
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {posts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage).map((post, index) => (
+                      <SuperPostCard
+                        key={post.id}
+                        post={post}
+                        user={user}
+                        navigate={navigate}
+                        formatDate={formatDate}
+                        getExcerpt={getExcerpt}
+                        getTimeRemaining={getTimeRemaining}
+                        cleanTitle={cleanTitle}
+                        isExpiringSoon={isExpiringSoon}
+                        onClaim={() => handleClaimPost(post)}
+                        onDelete={() => handleDeletePost(post)}
+                        onPreview={() => handlePreviewPost(post)}
+                        claiming={claiming === post.id}
+                        deleting={deleting === post.id}
+                        index={index}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {posts.length > postsPerPage && (
+                    <div className="flex justify-center items-center space-x-2 mt-12">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2"
+                      >
+                        Previous
+                      </Button>
+
+                      <div className="flex space-x-1">
+                        {Array.from({ length: Math.ceil(posts.length / postsPerPage) }, (_, i) => i + 1).map((page) => (
+                          <Button
+                            key={page}
+                            variant={currentPage === page ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setCurrentPage(page)}
+                            className={`px-3 py-2 ${
+                              currentPage === page
+                                ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                                : "hover:bg-gray-100"
+                            }`}
+                          >
+                            {page}
+                          </Button>
+                        ))}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(posts.length / postsPerPage)))}
+                        disabled={currentPage === Math.ceil(posts.length / postsPerPage)}
+                        className="px-4 py-2"
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
+
+          {/* Enhanced Search and Discovery Section - Moved Below Blog Listings */}
+          <div className="mt-16 space-y-6">
+            {/* Modern Search Design */}
+            <form onSubmit={handleSearch} className="relative max-w-5xl mx-auto">
+              <div className="relative">
+                {/* Redesigned search container with glass morphism */}
+                <div className="relative group">
+                  {/* Background with gradient and glass effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-2xl border border-blue-100/50 backdrop-blur-xl transition-all duration-500 group-focus-within:from-blue-100 group-focus-within:to-blue-50"></div>
+
+                  {/* Animated border glow */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 opacity-0 group-focus-within:opacity-20 rounded-2xl blur-xl transition-all duration-500"></div>
+
+                  {/* Main content container */}
+                  <div className="relative flex items-center p-3 gap-4">
+                    {/* Search icon with animation */}
+                    <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl group-focus-within:scale-110 transition-transform duration-300">
+                      <Search className="h-6 w-6 text-white" />
+                    </div>
+
+                    {/* Input field */}
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Search for trending posts, topics, or keywords..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full text-lg py-4 px-0 border-0 bg-transparent focus:outline-none focus:ring-0 placeholder:text-gray-500 text-gray-800 font-medium"
+                      />
+                    </div>
+
+                    {/* Search button with enhanced design */}
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="h-12 px-8 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
+                    >
+                      <span className="hidden sm:inline">Search</span>
+                      <div className="relative">
+                        <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+                      </div>
+                    </Button>
+                  </div>
+
+                  {/* Floating search suggestions indicator */}
+                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 opacity-0 group-focus-within:opacity-100 transition-all duration-300">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-blue-100 text-sm text-gray-600">
+                      <Sparkles className="h-4 w-4 text-blue-500" />
+                      <span>Press Enter to search or browse topics below</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+
+            {/* Enhanced Popular searches section */}
+            <div className="mb-6">
+              <div className="relative bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/20 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-6 backdrop-blur-sm">
+                {/* Decorative elements */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full -translate-y-16 translate-x-16 blur-2xl"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-400/10 to-blue-400/10 rounded-full translate-y-12 -translate-x-12 blur-xl"></div>
+
+                <div className="relative flex flex-col items-center gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+                      <TrendingUp className="h-4 w-4 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-white bg-clip-text text-transparent">
+                      Trending Topics
+                    </h3>
+                  </div>
+
+                  <p className="text-sm text-slate-600 dark:text-slate-400 text-center max-w-md">
+                    Discover what's popular right now or explore these trending categories
+                  </p>
+
+                  <div className="flex flex-wrap gap-3 justify-center max-w-2xl">
+                    {getRandomizedKeywords().map((term, index) => (
+                      <button
+                        key={term}
+                        type="button"
+                        onClick={() => {
+                          setSearchQuery(term);
+                          searchPosts(term);
+                          setCurrentPage(1); // Reset to first page when searching
+                        }}
+                        className="group relative px-6 py-3 text-sm font-medium bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/70 dark:border-slate-700/70 rounded-xl transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
+                        style={{
+                          animation: `fade-in 0.6s ease-out forwards ${index * 100}ms`
+                        }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-blue-500/10 group-hover:via-purple-500/10 group-hover:to-pink-500/10 rounded-xl transition-all duration-300"></div>
+                        <div className="relative flex items-center gap-2">
+                          <span className="capitalize text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                            {term}
+                          </span>
+                          <ArrowRight className="h-3 w-3 text-slate-400 group-hover:text-blue-500 transition-all duration-300 group-hover:translate-x-0.5 opacity-0 group-hover:opacity-100" />
+                        </div>
+
+                        {/* Subtle glow effect */}
+                        <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-xl transition-opacity duration-300 -z-10"></div>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Stats or additional info */}
+                  <div className="flex items-center gap-4 mt-2 text-xs text-slate-500 dark:text-slate-400">
+                    <div className="flex items-center gap-1">
+                      <Activity className="h-3 w-3" />
+                      <span>Live trending</span>
+                    </div>
+                    <div className="w-1 h-1 bg-slate-300 dark:bg-slate-600 rounded-full"></div>
+                    <div className="flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      <span>Most searched</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
 
         </div>
