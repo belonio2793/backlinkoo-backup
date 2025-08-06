@@ -342,9 +342,19 @@ const Index = () => {
                   title: "Success! 🎉",
                   description: `Your blog post "${blogPost.title}" is now live at ${blogPost.blogUrl}`,
                 });
-                // Navigate to blog section after a short delay to show the new post
+                // Navigate to the specific blog post after a short delay
                 setTimeout(() => {
-                  navigate('/blog');
+                  if (blogPost.blogUrl) {
+                    // Extract the path from the full URL and navigate to it
+                    const blogPath = new URL(blogPost.blogUrl).pathname;
+                    navigate(blogPath);
+                  } else if (blogPost.metadata?.slug) {
+                    // Fallback to slug-based navigation
+                    navigate(`/blog/${blogPost.metadata.slug}`);
+                  } else {
+                    // Final fallback to general blog page
+                    navigate('/blog');
+                  }
                 }, 2000);
               }}
             />
