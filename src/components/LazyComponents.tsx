@@ -63,3 +63,6 @@ export const LazyRouteSyncTest = lazy(() => import('@/pages/RouteSyncTest'));
 
 // Email Authentication Audit component
 export const LazyEmailAuthenticationAudit = lazy(() => import('@/pages/EmailAuthenticationAudit'));
+
+// Email Diagnostic component
+export const LazyEmailDiagnostic = lazy(() => import('@/pages/EmailDiagnostic'));
