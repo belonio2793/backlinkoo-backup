@@ -28,6 +28,8 @@ export function SavedBacklinkReports() {
   const { toast } = useToast();
   const { isAuthenticated, user } = useAuth();
 
+  const [isUsingLocalStorage, setIsUsingLocalStorage] = useState(false);
+
   const loadReports = async () => {
     if (!isAuthenticated) {
       setIsLoading(false);
@@ -38,6 +40,10 @@ export function SavedBacklinkReports() {
       setIsLoading(true);
       const data = await SavedBacklinkReportsService.getUserReports();
       setReports(data);
+
+      // Check if any reports are from localStorage
+      const hasLocalReports = data.some(report => report.id.startsWith('local_'));
+      setIsUsingLocalStorage(hasLocalReports);
     } catch (error) {
       console.error('Error loading saved reports:', error);
       toast({
