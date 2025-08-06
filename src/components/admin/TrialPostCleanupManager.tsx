@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { trialPostCleanupService, type TrialPostStatus } from '@/services/trialPostCleanupService';
+import { ExcerptCleaner } from '@/utils/excerptCleaner';
 import {
   Trash2,
   Clock,
