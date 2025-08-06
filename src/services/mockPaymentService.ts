@@ -23,8 +23,8 @@ export class MockPaymentService {
   private isEnabled: boolean;
 
   constructor() {
-    // Enable mock service in development or when functions aren't available
-    this.isEnabled = import.meta.env.DEV || window.location.hostname.includes('fly.dev');
+    // Disable mock service entirely - use real payment systems only
+    this.isEnabled = false;
   }
 
   static getInstance(): MockPaymentService {
