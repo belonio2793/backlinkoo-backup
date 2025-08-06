@@ -326,14 +326,14 @@ const Index = () => {
 
       {/* Free Blog Generator - Top Feature */}
       <section id="blog-generator" className="py-24 px-0 md:px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
-        <div className="w-full">
+        <div className="w-full px-4 md:px-0">
           {/* Optional: Advanced Generator Toggle (Hidden by default) */}
 
 
 
 
           {/* Generator */}
-          <div className="w-full px-6">
+          <div className="w-full px-2 md:px-6">
             <BlogForm
               onContentGenerated={(blogPost) => {
                 setUser(user); // Refresh state
