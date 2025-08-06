@@ -1,7 +1,7 @@
 import React from 'react';
 import { EmailAuthDiagnosticPanel } from '@/components/EmailAuthDiagnosticPanel';
 import { SupabaseEmailTemplateGuide } from '@/components/SupabaseEmailTemplateGuide';
-import { ToolsHeader } from '@/components/shared/ToolsHeader';
+import ToolsHeader from '@/components/shared/ToolsHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const EmailDiagnosticPage = () => {
