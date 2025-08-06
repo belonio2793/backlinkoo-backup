@@ -187,7 +187,7 @@ class PaymentIntegrationService {
 
         return {
           success: false,
-          error: `Invalid response from payment service: ${response.status} ${response.statusText}`
+          error: `Invalid response from payment service: ${response.status} ${response.statusText}. ${response.status === 404 ? 'Payment endpoint not found. Please check deployment.' : ''}`
         };
       }
 
