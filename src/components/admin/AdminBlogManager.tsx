@@ -98,7 +98,10 @@ export function AdminBlogManager() {
       setContentFilterStats(filterStats);
       setModerationStats(modStats);
     } catch (error) {
-      console.warn('Failed to load content filter stats:', error);
+      console.warn('Failed to load content filter stats:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.stack : String(error)
+      });
     }
   };
 
