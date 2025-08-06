@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Alert, AlertDescription } from './ui/alert';
 import { Badge } from './ui/badge';
 import { Mail, AlertCircle, CheckCircle, XCircle, Zap } from 'lucide-react';
-import { ResendEmailService } from '../services/resendEmailService';
+import { MockEmailService } from '../services/mockEmailService';
 
 interface TestResult {
   method: string;
@@ -63,7 +63,7 @@ const EmailServiceDebugger: React.FC = () => {
     try {
       console.log('🧪 Testing fallback system...');
       
-      const result = await ResendEmailService.sendEmail({
+      const result = await MockEmailService.sendEmail({
         to: 'support@backlinkoo.com',
         subject: '🧪 Fallback System Test',
         message: 'This email was sent using the fallback system which should try Netlify first, then fall back to direct API.',
