@@ -372,7 +372,7 @@ const Index = () => {
       {/* Inline Authentication Section - Show for guests or trial upgrades */}
       {(!user && authChecked) || showInlineAuth ? (
         <section className="py-16 px-6 bg-gradient-to-br from-blue-50 to-indigo-50" id="inline-auth">
-          <div className="container mx-auto max-w-6xl">
+          <div className="w-full px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               {/* Left side - Value proposition */}
               <div>
