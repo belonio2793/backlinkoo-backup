@@ -75,6 +75,7 @@ import {
   type UserUpdatePayload
 } from "@/services/realAdminUserService";
 import { supabase } from "@/integrations/supabase/client";
+import { SchemaCompatibility } from "@/utils/schemaCompatibility";
 
 interface UserStats {
   totalUsers: number;
@@ -263,7 +264,7 @@ export function AdminUserDashboard() {
       // Transform data to match expected format
       const transformedUsers: RealUserDetails[] = (profilesData || []).map(profile => ({
         ...profile,
-        subscription: profile.subscribers?.[0] || null,
+        subscription: (profile as any).subscribers?.[0] || (profile as any).premium_subscriptions?.[0] || null,
         campaignCount: 0, // Will be loaded separately if needed
         totalCreditsUsed: 0,
         totalRevenue: 0,
