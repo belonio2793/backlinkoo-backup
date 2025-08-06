@@ -113,13 +113,19 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
         return <Fallback error={this.state.error} />;
       }
 
-      // If we get here, redirect to 404 immediately
-      this.redirectTo404();
-      
-      // Show minimal loading while redirecting
+      // Show error UI instead of auto-redirecting
       return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+          <div className="max-w-md mx-auto text-center p-8">
+            <h1 className="text-xl font-semibold text-gray-900 mb-4">Something went wrong</h1>
+            <p className="text-gray-600 mb-6">We're experiencing a temporary issue. Please try refreshing the page.</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Refresh Page
+            </button>
+          </div>
         </div>
       );
     }
