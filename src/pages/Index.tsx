@@ -768,7 +768,7 @@ const Index = () => {
         className="relative py-24 px-0 md:px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
-        <div className="w-full relative z-10 px-6">
+        <div className="w-full relative z-10 px-4 md:px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">Starter Packages</h2>
             <p className="text-xl text-gray-700 max-w-6xl mx-auto leading-relaxed font-light">
