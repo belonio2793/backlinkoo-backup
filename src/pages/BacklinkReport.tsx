@@ -207,7 +207,7 @@ export default function BacklinkReport() {
 
     setIsSaving(true);
     try {
-      await SavedBacklinkReportsService.saveReport(
+      const savedReport = await SavedBacklinkReportsService.saveReport(
         reportData.campaignName,
         keyword.trim(),
         anchorText.trim(),
@@ -215,7 +215,7 @@ export default function BacklinkReport() {
         reportData
       );
 
-      const isLocalStorage = reportData && reportData.id && reportData.id.startsWith('local_');
+      const isLocalStorage = savedReport.id.startsWith('local_');
       toast({
         title: 'Report Saved Successfully',
         description: isLocalStorage
