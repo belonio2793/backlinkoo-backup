@@ -325,15 +325,15 @@ const Index = () => {
       </header>
 
       {/* Free Blog Generator - Top Feature */}
-      <section id="blog-generator" className="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
-        <div className="w-full">
+      <section id="blog-generator" className="py-24 px-0 md:px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
+        <div className="w-full px-4 md:px-0">
           {/* Optional: Advanced Generator Toggle (Hidden by default) */}
 
 
 
 
           {/* Generator */}
-          <div className="w-full px-6">
+          <div className="w-full px-2 md:px-6">
             <BlogForm
               onContentGenerated={(blogPost) => {
                 setUser(user); // Refresh state
@@ -510,8 +510,8 @@ const Index = () => {
       </section>
 
       {/* Features Grid */}
-      <section className="py-24 px-6 bg-muted/30">
-        <div className="w-full">
+      <section className="py-24 px-0 md:px-6 bg-muted/30">
+        <div className="w-full px-4 md:px-0">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight">Why Professionals Choose Us</h2>
             <p className="text-xl text-muted-foreground max-w-6xl mx-auto leading-relaxed font-light">
@@ -570,14 +570,18 @@ const Index = () => {
               </Button>
             </div>
             <div className="bg-gradient-to-br from-blue-500/5 to-primary/5 p-12 rounded-2xl overflow-hidden">
-              <img src="https://images.pexels.com/photos/14533601/pexels-photo-14533601.jpeg" alt="Command Center Dashboard" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
+              <div className="h-32 w-32 mx-auto bg-white rounded-xl shadow-lg flex items-center justify-center">
+                <BarChart3 className="h-16 w-16 text-blue-600" />
+              </div>
             </div>
           </div>
 
           {/* Campaign Management */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="bg-gradient-to-br from-green-500/5 to-primary/5 p-12 rounded-2xl order-2 lg:order-1 overflow-hidden">
-              <img src="https://images.pexels.com/photos/343457/pexels-photo-343457.jpeg" alt="Automated Excellence" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
+              <div className="h-32 w-32 mx-auto bg-white rounded-xl shadow-lg flex items-center justify-center">
+                <Activity className="h-16 w-16 text-green-600" />
+              </div>
             </div>
             <div className="order-1 lg:order-2">
               <Badge variant="outline" className="mb-6 bg-green-50 text-green-600 border-green-200 font-mono text-xs">
@@ -644,14 +648,18 @@ const Index = () => {
               </Button>
             </div>
             <div className="bg-gradient-to-br from-purple-500/5 to-primary/5 p-12 rounded-2xl overflow-hidden">
-              <img src="https://images.pexels.com/photos/25626428/pexels-photo-25626428.jpeg" alt="Intelligence Engine" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
+              <div className="h-32 w-32 mx-auto bg-white rounded-xl shadow-lg flex items-center justify-center">
+                <Sparkles className="h-16 w-16 text-purple-600" />
+              </div>
             </div>
           </div>
 
           {/* Rankings */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="bg-gradient-to-br from-orange-500/5 to-primary/5 p-12 rounded-2xl order-2 lg:order-1 overflow-hidden">
-              <img src="https://images.pexels.com/photos/15044697/pexels-photo-15044697.jpeg" alt="Performance Monitor" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
+              <div className="h-32 w-32 mx-auto bg-white rounded-xl shadow-lg flex items-center justify-center">
+                <TrendingUp className="h-16 w-16 text-orange-600" />
+              </div>
             </div>
             <div className="order-1 lg:order-2">
               <Badge variant="outline" className="mb-6 bg-orange-50 text-orange-600 border-orange-200 font-mono text-xs">
@@ -719,7 +727,9 @@ const Index = () => {
               </Button>
             </div>
             <div className="bg-gradient-to-br from-green-500/5 to-primary/5 p-12 rounded-2xl overflow-hidden">
-              <img src="https://images.pexels.com/photos/7793173/pexels-photo-7793173.jpeg" alt="Link Verification Reports" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
+              <div className="h-32 w-32 mx-auto bg-white rounded-xl shadow-lg flex items-center justify-center">
+                <CheckCircle className="h-16 w-16 text-green-600" />
+              </div>
             </div>
           </div>
 
@@ -763,12 +773,12 @@ const Index = () => {
       </section>
 
       {/* Pricing Section */}
-      <section 
-        id="pricing" 
-        className="relative py-24 px-6 bg-white"
+      <section
+        id="pricing"
+        className="relative py-24 px-0 md:px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
-        <div className="w-full relative z-10 px-6">
+        <div className="w-full relative z-10 px-4 md:px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">Starter Packages</h2>
             <p className="text-xl text-gray-700 max-w-6xl mx-auto leading-relaxed font-light">
@@ -894,10 +904,10 @@ const Index = () => {
 
       {/* Final CTA */}
       <section
-        className="relative py-24 px-6 bg-white"
+        className="relative py-24 px-0 md:px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
-        <div className="w-full text-center relative z-10 px-6">
+        <div className="w-full text-center relative z-10 px-4 md:px-6">
           <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">
             Ready to Dominate Search Results?
           </h2>
