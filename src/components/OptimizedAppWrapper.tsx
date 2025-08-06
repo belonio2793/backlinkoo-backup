@@ -37,6 +37,7 @@ import {
   LazyEmailMarketing,
   LazyBacklinkReport,
   LazyReportViewer,
+  LazySavedReports,
   LazyNoHandsSEO,
   LazyAffiliateProgram,
   LazyPromotionMaterials,
@@ -246,6 +247,11 @@ export const OptimizedAppWrapper = () => {
             </InstantEmailVerificationGuard>
           } />
           <Route path="/backlink-report" element={<LazyBacklinkReport />} />
+          <Route path="/saved-reports" element={
+            <InstantEmailVerificationGuard>
+              <LazySavedReports />
+            </InstantEmailVerificationGuard>
+          } />
           <Route path="/report/:reportId" element={<LazyReportViewer />} />
           <Route path="/automation-link-building" element={
             <InstantEmailVerificationGuard>

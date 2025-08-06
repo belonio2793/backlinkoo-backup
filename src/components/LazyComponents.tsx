@@ -5,6 +5,7 @@ export const LazyAdminDashboard = lazy(() => import('@/pages/AdminDashboard'));
 export const LazyEmailMarketing = lazy(() => import('@/pages/EmailMarketing'));
 export const LazyBacklinkReport = lazy(() => import('@/pages/BacklinkReport'));
 export const LazyReportViewer = lazy(() => import('@/pages/ReportViewer'));
+export const LazySavedReports = lazy(() => import('@/pages/SavedReports'));
 export const LazyNoHandsSEO = lazy(() => import('@/pages/NoHandsSEO'));
 export const LazyAffiliateProgram = lazy(() => import('@/pages/AffiliateProgram'));
 export const LazyPromotionMaterials = lazy(() => import('@/pages/PromotionMaterials'));
