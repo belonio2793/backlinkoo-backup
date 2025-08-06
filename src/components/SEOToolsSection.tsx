@@ -387,24 +387,25 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
 
 
               <Button onClick={() => {
-                alert('Start Subscription button clicked!');
                 console.log('SEO Tools Start Subscription clicked');
                 console.log('isPremium value:', isPremium);
                 console.log('subscriptionStatus.isSubscribed:', subscriptionStatus.isSubscribed);
-                // Temporarily bypass premium check for testing
-                // if (isPremium) {
-                //   toast({
-                //     title: "Already Premium",
-                //     description: "You already have an active premium subscription. Enjoy all premium features!",
-                //     variant: "default",
-                //   });
-                //   console.log('User is already premium, showing notification');
-                //   return;
-                // }
-                console.log('Opening premium checkout');
-                console.log('Setting isPaymentModalOpen to true');
+
+                // Check if user already has premium access
+                if (isPremium || subscriptionStatus.isSubscribed) {
+                  toast({
+                    title: "Already Premium",
+                    description: "You already have an active premium subscription. Enjoy all premium features!",
+                    variant: "default",
+                  });
+                  console.log('User is already premium, showing notification');
+                  return;
+                }
+
+                // Open premium checkout for free accounts or non-premium users
+                console.log('Opening premium checkout for non-premium user');
                 setIsPaymentModalOpen(true);
-              }} size="lg" className="w-full" variant="default">
+              }} size="lg" className="w-full" variant={isPremium || subscriptionStatus.isSubscribed ? "outline" : "default"}>
                 {isPremium ? (
                   <>
                     <CheckCircle2 className="h-4 w-4 mr-2" />
