@@ -102,7 +102,7 @@ Our system uses three sophisticated prompt patterns, randomly selected for conte
 - **Analytics**: Engagement tracking and performance metrics
 - **Content Moderation**: Quality assurance and spam prevention
 
-## ���� Getting Started
+## 📦 Getting Started
 
 ### Prerequisites
 - Node.js 18+ 

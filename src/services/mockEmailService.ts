@@ -124,7 +124,7 @@ Thank you for joining Backlink ∞ - your professional SEO and backlink manageme
 • Analyze competitor strategies
 • Track backlink performance
 
-��� EXPLORE OUR TOOLS
+🛠️ EXPLORE OUR TOOLS
 • Keyword research tools
 • Ranking tracker
 • Competitor analysis
