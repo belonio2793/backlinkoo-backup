@@ -6,13 +6,6 @@ const serpApiKey = Deno.env.get('SERP_API_KEY');
 const dataForSeoLogin = Deno.env.get('DATAFORSEO_API_LOGIN');
 const dataForSeoPassword = Deno.env.get('DATAFORSEO_API_PASSWORD');
 
-// Google Ads API Configuration
-const googleAdsDeveloperToken = Deno.env.get('GOOGLE_ADS_DEVELOPER_TOKEN');
-const googleAdsCustomerAccountId = Deno.env.get('GOOGLE_ADS_CUSTOMER_ACCOUNT_ID');
-const googleAdsClientId = Deno.env.get('GOOGLE_ADS_CLIENT_ID');
-const googleAdsClientSecret = Deno.env.get('GOOGLE_ADS_CLIENT_SECRET');
-const googleAdsRefreshToken = Deno.env.get('GOOGLE_ADS_REFRESH_TOKEN');
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -53,183 +46,7 @@ serve(async (req) => {
   }
 });
 
-// Google Ads API Helper Functions
-async function getGoogleAdsAccessToken(config: any): Promise<string> {
-  const tokenEndpoint = 'https://oauth2.googleapis.com/token';
-  
-  const response = await fetch(tokenEndpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      client_id: config.clientId,
-      client_secret: config.clientSecret,
-      refresh_token: config.refreshToken,
-      grant_type: 'refresh_token',
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to get access token: ${response.status} ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  return data.access_token;
-}
-
-async function generateGoogleAdsKeywordIdeas(config: any, seedKeywords: string[], geoTargets: string[] = ['2840'], language: string = 'en'): Promise<any[]> {
-  const accessToken = await getGoogleAdsAccessToken(config);
-  
-  const url = `https://googleads.googleapis.com/v16/customers/${config.customerAccountId}/keywordPlanIdeas:generateKeywordIdeas`;
-  
-  const requestBody = {
-    customer_id: config.customerAccountId,
-    language: `languageConstants/${getLanguageConstant(language)}`,
-    geo_target_constants: geoTargets.map((geo) => `geoTargetConstants/${geo}`),
-    keyword_plan_network: 'GOOGLE_SEARCH_AND_PARTNERS',
-    keyword_seed: {
-      keywords: seedKeywords
-    }
-  };
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'developer-token': config.developerToken,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(requestBody),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Google Ads API request failed: ${response.status} ${response.statusText} - ${errorText}`);
-  }
-
-  const data = await response.json();
-  return parseGoogleAdsKeywordIdeas(data);
-}
-
-async function getGoogleAdsHistoricalMetrics(config: any, keywords: string[], geoTargets: string[] = ['2840'], language: string = 'en'): Promise<any[]> {
-  const accessToken = await getGoogleAdsAccessToken(config);
-  
-  const url = `https://googleads.googleapis.com/v16/customers/${config.customerAccountId}/keywordPlanIdeas:generateKeywordHistoricalMetrics`;
-  
-  const requestBody = {
-    customer_id: config.customerAccountId,
-    language: `languageConstants/${getLanguageConstant(language)}`,
-    geo_target_constants: geoTargets.map((geo) => `geoTargetConstants/${geo}`),
-    keyword_plan_network: 'GOOGLE_SEARCH_AND_PARTNERS',
-    keywords: keywords
-  };
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'developer-token': config.developerToken,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(requestBody),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Google Ads API historical metrics request failed: ${response.status} ${response.statusText} - ${errorText}`);
-  }
-
-  const data = await response.json();
-  return parseGoogleAdsHistoricalMetrics(data);
-}
-
-function parseGoogleAdsKeywordIdeas(data: any): any[] {
-  if (!data.results) {
-    return [];
-  }
-
-  return data.results.map((result: any) => {
-    const keywordIdea = result.keyword_idea_metrics || {};
-    const keyword = result.text;
-    
-    return {
-      keyword: keyword,
-      searchVolume: keywordIdea.avg_monthly_searches || 0,
-      cpc: keywordIdea.suggested_bid_micros ? keywordIdea.suggested_bid_micros / 1000000 : 0,
-      competition: mapGoogleAdsCompetitionLevel(keywordIdea.competition || 'UNKNOWN'),
-      competitionIndex: keywordIdea.competition_index || 0,
-    };
-  });
-}
-
-function parseGoogleAdsHistoricalMetrics(data: any): any[] {
-  if (!data.results) {
-    return [];
-  }
-
-  return data.results.map((result: any) => {
-    const metrics = result.keyword_metrics || {};
-    const keyword = result.text;
-    
-    return {
-      keyword: keyword,
-      searchVolume: metrics.avg_monthly_searches || 0,
-      cpc: metrics.suggested_bid_micros ? metrics.suggested_bid_micros / 1000000 : 0,
-      competition: mapGoogleAdsCompetitionLevel(metrics.competition || 'UNKNOWN'),
-      competitionIndex: metrics.competition_index || 0,
-    };
-  });
-}
-
-function mapGoogleAdsCompetitionLevel(competition: string): 'low' | 'medium' | 'high' {
-  switch (competition) {
-    case 'LOW':
-      return 'low';
-    case 'MEDIUM':
-      return 'medium';
-    case 'HIGH':
-      return 'high';
-    default:
-      return 'medium';
-  }
-}
-
-function getLanguageConstant(languageCode: string): string {
-  const languageConstants: { [key: string]: string } = {
-    'en': '1000',
-    'es': '1003',
-    'fr': '1002',
-    'de': '1001',
-    'it': '1004',
-    'pt': '1014',
-    'ja': '1005',
-    'ko': '1012',
-    'zh': '1018',
-    'ru': '1007',
-  };
-  
-  return languageConstants[languageCode] || '1000';
-}
-
-function getGeoTargetConstant(countryCode: string): string {
-  const geoTargets: { [key: string]: string } = {
-    'US': '2840',
-    'GB': '2826',
-    'CA': '2124',
-    'AU': '2036',
-    'DE': '2276',
-    'FR': '2250',
-    'ES': '2724',
-    'IT': '2380',
-    'JP': '2392',
-    'BR': '2076',
-  };
-  
-  return geoTargets[countryCode] || '2840';
-}
-
-// Multi-API Search Volume Fetcher with Google Ads API Primary and Fallbacks
+// Multi-API Search Volume Fetcher with fallback services
 async function fetchSearchVolumeData(keyword: string, country: string = 'US', searchEngine: string = 'google') {
   const results = {
     keyword,
@@ -241,36 +58,7 @@ async function fetchSearchVolumeData(keyword: string, country: string = 'US', se
     confidence: 'low' as 'low' | 'medium' | 'high'
   };
 
-  // Try Google Ads API first (most accurate and direct)
-  try {
-    if (googleAdsDeveloperToken && googleAdsCustomerAccountId && googleAdsClientId && googleAdsClientSecret && googleAdsRefreshToken) {
-      const googleAdsConfig = {
-        developerToken: googleAdsDeveloperToken,
-        customerAccountId: googleAdsCustomerAccountId,
-        clientId: googleAdsClientId,
-        clientSecret: googleAdsClientSecret,
-        refreshToken: googleAdsRefreshToken,
-      };
-
-      const geoTarget = getGeoTargetConstant(country);
-      const historicalMetrics = await getGoogleAdsHistoricalMetrics(googleAdsConfig, [keyword], [geoTarget], 'en');
-      
-      if (historicalMetrics.length > 0) {
-        const metric = historicalMetrics[0];
-        results.searchVolume = metric.searchVolume;
-        results.difficulty = metric.competitionIndex || 50;
-        results.cpc = metric.cpc;
-        results.competition = metric.competition;
-        results.sources.push('Google_Ads_API');
-        results.confidence = 'high';
-        return results;
-      }
-    }
-  } catch (error) {
-    console.log('Google Ads API failed, trying DataForSEO fallback:', error);
-  }
-
-  // Try DataForSEO second (previously most accurate)
+  // Try DataForSEO first (high accuracy commercial API)
   try {
     const dataForSeoResult = await fetchDataForSEOVolume(keyword, country, searchEngine);
     if (dataForSeoResult.success) {
@@ -464,88 +252,37 @@ async function generateIntelligentEstimate(keyword: string, country: string, sea
   };
 }
 
-// Advanced Keyword Research with Google Ads API Integration
+// Advanced Keyword Research with Multi-API Integration
 async function handleAdvancedKeywordResearch(data: { keyword: string; country?: string; city?: string; searchEngine?: string }) {
   try {
     const { keyword, country = 'US', city, searchEngine = 'google' } = data;
     
-    console.log(`Starting Google Ads API keyword research for: ${keyword} in ${country}${city ? `, ${city}` : ''} on ${searchEngine}`);
+    console.log(`Starting advanced keyword research for: ${keyword} in ${country}${city ? `, ${city}` : ''} on ${searchEngine}`);
 
-    let enhancedKeywords = [];
-    let usingGoogleAdsApi = false;
-
-    // Try Google Ads API first for comprehensive keyword research
-    try {
-      if (googleAdsDeveloperToken && googleAdsCustomerAccountId && googleAdsClientId && googleAdsClientSecret && googleAdsRefreshToken) {
-        const googleAdsConfig = {
-          developerToken: googleAdsDeveloperToken,
-          customerAccountId: googleAdsCustomerAccountId,
-          clientId: googleAdsClientId,
-          clientSecret: googleAdsClientSecret,
-          refreshToken: googleAdsRefreshToken,
-        };
-
-        const geoTarget = getGeoTargetConstant(country);
-        
-        // Get keyword ideas from Google Ads API
-        const keywordIdeas = await generateGoogleAdsKeywordIdeas(googleAdsConfig, [keyword], [geoTarget], 'en');
-        
-        // Get historical metrics for primary keyword and top ideas
-        const topKeywords = [keyword, ...keywordIdeas.slice(0, 9).map(k => k.keyword)];
-        const historicalMetrics = await getGoogleAdsHistoricalMetrics(googleAdsConfig, topKeywords, [geoTarget], 'en');
-        
-        // Combine keyword ideas with historical metrics
-        enhancedKeywords = historicalMetrics.map(metric => ({
-          keyword: metric.keyword,
-          searchVolume: metric.searchVolume,
-          difficulty: metric.competitionIndex || 50,
-          cpc: metric.cpc,
-          trend: ['up', 'down', 'stable'][Math.floor(Math.random() * 3)] as 'up' | 'down' | 'stable',
-          competition: metric.competition,
-          searchEngine: searchEngine as 'google' | 'bing',
-          location: city ? `${city}, ${country}` : country,
-          competitorCount: Math.floor(Math.random() * 50) + 10,
-          topCompetitors: [],
-          dataSources: ['Google_Ads_API'],
-          confidence: 'high' as const
-        }));
-        
-        usingGoogleAdsApi = true;
-        console.log(`Google Ads API returned ${enhancedKeywords.length} keywords`);
-      }
-    } catch (error) {
-      console.log('Google Ads API failed, falling back to multi-API approach:', error);
-    }
-
-    // Fallback to original multi-API approach if Google Ads API fails
-    if (!usingGoogleAdsApi) {
-      console.log('Using fallback multi-API keyword research');
+    // Generate keyword variations
+    const keywordVariations = generateAdvancedKeywordVariations(keyword);
+    
+    // Fetch volume data for all keywords using multi-API approach
+    const keywordPromises = keywordVariations.map(async (kw) => {
+      const volumeData = await fetchSearchVolumeData(kw, country, searchEngine);
       
-      // Generate keyword variations
-      const keywordVariations = generateAdvancedKeywordVariations(keyword);
-      
-      // Fetch volume data for all keywords using multi-API approach
-      const keywordPromises = keywordVariations.map(async (kw) => {
-        const volumeData = await fetchSearchVolumeData(kw, country, searchEngine);
-        
-        return {
-          keyword: kw,
-          searchVolume: volumeData.searchVolume,
-          difficulty: volumeData.difficulty,
-          cpc: volumeData.cpc,
-          trend: ['up', 'down', 'stable'][Math.floor(Math.random() * 3)] as 'up' | 'down' | 'stable',
-          competition: volumeData.competition,
-          searchEngine: searchEngine as 'google' | 'bing',
-          location: city ? `${city}, ${country}` : country,
-          competitorCount: Math.floor(Math.random() * 50) + 10,
-          topCompetitors: [],
-          dataSources: volumeData.sources,
-          confidence: volumeData.confidence
-        };
-      });
+      return {
+        keyword: kw,
+        searchVolume: volumeData.searchVolume,
+        difficulty: volumeData.difficulty,
+        cpc: volumeData.cpc,
+        trend: ['up', 'down', 'stable'][Math.floor(Math.random() * 3)] as 'up' | 'down' | 'stable',
+        competition: volumeData.competition,
+        searchEngine: searchEngine as 'google' | 'bing',
+        location: city ? `${city}, ${country}` : country,
+        competitorCount: Math.floor(Math.random() * 50) + 10,
+        topCompetitors: [],
+        dataSources: volumeData.sources,
+        confidence: volumeData.confidence
+      };
+    });
 
-      enhancedKeywords = await Promise.all(keywordPromises);
-    }
+    const enhancedKeywords = await Promise.all(keywordPromises);
 
     // Get competitive analysis from SerpAPI
     const serpResponse = await fetch(
@@ -572,27 +309,27 @@ async function handleAdvancedKeywordResearch(data: { keyword: string; country?: 
       };
     });
 
-    // Enhanced AI analysis with Google Ads API data source information
-    const dataSource = usingGoogleAdsApi ? 'Google Ads API (Official)' : enhancedKeywords[0] && enhancedKeywords[0].dataSources ? enhancedKeywords[0].dataSources.join(', ') : 'Multiple APIs';
-    const dataConfidence = usingGoogleAdsApi ? 'high' : enhancedKeywords[0] && enhancedKeywords[0].confidence ? enhancedKeywords[0].confidence : 'medium';
+    // Enhanced AI analysis with multi-API data source information
+    const dataSource = enhancedKeywords[0] && enhancedKeywords[0].dataSources ? enhancedKeywords[0].dataSources.join(', ') : 'Multiple APIs';
+    const dataConfidence = enhancedKeywords[0] && enhancedKeywords[0].confidence ? enhancedKeywords[0].confidence : 'medium';
     
     const analysisPrompt = `
-    Analyze the keyword "${keyword}" using ${usingGoogleAdsApi ? 'official Google Ads API' : 'multi-source'} data for comprehensive SEO insights:
+    Analyze the keyword "${keyword}" using multi-source data for comprehensive SEO insights:
     
     Data Sources Used: ${dataSource}
     Data Confidence: ${dataConfidence}
-    API Integration: ${usingGoogleAdsApi ? 'Direct Google Ads API - Real-time official data' : 'Multi-API fallback approach'}
+    API Integration: Multi-API fallback approach with DataForSEO, SerpAPI, and AI estimation
     
     Provide analysis for:
     1. Search intent and user behavior
     2. Competition strategy based on ${rankingUrls.length} top competitors
     3. Content optimization recommendations
     4. Local SEO opportunities for ${country}${city ? ` (${city})` : ''}
-    5. Monetization potential and CPC insights from ${usingGoogleAdsApi ? 'official Google Ads data' : 'estimated sources'}
+    5. Monetization potential and CPC insights from estimated sources
     6. Long-tail keyword opportunities
     7. Seasonal trends and content calendar suggestions
     
-    Focus on actionable insights for ${searchEngine} optimization using ${usingGoogleAdsApi ? 'verified Google search volume data' : 'estimated metrics'}.
+    Focus on actionable insights for ${searchEngine} optimization using estimated metrics.
     `;
 
     const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -638,8 +375,8 @@ async function handleAdvancedKeywordResearch(data: { keyword: string; country?: 
         score: dataQuality,
         sources: [...new Set(enhancedKeywords.flatMap(kw => kw.dataSources || []))],
         confidence: dataQuality > 2.5 ? 'high' : dataQuality > 1.5 ? 'medium' : 'low',
-        usingGoogleAdsApi: usingGoogleAdsApi,
-        apiType: usingGoogleAdsApi ? 'Official Google Ads API' : 'Multi-API Fallback'
+        usingGoogleAdsApi: false,
+        apiType: 'Multi-API Fallback (DataForSEO, SerpAPI, AI Estimation)'
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
