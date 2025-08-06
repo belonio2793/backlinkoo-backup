@@ -129,7 +129,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             <div className="space-y-3">
               <Label htmlFor="keyword" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                 <div className="p-2 bg-white rounded-lg shadow-sm border border-emerald-200 overflow-hidden">
-                  <img src="https://images.pexels.com/photos/27499331/pexels-photo-27499331.jpeg" alt="Target Achievement" className="h-6 w-6 object-cover rounded-sm" />
+                  <img src="https://images.pexels.com/photos/19056728/pexels-photo-19056728.jpeg" alt="Target Achievement" className="h-6 w-6 object-cover rounded-sm" />
                 </div>
                 Keyword
               </Label>
@@ -145,7 +145,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
               </div>
               <p className="text-xs text-gray-500 flex items-center gap-1">
                 <div className="h-4 w-4 rounded-full overflow-hidden border border-emerald-300">
-                  <img src="https://images.pexels.com/photos/27499331/pexels-photo-27499331.jpeg" alt="Target Achievement" className="h-4 w-4 object-cover" />
+                  <img src="https://images.pexels.com/photos/19056728/pexels-photo-19056728.jpeg" alt="Target Achievement" className="h-4 w-4 object-cover" />
                 </div>
                 The main topic your blog post will focus on
               </p>
@@ -155,7 +155,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             <div className="space-y-3">
               <Label htmlFor="anchorText" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                 <div className="p-2 bg-white rounded-lg shadow-sm border border-amber-200 overflow-hidden">
-                  <img src="https://images.pexels.com/photos/2381712/pexels-photo-2381712.jpeg" alt="Chain Connection" className="h-6 w-6 object-cover rounded-sm" />
+                  <img src="https://images.pexels.com/photos/2381712/pexels-photo-2381712.jpeg" alt="Link Building" className="h-6 w-6 object-cover rounded-sm" />
                 </div>
                 Anchor Text
               </Label>
@@ -171,7 +171,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
               </div>
               <p className="text-xs text-gray-500 flex items-center gap-1">
                 <div className="h-4 w-4 rounded-full overflow-hidden border border-amber-300">
-                  <img src="https://images.pexels.com/photos/2381712/pexels-photo-2381712.jpeg" alt="Chain Connection" className="h-4 w-4 object-cover" />
+                  <img src="https://images.pexels.com/photos/2381712/pexels-photo-2381712.jpeg" alt="Link Building" className="h-4 w-4 object-cover" />
                 </div>
                 The clickable text that will link to your URL
               </p>
@@ -184,7 +184,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
           <div className="space-y-3">
             <Label htmlFor="targetUrl" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
               <div className="p-2 bg-white rounded-lg shadow-sm border border-blue-200 overflow-hidden">
-                <img src="https://images.pexels.com/photos/343457/pexels-photo-343457.jpeg" alt="Digital Technology" className="h-6 w-6 object-cover rounded-sm" />
+                <img src="https://images.pexels.com/photos/7793740/pexels-photo-7793740.jpeg" alt="SEO Technology" className="h-6 w-6 object-cover rounded-sm" />
               </div>
               Target URL
             </Label>
@@ -202,7 +202,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             </div>
             <p className="text-xs text-gray-500 flex items-center gap-1">
               <div className="h-4 w-4 rounded-full overflow-hidden border border-blue-300">
-                <img src="https://images.pexels.com/photos/343457/pexels-photo-343457.jpeg" alt="Digital Technology" className="h-4 w-4 object-cover" />
+                <img src="https://images.pexels.com/photos/7793740/pexels-photo-7793740.jpeg" alt="SEO Technology" className="h-4 w-4 object-cover" />
               </div>
               The destination URL where the anchor text will link to.
             </p>
