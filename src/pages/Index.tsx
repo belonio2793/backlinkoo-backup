@@ -510,7 +510,7 @@ const Index = () => {
 
       {/* Features Grid */}
       <section className="py-24 px-6 bg-muted/30">
-        <div className="container mx-auto">
+        <div className="w-full">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight">Why Professionals Choose Us</h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-light">
