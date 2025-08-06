@@ -223,7 +223,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
 
           {/* Agreement Text */}
           <div className="text-center">
-            <p className="text-xs text-gray-600 max-w-md mx-auto leading-relaxed">
+            <p className="text-xs text-gray-600 mx-auto whitespace-nowrap">
               I agree to create an account to prevent this post from being deleted and to help stop spam.
             </p>
           </div>
