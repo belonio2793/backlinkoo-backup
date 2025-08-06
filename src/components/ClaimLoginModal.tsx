@@ -69,10 +69,6 @@ export function ClaimLoginModal({
       });
 
       if (result.success) {
-        toast({
-          title: "Welcome back! 🎉",
-          description: "You're now logged in and ready to claim this post!",
-        });
         onAuthSuccess(result.user);
         onClose();
       } else {
@@ -148,10 +144,6 @@ export function ClaimLoginModal({
       });
 
       if (result.success) {
-        toast({
-          title: "Account created! 🎉",
-          description: "Welcome! You can now claim this post.",
-        });
         onAuthSuccess(result.user);
         onClose();
       } else {
