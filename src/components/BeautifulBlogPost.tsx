@@ -651,29 +651,60 @@ export function BeautifulBlogPost() {
                       </TooltipContent>
                     </Tooltip>
 
-                    {/* Delete Button - Show next to claimed status for owned posts */}
-                    {canDelete && isOwnPost && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            onClick={() => setShowDeleteDialog(true)}
-                            variant="outline"
-                            size="sm"
-                            className="bg-gradient-to-r from-gray-100 to-gray-200 border-gray-300 text-gray-700 hover:from-gray-200 hover:to-gray-300 hover:border-gray-400 hover:text-gray-800 hover:scale-105 px-4 py-2 rounded-full transition-all duration-300"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="max-w-xs">
-                          <div className="space-y-1">
-                            <p className="font-semibold">Delete Post</p>
-                            <p className="text-sm">
-                              Permanently delete this post. As the owner, you have full permission to remove it at any time.
-                            </p>
-                            <p className="text-xs text-red-400">⚠️ This action cannot be undone</p>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
+                    {/* Action Buttons - Show next to claimed status for owned posts */}
+                    {isOwnPost && (
+                      <div className="flex items-center gap-2">
+                        {/* Unclaim Button */}
+                        {unclaimPermissions.canUnclaim && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                onClick={() => setShowUnclaimDialog(true)}
+                                variant="outline"
+                                size="sm"
+                                className="bg-gradient-to-r from-orange-100 to-orange-200 border-orange-300 text-orange-700 hover:from-orange-200 hover:to-orange-300 hover:border-orange-400 hover:text-orange-800 hover:scale-105 px-4 py-2 rounded-full transition-all duration-300"
+                              >
+                                <XCircle className="h-4 w-4 mr-2" />
+                                Unclaim
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="max-w-xs">
+                              <div className="space-y-1">
+                                <p className="font-semibold">Unclaim Post</p>
+                                <p className="text-sm">
+                                  Release ownership and make this post available for others to claim.
+                                </p>
+                                <p className="text-xs text-orange-400">⏰ Will be deleted in 24 hours if not reclaimed</p>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+
+                        {/* Delete Button */}
+                        {canDelete && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                onClick={() => setShowDeleteDialog(true)}
+                                variant="outline"
+                                size="sm"
+                                className="bg-gradient-to-r from-gray-100 to-gray-200 border-gray-300 text-gray-700 hover:from-gray-200 hover:to-gray-300 hover:border-gray-400 hover:text-gray-800 hover:scale-105 px-4 py-2 rounded-full transition-all duration-300"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="max-w-xs">
+                              <div className="space-y-1">
+                                <p className="font-semibold">Delete Post</p>
+                                <p className="text-sm">
+                                  Permanently delete this post. As the owner, you have full permission to remove it at any time.
+                                </p>
+                                <p className="text-xs text-red-400">⚠️ This action cannot be undone</p>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
                     )}
                   </div>
                 ) : (
@@ -899,32 +930,7 @@ export function BeautifulBlogPost() {
 
               {/* Action Buttons - Moved here below Target URL */}
               <div className="flex flex-wrap justify-center gap-4 mt-8 max-w-2xl mx-auto">
-
-
-                {unclaimPermissions.canUnclaim && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        onClick={() => setShowUnclaimDialog(true)}
-                        variant="outline"
-                        size="lg"
-                        className="bg-transparent border-orange-300 text-orange-700 hover:bg-transparent hover:border-orange-500 hover:text-orange-800 hover:shadow-2xl hover:scale-105 px-8 py-4 text-lg rounded-full transition-all duration-300"
-                      >
-                        <XCircle className="mr-3 h-5 w-5" />
-                        Unclaim Post
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-xs">
-                      <div className="space-y-1">
-                        <p className="font-semibold">Unclaim Post</p>
-                        <p className="text-sm">Release ownership and make this post available for others to claim.</p>
-                        <p className="text-xs text-orange-400">⏰ Will be deleted in 24 hours if not reclaimed</p>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-
-
+                {/* Action buttons section - unclaim button moved to top */}
               </div>
             </div>
           </article>
