@@ -382,6 +382,8 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
               <div className="text-sm text-muted-foreground mb-4">per month</div>
               <Button onClick={() => {
                 console.log('SEO Tools Start Subscription clicked');
+                console.log('isPremium value:', isPremium);
+                console.log('subscriptionStatus.isSubscribed:', subscriptionStatus.isSubscribed);
                 if (isPremium) {
                   toast({
                     title: "Already Premium",
@@ -392,6 +394,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
                   return;
                 }
                 console.log('Opening premium checkout for non-premium user');
+                console.log('Setting isPaymentModalOpen to true');
                 setIsPaymentModalOpen(true);
               }} size="lg" className="w-full" variant={isPremium ? "outline" : "default"}>
                 {isPremium ? (
