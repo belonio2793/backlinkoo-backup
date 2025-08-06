@@ -513,7 +513,7 @@ const Index = () => {
         <div className="w-full">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight">Why Professionals Choose Us</h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-light">
+            <p className="text-xl text-muted-foreground max-w-6xl mx-auto leading-relaxed font-light">
               We provide the infrastructure and intelligence that SEO teams need to deliver consistent results at scale.
             </p>
           </div>
