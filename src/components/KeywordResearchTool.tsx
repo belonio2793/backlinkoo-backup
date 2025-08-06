@@ -9,7 +9,6 @@ import { Search, TrendingUp, Eye, DollarSign, Globe, MapPin, BarChart3, Target }
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SearchableSelect } from "@/components/SearchableSelect";
-import googleLogo from "@/assets/google-g-logo.png";
 
 interface KeywordData {
   keyword: string;
