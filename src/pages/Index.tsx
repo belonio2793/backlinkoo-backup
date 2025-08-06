@@ -334,7 +334,7 @@ const Index = () => {
 
 
           {/* Generator */}
-          <div className="max-w-4xl mx-auto">
+          <div className="w-full px-6">
             <BlogForm
               onContentGenerated={(blogPost) => {
                 setUser(user); // Refresh state
