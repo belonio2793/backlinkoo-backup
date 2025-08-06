@@ -151,9 +151,6 @@ export class SecureConfig {
     return decode(SECURE_STORE.anthropic_api_key);
   }
   
-  static get GOOGLE_API_KEY(): string {
-    return decode(SECURE_STORE.google_api_key);
-  }
   
   // Application secrets
   static get JWT_SECRET(): string {
