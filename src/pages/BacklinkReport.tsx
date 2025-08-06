@@ -187,16 +187,27 @@ export default function BacklinkReport() {
 
         {/* Instructions */}
         <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-xl">
-          <h2 className="text-lg font-semibold text-blue-900 mb-3">Instructions</h2>
+          <h2 className="text-lg font-semibold text-blue-900 mb-3">How Backlink Verification Works</h2>
           <p className="text-blue-800 mb-4">
-            Paste your list of URLs below and click generate report to create a professional verification report.
+            Enter your target keyword, expected anchor text, and destination URL. Then paste the list of URLs where your backlinks should be placed. We'll verify each link to ensure it contains the correct anchor text and links to your destination.
           </p>
-          <pre className="text-sm bg-white p-4 border border-blue-200 text-gray-700 rounded-lg">
-{`https://example.com/page1
-https://another.com/blog
-https://website.com/article
-https://domain.com/content`}
-          </pre>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="bg-white p-4 border border-blue-200 rounded-lg">
+              <h3 className="font-semibold text-blue-900 mb-2">1. Target Keyword</h3>
+              <p className="text-sm text-blue-700">The keyword you want to rank for</p>
+            </div>
+            <div className="bg-white p-4 border border-blue-200 rounded-lg">
+              <h3 className="font-semibold text-blue-900 mb-2">2. Anchor Text</h3>
+              <p className="text-sm text-blue-700">The exact text that should be hyperlinked</p>
+            </div>
+            <div className="bg-white p-4 border border-blue-200 rounded-lg">
+              <h3 className="font-semibold text-blue-900 mb-2">3. Destination URL</h3>
+              <p className="text-sm text-blue-700">Where the anchor text should link to</p>
+            </div>
+          </div>
+          <p className="text-sm text-blue-700">
+            <strong>Example:</strong> If you paid for a backlink with anchor text "best SEO tools" linking to "https://yoursite.com/seo-tools", we'll check each URL to verify the link exists and is correct.
+          </p>
         </div>
 
         {/* Input Area */}
