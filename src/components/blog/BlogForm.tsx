@@ -214,13 +214,16 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             </p>
           </div>
 
-          {/* API Status with enhanced styling */}
-          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl shadow-inner">
-            <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              API Status
-            </span>
-            <APIStatusIndicator />
+          {/* Estimated Time and Account Prompt */}
+          <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-inner">
+            <div className="text-center">
+              <p className="text-sm font-semibold text-amber-800 mb-1">
+                ⏱️ Estimated time: 30-60 seconds
+              </p>
+              <p className="text-xs text-amber-700">
+                You will be redirected to your blog post. Create an account to claim it before it gets deleted.
+              </p>
+            </div>
           </div>
 
           {/* Beautiful CTA Button */}
