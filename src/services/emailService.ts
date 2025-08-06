@@ -608,6 +608,29 @@ https://backlinkoo.com`,
     this.failureLog = [];
   }
 
+  /**
+   * Properly serialize error objects for logging
+   */
+  private static serializeError(error: any): string {
+    if (error instanceof Error) {
+      return JSON.stringify({
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+    }
+
+    if (typeof error === 'object' && error !== null) {
+      try {
+        return JSON.stringify(error, null, 2);
+      } catch (e) {
+        return `[Object: ${Object.prototype.toString.call(error)}]`;
+      }
+    }
+
+    return String(error);
+  }
+
   static async sendEmail(emailData: EmailData): Promise<EmailResult> {
     try {
       // Validate email data before sending
