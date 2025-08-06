@@ -695,10 +695,14 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
       {/* Premium Checkout Modal */}
       <EnhancedUnifiedPaymentModal
         isOpen={isPaymentModalOpen}
-        onClose={() => setIsPaymentModalOpen(false)}
+        onClose={() => {
+          console.log('Closing payment modal');
+          setIsPaymentModalOpen(false);
+        }}
         defaultTab="premium"
         redirectAfterSuccess="/dashboard"
         onSuccess={() => {
+          console.log('Payment successful, closing modal');
           setIsPaymentModalOpen(false);
           checkSubscriptionStatus(); // Refresh subscription status
           toast({
@@ -707,6 +711,8 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
           });
         }}
       />
+      {/* Debug info */}
+      {console.log('isPaymentModalOpen state:', isPaymentModalOpen)}
 
     </div>
   );
