@@ -569,15 +569,15 @@ const Index = () => {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
-            <div className="bg-gradient-to-br from-blue-500/5 to-primary/5 p-12 rounded-2xl">
-              <BarChart3 className="h-32 w-32 text-primary mx-auto" />
+            <div className="bg-gradient-to-br from-blue-500/5 to-primary/5 p-12 rounded-2xl overflow-hidden">
+              <img src="https://images.pexels.com/photos/14533601/pexels-photo-14533601.jpeg" alt="Command Center Dashboard" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
             </div>
           </div>
 
           {/* Campaign Management */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="bg-gradient-to-br from-green-500/5 to-primary/5 p-12 rounded-2xl order-2 lg:order-1">
-              <TrendingUp className="h-32 w-32 text-primary mx-auto" />
+            <div className="bg-gradient-to-br from-green-500/5 to-primary/5 p-12 rounded-2xl order-2 lg:order-1 overflow-hidden">
+              <img src="https://images.pexels.com/photos/343457/pexels-photo-343457.jpeg" alt="Automated Excellence" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
             </div>
             <div className="order-1 lg:order-2">
               <Badge variant="outline" className="mb-6 bg-green-50 text-green-600 border-green-200 font-mono text-xs">
@@ -643,15 +643,15 @@ const Index = () => {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
-            <div className="bg-gradient-to-br from-purple-500/5 to-primary/5 p-12 rounded-2xl">
-              <Search className="h-32 w-32 text-primary mx-auto" />
+            <div className="bg-gradient-to-br from-purple-500/5 to-primary/5 p-12 rounded-2xl overflow-hidden">
+              <img src="https://images.pexels.com/photos/25626428/pexels-photo-25626428.jpeg" alt="Intelligence Engine" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
             </div>
           </div>
 
           {/* Rankings */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="bg-gradient-to-br from-orange-500/5 to-primary/5 p-12 rounded-2xl order-2 lg:order-1">
-              <BarChart3 className="h-32 w-32 text-primary mx-auto" />
+            <div className="bg-gradient-to-br from-orange-500/5 to-primary/5 p-12 rounded-2xl order-2 lg:order-1 overflow-hidden">
+              <img src="https://images.pexels.com/photos/15044697/pexels-photo-15044697.jpeg" alt="Performance Monitor" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
             </div>
             <div className="order-1 lg:order-2">
               <Badge variant="outline" className="mb-6 bg-orange-50 text-orange-600 border-orange-200 font-mono text-xs">
@@ -718,8 +718,8 @@ const Index = () => {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
-            <div className="bg-gradient-to-br from-green-500/5 to-primary/5 p-12 rounded-2xl">
-              <BarChart3 className="h-32 w-32 text-primary mx-auto" />
+            <div className="bg-gradient-to-br from-green-500/5 to-primary/5 p-12 rounded-2xl overflow-hidden">
+              <img src="https://images.pexels.com/photos/7793173/pexels-photo-7793173.jpeg" alt="Link Verification Reports" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
             </div>
           </div>
 
