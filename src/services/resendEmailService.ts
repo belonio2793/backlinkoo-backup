@@ -169,11 +169,19 @@ export class ResendEmailService {
     // First try Netlify function
     try {
       const netlifyResult = await this.sendViaNetlify(emailData);
-      return netlifyResult;
-    } catch (error: any) {
-      console.warn('Netlify function failed, trying direct API:', error.message);
 
-      // If Netlify function fails, try direct API
+      // If Netlify function succeeded, return result
+      if (netlifyResult.success) {
+        return netlifyResult;
+      }
+
+      // If Netlify function failed, try direct API
+      console.warn('Netlify function failed, trying direct API:', netlifyResult.error);
+      return await this.sendDirectAPI(emailData);
+
+    } catch (error: any) {
+      // If there's an unexpected error, try direct API
+      console.warn('Netlify function error, trying direct API:', error.message);
       return await this.sendDirectAPI(emailData);
     }
   }
