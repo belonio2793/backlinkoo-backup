@@ -207,30 +207,55 @@ export class SavedBacklinkReportsService {
 
     // Check table access and provide helpful error message
     const hasAccess = await checkSavedReportsTableAccess();
-    if (!hasAccess) {
-      console.warn('⚠️ saved_backlink_reports table not accessible - feature may not be available yet');
-      return []; // Return empty array instead of throwing error
-    }
+    let databaseReports: SavedBacklinkReport[] = [];
 
-    const { data, error } = await supabase
-      .from('saved_backlink_reports')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+    if (hasAccess) {
+      const { data, error } = await supabase
+        .from('saved_backlink_reports')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching saved reports:', error);
+      if (error) {
+        console.error('Error fetching saved reports:', error);
 
-      // If table doesn't exist, return empty array instead of error
-      if (error.code === '42P01') {
-        console.warn('⚠️ saved_backlink_reports table does not exist yet');
-        return [];
+        // If table doesn't exist, continue to localStorage fallback
+        if (error.code !== '42P01') {
+          throw new Error(`Failed to fetch reports: ${error.message}`);
+        }
+      } else {
+        databaseReports = data || [];
       }
-
-      throw new Error(`Failed to fetch reports: ${error.message}`);
     }
 
-    return data || [];
+    // Get localStorage reports as fallback
+    const localReports = this.getFromLocalStorage()
+      .filter(report => report.user_id === user.id)
+      .map(report => ({
+        ...report,
+        // Ensure all required fields are present
+        id: report.id || `local_${Date.now()}`,
+        user_id: report.user_id || user.id,
+        title: report.title || 'Untitled Report',
+        keyword: report.keyword || '',
+        anchor_text: report.anchor_text || '',
+        destination_url: report.destination_url || '',
+        report_data: report.report_data || {},
+        report_summary: report.report_summary || null,
+        total_urls: report.total_urls || 0,
+        verified_backlinks: report.verified_backlinks || 0,
+        created_at: report.created_at || new Date().toISOString(),
+        updated_at: report.updated_at || new Date().toISOString()
+      })) as SavedBacklinkReport[];
+
+    // Combine database and local reports, removing duplicates
+    const allReports = [...databaseReports, ...localReports];
+
+    if (!hasAccess && localReports.length > 0) {
+      console.log(`📱 Loaded ${localReports.length} reports from localStorage (database not available)`);
+    }
+
+    return allReports.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }
 
   /**
