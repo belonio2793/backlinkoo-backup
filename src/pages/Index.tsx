@@ -357,7 +357,7 @@ const Index = () => {
       {/* Trial Conversion Section */}
       {showTrialUpgrade && (
         <section className="py-12 px-6 bg-gradient-to-br from-amber-50 to-orange-50">
-          <div className="container mx-auto max-w-4xl">
+          <div className="w-full px-6">
             <TrialConversionBanner
               onUpgrade={() => {
                 setShowInlineAuth(true);
