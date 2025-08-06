@@ -264,7 +264,7 @@ const Index = () => {
                 <>
                   <Button
                     onClick={() => navigate("/dashboard")}
-                    className="bg-transparent hover:bg-blue-50/50 border border-blue-200/60 text-blue-700 hover:text-blue-800 hover:border-blue-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+                    className="bg-transparent hover:bg-blue-50/50 border border-blue-200/60 text-blue-700 hover:text-blue-800 hover:border-blue-300/80 transition-all duration-200 font-medium px-4 py-1 text-sm backdrop-blur-sm shadow-sm hover:shadow-md"
                   >
                     Dashboard
                   </Button>
@@ -275,7 +275,7 @@ const Index = () => {
                       console.log('🚪 Sign out button clicked on home page');
                       handleSignOut();
                     }}
-                    className="bg-transparent hover:bg-red-50/50 border border-red-200/60 text-red-600 hover:text-red-700 hover:border-red-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+                    className="bg-transparent hover:bg-red-50/50 border border-red-200/60 text-red-600 hover:text-red-700 hover:border-red-300/80 transition-all duration-200 font-medium px-4 py-1 text-sm backdrop-blur-sm shadow-sm hover:shadow-md"
                     type="button"
                   >
                     Sign Out
@@ -298,7 +298,7 @@ const Index = () => {
                       <Button variant="ghost" onClick={() => {
                         setLoginModalTab("login");
                         setShowLoginModal(true);
-                      }} className="font-medium">
+                      }} className="font-medium text-sm px-3 py-1">
                         Sign In
                       </Button>
                     </>
@@ -308,7 +308,7 @@ const Index = () => {
                         console.log('Sign In button clicked');
                         setLoginModalTab("login");
                         setShowLoginModal(true);
-                      }} className="font-medium">
+                      }} className="font-medium text-sm px-3 py-1">
                         Sign In
                       </Button>
 
@@ -316,7 +316,7 @@ const Index = () => {
                         console.log('Get Started button clicked');
                         setLoginModalTab("signup");
                         setShowLoginModal(true);
-                      }} className="font-medium">
+                      }} className="font-medium text-sm px-3 py-1">
                         Create Account
                       </Button>
                     </>
