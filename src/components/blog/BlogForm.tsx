@@ -153,7 +153,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             <div className="space-y-3">
               <Label htmlFor="anchorText" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                 <div className="p-1.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg">
-                  <MousePointer className="h-4 w-4 text-white" />
+                  <img src="https://cdn.builder.io/api/v1/image/assets%2Fcd67eae1c1ec4d2395180e5ed246fb8d%2Fd7c555f716e54ad8b8357ef20f08bab5?format=webp&width=800" alt="Trending icon" className="h-4 w-4" />
                 </div>
                 Anchor Text
               </Label>
