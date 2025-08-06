@@ -115,7 +115,7 @@ export class EmailConfigurationTest {
         html: this.generateConfirmationEmailHTML(confirmationUrl)
       };
 
-      const response = await fetch('https://api.resend.com/emails', {
+      const response = await safeFetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.config.apiKey}`,
