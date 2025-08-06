@@ -648,7 +648,9 @@ const Index = () => {
               </Button>
             </div>
             <div className="bg-gradient-to-br from-purple-500/5 to-primary/5 p-12 rounded-2xl overflow-hidden">
-              <img src="https://images.pexels.com/photos/19056728/pexels-photo-19056728.jpeg" alt="Achievement Success" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
+              <div className="h-32 w-32 mx-auto bg-white rounded-xl shadow-lg flex items-center justify-center">
+                <Sparkles className="h-16 w-16 text-purple-600" />
+              </div>
             </div>
           </div>
 
