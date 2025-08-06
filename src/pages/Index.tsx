@@ -727,7 +727,9 @@ const Index = () => {
               </Button>
             </div>
             <div className="bg-gradient-to-br from-green-500/5 to-primary/5 p-12 rounded-2xl overflow-hidden">
-              <img src="https://images.pexels.com/photos/7793173/pexels-photo-7793173.jpeg" alt="Link Verification Reports" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
+              <div className="h-32 w-32 mx-auto bg-white rounded-xl shadow-lg flex items-center justify-center">
+                <CheckCircle className="h-16 w-16 text-green-600" />
+              </div>
             </div>
           </div>
 
