@@ -322,6 +322,11 @@ export const OptimizedAppWrapper = () => {
               <LazyEmailAuthenticationAudit />
             </Suspense>
           } />
+          <Route path="/email-diagnostic" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyEmailDiagnostic />
+            </Suspense>
+          } />
 
           {/* 404 routes */}
           <Route path="/404" element={<NotFound />} />
