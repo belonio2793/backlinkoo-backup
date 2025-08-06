@@ -4,6 +4,7 @@
  */
 
 import { mockPaymentService } from './mockPaymentService';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PaymentConfig {
   stripe: {
