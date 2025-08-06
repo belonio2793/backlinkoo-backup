@@ -339,6 +339,49 @@ export function AdminBlogManager() {
     }
   };
 
+  const handleForceDeletePost = async (post: PublishedBlogPost) => {
+    setConfirmDeletePost(post);
+  };
+
+  const confirmForceDelete = async () => {
+    if (!confirmDeletePost) return;
+
+    setDeletingPostId(confirmDeletePost.id);
+
+    try {
+      const result = await adminBlogOverrideService.forceDeleteBlogPost(
+        confirmDeletePost.id,
+        `Admin override delete: ${confirmDeletePost.title}`
+      );
+
+      if (result.success) {
+        toast({
+          title: 'Post Deleted',
+          description: `Successfully deleted "${confirmDeletePost.title}"`,
+          variant: 'default'
+        });
+
+        // Refresh the posts list
+        await loadBlogPosts();
+      } else {
+        toast({
+          title: 'Delete Failed',
+          description: result.error || 'Failed to delete post',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Delete Error',
+        description: 'An unexpected error occurred while deleting the post',
+        variant: 'destructive'
+      });
+    } finally {
+      setDeletingPostId(null);
+      setConfirmDeletePost(null);
+    }
+  };
+
   const stats = {
     total: blogPosts.length,
     published: blogPosts.filter(p => p.status === 'published').length,
