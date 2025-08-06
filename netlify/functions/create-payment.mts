@@ -38,6 +38,21 @@ function sanitizeInput(input: string): string {
   return input.replace(/[<>'"&]/g, '').trim();
 }
 
+// Initialize Supabase client for database operations
+function getSupabaseClient() {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.warn("Supabase configuration missing - order tracking disabled");
+    return null;
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: { persistSession: false }
+  });
+}
+
 async function getClientIP(request: Request): Promise<string> {
   const forwarded = request.headers.get('x-forwarded-for');
   const realIP = request.headers.get('x-real-ip');
