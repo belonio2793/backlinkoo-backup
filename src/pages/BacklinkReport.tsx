@@ -398,7 +398,7 @@ export default function BacklinkReport() {
                   <input
                     type="text"
                     value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
+                    onChange={(e) => handleKeywordChange(e.target.value)}
                     placeholder="e.g., best SEO tools"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
@@ -410,7 +410,7 @@ export default function BacklinkReport() {
                   <input
                     type="text"
                     value={anchorText}
-                    onChange={(e) => setAnchorText(e.target.value)}
+                    onChange={(e) => handleAnchorTextChange(e.target.value)}
                     placeholder="e.g., best SEO tools"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
@@ -422,7 +422,7 @@ export default function BacklinkReport() {
                   <input
                     type="url"
                     value={destinationUrl}
-                    onChange={(e) => setDestinationUrl(e.target.value)}
+                    onChange={(e) => handleDestinationUrlChange(e.target.value)}
                     placeholder="https://yoursite.com/page"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
@@ -469,7 +469,7 @@ export default function BacklinkReport() {
               </label>
               <textarea
                 value={urlList}
-                onChange={(e) => setUrlList(e.target.value)}
+                onChange={(e) => handleUrlListChange(e.target.value)}
                 placeholder="Paste your URLs here (one per line)..."
                 className="w-full h-64 p-4 border border-gray-300 bg-white text-gray-900 text-sm resize-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                 spellCheck={false}
