@@ -31,7 +31,7 @@ import { BlogForm } from "@/components/blog/BlogForm";
 import { RotatingTagline } from "@/components/RotatingTagline";
 import { RotatingStats } from "@/components/RotatingStats";
 import { RotatingTrustIndicators } from "@/components/RotatingTrustIndicators";
-
+import { RotatingNotificationBanner } from "@/components/RotatingNotificationBanner";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
@@ -245,8 +245,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background font-light">
+      {/* Rotating Notification Banner */}
+      <RotatingNotificationBanner className="fixed top-0 left-0 right-0 z-[60]" />
+
       {/* Header */}
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-16 z-50 mt-16">
         <div className="w-full px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
