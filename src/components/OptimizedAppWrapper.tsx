@@ -245,16 +245,8 @@ export const OptimizedAppWrapper = () => {
               <LazyEmailMarketing />
             </InstantEmailVerificationGuard>
           } />
-          <Route path="/backlink-report" element={
-            <InstantEmailVerificationGuard>
-              <LazyBacklinkReport />
-            </InstantEmailVerificationGuard>
-          } />
-          <Route path="/report/:reportId" element={
-            <InstantEmailVerificationGuard>
-              <LazyReportViewer />
-            </InstantEmailVerificationGuard>
-          } />
+          <Route path="/backlink-report" element={<LazyBacklinkReport />} />
+          <Route path="/report/:reportId" element={<LazyReportViewer />} />
           <Route path="/automation-link-building" element={
             <InstantEmailVerificationGuard>
               <LazyNoHandsSEO />

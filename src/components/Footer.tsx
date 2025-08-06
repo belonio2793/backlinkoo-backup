@@ -104,7 +104,7 @@ export const Footer = () => {
                 to="/blog"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
               >
-                Blog
+                Community Blog
               </Link>
             </div>
           </div>

@@ -118,16 +118,8 @@ export const AppWrapper = () => {
             <EmailMarketing />
           </EmailVerificationGuard>
         } />
-        <Route path="/backlink-report" element={
-          <EmailVerificationGuard>
-            <BacklinkReport />
-          </EmailVerificationGuard>
-        } />
-        <Route path="/report/:reportId" element={
-          <EmailVerificationGuard>
-            <ReportViewer />
-          </EmailVerificationGuard>
-        } />
+        <Route path="/backlink-report" element={<BacklinkReport />} />
+        <Route path="/report/:reportId" element={<ReportViewer />} />
         <Route path="/automation-link-building" element={
           <EmailVerificationGuard>
             <NoHandsSEO />
