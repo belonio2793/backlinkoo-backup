@@ -25,6 +25,7 @@ export default function PaymentSuccess() {
       const orderId = searchParams.get('order_id');
       const paymentMethod = searchParams.get('payment_method') as 'stripe' | 'paypal' | null;
       const isDemo = searchParams.get('demo');
+      const isMock = searchParams.get('mock');
       const credits = searchParams.get('credits');
       const amount = searchParams.get('amount');
 
