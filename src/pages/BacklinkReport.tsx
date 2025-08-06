@@ -570,12 +570,23 @@ export default function BacklinkReport() {
                 <svg className="w-5 h-5 text-blue-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <div>
+                <div className="w-full">
                   <h4 className="font-semibold text-gray-900 mb-1">Important Information</h4>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 mb-3">
                     Reports are generated instantly and can be shared publicly.
-                    No registration required for basic reporting functionality.
+                    {isAuthenticated ? ' Your saved reports can be accessed anytime from your account.' : ' Sign in to save reports to your account for future access.'}
                   </p>
+                  {isAuthenticated && (
+                    <button
+                      onClick={() => navigate('/saved-reports')}
+                      className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                    >
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                      </svg>
+                      View Saved Reports
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
