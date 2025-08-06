@@ -391,8 +391,8 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
                   console.log('User is already premium, showing notification');
                   return;
                 }
-                console.log('Opening premium plan popup for non-premium user');
-                setIsPremiumPopupOpen(true);
+                console.log('Opening premium checkout for non-premium user');
+                setIsPaymentModalOpen(true);
               }} size="lg" className="w-full" variant={isPremium ? "outline" : "default"}>
                 {isPremium ? (
                   <>
