@@ -474,6 +474,51 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_backlink_reports: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          keyword: string
+          anchor_text: string
+          destination_url: string
+          report_data: Json
+          report_summary: Json | null
+          total_urls: number
+          verified_backlinks: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          keyword: string
+          anchor_text: string
+          destination_url: string
+          report_data: Json
+          report_summary?: Json | null
+          total_urls?: number
+          verified_backlinks?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          keyword?: string
+          anchor_text?: string
+          destination_url?: string
+          report_data?: Json
+          report_summary?: Json | null
+          total_urls?: number
+          verified_backlinks?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       security_audit_log: {
         Row: {
           action: string
