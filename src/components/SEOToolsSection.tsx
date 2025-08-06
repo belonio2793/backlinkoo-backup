@@ -44,7 +44,7 @@ import NoHandsSEODashboard from "@/components/NoHandsSEODashboard";
 import SubscriptionService, { type SubscriptionStatus } from "@/services/subscriptionService";
 import FeatureAccessGuard from "@/components/FeatureAccessGuard";
 import { useOpenPremiumPopup } from "@/components/PremiumPopupProvider";
-import PremiumPlanPopup from "@/components/PremiumPlanPopup";
+import { EnhancedUnifiedPaymentModal } from "@/components/EnhancedUnifiedPaymentModal";
 
 interface SEOToolsSectionProps {
   user: User | null;
@@ -94,7 +94,7 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const [billingEmailNotifications, setBillingEmailNotifications] = useState(true);
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
-  const [isPremiumPopupOpen, setIsPremiumPopupOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const { toast } = useToast();
   const { openPremiumPopup, isPremium } = useOpenPremiumPopup();
 
@@ -311,7 +311,8 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
     }
   };
 
-  if (!subscriptionStatus.isSubscribed) {
+  // Show subscription CTA for free accounts or users without premium access
+  if (!isPremium && !subscriptionStatus.isSubscribed) {
     return (
       <div className="space-y-6">
         {/* Subscription CTA */}
@@ -380,9 +381,15 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
               </div>
               <div className="text-3xl font-bold text-primary mb-1">$29</div>
               <div className="text-sm text-muted-foreground mb-4">per month</div>
+
+
               <Button onClick={() => {
                 console.log('SEO Tools Start Subscription clicked');
-                if (isPremium) {
+                console.log('isPremium value:', isPremium);
+                console.log('subscriptionStatus.isSubscribed:', subscriptionStatus.isSubscribed);
+
+                // Check if user already has premium access
+                if (isPremium || subscriptionStatus.isSubscribed) {
                   toast({
                     title: "Already Premium",
                     description: "You already have an active premium subscription. Enjoy all premium features!",
@@ -391,9 +398,11 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
                   console.log('User is already premium, showing notification');
                   return;
                 }
-                console.log('Opening premium plan popup for non-premium user');
-                setIsPremiumPopupOpen(true);
-              }} size="lg" className="w-full" variant={isPremium ? "outline" : "default"}>
+
+                // Open premium checkout for free accounts or non-premium users
+                console.log('Opening premium checkout for non-premium user');
+                setIsPaymentModalOpen(true);
+              }} size="lg" className="w-full" variant={isPremium || subscriptionStatus.isSubscribed ? "outline" : "default"}>
                 {isPremium ? (
                   <>
                     <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -412,6 +421,22 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Premium Checkout Modal */}
+        <EnhancedUnifiedPaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => setIsPaymentModalOpen(false)}
+          defaultTab="premium"
+          redirectAfterSuccess="/dashboard"
+          onSuccess={() => {
+            setIsPaymentModalOpen(false);
+            checkSubscriptionStatus(); // Refresh subscription status
+            toast({
+              title: "Premium Activated!",
+              description: "Welcome to Premium! All SEO tools are now available.",
+            });
+          }}
+        />
       </div>
     );
   }
@@ -688,21 +713,6 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Premium Plan Popup with User State Detection */}
-      <PremiumPlanPopup
-        isOpen={isPremiumPopupOpen}
-        onClose={() => setIsPremiumPopupOpen(false)}
-        defaultEmail={user?.email || ''}
-        onSuccess={() => {
-          setIsPremiumPopupOpen(false);
-          checkSubscriptionStatus(); // Refresh subscription status
-          toast({
-            title: "Premium Activated!",
-            description: "Welcome to Premium! All SEO tools are now available.",
-          });
-        }}
-      />
 
     </div>
   );
