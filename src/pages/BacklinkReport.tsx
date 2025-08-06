@@ -480,9 +480,10 @@ export default function BacklinkReport() {
           </div>
 
           {/* Right Sidebar */}
-          {isAuthenticated && (
-            <div className="w-64 flex-shrink-0">
-              <div className="sticky top-8">
+          <div className="w-80 flex-shrink-0">
+            <div className="sticky top-8 space-y-6">
+              {/* Your Reports Section */}
+              {isAuthenticated && (
                 <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Reports</h3>
                   <div className="space-y-3">
@@ -500,9 +501,101 @@ export default function BacklinkReport() {
                     </p>
                   </div>
                 </div>
+              )}
+
+              {/* Help & Info Section */}
+              <div className="space-y-4">
+                {/* Preview Sample Report Section */}
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setIsPreviewSectionCollapsed(!isPreviewSectionCollapsed)}
+                        className="p-1 hover:bg-green-100 rounded-full transition-colors"
+                        title={isPreviewSectionCollapsed ? 'Expand preview section' : 'Minimize preview section'}
+                      >
+                        <svg
+                          className={`w-4 h-4 text-green-700 transition-transform ${isPreviewSectionCollapsed ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      <h4 className="font-semibold text-green-900 text-sm">Preview Sample Report</h4>
+                    </div>
+                  </div>
+                  {!isPreviewSectionCollapsed && (
+                    <div className="space-y-3">
+                      <p className="text-green-800 text-sm">
+                        See what your backlink reports will look like before creating your own.
+                      </p>
+                      <Button
+                        onClick={() => window.open('/report/demo_preview_12345', '_blank')}
+                        variant="outline"
+                        size="sm"
+                        className="w-full bg-white border-green-300 text-green-700 hover:bg-green-50"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        View Sample Report
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Instructions Section */}
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setIsInstructionsSectionCollapsed(!isInstructionsSectionCollapsed)}
+                        className="p-1 hover:bg-blue-100 rounded-full transition-colors"
+                        title={isInstructionsSectionCollapsed ? 'Expand instructions' : 'Minimize instructions'}
+                      >
+                        <svg
+                          className={`w-4 h-4 text-blue-700 transition-transform ${isInstructionsSectionCollapsed ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      <h4 className="font-semibold text-blue-900 text-sm">How It Works</h4>
+                    </div>
+                  </div>
+                  {!isInstructionsSectionCollapsed && (
+                    <div className="space-y-4">
+                      <p className="text-blue-800 text-sm">
+                        Enter your verification settings, then paste URLs to check for backlinks.
+                      </p>
+                      <div className="space-y-3">
+                        <div className="bg-white p-3 border border-blue-200 rounded">
+                          <h5 className="font-medium text-blue-900 text-xs mb-1">1. Target Keyword</h5>
+                          <p className="text-xs text-blue-700">The keyword you want to rank for</p>
+                        </div>
+                        <div className="bg-white p-3 border border-blue-200 rounded">
+                          <h5 className="font-medium text-blue-900 text-xs mb-1">2. Anchor Text</h5>
+                          <p className="text-xs text-blue-700">The exact text that should be hyperlinked</p>
+                        </div>
+                        <div className="bg-white p-3 border border-blue-200 rounded">
+                          <h5 className="font-medium text-blue-900 text-xs mb-1">3. Destination URL</h5>
+                          <p className="text-xs text-blue-700">Where the anchor text should link to</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-blue-700">
+                        <strong>Example:</strong> Check if "best SEO tools" links to "yoursite.com/seo-tools" on each URL.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
