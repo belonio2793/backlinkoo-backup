@@ -502,7 +502,10 @@ export default function BacklinkReport() {
               {/* Your Reports Section */}
               {isAuthenticated && (
                 <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Reports</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Your Reports</h3>
+                    <SavedReportsStatus />
+                  </div>
                   <div className="space-y-3">
                     <button
                       onClick={() => navigate('/saved-reports')}
