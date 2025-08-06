@@ -247,13 +247,13 @@ const Index = () => {
     <div className="min-h-screen bg-background font-light">
       {/* Header */}
       <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="w-full px-6 py-4">
+        <div className="w-full px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
               <Infinity className="h-7 w-7 text-primary" />
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
+              <h1 className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
 
               {!authChecked ? (
                 <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
@@ -326,7 +326,7 @@ const Index = () => {
       </header>
 
       {/* Free Blog Generator - Top Feature */}
-      <section id="blog-generator" className="py-24 px-0 md:px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
+      <section id="blog-generator" className="py-12 sm:py-16 md:py-24 px-4 md:px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
         <div className="w-full px-4 md:px-0">
           {/* Optional: Advanced Generator Toggle (Hidden by default) */}
 
@@ -398,13 +398,13 @@ const Index = () => {
       {(!user && authChecked) || showInlineAuth ? (
         <section className="py-16 px-6 bg-gradient-to-br from-blue-50 to-indigo-50" id="inline-auth">
           <div className="w-full px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
               {/* Left side - Value proposition */}
               <div>
-                <h2 className="text-3xl md:text-4xl font-light mb-6 tracking-tight">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-6 tracking-tight">
                   {showTrialUpgrade ? "Upgrade Your Trial" : "Start Building Authority Today"}
                 </h2>
-                <p className="text-xl text-muted-foreground mb-8 leading-relaxed font-light">
+                <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed font-light">
                   {showTrialUpgrade
                     ? "Convert your trial backlinks to permanent ones and unlock the full power of our platform."
                     : "Join thousands of professionals who trust our platform for their most important SEO campaigns."
@@ -463,8 +463,8 @@ const Index = () => {
       ) : null}
 
       {/* Hero Section */}
-      <section 
-        className="relative py-32 px-6 bg-white"
+      <section
+        className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
         <div className="w-full text-center relative z-10 px-6">
@@ -473,18 +473,18 @@ const Index = () => {
           <AnimatedHeadline
             baseText="Professional SEO with"
             animatedTexts={headlineVariations}
-            className="text-5xl md:text-7xl font-light mb-8 text-gray-900 tracking-tight"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light mb-8 text-gray-900 tracking-tight"
           />
           
-          <p className="text-xl md:text-2xl text-gray-700 mb-6 max-w-6xl mx-auto leading-relaxed font-light">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-700 mb-6 max-w-6xl mx-auto leading-relaxed font-light">
             The backlink platform that SEO professionals rely on for consistent, measurable results.
           </p>
           
-          <p className="text-lg text-gray-600 mb-12 font-medium max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg text-gray-600 mb-8 sm:mb-12 font-medium max-w-3xl mx-auto">
             High-authority links • Competitive intelligence
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-8 sm:mb-12">
             <Button
               size="lg"
               className="text-base px-8 py-6 font-medium"
