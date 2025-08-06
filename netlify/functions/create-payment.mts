@@ -1,5 +1,6 @@
 import type { Context, Config } from "@netlify/functions";
 import Stripe from "stripe";
+import { createClient } from '@supabase/supabase-js';
 
 interface PaymentRequest {
   amount: number;
