@@ -81,14 +81,15 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
     }
 
     if (isRouteError || isBlogError) {
-      console.warn('Route/Blog error - redirecting to 404:', error.message);
-      this.redirectTo404();
+      console.warn('Route/Blog error - recovering gracefully:', error.message);
+      // Reset error state instead of redirecting to 404
+      this.setState({ hasError: false, error: undefined });
       return;
     }
 
-    // For all other errors, set error state
+    // For all other errors, set error state but don't auto-redirect
+    console.warn('Application error - showing fallback UI:', error.message);
     this.setState({ hasError: true, error, errorInfo });
-    this.redirectTo404();
   }
 
   componentWillUnmount() {
