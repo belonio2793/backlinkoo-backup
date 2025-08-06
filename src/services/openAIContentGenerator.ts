@@ -482,8 +482,21 @@ export class OpenAIContentGenerator {
     // Try to extract h1 tag from content
     const h1Match = content.match(/<h1[^>]*>(.*?)<\/h1>/i);
     if (h1Match && h1Match[1]) {
-      // Strip any remaining HTML tags from the title
-      return h1Match[1].replace(/<[^>]*>/g, '').trim();
+      // Strip any remaining HTML tags from the title and clean markdown artifacts
+      let title = h1Match[1].replace(/<[^>]*>/g, '').trim();
+      // Clean Title: prefixes and markdown artifacts
+      title = title
+        .replace(/^\s*\*\*Title:\s*([^*]*)\*\*\s*/i, '$1') // Remove **Title:** wrapper and extract content
+        .replace(/^\*\*H1\*\*:\s*/i, '')
+        .replace(/^\*\*Title\*\*:\s*/i, '') // Remove **Title**: prefix
+        .replace(/^Title:\s*/gi, '') // Remove Title: prefix (global + case insensitive)
+        .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
+        .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
+        .replace(/\*\*/g, '') // Remove any remaining ** symbols
+        .replace(/\*/g, '') // Remove any remaining * symbols
+        .replace(/^#{1,6}\s+/, '')
+        .trim();
+      return title;
     }
 
     // If no h1 found, generate a simple title

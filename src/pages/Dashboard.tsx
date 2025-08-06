@@ -78,6 +78,7 @@ import { ApiUsageDashboard } from "@/components/ApiUsageDashboard";
 import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
 
 import { AIPostsManager } from "@/components/admin/AIPostsManager";
+import { RotatingText } from "@/components/ui/rotating-text";
 import { PremiumUserAdmin } from "@/components/admin/PremiumUserAdmin";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -1270,10 +1271,23 @@ const Dashboard = () => {
                     <CardTitle className="text-blue-800">Welcome to Backlink ∞!</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-blue-700 mb-4">
-                      Get started by purchasing credits to create your first backlink campaign.
-                      Our high-quality backlinks will help improve your website's search engine rankings.
-                    </p>
+                    <div className="text-blue-700 mb-4">
+                      <RotatingText
+                        texts={[
+                          "Get started by purchasing credits to create your first backlink campaign.",
+                          "Our high-quality backlinks will help improve your website's search engine rankings.",
+                          "You'll gain access to a diverse network of high-authority domains including established blogs, news sites, niche industry platforms, and content-rich web properties.",
+                          "Each backlink is contextually placed to maximize SEO impact and help elevate your website's search engine rankings across targeted keywords.",
+                          "Get backlinks from domains with 50+ DA, real traffic, and proven SEO authority.",
+                          "Our links come from premium sites with high Domain Authority (DA), Trust Flow, and organic visibility.",
+                          "We source backlinks exclusively from websites indexed, ranked, and respected by Google.",
+                          "Every backlink is placed on a clean, authoritative domain with real-world relevance and SEO power.",
+                          "Boost your rankings with backlinks from aged domains, active blogs, and trusted publisher networks."
+                        ]}
+                        duration={5}
+                        className="min-h-[3rem]"
+                      />
+                    </div>
                     <Button onClick={() => {
                       setPaymentDefaultTab('credits');
                       setIsPaymentModalOpen(true);

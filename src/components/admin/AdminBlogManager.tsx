@@ -9,6 +9,7 @@ import { contentFilterService } from '@/services/contentFilterService';
 import { contentModerationService } from '@/services/contentModerationService';
 import { adminAuditLogger } from '@/services/adminAuditLogger';
 import { adminBlogOverrideService } from '@/services/adminBlogOverrideService';
+import { ExcerptCleaner } from '@/utils/excerptCleaner';
 import {
   Calendar,
   Clock,
@@ -98,7 +99,10 @@ export function AdminBlogManager() {
       setContentFilterStats(filterStats);
       setModerationStats(modStats);
     } catch (error) {
-      console.warn('Failed to load content filter stats:', error);
+      console.warn('Failed to load content filter stats:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.stack : String(error)
+      });
     }
   };
 
@@ -600,7 +604,7 @@ export function AdminBlogManager() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <h3 className="font-semibold text-gray-900 truncate flex-1 min-w-0">{post.title || 'Untitled Post'}</h3>
+                        <h3 className="font-semibold text-gray-900 truncate flex-1 min-w-0">{ExcerptCleaner.cleanTitle(post.title) || 'Untitled Post'}</h3>
                         <Badge className={getStatusColor(post.status)}>
                           {post.status.toUpperCase()}
                         </Badge>
@@ -787,7 +791,7 @@ export function AdminBlogManager() {
                 You are about to <strong>permanently delete</strong> the following blog post:
               </p>
               <div className="bg-gray-50 p-3 rounded border">
-                <p className="font-medium text-gray-900">{confirmDeletePost.title}</p>
+                <p className="font-medium text-gray-900">{ExcerptCleaner.cleanTitle(confirmDeletePost.title)}</p>
                 <p className="text-sm text-gray-600">ID: {confirmDeletePost.id}</p>
                 <p className="text-sm text-gray-600">URL: {confirmDeletePost.published_url}</p>
               </div>

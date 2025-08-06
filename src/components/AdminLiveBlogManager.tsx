@@ -29,6 +29,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { liveBlogPublisher, type LiveBlogPost } from '@/services/liveBlogPublisher';
 import { format, formatDistanceToNow } from 'date-fns';
+import { ExcerptCleaner } from '@/utils/excerptCleaner';
 
 export function AdminLiveBlogManager() {
   const [blogPosts, setBlogPosts] = useState<LiveBlogPost[]>([]);
@@ -314,7 +315,7 @@ export function AdminLiveBlogManager() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold truncate">{post.title}</h3>
+                      <h3 className="text-lg font-semibold truncate">{ExcerptCleaner.cleanTitle(post.title)}</h3>
                       <Badge variant={getStatusColor(post)}>
                         {getStatusLabel(post)}
                       </Badge>

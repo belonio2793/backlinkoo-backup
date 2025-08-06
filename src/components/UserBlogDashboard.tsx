@@ -19,6 +19,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ExcerptCleaner } from '@/utils/excerptCleaner';
 import { liveBlogPublisher, type LiveBlogPost } from '@/services/liveBlogPublisher';
 import { supabase } from '@/integrations/supabase/client';
 import { UserClaimedPosts } from '@/components/UserClaimedPosts';
@@ -182,7 +183,7 @@ export function UserBlogDashboard({ userId }: UserBlogDashboardProps) {
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold">{post.title}</h3>
+                          <h3 className="text-lg font-semibold">{ExcerptCleaner.cleanTitle(post.title)}</h3>
                           <Badge
                             variant={post.isTrialPost ? 'outline' : 'default'}
                             className={post.isTrialPost ? 'bg-green-50 text-green-700 border-green-200' : ''}

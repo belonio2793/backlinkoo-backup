@@ -63,7 +63,10 @@ export function ContentModerationQueue() {
       setStats(moderationStats);
       setRemovalList(currentRemovalList);
     } catch (error) {
-      console.error('Failed to load moderation data:', error);
+      console.error('Failed to load moderation data:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.stack : String(error)
+      });
       toast({
         title: 'Error',
         description: 'Failed to load moderation data',

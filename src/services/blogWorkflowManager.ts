@@ -374,9 +374,21 @@ export class BlogWorkflowManager {
     const lines = content.split('\n');
     const firstHeading = lines.find(line => line.startsWith('#'));
     if (firstHeading) {
-      return firstHeading.replace(/^#+\s*/, '').trim();
+      let title = firstHeading.replace(/^#+\s*/, '').trim();
+      // Clean Title: prefixes and markdown artifacts
+      title = title
+        .replace(/^\s*\*\*Title:\s*([^*]*)\*\*\s*/i, '$1') // Remove **Title:** wrapper and extract content
+        .replace(/^\*\*H1\*\*:\s*/i, '')
+        .replace(/^\*\*Title\*\*:\s*/i, '') // Remove **Title**: prefix
+        .replace(/^Title:\s*/gi, '') // Remove Title: prefix (global + case insensitive)
+        .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
+        .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
+        .replace(/\*\*/g, '') // Remove any remaining ** symbols
+        .replace(/\*/g, '') // Remove any remaining * symbols
+        .trim();
+      return title;
     }
-    
+
     // Fallback: use first 60 characters
     return content.substring(0, 60).trim() + '...';
   }

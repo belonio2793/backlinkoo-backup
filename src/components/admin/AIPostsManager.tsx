@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { ExcerptCleaner } from '@/utils/excerptCleaner';
 import {
   Table,
   TableBody,
@@ -393,7 +394,7 @@ export function AIPostsManager() {
                 <TableRow key={post.id}>
                   <TableCell>
                     <div>
-                      <div className="font-medium">{post.title}</div>
+                      <div className="font-medium">{ExcerptCleaner.cleanTitle(post.title)}</div>
                       <div className="text-sm text-gray-500">/{post.slug}</div>
                       <div className="flex gap-1 mt-1">
                         {post.keywords.slice(0, 3).map((keyword, idx) => (
@@ -468,7 +469,7 @@ export function AIPostsManager() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="font-medium">Title</Label>
-                  <p className="text-sm">{selectedPost.title}</p>
+                  <p className="text-sm">{ExcerptCleaner.cleanTitle(selectedPost.title)}</p>
                 </div>
                 <div>
                   <Label className="font-medium">Word Count</Label>
