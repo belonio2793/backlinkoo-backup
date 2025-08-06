@@ -37,6 +37,7 @@ import {
   LazyEmailMarketing,
   LazyBacklinkReport,
   LazyReportViewer,
+  LazySavedReports,
   LazyNoHandsSEO,
   LazyAffiliateProgram,
   LazyPromotionMaterials,
