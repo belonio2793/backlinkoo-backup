@@ -11,11 +11,19 @@ interface BacklinkResult {
   sourceUrl: string;
   targetUrl: string;
   anchorText: string;
+  destinationUrl?: string;
+  isDestinationChecked?: boolean;
   status: 'found' | 'not_found' | 'error';
   domainAuthority: number;
   pageAuthority: number;
   responseTime: number;
   lastChecked: string;
+  verification?: {
+    keywordFound: boolean;
+    anchorTextFound: boolean;
+    destinationUrlMatches: boolean;
+    isVerified: boolean;
+  };
 }
 
 interface ReportData {
@@ -82,7 +90,9 @@ export default function ReportViewer() {
       id: `entry_${Date.now()}_${index}`,
       sourceUrl: url,
       targetUrl: '',
-      anchorText: ''
+      anchorText: '',
+      destinationUrl: '',
+      isDestinationChecked: false
     }));
 
     const createdDate = new Date();
@@ -98,20 +108,40 @@ export default function ReportViewer() {
       backlinks: backlinks,
       createdAt: createdDate.toISOString(),
       totalBacklinks: backlinks.length,
-      results: backlinks.map((bl, index) => ({
-        ...bl,
-        status: reportId === 'demo_preview_12345' ?
-          (index < 8 ? 'found' : 'not_found') : // First 8 found for preview
-          (Math.random() > 0.3 ? 'found' : 'not_found'),
-        domainAuthority: reportId === 'demo_preview_12345' ?
-          [85, 90, 88, 82, 87, 91, 89, 86, 84, 83][index] || 80 : // High DA for preview
-          Math.floor(Math.random() * 40) + 40,
-        pageAuthority: reportId === 'demo_preview_12345' ?
-          [75, 80, 78, 72, 77, 81, 79, 76, 74, 73][index] || 70 : // High PA for preview
-          Math.floor(Math.random() * 50) + 20,
-        responseTime: Math.floor(Math.random() * 1000) + 300,
-        lastChecked: new Date().toISOString()
-      }))
+      results: backlinks.map((bl, index) => {
+        const hasLink = Math.random() > 0.3;
+        const mockDestinations = [
+          'https://yoursite.com/page',
+          'https://example.com/target',
+          'https://destination.com/content',
+          'https://yoursite.com/seo-tools',
+          '# (no link found)',
+          'https://redirect.com/link'
+        ];
+
+        return {
+          ...bl,
+          destinationUrl: hasLink ? mockDestinations[Math.floor(Math.random() * (mockDestinations.length - 1))] : '# (no link found)',
+          isDestinationChecked: true,
+          status: reportId === 'demo_preview_12345' ?
+            (index < 8 ? 'found' : 'not_found') : // First 8 found for preview
+            (hasLink ? 'found' : 'not_found'),
+          domainAuthority: reportId === 'demo_preview_12345' ?
+            [85, 90, 88, 82, 87, 91, 89, 86, 84, 83][index] || 80 : // High DA for preview
+            Math.floor(Math.random() * 40) + 40,
+          pageAuthority: reportId === 'demo_preview_12345' ?
+            [75, 80, 78, 72, 77, 81, 79, 76, 74, 73][index] || 70 : // High PA for preview
+            Math.floor(Math.random() * 50) + 20,
+          responseTime: Math.floor(Math.random() * 1000) + 300,
+          lastChecked: new Date().toISOString(),
+          verification: {
+            keywordFound: hasLink && Math.random() > 0.4,
+            anchorTextFound: hasLink && Math.random() > 0.3,
+            destinationUrlMatches: hasLink && Math.random() > 0.5,
+            isVerified: hasLink && Math.random() > 0.6
+          }
+        };
+      })
     };
   };
 
@@ -201,10 +231,12 @@ export default function ReportViewer() {
     if (!reportData) return;
 
     const csvData = [
-      ['URL', 'Status', 'Domain Authority', 'Page Authority', 'Response Time (ms)', 'Last Checked'],
+      ['Source URL', 'Destination URL', 'Status', 'Verified', 'Domain Authority', 'Page Authority', 'Response Time (ms)', 'Last Checked'],
       ...reportData.results.map(r => [
         r.sourceUrl,
+        r.destinationUrl || 'N/A',
         r.status,
+        r.verification?.isVerified ? 'Yes' : 'No',
         r.domainAuthority,
         r.pageAuthority,
         r.responseTime,
@@ -385,7 +417,7 @@ export default function ReportViewer() {
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-6 mb-8">
           <div className="bg-white border border-gray-200 p-6 text-center rounded-xl shadow-sm">
             <div className="text-3xl font-bold text-green-600 mb-2">{stats.found}</div>
             <div className="text-sm font-medium text-gray-600">Active Links</div>
@@ -395,11 +427,15 @@ export default function ReportViewer() {
             <div className="text-sm font-medium text-gray-600">Not Found</div>
           </div>
           <div className="bg-white border border-gray-200 p-6 text-center rounded-xl shadow-sm">
+            <div className="text-3xl font-bold text-purple-600 mb-2">{reportData?.results.filter(r => r.verification?.isVerified).length || 0}</div>
+            <div className="text-sm font-medium text-gray-600">Verified</div>
+          </div>
+          <div className="bg-white border border-gray-200 p-6 text-center rounded-xl shadow-sm">
             <div className="text-3xl font-bold text-blue-600 mb-2">{stats.avgDA}</div>
             <div className="text-sm font-medium text-gray-600">Avg Domain Authority</div>
           </div>
           <div className="bg-white border border-gray-200 p-6 text-center rounded-xl shadow-sm">
-            <div className="text-3xl font-bold text-purple-600 mb-2">{stats.avgPA}</div>
+            <div className="text-3xl font-bold text-orange-600 mb-2">{stats.avgPA}</div>
             <div className="text-sm font-medium text-gray-600">Avg Page Authority</div>
           </div>
         </div>
@@ -419,19 +455,58 @@ export default function ReportViewer() {
                       <span className="inline-flex items-center justify-center w-6 h-6 bg-gray-100 text-gray-600 text-xs font-medium rounded-full mr-3">
                         {index + 1}
                       </span>
-                      <a 
-                        href={result.sourceUrl} 
-                        target="_blank" 
+                      <a
+                        href={result.sourceUrl}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary hover:text-primary/80 text-sm break-all font-medium transition-colors"
                       >
                         {result.sourceUrl}
                       </a>
                     </div>
+
+                    {/* Destination URL Display */}
+                    {result.destinationUrl && result.destinationUrl !== '# (no link found)' && result.destinationUrl !== '# (error fetching)' && (
+                      <div className="flex items-center mb-2 ml-9">
+                        <span className="text-xs text-gray-500 mr-2">Links to:</span>
+                        <a
+                          href={result.destinationUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-green-600 hover:text-green-700 text-xs break-all transition-colors"
+                        >
+                          {result.destinationUrl}
+                        </a>
+                        {result.verification?.destinationUrlMatches && (
+                          <span className="ml-2 inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700 border border-green-200">
+                            ✓ Match
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {result.destinationUrl === '# (no link found)' && (
+                      <div className="flex items-center mb-2 ml-9">
+                        <span className="text-xs text-gray-400">No outbound links found</span>
+                      </div>
+                    )}
+
+                    {result.destinationUrl === '# (error fetching)' && (
+                      <div className="flex items-center mb-2 ml-9">
+                        <span className="text-xs text-red-400">Error checking links</span>
+                      </div>
+                    )}
                   </div>
-                  
-                  <div className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(result.status)}`}>
-                    {getStatusText(result.status)}
+
+                  <div className="flex flex-col items-end gap-2">
+                    <div className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(result.status)}`}>
+                      {getStatusText(result.status)}
+                    </div>
+                    {result.verification?.isVerified && (
+                      <div className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700 border border-blue-200">
+                        ✓ Verified
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -453,6 +528,24 @@ export default function ReportViewer() {
                     <span className="font-semibold text-gray-900">{new Date(result.lastChecked).toLocaleString()}</span>
                   </div>
                 </div>
+
+                {/* Verification Details */}
+                {result.verification && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-gray-600 ml-9 mt-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center">
+                      <span className={`w-2 h-2 rounded-full mr-2 ${result.verification.keywordFound ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                      Keyword Found: {result.verification.keywordFound ? 'Yes' : 'No'}
+                    </div>
+                    <div className="flex items-center">
+                      <span className={`w-2 h-2 rounded-full mr-2 ${result.verification.anchorTextFound ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                      Anchor Text: {result.verification.anchorTextFound ? 'Found' : 'Not Found'}
+                    </div>
+                    <div className="flex items-center">
+                      <span className={`w-2 h-2 rounded-full mr-2 ${result.verification.destinationUrlMatches ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                      Destination: {result.verification.destinationUrlMatches ? 'Matches' : 'Different'}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -468,8 +561,13 @@ export default function ReportViewer() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full p-3 border border-gray-300 bg-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
           />
-          <div className="mt-3 text-sm text-gray-600">
-            Showing <span className="font-medium">{filteredResults.length}</span> of <span className="font-medium">{reportData.totalBacklinks}</span> URLs
+          <div className="mt-3 text-sm text-gray-600 flex justify-between">
+            <span>
+              Showing <span className="font-medium">{filteredResults.length}</span> of <span className="font-medium">{reportData.totalBacklinks}</span> URLs
+            </span>
+            <span>
+              <span className="font-medium">{reportData.results.filter(r => r.destinationUrl && r.destinationUrl !== '# (no link found)' && r.destinationUrl !== '# (error fetching)').length}</span> with destination URLs found
+            </span>
           </div>
         </div>
 
