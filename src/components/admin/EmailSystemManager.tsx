@@ -76,7 +76,7 @@ Email System Manager`
 
   const loadSystemHealth = async () => {
     try {
-      const health = await ResendEmailService.healthCheck();
+      const health = await MockEmailService.healthCheck();
       // Transform the actual service response to match expected structure
       const safeHealth = {
         status: health?.status || 'unknown',
@@ -109,7 +109,7 @@ Email System Manager`
 
   const loadFailureLog = () => {
     try {
-      const failures = ResendEmailService.getFailureLog();
+      const failures = MockEmailService.getEmailLog();
       // Ensure failures is an array
       setFailureLog(Array.isArray(failures) ? failures : []);
     } catch (error) {
@@ -124,7 +124,7 @@ Email System Manager`
 
     try {
       console.log('🚀 Running comprehensive email system test...');
-      const result = await ResendEmailService.sendEmail(testEmail);
+      const result = await MockEmailService.sendEmail(testEmail);
       setTestResults(result);
 
       toast({
