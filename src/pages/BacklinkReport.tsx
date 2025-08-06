@@ -215,9 +215,12 @@ export default function BacklinkReport() {
         reportData
       );
 
+      const isLocalStorage = reportData && reportData.id && reportData.id.startsWith('local_');
       toast({
         title: 'Report Saved Successfully',
-        description: 'Your backlink report has been saved to your account.',
+        description: isLocalStorage
+          ? 'Your backlink report has been saved locally. It will be synced to your account once the database is ready.'
+          : 'Your backlink report has been saved to your account.',
       });
     } catch (error) {
       console.error('Error saving report:', error);
