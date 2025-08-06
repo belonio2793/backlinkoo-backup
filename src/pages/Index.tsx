@@ -327,7 +327,7 @@ const Index = () => {
 
       {/* Free Blog Generator - Top Feature */}
       <section id="blog-generator" className="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
-        <div className="container mx-auto">
+        <div className="w-full">
           {/* Optional: Advanced Generator Toggle (Hidden by default) */}
 
 
