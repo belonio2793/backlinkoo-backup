@@ -128,8 +128,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             {/* Keyword Field */}
             <div className="space-y-3">
               <Label htmlFor="keyword" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <div className="p-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg">
-                  <img src="https://cdn.builder.io/api/v1/image/assets%2Fcd67eae1c1ec4d2395180e5ed246fb8d%2Fcec186ec8b5946b7af5822a24824aa0b?format=webp&width=800" alt="Search icon" className="h-4 w-4" />
+                <div className="p-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg overflow-hidden">
+                  <img src="https://images.pexels.com/photos/27499331/pexels-photo-27499331.jpeg" alt="Target Achievement" className="h-4 w-4 object-cover rounded-sm" />
                 </div>
                 Keyword
               </Label>
@@ -144,7 +144,9 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
               <p className="text-xs text-gray-500 flex items-center gap-1">
-                <img src="https://cdn.builder.io/api/v1/image/assets%2Fcd67eae1c1ec4d2395180e5ed246fb8d%2Fcec186ec8b5946b7af5822a24824aa0b?format=webp&width=800" alt="Search icon" className="h-3 w-3" />
+                <div className="h-3 w-3 rounded-full overflow-hidden">
+                  <img src="https://images.pexels.com/photos/27499331/pexels-photo-27499331.jpeg" alt="Target Achievement" className="h-3 w-3 object-cover" />
+                </div>
                 The main topic your blog post will focus on
               </p>
             </div>
@@ -152,8 +154,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             {/* Anchor Text Field */}
             <div className="space-y-3">
               <Label htmlFor="anchorText" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <div className="p-1.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg">
-                  <img src="https://cdn.builder.io/api/v1/image/assets%2Fcd67eae1c1ec4d2395180e5ed246fb8d%2Fd7c555f716e54ad8b8357ef20f08bab5?format=webp&width=800" alt="Trending icon" className="h-4 w-4" />
+                <div className="p-1.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg overflow-hidden">
+                  <img src="https://images.pexels.com/photos/2381712/pexels-photo-2381712.jpeg" alt="Chain Connection" className="h-4 w-4 object-cover rounded-sm" />
                 </div>
                 Anchor Text
               </Label>
@@ -168,7 +170,9 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
               <p className="text-xs text-gray-500 flex items-center gap-1">
-                <img src="https://cdn.builder.io/api/v1/image/assets%2Fcd67eae1c1ec4d2395180e5ed246fb8d%2Fd7c555f716e54ad8b8357ef20f08bab5?format=webp&width=800" alt="Trending icon" className="h-3 w-3" />
+                <div className="h-3 w-3 rounded-full overflow-hidden">
+                  <img src="https://images.pexels.com/photos/2381712/pexels-photo-2381712.jpeg" alt="Chain Connection" className="h-3 w-3 object-cover" />
+                </div>
                 The clickable text that will link to your URL
               </p>
             </div>
@@ -179,8 +183,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
           {/* Bottom row: Target URL (full width for better UX) */}
           <div className="space-y-3">
             <Label htmlFor="targetUrl" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <div className="p-1.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg">
-                <img src="https://cdn.builder.io/api/v1/image/assets%2Fcd67eae1c1ec4d2395180e5ed246fb8d%2F90b1576cf70b440994239ba35a8c7102?format=webp&width=800" alt="Users icon" className="h-4 w-4" />
+              <div className="p-1.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg overflow-hidden">
+                <img src="https://images.pexels.com/photos/343457/pexels-photo-343457.jpeg" alt="Digital Technology" className="h-4 w-4 object-cover rounded-sm" />
               </div>
               Target URL
             </Label>
@@ -197,7 +201,9 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             </div>
             <p className="text-xs text-gray-500 flex items-center gap-1">
-              <img src="https://cdn.builder.io/api/v1/image/assets%2Fcd67eae1c1ec4d2395180e5ed246fb8d%2F90b1576cf70b440994239ba35a8c7102?format=webp&width=800" alt="Users icon" className="h-3 w-3" />
+              <div className="h-3 w-3 rounded-full overflow-hidden">
+                <img src="https://images.pexels.com/photos/343457/pexels-photo-343457.jpeg" alt="Digital Technology" className="h-3 w-3 object-cover" />
+              </div>
               The destination URL where the anchor text will link to.
             </p>
           </div>
