@@ -52,7 +52,11 @@ export const RotatingNotificationBanner = ({
   if (!isVisible) return null;
 
   return (
-    <div className={`relative bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_100%] animate-gradient-shift text-white py-2 sm:py-3 px-3 sm:px-4 min-h-[56px] sm:min-h-[64px] flex flex-col justify-center overflow-hidden ${className}`}>
+    <div
+      className={`relative bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_100%] animate-gradient-shift text-white py-2 sm:py-3 px-3 sm:px-4 min-h-[56px] sm:min-h-[64px] flex flex-col justify-center overflow-hidden cursor-pointer ${className}`}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       {/* Shimmer effect overlay */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer transform -skew-x-12"></div>
