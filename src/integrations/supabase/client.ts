@@ -2,11 +2,10 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { SecureConfig } from '../../lib/secure-config';
+import { safeFetch, preserveOriginalFetch } from '../../utils/fullstoryWorkaround';
 
 // Store original fetch before third-party scripts can modify it
-if (typeof window !== 'undefined' && !(globalThis as any).__originalFetch__) {
-  (globalThis as any).__originalFetch__ = window.fetch.bind(window);
-}
+preserveOriginalFetch();
 
 // Get Supabase configuration with proper fallback
 const getSupabaseConfig = () => {
@@ -240,70 +239,6 @@ export const supabase = hasValidCredentials ?
         'X-Client-Info': 'backlink-infinity@1.0.0',
       },
       fetch: (url, options = {}) => {
-        // Store original fetch before any third-party scripts modify it
-        const originalFetch = (globalThis as any).__originalFetch__ || window.fetch;
-
-        // If we detect FullStory interference, use a workaround
-        const isFullStoryPresent = !!(window as any).FS || document.querySelector('script[src*="fullstory"]');
-
-        let fetchFunction = originalFetch;
-
-        if (isFullStoryPresent) {
-          console.log('🔍 FullStory detected - using workaround fetch');
-          // Create a new fetch function that bypasses FullStory
-          fetchFunction = async (url: string, init?: RequestInit) => {
-            try {
-              // Use XMLHttpRequest as fallback when FullStory interferes
-              return await new Promise<Response>((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-
-                xhr.open(init?.method || 'GET', url);
-
-                // Set headers
-                if (init?.headers) {
-                  const headers = new Headers(init.headers);
-                  headers.forEach((value, key) => {
-                    xhr.setRequestHeader(key, value);
-                  });
-                }
-
-                xhr.onload = () => {
-                  // Status codes that cannot have a body according to HTTP spec
-                  const statusCodesWithoutBody = [204, 205, 304];
-                  const canHaveBody = !statusCodesWithoutBody.includes(xhr.status);
-
-                  // Create Response object with appropriate body handling
-                  const response = new Response(
-                    canHaveBody ? xhr.responseText : null,
-                    {
-                      status: xhr.status,
-                      statusText: xhr.statusText,
-                      headers: new Headers(xhr.getAllResponseHeaders().split('\r\n').reduce((acc, line) => {
-                        const [key, value] = line.split(': ');
-                        if (key && value) acc[key] = value;
-                        return acc;
-                      }, {} as Record<string, string>))
-                    }
-                  );
-                  resolve(response);
-                };
-
-                xhr.onerror = () => reject(new Error('Network request failed'));
-                xhr.ontimeout = () => reject(new Error('Request timeout'));
-
-                // Set timeout
-                xhr.timeout = 30000;
-
-                // Send request
-                xhr.send(init?.body as any);
-              });
-            } catch (error) {
-              // Fallback to original fetch if XMLHttpRequest fails
-              return originalFetch(url, init);
-            }
-          };
-        }
-
         // Create a timeout that won't interfere with existing signals
         const timeoutMs = 30000;
         const timeoutController = new AbortController();
@@ -315,7 +250,7 @@ export const supabase = hasValidCredentials ?
 
         const finalSignal = options.signal || timeoutController.signal;
 
-        return fetchFunction(url, {
+        return safeFetch(url, {
           ...options,
           signal: finalSignal,
         }).then(response => {
@@ -328,17 +263,6 @@ export const supabase = hasValidCredentials ?
           if (error.name === 'AbortError') {
             console.warn('🔍 Request aborted (likely timeout):', url);
             throw new Error('Request timeout - please try again');
-          }
-
-          // Check if this is likely third-party interference
-          const isThirdPartyIssue = error?.stack?.includes('fullstory') ||
-                                   error?.stack?.includes('fs.js') ||
-                                   error?.message?.includes('Failed to fetch');
-
-          if (isThirdPartyIssue) {
-            console.warn('🔍 Network request blocked by FullStory/Analytics - using workaround');
-            // Return a more specific error for third-party interference
-            throw new Error('Third-party script interference detected - request blocked');
           }
 
           console.warn('Supabase fetch error:', error);
