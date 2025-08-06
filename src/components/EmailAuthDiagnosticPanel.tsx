@@ -20,6 +20,8 @@ export const EmailAuthDiagnosticPanel = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [results, setResults] = useState<DiagnosticResult[]>([]);
   const [progress, setProgress] = useState(0);
+  const [isTestingRegistration, setIsTestingRegistration] = useState(false);
+  const [registrationResults, setRegistrationResults] = useState<any[]>([]);
 
   const runDiagnostic = async () => {
     setIsRunning(true);
