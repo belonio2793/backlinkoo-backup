@@ -570,7 +570,9 @@ const Index = () => {
               </Button>
             </div>
             <div className="bg-gradient-to-br from-blue-500/5 to-primary/5 p-12 rounded-2xl overflow-hidden">
-              <img src="https://images.pexels.com/photos/7793740/pexels-photo-7793740.jpeg" alt="SEO Dashboard" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
+              <div className="h-32 w-32 mx-auto bg-white rounded-xl shadow-lg flex items-center justify-center">
+                <BarChart3 className="h-16 w-16 text-blue-600" />
+              </div>
             </div>
           </div>
 
