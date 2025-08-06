@@ -384,19 +384,20 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
                 console.log('SEO Tools Start Subscription clicked');
                 console.log('isPremium value:', isPremium);
                 console.log('subscriptionStatus.isSubscribed:', subscriptionStatus.isSubscribed);
-                if (isPremium) {
-                  toast({
-                    title: "Already Premium",
-                    description: "You already have an active premium subscription. Enjoy all premium features!",
-                    variant: "default",
-                  });
-                  console.log('User is already premium, showing notification');
-                  return;
-                }
-                console.log('Opening premium checkout for non-premium user');
+                // Temporarily bypass premium check for testing
+                // if (isPremium) {
+                //   toast({
+                //     title: "Already Premium",
+                //     description: "You already have an active premium subscription. Enjoy all premium features!",
+                //     variant: "default",
+                //   });
+                //   console.log('User is already premium, showing notification');
+                //   return;
+                // }
+                console.log('Opening premium checkout');
                 console.log('Setting isPaymentModalOpen to true');
                 setIsPaymentModalOpen(true);
-              }} size="lg" className="w-full" variant={isPremium ? "outline" : "default"}>
+              }} size="lg" className="w-full" variant="default">
                 {isPremium ? (
                   <>
                     <CheckCircle2 className="h-4 w-4 mr-2" />
