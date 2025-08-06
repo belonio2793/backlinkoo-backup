@@ -221,11 +221,23 @@ export default function BacklinkReport() {
       });
     } catch (error) {
       console.error('Error saving report:', error);
-      toast({
-        title: 'Save Failed',
-        description: error instanceof Error ? error.message : 'Failed to save report. Please try again.',
-        variant: 'destructive'
-      });
+
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save report. Please try again.';
+
+      // Check if it's a database setup issue
+      if (errorMessage.includes('database setup') || errorMessage.includes('Database table not ready')) {
+        toast({
+          title: 'Feature Setup Required',
+          description: 'The saved reports feature is being set up. Please try again in a few moments or contact support.',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Save Failed',
+          description: errorMessage,
+          variant: 'destructive'
+        });
+      }
     } finally {
       setIsSaving(false);
     }
