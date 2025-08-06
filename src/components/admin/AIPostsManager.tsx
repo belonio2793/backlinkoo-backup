@@ -469,7 +469,7 @@ export function AIPostsManager() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="font-medium">Title</Label>
-                  <p className="text-sm">{selectedPost.title}</p>
+                  <p className="text-sm">{ExcerptCleaner.cleanTitle(selectedPost.title)}</p>
                 </div>
                 <div>
                   <Label className="font-medium">Word Count</Label>
