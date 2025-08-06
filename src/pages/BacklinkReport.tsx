@@ -17,6 +17,9 @@ export default function BacklinkReport() {
   const { toast } = useToast();
   
   const [urlList, setUrlList] = useState('');
+  const [keyword, setKeyword] = useState('');
+  const [anchorText, setAnchorText] = useState('');
+  const [destinationUrl, setDestinationUrl] = useState('');
   const [reportUrl, setReportUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPreviewSectionCollapsed, setIsPreviewSectionCollapsed] = useState(false);
