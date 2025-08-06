@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import RegistrationModal from '@/components/RegistrationModal';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
-import { Infinity } from 'lucide-react';
 
 interface BacklinkResult {
   id: string;
@@ -37,8 +37,6 @@ export default function ReportViewer() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showRegistration, setShowRegistration] = useState(false);
-  const [modalService, setModalService] = useState<'indexing' | 'linkbuilding'>('indexing');
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -267,31 +265,6 @@ export default function ReportViewer() {
     result.anchorText.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  const handleIndexingService = () => {
-    setModalService('indexing');
-    setShowRegistration(true);
-  };
-
-  const handleLinkBuilding = () => {
-    setModalService('linkbuilding');
-    setShowRegistration(true);
-  };
-
-  const handleRunIndexing = () => {
-    if (!user) {
-      // User not logged in, show registration modal
-      setModalService('indexing');
-      setShowRegistration(true);
-    } else {
-      // User is logged in, proceed with indexing service
-      toast({
-        title: 'Indexing Service Started',
-        description: 'Your URLs are being submitted to our indexing servers. You will receive updates via email.',
-      });
-      // Here you would typically make an API call to start the indexing process
-      // For now, we'll just show a success message
-    }
-  };
 
   if (isLoading) {
     return (
@@ -336,27 +309,17 @@ export default function ReportViewer() {
   const stats = calculateStats();
 
   return (
-    <>
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white text-gray-900">
-      {/* Header */}
+      <Header />
+
+      {/* Page Header */}
       <div className="border-b border-gray-200 bg-white shadow-sm p-6">
         <div className="max-w-7xl mx-auto">
-          {/* Top Navigation */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <Infinity className="h-7 w-7 text-primary" />
-              <span className="text-2xl font-semibold tracking-tight text-foreground">Backlink</span>
-            </div>
-            <button
-              onClick={() => navigate('/')}
-              className="inline-flex items-center text-primary hover:text-primary/80 transition-colors text-sm font-medium"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back to Home
-            </button>
-          </div>
+
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Backlink Report</h1>
+          <p className="text-gray-600 text-lg mb-6">
+            Professional backlink verification and analysis results
+          </p>
 
           <div className="flex items-center justify-end">
             <div className="flex gap-3">
@@ -370,8 +333,8 @@ export default function ReportViewer() {
                 </svg>
                 {isRefreshing ? 'Refreshing...' : 'Refresh'}
               </button>
-              
-              <button 
+
+              <button
                 onClick={shareReport}
                 className="inline-flex items-center px-4 py-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors font-medium"
               >
@@ -380,8 +343,8 @@ export default function ReportViewer() {
                 </svg>
                 Copy URL
               </button>
-              
-              <button 
+
+              <button
                 onClick={downloadReport}
                 className="inline-flex items-center px-4 py-2 bg-primary text-white hover:bg-primary/90 rounded-lg transition-colors font-medium"
               >
@@ -389,6 +352,16 @@ export default function ReportViewer() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 Download CSV
+              </button>
+
+              <button
+                onClick={() => navigate('/backlink-report')}
+                className="inline-flex items-center px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors font-medium"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Create New Report
               </button>
             </div>
           </div>
@@ -433,17 +406,8 @@ export default function ReportViewer() {
 
         {/* Results Table */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-          <div className="bg-gray-50 p-4 border-b border-gray-200 flex justify-between items-center">
+          <div className="bg-gray-50 p-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">URL Analysis Results</h3>
-            <button
-              onClick={handleRunIndexing}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors font-medium text-sm shadow-sm"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              Run Indexing
-            </button>
           </div>
           
           <div className="max-h-[600px] overflow-y-auto">
@@ -537,42 +501,9 @@ export default function ReportViewer() {
           </div>
         </div>
 
-        {/* Services - Premium Upsell */}
-        <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
-          <h3 className="text-lg font-semibold text-blue-900 mb-3">Need More? Premium Services Available</h3>
-          <p className="text-blue-800 mb-4">Take your SEO to the next level with our professional services</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button
-              onClick={handleIndexingService}
-              className="flex items-center justify-center px-6 py-4 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors font-medium shadow-md"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              Get URLs Indexed
-            </button>
-            <button
-              onClick={handleLinkBuilding}
-              className="flex items-center justify-center px-6 py-4 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors font-medium shadow-md"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
-              Build Backlinks To These URLs
-            </button>
-          </div>
-          <p className="text-xs text-blue-700 mt-3 text-center">
-            ✨ Supports up to 10,000 URLs per service • Professional results guaranteed
-          </p>
-        </div>
       </div>
-    </div>
 
-    <RegistrationModal
-      isOpen={showRegistration}
-      onClose={() => setShowRegistration(false)}
-      serviceType={modalService}
-    />
-    </>
+      <Footer />
+    </div>
   );
 }
