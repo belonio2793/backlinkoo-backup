@@ -57,3 +57,6 @@ export const LazyPaymentDiagnostic = lazy(() => import('@/pages/PaymentDiagnosti
 
 // Edge Function Diagnostic component
 export const LazyEdgeFunctionDiagnostic = lazy(() => import('@/pages/EdgeFunctionDiagnostic'));
+
+// Route Sync Test component
+export const LazyRouteSyncTest = lazy(() => import('@/pages/RouteSyncTest'));
