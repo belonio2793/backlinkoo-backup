@@ -561,7 +561,10 @@ const Index = () => {
                   <span className="font-light">ROI calculations</span>
                 </li>
               </ul>
-              <Button onClick={() => navigate("/login")} className="font-medium">
+              <Button onClick={() => {
+                setLoginModalTab("login");
+                setShowLoginModal(true);
+              }} className="font-medium">
                 Explore Dashboard
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -598,7 +601,10 @@ const Index = () => {
                   <span className="font-light">Smart budget allocation</span>
                 </li>
               </ul>
-              <Button onClick={() => navigate("/login")} className="font-medium">
+              <Button onClick={() => {
+                setLoginModalTab("login");
+                setShowLoginModal(true);
+              }} className="font-medium">
                 Launch Campaign
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -629,7 +635,10 @@ const Index = () => {
                   <span className="font-light">Search intent classification</span>
                 </li>
               </ul>
-              <Button onClick={() => navigate("/login")} className="font-medium">
+              <Button onClick={() => {
+                setLoginModalTab("login");
+                setShowLoginModal(true);
+              }} className="font-medium">
                 Research Keywords
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -666,7 +675,10 @@ const Index = () => {
                   <span className="font-light">Competitor surveillance</span>
                 </li>
               </ul>
-              <Button onClick={() => navigate("/login")} className="font-medium">
+              <Button onClick={() => {
+                setLoginModalTab("login");
+                setShowLoginModal(true);
+              }} className="font-medium">
                 Track Rankings
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -738,7 +750,10 @@ const Index = () => {
                   <span className="font-light">Best practice sharing</span>
                 </li>
               </ul>
-              <Button onClick={() => navigate("/login")} className="font-medium">
+              <Button onClick={() => {
+                setLoginModalTab("login");
+                setShowLoginModal(true);
+              }} className="font-medium">
                 Join Community
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
