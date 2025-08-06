@@ -38,7 +38,7 @@ interface APIKey {
   id: string;
   name: string;
   key: string;
-  service: 'openai' | 'anthropic' | 'google' | 'stripe' | 'resend';
+  service: 'openai' | 'anthropic' | 'stripe' | 'resend';
   status: 'testing' | 'valid' | 'invalid' | 'unknown';
   lastTested?: Date;
   description?: string;
