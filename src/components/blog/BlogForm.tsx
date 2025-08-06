@@ -121,19 +121,9 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      {/* Beautiful gradient background card */}
-      <Card className="relative overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-          <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
-          <div className="absolute bottom-0 left-1/2 w-72 h-72 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-4000"></div>
-        </div>
-
-        <CardContent className="relative z-10 p-8 space-y-8">
-          {/* Animated headline */}
-          <AnimatedBlogHeadline />
+    <div className="w-full px-6 space-y-8">
+      {/* Animated headline */}
+      <AnimatedBlogHeadline />
           {/* Top row: Keyword and Anchor Text side by side */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Keyword Field */}
@@ -213,18 +203,6 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             </p>
           </div>
 
-          {/* Estimated Time and Account Prompt */}
-          <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-inner">
-            <div className="text-center">
-              <p className="text-sm font-semibold text-amber-800 mb-1">
-                ⏱️ Estimated time: 30-60 seconds
-              </p>
-              <p className="text-xs text-amber-700">
-                You will be redirected to your blog post. Create an account to claim it before it gets deleted.
-              </p>
-            </div>
-          </div>
-
           {/* Beautiful CTA Button */}
           <div className="pt-4">
             <Button
@@ -244,20 +222,30 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             </Button>
           </div>
 
-          {/* Bottom decorative elements */}
-          <div className="flex justify-center pt-2">
-            <div className="flex items-center gap-2 text-xs text-gray-400">
-              <div className="w-1 h-1 bg-blue-400 rounded-full"></div>
-              <span>Instant Generation</span>
-              <div className="w-1 h-1 bg-purple-400 rounded-full"></div>
-              <span>100% Free</span>
-              <div className="w-1 h-1 bg-pink-400 rounded-full"></div>
-              <span>No Credit Card</span>
-              <div className="w-1 h-1 bg-orange-400 rounded-full"></div>
+          {/* Estimated Time and Account Prompt - Moved below button */}
+          <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-inner">
+            <div className="text-center">
+              <p className="text-sm font-semibold text-amber-800 mb-1">
+                ⏱️ Estimated time: 30-60 seconds
+              </p>
+              <p className="text-xs text-amber-700">
+                You will be redirected to your blog post. Create an account to claim it before it gets deleted.
+              </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+      {/* Bottom decorative elements */}
+      <div className="flex justify-center pt-2">
+        <div className="flex items-center gap-2 text-xs text-gray-400">
+          <div className="w-1 h-1 bg-blue-400 rounded-full"></div>
+          <span>Instant Generation</span>
+          <div className="w-1 h-1 bg-purple-400 rounded-full"></div>
+          <span>100% Free</span>
+          <div className="w-1 h-1 bg-pink-400 rounded-full"></div>
+          <span>No Credit Card</span>
+          <div className="w-1 h-1 bg-orange-400 rounded-full"></div>
+        </div>
+      </div>
 
       {/* Real-time Blog Generation Status Tracker */}
       <RealTimeBlogStatus
