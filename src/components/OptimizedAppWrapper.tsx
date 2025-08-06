@@ -3,6 +3,8 @@ import { Suspense, useEffect } from 'react';
 import { useReferralTracking } from '@/hooks/useReferralTracking';
 import { Skeleton } from '@/components/ui/skeleton';
 import { scrollToTop } from '@/utils/scrollToTop';
+import { ReportSyncProvider } from '@/contexts/ReportSyncContext';
+import { RouteSync } from '@/components/RouteSync';
 
 // Import lightweight page components directly
 import Index from '@/pages/Index';
@@ -68,7 +70,10 @@ import {
   LazyPaymentTest,
   LazyWebhookTest,
   LazyPaymentDiagnostic,
-  LazyEdgeFunctionDiagnostic
+  LazyEdgeFunctionDiagnostic,
+  LazyRouteSyncTest,
+  LazyEmailAuthenticationAudit,
+  LazyEmailDiagnostic
 } from './LazyComponents';
 
 // Loading component for better UX
@@ -104,7 +109,8 @@ export const OptimizedAppWrapper = () => {
   useReferralTracking();
 
   return (
-    <>
+    <ReportSyncProvider>
+      <RouteSync />
       <TrialNotificationBanner />
       <ScrollToTop />
       <Suspense fallback={<PageLoader />}>
@@ -247,6 +253,7 @@ export const OptimizedAppWrapper = () => {
             </InstantEmailVerificationGuard>
           } />
           <Route path="/backlink-report" element={<LazyBacklinkReport />} />
+          <Route path="/report" element={<LazyBacklinkReport />} />
           <Route path="/saved-reports" element={
             <InstantEmailVerificationGuard>
               <LazySavedReports />
@@ -305,12 +312,27 @@ export const OptimizedAppWrapper = () => {
               <EmailDiagnosticPage />
             </Suspense>
           } />
+          <Route path="/route-sync-test" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyRouteSyncTest />
+            </Suspense>
+          } />
+          <Route path="/email-auth-audit" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyEmailAuthenticationAudit />
+            </Suspense>
+          } />
+          <Route path="/email-diagnostic" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyEmailDiagnostic />
+            </Suspense>
+          } />
 
           {/* 404 routes */}
           <Route path="/404" element={<NotFound />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
-    </>
+    </ReportSyncProvider>
   );
 };

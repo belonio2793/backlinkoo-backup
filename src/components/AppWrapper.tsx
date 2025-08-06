@@ -1,5 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { useReferralTracking } from '@/hooks/useReferralTracking';
+import { ReportSyncProvider } from '@/contexts/ReportSyncContext';
+import { RouteSync } from '@/components/RouteSync';
 
 // Import all page components
 import Index from '@/pages/Index';
@@ -46,7 +48,8 @@ export const AppWrapper = () => {
   useReferralTracking();
 
   return (
-    <>
+    <ReportSyncProvider>
+      <RouteSync />
       <TrialNotificationBanner />
       <Routes>
         {/* Public routes - no authentication required */}
@@ -119,6 +122,7 @@ export const AppWrapper = () => {
           </EmailVerificationGuard>
         } />
         <Route path="/backlink-report" element={<BacklinkReport />} />
+        <Route path="/report" element={<BacklinkReport />} />
         <Route path="/report/:reportId" element={<ReportViewer />} />
         <Route path="/automation-link-building" element={
           <EmailVerificationGuard>
@@ -136,6 +140,6 @@ export const AppWrapper = () => {
           </EmailVerificationGuard>
         } />
       </Routes>
-    </>
+    </ReportSyncProvider>
   );
 };

@@ -57,3 +57,12 @@ export const LazyPaymentDiagnostic = lazy(() => import('@/pages/PaymentDiagnosti
 
 // Edge Function Diagnostic component
 export const LazyEdgeFunctionDiagnostic = lazy(() => import('@/pages/EdgeFunctionDiagnostic'));
+
+// Route Sync Test component
+export const LazyRouteSyncTest = lazy(() => import('@/pages/RouteSyncTest'));
+
+// Email Authentication Audit component
+export const LazyEmailAuthenticationAudit = lazy(() => import('@/pages/EmailAuthenticationAudit'));
+
+// Email Diagnostic component
+export const LazyEmailDiagnostic = lazy(() => import('@/pages/EmailDiagnostic'));

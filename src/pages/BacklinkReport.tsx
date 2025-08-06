@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { LoginModal } from '@/components/LoginModal';
 import { useAuth } from '@/hooks/useAuth';
 import { SavedBacklinkReportsService, type BacklinkReportData } from '@/services/savedBacklinkReportsService';
+import { useReportSync, useReportFormData } from '@/contexts/ReportSyncContext';
 
 interface BacklinkEntry {
   id: string;
@@ -19,14 +20,16 @@ interface BacklinkEntry {
 
 export default function BacklinkReport() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  
-  const [urlList, setUrlList] = useState('');
-  const [keyword, setKeyword] = useState('');
-  const [anchorText, setAnchorText] = useState('');
-  const [destinationUrl, setDestinationUrl] = useState('');
+
+  // Use report sync context for form data
+  const { state, setGeneratedReport, setIsGenerating, navigateToReportView } = useReportSync();
+  const { formData, updateFormData } = useReportFormData();
+
+  // Local state for non-synced data
   const [reportUrl, setReportUrl] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isPreviewSectionCollapsed, setIsPreviewSectionCollapsed] = useState(false);
   const [isInstructionsSectionCollapsed, setIsInstructionsSectionCollapsed] = useState(false);
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
@@ -34,7 +37,43 @@ export default function BacklinkReport() {
   const [isSaving, setIsSaving] = useState(false);
   const [reportData, setReportData] = useState<BacklinkReportData | null>(null);
 
+  // Extract form values from context
+  const { keyword, anchorText, destinationUrl, urlList } = formData;
+  const isGenerating = state.isGenerating;
+
   const { user, isAuthenticated } = useAuth();
+
+  // Handle URL parameters and initialize form data from URL or context
+  useEffect(() => {
+    const urlKeyword = searchParams.get('keyword');
+    const urlAnchorText = searchParams.get('anchorText');
+    const urlDestinationUrl = searchParams.get('destinationUrl');
+    const urlList = searchParams.get('urls');
+    const reportId = searchParams.get('reportId');
+
+    // If there's a reportId in URL params, navigate to that report
+    if (reportId) {
+      navigateToReportView(reportId);
+      return;
+    }
+
+    // Initialize form data from URL parameters if available
+    const urlParams: any = {};
+    if (urlKeyword) urlParams.keyword = urlKeyword;
+    if (urlAnchorText) urlParams.anchorText = urlAnchorText;
+    if (urlDestinationUrl) urlParams.destinationUrl = urlDestinationUrl;
+    if (urlList) urlParams.urlList = decodeURIComponent(urlList);
+
+    if (Object.keys(urlParams).length > 0) {
+      updateFormData(urlParams);
+    }
+  }, [searchParams, navigateToReportView, updateFormData]);
+
+  // Update form data handlers
+  const handleKeywordChange = (value: string) => updateFormData({ keyword: value });
+  const handleAnchorTextChange = (value: string) => updateFormData({ anchorText: value });
+  const handleDestinationUrlChange = (value: string) => updateFormData({ destinationUrl: value });
+  const handleUrlListChange = (value: string) => updateFormData({ urlList: value });
 
   const parseUrls = (text: string): BacklinkEntry[] => {
     const lines = text.split('\n').filter(line => line.trim());
@@ -234,7 +273,15 @@ export default function BacklinkReport() {
 
       localStorage.setItem(`report_${reportId}`, JSON.stringify(reportData));
 
-      // Store report data for potential saving
+      // Store report data in context for sharing between routes
+      const generatedReport = {
+        id: reportId,
+        url: generatedUrl,
+        data: reportData,
+        createdAt: new Date().toISOString()
+      };
+
+      setGeneratedReport(generatedReport);
       setReportData(reportData);
       setReportUrl(generatedUrl);
       
@@ -359,7 +406,7 @@ export default function BacklinkReport() {
                   <input
                     type="text"
                     value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
+                    onChange={(e) => handleKeywordChange(e.target.value)}
                     placeholder="e.g., best SEO tools"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
@@ -371,7 +418,7 @@ export default function BacklinkReport() {
                   <input
                     type="text"
                     value={anchorText}
-                    onChange={(e) => setAnchorText(e.target.value)}
+                    onChange={(e) => handleAnchorTextChange(e.target.value)}
                     placeholder="e.g., best SEO tools"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
@@ -383,7 +430,7 @@ export default function BacklinkReport() {
                   <input
                     type="url"
                     value={destinationUrl}
-                    onChange={(e) => setDestinationUrl(e.target.value)}
+                    onChange={(e) => handleDestinationUrlChange(e.target.value)}
                     placeholder="https://yoursite.com/page"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
@@ -430,7 +477,7 @@ export default function BacklinkReport() {
               </label>
               <textarea
                 value={urlList}
-                onChange={(e) => setUrlList(e.target.value)}
+                onChange={(e) => handleUrlListChange(e.target.value)}
                 placeholder="Paste your URLs here (one per line)..."
                 className="w-full h-64 p-4 border border-gray-300 bg-white text-gray-900 text-sm resize-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                 spellCheck={false}
@@ -507,7 +554,13 @@ export default function BacklinkReport() {
                     Copy URL
                   </button>
                   <button
-                    onClick={() => window.open(reportUrl, '_blank')}
+                    onClick={() => {
+                      if (state.lastGeneratedReport) {
+                        navigateToReportView(state.lastGeneratedReport.id);
+                      } else {
+                        window.open(reportUrl, '_blank');
+                      }
+                    }}
                     className="inline-flex items-center px-4 py-2 bg-primary text-white hover:bg-primary/90 rounded-lg transition-colors font-medium"
                   >
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
