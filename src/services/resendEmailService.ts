@@ -61,7 +61,7 @@ export class ResendEmailService {
           });
 
           if (!altResponse.ok) {
-            throw new Error('Email service unavailable - Netlify function not deployed or accessible');
+            throw new Error(`Email service unavailable - Netlify function not deployed or accessible (${altResponse.status})`);
           }
 
           const altResult = await altResponse.json();
