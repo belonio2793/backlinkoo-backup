@@ -24,11 +24,27 @@ export default function PaymentSuccess() {
       const sessionId = searchParams.get('session_id');
       const orderId = searchParams.get('order_id');
       const paymentMethod = searchParams.get('payment_method') as 'stripe' | 'paypal' | null;
+      const isDemo = searchParams.get('demo');
+      const credits = searchParams.get('credits');
+      const amount = searchParams.get('amount');
 
       try {
         let result;
 
-        if (sessionId || orderId || paymentMethod) {
+        // Handle demo mode for development
+        if (isDemo === 'true') {
+          console.log('🚧 Demo mode payment success:', { credits, amount });
+          result = {
+            success: true,
+            redirectUrl: '/dashboard',
+            message: `Demo mode: ${credits} credits purchased for $${amount}`
+          };
+
+          toast({
+            title: "🚧 Demo Payment Success",
+            description: `Demo mode: ${credits} credits have been added to your account.`,
+          });
+        } else if (sessionId || orderId || paymentMethod) {
           // Process payment verification with enhanced service
           result = await PaymentVerificationService.verifyPayment({
             sessionId: sessionId || undefined,
@@ -42,12 +58,14 @@ export default function PaymentSuccess() {
 
         if (result.success) {
           setRedirectUrl(result.redirectUrl || '/dashboard');
-          toast({
-            title: "🎉 Welcome to Premium!",
-            description: "Your account has been successfully upgraded. Enjoy all premium features!",
-          });
+          if (!isDemo) {
+            toast({
+              title: "🎉 Payment Successful!",
+              description: result.message || "Your payment has been processed successfully!",
+            });
+          }
         } else {
-          setProcessingError(result.error || 'Failed to process upgrade');
+          setProcessingError(result.error || 'Failed to process payment');
         }
       } catch (error: any) {
         console.error('Error processing payment success:', error);
