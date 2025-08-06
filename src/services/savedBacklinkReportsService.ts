@@ -32,9 +32,15 @@ export class SavedBacklinkReportsService {
     reportData: BacklinkReportData
   ): Promise<SavedBacklinkReport> {
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) {
       throw new Error('User must be authenticated to save reports');
+    }
+
+    // Check table access first
+    const hasAccess = await checkSavedReportsTableAccess();
+    if (!hasAccess) {
+      throw new Error('Saved reports feature is not available yet. Please contact support if this issue persists.');
     }
 
     // Calculate summary statistics
@@ -66,6 +72,9 @@ export class SavedBacklinkReportsService {
 
     if (error) {
       console.error('Error saving backlink report:', error);
+      if (error.code === '42P01') {
+        throw new Error('Saved reports feature is not available yet. Please contact support.');
+      }
       throw new Error(`Failed to save report: ${error.message}`);
     }
 
