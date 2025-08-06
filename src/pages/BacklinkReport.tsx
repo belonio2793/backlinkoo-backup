@@ -554,7 +554,13 @@ export default function BacklinkReport() {
                     Copy URL
                   </button>
                   <button
-                    onClick={() => window.open(reportUrl, '_blank')}
+                    onClick={() => {
+                      if (state.lastGeneratedReport) {
+                        navigateToReportView(state.lastGeneratedReport.id);
+                      } else {
+                        window.open(reportUrl, '_blank');
+                      }
+                    }}
                     className="inline-flex items-center px-4 py-2 bg-primary text-white hover:bg-primary/90 rounded-lg transition-colors font-medium"
                   >
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
