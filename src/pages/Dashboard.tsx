@@ -775,7 +775,7 @@ const Dashboard = () => {
       console.log('🔄 Dashboard - Auth state change:', { event, hasUser: !!session?.user });
 
       if (event === 'SIGNED_OUT' || !session) {
-        console.log('�� Dashboard - User signed out, redirecting to home...');
+        console.log('🚪 Dashboard - User signed out, redirecting to home...');
         navigate('/');
       } else if (event === 'SIGNED_IN' && session) {
         console.log('🏠 Dashboard - User signed in, updating user state');
