@@ -644,24 +644,39 @@ https://backlinkoo.com`,
         throw new Error('Invalid email address format');
       }
 
-      const result = await this.sendViaNetlifyFunction(emailData);
+      // Try the original method first
+      let result;
+      try {
+        result = await this.sendViaNetlifyFunction(emailData);
+      } catch (error) {
+        console.warn('Original method failed, trying enhanced service...', this.serializeError(error));
+
+        // Fallback to enhanced service
+        try {
+          const { EnhancedEmailService } = await import('./enhancedEmailService');
+          result = await EnhancedEmailService.sendEmailRobust(emailData);
+        } catch (enhancedError) {
+          console.error('Enhanced service also failed:', this.serializeError(enhancedError));
+          throw error; // Throw original error
+        }
+      }
 
       // Enhanced logging for debugging
       if (result.success) {
-        console.log(`Email sent successfully to ${emailData.to} via ${result.provider}`);
+        console.log(`✅ Email sent successfully to ${emailData.to} via ${result.provider}`);
       } else {
-        console.error(`Email failed to send to ${emailData.to}:`, result.error);
+        console.error(`❌ Email failed to send to ${emailData.to}:`, result.error);
       }
 
       return result as EmailResult;
     } catch (error: any) {
-      const sanitizedError = this.sanitizeErrorMessage(error.message);
-      console.error('SendEmail error:', sanitizedError);
+      const sanitizedError = this.sanitizeErrorMessage(error.message || String(error));
+      console.error('💥 SendEmail error:', sanitizedError);
 
       const failureResult: EmailResult = {
         success: false,
         error: sanitizedError,
-        provider: 'netlify_resend'
+        provider: 'all_failed'
       };
 
       // Failure logging is handled within sendViaNetlifyFunction
