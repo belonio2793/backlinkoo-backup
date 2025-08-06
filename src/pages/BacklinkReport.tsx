@@ -346,9 +346,14 @@ export default function BacklinkReport() {
             <div className="text-sm text-gray-600">
               <span className="font-medium">{parseUrls(urlList).length}</span> URLs detected (max 10,000)
             </div>
-            {parseUrls(urlList).length > 0 && (
+            {parseUrls(urlList).length > 0 && keyword && anchorText && destinationUrl && (
               <div className="text-xs text-green-600 font-medium">
-                ✓ Ready to generate
+                ✓ Ready to verify backlinks
+              </div>
+            )}
+            {parseUrls(urlList).length > 0 && (!keyword || !anchorText || !destinationUrl) && (
+              <div className="text-xs text-amber-600 font-medium">
+                ⚠ Complete verification settings above
               </div>
             )}
           </div>
