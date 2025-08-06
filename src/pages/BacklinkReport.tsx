@@ -210,10 +210,80 @@ export default function BacklinkReport() {
           </p>
         </div>
 
-        {/* Input Area */}
+        {/* Verification Parameters */}
+        <div className="mb-8 p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">Backlink Verification Settings</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
+                Target Keyword
+              </label>
+              <input
+                type="text"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="e.g., best SEO tools"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
+                Expected Anchor Text
+              </label>
+              <input
+                type="text"
+                value={anchorText}
+                onChange={(e) => setAnchorText(e.target.value)}
+                placeholder="e.g., best SEO tools"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
+                Destination URL
+              </label>
+              <input
+                type="url"
+                value={destinationUrl}
+                onChange={(e) => setDestinationUrl(e.target.value)}
+                placeholder="https://yoursite.com/page"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Validation Status */}
+          {(keyword || anchorText || destinationUrl) && (
+            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <h3 className="font-medium text-gray-900 mb-2">Verification Setup Status:</h3>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <span className={`flex items-center ${keyword ? 'text-green-600' : 'text-gray-400'}`}>
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={keyword ? "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" : "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"} />
+                  </svg>
+                  Keyword {keyword ? '✓' : '(required)'}
+                </span>
+                <span className={`flex items-center ${anchorText ? 'text-green-600' : 'text-gray-400'}`}>
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={anchorText ? "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" : "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"} />
+                  </svg>
+                  Anchor Text {anchorText ? '✓' : '(required)'}
+                </span>
+                <span className={`flex items-center ${destinationUrl ? 'text-green-600' : 'text-gray-400'}`}>
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={destinationUrl ? "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" : "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"} />
+                  </svg>
+                  Destination URL {destinationUrl ? '✓' : '(required)'}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* URL Input Area */}
         <div className="mb-8">
           <label className="block text-lg font-semibold text-gray-900 mb-3">
-            URL List
+            URLs to Verify
           </label>
           <textarea
             value={urlList}
