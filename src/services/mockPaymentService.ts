@@ -43,13 +43,6 @@ export class MockPaymentService {
   ): Promise<PaymentResult> {
     console.log('🔄 MockPaymentService: Creating payment simulation');
 
-    // Show user-friendly notification
-    if (window.alert) {
-      setTimeout(() => {
-        alert('🚧 Development Mode: Using simulated payment system.\n\nThis is a mock payment that will simulate the purchase process without actual charges.\n\nClick OK to continue with the simulation.');
-      }, 100);
-    }
-
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
