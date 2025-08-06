@@ -129,7 +129,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             <div className="space-y-3">
               <Label htmlFor="keyword" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                 <div className="p-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg">
-                  <Search className="h-4 w-4 text-white" />
+                  <img src="https://cdn.builder.io/api/v1/image/assets%2Fcd67eae1c1ec4d2395180e5ed246fb8d%2Fcec186ec8b5946b7af5822a24824aa0b?format=webp&width=800" alt="Search icon" className="h-4 w-4" />
                 </div>
                 Keyword
               </Label>
