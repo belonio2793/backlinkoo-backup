@@ -347,7 +347,6 @@ export function AdminUserDashboard() {
         const periodEnd = new Date();
         periodEnd.setFullYear(periodEnd.getFullYear() + 1); // 1 year from now
 
-        const { error: subError } = await supabase
         const { error: subError } = await SchemaCompatibility.upsertSubscription({
           user_id: user.user_id,
           plan_type: 'premium',
