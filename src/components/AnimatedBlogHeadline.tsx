@@ -63,22 +63,11 @@ export function AnimatedBlogHeadline() {
     <div className="text-center mb-8">
       <div className="relative inline-block">
         {/* Animated headline with word-by-word reveal */}
-        <h2 className="text-3xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight overflow-hidden">
+        <h2 className="text-3xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight text-black">
           {words.map((word, index) => (
             <span
               key={index}
-              className={`inline-block text-transparent bg-clip-text bg-gradient-to-r ${currentGradient} mr-3 ${
-                animateWords 
-                  ? `animate-word-slide opacity-100` 
-                  : 'opacity-0'
-              }`}
-              style={{
-                animationDelay: `${index * 150}ms`,
-                backgroundSize: '300% 300%',
-                animation: animateWords 
-                  ? `word-slide 0.5s ease-out forwards ${index * 150}ms, gradient-shift 3s ease-in-out infinite ${index * 150 + 800}ms`
-                  : 'none'
-              }}
+              className="inline-block text-black mr-3"
             >
               {word}
             </span>
