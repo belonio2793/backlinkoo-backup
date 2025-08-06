@@ -191,6 +191,13 @@ class PaymentIntegrationService {
         }
       } catch (fetchError) {
         console.error('Payment endpoint fetch error:', fetchError);
+
+        // Use mock service as final fallback
+        if (mockPaymentService.isAvailable()) {
+          console.log('🔄 Network error, falling back to mock payment service...');
+          return await mockPaymentService.createPayment(amount, credits, paymentMethod, isGuest, guestEmail);
+        }
+
         return {
           success: false,
           error: 'Network error: Unable to connect to payment service'
