@@ -10,14 +10,17 @@
  */
 export function isFullStoryPresent(): boolean {
   if (typeof window === 'undefined') return false;
-  
+
   return !!(
     (window as any).FS ||
+    (window as any)._fs ||
     document.querySelector('script[src*="fullstory"]') ||
     document.querySelector('script[src*="fs.js"]') ||
+    document.querySelector('script[src*="edge.fullstory.com"]') ||
     // Check if fetch has been modified by looking at its string representation
     window.fetch.toString().includes('fullstory') ||
-    window.fetch.toString().includes('FS')
+    window.fetch.toString().includes('FS') ||
+    window.fetch.toString().length < 50 // Native fetch is usually longer
   );
 }
 
@@ -26,14 +29,18 @@ export function isFullStoryPresent(): boolean {
  */
 export function isFullStoryError(error: any): boolean {
   if (!error) return false;
-  
+
   const message = error.message || '';
   const stack = error.stack || '';
-  
+
   return message.includes('Failed to fetch') ||
+         message.includes('fetch is not defined') ||
+         message.includes('NetworkError') ||
          stack.includes('fullstory') ||
          stack.includes('fs.js') ||
-         stack.includes('edge.fullstory.com');
+         stack.includes('edge.fullstory.com') ||
+         // Common FullStory interference patterns
+         (message.includes('TypeError') && stack.includes('messageHandler'));
 }
 
 /**
