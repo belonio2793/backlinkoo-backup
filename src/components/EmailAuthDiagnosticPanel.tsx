@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, AlertTriangle, XCircle, Play, Mail, Settings, Database } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, XCircle, Play, Mail, Settings, Database, TestTube } from 'lucide-react';
 import { emailAuthDiagnostic } from '../utils/emailAuthDiagnostic';
+import { testUserRegistrationEmail } from '../utils/testUserRegistrationEmail';
 
 interface DiagnosticResult {
   test: string;
