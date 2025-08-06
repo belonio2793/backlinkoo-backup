@@ -104,9 +104,22 @@ export async function safeNetlifyFetch<T = any>(
     };
     
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+    // Check if this is FullStory interference
+    if (errorMessage.includes('Failed to fetch') ||
+        (error as any)?.stack?.includes('fullstory') ||
+        (error as any)?.stack?.includes('fs.js')) {
+      return {
+        success: false,
+        error: 'Third-party script interference detected (FullStory). Using fallback method.',
+        isLocal: true
+      };
+    }
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: errorMessage,
       isLocal: true
     };
   }
