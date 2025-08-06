@@ -1251,8 +1251,7 @@ const Dashboard = () => {
                 <span className="sm:hidden">Home</span>
               </TabsTrigger>
               <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
-                <span className="hidden sm:inline">Campaigns</span>
-                <span className="sm:hidden">Camps</span>
+                Campaigns
               </TabsTrigger>
               <TabsTrigger value="keyword-research" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Keyword Research</span>
