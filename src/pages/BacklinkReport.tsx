@@ -46,10 +46,38 @@ export default function BacklinkReport() {
   const generateReport = async () => {
     const backlinks = parseUrls(urlList);
 
+    // Validation checks
+    if (!keyword.trim()) {
+      toast({
+        title: 'Missing Keyword',
+        description: 'Please enter the target keyword you want to verify.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (!anchorText.trim()) {
+      toast({
+        title: 'Missing Anchor Text',
+        description: 'Please enter the expected anchor text for your backlinks.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (!destinationUrl.trim()) {
+      toast({
+        title: 'Missing Destination URL',
+        description: 'Please enter the URL where the anchor text should link to.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     if (backlinks.length === 0) {
       toast({
         title: 'No Valid URLs',
-        description: 'Please add URLs in the correct format.',
+        description: 'Please add URLs to verify in the correct format.',
         variant: 'destructive'
       });
       return;
