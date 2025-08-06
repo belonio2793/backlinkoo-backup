@@ -144,8 +144,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
               <p className="text-xs text-gray-500 flex items-center gap-1">
-                <div className="h-4 w-4 rounded-full overflow-hidden border border-emerald-300">
-                  <img src="https://images.pexels.com/photos/19056728/pexels-photo-19056728.jpeg" alt="Target Achievement" className="h-4 w-4 object-cover" />
+                <div className="h-4 w-4 rounded-full bg-emerald-50 border border-emerald-300 flex items-center justify-center">
+                  <Target className="h-2.5 w-2.5 text-emerald-600" />
                 </div>
                 The main topic your blog post will focus on
               </p>
