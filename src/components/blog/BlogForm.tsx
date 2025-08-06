@@ -183,8 +183,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
           {/* Bottom row: Target URL (full width for better UX) */}
           <div className="space-y-3">
             <Label htmlFor="targetUrl" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <div className="p-2 bg-white rounded-lg shadow-sm border border-blue-200 overflow-hidden">
-                <img src="https://images.pexels.com/photos/7793740/pexels-photo-7793740.jpeg" alt="SEO Technology" className="h-6 w-6 object-cover rounded-sm" />
+              <div className="p-2 bg-white rounded-lg shadow-sm border border-blue-200">
+                <Globe className="h-6 w-6 text-blue-600" />
               </div>
               Target URL
             </Label>
