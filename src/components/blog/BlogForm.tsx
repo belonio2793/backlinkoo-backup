@@ -180,7 +180,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
           <div className="space-y-3">
             <Label htmlFor="targetUrl" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
               <div className="p-1.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg">
-                <Globe className="h-4 w-4 text-white" />
+                <img src="https://cdn.builder.io/api/v1/image/assets%2Fcd67eae1c1ec4d2395180e5ed246fb8d%2F90b1576cf70b440994239ba35a8c7102?format=webp&width=800" alt="Users icon" className="h-4 w-4" />
               </div>
               Target URL
             </Label>
