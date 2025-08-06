@@ -29,6 +29,7 @@ import { OpenAIGenerator } from "@/components/OpenAIGenerator";
 import { BlogForm } from "@/components/blog/BlogForm";
 import { RotatingTagline } from "@/components/RotatingTagline";
 import { RotatingStats } from "@/components/RotatingStats";
+import { RotatingTrustIndicators } from "@/components/RotatingTrustIndicators";
 
 
 import { supabase } from "@/integrations/supabase/client";
@@ -436,21 +437,8 @@ const Index = () => {
                   </div>
                 </div>
 
-                {/* Trust indicators */}
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <div className="text-2xl font-semibold text-primary mb-1">Growing</div>
-                    <div className="text-sm text-muted-foreground">User Base</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-semibold text-primary mb-1">High</div>
-                    <div className="text-sm text-muted-foreground">Success Rate</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-semibold text-primary mb-1">Rated</div>
-                    <div className="text-sm text-muted-foreground">User Reviews</div>
-                  </div>
-                </div>
+                {/* Rotating Trust indicators */}
+                <RotatingTrustIndicators />
               </div>
 
               {/* Right side - Inline auth form */}
