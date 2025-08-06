@@ -199,15 +199,23 @@ export function SavedBacklinkReports() {
         {reports.map((report) => {
           const verificationRate = getVerificationRate(report);
           const statusColor = getStatusColor(verificationRate);
-          
+          const isLocalStorage = report.id.startsWith('local_');
+
           return (
             <Card key={report.id} className="hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <CardTitle className="text-lg leading-tight mb-1 truncate">
-                      {report.title}
-                    </CardTitle>
+                    <div className="flex items-center gap-2 mb-1">
+                      <CardTitle className="text-lg leading-tight truncate">
+                        {report.title}
+                      </CardTitle>
+                      {isLocalStorage && (
+                        <Badge variant="outline" className="text-xs bg-orange-50 text-orange-600 border-orange-200">
+                          Local
+                        </Badge>
+                      )}
+                    </div>
                     <CardDescription className="text-sm">
                       <div className="flex items-center gap-1 mb-1">
                         <Calendar className="h-3 w-3" />
