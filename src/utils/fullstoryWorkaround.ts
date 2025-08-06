@@ -166,8 +166,21 @@ export function getFullStoryErrorMessage(originalError: string): string {
  * Store original fetch before any third-party modifications
  */
 export function preserveOriginalFetch(): void {
-  if (typeof window !== 'undefined' && !(globalThis as any).__originalFetch__) {
-    (globalThis as any).__originalFetch__ = window.fetch.bind(window);
+  if (typeof window !== 'undefined') {
+    // Store original fetch if not already stored
+    if (!(globalThis as any).__originalFetch__) {
+      (globalThis as any).__originalFetch__ = window.fetch.bind(window);
+    }
+
+    // Also store it in window for fallback access
+    if (!(window as any).__originalFetch__) {
+      (window as any).__originalFetch__ = window.fetch.bind(window);
+    }
+
+    // Store the original XMLHttpRequest as well in case we need it
+    if (!(globalThis as any).__originalXHR__) {
+      (globalThis as any).__originalXHR__ = window.XMLHttpRequest;
+    }
   }
 }
 
