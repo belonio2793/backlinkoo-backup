@@ -174,6 +174,38 @@ export const EmailAuthDiagnosticPanel = () => {
         </CardContent>
       </Card>
 
+      {/* Registration Test Results */}
+      {registrationResults.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TestTube className="h-5 w-5" />
+              Registration Flow Test Results
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {registrationResults.map((result, index) => (
+                <div key={index} className="flex items-center gap-3 p-3 border rounded-md">
+                  {result.success ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-red-500" />
+                  )}
+                  <div className="flex-1">
+                    <p className="font-medium">{result.step}</p>
+                    <p className="text-sm text-muted-foreground">{result.message}</p>
+                    {result.error && (
+                      <p className="text-sm text-red-600 mt-1">Error: {result.error}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {hasResults && (
         <div className="space-y-4">
           {/* Summary Card */}
