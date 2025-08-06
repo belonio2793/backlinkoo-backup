@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 
 export function EmailSystemManager() {
-  const [testEmail, setTestEmail] = useState<ResendEmailData>({
+  const [testEmail, setTestEmail] = useState<MockEmailData>({
     to: 'support@backlinkoo.com',
     subject: 'Multi-Provider Email System Test - ' + new Date().toLocaleString(),
     message: `Hello Support Team,
@@ -37,7 +37,7 @@ This is a comprehensive test of our multi-provider email delivery system.
 🔧 Test Details:
 - Timestamp: ${new Date().toISOString()}
 - Source: Admin Email System Manager
-- Providers: Resend �� Supabase → Netlify → Admin Config
+- Providers: Resend → Supabase → Netlify → Admin Config
 
 📊 This test validates:
 ✅ Primary delivery via Resend
@@ -52,7 +52,7 @@ Email System Manager`
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [testResults, setTestResults] = useState<ResendEmailResponse | null>(null);
+  const [testResults, setTestResults] = useState<MockEmailResponse | null>(null);
   const [systemHealth, setSystemHealth] = useState<any>({
     status: 'unknown',
     recentFailures: 0,
