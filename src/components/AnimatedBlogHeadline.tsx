@@ -56,7 +56,7 @@ export function AnimatedBlogHeadline() {
     };
   }, []);
 
-  const words = ["Create", "a", "Free", "Permanent", "Natural", "Backlink"];
+  const words = ["Create", "a", "Your", "First", "Backlink", "For", "Free"];
   const currentGradient = gradientThemes[gradientTheme];
 
   return (
