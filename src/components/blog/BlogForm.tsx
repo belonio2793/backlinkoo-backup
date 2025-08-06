@@ -170,8 +170,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
               <p className="text-xs text-gray-500 flex items-center gap-1">
-                <div className="h-4 w-4 rounded-full overflow-hidden border border-amber-300">
-                  <img src="https://images.pexels.com/photos/2381712/pexels-photo-2381712.jpeg" alt="Link Building" className="h-4 w-4 object-cover" />
+                <div className="h-4 w-4 rounded-full bg-amber-50 border border-amber-300 flex items-center justify-center">
+                  <Link className="h-2.5 w-2.5 text-amber-600" />
                 </div>
                 The clickable text that will link to your URL
               </p>
