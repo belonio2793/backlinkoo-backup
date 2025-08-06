@@ -176,6 +176,23 @@ export function SavedBacklinkReports() {
         <p className="text-gray-600">
           Manage and view your saved backlink verification reports. Total: {reports.length} report{reports.length !== 1 ? 's' : ''}
         </p>
+
+        {/* Local Storage Status Banner */}
+        {isUsingLocalStorage && (
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-start">
+              <svg className="w-5 h-5 text-blue-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h4 className="font-semibold text-blue-900 mb-1">Reports Stored Locally</h4>
+                <p className="text-blue-800 text-sm">
+                  Some of your reports are currently stored locally on this device. They will be automatically synced to your account once the database feature is fully activated.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
