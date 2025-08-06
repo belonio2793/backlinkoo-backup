@@ -144,7 +144,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
               <p className="text-xs text-gray-500 flex items-center gap-1">
-                <Search className="h-3 w-3 text-emerald-500" />
+                <img src="https://cdn.builder.io/api/v1/image/assets%2Fcd67eae1c1ec4d2395180e5ed246fb8d%2Fcec186ec8b5946b7af5822a24824aa0b?format=webp&width=800" alt="Search icon" className="h-3 w-3" />
                 The main topic your blog post will focus on
               </p>
             </div>
@@ -168,7 +168,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
               <p className="text-xs text-gray-500 flex items-center gap-1">
-                <MousePointer className="h-3 w-3 text-amber-500" />
+                <img src="https://cdn.builder.io/api/v1/image/assets%2Fcd67eae1c1ec4d2395180e5ed246fb8d%2Fd7c555f716e54ad8b8357ef20f08bab5?format=webp&width=800" alt="Trending icon" className="h-3 w-3" />
                 The clickable text that will link to your URL
               </p>
             </div>
@@ -197,7 +197,7 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             </div>
             <p className="text-xs text-gray-500 flex items-center gap-1">
-              <Globe className="h-3 w-3 text-blue-500" />
+              <img src="https://cdn.builder.io/api/v1/image/assets%2Fcd67eae1c1ec4d2395180e5ed246fb8d%2F90b1576cf70b440994239ba35a8c7102?format=webp&width=800" alt="Users icon" className="h-3 w-3" />
               The destination URL where the anchor text will link to.
             </p>
           </div>
