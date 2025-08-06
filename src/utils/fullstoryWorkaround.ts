@@ -56,7 +56,7 @@ export function createBypassFetch(): typeof fetch {
     return originalFetch;
   }
   
-  console.log('�� Creating FullStory bypass fetch using XMLHttpRequest');
+  console.log('🔧 Creating FullStory bypass fetch using XMLHttpRequest');
   
   // Create XMLHttpRequest-based fetch replacement
   return async function bypassFetch(url: string | URL, init?: RequestInit): Promise<Response> {
@@ -67,13 +67,20 @@ export function createBypassFetch(): typeof fetch {
       
       try {
         xhr.open(method, urlString);
-        
-        // Set headers
+
+        // Set headers safely
         if (init?.headers) {
-          const headers = new Headers(init.headers);
-          headers.forEach((value, key) => {
-            xhr.setRequestHeader(key, value);
-          });
+          try {
+            const headers = new Headers(init.headers);
+            headers.forEach((value, key) => {
+              // Skip headers that XMLHttpRequest handles automatically
+              if (!['host', 'user-agent', 'content-length'].includes(key.toLowerCase())) {
+                xhr.setRequestHeader(key, value);
+              }
+            });
+          } catch (headerError) {
+            console.warn('Failed to set request headers:', headerError);
+          }
         }
         
         // Handle response
