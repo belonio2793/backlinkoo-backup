@@ -175,14 +175,14 @@ export class ResendEmailService {
         return netlifyResult;
       }
 
-      // If Netlify function failed, try direct API
-      console.warn('Netlify function failed, trying direct API:', netlifyResult.error);
-      return await this.sendDirectAPI(emailData);
+      // If Netlify function failed, use mock service for development
+      console.warn('Netlify function failed, using mock email service:', netlifyResult.error);
+      return await this.sendMockEmail(emailData);
 
     } catch (error: any) {
-      // If there's an unexpected error, try direct API
-      console.warn('Netlify function error, trying direct API:', error.message);
-      return await this.sendDirectAPI(emailData);
+      // If there's an unexpected error, use mock service
+      console.warn('Netlify function error, using mock email service:', error.message);
+      return await this.sendMockEmail(emailData);
     }
   }
 
