@@ -644,7 +644,7 @@ const Index = () => {
               </Button>
             </div>
             <div className="bg-gradient-to-br from-purple-500/5 to-primary/5 p-12 rounded-2xl overflow-hidden">
-              <img src="https://images.pexels.com/photos/25626428/pexels-photo-25626428.jpeg" alt="Intelligence Engine" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
+              <img src="https://images.pexels.com/photos/19056728/pexels-photo-19056728.jpeg" alt="Achievement Success" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
             </div>
           </div>
 
