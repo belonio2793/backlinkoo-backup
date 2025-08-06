@@ -247,7 +247,7 @@ const Index = () => {
     <div className="min-h-screen bg-background font-light">
       {/* Header */}
       <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
+        <div className="w-full px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
               <Infinity className="h-7 w-7 text-primary" />
@@ -327,14 +327,14 @@ const Index = () => {
 
       {/* Free Blog Generator - Top Feature */}
       <section id="blog-generator" className="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
-        <div className="container mx-auto">
+        <div className="w-full">
           {/* Optional: Advanced Generator Toggle (Hidden by default) */}
 
 
 
 
           {/* Generator */}
-          <div className="max-w-4xl mx-auto">
+          <div className="w-full px-6">
             <BlogForm
               onContentGenerated={(blogPost) => {
                 setUser(user); // Refresh state
@@ -342,9 +342,34 @@ const Index = () => {
                   title: "Success! 🎉",
                   description: `Your blog post "${blogPost.title}" is now live at ${blogPost.blogUrl}`,
                 });
-                // Navigate to blog section after a short delay to show the new post
+                // Navigate to the specific blog post after a short delay
                 setTimeout(() => {
-                  navigate('/blog');
+                  if (blogPost.blogUrl) {
+                    try {
+                      // Check if it's already a relative path
+                      if (blogPost.blogUrl.startsWith('/')) {
+                        navigate(blogPost.blogUrl);
+                      } else {
+                        // Try to extract the path from absolute URL
+                        const blogPath = new URL(blogPost.blogUrl).pathname;
+                        navigate(blogPath);
+                      }
+                    } catch (error) {
+                      console.warn('Invalid blogUrl format:', blogPost.blogUrl, error);
+                      // Fallback to slug if URL parsing fails
+                      if (blogPost.metadata?.slug) {
+                        navigate(`/blog/${blogPost.metadata.slug}`);
+                      } else {
+                        navigate('/blog');
+                      }
+                    }
+                  } else if (blogPost.metadata?.slug) {
+                    // Fallback to slug-based navigation
+                    navigate(`/blog/${blogPost.metadata.slug}`);
+                  } else {
+                    // Final fallback to general blog page
+                    navigate('/blog');
+                  }
                 }, 2000);
               }}
             />
@@ -357,7 +382,7 @@ const Index = () => {
       {/* Trial Conversion Section */}
       {showTrialUpgrade && (
         <section className="py-12 px-6 bg-gradient-to-br from-amber-50 to-orange-50">
-          <div className="container mx-auto max-w-4xl">
+          <div className="w-full px-6">
             <TrialConversionBanner
               onUpgrade={() => {
                 setShowInlineAuth(true);
@@ -372,7 +397,7 @@ const Index = () => {
       {/* Inline Authentication Section - Show for guests or trial upgrades */}
       {(!user && authChecked) || showInlineAuth ? (
         <section className="py-16 px-6 bg-gradient-to-br from-blue-50 to-indigo-50" id="inline-auth">
-          <div className="container mx-auto max-w-6xl">
+          <div className="w-full px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               {/* Left side - Value proposition */}
               <div>
@@ -455,7 +480,7 @@ const Index = () => {
         className="relative py-32 px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
-        <div className="container mx-auto text-center relative z-10">
+        <div className="w-full text-center relative z-10 px-6">
           <Badge variant="outline" className="mb-8 bg-gray-100 border-gray-300 text-gray-900 font-mono text-xs px-4 py-2">
             THE NUMBER ONE PLACE TO BUY BACKLINKS
           </Badge>
@@ -466,12 +491,12 @@ const Index = () => {
             className="text-5xl md:text-7xl font-light mb-8 text-gray-900 tracking-tight"
           />
           
-          <p className="text-xl md:text-2xl text-gray-700 mb-6 max-w-4xl mx-auto leading-relaxed font-light">
+          <p className="text-xl md:text-2xl text-gray-700 mb-6 max-w-6xl mx-auto leading-relaxed font-light">
             The backlink platform that SEO professionals rely on for consistent, measurable results.
           </p>
           
           <p className="text-lg text-gray-600 mb-12 font-medium max-w-3xl mx-auto">
-            High-authority links • Competitive intelligence
+            High-authority links ��� Competitive intelligence
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12">
@@ -496,7 +521,7 @@ const Index = () => {
 
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-8 max-w-2xl mx-auto">
+          <div className="grid grid-cols-2 gap-8 max-w-4xl mx-auto">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2">{stat.value}</div>
@@ -510,10 +535,10 @@ const Index = () => {
 
       {/* Features Grid */}
       <section className="py-24 px-6 bg-muted/30">
-        <div className="container mx-auto">
+        <div className="w-full">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight">Why Professionals Choose Us</h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-light">
+            <p className="text-xl text-muted-foreground max-w-6xl mx-auto leading-relaxed font-light">
               We provide the infrastructure and intelligence that SEO teams need to deliver consistent results at scale.
             </p>
           </div>
@@ -534,7 +559,7 @@ const Index = () => {
 
       {/* Service Sections */}
       <section className="py-20 px-6">
-        <div className="container mx-auto space-y-32">
+        <div className="w-full space-y-32">
           
           {/* Dashboard Overview */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -752,15 +777,15 @@ const Index = () => {
         className="relative py-24 px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
-        <div className="container mx-auto relative z-10">
+        <div className="w-full relative z-10 px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">Starter Packages</h2>
-            <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed font-light">
+            <p className="text-xl text-gray-700 max-w-6xl mx-auto leading-relaxed font-light">
               Begin your journey with our proven backlink platform. All starter packages include full access to our professional tools.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto max-w-6xl">
             {pricingPlans.map((plan) => (
               <Card 
                 key={plan.id} 
@@ -877,7 +902,7 @@ const Index = () => {
 
       {/* Blog Showcase Section */}
       <section className="py-24 px-6 bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
-        <div className="container mx-auto">
+        <div className="w-full">
           <div className="text-center mb-16">
             <Badge variant="outline" className="mb-6 bg-blue-50 text-blue-600 border-blue-200 font-mono text-xs">
               EXPERT CONTENT
@@ -885,7 +910,7 @@ const Index = () => {
             <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">
               Explore Our AI Blog
             </h2>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed font-light">
+            <p className="text-xl text-gray-600 mb-8 max-w-6xl mx-auto leading-relaxed font-light">
               Discover high-quality, AI-generated content designed to boost SEO rankings with contextual backlinks.
               See the power of our content generation system in action.
             </p>
@@ -993,11 +1018,11 @@ const Index = () => {
         className="relative py-24 px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
-        <div className="container mx-auto text-center relative z-10">
+        <div className="w-full text-center relative z-10 px-6">
           <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">
             Ready to Dominate Search Results?
           </h2>
-          <p className="text-xl text-gray-700 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
+          <p className="text-xl text-gray-700 mb-12 max-w-6xl mx-auto leading-relaxed font-light">
             Join the professionals who trust Backlink ∞ for their most important SEO campaigns. 
             Start with our risk-free guarantee today.
           </p>

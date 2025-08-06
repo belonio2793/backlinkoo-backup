@@ -56,29 +56,18 @@ export function AnimatedBlogHeadline() {
     };
   }, []);
 
-  const words = ["Create", "a", "Free", "Permanent", "Natural", "Backlink"];
+  const words = ["Create", "a", "Your", "First", "Backlink", "For", "Free"];
   const currentGradient = gradientThemes[gradientTheme];
 
   return (
     <div className="text-center mb-8">
       <div className="relative inline-block">
         {/* Animated headline with word-by-word reveal */}
-        <h2 className="text-3xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight overflow-hidden">
+        <h2 className="text-3xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight text-black">
           {words.map((word, index) => (
             <span
               key={index}
-              className={`inline-block text-transparent bg-clip-text bg-gradient-to-r ${currentGradient} mr-3 ${
-                animateWords 
-                  ? `animate-word-slide opacity-100` 
-                  : 'opacity-0'
-              }`}
-              style={{
-                animationDelay: `${index * 150}ms`,
-                backgroundSize: '300% 300%',
-                animation: animateWords 
-                  ? `word-slide 0.5s ease-out forwards ${index * 150}ms, gradient-shift 3s ease-in-out infinite ${index * 150 + 800}ms`
-                  : 'none'
-              }}
+              className="inline-block text-black mr-3"
             >
               {word}
             </span>
@@ -108,7 +97,7 @@ export function AnimatedBlogHeadline() {
       >
         <p className="text-lg text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
           <span className="relative">
-            Generate a high-quality, powerful blog post with natural backlinks in seconds
+            Generate a high quality, powerful blog post with your targeted keyword and boost your SEO score and search engine rankings in seconds. Claim this for free, now.
             <span className="absolute -bottom-3 left-0 w-full h-0.5 bg-gradient-to-r from-blue-300 to-purple-300 opacity-30 transform scale-x-0 animate-[scaleX_1s_ease-out_1.8s_forwards] origin-left"></span>
           </span>
         </p>

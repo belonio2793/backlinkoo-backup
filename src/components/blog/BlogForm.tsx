@@ -2,10 +2,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { DirectOpenAIService } from '@/services/directOpenAI';
-import { APIStatusIndicator } from '@/components/shared/APIStatusIndicator';
 import { AnimatedBlogHeadline } from '@/components/AnimatedBlogHeadline';
 import { RealTimeBlogStatus } from '@/components/blog/RealTimeBlogStatus';
 import { Loader2, Link, Target, Hash, Sparkles, Zap, Star, Rocket } from 'lucide-react';
@@ -122,19 +120,9 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      {/* Beautiful gradient background card */}
-      <Card className="relative overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-          <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
-          <div className="absolute bottom-0 left-1/2 w-72 h-72 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-4000"></div>
-        </div>
-
-        <CardContent className="relative z-10 p-8 space-y-8">
-          {/* Animated headline */}
-          <AnimatedBlogHeadline />
+    <div className="w-full px-6 space-y-8">
+      {/* Animated headline */}
+      <AnimatedBlogHeadline />
           {/* Top row: Keyword and Anchor Text side by side */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Keyword Field */}
@@ -214,56 +202,56 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             </p>
           </div>
 
-          {/* API Status with enhanced styling */}
-          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl shadow-inner">
-            <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              API Status
-            </span>
-            <APIStatusIndicator />
-          </div>
-
           {/* Beautiful CTA Button */}
           <div className="pt-4">
             <Button
               onClick={generateContent}
               disabled={isGenerating || !keyword || !anchorText || !targetUrl}
               size="lg"
-              className="w-full h-16 text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 border-0 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-[1.02] transition-all duration-300 relative overflow-hidden group"
+              className="w-full h-16 text-xl font-bold bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 border-0 rounded-lg text-white"
             >
-              {/* Button shine effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              
               {isGenerating ? (
                 <div className="flex items-center gap-3">
                   <Loader2 className="h-6 w-6 animate-spin" />
                   <span>Generating Your Backlink...</span>
-                  <Sparkles className="h-5 w-5 animate-pulse" />
                 </div>
               ) : (
-                <div className="flex items-center gap-3">
-                  <Rocket className="h-6 w-6" />
-                  <span>Claim Now For Free</span>
-                  <Zap className="h-5 w-5" />
-                </div>
+                <span>Create a Permanent Backlink</span>
               )}
             </Button>
           </div>
 
-          {/* Bottom decorative elements */}
-          <div className="flex justify-center pt-2">
-            <div className="flex items-center gap-2 text-xs text-gray-400">
-              <div className="w-1 h-1 bg-blue-400 rounded-full"></div>
-              <span>Instant Generation</span>
-              <div className="w-1 h-1 bg-purple-400 rounded-full"></div>
-              <span>100% Free</span>
-              <div className="w-1 h-1 bg-pink-400 rounded-full"></div>
-              <span>No Credit Card</span>
-              <div className="w-1 h-1 bg-orange-400 rounded-full"></div>
+          {/* Agreement Text */}
+          <div className="text-center">
+            <p className="text-xs text-gray-600 mx-auto whitespace-nowrap">
+              I agree to create an account to prevent this post from being deleted and to help stop spam.
+            </p>
+          </div>
+
+          {/* Estimated Time and Account Prompt - Moved below button */}
+          <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-inner">
+            <div className="text-center">
+              <p className="text-sm font-semibold text-amber-800 mb-1">
+                ⏱️ Estimated time: 30-60 seconds
+              </p>
+              <p className="text-xs text-amber-700">
+                You will be redirected to your blog post. Create an account to claim it before it gets deleted.
+              </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+      {/* Bottom decorative elements */}
+      <div className="flex justify-center pt-2">
+        <div className="flex items-center gap-2 text-xs text-gray-400">
+          <div className="w-1 h-1 bg-blue-400 rounded-full"></div>
+          <span>Instant Generation</span>
+          <div className="w-1 h-1 bg-purple-400 rounded-full"></div>
+          <span>100% Free</span>
+          <div className="w-1 h-1 bg-pink-400 rounded-full"></div>
+          <span>No Credit Card</span>
+          <div className="w-1 h-1 bg-orange-400 rounded-full"></div>
+        </div>
+      </div>
 
       {/* Real-time Blog Generation Status Tracker */}
       <RealTimeBlogStatus
