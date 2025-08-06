@@ -384,6 +384,20 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
               </div>
               <div className="text-3xl font-bold text-primary mb-1">$29</div>
               <div className="text-sm text-muted-foreground mb-4">per month</div>
+
+              {/* Test Button */}
+              <Button
+                onClick={() => {
+                  console.log('TEST BUTTON: Direct modal open');
+                  setIsPaymentModalOpen(true);
+                }}
+                size="sm"
+                variant="outline"
+                className="w-full mb-2"
+              >
+                🧪 Test Modal Open
+              </Button>
+
               <Button onClick={() => {
                 console.log('SEO Tools Start Subscription clicked');
                 console.log('isPremium value:', isPremium);
