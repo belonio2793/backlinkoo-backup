@@ -657,7 +657,9 @@ const Index = () => {
           {/* Rankings */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="bg-gradient-to-br from-orange-500/5 to-primary/5 p-12 rounded-2xl order-2 lg:order-1 overflow-hidden">
-              <img src="https://images.pexels.com/photos/4515793/pexels-photo-4515793.jpeg" alt="Digital Marketing" className="h-32 w-32 object-cover rounded-xl mx-auto shadow-lg" />
+              <div className="h-32 w-32 mx-auto bg-white rounded-xl shadow-lg flex items-center justify-center">
+                <TrendingUp className="h-16 w-16 text-orange-600" />
+              </div>
             </div>
             <div className="order-1 lg:order-2">
               <Badge variant="outline" className="mb-6 bg-orange-50 text-orange-600 border-orange-200 font-mono text-xs">
