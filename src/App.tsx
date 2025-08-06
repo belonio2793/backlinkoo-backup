@@ -10,6 +10,7 @@ import { InstantAuthProvider } from "@/components/InstantAuth";
 import { EnhancedErrorBoundary } from "@/components/EnhancedErrorBoundary";
 import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
 import { PremiumPopupProvider } from "@/components/PremiumPopupProvider";
+import { affiliateService } from "@/services/affiliateService";
 
 // Lightweight initialization for better performance
 if (import.meta.env.DEV) {
