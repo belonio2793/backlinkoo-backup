@@ -164,11 +164,12 @@ export function OrganizedAdminDashboard() {
 
         {activeSection === "system" && (
           <Tabs defaultValue="assessment" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="assessment">Systems Assessment</TabsTrigger>
               <TabsTrigger value="environment">Environment & API Keys</TabsTrigger>
               <TabsTrigger value="deployment">Deployment</TabsTrigger>
               <TabsTrigger value="database">Database</TabsTrigger>
+              <TabsTrigger value="network">Network</TabsTrigger>
             </TabsList>
 
             <TabsContent value="assessment">
