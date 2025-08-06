@@ -894,7 +894,7 @@ const Index = () => {
 
       {/* Final CTA */}
       <section
-        className="relative py-24 px-6 bg-white"
+        className="relative py-24 px-0 md:px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
         <div className="w-full text-center relative z-10 px-6">
