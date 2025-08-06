@@ -121,14 +121,24 @@ export const EmailAuthDiagnosticPanel = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Button 
-              onClick={runDiagnostic} 
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={runDiagnostic}
               disabled={isRunning}
               className="flex items-center gap-2"
             >
               <Play className="h-4 w-4" />
               {isRunning ? 'Running Diagnostic...' : 'Run Email Auth Diagnostic'}
+            </Button>
+
+            <Button
+              onClick={runRegistrationTest}
+              disabled={isTestingRegistration}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <TestTube className="h-4 w-4" />
+              {isTestingRegistration ? 'Testing Registration...' : 'Test Registration Flow'}
             </Button>
             
             {hasResults && (
