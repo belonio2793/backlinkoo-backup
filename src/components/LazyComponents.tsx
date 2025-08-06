@@ -60,3 +60,6 @@ export const LazyEdgeFunctionDiagnostic = lazy(() => import('@/pages/EdgeFunctio
 
 // Route Sync Test component
 export const LazyRouteSyncTest = lazy(() => import('@/pages/RouteSyncTest'));
+
+// Email Authentication Audit component
+export const LazyEmailAuthenticationAudit = lazy(() => import('@/pages/EmailAuthenticationAudit'));
