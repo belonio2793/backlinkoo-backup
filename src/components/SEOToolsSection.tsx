@@ -311,9 +311,6 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
     }
   };
 
-  console.log('SEOToolsSection render - subscriptionStatus:', subscriptionStatus);
-  console.log('SEOToolsSection render - isPremium:', isPremium);
-
   // Show subscription CTA for free accounts or users without premium access
   if (!isPremium && !subscriptionStatus.isSubscribed) {
     return (
