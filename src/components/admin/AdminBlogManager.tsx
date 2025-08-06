@@ -791,7 +791,7 @@ export function AdminBlogManager() {
                 You are about to <strong>permanently delete</strong> the following blog post:
               </p>
               <div className="bg-gray-50 p-3 rounded border">
-                <p className="font-medium text-gray-900">{confirmDeletePost.title}</p>
+                <p className="font-medium text-gray-900">{ExcerptCleaner.cleanTitle(confirmDeletePost.title)}</p>
                 <p className="text-sm text-gray-600">ID: {confirmDeletePost.id}</p>
                 <p className="text-sm text-gray-600">URL: {confirmDeletePost.published_url}</p>
               </div>
