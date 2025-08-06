@@ -38,6 +38,8 @@ export function AdminBlogManager() {
   const [trialFilter, setTrialFilter] = useState<string>('');
   const [contentFilterStats, setContentFilterStats] = useState<any>(null);
   const [moderationStats, setModerationStats] = useState<any>(null);
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
+  const [confirmDeletePost, setConfirmDeletePost] = useState<PublishedBlogPost | null>(null);
 
   useEffect(() => {
     loadBlogPosts();
