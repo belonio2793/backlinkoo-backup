@@ -624,12 +624,12 @@ const Index = () => {
               </Badge>
               <h2 className="text-4xl font-light mb-6 tracking-tight">Intelligence Engine</h2>
               <p className="text-xl text-muted-foreground mb-8 leading-relaxed font-light">
-                Advanced keyword research powered by direct Google API integration for the most accurate data.
+                Advanced keyword research powered by multiple professional data sources for comprehensive insights.
               </p>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3">
                   <CheckCircle className="h-5 w-5 text-primary" />
-                  <span className="font-light">Direct Google API access</span>
+                  <span className="font-light">Multi-source data integration</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <CheckCircle className="h-5 w-5 text-primary" />
