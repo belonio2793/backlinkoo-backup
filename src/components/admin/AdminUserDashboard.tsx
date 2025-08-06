@@ -223,7 +223,7 @@ export function AdminUserDashboard() {
         .from('profiles')
         .select(`
           *,
-          premium_subscriptions (
+          subscribers (
             id,
             status,
             plan_type,
