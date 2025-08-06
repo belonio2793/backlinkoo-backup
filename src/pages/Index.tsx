@@ -578,7 +578,7 @@ const Index = () => {
           </div>
 
           {/* Campaign Management */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             <div className="bg-gradient-to-br from-green-500/5 to-primary/5 p-12 rounded-2xl order-2 lg:order-1 overflow-hidden">
               <div className="h-32 w-32 mx-auto bg-white rounded-xl shadow-lg flex items-center justify-center">
                 <Activity className="h-16 w-16 text-green-600" />
@@ -588,8 +588,8 @@ const Index = () => {
               <Badge variant="outline" className="mb-6 bg-green-50 text-green-600 border-green-200 font-mono text-xs">
                 CAMPAIGN MANAGEMENT
               </Badge>
-              <h2 className="text-4xl font-light mb-6 tracking-tight">Automated Excellence</h2>
-              <p className="text-xl text-muted-foreground mb-8 leading-relaxed font-light">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-6 tracking-tight">Automated Excellence</h2>
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed font-light">
                 Create and deploy sophisticated backlink campaigns in minutes with intelligent optimization.
               </p>
               <ul className="space-y-4 mb-8">
