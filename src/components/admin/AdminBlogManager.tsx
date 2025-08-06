@@ -705,7 +705,7 @@ export function AdminBlogManager() {
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex gap-1">
+                      <div className="flex gap-1 flex-wrap">
                         <Button
                           variant="outline"
                           size="sm"
@@ -743,6 +743,20 @@ export function AdminBlogManager() {
                           <a href={post.target_url} target="_blank" rel="noopener noreferrer">
                             Target
                           </a>
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 border-red-600"
+                          onClick={() => handleForceDeletePost(post)}
+                          disabled={deletingPostId === post.id}
+                        >
+                          {deletingPostId === post.id ? (
+                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                          ) : (
+                            <Zap className="h-3 w-3 mr-1" />
+                          )}
+                          Force Delete
                         </Button>
                       </div>
                     </div>
