@@ -94,14 +94,32 @@ CREATE TRIGGER update_saved_backlink_reports_updated_at
  */
 export async function checkSavedReportsTableAccess(): Promise<boolean> {
   try {
-    const { error } = await supabase
+    console.log('🔍 Checking saved_backlink_reports table access...');
+
+    const { data, error } = await supabase
       .from('saved_backlink_reports')
       .select('id')
       .limit(1);
-    
-    return !error;
+
+    if (!error) {
+      console.log('✅ Table access confirmed - table exists and is accessible');
+      return true;
+    }
+
+    console.log('❌ Table access failed:', error.code, error.message);
+
+    // Check specific error codes
+    if (error.code === '42P01') {
+      console.log('💡 Table does not exist - needs to be created');
+    } else if (error.code === '42501') {
+      console.log('🔒 Permission denied - RLS policies may need adjustment');
+    } else {
+      console.log('🔧 Other database issue:', error.code);
+    }
+
+    return false;
   } catch (error) {
-    console.error('❌ Table access check failed:', error);
+    console.error('❌ Table access check failed with exception:', error);
     return false;
   }
 }
