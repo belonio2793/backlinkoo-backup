@@ -591,7 +591,7 @@ CREATE POLICY "Public can read trial posts" ON blog_posts
                   {posts.map((post) => (
                     <TableRow key={post.id}>
                       <TableCell className="max-w-xs">
-                        <div className="truncate font-medium">{post.title}</div>
+                        <div className="truncate font-medium">{cleanTitle(post.title)}</div>
                         <div className="text-xs text-gray-500">/{post.slug}</div>
                       </TableCell>
                       <TableCell>
