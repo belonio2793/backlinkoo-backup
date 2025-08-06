@@ -1,0 +1,94 @@
+import { useState, useEffect } from "react";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+const notifications = [
+  "Create a free account and take advantage of our pre-launch special pricing.",
+  "We have plans on releasing version 2.0 soon.",
+  "Credits for our ∞ backlinks include exclusive links from our private networks.",
+  "Secure exclusive lower pricing before our next upcoming version release.",
+  "Fully mobile optimized and responsive. Manage campaigns while travelling or on the go.",
+  "Get real time updates on keyword rankings with our tracking technology.",
+  "Create campaigns and receive backlink reports with full transparency and verification.",
+  "Get the leading industry search engine optimization services.",
+  "Get started with our SEO Academy as a complimentary e-learning experience for Premium Plan subscribers.",
+  "Learn how search engine optimization is changing and take advantage of the opportunities this industry has to offer right now.",
+  "Claim up to 3 free blog posts with contextual links and experience SEO for your website.",
+  "Generate unlimited blog posts and claim unlimited permanent links as a Premium Plan subscriber.",
+  "Get proprietary merchant tools, access to backlink network technology and more."
+];
+
+interface RotatingNotificationBannerProps {
+  autoRotateInterval?: number;
+  showCloseButton?: boolean;
+  className?: string;
+}
+
+export const RotatingNotificationBanner = ({ 
+  autoRotateInterval = 4000,
+  showCloseButton = true,
+  className = ""
+}: RotatingNotificationBannerProps) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      
+      setTimeout(() => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % notifications.length);
+        setIsAnimating(false);
+      }, 200);
+    }, autoRotateInterval);
+
+    return () => clearInterval(interval);
+  }, [autoRotateInterval, isVisible]);
+
+  if (!isVisible) return null;
+
+  return (
+    <div className={`relative bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_100%] animate-gradient-shift text-white py-3 px-4 ${className}`}>
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="flex-1 text-center">
+          <p 
+            className={`text-sm md:text-base font-medium transition-all duration-200 ${
+              isAnimating ? 'opacity-0 transform translate-y-2' : 'opacity-100 transform translate-y-0'
+            }`}
+          >
+            {notifications[currentIndex]}
+          </p>
+        </div>
+        
+        {showCloseButton && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsVisible(false)}
+            className="ml-4 text-white hover:text-gray-200 hover:bg-white/10 flex-shrink-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+      
+      {/* Progress indicator dots */}
+      <div className="flex justify-center space-x-2 mt-2">
+        {notifications.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            className={`w-2 h-2 rounded-full transition-all duration-200 ${
+              index === currentIndex 
+                ? 'bg-white' 
+                : 'bg-white/40 hover:bg-white/60'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
