@@ -56,16 +56,28 @@ const EmailConfigurationTester: React.FC = () => {
   const sendTestEmail = async () => {
     setTesting(true);
     try {
+      console.log('🔧 Starting email test...');
       const result = await emailTest.sendTestConfirmationEmail();
+      console.log('📧 Email test result:', result);
       setResults(prev => ({ ...prev, emailDelivery: result }));
+
+      if (result.success) {
+        // Also show success message
+        alert('✅ Test email sent successfully! Check your inbox.');
+      }
     } catch (error: any) {
-      setResults(prev => ({ 
-        ...prev, 
-        emailDelivery: { 
-          success: false, 
-          message: 'Failed to send test email', 
-          error: error.message 
-        } 
+      console.error('❌ Email test error:', error);
+      setResults(prev => ({
+        ...prev,
+        emailDelivery: {
+          success: false,
+          message: 'Failed to send test email',
+          error: error.message,
+          details: {
+            errorType: error.constructor.name,
+            stack: error.stack?.split('\n').slice(0, 3).join('\n')
+          }
+        }
       }));
     } finally {
       setTesting(false);
