@@ -276,6 +276,8 @@ https://domain.com/content`}
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }
