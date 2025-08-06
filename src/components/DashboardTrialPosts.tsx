@@ -280,17 +280,24 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
     return hoursLeft < 2;
   };
 
+  // Statistics calculations
+  const allClaimedPosts = posts.filter(post => post.claimed && post.user_id !== null);
+  const allUnclaimedPosts = posts.filter(post => !post.claimed || post.user_id === null);
+  const trialPosts = posts.filter(p => p.is_trial_post);
+
   // Get all unclaimed posts for Available tab
-  const unclaimedPosts = posts.filter(post => !post.claimed || post.user_id === null);
+  const unclaimedPosts = allUnclaimedPosts;
 
   // Get user's claimed posts (limited to 3) for Claimed tab
-  const claimedPosts = posts
+  const userClaimedPosts = posts
     .filter(post => post.claimed && post.user_id === user?.id)
     .slice(0, 3); // Maximum of 3 claimed posts
 
+  const claimedPosts = userClaimedPosts;
+
   // Apply filtering based on active tab and search query
   const getFilteredPosts = () => {
-    let postsToFilter = activeTab === 'claimed' ? claimedPosts : unclaimedPosts;
+    let postsToFilter = activeTab === 'claimed' ? userClaimedPosts : unclaimedPosts;
 
     // Apply search filter
     if (searchQuery) {
@@ -524,19 +531,19 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-emerald-600">{claimedPosts.length}</div>
+            <div className="text-2xl font-bold text-emerald-600">{allClaimedPosts.length}</div>
             <div className="text-sm text-gray-600">Claimed</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{unclaimedPosts.length}</div>
+            <div className="text-2xl font-bold text-blue-600">{allUnclaimedPosts.length}</div>
             <div className="text-sm text-gray-600">Available</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600">{posts.filter(p => p.is_trial_post).length}</div>
+            <div className="text-2xl font-bold text-purple-600">{trialPosts.length}</div>
             <div className="text-sm text-gray-600">Trial Posts</div>
           </CardContent>
         </Card>
@@ -587,7 +594,7 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
             </TabsTrigger>
             <TabsTrigger value="claimed" className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4" />
-              Claimed ({claimedPosts.length}{canClaimUnlimited ? '' : `/${maxClaimedPosts}`})
+              Claimed ({userClaimedPosts.length}{canClaimUnlimited ? '' : `/${maxClaimedPosts}`})
               {canClaimUnlimited && <Infinity className="h-3 w-3 ml-1 text-yellow-600" />}
             </TabsTrigger>
           </TabsList>
