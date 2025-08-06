@@ -41,6 +41,7 @@ import { SupabaseEmailGuide } from "@/components/SupabaseEmailGuide";
 import EmailConfigurationTester from "@/components/EmailConfigurationTester";
 import FullStoryTestComponent from "@/components/FullStoryTestComponent";
 import ResendDirectTest from "@/components/ResendDirectTest";
+import EmailServiceDebugger from "@/components/EmailServiceDebugger";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { DatabaseTestComponent } from "../DatabaseTestComponent";
@@ -231,6 +232,7 @@ export function OrganizedAdminDashboard() {
 
             <TabsContent value="email-test">
               <div className="space-y-6">
+                <EmailServiceDebugger />
                 <ResendDirectTest />
                 <EmailConfigurationTester />
                 <AuthEmailTest />
