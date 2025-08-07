@@ -351,6 +351,29 @@ const AffiliateHub: React.FC = () => {
     );
   }
 
+  // Show system setup if table not found (for authenticated users)
+  if (user && tableNotFound) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="max-w-4xl mx-auto px-6 py-8">
+          <div className="text-center mb-8">
+            <Infinity className="w-12 h-12 text-primary mx-auto mb-4" />
+            <h1 className="text-3xl font-bold mb-2">Affiliate System Setup</h1>
+            <p className="text-gray-600">Setting up the affiliate program for Backlinkoo</p>
+          </div>
+
+          <AffiliateSystemSetup
+            onSystemReady={() => {
+              setSystemReady(true);
+              setTableNotFound(false);
+              loadAffiliateData(); // Reload data after system is ready
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   // Show sign in prompt for non-authenticated users
   if (!user) {
     return (
