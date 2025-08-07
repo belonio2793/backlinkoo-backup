@@ -178,13 +178,31 @@ const AffiliateHub: React.FC = () => {
   };
 
   const joinAffiliateProgram = async () => {
-    if (!user) return;
-    
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to join the affiliate program",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsJoining(true);
     try {
+      console.log('👤 User attempting to join affiliate program:', user.id);
+
       const affiliateCode = generateAffiliateCode();
       const customId = generateCustomId();
       const referralUrl = `${window.location.origin}?ref=${affiliateCode}`;
+
+      console.log('📝 Attempting to create affiliate profile with data:', {
+        user_id: user.id,
+        affiliate_code: affiliateCode,
+        custom_id: customId,
+        status: 'active',
+        commission_rate: 0.20,
+        referral_url: referralUrl
+      });
 
       // Create affiliate profile
       const { data, error } = await supabase
@@ -203,22 +221,55 @@ const AffiliateHub: React.FC = () => {
         .select()
         .single();
 
+      console.log('📊 Insert result:', { data, error });
+
       if (error) {
-        throw error;
+        // Enhanced error logging and handling
+        console.error('❌ Supabase error joining affiliate program:');
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
+        console.error('Error hint:', error.hint);
+        console.error('Full error object:', JSON.stringify(error, null, 2));
+
+        // Extract meaningful error message
+        let errorMessage = 'Unknown database error';
+
+        if (error.code === '42P01') {
+          errorMessage = 'Affiliate system is not set up yet. Please contact an administrator to enable the affiliate program.';
+          console.log('💡 Table does not exist - admin needs to run migration');
+        } else if (error.code === '23505') {
+          errorMessage = 'You already have an affiliate account. Please refresh the page.';
+        } else if (error.code === '23503') {
+          errorMessage = 'Authentication error. Please sign out and sign back in.';
+        } else if (error.code === '42501') {
+          errorMessage = 'Permission denied. Please contact support.';
+        } else if (error.message && error.message.trim()) {
+          errorMessage = error.message;
+        } else if (error.details && error.details.trim()) {
+          errorMessage = error.details;
+        } else if (error.hint && error.hint.trim()) {
+          errorMessage = error.hint;
+        } else if (error.code) {
+          errorMessage = `Database error code: ${error.code}`;
+        }
+
+        throw new Error(errorMessage);
       }
 
+      console.log('✅ Affiliate profile created successfully:', data);
       setAffiliateProfile(data);
       await loadMetrics(affiliateCode);
-      
+
       toast({
         title: "🎉 Welcome to the Affiliate Program!",
         description: "Your account is active and ready to earn commissions!"
       });
     } catch (error: any) {
-      console.error('Error joining affiliate program:', error);
+      console.error('❌ Error joining affiliate program:', error);
       toast({
         title: "Join failed",
-        description: error.message || "Please try again",
+        description: error.message || "Unknown error occurred. Please try again or contact support.",
         variant: "destructive"
       });
     } finally {
