@@ -499,6 +499,13 @@ export function AuthFormTabs({
             {showTrialUpgrade ? "Upgrade Trial" : "Create Account"}
           </Button>
         </form>
+
+        {/* Testimonials for signup tab */}
+        {!isCompact && (
+          <div className="mt-8 pt-6 border-t border-gray-100">
+            <CompactTestimonials />
+          </div>
+        )}
       </TabsContent>
     </Tabs>
   );
