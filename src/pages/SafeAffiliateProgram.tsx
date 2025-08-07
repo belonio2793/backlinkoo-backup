@@ -365,7 +365,7 @@ ${referralUrl}`,
         },
         {
           type: "Results",
-          content: `📈 Increased my domain authority by 15 points using Backlink ∞'s link building platform.
+          content: `📈 Increased my domain authority by 15 points using Backlink ���'s link building platform.
 
 The ROI is amazing!
 
@@ -985,7 +985,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Sunday Reflection",
-          content: `🌅 SUNDAY REFLECTION 🌅\n\nThis week I learned:\n\n💭 Working harder ≠ Better results\n💭 The right tools make all the difference\n💭 Backlink ∞ is that tool for SEO\n\nWhat did you learn?\n\nLink in bio: ${referralUrl}\n\n#SundayReflection #Lessons`,
+          content: `🌅 SUNDAY REFLECTION 🌅\n\nThis week I learned:\n\n💭 Working harder ��� Better results\n💭 The right tools make all the difference\n💭 Backlink ∞ is that tool for SEO\n\nWhat did you learn?\n\nLink in bio: ${referralUrl}\n\n#SundayReflection #Lessons`,
           engagement: "Medium",
           audience: "Reflective thinkers"
         },
@@ -2610,8 +2610,8 @@ Here's the math: ${referralUrl}`,
                     </div>
                   </div>
 
-                  {/* Asset Categories */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Spectacular Creative Asset Categories */}
+                  <div className="space-y-8">
                     {/* Enhanced Display Banners */}
                     <div>
                       <h4 className="font-semibold mb-3 flex items-center gap-2">
