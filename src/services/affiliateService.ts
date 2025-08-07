@@ -98,7 +98,11 @@ export class AffiliateService {
         .single();
 
       if (statsError) {
-        console.error('Error fetching affiliate stats:', statsError);
+        if (statsError.code === '42P01' || statsError.message.includes('does not exist')) {
+          console.log('⚠️ Affiliate stats view not available, using default stats');
+        } else {
+          console.error('Error fetching affiliate stats:', statsError);
+        }
         // Return default stats if view doesn't exist
         return {
           total_clicks: 0,
