@@ -326,7 +326,7 @@ const SafeAffiliateProgram: React.FC = () => {
       if (toast) {
         toast({
           title: "Copied!",
-          description: "Link copied to clipboard"
+          description: "Content copied to clipboard"
         });
       }
     } catch (error) {
@@ -337,14 +337,176 @@ const SafeAffiliateProgram: React.FC = () => {
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
-      
+
       if (toast) {
         toast({
           title: "Copied!",
-          description: "Link copied to clipboard"
+          description: "Content copied to clipboard"
         });
       }
     }
+  };
+
+  const getSocialTemplates = (platform: string, referralUrl: string) => {
+    const templates: Record<string, any[]> = {
+      twitter: [
+        {
+          type: "Discovery",
+          content: `🚀 Just discovered Backlinkoo - game-changing SEO tool for link building! Their automated outreach is incredible. Check it out: ${referralUrl}`,
+          engagement: "High",
+          audience: "SEO professionals"
+        },
+        {
+          type: "Results",
+          content: `📈 Increased my domain authority by 15 points using Backlinkoo's link building platform. The ROI is amazing! ${referralUrl} #SEO #LinkBuilding`,
+          engagement: "Very High",
+          audience: "Digital marketers"
+        },
+        {
+          type: "Tips",
+          content: `💡 Pro tip: Quality backlinks > quantity. Backlinkoo helps you get high-DA links that actually move the needle. Try it: ${referralUrl}`,
+          engagement: "Medium",
+          audience: "Business owners"
+        }
+      ],
+      linkedin: [
+        {
+          type: "Professional",
+          content: `As an SEO professional, I'm always looking for tools that deliver real results. Backlinkoo's automated link building platform has transformed how I approach SEO campaigns. The quality of links and time saved is remarkable. ${referralUrl}`,
+          engagement: "High",
+          audience: "B2B professionals"
+        },
+        {
+          type: "Case Study",
+          content: `Case Study: How I increased organic traffic by 300% in 6 months using strategic link building. The secret? Backlinkoo's platform made it scalable and efficient. ${referralUrl}`,
+          engagement: "Very High",
+          audience: "Marketing managers"
+        }
+      ],
+      facebook: [
+        {
+          type: "Recommendation",
+          content: `🌟 Recommendation for small business owners: If you're struggling with SEO and getting your website noticed, Backlinkoo is a game-changer. Their platform simplifies link building and delivers real results. ${referralUrl}`,
+          engagement: "High",
+          audience: "Small business owners"
+        },
+        {
+          type: "Success Story",
+          content: `From struggling with SEO to ranking on page 1 - here's how Backlinkoo helped transform my online presence. The automated outreach and quality links made all the difference! ${referralUrl}`,
+          engagement: "Very High",
+          audience: "Entrepreneurs"
+        }
+      ],
+      instagram: [
+        {
+          type: "Visual Story",
+          content: `📊 Behind the scenes of my SEO growth strategy ✨ Swipe to see how Backlinkoo helped me build high-quality backlinks that actually work! Link in bio: ${referralUrl} #SEO #DigitalMarketing #Entrepreneur`,
+          engagement: "High",
+          audience: "Visual marketers"
+        }
+      ],
+      youtube: [
+        {
+          type: "Tutorial",
+          content: `🎥 NEW VIDEO: "How I Built 500+ High-Quality Backlinks in 30 Days" - featuring Backlinkoo's automated platform. This tool is a game-changer for SEO! ${referralUrl}`,
+          engagement: "Very High",
+          audience: "Content creators"
+        }
+      ]
+    };
+    return templates[platform] || [];
+  };
+
+  const getPlatformTips = (platform: string) => {
+    const tips: Record<string, string[]> = {
+      twitter: [
+        "Use relevant hashtags (#SEO, #LinkBuilding, #DigitalMarketing)",
+        "Tweet during peak hours (12-3 PM, 5-6 PM EST)",
+        "Engage with responses to boost visibility",
+        "Share results and metrics for credibility"
+      ],
+      linkedin: [
+        "Write longer, value-driven posts for better engagement",
+        "Share professional insights and case studies",
+        "Use LinkedIn native video for higher reach",
+        "Engage in relevant industry groups"
+      ],
+      facebook: [
+        "Post during evenings (6-9 PM) for better reach",
+        "Use compelling visuals or videos",
+        "Encourage comments with questions",
+        "Share in relevant business groups"
+      ],
+      instagram: [
+        "Use high-quality visuals and consistent aesthetics",
+        "Include 5-10 relevant hashtags",
+        "Post during lunch (11 AM-1 PM) or evening (7-9 PM)",
+        "Use Stories for behind-the-scenes content"
+      ],
+      youtube: [
+        "Create valuable, educational content",
+        "Use SEO-optimized titles and descriptions",
+        "Include clear calls-to-action",
+        "Engage with comments to boost algorithm ranking"
+      ]
+    };
+    return tips[platform] || [];
+  };
+
+  const getEmailTemplate = (templateType: string, referralUrl: string) => {
+    const templates: Record<string, any[]> = {
+      professional: [
+        {
+          label: "Subject Line",
+          content: "Boost Your SEO Results with This Game-Changing Platform"
+        },
+        {
+          label: "Opening",
+          content: "Hi [Name],\n\nI hope this email finds you well. As someone who values efficient SEO strategies, I wanted to share a tool that has significantly improved my link building results."
+        },
+        {
+          label: "Body",
+          content: `I've been using Backlinkoo for the past few months, and the results speak for themselves:\n\n• 300% increase in high-quality backlinks\n• 50% reduction in outreach time\n• Improved domain authority across all projects\n\nWhat sets Backlinkoo apart is their automated outreach system and focus on high-DA websites. The platform has streamlined my entire link building process.\n\nYou can check it out here: ${referralUrl}\n\nThey're currently offering a free trial, so there's no risk in testing it out.`
+        },
+        {
+          label: "Closing",
+          content: "I'd be happy to discuss my experience in more detail if you're interested.\n\nBest regards,\n[Your Name]"
+        }
+      ],
+      casual: [
+        {
+          label: "Subject Line",
+          content: "Found something cool for your SEO efforts! 🚀"
+        },
+        {
+          label: "Opening",
+          content: "Hey [Name]!\n\nHope you're doing awesome! I just had to share this SEO tool I've been using - it's been a total game-changer for my websites."
+        },
+        {
+          label: "Body",
+          content: `So I've been struggling with link building (you know how tedious it can be), and then I found Backlinkoo. This platform is seriously impressive:\n\n✅ Automated outreach that actually works\n✅ High-quality backlinks from real websites\n✅ Super easy to use interface\n\nI've seen my rankings improve within just a few weeks! Here's the link if you want to check it out: ${referralUrl}\n\nThey have a free trial, so you can test it risk-free.`
+        },
+        {
+          label: "Closing",
+          content: "Let me know what you think if you try it out!\n\nCheers,\n[Your Name]"
+        }
+      ],
+      newsletter: [
+        {
+          label: "Subject Line",
+          content: "This Month's SEO Spotlight: Revolutionary Link Building Platform"
+        },
+        {
+          label: "Introduction",
+          content: "Welcome to this month's SEO insights! Today, I'm excited to spotlight a platform that's transforming how we approach link building."
+        },
+        {
+          label: "Feature Article",
+          content: `SPOTLIGHT: Backlinkoo - The Future of Link Building\n\nIn the ever-evolving world of SEO, link building remains one of the most crucial yet challenging aspects of digital marketing. That's where Backlinkoo comes in.\n\nWhat makes it special:\n• AI-powered outreach automation\n• Focus on high-authority websites\n• Comprehensive tracking and analytics\n• Time-saving automation features\n\nThe platform has gained significant traction among SEO professionals, with many reporting substantial improvements in their link building success rates.\n\nInterested in learning more? You can explore Backlinkoo here: ${referralUrl}`
+        }
+      ]
+    };
+    return templates[templateType] || [];
   };
 
   if (loading) {
