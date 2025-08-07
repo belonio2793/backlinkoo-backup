@@ -947,7 +947,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Motivational Monday",
-          content: `💪 MOTIVATIONAL MONDAY 💪\n\n"Success isn't about working harder, it's about working smarter"\n\nThat's why I use Backlink ��� for link building 🧠\n\nWork smart, not hard! 💯\n\nLink in bio: ${referralUrl}\n\n#MotivationMonday #WorkSmart #Entrepreneur`,
+          content: `💪 MOTIVATIONAL MONDAY 💪\n\n"Success isn't about working harder, it's about working smarter"\n\nThat's why I use Backlink ∞ for link building 🧠\n\nWork smart, not hard! 💯\n\nLink in bio: ${referralUrl}\n\n#MotivationMonday #WorkSmart #Entrepreneur`,
           engagement: "High",
           audience: "Motivation seekers"
         },
@@ -966,7 +966,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Quick Win",
-          content: `⚡ QUICK WIN WEDNESDAY ⚡\n\nWant an instant SEO boost?\n\nStart building quality backlinks TODAY with Backlink ∞\n\nNo experience needed 🎯\nResults in 30 days ���\nFree trial available 🆓\n\nLink in bio: ${referralUrl}\n\n#QuickWin #SEOBoost`,
+          content: `⚡ QUICK WIN WEDNESDAY ⚡\n\nWant an instant SEO boost?\n\nStart building quality backlinks TODAY with Backlink ∞\n\nNo experience needed 🎯\nResults in 30 days ✅\nFree trial available 🆓\n\nLink in bio: ${referralUrl}\n\n#QuickWin #SEOBoost`,
           engagement: "High",
           audience: "Quick results"
         },
@@ -985,7 +985,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Sunday Reflection",
-          content: `🌅 SUNDAY REFLECTION 🌅\n\nThis week I learned:\n\n💭 Working harder ��� Better results\n💭 The right tools make all the difference\n💭 Backlink ∞ is that tool for SEO\n\nWhat did you learn?\n\nLink in bio: ${referralUrl}\n\n#SundayReflection #Lessons`,
+          content: `🌅 SUNDAY REFLECTION 🌅\n\nThis week I learned:\n\n💭 Working harder ≠ Better results\n💭 The right tools make all the difference\n💭 Backlink ∞ is that tool for SEO\n\nWhat did you learn?\n\nLink in bio: ${referralUrl}\n\n#SundayReflection #Lessons`,
           engagement: "Medium",
           audience: "Reflective thinkers"
         },
