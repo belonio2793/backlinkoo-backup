@@ -267,11 +267,7 @@ export const OptimizedAppWrapper = () => {
               <LazyNoHandsSEO />
             </InstantEmailVerificationGuard>
           } />
-          <Route path="/affiliate" element={
-            <Suspense fallback={<PageLoader />}>
-              <SafeAffiliateProgram />
-            </Suspense>
-          } />
+          <Route path="/affiliate" element={<MinimalAffiliateTest />} />
           <Route path="/affiliate/test" element={
             <InstantEmailVerificationGuard>
               <SafeAffiliateProgram />
