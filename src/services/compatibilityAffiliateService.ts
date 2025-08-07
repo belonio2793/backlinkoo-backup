@@ -58,7 +58,7 @@ export class CompatibilityAffiliateService {
       // Generate unique affiliate code and custom ID
       const affiliateCode = this.generateAffiliateCode();
       const customId = this.generateCustomId();
-      const referralUrl = `${window.location.origin}?ref=${affiliateCode}`;
+      const referralUrl = `https://backlinkoo.com?ref=${affiliateCode}`;
 
       const { data, error } = await supabase
         .from('affiliate_programs')
@@ -174,7 +174,7 @@ export class CompatibilityAffiliateService {
    * Generate affiliate tracking link
    */
   generateTrackingLink(affiliateCode: string, targetUrl: string, utmParams?: any): string {
-    const url = new URL(targetUrl, window.location.origin);
+    const url = new URL(targetUrl, 'https://backlinkoo.com');
     url.searchParams.set('ref', affiliateCode);
     
     if (utmParams) {
