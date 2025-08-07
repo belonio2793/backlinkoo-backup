@@ -2521,13 +2521,102 @@ Here's the math: ${referralUrl}`,
                     </div>
                   </div>
 
+                  {/* Professional Asset Downloads */}
+                  <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-6 rounded-lg border border-gray-200 mb-6">
+                    <h3 className="text-lg font-semibold mb-4 text-gray-900">📦 Professional Asset Downloads</h3>
+                    <p className="text-sm text-gray-700 mb-4">Enterprise-quality marketing assets designed by professionals with proven sales psychology</p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {[
+                        {
+                          title: "Animated Banner Pack",
+                          description: "10 animated banners with CSS animations",
+                          fileSize: "2.1 MB",
+                          formats: ["HTML", "CSS", "PNG"],
+                          features: ["Responsive Design", "CSS3 Animations", "Call-to-Action Optimization"],
+                          psychology: ["Urgency triggers", "Social proof elements", "Benefit-focused copy"]
+                        },
+                        {
+                          title: "Social Media Kit",
+                          description: "Complete social media asset collection",
+                          fileSize: "5.3 MB",
+                          formats: ["PSD", "PNG", "JPG"],
+                          features: ["Instagram Templates", "Facebook Assets", "Twitter Headers"],
+                          psychology: ["FOMO triggers", "Success stories", "Authority positioning"]
+                        },
+                        {
+                          title: "Video Ad Templates",
+                          description: "After Effects video ad templates",
+                          fileSize: "12.7 MB",
+                          formats: ["AEP", "MP4", "MOV"],
+                          features: ["Professional Transitions", "Brand Animations", "Call-to-Action Overlays"],
+                          psychology: ["Problem-solution narrative", "Social proof videos", "Scarcity messaging"]
+                        },
+                        {
+                          title: "Email Signature Pack",
+                          description: "Professional email signatures with tracking",
+                          fileSize: "1.8 MB",
+                          formats: ["HTML", "PNG", "SVG"],
+                          features: ["HTML Signatures", "Click Tracking", "Mobile Responsive"],
+                          psychology: ["Authority building", "Trust signals", "Subtle call-to-action"]
+                        }
+                      ].map((asset, index) => (
+                        <div key={index} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                          <h4 className="font-semibold text-sm mb-2">{asset.title}</h4>
+                          <p className="text-xs text-gray-600 mb-3">{asset.description}</p>
+                          <div className="mb-3">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs text-gray-500">Size:</span>
+                              <Badge variant="outline" className="text-xs">{asset.fileSize}</Badge>
+                            </div>
+                            <div className="flex flex-wrap gap-1 mb-2">
+                              {asset.formats.map((format, i) => (
+                                <Badge key={i} variant="secondary" className="text-xs">{format}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="mb-3">
+                            <p className="text-xs font-medium text-gray-700 mb-1">Features:</p>
+                            <ul className="text-xs text-gray-600 space-y-1">
+                              {asset.features.map((feature, i) => (
+                                <li key={i} className="flex items-start gap-1">
+                                  <span className="text-green-500">✓</span>
+                                  {feature}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div className="mb-4">
+                            <p className="text-xs font-medium text-purple-700 mb-1">Sales Psychology:</p>
+                            <ul className="text-xs text-purple-600 space-y-1">
+                              {asset.psychology.map((psych, i) => (
+                                <li key={i} className="flex items-start gap-1">
+                                  <span className="text-purple-500">🧠</span>
+                                  {psych}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <Button
+                            size="sm"
+                            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                            onClick={() => downloadAsset(asset.title, '', 'ZIP')}
+                          >
+                            <Download className="h-3 w-3 mr-2" />
+                            Download Pack
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Asset Categories */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Banners & Display Ads */}
+                    {/* Enhanced Display Banners */}
                     <div>
                       <h4 className="font-semibold mb-3 flex items-center gap-2">
                         <Monitor className="h-4 w-4" />
-                        Display Banners
+                        Enterprise Display Banners
                       </h4>
                       <div className="space-y-3">
                         {[
