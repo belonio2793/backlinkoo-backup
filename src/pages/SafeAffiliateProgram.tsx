@@ -1175,7 +1175,7 @@ ${referralUrl}`,
         // Page 3
         {
           type: "Tool Comparison",
-          content: `⚔️ ULTIMATE COMPARISON: Backlink ∞ vs 7 other link building tools.
+          content: `��️ ULTIMATE COMPARISON: Backlink ∞ vs 7 other link building tools.
 
 I spent $3,000 testing them all so you don't have to. The winner might surprise you!
 
@@ -2145,7 +2145,7 @@ Here's the math: ${referralUrl}`,
                         </div>
                       </div>
                       <div className="space-y-3">
-                        {getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url)
+                        {getSocialTemplates(selectedSocialPlatform, cleanUrl(affiliateData.referral_url))
                           .slice(socialPage * 3, (socialPage + 1) * 3)
                           .map((template, index) => (
                           <div key={socialPage * 3 + index} className="p-4 bg-gray-50 rounded-lg border">
