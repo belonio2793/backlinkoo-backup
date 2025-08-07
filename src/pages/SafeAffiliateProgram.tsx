@@ -5,6 +5,7 @@ import { useToast } from '../hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { LoginModal } from '../components/LoginModal';
 
 const SafeAffiliateProgram: React.FC = () => {
   const { user } = useAuth();
@@ -14,6 +15,8 @@ const SafeAffiliateProgram: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [affiliateData, setAffiliateData] = useState<any>(null);
   const [isJoining, setIsJoining] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [defaultTab, setDefaultTab] = useState<'login' | 'signup'>('login');
 
   useEffect(() => {
     if (user) {
