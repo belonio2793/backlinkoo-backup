@@ -10,6 +10,7 @@ import { TrialConversionService } from "@/services/trialConversionService";
 import { validateEmail, validatePassword, validateRequired } from "@/utils/authValidation";
 import { Eye, EyeOff, Shield, CheckCircle } from "lucide-react";
 import CompactTestimonials from "@/components/CompactTestimonials";
+import TestimonialBanner from "@/components/TestimonialBanner";
 
 interface AuthFormTabsProps {
   onAuthSuccess?: (user: any) => void;
