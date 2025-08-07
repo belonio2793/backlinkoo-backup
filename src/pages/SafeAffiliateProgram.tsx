@@ -263,6 +263,15 @@ const SafeAffiliateProgram: React.FC = () => {
     return `${prefix}${timestamp}${random}`;
   };
 
+  // URL cleaner to replace fly.dev with backlinkoo.com
+  const cleanUrl = (url: string): string => {
+    if (!url) return url;
+
+    // Replace any fly.dev domain with backlinkoo.com, preserving query parameters
+    const flyDevPattern = /https?:\/\/[^\/]*\.fly\.dev/gi;
+    return url.replace(flyDevPattern, 'https://backlinkoo.com');
+  };
+
   const joinProgram = async () => {
     if (!user) return;
 
