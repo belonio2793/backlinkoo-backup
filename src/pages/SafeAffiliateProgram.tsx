@@ -800,7 +800,7 @@ Here's what happened... ${referralUrl}`,
         },
         {
           type: "Problem Solver",
-          content: `Struggling with getting your website noticed? �� You're not alone! I was in the same boat until I found Backlink ∞. This platform has completely changed my approach to SEO and the results speak for themselves. ${referralUrl}`,
+          content: `Struggling with getting your website noticed? �� You're not alone! I was in the same boat until I found Backlink ��. This platform has completely changed my approach to SEO and the results speak for themselves. ${referralUrl}`,
           engagement: "High",
           audience: "Problem seekers"
         },
@@ -910,7 +910,13 @@ Here's what happened... ${referralUrl}`,
         // Page 1
         {
           type: "Visual Story",
-          content: `📊 Behind the scenes of my SEO growth strategy ✨ Swipe to see how Backlink ∞ helped me build high-quality backlinks that actually work! Link in bio: ${referralUrl} #SEO #DigitalMarketing #Entrepreneur`,
+          content: `📊 Behind the scenes of my SEO growth strategy ✨
+
+Swipe to see how Backlink ∞ helped me build high-quality backlinks that actually work!
+
+Link in bio: ${referralUrl}
+
+#SEO #DigitalMarketing #Entrepreneur`,
           engagement: "High",
           audience: "Visual marketers"
         },
