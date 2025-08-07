@@ -657,51 +657,109 @@ const SafeAffiliateProgram: React.FC = () => {
       professional: [
         {
           label: "Subject Line",
-          content: "Boost Your SEO Results with This Game-Changing Platform"
+          content: "Boost Your SEO Results with This Game-Changing Platform",
+          isHtml: false
         },
         {
           label: "Opening",
-          content: "Hi [Name],\n\nI hope this email finds you well. As someone who values efficient SEO strategies, I wanted to share a tool that has significantly improved my link building results."
+          content: `<p>Hi [Name],</p>
+<p>I hope this email finds you well. As someone who values efficient SEO strategies, I wanted to share a tool that has significantly improved my link building results.</p>`,
+          isHtml: true
         },
         {
           label: "Body",
-          content: `I've been using Backlink ∞ for the past few months, and the results speak for themselves:\n\n• 300% increase in high-quality backlinks\n• 50% reduction in outreach time\n• Improved domain authority across all projects\n\nWhat sets Backlink ∞ apart is their automated outreach system and focus on high-DA websites. The platform has streamlined my entire link building process.\n\nYou can check it out here: ${referralUrl}\n\nThey're currently offering a free trial, so there's no risk in testing it out.`
+          content: `<p>I've been using <strong>Backlink ∞</strong> for the past few months, and the results speak for themselves:</p>
+
+<ul>
+  <li><strong>300% increase</strong> in high-quality backlinks</li>
+  <li><strong>50% reduction</strong> in outreach time</li>
+  <li><strong>Improved domain authority</strong> across all projects</li>
+</ul>
+
+<p>What sets Backlink ∞ apart is their automated outreach system and focus on high-DA websites. The platform has streamlined my entire link building process.</p>
+
+<p>You can check it out here: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none;">Backlink ∞ Platform</a></p>
+
+<p>They're currently offering a <strong>free trial</strong>, so there's no risk in testing it out.</p>`,
+          isHtml: true
         },
         {
           label: "Closing",
-          content: "I'd be happy to discuss my experience in more detail if you're interested.\n\nBest regards,\n[Your Name]"
+          content: `<p>I'd be happy to discuss my experience in more detail if you're interested.</p>
+<p>Best regards,<br>[Your Name]</p>`,
+          isHtml: true
         }
       ],
       casual: [
         {
           label: "Subject Line",
-          content: "Found something cool for your SEO efforts! 🚀"
+          content: "Found something cool for your SEO efforts! 🚀",
+          isHtml: false
         },
         {
           label: "Opening",
-          content: "Hey [Name]!\n\nHope you're doing awesome! I just had to share this SEO tool I've been using - it's been a total game-changer for my websites."
+          content: `<p>Hey [Name]!</p>
+<p>Hope you're doing awesome! I just had to share this SEO tool I've been using - it's been a <em>total game-changer</em> for my websites.</p>`,
+          isHtml: true
         },
         {
           label: "Body",
-          content: `So I've been struggling with link building (you know how tedious it can be), and then I found Backlink ∞. This platform is seriously impressive:\n\n✅ Automated outreach that actually works\n✅ High-quality backlinks from real websites\n✅ Super easy to use interface\n\nI've seen my rankings improve within just a few weeks! Here's the link if you want to check it out: ${referralUrl}\n\nThey have a free trial, so you can test it risk-free.`
+          content: `<p>So I've been struggling with link building (you know how tedious it can be), and then I found <strong>Backlink ∞</strong>. This platform is seriously impressive:</p>
+
+<ul style="list-style: none; padding-left: 0;">
+  <li>✅ <strong>Automated outreach</strong> that actually works</li>
+  <li>✅ <strong>High-quality backlinks</strong> from real websites</li>
+  <li>✅ <strong>Super easy to use</strong> interface</li>
+</ul>
+
+<p>I've seen my rankings improve within just a few weeks! Here's the link if you want to check it out: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none;">Try Backlink ∞</a></p>
+
+<p>They have a <strong>free trial</strong>, so you can test it risk-free.</p>`,
+          isHtml: true
         },
         {
           label: "Closing",
-          content: "Let me know what you think if you try it out!\n\nCheers,\n[Your Name]"
+          content: `<p>Let me know what you think if you try it out!</p>
+<p>Cheers,<br>[Your Name]</p>`,
+          isHtml: true
         }
       ],
       newsletter: [
         {
           label: "Subject Line",
-          content: "This Month's SEO Spotlight: Revolutionary Link Building Platform"
+          content: "This Month's SEO Spotlight: Revolutionary Link Building Platform",
+          isHtml: false
         },
         {
           label: "Introduction",
-          content: "Welcome to this month's SEO insights! Today, I'm excited to spotlight a platform that's transforming how we approach link building."
+          content: `<div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+  <h2 style="color: #1e293b; margin: 0 0 10px 0;">Welcome to this month's SEO insights!</h2>
+  <p style="margin: 0; color: #475569;">Today, I'm excited to spotlight a platform that's transforming how we approach link building.</p>
+</div>`,
+          isHtml: true
         },
         {
           label: "Feature Article",
-          content: `SPOTLIGHT: Backlink ∞ - The Future of Link Building\n\nIn the ever-evolving world of SEO, link building remains one of the most crucial yet challenging aspects of digital marketing. That's where Backlink ∞ comes in.\n\nWhat makes it special:\n• AI-powered outreach automation\n• Focus on high-authority websites\n• Comprehensive tracking and analytics\n• Time-saving automation features\n\nThe platform has gained significant traction among SEO professionals, with many reporting substantial improvements in their link building success rates.\n\nInterested in learning more? You can explore Backlink ∞ here: ${referralUrl}`
+          content: `<div style="border-left: 4px solid #2563eb; padding-left: 20px; margin: 20px 0;">
+  <h2 style="color: #2563eb;">SPOTLIGHT: Backlink ∞ - The Future of Link Building</h2>
+</div>
+
+<p>In the ever-evolving world of SEO, link building remains one of the most crucial yet challenging aspects of digital marketing. That's where <strong>Backlink ∞</strong> comes in.</p>
+
+<h3 style="color: #1e293b;">What makes it special:</h3>
+<ul>
+  <li><strong>AI-powered outreach automation</strong> - No more manual emails</li>
+  <li><strong>Focus on high-authority websites</strong> - Quality over quantity</li>
+  <li><strong>Comprehensive tracking and analytics</strong> - Know what works</li>
+  <li><strong>Time-saving automation features</strong> - Focus on strategy</li>
+</ul>
+
+<div style="background: #ecfccb; border: 1px solid #bef264; padding: 15px; border-radius: 6px; margin: 20px 0;">
+  <p style="margin: 0; color: #365314;"><strong>Success Story:</strong> The platform has gained significant traction among SEO professionals, with many reporting substantial improvements in their link building success rates.</p>
+</div>
+
+<p>Interested in learning more? You can explore <a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Backlink ∞ here</a></p>`,
+          isHtml: true
         }
       ]
     };
