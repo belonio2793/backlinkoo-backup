@@ -74,7 +74,7 @@ export const TestimonialBanner: React.FC<TestimonialBannerProps> = ({
           key={currentIndex}
           className="animate-in slide-in-from-right-2 fade-in duration-500"
         >
-          <p className="text-sm font-medium text-gray-800 mb-2">
+          <p className="text-base font-semibold text-gray-900 mb-3 bg-white/70 p-3 rounded-md border-l-4 border-green-400 shadow-sm">
             "{currentTestimonial.text}"
           </p>
           <div className="flex items-center justify-between">

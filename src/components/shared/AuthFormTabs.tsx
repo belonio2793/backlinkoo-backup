@@ -389,30 +389,28 @@ export function AuthFormTabs({
             {isLoading ? (loadingMessage || "Signing In...") : "Sign In"}
           </Button>
 
-          <div className="space-y-2">
+          <div className="flex items-center justify-center gap-1 text-center">
             {onForgotPassword && (
-              <div className="text-center">
+              <>
                 <Button
                   type="button"
                   variant="link"
-                  className="text-sm text-muted-foreground"
+                  className="text-sm text-muted-foreground p-0 h-auto"
                   onClick={onForgotPassword}
                 >
                   Forgot your password?
                 </Button>
-              </div>
+                <span className="text-sm text-muted-foreground">•</span>
+              </>
             )}
-
-            <div className="text-center">
-              <Button
-                type="button"
-                variant="link"
-                className="text-sm text-muted-foreground"
-                onClick={() => window.open('/auth-diagnostic', '_blank')}
-              >
-                Having trouble signing in?
-              </Button>
-            </div>
+            <Button
+              type="button"
+              variant="link"
+              className="text-sm text-muted-foreground p-0 h-auto"
+              onClick={() => window.open('/auth-diagnostic', '_blank')}
+            >
+              Having trouble signing in?
+            </Button>
           </div>
 
           {/* Testimonial banner for login */}

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affiliate Table Creation Test</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Affiliate Tables Setup</h1>
+        <p>This tool will create the required affiliate_programs table in your Supabase database.</p>
+        
+        <div id="status"></div>
+        
+        <button id="createTables" onclick="createAffiliateTables()">
+            Create Affiliate Tables
+        </button>
+        
+        <button id="testTables" onclick="testTables()">
+            Test Tables
+        </button>
+        
+        <div id="logs"></div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://bclhqtjxaaxdvlnubhhd.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjbGhxdGp4YWF4ZHZsbnViaGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI5MDU1OTUsImV4cCI6MjA0ODQ4MTU5NX0.v2BI2WiXVnobWh76v6_RW3PUqcdZSNJCjEiw6gOjKJQ';
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        function log(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const logsDiv = document.getElementById('logs');
+            
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'warning';
+            statusDiv.innerHTML = `<div class="${className}">${message}</div>`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            logsDiv.innerHTML += `<pre>[${timestamp}] ${message}</pre>`;
+            
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        async function createAffiliateTables() {
+            const button = document.getElementById('createTables');
+            button.disabled = true;
+            button.textContent = 'Creating...';
+            
+            try {
+                log('🔄 Starting affiliate table creation...', 'info');
+
+                // Create the table using raw SQL - we'll use a direct approach
+                log('📝 Creating affiliate_programs table...', 'info');
+
+                // Test if table already exists
+                const { data: existingData, error: existingError } = await supabase
+                    .from('affiliate_programs')
+                    .select('id')
+                    .limit(1);
+
+                if (!existingError) {
+                    log('✅ affiliate_programs table already exists!', 'success');
+                    button.disabled = false;
+                    button.textContent = 'Create Affiliate Tables';
+                    return;
+                }
+
+                if (existingError && !existingError.message.includes('does not exist')) {
+                    log(`❌ Unexpected error checking table: ${existingError.message}`, 'error');
+                    button.disabled = false;
+                    button.textContent = 'Create Affiliate Tables';
+                    return;
+                }
+
+                // Table doesn't exist, we need to create it
+                log('🔨 Table does not exist, attempting to create via SQL execution...', 'info');
+
+                // Try using a function to execute SQL
+                const createTableSQL = `
+                    CREATE TABLE IF NOT EXISTS affiliate_programs (
+                        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                        user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+                        affiliate_code VARCHAR(50) UNIQUE NOT NULL,
+                        custom_id VARCHAR(8) UNIQUE NOT NULL,
+                        status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'suspended')),
+                        commission_rate DECIMAL(3,2) DEFAULT 0.50 CHECK (commission_rate >= 0 AND commission_rate <= 1),
+                        total_earnings DECIMAL(10,2) DEFAULT 0.00,
+                        total_paid DECIMAL(10,2) DEFAULT 0.00,
+                        pending_earnings DECIMAL(10,2) DEFAULT 0.00,
+                        referral_url TEXT NOT NULL,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    );
+
+                    CREATE INDEX IF NOT EXISTS idx_affiliate_programs_user_id ON affiliate_programs(user_id);
+                    CREATE INDEX IF NOT EXISTS idx_affiliate_programs_affiliate_code ON affiliate_programs(affiliate_code);
+                    CREATE INDEX IF NOT EXISTS idx_affiliate_programs_custom_id ON affiliate_programs(custom_id);
+
+                    ALTER TABLE affiliate_programs ENABLE ROW LEVEL SECURITY;
+
+                    DROP POLICY IF EXISTS "Users can view their own affiliate programs" ON affiliate_programs;
+                    DROP POLICY IF EXISTS "Users can create their own affiliate programs" ON affiliate_programs;
+                    DROP POLICY IF EXISTS "Users can update their own affiliate programs" ON affiliate_programs;
+
+                    CREATE POLICY "Users can view their own affiliate programs" ON affiliate_programs
+                        FOR SELECT USING (auth.uid() = user_id);
+
+                    CREATE POLICY "Users can create their own affiliate programs" ON affiliate_programs
+                        FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+                    CREATE POLICY "Users can update their own affiliate programs" ON affiliate_programs
+                        FOR UPDATE USING (auth.uid() = user_id);
+                `;
+
+                log('📡 Attempting to execute SQL via RPC...', 'info');
+
+                const { data: sqlData, error: sqlError } = await supabase.rpc('exec_sql', {
+                    sql_query: createTableSQL
+                });
+
+                if (sqlError) {
+                    log(`❌ SQL execution failed: ${sqlError.message}`, 'error');
+                    log(`💡 You may need to run the SQL manually in your Supabase dashboard`, 'warning');
+                    log(`📋 SQL to run: ${createTableSQL}`, 'info');
+                } else {
+                    log('✅ SQL executed successfully!', 'success');
+                }
+
+                // Test the table again
+                await testTables();
+
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            }
+            
+            button.disabled = false;
+            button.textContent = 'Create Affiliate Tables';
+        }
+
+        async function testTables() {
+            try {
+                log('🧪 Testing affiliate_programs table...', 'info');
+
+                const { data, error } = await supabase
+                    .from('affiliate_programs')
+                    .select('id')
+                    .limit(1);
+
+                if (error) {
+                    if (error.message.includes('does not exist')) {
+                        log('❌ affiliate_programs table does not exist', 'error');
+                        log('💡 Please run the table creation process or execute the SQL manually', 'warning');
+                        
+                        // Show the SQL that needs to be run
+                        const sqlToRun = `
+-- Run this SQL in your Supabase SQL Editor:
+
+CREATE TABLE IF NOT EXISTS affiliate_programs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    affiliate_code VARCHAR(50) UNIQUE NOT NULL,
+    custom_id VARCHAR(8) UNIQUE NOT NULL,
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'suspended')),
+    commission_rate DECIMAL(3,2) DEFAULT 0.50 CHECK (commission_rate >= 0 AND commission_rate <= 1),
+    total_earnings DECIMAL(10,2) DEFAULT 0.00,
+    total_paid DECIMAL(10,2) DEFAULT 0.00,
+    pending_earnings DECIMAL(10,2) DEFAULT 0.00,
+    referral_url TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_affiliate_programs_user_id ON affiliate_programs(user_id);
+CREATE INDEX IF NOT EXISTS idx_affiliate_programs_affiliate_code ON affiliate_programs(affiliate_code);
+CREATE INDEX IF NOT EXISTS idx_affiliate_programs_custom_id ON affiliate_programs(custom_id);
+
+ALTER TABLE affiliate_programs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own affiliate programs" ON affiliate_programs
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own affiliate programs" ON affiliate_programs
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own affiliate programs" ON affiliate_programs
+    FOR UPDATE USING (auth.uid() = user_id);
+`;
+                        log(`📋 SQL to copy and paste in Supabase Dashboard:\n${sqlToRun}`, 'info');
+                    } else {
+                        log(`❌ Table test failed: ${error.message}`, 'error');
+                    }
+                } else {
+                    log('✅ affiliate_programs table exists and is accessible!', 'success');
+                    log(`📊 Table ready for use`, 'success');
+                }
+
+            } catch (error) {
+                log(`❌ Test error: ${error.message}`, 'error');
+            }
+        }
+
+        // Test on page load
+        window.onload = function() {
+            log('🚀 Page loaded - testing database connection...', 'info');
+            testTables();
+        };
+    </script>
+</body>
+</html>

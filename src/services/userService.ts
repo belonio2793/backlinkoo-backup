@@ -34,6 +34,20 @@ class UserService {
         const errorMessage = error.message || error;
         console.error('❌ userService: Error fetching user profile:', errorMessage);
 
+        // Handle infinite recursion in RLS policies
+        if (errorMessage && errorMessage.includes('infinite recursion detected in policy')) {
+          console.warn('⚠️ Infinite recursion detected in RLS policy - returning minimal profile');
+          return {
+            id: user.id,
+            user_id: user.id,
+            email: user.email || '',
+            role: 'user' as const,
+            subscription_tier: 'free' as const,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+        }
+
         // Handle specific permission denied errors
         if (errorMessage && errorMessage.includes('permission denied for table users')) {
           console.warn('⚠️ Permission denied for "users" table - this indicates a database configuration issue');
@@ -47,7 +61,14 @@ class UserService {
       console.log('✅ userService: Profile loaded successfully:', profile);
       return profile;
     } catch (error: any) {
-      console.error('❌ userService: Error getting current user profile:', error.message || error);
+      const errorMessage = error.message || error;
+      console.error('❌ userService: Error getting current user profile:', errorMessage);
+
+      // Handle infinite recursion gracefully
+      if (errorMessage && errorMessage.includes('infinite recursion detected in policy')) {
+        console.warn('⚠️ Infinite recursion detected in RLS policy - returning null profile');
+      }
+
       return null;
     }
   }

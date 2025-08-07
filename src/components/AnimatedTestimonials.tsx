@@ -252,7 +252,7 @@ export const AnimatedTestimonials: React.FC<AnimatedTestimonialsProps> = ({
               </div>
 
               {/* Content */}
-              <p className="text-gray-700 mb-6 leading-relaxed">
+              <p className="text-lg text-gray-800 mb-6 leading-relaxed font-medium bg-gradient-to-r from-gray-50 to-blue-50 p-4 rounded-lg border-l-4 border-primary/30">
                 "{testimonial.content}"
               </p>
 

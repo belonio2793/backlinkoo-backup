@@ -16,7 +16,8 @@ import TermsOfService from '@/pages/TermsOfService';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import BlogPreview from '@/pages/BlogPreview';
 import NotFound from '@/pages/NotFound';
-import AffiliateTest from '@/pages/AffiliateTest';
+// import AffiliateTest from '@/pages/AffiliateTest';
+import SafeAffiliateProgram from '@/pages/SafeAffiliateProgram';
 import Dashboard from '@/pages/Dashboard';
 import PaymentSuccess from '@/pages/PaymentSuccess';
 import PaymentCancelled from '@/pages/PaymentCancelled';
@@ -266,16 +267,8 @@ export const OptimizedAppWrapper = () => {
               <LazyNoHandsSEO />
             </InstantEmailVerificationGuard>
           } />
-          <Route path="/affiliate" element={
-            <InstantEmailVerificationGuard>
-              <LazyAffiliateProgram />
-            </InstantEmailVerificationGuard>
-          } />
-          <Route path="/affiliate/test" element={
-            <InstantEmailVerificationGuard>
-              <AffiliateTest />
-            </InstantEmailVerificationGuard>
-          } />
+          <Route path="/affiliate" element={<SafeAffiliateProgram />} />
+          <Route path="/affiliate/test" element={<SafeAffiliateProgram />} />
           <Route path="/affiliate/promotion-materials" element={
             <InstantEmailVerificationGuard>
               <LazyPromotionMaterials />
