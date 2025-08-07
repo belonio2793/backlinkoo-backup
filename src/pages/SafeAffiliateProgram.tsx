@@ -825,7 +825,7 @@ Here's what happened... ${referralUrl}`,
         },
         {
           type: "Local Business",
-          content: `Local business owners - listen up! 📢 Getting found online is crucial for your success. Backlink ∞ helped my local service business rank #1 for our main keywords. Now we're booked solid! ${referralUrl}`,
+          content: `Local business owners - listen up! 📢 Getting found online is crucial for your success. Backlink ��� helped my local service business rank #1 for our main keywords. Now we're booked solid! ${referralUrl}`,
           engagement: "High",
           audience: "Local businesses"
         },
@@ -1355,35 +1355,35 @@ Here's the math: ${referralUrl}`,
         {
           label: "Opening",
           content: `<p>Hey [Name]!</p>
-
+<br>
 <p>Hope you're doing awesome!</p>
-
+<br>
 <p>I just had to share this SEO tool I've been using - it's been a <em>total game-changer</em> for my websites.</p>`,
           isHtml: true
         },
         {
           label: "Body",
           content: `<p>So I've been struggling with link building (you know how tedious it can be), and then I found <strong>Backlink ∞</strong>.</p>
-
+<br>
 <p>This platform is seriously impressive:</p>
-
+<br>
 <ul style="list-style: none; padding-left: 0; margin: 20px 0;">
-  <li style="margin-bottom: 10px;">✅ <strong>Automated outreach</strong> that actually works</li>
-  <li style="margin-bottom: 10px;">✅ <strong>High-quality backlinks</strong> from real websites</li>
-  <li style="margin-bottom: 10px;">✅ <strong>Super easy to use</strong> interface</li>
+  <li style="margin-bottom: 12px;">✅ <strong>Automated outreach</strong> that actually works</li>
+  <li style="margin-bottom: 12px;">✅ <strong>High-quality backlinks</strong> from real websites</li>
+  <li style="margin-bottom: 12px;">✅ <strong>Super easy to use</strong> interface</li>
 </ul>
-
+<br>
 <p>I've seen my rankings improve within just a few weeks!</p>
-
+<br>
 <p>Here's the link if you want to check it out: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Try Backlink ∞</a></p>
-
+<br>
 <p>They have a <strong>free trial</strong>, so you can test it risk-free.</p>`,
           isHtml: true
         },
         {
           label: "Closing",
           content: `<p>Let me know what you think if you try it out!</p>
-
+<br>
 <p>Cheers,<br>[Your Name]</p>`,
           isHtml: true
         }
@@ -1641,7 +1641,7 @@ Here's the math: ${referralUrl}`,
                     <span>Marketing asset library</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span>✓</span>
+                    <span>���</span>
                     <span>Real-time analytics</span>
                   </div>
                   <div className="flex items-center gap-2">
