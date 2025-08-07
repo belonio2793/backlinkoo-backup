@@ -1746,7 +1746,7 @@ Here's the math: ${referralUrl}`,
               </div>
               <div className="text-center">
                 <span className="text-2xl mb-2 block">⏰</span>
-                <h4 className="font-semibold">30-Day Tracking</h4>
+                <h4 className="font-semibold">90-Day Tracking</h4>
                 <p className="text-sm text-gray-600">Cookie duration</p>
               </div>
               <div className="text-center">
