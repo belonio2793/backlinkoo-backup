@@ -1180,7 +1180,7 @@ Here's the math: ${referralUrl}`,
         },
         {
           type: "Success Stories",
-          content: `🏆 SUCCESS STORIES: 5 entrepreneurs who transformed their businesses with Backlink ∞. Their strategies, results, and advice for getting started: ${referralUrl}`,
+          content: `🏆 SUCCESS STORIES: 5 entrepreneurs who transformed their businesses with Backlink ���. Their strategies, results, and advice for getting started: ${referralUrl}`,
           engagement: "High",
           audience: "Inspiration seekers"
         },
@@ -1591,7 +1591,7 @@ Here's the math: ${referralUrl}`,
 
               <div className="bg-white p-8 rounded-xl shadow-sm border-2 border-blue-200">
                 <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-2xl">���</span>
+                  <span className="text-2xl">⏰</span>
                 </div>
                 <h3 className="text-2xl font-bold mb-4">30-Day Cookies</h3>
                 <p className="text-gray-600 mb-4">Extended attribution window ensures maximum earnings</p>
