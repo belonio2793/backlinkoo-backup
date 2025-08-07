@@ -41,8 +41,13 @@ export class AffiliateService {
         .single();
 
       if (error) {
-        console.error('Error creating affiliate profile:', error);
-        throw new Error(`Failed to create affiliate profile: ${error.message}`);
+        if (error.code === '42P01' || error.message.includes('does not exist')) {
+          // Tables don't exist yet - show a helpful message
+          throw new Error('Affiliate system is not set up yet. Please contact an administrator to enable the affiliate program.');
+        } else {
+          console.error('Error creating affiliate profile:', error);
+          throw new Error(`Failed to create affiliate profile: ${error.message}`);
+        }
       }
 
       return data;
