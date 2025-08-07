@@ -1313,6 +1313,90 @@ ${referralUrl}`,
 <p>Interested in learning more? You can explore <a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Backlink ∞ here</a></p>`,
           isHtml: true
         }
+      ],
+      direct_outreach: [
+        {
+          label: "Subject Line",
+          content: "Quick question about your SEO strategy",
+          isHtml: false
+        },
+        {
+          label: "Opening",
+          content: `<p>Hi [Name],</p>
+
+<p>I noticed your website [Website Name] and I'm impressed with your content quality.</p>
+
+<p>I wanted to reach out because I recently discovered a tool that's been a game-changer for my SEO results.</p>`,
+          isHtml: true
+        },
+        {
+          label: "Body",
+          content: `<p>Are you currently working on link building for your site?</p>
+
+<p>I ask because I've been using <strong>Backlink ∞</strong> and the results have been incredible:</p>
+
+<ul>
+  <li><strong>250% increase</strong> in quality backlinks</li>
+  <li><strong>Automated outreach</strong> that saves 15+ hours/week</li>
+  <li><strong>Higher success rates</strong> than manual methods</li>
+</ul>
+
+<p>The platform focuses on high-authority websites and uses AI to personalize outreach at scale.</p>
+
+<p>Given your expertise in [Industry], I thought this might be valuable for your SEO strategy: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none;">Check out Backlink ∞</a></p>`,
+          isHtml: true
+        },
+        {
+          label: "Closing",
+          content: `<p>Would love to hear your thoughts if you take a look!</p>
+
+<p>Best,<br>[Your Name]</p>
+
+<p style="font-size: 12px; color: #666; margin-top: 15px;">P.S. They offer a free trial, so there's no risk in testing it out.</p>`,
+          isHtml: true
+        }
+      ],
+      follow_up: [
+        {
+          label: "Subject Line",
+          content: "Re: SEO tool recommendation - any thoughts?",
+          isHtml: false
+        },
+        {
+          label: "Opening",
+          content: `<p>Hi [Name],</p>
+
+<p>Hope you're having a great week!</p>
+
+<p>I wanted to follow up on my previous email about Backlink ∞.</p>`,
+          isHtml: true
+        },
+        {
+          label: "Body",
+          content: `<p>I know you're probably busy, so I'll keep this brief.</p>
+
+<p>Since my last email, I've seen even more impressive results:</p>
+
+<ul>
+  <li><strong>Just landed 12 high-DA backlinks</strong> in the past week</li>
+  <li><strong>Domain Authority increased by 8 points</strong></li>
+  <li><strong>Organic traffic up 45%</strong> this month</li>
+</ul>
+
+<p>The ROI has been phenomenal, and I genuinely think it could help with your SEO goals too.</p>
+
+<p>Here's the link again if you'd like to take a look: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none;">Backlink ∞ Platform</a></p>`,
+          isHtml: true
+        },
+        {
+          label: "Closing",
+          content: `<p>No pressure at all - just wanted to share something that's been working well for me.</p>
+
+<p>Either way, keep up the excellent work on your site!</p>
+
+<p>Best regards,<br>[Your Name]</p>`,
+          isHtml: true
+        }
       ]
     };
     return templates[templateType] || [];
