@@ -22,28 +22,7 @@ const SafeAffiliateProgram: React.FC = () => {
   }, [user]);
 
   const createTableIfNotExists = async () => {
-    try {
-      console.log('🔧 Attempting to create affiliate_programs table...');
-
-      const response = await fetch('/api/create-affiliate-tables', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      if (!response.ok) {
-        console.error('❌ HTTP error:', response.status, response.statusText);
-        return false;
-      }
-
-      const result = await response.json();
-      console.log('✅ Table creation completed:', result);
-      return true;
-
-    } catch (error) {
-      console.error('❌ Table creation error:', error);
-      // Try alternative approach - direct table creation using Supabase
-      return await createTableDirectly();
-    }
+    return await createTableDirectly();
   };
 
   const createTableDirectly = async () => {
@@ -170,7 +149,7 @@ const SafeAffiliateProgram: React.FC = () => {
       }
 
       setAffiliateData(data);
-      console.log('✅ Affiliate data loaded successfully:', data);
+      console.log('�� Affiliate data loaded successfully:', data);
     } catch (error: any) {
       const errorMessage = error.message || error.details || JSON.stringify(error);
       console.error('Failed to load affiliate data:', errorMessage);
