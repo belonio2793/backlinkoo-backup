@@ -90,13 +90,40 @@ const SafeAffiliateProgram: React.FC = () => {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('affiliate_programs')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      let data, error;
 
-      console.log('📊 Affiliate query result:', { data, error });
+      // Add retry mechanism for database queries
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const result = await supabase
+            .from('affiliate_programs')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+          data = result.data;
+          error = result.error;
+
+          console.log(`📊 Affiliate query result (attempt ${attempt}):`, { data, error });
+
+          // Break if successful or if it's a logical error (not a network error)
+          if (!error || error.code === 'PGRST116' || error.message.includes('does not exist')) {
+            break;
+          }
+
+          // If it's a potential network error, wait before retrying
+          if (attempt < 3) {
+            console.log(`⏳ Retrying query in ${attempt * 1000}ms...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+          }
+        } catch (networkError) {
+          console.error(`Network error on attempt ${attempt}:`, networkError);
+          if (attempt === 3) {
+            throw new Error('Database connection failed after 3 attempts. Please check your internet connection and try again.');
+          }
+          await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        }
+      }
 
       // Check if table doesn't exist
       if (error && error.message.includes('does not exist')) {
@@ -1185,7 +1212,7 @@ Here's the math: ${referralUrl}`,
         },
         {
           type: "Behind the Scenes",
-          content: `🎬 BEHIND THE SCENES: My entire link building operation revealed. See exactly how I manage multiple Backlink ∞ campaigns and scale to 6-figure results: ${referralUrl}`,
+          content: `�� BEHIND THE SCENES: My entire link building operation revealed. See exactly how I manage multiple Backlink ∞ campaigns and scale to 6-figure results: ${referralUrl}`,
           engagement: "Very High",
           audience: "BTS enthusiasts"
         },
