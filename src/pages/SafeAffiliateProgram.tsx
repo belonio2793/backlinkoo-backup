@@ -871,7 +871,7 @@ const SafeAffiliateProgram: React.FC = () => {
                     <span>Session persistence</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span>✓</span>
+                    <span>��</span>
                     <span>First-click attribution</span>
                   </div>
                 </div>
@@ -1259,10 +1259,37 @@ const SafeAffiliateProgram: React.FC = () => {
                   {/* Content Templates */}
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <Label className="text-sm font-medium mb-3 block">Ready-to-Post Content</Label>
+                      <div className="flex items-center justify-between mb-3">
+                        <Label className="text-sm font-medium">Ready-to-Post Content</Label>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setSocialPage(Math.max(0, socialPage - 1))}
+                            disabled={socialPage === 0}
+                            className="h-7 px-2"
+                          >
+                            ←
+                          </Button>
+                          <span className="text-xs text-gray-500">
+                            {socialPage + 1} / {Math.ceil(getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).length / 3)}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setSocialPage(socialPage + 1)}
+                            disabled={(socialPage + 1) * 3 >= getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).length}
+                            className="h-7 px-2"
+                          >
+                            →
+                          </Button>
+                        </div>
+                      </div>
                       <div className="space-y-3">
-                        {getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).map((template, index) => (
-                          <div key={index} className="p-4 bg-gray-50 rounded-lg border">
+                        {getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url)
+                          .slice(socialPage * 3, (socialPage + 1) * 3)
+                          .map((template, index) => (
+                          <div key={socialPage * 3 + index} className="p-4 bg-gray-50 rounded-lg border">
                             <div className="flex items-start justify-between mb-2">
                               <Badge variant="outline" className="text-xs">
                                 {template.type}
