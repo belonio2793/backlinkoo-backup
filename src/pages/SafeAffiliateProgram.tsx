@@ -198,7 +198,7 @@ const SafeAffiliateProgram: React.FC = () => {
                 className="border-2 border-blue-600 text-blue-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-colors"
                 onClick={() => navigate('/login')}
               >
-                ��� Sign In to Dashboard
+                📱 Sign In to Dashboard
               </button>
             </div>
 
@@ -543,26 +543,69 @@ const SafeAffiliateProgram: React.FC = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-xl font-bold mb-4">🚀 Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 transition-colors text-center">
-              <span className="block text-2xl mb-2">📱</span>
+        <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
+          <h2 className="text-xl font-bold mb-4">🚀 Quick Start Guide</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <button
+              onClick={() => copyToClipboard(affiliateData.referral_url)}
+              className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 transition-colors text-center group hover:bg-blue-50"
+            >
+              <span className="block text-2xl mb-2 group-hover:scale-110 transition-transform">📱</span>
               <span className="font-semibold">Share on Social</span>
               <p className="text-sm text-gray-600">Post your referral links</p>
             </button>
-            
-            <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-green-300 transition-colors text-center">
-              <span className="block text-2xl mb-2">📧</span>
-              <span className="font-semibold">Email Your List</span>
-              <p className="text-sm text-gray-600">Send to subscribers</p>
+
+            <button
+              onClick={() => copyToClipboard(`Check out Backlinkoo - the best SEO tool I've found! ${affiliateData.referral_url}`)}
+              className="p-4 border-2 border-gray-200 rounded-lg hover:border-green-300 transition-colors text-center group hover:bg-green-50"
+            >
+              <span className="block text-2xl mb-2 group-hover:scale-110 transition-transform">📧</span>
+              <span className="font-semibold">Email Template</span>
+              <p className="text-sm text-gray-600">Copy email template</p>
             </button>
-            
-            <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 transition-colors text-center">
-              <span className="block text-2xl mb-2">📊</span>
-              <span className="font-semibold">View Analytics</span>
-              <p className="text-sm text-gray-600">Track performance</p>
+
+            <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 transition-colors text-center group hover:bg-purple-50">
+              <span className="block text-2xl mb-2 group-hover:scale-110 transition-transform">📊</span>
+              <span className="font-semibold">Track Performance</span>
+              <p className="text-sm text-gray-600">View click analytics</p>
             </button>
+
+            <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-orange-300 transition-colors text-center group hover:bg-orange-50">
+              <span className="block text-2xl mb-2 group-hover:scale-110 transition-transform">🎯</span>
+              <span className="font-semibold">Marketing Assets</span>
+              <p className="text-sm text-gray-600">Download banners</p>
+            </button>
+          </div>
+        </div>
+
+        {/* Earnings Potential Calculator */}
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200 p-6">
+          <h2 className="text-xl font-bold mb-4">💰 Earnings Potential</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-green-600">$500/mo</div>
+              <div className="text-sm text-gray-600 mb-2">5 sales × $100 avg commission</div>
+              <div className="text-xs text-gray-500">Part-time effort</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-blue-600">$2,000/mo</div>
+              <div className="text-sm text-gray-600 mb-2">20 sales × $100 avg commission</div>
+              <div className="text-xs text-gray-500">Active promotion</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-purple-600">$10,000/mo</div>
+              <div className="text-sm text-gray-600 mb-2">100+ sales × $100+ commission</div>
+              <div className="text-xs text-gray-500">Full-time affiliate</div>
+            </div>
+          </div>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-700 mb-2">
+              <strong>Your current rate:</strong> {(affiliateData.commission_rate * 100).toFixed(0)}% commission on all sales
+            </p>
+            <p className="text-xs text-gray-600">
+              Track your progress and upgrade tiers for higher commission rates up to 35%
+            </p>
           </div>
         </div>
       </div>
