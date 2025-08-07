@@ -76,12 +76,23 @@ const SafeAffiliateProgram: React.FC = () => {
 
   const joinProgram = async () => {
     if (!user) return;
-    
+
     setIsJoining(true);
     try {
+      console.log('🚀 Creating affiliate profile for user:', user.id);
+
       const affiliateCode = generateAffiliateCode();
       const customId = Math.random().toString(36).substr(2, 8).toUpperCase();
       const referralUrl = `${window.location.origin}?ref=${affiliateCode}`;
+
+      console.log('📝 Affiliate data to insert:', {
+        user_id: user.id,
+        affiliate_code: affiliateCode,
+        custom_id: customId,
+        status: 'active',
+        commission_rate: 0.20,
+        referral_url: referralUrl
+      });
 
       const { data, error } = await supabase
         .from('affiliate_programs')
@@ -99,9 +110,17 @@ const SafeAffiliateProgram: React.FC = () => {
         .select()
         .single();
 
+      console.log('📊 Insert result:', { data, error });
+
       if (error) {
-        const errorMessage = error.message || error.details || JSON.stringify(error);
-        console.error('Supabase error joining affiliate program:', errorMessage);
+        const errorMessage = error.message || error.details || error.hint || JSON.stringify(error);
+        console.error('❌ Supabase error joining affiliate program:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          fullError: error
+        });
         throw new Error(`Failed to create affiliate account: ${errorMessage}`);
       }
 
