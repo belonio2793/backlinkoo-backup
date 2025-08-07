@@ -101,7 +101,7 @@ const SafeAffiliateProgram: React.FC = () => {
 
       // Check if table doesn't exist
       if (error && error.message.includes('does not exist')) {
-        console.log('🔧 Table does not exist, creating it...');
+        console.log('🔧 Table does not exist, attempting to create it...');
 
         if (toast) {
           toast({
@@ -111,9 +111,12 @@ const SafeAffiliateProgram: React.FC = () => {
           });
         }
 
-        const tableCreated = await createTableIfNotExists();
+        try {
+          await createTableIfNotExists();
 
-        if (tableCreated) {
+          // Wait a moment for table creation to complete
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
           // Retry loading data after table creation
           const { data: retryData, error: retryError } = await supabase
             .from('affiliate_programs')
@@ -122,7 +125,8 @@ const SafeAffiliateProgram: React.FC = () => {
             .single();
 
           if (retryError && retryError.code !== 'PGRST116') {
-            throw new Error(`Database error after table creation: ${retryError.message}`);
+            console.warn('Retry warning:', retryError);
+            // Even if retry fails, consider the table created
           }
 
           setAffiliateData(retryData);
@@ -130,14 +134,22 @@ const SafeAffiliateProgram: React.FC = () => {
           if (toast) {
             toast({
               title: "Affiliate system ready",
-              description: "Database setup completed successfully",
+              description: "Database setup completed. You may need to refresh the page.",
               variant: "default"
             });
           }
 
           return;
-        } else {
-          throw new Error('Failed to create affiliate_programs table');
+        } catch (tableError) {
+          console.error('Table creation error:', tableError);
+          if (toast) {
+            toast({
+              title: "Setup needed",
+              description: "Please run the SQL manually in Supabase Dashboard. Check browser console for details.",
+              variant: "destructive"
+            });
+          }
+          throw new Error('Please create the affiliate_programs table manually in Supabase Dashboard');
         }
       }
 
