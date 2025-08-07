@@ -9,7 +9,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Badge } from '../ui/badge';
 import { Progress } from '../ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { enhancedAffiliateService } from '../../services/enhancedAffiliateService';
+import { compatibilityAffiliateService } from '../../services/compatibilityAffiliateService';
 import {
   User,
   Building,
