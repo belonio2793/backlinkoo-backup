@@ -2058,11 +2058,13 @@ ${referralUrl}`,
                   {/* Template Selection */}
                   <div>
                     <Label className="text-sm font-medium mb-3 block">Email Template Type</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
                       {[
                         { id: 'professional', name: 'Professional', desc: 'B2B focused', icon: '💼' },
                         { id: 'casual', name: 'Casual', desc: 'Friendly tone', icon: '😊' },
-                        { id: 'newsletter', name: 'Newsletter', desc: 'Content style', icon: '📰' }
+                        { id: 'newsletter', name: 'Newsletter', desc: 'Content style', icon: '📰' },
+                        { id: 'direct_outreach', name: 'Direct Outreach', desc: 'Personal approach', icon: '📧' },
+                        { id: 'follow_up', name: 'Follow-up', desc: 'Second contact', icon: '🔄' }
                       ].map((template) => (
                         <button
                           key={template.id}
