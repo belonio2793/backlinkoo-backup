@@ -1161,7 +1161,7 @@ Here's the math: ${referralUrl}`,
         },
         {
           type: "Update Video",
-          content: `🆕 MAJOR UPDATE: New Backlink ∞ features that will blow your mind! AI improvements, better targeting, and automation upgrades that change everything: ${referralUrl}`,
+          content: `�� MAJOR UPDATE: New Backlink ∞ features that will blow your mind! AI improvements, better targeting, and automation upgrades that change everything: ${referralUrl}`,
           engagement: "High",
           audience: "Update watchers"
         },
@@ -2642,7 +2642,7 @@ Here's the math: ${referralUrl}`,
                             name: 'Mobile Banner',
                             size: '320x50',
                             format: 'PNG',
-                            preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjUwIiB2aWV3Qm94PSIwIDAgMzIwIDUwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iNTAiIGZpbGw9IiMyNTYzZWIiLz48dGV4dCB4PSIxNjAiIHk9IjE4IiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QmFja2xpbmsgwqAgLSBBdXRvbWF0ZWQgTGluayBCdWlsZGluZzwvdGV4dD48dGV4dCB4PSIxNjAiIHk9IjM4IiBmaWxsPSIjZmJmMDQ3IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TdGFydCBGcmVlIFRyaWFsPC90ZXh0Pjwvc3ZnPg=='
+                            preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjUwIiB2aWV3Qm94PSIwIDAgMzIwIDUwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iYmc0IiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMGY1N2ZmIi8+PHN0b3Agb2Zmc2V0PSI1MCUiIHN0b3AtY29sb3I9IiM0Nzc3ZjMiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM2NjY2ZjciLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMzIwIiBoZWlnaHQ9IjUwIiBmaWxsPSJ1cmwoI2JnNCkiIHJ4PSI4Ii8+PGNpcmNsZSBjeD0iMzAiIGN5PSIyNSIgcj0iMTIiIGZpbGw9IiNmZmY3MDAiIGZpbHRlcj0iZHJvcC1zaGFkb3coMCA0cHggMTJweCByZ2JhKDI1NSwyNDcsMCwwLjQpKSIvPjx0ZXh0IHg9IjMwIiB5PSIzMCIgZmlsbD0iIzBmMTcyYSIgZm9udC1mYW1pbHk9Ii1hcHBsZS1zeXN0ZW0sQmxpbmtNYWNTeXN0ZW1Gb250LCdTZWdvZSBVSScsUm9ib3RvLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPuKIgzwvdGV4dD48dGV4dCB4PSIxMjAiIHk9IjIwIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9Ii1hcHBsZS1zeXN0ZW0sQmxpbmtNYWNTeXN0ZW1Gb250LCdTZWdvZSBVSScsUm9ib3RvLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbHRlcj0iZHJvcC1zaGFkb3coMCAycHggOHB4IHJnYmEoMCwwLDAsMC4zKSkiPkJhY2tsaW5rIOKIgyAtIEF1dG9tYXRlZCBMaW5rIEJ1aWxkaW5nPC90ZXh0Pjx0ZXh0IHg9IjEyMCIgeT0iMzciIGZpbGw9IiNmZmY3MDAiIGZvbnQtZmFtaWx5PSItYXBwbGUtc3lzdGVtLEJsaW5rTWFjU3lzdGVtRm9udCwnU2Vnb2UgVUknLFJvYm90byxzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNjAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7ijYIgMzAwJSBGYXN0ZXIgUmVzdWx0cyAtIFRyeSBGcmVlPC90ZXh0Pjx0ZXh0IHg9IjI4NSIgeT0iMzAiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSxCbGlua01hY1N5c3RlbUZvbnQsJ1NlZ29lIFVJJyxSb2JvdG8sc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+JmFtcDsjODU5NDsvdGV4dD48L3N2Zz4='
                           }
                         ].map((banner) => (
                           <div key={banner.name} className="p-3 bg-gray-50 rounded border">
