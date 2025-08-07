@@ -375,7 +375,7 @@ ${referralUrl} #SEO #LinkBuilding`,
         },
         {
           type: "Tips",
-          content: `💡 Pro tip: Quality backlinks > quantity.
+          content: `��� Pro tip: Quality backlinks > quantity.
 
 Backlink ∞ helps you get high-DA links that actually move the needle.
 
@@ -1180,7 +1180,7 @@ Here's the math: ${referralUrl}`,
         },
         {
           type: "Success Stories",
-          content: `🏆 SUCCESS STORIES: 5 entrepreneurs who transformed their businesses with Backlink ���. Their strategies, results, and advice for getting started: ${referralUrl}`,
+          content: `🏆 SUCCESS STORIES: 5 entrepreneurs who transformed their businesses with Backlink ∞. Their strategies, results, and advice for getting started: ${referralUrl}`,
           engagement: "High",
           audience: "Inspiration seekers"
         },
@@ -1659,7 +1659,7 @@ Here's the math: ${referralUrl}`,
         <Header />
         <div className="max-w-4xl mx-auto px-6 py-12">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Join the Backlink ∞ Affiliate Program</h1>
+            <h1 className="text-3xl font-bold mb-2">Join the Backlink ��� Affiliate Program</h1>
             <p className="text-gray-600">Start earning commissions by promoting the world's leading SEO platform</p>
           </div>
 
@@ -1760,7 +1760,7 @@ Here's the math: ${referralUrl}`,
           <div className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-lg p-6 mb-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold mb-2">�� Welcome to the Affiliate Program!</h2>
+                <h2 className="text-xl font-bold mb-2">🎉 Welcome to the Affiliate Program!</h2>
                 <p className="text-green-100">
                   Your account is active and ready to earn commissions. Your unique affiliate links are tied to User ID: {user.id.slice(-8)}
                 </p>
