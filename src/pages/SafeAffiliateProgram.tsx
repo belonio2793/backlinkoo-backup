@@ -355,26 +355,42 @@ const SafeAffiliateProgram: React.FC = () => {
         // Page 1
         {
           type: "Discovery",
-          content: `🚀 Just discovered Backlink ∞ - game-changing SEO tool for link building! Their automated outreach is incredible. Check it out: ${referralUrl}`,
+          content: `🚀 Just discovered Backlink ∞ - game-changing SEO tool for link building!
+
+Their automated outreach is incredible. Check it out:
+
+${referralUrl}`,
           engagement: "High",
           audience: "SEO professionals"
         },
         {
           type: "Results",
-          content: `📈 Increased my domain authority by 15 points using Backlink ∞'s link building platform. The ROI is amazing! ${referralUrl} #SEO #LinkBuilding`,
+          content: `📈 Increased my domain authority by 15 points using Backlink ∞'s link building platform.
+
+The ROI is amazing!
+
+${referralUrl} #SEO #LinkBuilding`,
           engagement: "Very High",
           audience: "Digital marketers"
         },
         {
           type: "Tips",
-          content: `💡 Pro tip: Quality backlinks > quantity. Backlink ∞ helps you get high-DA links that actually move the needle. Try it: ${referralUrl}`,
+          content: `💡 Pro tip: Quality backlinks > quantity.
+
+Backlink ∞ helps you get high-DA links that actually move the needle.
+
+Try it: ${referralUrl}`,
           engagement: "Medium",
           audience: "Business owners"
         },
         // Page 2
         {
           type: "Question",
-          content: `Struggling with link building? 🤔 I was too until I found Backlink ∞. Their automated system has saved me 20+ hours per week. Who else needs this? ${referralUrl}`,
+          content: `Struggling with link building? 🤔
+
+I was too until I found Backlink ∞. Their automated system has saved me 20+ hours per week.
+
+Who else needs this? ${referralUrl}`,
           engagement: "High",
           audience: "SEO beginners"
         },
