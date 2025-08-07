@@ -393,7 +393,7 @@ const SafeAffiliateProgram: React.FC = () => {
         // Page 3
         {
           type: "Stats",
-          content: `�� 6 months with Backlink ∞:\n• 400+ high-quality backlinks\n• 65% increase in organic traffic\n• 23 point DA improvement\n\nResults speak louder than words: ${referralUrl}`,
+          content: `📊 6 months with Backlink ∞:\n• 400+ high-quality backlinks\n• 65% increase in organic traffic\n• 23 point DA improvement\n\nResults speak louder than words: ${referralUrl}`,
           engagement: "High",
           audience: "Data-driven marketers"
         },
@@ -572,7 +572,7 @@ const SafeAffiliateProgram: React.FC = () => {
         // Page 1
         {
           type: "Visual Story",
-          content: `��� Behind the scenes of my SEO growth strategy ✨ Swipe to see how Backlink ∞ helped me build high-quality backlinks that actually work! Link in bio: ${referralUrl} #SEO #DigitalMarketing #Entrepreneur`,
+          content: `📊 Behind the scenes of my SEO growth strategy ✨ Swipe to see how Backlink ∞ helped me build high-quality backlinks that actually work! Link in bio: ${referralUrl} #SEO #DigitalMarketing #Entrepreneur`,
           engagement: "High",
           audience: "Visual marketers"
         },
@@ -1294,7 +1294,10 @@ const SafeAffiliateProgram: React.FC = () => {
                       ].map((platform) => (
                         <button
                           key={platform.id}
-                          onClick={() => setSelectedSocialPlatform(platform.id)}
+                          onClick={() => {
+                            setSelectedSocialPlatform(platform.id);
+                            setSocialPage(0); // Reset pagination when switching platforms
+                          }}
                           className={`p-3 rounded-lg border-2 transition-all duration-200 ${
                             selectedSocialPlatform === platform.id
                               ? `border-blue-500 bg-blue-50 ${platform.textColor}`
