@@ -409,7 +409,7 @@ Who else needs this? ${referralUrl}`,
         // Page 3
         {
           type: "Stats",
-          content: `�� 6 months with Backlink ∞:\n• 400+ high-quality backlinks\n• 65% increase in organic traffic\n• 23 point DA improvement\n\nResults speak louder than words: ${referralUrl}`,
+          content: `📊 6 months with Backlink ∞:\n• 400+ high-quality backlinks\n• 65% increase in organic traffic\n• 23 point DA improvement\n\nResults speak louder than words: ${referralUrl}`,
           engagement: "High",
           audience: "Data-driven marketers"
         },
@@ -625,7 +625,7 @@ ${referralUrl}`,
         // Page 4
         {
           type: "Data-Driven Results",
-          content: `Data speaks louder than opinions. After 6 months with Backlink ∞:\n\n📈 Domain Authority: +23 points\n�� Referring domains: +287\n📈 Organic traffic: +156%\n📈 Lead quality: Significantly improved\n\nROI has exceeded all expectations. ${referralUrl}`,
+          content: `Data speaks louder than opinions. After 6 months with Backlink ∞:\n\n📈 Domain Authority: +23 points\n📈 Referring domains: +287\n📈 Organic traffic: +156%\n📈 Lead quality: Significantly improved\n\nROI has exceeded all expectations. ${referralUrl}`,
           engagement: "Very High",
           audience: "Data analysts"
         },
@@ -1042,7 +1042,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Final Push",
-          content: `🎯 FINAL CALL 🎯\n\nIf you're serious about SEO success:\n\n⏰ Don't wait another day\n⏰ Every moment counts\n⏰ Your competitors aren't waiting\n⏰ Start building links NOW\n\nBacklink ∞ = Your secret weapon! 🚀\n\nLink in bio: ${referralUrl}\n\n#FinalCall #TakeAction`,
+          content: `🎯 FINAL CALL 🎯\n\nIf you're serious about SEO success:\n\n⏰ Don't wait another day\n��� Every moment counts\n⏰ Your competitors aren't waiting\n⏰ Start building links NOW\n\nBacklink ∞ = Your secret weapon! 🚀\n\nLink in bio: ${referralUrl}\n\n#FinalCall #TakeAction`,
           engagement: "High",
           audience: "Action takers"
         }
@@ -2125,7 +2125,7 @@ Here's the math: ${referralUrl}`,
                   {/* Platform-Specific Tips */}
                   <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
                     <h4 className="font-semibold text-blue-900 mb-2">
-                      ���� {selectedSocialPlatform.charAt(0).toUpperCase() + selectedSocialPlatform.slice(1)} Best Practices
+                      💡 {selectedSocialPlatform.charAt(0).toUpperCase() + selectedSocialPlatform.slice(1)} Best Practices
                     </h4>
                     <div className="text-sm text-blue-800 space-y-1">
                       {getPlatformTips(selectedSocialPlatform).map((tip, index) => (
