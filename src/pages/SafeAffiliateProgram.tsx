@@ -475,7 +475,7 @@ Who else needs this? ${referralUrl}`,
         // Page 3
         {
           type: "Stats",
-          content: `📊 6 months with Backlink ∞:\n• 400+ high-quality backlinks\n• 65% increase in organic traffic\n• 23 point DA improvement\n\nResults speak louder than words: ${referralUrl}`,
+          content: `�� 6 months with Backlink ∞:\n• 400+ high-quality backlinks\n• 65% increase in organic traffic\n• 23 point DA improvement\n\nResults speak louder than words: ${referralUrl}`,
           engagement: "High",
           audience: "Data-driven marketers"
         },
@@ -506,7 +506,7 @@ Here's my experience: ${referralUrl}`,
         },
         {
           type: "Urgency",
-          content: `🔥 LAST 24 HOURS: Backlink ∞'s free trial ends soon.
+          content: `🔥 LAST 24 HOURS: Backlink ���'s free trial ends soon.
 
 If you're serious about SEO, don't miss this opportunity to transform your link building:
 
@@ -1175,7 +1175,7 @@ ${referralUrl}`,
         // Page 3
         {
           type: "Tool Comparison",
-          content: `��️ ULTIMATE COMPARISON: Backlink ∞ vs 7 other link building tools.
+          content: `⚔️ ULTIMATE COMPARISON: Backlink ∞ vs 7 other link building tools.
 
 I spent $3,000 testing them all so you don't have to. The winner might surprise you!
 
@@ -2131,7 +2131,7 @@ Here's the math: ${referralUrl}`,
                             ←
                           </Button>
                           <span className="text-xs text-gray-500">
-                            {socialPage + 1} / {Math.ceil(getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).length / 3)}
+                            {socialPage + 1} / {Math.ceil(getSocialTemplates(selectedSocialPlatform, cleanUrl(affiliateData.referral_url)).length / 3)}
                           </span>
                           <Button
                             size="sm"
