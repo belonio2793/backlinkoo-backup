@@ -872,7 +872,7 @@ Here's what happened... ${referralUrl}`,
         },
         {
           type: "Group Share",
-          content: `Friends! I had to share this with you all. After months of trying different SEO strategies, I finally found something that works. Backlink ∞ has helped me increase my website traffic by 300% in just 2 months! ${referralUrl}`,
+          content: `Friends! I had to share this with you all. After months of trying different SEO strategies, I finally found something that works. Backlink �� has helped me increase my website traffic by 300% in just 2 months! ${referralUrl}`,
           engagement: "High",
           audience: "Facebook groups"
         },
@@ -1221,7 +1221,7 @@ Here's the math: ${referralUrl}`,
         // Page 5
         {
           type: "Q&A Session",
-          content: `�� LIVE Q&A: Everything you want to know about Backlink ∞. I'm answering your top 50 questions about features, pricing, results, and more. Timestamps included: ${referralUrl}`,
+          content: `❓ LIVE Q&A: Everything you want to know about Backlink ∞. I'm answering your top 50 questions about features, pricing, results, and more. Timestamps included: ${referralUrl}`,
           engagement: "High",
           audience: "Question askers"
         },
@@ -2234,7 +2234,7 @@ Here's the math: ${referralUrl}`,
                           <Button
                             size="sm"
                             className="mt-3"
-                            onClick={() => copyToClipboard(`${customMessage} ${affiliateData.referral_url}`)}
+                            onClick={() => copyToClipboard(`${customMessage} ${cleanUrl(affiliateData.referral_url)}`)}
                           >
                             <Copy className="h-4 w-4 mr-2" />
                             Copy Custom Post
