@@ -1004,7 +1004,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Growth Hack",
-          content: `��� GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️��� Technical SEO ✅\n3️⃣ High-quality backlinks ✅\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
+          content: `��� GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ��\n2️��� Technical SEO ✅\n3️⃣ High-quality backlinks ✅\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
           engagement: "Very High",
           audience: "Growth hackers"
         },
@@ -1023,7 +1023,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Weekend Warrior",
-          content: `⚡ WEEKEND WARRIOR ⚡\n\nWhile others rest, I optimize! 💪\n\nThis weekend's project:\nOptimizing my Backlink ∞ campaigns for even better results\n\nHustle never stops! 🔥\n\nLink in bio: ${referralUrl}\n\n#WeekendWarrior #HustleMode #SEOLife`,
+          content: `⚡ WEEKEND WARRIOR ⚡\n\nWhile others rest, I optimize! ��\n\nThis weekend's project:\nOptimizing my Backlink ∞ campaigns for even better results\n\nHustle never stops! 🔥\n\nLink in bio: ${referralUrl}\n\n#WeekendWarrior #HustleMode #SEOLife`,
           engagement: "Medium",
           audience: "Weekend workers"
         },
@@ -1071,7 +1071,7 @@ Full breakdown in today's video: ${referralUrl}`,
         },
         {
           type: "Case Study",
-          content: `🔥 CASE STUDY: How I 10x'd my organic traffic using ONE tool. In this deep-dive video, I show you exactly how Backlink �� transformed my SEO strategy: ${referralUrl}`,
+          content: `🔥 CASE STUDY: How I 10x'd my organic traffic using ONE tool. In this deep-dive video, I show you exactly how Backlink ∞ transformed my SEO strategy: ${referralUrl}`,
           engagement: "High",
           audience: "Strategy learners"
         },
@@ -1119,7 +1119,7 @@ ${referralUrl}`,
         },
         {
           type: "Expert Interview",
-          content: `🎤 EXPERT INTERVIEW: SEO guru reveals why Backlink ��� is the future of link building. Insider secrets and industry predictions you won't hear anywhere else: ${referralUrl}`,
+          content: `🎤 EXPERT INTERVIEW: SEO guru reveals why Backlink ∞ is the future of link building. Insider secrets and industry predictions you won't hear anywhere else: ${referralUrl}`,
           engagement: "High",
           audience: "Expert insights"
         },
@@ -1591,7 +1591,7 @@ Here's the math: ${referralUrl}`,
 
               <div className="bg-white p-8 rounded-xl shadow-sm border-2 border-blue-200">
                 <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-2xl">���</span>
+                  <span className="text-2xl">�����</span>
                 </div>
                 <h3 className="text-2xl font-bold mb-4">30-Day Cookies</h3>
                 <p className="text-gray-600 mb-4">Extended attribution window ensures maximum earnings</p>
