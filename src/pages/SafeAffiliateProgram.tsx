@@ -360,13 +360,19 @@ const SafeAffiliateProgram: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <button
                 className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
-                onClick={() => navigate('/login')}
+                onClick={() => {
+                  setDefaultTab('signup');
+                  setShowLoginModal(true);
+                }}
               >
                 🚀 Create Account & Join
               </button>
               <button
                 className="border-2 border-blue-600 text-blue-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-colors"
-                onClick={() => navigate('/login')}
+                onClick={() => {
+                  setDefaultTab('login');
+                  setShowLoginModal(true);
+                }}
               >
                 📱 Sign In to Dashboard
               </button>
