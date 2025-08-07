@@ -16,45 +16,145 @@ interface AssetCardProps {
   onPreview: (name: string) => void;
 }
 
-const AssetCard: React.FC<AssetCardProps> = ({ asset, onDownload, onPreview }) => (
-  <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl hover:shadow-purple-500/25 transition-all duration-700 hover:scale-[1.02] group">
-    <div className="flex items-center justify-between mb-6">
-      <div>
-        <h5 className="text-2xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">{asset.name}</h5>
-        <p className="text-purple-200 text-base font-medium">{asset.size} • {asset.description}</p>
+const AssetCard: React.FC<AssetCardProps> = ({ asset, onDownload, onPreview }) => {
+  // Generate high-quality preview data URL from the React component
+  const getPreviewDataUrl = () => {
+    // Create a data URL for the preview based on asset type
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas size based on asset dimensions
+    const [width, height] = asset.size.split('x').map(Number);
+    canvas.width = width;
+    canvas.height = height;
+
+    if (ctx) {
+      // Create a basic gradient background as fallback
+      const gradient = ctx.createLinearGradient(0, 0, width, height);
+      gradient.addColorStop(0, '#4f46e5');
+      gradient.addColorStop(0.5, '#7c3aed');
+      gradient.addColorStop(1, '#db2777');
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+
+      // Add text
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Backlink ∞', width / 2, height / 2);
+
+      ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText(asset.description, width / 2, height / 2 + 60);
+    }
+
+    return canvas.toDataURL('image/png');
+  };
+
+  const handleDownload = () => {
+    const dataUrl = getPreviewDataUrl();
+    const link = document.createElement('a');
+    link.download = `${asset.name.toLowerCase().replace(/\s+/g, '-')}-${asset.size}.${asset.format.toLowerCase()}`;
+    link.href = dataUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Also call the original callback
+    onDownload(asset.name, dataUrl, asset.format);
+  };
+
+  const handlePreview = () => {
+    const dataUrl = getPreviewDataUrl();
+
+    // Create a modal/popup for preview
+    const previewWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+    if (previewWindow) {
+      previewWindow.document.write(`
+        <html>
+          <head>
+            <title>${asset.name} Preview</title>
+            <style>
+              body {
+                margin: 0;
+                padding: 20px;
+                background: #1a1a1a;
+                color: white;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+              }
+              h1 { margin-bottom: 10px; }
+              .info { margin-bottom: 20px; opacity: 0.7; }
+              img {
+                max-width: 100%;
+                height: auto;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                border-radius: 8px;
+              }
+            </style>
+          </head>
+          <body>
+            <h1>${asset.name}</h1>
+            <div class="info">${asset.size} • ${asset.format} • ${asset.description}</div>
+            <img src="${dataUrl}" alt="${asset.name}" />
+          </body>
+        </html>
+      `);
+      previewWindow.document.close();
+    }
+
+    // Also call the original callback
+    onPreview(asset.name, dataUrl);
+  };
+
+  return (
+    <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl hover:shadow-purple-500/25 transition-all duration-700 hover:scale-[1.02] group">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h5 className="text-2xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">{asset.name}</h5>
+          <p className="text-purple-200 text-base font-medium">{asset.size} • {asset.description}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Badge className="bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold text-sm px-4 py-1.5">
+            {asset.format}
+          </Badge>
+          <div className="w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse"></div>
+        </div>
       </div>
-      <div className="flex items-center gap-3">
-        <Badge className="bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold text-sm px-4 py-1.5">
-          {asset.format}
-        </Badge>
-        <div className="w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse"></div>
+
+      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl p-6 mb-8 border border-purple-500/20 shadow-inner backdrop-blur-sm">
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 p-2 cursor-pointer hover:scale-105 transition-transform duration-300" onClick={handlePreview}>
+          {asset.preview}
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-xl">
+            <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
+              <Eye className="h-8 w-8 text-white" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-4">
+        <Button
+          className="flex-1 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-700 hover:from-purple-700 hover:via-pink-700 hover:to-purple-800 text-white font-bold text-lg py-3 shadow-xl hover:shadow-purple-500/30 transition-all duration-300"
+          onClick={handleDownload}
+        >
+          <Download className="h-5 w-5 mr-3" />
+          Download 4K
+        </Button>
+        <Button
+          variant="outline"
+          className="border-2 border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white font-bold px-6 py-3 transition-all duration-300"
+          onClick={handlePreview}
+        >
+          <Eye className="h-5 w-5" />
+        </Button>
       </div>
     </div>
-    
-    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl p-6 mb-8 border border-purple-500/20 shadow-inner backdrop-blur-sm">
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 p-2">
-        {asset.preview}
-      </div>
-    </div>
-    
-    <div className="flex gap-4">
-      <Button 
-        className="flex-1 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-700 hover:from-purple-700 hover:via-pink-700 hover:to-purple-800 text-white font-bold text-lg py-3 shadow-xl hover:shadow-purple-500/30 transition-all duration-300"
-        onClick={() => onDownload(asset.name)}
-      >
-        <Download className="h-5 w-5 mr-3" />
-        Download 4K
-      </Button>
-      <Button 
-        variant="outline" 
-        className="border-2 border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white font-bold px-6 py-3 transition-all duration-300"
-        onClick={() => onPreview(asset.name)}
-      >
-        <Eye className="h-5 w-5" />
-      </Button>
-    </div>
-  </div>
-);
+  );
+};
 
 const CreativeAssetsShowcase: React.FC<{
   onDownload: (name: string, preview: string, format: string) => void;
@@ -74,7 +174,7 @@ const CreativeAssetsShowcase: React.FC<{
           <div className="relative h-full flex items-center justify-between px-8">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
-                <span className="text-2xl font-black text-gray-900">∞</span>
+                <span className="text-2xl font-black text-gray-900">���</span>
               </div>
               <div>
                 <div className="text-white font-black text-3xl drop-shadow-xl">Backlink ∞</div>
