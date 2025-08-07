@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { useAuth } from '../hooks/useAuth';
 import { enhancedAffiliateService } from '../services/enhancedAffiliateService';
 import ComprehensiveAffiliateDashboard from '../components/affiliate/ComprehensiveAffiliateDashboard';
-import AffiliateRegistration from '../components/affiliate/AffiliateRegistration';
+import EnhancedAffiliateRegistration from '../components/affiliate/EnhancedAffiliateRegistration';
 import AffiliateAssetLibrary from '../components/affiliate/AffiliateAssetLibrary';
 import AffiliateSetupGuide from '../components/AffiliateSetupGuide';
 import {
