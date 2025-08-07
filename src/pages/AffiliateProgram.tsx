@@ -9,6 +9,7 @@ import { affiliateService } from '../services/affiliateService';
 import AffiliateDashboard from '../components/affiliate/AffiliateDashboard';
 import AffiliateRegistration from '../components/affiliate/AffiliateRegistration';
 import AffiliateAssetLibrary from '../components/affiliate/AffiliateAssetLibrary';
+import AffiliateSetupGuide from '../components/AffiliateSetupGuide';
 import {
   DollarSign,
   Users,
