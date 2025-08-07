@@ -11,6 +11,7 @@ import { Label } from '../components/ui/label';
 import { useToast } from '../hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
 import { AffiliateSystemSetup } from '../components/AffiliateSystemSetup';
+import { Footer } from '../components/Footer';
 import {
   DollarSign,
   Users,
@@ -1106,6 +1107,7 @@ const AffiliateHub: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+      <Footer />
     </div>
   );
 };

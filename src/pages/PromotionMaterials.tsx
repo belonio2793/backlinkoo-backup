@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { Footer } from '@/components/Footer';
 import { 
   Infinity,
   ArrowLeft,
@@ -138,7 +139,7 @@ Learn more: [Your Affiliate Link]
     twitter: [
       {
         title: "Quick Win Tweet",
-        content: `🔥 SEO professionals: Stop wasting money on low-quality backlinks
+        content: `��� SEO professionals: Stop wasting money on low-quality backlinks
 
 What you need:
 ✅ High DA domains
@@ -634,6 +635,7 @@ For fellow marketers looking to scale their SEO efforts, I recommend checking ou
           </CardContent>
         </Card>
       </div>
+      <Footer />
     </div>
   );
 };
