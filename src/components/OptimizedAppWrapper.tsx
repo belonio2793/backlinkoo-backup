@@ -271,6 +271,11 @@ export const OptimizedAppWrapper = () => {
               <LazyAffiliateProgram />
             </InstantEmailVerificationGuard>
           } />
+          <Route path="/affiliate/test" element={
+            <InstantEmailVerificationGuard>
+              <AffiliateTest />
+            </InstantEmailVerificationGuard>
+          } />
           <Route path="/affiliate/promotion-materials" element={
             <InstantEmailVerificationGuard>
               <LazyPromotionMaterials />
