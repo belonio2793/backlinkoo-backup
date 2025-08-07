@@ -346,14 +346,24 @@ const SafeAffiliateProgram: React.FC = () => {
   // Affiliate Dashboard
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b">
+      {/* Enhanced Header */}
+      <div className="bg-white border-b shadow-sm">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Affiliate Dashboard</h1>
-              <p className="text-gray-600">Welcome back, {user.email?.split('@')[0]}!</p>
+            <div className="flex items-center gap-4">
+              <div className="bg-blue-100 p-2 rounded-lg">
+                <span className="text-blue-600 text-xl">∞</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Affiliate Dashboard</h1>
+                <p className="text-gray-600">Welcome back, {user.email?.split('@')[0]}! 👋</p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
+              <div className="text-right mr-3">
+                <div className="text-sm text-gray-500">User ID</div>
+                <div className="text-xs font-mono text-gray-700">{user.id.slice(-8)}</div>
+              </div>
               <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium border border-orange-200">
                 🥉 Bronze Affiliate
               </span>
@@ -364,6 +374,26 @@ const SafeAffiliateProgram: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Welcome Banner for New Affiliates */}
+      {affiliateData.total_earnings === 0 && (
+        <div className="max-w-6xl mx-auto px-6 pt-6">
+          <div className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-lg p-6 mb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold mb-2">🎉 Welcome to the Affiliate Program!</h2>
+                <p className="text-green-100">
+                  Your account is active and ready to earn commissions. Your unique affiliate links are tied to User ID: {user.id.slice(-8)}
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold">${affiliateData.total_earnings.toFixed(2)}</div>
+                <div className="text-green-100 text-sm">Total Earnings</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Quick Stats */}
