@@ -708,7 +708,7 @@ const SafeAffiliateProgram: React.FC = () => {
 
 <ul style="list-style: none; padding-left: 0;">
   <li>✅ <strong>Automated outreach</strong> that actually works</li>
-  <li>��� <strong>High-quality backlinks</strong> from real websites</li>
+  <li>✅ <strong>High-quality backlinks</strong> from real websites</li>
   <li>✅ <strong>Super easy to use</strong> interface</li>
 </ul>
 
@@ -1620,21 +1620,62 @@ const SafeAffiliateProgram: React.FC = () => {
                       </h4>
                       <div className="space-y-3">
                         {[
-                          { name: 'Leaderboard', size: '728x90', format: 'PNG/JPG' },
-                          { name: 'Rectangle', size: '300x250', format: 'PNG/JPG' },
-                          { name: 'Skyscraper', size: '160x600', format: 'PNG/JPG' },
-                          { name: 'Mobile Banner', size: '320x50', format: 'PNG/JPG' }
+                          {
+                            name: 'Leaderboard',
+                            size: '728x90',
+                            format: 'PNG',
+                            preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzI4IiBoZWlnaHQ9IjkwIiB2aWV3Qm94PSIwIDAgNzI4IDkwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI3MjgiIGhlaWdodD0iOTAiIGZpbGw9IiMyNTYzZWIiLz48dGV4dCB4PSIzNjQiIHk9IjMwIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QmFja2xpbmsgwqA8L3RleHQ+PHRleHQgeD0iMzY0IiB5PSI1NSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QXV0b21hdGVkIExpbmsgQnVpbGRpbmcgUGxhdGZvcm08L3RleHQ+PHRleHQgeD0iMzY0IiB5PSI3NSIgZmlsbD0iI2ZiZjA0NyIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+U3RhcnQgWW91ciBGcmVlIFRyaWFsIFRvZGF5PC90ZXh0Pjwvc3ZnPg=='
+                          },
+                          {
+                            name: 'Rectangle',
+                            size: '300x250',
+                            format: 'PNG',
+                            preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDMwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyNTAiIGZpbGw9IiMyNTYzZWIiLz48dGV4dCB4PSIxNTAiIHk9IjQwIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QmFja2xpbms8L3RleHQ+PHRleHQgeD0iMTUwIiB5PSI2NSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyNCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPuKInzwvdGV4dD48dGV4dCB4PSIxNTAiIHk9IjEwNSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QXV0b21hdGVkPC90ZXh0Pjx0ZXh0IHg9IjE1MCIgeT0iMTI1IiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5MaW5rIEJ1aWxkaW5nPC90ZXh0Pjx0ZXh0IHg9IjE1MCIgeT0iMTQ1IiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5QbGF0Zm9ybTwvdGV4dD48cmVjdCB4PSI1MCIgeT0iMTgwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZmJmMDQ3IiByeD0iNSIvPjx0ZXh0IHg9IjE1MCIgeT0iMjA1IiBmaWxsPSIjMTExODI3IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TdGFydCBGcmVlIFRyaWFsPC90ZXh0Pjwvc3ZnPg=='
+                          },
+                          {
+                            name: 'Skyscraper',
+                            size: '160x600',
+                            format: 'PNG',
+                            preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYwIiBoZWlnaHQ9IjYwMCIgdmlld0JveD0iMCAwIDE2MCA2MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE2MCIgaGVpZ2h0PSI2MDAiIGZpbGw9IiMyNTYzZWIiLz48dGV4dCB4PSI4MCIgeT0iNDAiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5CYWNrbGluazwvdGV4dD48dGV4dCB4PSI4MCIgeT0iNjUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7iiJ88L3RleHQ+PHRleHQgeD0iODAiIHk9IjEyMCIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QXV0b21hdGVkPC90ZXh0Pjx0ZXh0IHg9IjgwIiB5PSIxNDAiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkxpbmsgQnVpbGRpbmc8L3RleHQ+PHRleHQgeD0iODAiIHk9IjE2MCIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UGxhdGZvcm08L3RleHQ+PGNpcmNsZSBjeD0iODAiIGN5PSIyMDAiIHI9IjMwIiBmaWxsPSIjZmJmMDQ3Ii8+PHRleHQgeD0iODAiIHk9IjIwNyIgZmlsbD0iIzExMTgyNyIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VFJZPC90ZXh0Pjx0ZXh0IHg9IjgwIiB5PSIyODAiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPuKAmiBIaWdoLURBPC90ZXh0Pjx0ZXh0IHg9IjgwIiB5PSIzMDAiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkJhY2tsaW5rczwvdGV4dD48dGV4dCB4PSI4MCIgeT0iMzMwIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7igKIgQUkgT3V0cmVhY2g8L3RleHQ+PHRleHQgeD0iODAiIHk9IjM2MCIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+4oCiIEF1dG9tYXRpb248L3RleHQ+PHJlY3QgeD0iMjAiIHk9IjQ4MCIgd2lkdGg9IjEyMCIgaGVpZ2h0PSIzNSIgZmlsbD0iI2ZiZjA0NyIgcng9IjUiLz48dGV4dCB4PSI4MCIgeT0iNTAyIiBmaWxsPSIjMTExODI3IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TdGFydCBGcmVlIFRyaWFsPC90ZXh0Pjwvc3ZnPg=='
+                          },
+                          {
+                            name: 'Mobile Banner',
+                            size: '320x50',
+                            format: 'PNG',
+                            preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjUwIiB2aWV3Qm94PSIwIDAgMzIwIDUwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iNTAiIGZpbGw9IiMyNTYzZWIiLz48dGV4dCB4PSIxNjAiIHk9IjE4IiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QmFja2xpbmsgwqAgLSBBdXRvbWF0ZWQgTGluayBCdWlsZGluZzwvdGV4dD48dGV4dCB4PSIxNjAiIHk9IjM4IiBmaWxsPSIjZmJmMDQ3IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TdGFydCBGcmVlIFRyaWFsPC90ZXh0Pjwvc3ZnPg=='
+                          }
                         ].map((banner) => (
                           <div key={banner.name} className="p-3 bg-gray-50 rounded border">
                             <div className="flex items-center justify-between mb-2">
                               <span className="font-medium text-sm">{banner.name}</span>
                               <Badge variant="outline" className="text-xs">{banner.format}</Badge>
                             </div>
+                            <div className="mb-3">
+                              <img
+                                src={banner.preview}
+                                alt={`${banner.name} preview`}
+                                className="w-full h-auto border rounded max-h-20 object-contain bg-white"
+                              />
+                            </div>
                             <p className="text-xs text-gray-600 mb-2">{banner.size}px</p>
-                            <Button size="sm" variant="outline" className="w-full">
-                              <Download className="h-3 w-3 mr-2" />
-                              Download
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1"
+                                onClick={() => downloadAsset(banner.name, banner.preview, banner.format)}
+                              >
+                                <Download className="h-3 w-3 mr-1" />
+                                Download
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => previewAsset(banner.name, banner.preview)}
+                              >
+                                <Eye className="h-3 w-3" />
+                              </Button>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -1648,21 +1689,62 @@ const SafeAffiliateProgram: React.FC = () => {
                       </h4>
                       <div className="space-y-3">
                         {[
-                          { name: 'Instagram Post', size: '1080x1080', platform: 'Instagram' },
-                          { name: 'Instagram Story', size: '1080x1920', platform: 'Instagram' },
-                          { name: 'Facebook Post', size: '1200x630', platform: 'Facebook' },
-                          { name: 'Twitter Header', size: '1500x500', platform: 'Twitter' }
+                          {
+                            name: 'Instagram Post',
+                            size: '1080x1080',
+                            platform: 'Instagram',
+                            preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJpbnN0YWdyYW0iIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmNTZhMDAiLz48c3RvcCBvZmZzZXQ9IjUwJSIgc3RvcC1jb2xvcj0iI2U5MTA4YyIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzUxNGE5ZCIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSJ1cmwoI2luc3RhZ3JhbSkiLz48Y2lyY2xlIGN4PSIxNTAiIGN5PSIxMDAiIHI9IjQwIiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSIjZmJmMDQ3IiBzdHJva2Utd2lkdGg9IjMiLz48dGV4dCB4PSIxNTAiIHk9IjEwOCIgZmlsbD0iIzExMTgyNyIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+wqA8L3RleHQ+PHRleHQgeD0iMTUwIiB5PSIxNjAiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5CYWNrbGluayDiiJ88L3RleHQ+PHRleHQgeD0iMTUwIiB5PSIxODUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkF1dG9tYXRlZCBMaW5rIEJ1aWxkaW5nPC90ZXh0Pjx0ZXh0IHg9IjE1MCIgeT0iMjIwIiBmaWxsPSIjZmJmMDQ3IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4jU0VPICNMaW5rQnVpbGRpbmcgI0FmZmlsaWF0ZTwvdGV4dD48cmVjdCB4PSI3NSIgeT0iMjQwIiB3aWR0aD0iMTUwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjZmJmMDQ3IiByeD0iMTUiLz48dGV4dCB4PSIxNTAiIHk9IjI2MCIgZmlsbD0iIzExMTgyNyIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+TGluayBpbiBCaW88L3RleHQ+PC9zdmc+'
+                          },
+                          {
+                            name: 'Instagram Story',
+                            size: '1080x1920',
+                            platform: 'Instagram',
+                            preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjMyMCIgdmlld0JveD0iMCAwIDE4MCAzMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJzdG9yeSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2Y1NmEwMCIvPjxzdG9wIG9mZnNldD0iNTAlIiBzdG9wLWNvbG9yPSIjZTkxMDhjIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNTE0YTlkIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIzMjAiIGZpbGw9InVybCgjc3RvcnkpIi8+PGNpcmNsZSBjeD0iOTAiIGN5PSI4MCIgcj0iMzAiIGZpbGw9IndoaXRlIiBzdHJva2U9IiNmYmYwNDciIHN0cm9rZS13aWR0aD0iMyIvPjx0ZXh0IHg9IjkwIiB5PSI4OCIgZmlsbD0iIzExMTgyNyIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+wqA8L3RleHQ+PHRleHQgeD0iOTAiIHk9IjE0MCIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkJhY2tsaW5rPC90ZXh0Pjx0ZXh0IHg9IjkwIiB5PSIxNjAiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7iiJ88L3RleHQ+PHRleHQgeD0iOTAiIHk9IjE5MCIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QXV0b21hdGVkPC90ZXh0Pjx0ZXh0IHg9IjkwIiB5PSIyMDUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkxpbmsgQnVpbGRpbmc8L3RleHQ+PHRleHQgeD0iOTAiIHk9IjI0MCIgZmlsbD0iI2ZiZjA0NyIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+U3dpcGUgVXAgZm9yIE1vcmU8L3RleHQ+PC9zdmc+'
+                          },
+                          {
+                            name: 'Facebook Post',
+                            size: '1200x630',
+                            platform: 'Facebook',
+                            preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE1OCIgdmlld0JveD0iMCAwIDMwMCAxNTgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxNTgiIGZpbGw9IiMxODc3ZjIiLz48dGV4dCB4PSIxNTAiIHk9IjQwIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QmFja2xpbmsgwqA8L3RleHQ+PHRleHQgeD0iMTUwIiB5PSI2NSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VGhlIFNtYXJ0IFdheSB0byBCdWlsZCBIaWdoLVF1YWxpdHkgQmFja2xpbmtzPC90ZXh0Pjx0ZXh0IHg9IjE1MCIgeT0iOTAiIGZpbGw9IiNkY2ZkZjQiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SmlvYW9BdXRvbWF0ZWQgT3V0cmVhY2ggLSBJbnN0YW50IFJlc3VsdHMgLSBGcmVlIFRyaWFsPC90ZXh0Pjx0ZXh0IHg9IjE1MCIgeT0iMTMwIiBmaWxsPSIjZmJmMDQ3IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TdGFydCBZb3VyIEZyZWUgVHJpYWwgVG9kYXk8L3RleHQ+PC9zdmc+'
+                          },
+                          {
+                            name: 'Twitter Header',
+                            size: '1500x500',
+                            platform: 'Twitter',
+                            preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDMwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiMxZDliZjAiLz48dGV4dCB4PSIxNTAiIHk9IjM1IiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QmFja2xpbmsgwqAgQWZmaWxpYXRlPC90ZXh0Pjx0ZXh0IHg9IjE1MCIgeT0iNTUiIGZpbGw9IiNkY2ZkZjQiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QXV0b21hdGVkIExpbmsgQnVpbGRpbmcgUGxhdGZvcm0gLSBFYXJuIDIwJSBDb21taXNzaW9uPC90ZXh0Pjx0ZXh0IHg9IjE1MCIgeT0iODAiIGZpbGw9IiNmYmYwNDciIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkpvaW4gTm93ICYgU3RhcnQgRWFybmluZzwvdGV4dD48L3N2Zz4='
+                          }
                         ].map((graphic) => (
                           <div key={graphic.name} className="p-3 bg-gray-50 rounded border">
                             <div className="flex items-center justify-between mb-2">
                               <span className="font-medium text-sm">{graphic.name}</span>
                               <Badge variant="outline" className="text-xs">{graphic.platform}</Badge>
                             </div>
+                            <div className="mb-3">
+                              <img
+                                src={graphic.preview}
+                                alt={`${graphic.name} preview`}
+                                className="w-full h-auto border rounded max-h-20 object-contain bg-white"
+                              />
+                            </div>
                             <p className="text-xs text-gray-600 mb-2">{graphic.size}px</p>
-                            <Button size="sm" variant="outline" className="w-full">
-                              <Download className="h-3 w-3 mr-2" />
-                              Download
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1"
+                                onClick={() => downloadAsset(graphic.name, graphic.preview, 'PNG')}
+                              >
+                                <Download className="h-3 w-3 mr-1" />
+                                Download
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => previewAsset(graphic.name, graphic.preview)}
+                              >
+                                <Eye className="h-3 w-3" />
+                              </Button>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -1676,21 +1758,62 @@ const SafeAffiliateProgram: React.FC = () => {
                       </h4>
                       <div className="space-y-3">
                         {[
-                          { name: 'Backlink ∞ Logo', type: 'High-res PNG', use: 'General use' },
-                          { name: 'Logo + Tagline', type: 'Vector SVG', use: 'Professional' },
-                          { name: 'Icon Only', type: 'PNG/SVG', use: 'Small spaces' },
-                          { name: 'Brand Guidelines', type: 'PDF', use: 'Reference' }
+                          {
+                            name: 'Backlink ∞ Logo',
+                            type: 'PNG',
+                            use: 'General use',
+                            preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDIwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IndoaXRlIi8+PGNpcmNsZSBjeD0iNDAiIGN5PSI1MCIgcj0iMjAiIGZpbGw9IiMyNTYzZWIiLz48dGV4dCB4PSI0MCIgeT0iNTciIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7iiJ88L3RleHQ+PHRleHQgeD0iMTIwIiB5PSI1NyIgZmlsbD0iIzExMTgyNyIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QmFja2xpbms8L3RleHQ+PC9zdmc+'
+                          },
+                          {
+                            name: 'Logo + Tagline',
+                            type: 'SVG',
+                            use: 'Professional',
+                            preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDI1MCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjI1MCIgaGVpZ2h0PSIxMjAiIGZpbGw9IndoaXRlIi8+PGNpcmNsZSBjeD0iNDAiIGN5PSI0NSIgcj0iMjAiIGZpbGw9IiMyNTYzZWIiLz48dGV4dCB4PSI0MCIgeT0iNTIiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7iiJ88L3RleHQ+PHRleHQgeD0iMTQwIiB5PSI1MiIgZmlsbD0iIzExMTgyNyIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QmFja2xpbms8L3RleHQ+PHRleHQgeD0iMTI1IiB5PSI3NSIgZmlsbD0iIzY2NjY2NiIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5BdXRvbWF0ZWQgTGluayBCdWlsZGluZyBQbGF0Zm9ybTwvdGV4dD48L3N2Zz4='
+                          },
+                          {
+                            name: 'Icon Only',
+                            type: 'PNG',
+                            use: 'Small spaces',
+                            preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IndoaXRlIi8+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iMzUiIGZpbGw9IiMyNTYzZWIiLz48dGV4dCB4PSI1MCIgeT0iNjAiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7iiJ88L3RleHQ+PC9zdmc+'
+                          },
+                          {
+                            name: 'Brand Guidelines',
+                            type: 'PDF',
+                            use: 'Reference',
+                            preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE0MCIgdmlld0JveD0iMCAwIDIwMCAxNDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxNDAiIGZpbGw9IiNmOWZhZmIiIHN0cm9rZT0iI2UyZThmMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHJlY3QgeD0iMjAiIHk9IjIwIiB3aWR0aD0iMTYwIiBoZWlnaHQ9IjEwMCIgZmlsbD0id2hpdGUiIHN0cm9rZT0iI2QxZDVkYiIvPjx0ZXh0IHg9IjEwMCIgeT0iNDAiIGZpbGw9IiMxMTE4MjciIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkJyYW5kIEd1aWRlbGluZXM8L3RleHQ+PGxpbmUgeDE9IjMwIiB5MT0iNTUiIHgyPSIxNzAiIHkyPSI1NSIgc3Ryb2tlPSIjZDFkNWRiIiBzdHJva2Utd2lkdGg9IjIiLz48bGluZSB4MT0iMzAiIHkxPSI3MCIgeDI9IjE0MCIgeTI9IjcwIiBzdHJva2U9IiNkMWQ1ZGIiIHN0cm9rZS13aWR0aD0iMiIvPjxsaW5lIHgxPSIzMCIgeTE9Ijg1IiB4Mj0iMTYwIiB5Mj0iODUiIHN0cm9rZT0iI2QxZDVkYiIgc3Ryb2tlLXdpZHRoPSIyIi8+PGxpbmUgeDE9IjMwIiB5MT0iMTAwIiB4Mj0iMTIwIiB5Mj0iMTAwIiBzdHJva2U9IiNkMWQ1ZGIiIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg=='
+                          }
                         ].map((asset) => (
                           <div key={asset.name} className="p-3 bg-gray-50 rounded border">
                             <div className="flex items-center justify-between mb-2">
                               <span className="font-medium text-sm">{asset.name}</span>
                               <Badge variant="outline" className="text-xs">{asset.type}</Badge>
                             </div>
+                            <div className="mb-3">
+                              <img
+                                src={asset.preview}
+                                alt={`${asset.name} preview`}
+                                className="w-full h-auto border rounded max-h-16 object-contain bg-white"
+                              />
+                            </div>
                             <p className="text-xs text-gray-600 mb-2">{asset.use}</p>
-                            <Button size="sm" variant="outline" className="w-full">
-                              <Download className="h-3 w-3 mr-2" />
-                              Download
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1"
+                                onClick={() => downloadAsset(asset.name, asset.preview, asset.type)}
+                              >
+                                <Download className="h-3 w-3 mr-1" />
+                                Download
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => previewAsset(asset.name, asset.preview)}
+                              >
+                                <Eye className="h-3 w-3" />
+                              </Button>
+                            </div>
                           </div>
                         ))}
                       </div>
