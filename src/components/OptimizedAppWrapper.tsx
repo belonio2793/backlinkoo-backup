@@ -269,12 +269,12 @@ export const OptimizedAppWrapper = () => {
           } />
           <Route path="/affiliate" element={
             <InstantEmailVerificationGuard>
-              <WorkingAffiliate />
+              <SafeAffiliateProgram />
             </InstantEmailVerificationGuard>
           } />
           <Route path="/affiliate/test" element={
             <InstantEmailVerificationGuard>
-              <WorkingAffiliate />
+              <SafeAffiliateProgram />
             </InstantEmailVerificationGuard>
           } />
           <Route path="/affiliate/promotion-materials" element={
