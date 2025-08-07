@@ -1109,7 +1109,11 @@ ${referralUrl}`,
         // Page 3
         {
           type: "Tool Comparison",
-          content: `⚔️ ULTIMATE COMPARISON: Backlink ∞ vs 7 other link building tools. I spent $3,000 testing them all so you don't have to. The winner might surprise you! ${referralUrl}`,
+          content: `⚔️ ULTIMATE COMPARISON: Backlink ∞ vs 7 other link building tools.
+
+I spent $3,000 testing them all so you don't have to. The winner might surprise you!
+
+${referralUrl}`,
           engagement: "Very High",
           audience: "Comparison shoppers"
         },
@@ -1121,7 +1125,11 @@ ${referralUrl}`,
         },
         {
           type: "ROI Breakdown",
-          content: `💰 ROI BREAKDOWN: Exact numbers from my Backlink ∞ investment. $99/month turned into $5,000/month in additional revenue. Here's the math: ${referralUrl}`,
+          content: `💰 ROI BREAKDOWN: Exact numbers from my Backlink ∞ investment.
+
+$99/month turned into $5,000/month in additional revenue.
+
+Here's the math: ${referralUrl}`,
           engagement: "Very High",
           audience: "ROI focused"
         },
@@ -1837,7 +1845,7 @@ ${referralUrl}`,
           {/* Tracking Info */}
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-green-600">✓</span>
+              <span className="text-green-600">���</span>
               <span className="font-medium text-sm">User ID Tracking Active</span>
             </div>
             <div className="text-xs text-gray-600 space-y-1">
