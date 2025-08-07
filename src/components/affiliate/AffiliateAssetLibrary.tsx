@@ -274,7 +274,7 @@ export const AffiliateAssetLibrary: React.FC<AffiliateAssetLibraryProps> = ({
   };
 
   const generateAffiliateLink = (baseUrl: string) => {
-    const url = new URL(baseUrl, window.location.origin);
+    const url = new URL(baseUrl, 'https://backlinkoo.com');
     url.searchParams.set('ref', affiliateCode);
     return url.toString();
   };
