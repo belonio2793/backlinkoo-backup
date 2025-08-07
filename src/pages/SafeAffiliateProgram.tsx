@@ -1023,7 +1023,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Weekend Warrior",
-          content: `⚡ WEEKEND WARRIOR ⚡\n\nWhile others rest, I optimize! ��\n\nThis weekend's project:\nOptimizing my Backlink ∞ campaigns for even better results\n\nHustle never stops! 🔥\n\nLink in bio: ${referralUrl}\n\n#WeekendWarrior #HustleMode #SEOLife`,
+          content: `⚡ WEEKEND WARRIOR ⚡\n\nWhile others rest, I optimize! 💪\n\nThis weekend's project:\nOptimizing my Backlink ∞ campaigns for even better results\n\nHustle never stops! 🔥\n\nLink in bio: ${referralUrl}\n\n#WeekendWarrior #HustleMode #SEOLife`,
           engagement: "Medium",
           audience: "Weekend workers"
         },
@@ -1071,7 +1071,7 @@ Full breakdown in today's video: ${referralUrl}`,
         },
         {
           type: "Case Study",
-          content: `🔥 CASE STUDY: How I 10x'd my organic traffic using ONE tool. In this deep-dive video, I show you exactly how Backlink ∞ transformed my SEO strategy: ${referralUrl}`,
+          content: `🔥 CASE STUDY: How I 10x'd my organic traffic using ONE tool. In this deep-dive video, I show you exactly how Backlink �� transformed my SEO strategy: ${referralUrl}`,
           engagement: "High",
           audience: "Strategy learners"
         },
@@ -2615,7 +2615,7 @@ Here's the math: ${referralUrl}`,
                           <li>• Don't add effects or filters to logos</li>
                           <li>• Don't use assets for competing services</li>
                           <li>• Don't make false or misleading claims</li>
-                          <li>�� Don't use outdated brand materials</li>
+                          <li>• Don't use outdated brand materials</li>
                         </ul>
                       </div>
                     </div>
