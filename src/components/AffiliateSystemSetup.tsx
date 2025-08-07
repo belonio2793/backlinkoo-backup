@@ -60,10 +60,10 @@ export const AffiliateSystemSetup: React.FC<AffiliateSystemSetupProps> = ({
 
   if (isChecking) {
     return (
-      <Card className=\"w-full max-w-2xl mx-auto\">
+      <Card className="w-full max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle className=\"flex items-center gap-2\">
-            <Database className=\"h-5 w-5\" />
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5" />
             Checking Affiliate System
           </CardTitle>
           <CardDescription>
@@ -71,9 +71,9 @@ export const AffiliateSystemSetup: React.FC<AffiliateSystemSetupProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className=\"flex items-center justify-center p-8\">
-            <Loader2 className=\"h-8 w-8 animate-spin\" />
-            <span className=\"ml-2\">Checking system status...</span>
+          <div className="flex items-center justify-center p-8">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="ml-2">Checking system status...</span>
           </div>
         </CardContent>
       </Card>
@@ -82,8 +82,8 @@ export const AffiliateSystemSetup: React.FC<AffiliateSystemSetupProps> = ({
 
   if (!systemStatus) {
     return (
-      <Alert variant=\"destructive\">
-        <AlertTriangle className=\"h-4 w-4\" />
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
         <AlertDescription>
           Failed to check affiliate system status. Please refresh the page.
         </AlertDescription>
@@ -96,7 +96,7 @@ export const AffiliateSystemSetup: React.FC<AffiliateSystemSetupProps> = ({
   if (isSystemReady) {
     return (
       <Alert>
-        <CheckCircle className=\"h-4 w-4\" />
+        <CheckCircle className="h-4 w-4" />
         <AlertDescription>
           Affiliate system is ready! Found {systemStatus.recordCount} existing affiliate accounts.
         </AlertDescription>
@@ -105,40 +105,40 @@ export const AffiliateSystemSetup: React.FC<AffiliateSystemSetupProps> = ({
   }
 
   return (
-    <Card className=\"w-full max-w-2xl mx-auto\">
+    <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle className=\"flex items-center gap-2\">
-          <Settings className=\"h-5 w-5\" />
+        <CardTitle className="flex items-center gap-2">
+          <Settings className="h-5 w-5" />
           Affiliate System Setup Required
         </CardTitle>
         <CardDescription>
           The affiliate system needs to be configured before you can join the program.
         </CardDescription>
       </CardHeader>
-      <CardContent className=\"space-y-4\">
+      <CardContent className="space-y-4">
         {/* System Status */}
-        <div className=\"space-y-2\">
-          <h4 className=\"font-medium\">System Status:</h4>
-          <div className=\"flex flex-wrap gap-2\">
-            <Badge variant={systemStatus.tableExists ? \"default\" : \"destructive\"}>
-              Database Tables: {systemStatus.tableExists ? \"✓ Ready\" : \"✗ Missing\"}
+        <div className="space-y-2">
+          <h4 className="font-medium">System Status:</h4>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant={systemStatus.tableExists ? "default" : "destructive"}>
+              Database Tables: {systemStatus.tableExists ? "✓ Ready" : "✗ Missing"}
             </Badge>
-            <Badge variant={systemStatus.hasPermissions ? \"default\" : \"destructive\"}>
-              Permissions: {systemStatus.hasPermissions ? \"✓ Ready\" : \"✗ Missing\"}
+            <Badge variant={systemStatus.hasPermissions ? "default" : "destructive"}>
+              Permissions: {systemStatus.hasPermissions ? "✓ Ready" : "✗ Missing"}
             </Badge>
           </div>
         </div>
 
         {/* Errors */}
         {systemStatus.errors.length > 0 && (
-          <Alert variant=\"destructive\">
-            <AlertTriangle className=\"h-4 w-4\" />
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              <div className=\"space-y-1\">
-                <p className=\"font-medium\">Issues found:</p>
-                <ul className=\"list-disc list-inside space-y-1\">
+              <div className="space-y-1">
+                <p className="font-medium">Issues found:</p>
+                <ul className="list-disc list-inside space-y-1">
                   {systemStatus.errors.map((error, index) => (
-                    <li key={index} className=\"text-sm\">{error}</li>
+                    <li key={index} className="text-sm">{error}</li>
                   ))}
                 </ul>
               </div>
@@ -147,19 +147,19 @@ export const AffiliateSystemSetup: React.FC<AffiliateSystemSetupProps> = ({
         )}
 
         {/* Setup Instructions */}
-        <div className=\"space-y-3\">
-          <h4 className=\"font-medium\">Setup Instructions:</h4>
+        <div className="space-y-3">
+          <h4 className="font-medium">Setup Instructions:</h4>
           
           {!systemStatus.tableExists && (
             <Alert>
-              <Database className=\"h-4 w-4\" />
+              <Database className="h-4 w-4" />
               <AlertDescription>
-                <div className=\"space-y-2\">
-                  <p className=\"font-medium\">Database Setup Required</p>
-                  <p className=\"text-sm\">
+                <div className="space-y-2">
+                  <p className="font-medium">Database Setup Required</p>
+                  <p className="text-sm">
                     The affiliate_programs table needs to be created. This requires administrator access.
                   </p>
-                  <div className=\"space-y-1 text-xs\">
+                  <div className="space-y-1 text-xs">
                     <p><strong>For Administrators:</strong></p>
                     <p>• Run the SQL migration: <code>supabase/migrations/20241223000000_create_affiliate_tables_final.sql</code></p>
                     <p>• Or use the Supabase dashboard to execute the migration</p>
@@ -169,18 +169,18 @@ export const AffiliateSystemSetup: React.FC<AffiliateSystemSetupProps> = ({
             </Alert>
           )}
 
-          <div className=\"flex gap-2\">
+          <div className="flex gap-2">
             <Button 
               onClick={setupSystem}
               disabled={isSettingUp}
-              className=\"flex items-center gap-2\"
+              className="flex items-center gap-2"
             >
-              {isSettingUp && <Loader2 className=\"h-4 w-4 animate-spin\" />}
+              {isSettingUp && <Loader2 className="h-4 w-4 animate-spin" />}
               {isSettingUp ? 'Setting up...' : 'Try Auto-Setup'}
             </Button>
             
             <Button 
-              variant=\"outline\"
+              variant="outline"
               onClick={checkSystemStatus}
               disabled={isChecking}
             >
@@ -190,7 +190,7 @@ export const AffiliateSystemSetup: React.FC<AffiliateSystemSetupProps> = ({
 
           <Alert>
             <AlertDescription>
-              <p className=\"text-sm\">
+              <p className="text-sm">
                 <strong>Need help?</strong> Contact your system administrator or support team to set up the affiliate system.
                 The database migration files contain all the necessary SQL to create the required tables and permissions.
               </p>
