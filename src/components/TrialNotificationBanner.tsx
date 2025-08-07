@@ -36,12 +36,17 @@ export function TrialNotificationBanner({ onSignUp }: TrialNotificationBannerPro
 
   useEffect(() => {
     checkUserAndTrialPosts();
-    
-    // Check every minute for updated trial posts
-    const interval = setInterval(checkUserAndTrialPosts, 60000);
-    
+
+    // Only check every 5 minutes to reduce load and random appearances
+    // Also ensure we don't re-check if user is logged in or banner is dismissed
+    const interval = setInterval(() => {
+      if (!currentUser && isVisible) {
+        checkUserAndTrialPosts();
+      }
+    }, 300000); // 5 minutes instead of 1 minute
+
     return () => clearInterval(interval);
-  }, []);
+  }, [currentUser, isVisible]);
 
   const checkUserAndTrialPosts = async () => {
     try {
