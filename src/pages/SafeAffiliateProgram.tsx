@@ -56,6 +56,7 @@ const SafeAffiliateProgram: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [affiliateData, setAffiliateData] = useState<any>(null);
   const [isJoining, setIsJoining] = useState(false);
+  const [databaseSetupRequired, setDatabaseSetupRequired] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [defaultTab, setDefaultTab] = useState<'login' | 'signup'>('login');
   const [activeToolkitTab, setActiveToolkitTab] = useState('social');
@@ -1009,7 +1010,7 @@ Link in bio: ${referralUrl}
         // Page 3
         {
           type: "Process Reveal",
-          content: `🔍 HOW I BUILD 30+ BACKLINKS/MONTH\n\nStep 1: Log into Backlink ∞\nStep 2: Set targeting parameters\nStep 3: Let AI do the work\nStep 4: Watch links roll in 📊\n\nIt's that simple!\n\nLink in bio: ${referralUrl}\n\n#ProcessReveal #SEOHacks`,
+          content: `🔍 HOW I BUILD 30+ BACKLINKS/MONTH\n\nStep 1: Log into Backlink ∞\nStep 2: Set targeting parameters\nStep 3: Let AI do the work\nStep 4: Watch links roll in ��\n\nIt's that simple!\n\nLink in bio: ${referralUrl}\n\n#ProcessReveal #SEOHacks`,
           engagement: "Very High",
           audience: "Process learners"
         },
