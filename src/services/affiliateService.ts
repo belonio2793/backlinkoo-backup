@@ -153,10 +153,19 @@ export class AffiliateService {
   }
 
   /**
+   * Get the production base URL
+   */
+  private getBaseUrl(): string {
+    // Always use production domain for affiliate links
+    const isProduction = import.meta.env.PROD || window.location.hostname.includes('backlinkoo.com');
+    return isProduction ? 'https://backlinkoo.com' : 'https://backlinkoo.com';
+  }
+
+  /**
    * Generate affiliate tracking link
    */
   generateAffiliateLink(affiliateId: string, targetUrl: string = '', utmParams?: Record<string, string>) {
-    const baseUrl = window.location.origin;
+    const baseUrl = this.getBaseUrl();
     const url = new URL(targetUrl || baseUrl);
     
     // Add affiliate tracking parameter
