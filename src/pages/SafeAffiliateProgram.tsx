@@ -145,7 +145,7 @@ const SafeAffiliateProgram: React.FC = () => {
       }
 
       if (error && error.code === 'PGRST116') {
-        console.log('ℹ️ No affiliate profile found (expected for new users)');
+        console.log('���️ No affiliate profile found (expected for new users)');
       }
 
       setAffiliateData(data);
@@ -212,26 +212,26 @@ const SafeAffiliateProgram: React.FC = () => {
       console.log('📊 Insert result:', { data, error });
 
       if (error) {
+        // Log error details properly
+        console.error('❌ Supabase error joining affiliate program:');
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
+        console.error('Error hint:', error.hint);
+        console.error('Full error object:', JSON.stringify(error, null, 2));
+
         // Extract meaningful error message
         let errorMessage = 'Unknown database error';
 
-        if (error.message) {
+        if (error.message && error.message.trim()) {
           errorMessage = error.message;
-        } else if (error.details) {
+        } else if (error.details && error.details.trim()) {
           errorMessage = error.details;
-        } else if (error.hint) {
+        } else if (error.hint && error.hint.trim()) {
           errorMessage = error.hint;
         } else if (error.code) {
           errorMessage = `Database error code: ${error.code}`;
         }
-
-        console.error('❌ Supabase error joining affiliate program:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          fullError: error
-        });
 
         // Check for specific error types
         if (error.code === '23505') {
@@ -242,7 +242,7 @@ const SafeAffiliateProgram: React.FC = () => {
           errorMessage = 'Authentication error. Please sign out and sign back in.';
         }
 
-        throw new Error(`Failed to create affiliate account: ${errorMessage}`);
+        throw new Error(errorMessage);
       }
 
       setAffiliateData(data);
@@ -543,7 +543,7 @@ const SafeAffiliateProgram: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Affiliate Dashboard</h1>
-                <p className="text-gray-600">Welcome back, {user.email?.split('@')[0]}! 👋</p>
+                <p className="text-gray-600">Welcome back, {user.email?.split('@')[0]}! ����</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
