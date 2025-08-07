@@ -9,6 +9,17 @@ const BrandGuidelinesPDF: React.FC = () => {
   const [showPreview, setShowPreview] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const handleGeneratePDF = () => {
+      generatePDF();
+    };
+
+    window.addEventListener('generateBrandGuidelinesPDF', handleGeneratePDF);
+    return () => {
+      window.removeEventListener('generateBrandGuidelinesPDF', handleGeneratePDF);
+    };
+  }, []);
+
   const generatePDF = async () => {
     setIsGenerating(true);
     
