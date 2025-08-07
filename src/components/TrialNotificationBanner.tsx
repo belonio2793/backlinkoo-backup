@@ -60,21 +60,37 @@ export function TrialNotificationBanner({ onSignUp }: TrialNotificationBannerPro
         return;
       }
 
+      // Check if banner was globally dismissed for this session
+      const sessionDismissed = sessionStorage.getItem('trial_banner_dismissed');
+      if (sessionDismissed === 'true') {
+        setIsVisible(false);
+        return;
+      }
+
       // Get trial posts from in-memory storage (for guests)
       const storedTrialPosts = localStorage.getItem('trial_blog_posts');
       if (storedTrialPosts) {
         const posts: TrialPost[] = JSON.parse(storedTrialPosts);
+
+        // Load dismissed posts from localStorage for persistence
+        const dismissedFromStorage = localStorage.getItem('dismissed_trial_posts');
+        const dismissedIds = dismissedFromStorage ? new Set(JSON.parse(dismissedFromStorage)) : new Set();
+        setDismissedPosts(dismissedIds);
+
         const activePosts = posts.filter(post => {
           const expiresAt = new Date(post.expires_at);
           const now = new Date();
-          return now < expiresAt && !dismissedPosts.has(post.id);
+          return now < expiresAt && !dismissedIds.has(post.id);
         });
 
         setTrialPosts(activePosts);
         setIsVisible(activePosts.length > 0);
+      } else {
+        setIsVisible(false);
       }
     } catch (error) {
       console.warn('Failed to check trial posts:', error);
+      setIsVisible(false);
     }
   };
 
