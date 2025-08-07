@@ -2006,7 +2006,7 @@ Here's the math: ${referralUrl}`,
                             disabled={socialPage === 0}
                             className="h-7 px-2"
                           >
-                            ��
+                            ←
                           </Button>
                           <span className="text-xs text-gray-500">
                             {socialPage + 1} / {Math.ceil(getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).length / 3)}
