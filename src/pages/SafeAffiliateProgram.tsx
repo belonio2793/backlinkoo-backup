@@ -475,7 +475,7 @@ Who else needs this? ${referralUrl}`,
         // Page 3
         {
           type: "Stats",
-          content: `�� 6 months with Backlink ∞:\n• 400+ high-quality backlinks\n• 65% increase in organic traffic\n• 23 point DA improvement\n\nResults speak louder than words: ${referralUrl}`,
+          content: `📊 6 months with Backlink ∞:\n• 400+ high-quality backlinks\n• 65% increase in organic traffic\n• 23 point DA improvement\n\nResults speak louder than words: ${referralUrl}`,
           engagement: "High",
           audience: "Data-driven marketers"
         },
@@ -506,7 +506,7 @@ Here's my experience: ${referralUrl}`,
         },
         {
           type: "Urgency",
-          content: `🔥 LAST 24 HOURS: Backlink ���'s free trial ends soon.
+          content: `🔥 LAST 24 HOURS: Backlink ∞'s free trial ends soon.
 
 If you're serious about SEO, don't miss this opportunity to transform your link building:
 
@@ -1712,7 +1712,7 @@ Here's the math: ${referralUrl}`,
                     <span>Real-time analytics</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span>✓</span>
+                    <span>��</span>
                     <span>Dedicated support team</span>
                   </div>
                 </div>
@@ -1946,7 +1946,7 @@ Here's the math: ${referralUrl}`,
                 <p className="text-sm text-orange-600">Bronze tier</p>
               </div>
               <div className="bg-orange-100 p-3 rounded-full">
-                <span className="text-orange-600 text-xl">📈</span>
+                <span className="text-orange-600 text-xl">���</span>
               </div>
             </div>
           </div>
@@ -2137,7 +2137,7 @@ Here's the math: ${referralUrl}`,
                             size="sm"
                             variant="outline"
                             onClick={() => setSocialPage(socialPage + 1)}
-                            disabled={(socialPage + 1) * 3 >= getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).length}
+                            disabled={(socialPage + 1) * 3 >= getSocialTemplates(selectedSocialPlatform, cleanUrl(affiliateData.referral_url)).length}
                             className="h-7 px-2"
                           >
                             →
