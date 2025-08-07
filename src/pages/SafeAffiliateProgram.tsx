@@ -1488,19 +1488,19 @@ Here's the math: ${referralUrl}`,
         {
           label: "Body",
           content: `<p>I know you're probably busy, so I'll keep this brief.</p>
-
+<br>
 <p>Since my last email, I've seen even more impressive results:</p>
-
+<br>
 <ul style="margin: 20px 0; padding-left: 20px;">
-  <li style="margin-bottom: 8px;"><strong>Just landed 12 high-DA backlinks</strong> in the past week</li>
-  <li style="margin-bottom: 8px;"><strong>Domain Authority increased by 8 points</strong></li>
-  <li style="margin-bottom: 8px;"><strong>Organic traffic up 45%</strong> this month</li>
+  <li style="margin-bottom: 12px;"><strong>Just landed 12 high-DA backlinks</strong> in the past week</li>
+  <li style="margin-bottom: 12px;"><strong>Domain Authority increased by 8 points</strong></li>
+  <li style="margin-bottom: 12px;"><strong>Organic traffic up 45%</strong> this month</li>
 </ul>
-
+<br>
 <p>The ROI has been phenomenal, and I genuinely think it could help with your SEO goals too.</p>
-
+<br>
 <p>Here's the link again if you'd like to take a look:</p>
-
+<br>
 <p><a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Backlink ∞ Platform</a></p>`,
           isHtml: true
         },
@@ -2551,7 +2551,7 @@ Here's the math: ${referralUrl}`,
                       <div className="space-y-3">
                         {[
                           {
-                            name: 'Backlink �� Logo',
+                            name: 'Backlink ∞ Logo',
                             type: 'PNG',
                             use: 'General use',
                             preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDIwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IndoaXRlIi8+PGNpcmNsZSBjeD0iNDAiIGN5PSI1MCIgcj0iMjAiIGZpbGw9IiMyNTYzZWIiLz48dGV4dCB4PSI0MCIgeT0iNTciIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7iiJ88L3RleHQ+PHRleHQgeD0iMTIwIiB5PSI1NyIgZmlsbD0iIzExMTgyNyIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QmFja2xpbms8L3RleHQ+PC9zdmc+'
