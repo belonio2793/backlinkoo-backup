@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Monitor, Share2, FileText, Download, Eye, Sparkles, Crown, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { generateAsset } from '@/utils/assetGenerator';
+import BrandGuidelinesPDF from './BrandGuidelinesPDF';
 
 interface AssetCardProps {
   asset: {
@@ -620,7 +621,7 @@ const CreativeAssetsShowcase: React.FC<{
       preview: (
         <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden aspect-square shadow-2xl flex items-center justify-center">
           <div className="w-32 h-32 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
-            <span className="text-5xl font-black text-gray-900">∞</span>
+            <span className="text-5xl font-black text-gray-900">���</span>
           </div>
         </div>
       )
