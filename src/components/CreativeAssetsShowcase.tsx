@@ -644,36 +644,6 @@ const CreativeAssetsShowcase: React.FC<{
           <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/10 rounded-2xl"></div>
         </div>
       )
-    },
-    {
-      name: 'Brand Guidelines',
-      size: '2480x3508',
-      format: 'PDF',
-      description: 'Complete brand guide',
-      category: 'brand',
-      preview: (
-        <div className="relative bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl overflow-hidden aspect-[210/297] shadow-2xl p-6">
-          <div className="bg-white rounded-xl h-full p-6 shadow-inner">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                <span className="text-lg font-black text-gray-900">∞</span>
-              </div>
-              <h3 className="text-gray-900 font-black text-xl">Brand Guidelines</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="h-2 bg-gray-300 rounded"></div>
-              <div className="h-2 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-2 bg-gray-300 rounded w-1/2"></div>
-              <div className="h-2 bg-gray-200 rounded w-5/6"></div>
-              <div className="mt-4 grid grid-cols-3 gap-2">
-                <div className="h-6 bg-yellow-400 rounded"></div>
-                <div className="h-6 bg-purple-500 rounded"></div>
-                <div className="h-6 bg-blue-500 rounded"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
     }
   ];
 
