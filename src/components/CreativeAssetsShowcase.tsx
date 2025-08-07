@@ -18,96 +18,124 @@ interface AssetCardProps {
 }
 
 const AssetCard: React.FC<AssetCardProps> = ({ asset, onDownload, onPreview }) => {
-  // Generate high-quality preview data URL from the React component
-  const getPreviewDataUrl = () => {
-    // Create a data URL for the preview based on asset type
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+  const handleDownload = async () => {
+    try {
+      // Generate high-quality asset using the advanced generator
+      const dataUrl = await generateAsset(asset.name);
 
-    // Set canvas size based on asset dimensions
-    const [width, height] = asset.size.split('x').map(Number);
-    canvas.width = width;
-    canvas.height = height;
+      const link = document.createElement('a');
+      link.download = `${asset.name.toLowerCase().replace(/\s+/g, '-')}-${asset.size}.${asset.format.toLowerCase()}`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-    if (ctx) {
-      // Create a basic gradient background as fallback
-      const gradient = ctx.createLinearGradient(0, 0, width, height);
-      gradient.addColorStop(0, '#4f46e5');
-      gradient.addColorStop(0.5, '#7c3aed');
-      gradient.addColorStop(1, '#db2777');
-
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, width, height);
-
-      // Add text
-      ctx.fillStyle = 'white';
-      ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('Backlink ∞', width / 2, height / 2);
-
-      ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillText(asset.description, width / 2, height / 2 + 60);
+      // Also call the original callback
+      onDownload(asset.name, dataUrl, asset.format);
+    } catch (error) {
+      console.error('Error generating asset:', error);
+      // Fallback to a simple notification
+      alert('Asset download will be available soon. Please try again.');
     }
-
-    return canvas.toDataURL('image/png');
   };
 
-  const handleDownload = () => {
-    const dataUrl = getPreviewDataUrl();
-    const link = document.createElement('a');
-    link.download = `${asset.name.toLowerCase().replace(/\s+/g, '-')}-${asset.size}.${asset.format.toLowerCase()}`;
-    link.href = dataUrl;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handlePreview = async () => {
+    try {
+      // Generate high-quality asset for preview
+      const dataUrl = await generateAsset(asset.name);
 
-    // Also call the original callback
-    onDownload(asset.name, dataUrl, asset.format);
-  };
+      // Create a modal/popup for preview
+      const previewWindow = window.open('', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+      if (previewWindow) {
+        previewWindow.document.write(`
+          <html>
+            <head>
+              <title>${asset.name} Preview - Backlink ∞</title>
+              <style>
+                body {
+                  margin: 0;
+                  padding: 40px;
+                  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f172a 100%);
+                  color: white;
+                  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  min-height: 100vh;
+                }
+                h1 {
+                  margin-bottom: 15px;
+                  font-size: 2.5rem;
+                  font-weight: 800;
+                  background: linear-gradient(45deg, #fff700, #ff9500);
+                  -webkit-background-clip: text;
+                  -webkit-text-fill-color: transparent;
+                  background-clip: text;
+                }
+                .info {
+                  margin-bottom: 30px;
+                  opacity: 0.8;
+                  font-size: 1.2rem;
+                  text-align: center;
+                }
+                .preview-container {
+                  background: rgba(255, 255, 255, 0.05);
+                  backdrop-filter: blur(10px);
+                  border-radius: 20px;
+                  padding: 30px;
+                  border: 1px solid rgba(255, 255, 255, 0.1);
+                  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                }
+                img {
+                  max-width: 100%;
+                  height: auto;
+                  box-shadow: 0 15px 50px rgba(0,0,0,0.7);
+                  border-radius: 12px;
+                  display: block;
+                }
+                .download-btn {
+                  margin-top: 30px;
+                  background: linear-gradient(45deg, #fff700, #ff9500);
+                  color: #0f172a;
+                  padding: 15px 30px;
+                  border: none;
+                  border-radius: 25px;
+                  font-weight: bold;
+                  font-size: 1.1rem;
+                  cursor: pointer;
+                  transition: transform 0.2s;
+                }
+                .download-btn:hover {
+                  transform: scale(1.05);
+                }
+              </style>
+            </head>
+            <body>
+              <h1>${asset.name}</h1>
+              <div class="info">${asset.size} • ${asset.format} • ${asset.description}</div>
+              <div class="preview-container">
+                <img src="${dataUrl}" alt="${asset.name}" />
+                <button class="download-btn" onclick="
+                  const link = document.createElement('a');
+                  link.download = '${asset.name.toLowerCase().replace(/\s+/g, '-')}-${asset.size}.${asset.format.toLowerCase()}';
+                  link.href = '${dataUrl}';
+                  link.click();
+                ">
+                  ⬇ Download High-Quality Asset
+                </button>
+              </div>
+            </body>
+          </html>
+        `);
+        previewWindow.document.close();
+      }
 
-  const handlePreview = () => {
-    const dataUrl = getPreviewDataUrl();
-
-    // Create a modal/popup for preview
-    const previewWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
-    if (previewWindow) {
-      previewWindow.document.write(`
-        <html>
-          <head>
-            <title>${asset.name} Preview</title>
-            <style>
-              body {
-                margin: 0;
-                padding: 20px;
-                background: #1a1a1a;
-                color: white;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-              }
-              h1 { margin-bottom: 10px; }
-              .info { margin-bottom: 20px; opacity: 0.7; }
-              img {
-                max-width: 100%;
-                height: auto;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-                border-radius: 8px;
-              }
-            </style>
-          </head>
-          <body>
-            <h1>${asset.name}</h1>
-            <div class="info">${asset.size} • ${asset.format} • ${asset.description}</div>
-            <img src="${dataUrl}" alt="${asset.name}" />
-          </body>
-        </html>
-      `);
-      previewWindow.document.close();
+      // Also call the original callback
+      onPreview(asset.name, dataUrl);
+    } catch (error) {
+      console.error('Error previewing asset:', error);
+      alert('Preview will be available soon. Please try again.');
     }
-
-    // Also call the original callback
-    onPreview(asset.name, dataUrl);
   };
 
   return (
@@ -486,7 +514,7 @@ const CreativeAssetsShowcase: React.FC<{
 
               <div>
                 <h3 className="text-white font-black text-4xl mb-2 drop-shadow-xl">
-                  Backlink <span className="text-yellow-400">��</span> Affiliate
+                  Backlink <span className="text-yellow-400">∞</span> Affiliate
                 </h3>
                 <p className="text-blue-200 text-xl font-bold mb-3">
                   AI-Powered Link Building • Earn Premium Commissions
