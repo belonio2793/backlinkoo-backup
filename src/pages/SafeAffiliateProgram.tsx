@@ -1712,7 +1712,7 @@ Here's the math: ${referralUrl}`,
                     <span>Real-time analytics</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span>��</span>
+                    <span>✓</span>
                     <span>Dedicated support team</span>
                   </div>
                 </div>
@@ -1946,7 +1946,7 @@ Here's the math: ${referralUrl}`,
                 <p className="text-sm text-orange-600">Bronze tier</p>
               </div>
               <div className="bg-orange-100 p-3 rounded-full">
-                <span className="text-orange-600 text-xl">���</span>
+                <span className="text-orange-600 text-xl">📈</span>
               </div>
             </div>
           </div>
@@ -2185,7 +2185,7 @@ Here's the math: ${referralUrl}`,
                           ← Previous
                         </Button>
                         <div className="flex items-center gap-1">
-                          {Array.from({ length: Math.ceil(getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).length / 3) }, (_, index) => (
+                          {Array.from({ length: Math.ceil(getSocialTemplates(selectedSocialPlatform, cleanUrl(affiliateData.referral_url)).length / 3) }, (_, index) => (
                             <Button
                               key={index}
                               size="sm"
