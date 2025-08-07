@@ -1089,7 +1089,7 @@ Timestamps in description: ${referralUrl}`,
         },
         {
           type: "Before vs After",
-          content: `📊 DRAMATIC BEFORE & AFTER: My website's transformation using Backlink ∞.
+          content: `�� DRAMATIC BEFORE & AFTER: My website's transformation using Backlink ∞.
 
 Traffic charts, ranking improvements, and revenue growth - all the data revealed!
 
@@ -2611,8 +2611,14 @@ Here's the math: ${referralUrl}`,
                     </div>
                   </div>
 
-                  {/* Spectacular Creative Asset Categories */}
-                  <div className="space-y-8">
+                  {/* SPECTACULAR CREATIVE ASSETS SHOWCASE */}
+                  <CreativeAssetsShowcase
+                    onDownload={downloadAsset}
+                    onPreview={previewAsset}
+                  />
+
+                  {/* Temporarily keeping the original structure for reference */}
+                  <div className="space-y-8" style={{ display: 'none' }}>
                     {/* Enhanced Display Banners */}
                     <div>
                       <h4 className="font-semibold mb-3 flex items-center gap-2">
