@@ -92,6 +92,8 @@ const AffiliateHub: React.FC = () => {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [isJoining, setIsJoining] = useState(false);
   const [selectedTimeframe, setSelectedTimeframe] = useState('week');
+  const [systemReady, setSystemReady] = useState<boolean | null>(null);
+  const [tableNotFound, setTableNotFound] = useState(false);
 
   // Load affiliate data
   useEffect(() => {
