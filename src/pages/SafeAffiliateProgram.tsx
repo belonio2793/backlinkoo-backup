@@ -307,19 +307,24 @@ const SafeAffiliateProgram: React.FC = () => {
     } catch (error: any) {
       let errorMessage = 'Unknown error occurred';
 
-      console.error('Error joining affiliate program:');
-      console.error('Error type:', typeof error);
-      console.error('Error instance:', error instanceof Error);
-      console.error('Error string:', String(error));
-      console.error('Error JSON:', JSON.stringify(error, null, 2));
+      console.error('Error joining affiliate program:', error);
 
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      } else {
+      try {
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else if (error?.message) {
+          errorMessage = String(error.message);
+        } else if (error?.details) {
+          errorMessage = String(error.details);
+        } else if (error?.hint) {
+          errorMessage = String(error.hint);
+        } else {
+          errorMessage = 'Failed to join affiliate program. Please try again.';
+        }
+      } catch (stringifyError) {
+        console.error('Error stringifying error object:', stringifyError);
         errorMessage = 'Failed to join affiliate program. Please try again.';
       }
 
@@ -1049,7 +1054,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Industry Update",
-          content: `📰 INDUSTRY UPDATE 📰\n\nLatest SEO trends:\n\n🔥 AI-powered link building\n🔥 Quality over quantity\n🔥 Automated outreach\n🔥 Data-driven strategies\n\nBacklink ∞ covers all of these! 💯\n\nLink in bio: ${referralUrl}\n\n#IndustryUpdate #SEOTrends`,
+          content: `📰 INDUSTRY UPDATE ���\n\nLatest SEO trends:\n\n🔥 AI-powered link building\n🔥 Quality over quantity\n🔥 Automated outreach\n🔥 Data-driven strategies\n\nBacklink ∞ covers all of these! 💯\n\nLink in bio: ${referralUrl}\n\n#IndustryUpdate #SEOTrends`,
           engagement: "Medium",
           audience: "Industry watchers"
         },
