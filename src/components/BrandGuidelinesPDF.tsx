@@ -1410,19 +1410,19 @@ const BrandGuidelinesPDF: React.FC = () => {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 bg-yellow-300 text-yellow-700 rounded border border-red-300">
                       <span>Light colors on light backgrounds</span>
-                      <span className="text-sm">< 3:1</span>
+                      <span className="text-sm">&lt; 3:1</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-gray-400 text-gray-600 rounded border border-red-300">
                       <span>Similar color combinations</span>
-                      <span className="text-sm">< 3:1</span>
+                      <span className="text-sm">&lt; 3:1</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-blue-200 text-blue-400 rounded border border-red-300">
                       <span>Low contrast blues</span>
-                      <span className="text-sm">< 3:1</span>
+                      <span className="text-sm">&lt; 3:1</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-purple-200 text-purple-400 rounded border border-red-300">
                       <span>Low contrast purples</span>
-                      <span className="text-sm">< 3:1</span>
+                      <span className="text-sm">&lt; 3:1</span>
                     </div>
                   </div>
                 </div>
