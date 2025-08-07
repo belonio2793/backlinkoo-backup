@@ -119,7 +119,7 @@ export const CompactTestimonials: React.FC<CompactTestimonialsProps> = ({
                     ))}
                   </div>
                 </div>
-                <p className="text-sm text-gray-700 leading-relaxed">
+                <p className="text-base text-gray-800 leading-relaxed font-medium bg-gradient-to-r from-white to-blue-50 p-3 rounded-md border-l-3 border-primary/40">
                   "{testimonial.content}"
                 </p>
               </div>
