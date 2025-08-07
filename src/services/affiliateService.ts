@@ -64,9 +64,18 @@ export class AffiliateService {
         .eq('status', 'active')
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching affiliate profile:', error);
-        return null;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No data found - normal case
+          return null;
+        } else if (error.code === '42P01' || error.message.includes('does not exist')) {
+          // Table doesn't exist - development mode, return null gracefully
+          console.log('⚠️ Affiliate tables not set up yet, affiliate page will show registration');
+          return null;
+        } else {
+          console.error('Error fetching affiliate profile:', error);
+          return null;
+        }
       }
 
       return data;
