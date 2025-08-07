@@ -1479,9 +1479,9 @@ Here's the math: ${referralUrl}`,
         {
           label: "Opening",
           content: `<p>Hi [Name],</p>
-
+<br>
 <p>Hope you're having a great week!</p>
-
+<br>
 <p>I wanted to follow up on my previous email about Backlink ∞.</p>`,
           isHtml: true
         },
@@ -2551,7 +2551,7 @@ Here's the math: ${referralUrl}`,
                       <div className="space-y-3">
                         {[
                           {
-                            name: 'Backlink ∞ Logo',
+                            name: 'Backlink �� Logo',
                             type: 'PNG',
                             use: 'General use',
                             preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDIwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IndoaXRlIi8+PGNpcmNsZSBjeD0iNDAiIGN5PSI1MCIgcj0iMjAiIGZpbGw9IiMyNTYzZWIiLz48dGV4dCB4PSI0MCIgeT0iNTciIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7iiJ88L3RleHQ+PHRleHQgeD0iMTIwIiB5PSI1NyIgZmlsbD0iIzExMTgyNyIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QmFja2xpbms8L3RleHQ+PC9zdmc+'
