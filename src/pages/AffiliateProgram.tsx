@@ -80,7 +80,7 @@ export const AffiliateProgram: React.FC = () => {
               <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
                 Earn <span className="text-primary">$10,000+</span> Monthly
                 <br />
-                with Backlinkoo Affiliate Program
+                with Backlink ∞ Affiliate Program
               </h1>
               <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
                 Join the most lucrative affiliate program in the SEO industry. Earn up to 35% 
@@ -108,7 +108,7 @@ export const AffiliateProgram: React.FC = () => {
         <div className="py-20 max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Why Choose Backlinkoo Affiliate Program?
+              Why Choose Backlink ∞ Affiliate Program?
             </h2>
             <p className="text-xl text-gray-600">
               Industry-leading commissions, premium tools, and dedicated support
@@ -238,7 +238,7 @@ export const AffiliateProgram: React.FC = () => {
                   </div>
                 </div>
                 <p className="text-gray-700 mb-4 italic">
-                  "Backlinkoo's affiliate program is the best I've ever joined. High commissions, 
+                  "Backlink ∞'s affiliate program is the best I've ever joined. High commissions, 
                   great tools, and the product sells itself."
                 </p>
                 <div className="flex justify-between text-sm">
@@ -302,7 +302,7 @@ export const AffiliateProgram: React.FC = () => {
             <h3 className="text-3xl font-bold mb-4">Ready to Start Earning?</h3>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
               Join thousands of successful affiliates who are already earning substantial 
-              monthly income with Backlinkoo's industry-leading affiliate program.
+              monthly income with Backlink ∞'s industry-leading affiliate program.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
@@ -341,7 +341,7 @@ export const AffiliateProgram: React.FC = () => {
           <div className="text-center py-12">
             <Infinity className="w-16 h-16 text-primary mx-auto mb-6" />
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              Welcome to the Backlinkoo Affiliate Program
+              Welcome to the Backlink ∞ Affiliate Program
             </h1>
             <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
               You're one step away from joining our exclusive affiliate program. 
