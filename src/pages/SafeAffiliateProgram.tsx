@@ -34,7 +34,13 @@ const SafeAffiliateProgram: React.FC = () => {
 
   const loadAffiliateData = async () => {
     try {
-      console.log('🔄 Loading affiliate data for user:', user.id);
+      console.log('🔄 Loading affiliate data for user:', user?.id);
+
+      if (!user?.id) {
+        console.log('❌ No user ID available');
+        setLoading(false);
+        return;
+      }
 
       const { data, error } = await supabase
         .from('affiliate_programs')
