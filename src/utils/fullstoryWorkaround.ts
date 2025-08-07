@@ -128,15 +128,15 @@ export function createBypassFetch(): typeof fetch {
         };
         
         xhr.onerror = () => {
-          reject(new Error('Network request failed'));
+          reject(new Error(`Network request failed for ${urlString}. This could be due to CORS, connectivity issues, or server problems.`));
         };
-        
+
         xhr.ontimeout = () => {
-          reject(new Error('Request timeout'));
+          reject(new Error(`Request timeout for ${urlString} (exceeded 30 seconds). Please check your internet connection and try again.`));
         };
-        
+
         xhr.onabort = () => {
-          reject(new Error('Request aborted'));
+          reject(new Error(`Request aborted for ${urlString}`));
         };
         
         // Set timeout
