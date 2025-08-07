@@ -56,6 +56,7 @@ const SafeAffiliateProgram: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [affiliateData, setAffiliateData] = useState<any>(null);
   const [isJoining, setIsJoining] = useState(false);
+  const [databaseSetupRequired, setDatabaseSetupRequired] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [defaultTab, setDefaultTab] = useState<'login' | 'signup'>('login');
   const [activeToolkitTab, setActiveToolkitTab] = useState('social');
@@ -77,6 +78,16 @@ const SafeAffiliateProgram: React.FC = () => {
   const createTableIfNotExists = async () => {
     // Skip table creation - this should be handled via migrations or manual setup
     console.log('⚠️ Table creation skipped - affiliate_programs table should exist');
+
+    // Show helpful error message to users
+    if (toast) {
+      toast({
+        title: "Database Setup Required",
+        description: "The affiliate system needs to be set up by an administrator. Please contact support.",
+        variant: "destructive"
+      });
+    }
+
     return false;
   };
 
@@ -128,6 +139,7 @@ const SafeAffiliateProgram: React.FC = () => {
       // Check if table doesn't exist
       if (error && error.message.includes('does not exist')) {
         console.log('🔧 Table does not exist, attempting to create it...');
+        setDatabaseSetupRequired(true);
 
         if (toast) {
           toast({
@@ -205,6 +217,27 @@ const SafeAffiliateProgram: React.FC = () => {
         console.log('ℹ️ No affiliate profile found (expected for new users)');
       }
 
+      // Clean any fly.dev URLs in existing data
+      if (data && data.referral_url) {
+        const originalUrl = data.referral_url;
+        const cleanedUrl = cleanUrl(originalUrl);
+
+        // If URL was changed from fly.dev to backlinkoo.com, update the database
+        if (cleanedUrl !== originalUrl) {
+          try {
+            await supabase
+              .from('affiliate_programs')
+              .update({ referral_url: cleanedUrl })
+              .eq('user_id', user.id);
+            console.log('✅ Updated affiliate URL in database from fly.dev to backlinkoo.com');
+          } catch (updateError) {
+            console.warn('⚠️ Could not update affiliate URL in database:', updateError);
+          }
+        }
+
+        data.referral_url = cleanedUrl;
+      }
+
       setAffiliateData(data);
       console.log('✅ Affiliate data loaded successfully:', data);
     } catch (error: any) {
@@ -249,6 +282,15 @@ const SafeAffiliateProgram: React.FC = () => {
     const timestamp = Date.now().toString().slice(-6);
     const random = Math.random().toString(36).substr(2, 4).toUpperCase();
     return `${prefix}${timestamp}${random}`;
+  };
+
+  // URL cleaner to replace fly.dev with backlinkoo.com
+  const cleanUrl = (url: string): string => {
+    if (!url) return url;
+
+    // Replace any fly.dev domain with backlinkoo.com, preserving query parameters
+    const flyDevPattern = /https?:\/\/[^\/]*\.fly\.dev/gi;
+    return url.replace(flyDevPattern, 'https://backlinkoo.com');
   };
 
   const joinProgram = async () => {
@@ -999,7 +1041,7 @@ Link in bio: ${referralUrl}
         // Page 3
         {
           type: "Process Reveal",
-          content: `🔍 HOW I BUILD 30+ BACKLINKS/MONTH\n\nStep 1: Log into Backlink ∞\nStep 2: Set targeting parameters\nStep 3: Let AI do the work\nStep 4: Watch links roll in 📊\n\nIt's that simple!\n\nLink in bio: ${referralUrl}\n\n#ProcessReveal #SEOHacks`,
+          content: `🔍 HOW I BUILD 30+ BACKLINKS/MONTH\n\nStep 1: Log into Backlink ∞\nStep 2: Set targeting parameters\nStep 3: Let AI do the work\nStep 4: Watch links roll in ��\n\nIt's that simple!\n\nLink in bio: ${referralUrl}\n\n#ProcessReveal #SEOHacks`,
           engagement: "Very High",
           audience: "Process learners"
         },
@@ -1018,7 +1060,7 @@ Link in bio: ${referralUrl}
         // Page 4
         {
           type: "Feature Friday",
-          content: `🌟 FEATURE FRIDAY 🌟\n\nSpotlight: Backlink ∞'s AI Outreach\n\n✨ Writes personalized emails\n✨ Finds perfect prospects\n✨ Follows up automatically\n✨ Tracks everything\n\nIt's like having a team of experts! 👥\n\nLink in bio: ${referralUrl}\n\n#FeatureFriday #AITools`,
+          content: `🌟 FEATURE FRIDAY 🌟\n\nSpotlight: Backlink ∞'s AI Outreach\n\n✨ Writes personalized emails\n✨ Finds perfect prospects\n✨ Follows up automatically\n✨ Tracks everything\n\nIt's like having a team of experts! ����\n\nLink in bio: ${referralUrl}\n\n#FeatureFriday #AITools`,
           engagement: "High",
           audience: "Feature enthusiasts"
         },
@@ -1037,7 +1079,7 @@ Link in bio: ${referralUrl}
         // Page 5
         {
           type: "Myth Buster",
-          content: `🚫 MYTH BUSTER ALERT 🚫\n\nMyth: "AI can't do personalized outreach"\n\nReality: Backlink ∞'s AI writes better emails than most humans! 🤖\n\nPersonalization ✅\nContext awareness ✅\nHigh response rates ✅\n\nLink in bio: ${referralUrl}\n\n#MythBuster #AIFacts`,
+          content: `🚫 MYTH BUSTER ALERT 🚫\n\nMyth: "AI can't do personalized outreach"\n\nReality: Backlink ∞'s AI writes better emails than most humans! 🤖\n\nPersonalization ���\nContext awareness ✅\nHigh response rates ✅\n\nLink in bio: ${referralUrl}\n\n#MythBuster #AIFacts`,
           engagement: "High",
           audience: "Myth busters"
         },
@@ -1143,7 +1185,7 @@ ${referralUrl}`,
         },
         {
           type: "Step by Step",
-          content: `📋 COMPLETE GUIDE: Setting up your first Backlink ∞ campaign (Beginner friendly).
+          content: `��� COMPLETE GUIDE: Setting up your first Backlink ∞ campaign (Beginner friendly).
 
 Follow along as I walk through every single step with zero experience assumed:
 
@@ -1728,54 +1770,91 @@ Here's the math: ${referralUrl}`,
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border max-w-2xl mx-auto p-8">
-            <div className="text-center mb-6">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">⭐</span>
-              </div>
-              <h2 className="text-2xl font-bold mb-2">You're Almost Ready!</h2>
-              <p className="text-gray-600">
-                Click below to activate your affiliate account and start earning 20% recurring commissions
-              </p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 py-6 mb-6">
+            {databaseSetupRequired ? (
+              // Show setup guide when database tables are missing
               <div className="text-center">
-                <span className="text-2xl mb-2 block">💰</span>
-                <h4 className="font-semibold">20% Commission</h4>
-                <p className="text-sm text-gray-600">Starting rate</p>
-              </div>
-              <div className="text-center">
-                <span className="text-2xl mb-2 block">⏰</span>
-                <h4 className="font-semibold">30-Day Tracking</h4>
-                <p className="text-sm text-gray-600">Cookie duration</p>
-              </div>
-              <div className="text-center">
-                <span className="text-2xl mb-2 block">📊</span>
-                <h4 className="font-semibold">Real-Time Stats</h4>
-                <p className="text-sm text-gray-600">Live dashboard</p>
-              </div>
-            </div>
+                <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">⚙️</span>
+                </div>
+                <h2 className="text-2xl font-bold mb-2 text-orange-800">Database Setup Required</h2>
+                <p className="text-gray-600 mb-6">
+                  The affiliate program database tables need to be set up before you can join.
+                </p>
 
-            <button 
-              className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50"
-              onClick={joinProgram}
-              disabled={isJoining}
-            >
-              {isJoining ? (
-                <>
-                  <span className="inline-block animate-spin mr-2">⭐</span>
-                  Activating Account...
-                </>
-              ) : (
-                <>
-                  Activate My Affiliate Account ✓
-                </>
-              )}
-            </button>
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 text-left">
+                  <h3 className="font-semibold text-orange-800 mb-2">Setup Instructions:</h3>
+                  <ol className="text-sm text-orange-700 space-y-2">
+                    <li>1. Contact your system administrator</li>
+                    <li>2. Run the SQL migration file in Supabase Dashboard</li>
+                    <li>3. Verify the affiliate_programs table exists</li>
+                    <li>4. Refresh this page</li>
+                  </ol>
+                </div>
 
-            <p className="text-xs text-gray-500 text-center mt-4">
-              No approval required • Instant activation • Start earning immediately
-            </p>
+                <button
+                  className="w-full bg-orange-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-orange-700 transition-colors"
+                  onClick={() => window.location.reload()}
+                >
+                  🔄 Refresh Page
+                </button>
+
+                <p className="text-xs text-gray-500 text-center mt-4">
+                  Contact support if you continue to see this message
+                </p>
+              </div>
+            ) : (
+              // Show normal activation UI when database is ready
+              <>
+                <div className="text-center mb-6">
+                  <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">⭐</span>
+                  </div>
+                  <h2 className="text-2xl font-bold mb-2">You're Almost Ready!</h2>
+                  <p className="text-gray-600">
+                    Click below to activate your affiliate account and start earning 20% recurring commissions
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 py-6 mb-6">
+                  <div className="text-center">
+                    <span className="text-2xl mb-2 block">💰</span>
+                    <h4 className="font-semibold">20% Commission</h4>
+                    <p className="text-sm text-gray-600">Starting rate</p>
+                  </div>
+                  <div className="text-center">
+                    <span className="text-2xl mb-2 block">⏰</span>
+                    <h4 className="font-semibold">90-Day Tracking</h4>
+                    <p className="text-sm text-gray-600">Cookie duration</p>
+                  </div>
+                  <div className="text-center">
+                    <span className="text-2xl mb-2 block">📊</span>
+                    <h4 className="font-semibold">Real-Time Stats</h4>
+                    <p className="text-sm text-gray-600">Live dashboard</p>
+                  </div>
+                </div>
+
+                <button
+                  className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50"
+                  onClick={joinProgram}
+                  disabled={isJoining}
+                >
+                  {isJoining ? (
+                    <>
+                      <span className="inline-block animate-spin mr-2">⭐</span>
+                      Activating Account...
+                    </>
+                  ) : (
+                    <>
+                      Activate My Affiliate Account ✓
+                    </>
+                  )}
+                </button>
+
+                <p className="text-xs text-gray-500 text-center mt-4">
+                  No approval required • Instant activation • Start earning immediately
+                </p>
+              </>
+            )}
           </div>
         </div>
         <Footer />
@@ -1799,7 +1878,7 @@ Here's the math: ${referralUrl}`,
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Affiliate Dashboard</h1>
-                <p className="text-gray-600">Welcome back, {user.email?.split('@')[0]}! 👋</p>
+                <p className="text-gray-600">Welcome back, {user.email?.split('@')[0]}! ���</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -1928,12 +2007,12 @@ Here's the math: ${referralUrl}`,
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={affiliateData.referral_url}
+                  value={cleanUrl(affiliateData.referral_url)}
                   readOnly
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
                 />
                 <button
-                  onClick={() => copyToClipboard(affiliateData.referral_url)}
+                  onClick={() => copyToClipboard(cleanUrl(affiliateData.referral_url))}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
                   📋 Copy
@@ -2073,13 +2152,13 @@ Here's the math: ${referralUrl}`,
                             ←
                           </Button>
                           <span className="text-xs text-gray-500">
-                            {socialPage + 1} / {Math.ceil(getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).length / 3)}
+                            {socialPage + 1} / {Math.ceil(getSocialTemplates(selectedSocialPlatform, cleanUrl(affiliateData.referral_url)).length / 3)}
                           </span>
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => setSocialPage(socialPage + 1)}
-                            disabled={(socialPage + 1) * 3 >= getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).length}
+                            disabled={(socialPage + 1) * 3 >= getSocialTemplates(selectedSocialPlatform, cleanUrl(affiliateData.referral_url)).length}
                             className="h-7 px-2"
                           >
                             →
@@ -2087,7 +2166,7 @@ Here's the math: ${referralUrl}`,
                         </div>
                       </div>
                       <div className="space-y-3">
-                        {getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url)
+                        {getSocialTemplates(selectedSocialPlatform, cleanUrl(affiliateData.referral_url))
                           .slice(socialPage * 3, (socialPage + 1) * 3)
                           .map((template, index) => (
                           <div key={socialPage * 3 + index} className="p-4 bg-gray-50 rounded-lg border">
@@ -2127,7 +2206,7 @@ Here's the math: ${referralUrl}`,
                           ← Previous
                         </Button>
                         <div className="flex items-center gap-1">
-                          {Array.from({ length: Math.ceil(getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).length / 3) }, (_, index) => (
+                          {Array.from({ length: Math.ceil(getSocialTemplates(selectedSocialPlatform, cleanUrl(affiliateData.referral_url)).length / 3) }, (_, index) => (
                             <Button
                               key={index}
                               size="sm"
@@ -2143,7 +2222,7 @@ Here's the math: ${referralUrl}`,
                           size="sm"
                           variant="outline"
                           onClick={() => setSocialPage(socialPage + 1)}
-                          disabled={(socialPage + 1) * 3 >= getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).length}
+                          disabled={(socialPage + 1) * 3 >= getSocialTemplates(selectedSocialPlatform, cleanUrl(affiliateData.referral_url)).length}
                           className="flex items-center gap-1"
                         >
                           Next →
@@ -2171,12 +2250,12 @@ Here's the math: ${referralUrl}`,
                             <strong>Your personalized post:</strong>
                           </p>
                           <p className="text-sm text-gray-700">
-                            {customMessage || "Your custom message will appear here..."} {affiliateData.referral_url}
+                            {customMessage || "Your custom message will appear here..."} {cleanUrl(affiliateData.referral_url)}
                           </p>
                           <Button
                             size="sm"
                             className="mt-3"
-                            onClick={() => copyToClipboard(`${customMessage} ${affiliateData.referral_url}`)}
+                            onClick={() => copyToClipboard(`${customMessage} ${cleanUrl(affiliateData.referral_url)}`)}
                           >
                             <Copy className="h-4 w-4 mr-2" />
                             Copy Custom Post
@@ -2249,7 +2328,7 @@ Here's the math: ${referralUrl}`,
                   <div>
                     <div className="bg-white border border-gray-200 rounded-lg p-6">
                       <div className="space-y-4">
-                        {getEmailTemplate(selectedEmailTemplate, affiliateData.referral_url).map((section, index) => (
+                        {getEmailTemplate(selectedEmailTemplate, cleanUrl(affiliateData.referral_url)).map((section, index) => (
                           <div key={index}>
                             <Label className="text-xs text-gray-500 uppercase tracking-wide">
                               {section.label}

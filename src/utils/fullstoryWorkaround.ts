@@ -128,15 +128,15 @@ export function createBypassFetch(): typeof fetch {
         };
         
         xhr.onerror = () => {
-          reject(new Error('Network request failed'));
+          reject(new Error(`Network request failed for ${urlString}. This could be due to CORS, connectivity issues, or server problems.`));
         };
-        
+
         xhr.ontimeout = () => {
-          reject(new Error('Request timeout'));
+          reject(new Error(`Request timeout for ${urlString} (exceeded 30 seconds). Please check your internet connection and try again.`));
         };
-        
+
         xhr.onabort = () => {
-          reject(new Error('Request aborted'));
+          reject(new Error(`Request aborted for ${urlString}`));
         };
         
         // Set timeout
@@ -201,10 +201,37 @@ export async function safeFetch(url: string | URL, init?: RequestInit): Promise<
   } catch (error) {
     // If it fails, check if it could be FullStory interference and retry
     if (isFullStoryError(error)) {
-      console.log('🔄 Fetch failed with FullStory error - retrying with bypass');
-      const bypassFetch = createBypassFetch();
-      return await bypassFetch(url, init);
+      console.log('🔄 Fetch failed with FullStory error - retrying with bypass for:', url.toString());
+
+      try {
+        const bypassFetch = createBypassFetch();
+        return await bypassFetch(url, init);
+      } catch (bypassError) {
+        console.error('❌ Both normal fetch and bypass failed:', {
+          originalError: error.message,
+          bypassError: bypassError.message
+        });
+
+        // Instead of throwing a cryptic error, provide more context
+        const contextualError = new Error(
+          `Network request failed. This may be due to browser extensions or third-party scripts interfering with requests. ` +
+          `Try disabling browser extensions or refreshing the page. Original error: ${error.message}`
+        );
+        contextualError.name = 'NetworkInterferenceError';
+        throw contextualError;
+      }
     }
+
+    // Re-throw other types of errors with additional context if helpful
+    if (error.message?.includes('Failed to fetch')) {
+      const enhancedError = new Error(
+        `Network request failed. This could be due to connectivity issues, CORS problems, or browser extension interference. ` +
+        `Please check your internet connection and try again. Original error: ${error.message}`
+      );
+      enhancedError.name = 'NetworkError';
+      throw enhancedError;
+    }
+
     throw error;
   }
 }

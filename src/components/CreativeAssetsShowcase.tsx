@@ -3,7 +3,6 @@ import { Monitor, Share2, FileText, Download, Eye, Sparkles, Crown, Star } from 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { generateAsset } from '@/utils/assetGenerator';
-import BrandGuidelinesPDF from './BrandGuidelinesPDF';
 
 interface AssetCardProps {
   asset: {
@@ -40,103 +39,8 @@ const AssetCard: React.FC<AssetCardProps> = ({ asset, onDownload, onPreview }) =
     }
   };
 
-  const handlePreview = async () => {
-    try {
-      // Generate high-quality asset for preview
-      const dataUrl = await generateAsset(asset.name);
-
-      // Create a modal/popup for preview
-      const previewWindow = window.open('', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
-      if (previewWindow) {
-        previewWindow.document.write(`
-          <html>
-            <head>
-              <title>${asset.name} Preview - Backlink ∞</title>
-              <style>
-                body {
-                  margin: 0;
-                  padding: 40px;
-                  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f172a 100%);
-                  color: white;
-                  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  min-height: 100vh;
-                }
-                h1 {
-                  margin-bottom: 15px;
-                  font-size: 2.5rem;
-                  font-weight: 800;
-                  background: linear-gradient(45deg, #fff700, #ff9500);
-                  -webkit-background-clip: text;
-                  -webkit-text-fill-color: transparent;
-                  background-clip: text;
-                }
-                .info {
-                  margin-bottom: 30px;
-                  opacity: 0.8;
-                  font-size: 1.2rem;
-                  text-align: center;
-                }
-                .preview-container {
-                  background: rgba(255, 255, 255, 0.05);
-                  backdrop-filter: blur(10px);
-                  border-radius: 20px;
-                  padding: 30px;
-                  border: 1px solid rgba(255, 255, 255, 0.1);
-                  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-                }
-                img {
-                  max-width: 100%;
-                  height: auto;
-                  box-shadow: 0 15px 50px rgba(0,0,0,0.7);
-                  border-radius: 12px;
-                  display: block;
-                }
-                .download-btn {
-                  margin-top: 30px;
-                  background: linear-gradient(45deg, #fff700, #ff9500);
-                  color: #0f172a;
-                  padding: 15px 30px;
-                  border: none;
-                  border-radius: 25px;
-                  font-weight: bold;
-                  font-size: 1.1rem;
-                  cursor: pointer;
-                  transition: transform 0.2s;
-                }
-                .download-btn:hover {
-                  transform: scale(1.05);
-                }
-              </style>
-            </head>
-            <body>
-              <h1>${asset.name}</h1>
-              <div class="info">${asset.size} • ${asset.format} • ${asset.description}</div>
-              <div class="preview-container">
-                <img src="${dataUrl}" alt="${asset.name}" />
-                <button class="download-btn" onclick="
-                  const link = document.createElement('a');
-                  link.download = '${asset.name.toLowerCase().replace(/\s+/g, '-')}-${asset.size}.${asset.format.toLowerCase()}';
-                  link.href = '${dataUrl}';
-                  link.click();
-                ">
-                  ⬇ Download High-Quality Asset
-                </button>
-              </div>
-            </body>
-          </html>
-        `);
-        previewWindow.document.close();
-      }
-
-      // Also call the original callback
-      onPreview(asset.name, dataUrl);
-    } catch (error) {
-      console.error('Error previewing asset:', error);
-      alert('Preview will be available soon. Please try again.');
-    }
+  const handlePreview = () => {
+    onPreview(asset.name, '');
   };
 
   return (
@@ -190,21 +94,41 @@ const CreativeAssetsShowcase: React.FC<{
   onDownload: (name: string, preview: string, format: string) => void;
   onPreview: (name: string, preview: string) => void;
 }> = ({ onDownload, onPreview }) => {
-  const [showBrandGuidelines, setShowBrandGuidelines] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [currentPreviewAsset, setCurrentPreviewAsset] = useState<{
+    name: string;
+    size: string;
+    format: string;
+    description: string;
+    dataUrl?: string;
+  } | null>(null);
 
   const handleDownload = (name: string, preview: string, format: string) => {
-    if (name === 'Brand Guidelines') {
-      setShowBrandGuidelines(true);
-      return;
-    }
     onDownload(name, preview, format);
   };
 
-  const handlePreview = (name: string, preview: string) => {
-    if (name === 'Brand Guidelines') {
-      setShowBrandGuidelines(true);
-      return;
+  const handlePreview = async (name: string, preview: string) => {
+    try {
+      // Find the asset details
+      const asset = [...displayBanners, ...brandAssets].find(a => a.name === name);
+      if (asset) {
+        // Generate high-quality asset for preview
+        const dataUrl = await generateAsset(asset.name);
+
+        setCurrentPreviewAsset({
+          name: asset.name,
+          size: asset.size,
+          format: asset.format,
+          description: asset.description,
+          dataUrl: dataUrl
+        });
+        setShowPreviewModal(true);
+      }
+    } catch (error) {
+      console.error('Failed to generate preview:', error);
     }
+
+    // Also call the original callback
     onPreview(name, preview);
   };
   
@@ -639,39 +563,9 @@ const CreativeAssetsShowcase: React.FC<{
         <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden aspect-square shadow-2xl flex items-center justify-center">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 animate-pulse"></div>
           <div className="relative w-40 h-40 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-full flex items-center justify-center shadow-2xl border-4 border-white/20">
-            <span className="text-6xl font-black text-white drop-shadow-xl">∞</span>
+            <span className="text-6xl font-black text-white drop-shadow-xl">��</span>
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/10 rounded-2xl"></div>
-        </div>
-      )
-    },
-    {
-      name: 'Brand Guidelines',
-      size: '2480x3508',
-      format: 'PDF',
-      description: 'Complete brand guide',
-      category: 'brand',
-      preview: (
-        <div className="relative bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl overflow-hidden aspect-[210/297] shadow-2xl p-6">
-          <div className="bg-white rounded-xl h-full p-6 shadow-inner">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                <span className="text-lg font-black text-gray-900">∞</span>
-              </div>
-              <h3 className="text-gray-900 font-black text-xl">Brand Guidelines</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="h-2 bg-gray-300 rounded"></div>
-              <div className="h-2 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-2 bg-gray-300 rounded w-1/2"></div>
-              <div className="h-2 bg-gray-200 rounded w-5/6"></div>
-              <div className="mt-4 grid grid-cols-3 gap-2">
-                <div className="h-6 bg-yellow-400 rounded"></div>
-                <div className="h-6 bg-purple-500 rounded"></div>
-                <div className="h-6 bg-blue-500 rounded"></div>
-              </div>
-            </div>
-          </div>
         </div>
       )
     }
@@ -775,26 +669,65 @@ const CreativeAssetsShowcase: React.FC<{
         </div>
       </div>
 
-      {/* Brand Guidelines Modal */}
-      {showBrandGuidelines && (
+      {/* Asset Preview Modal */}
+      {showPreviewModal && currentPreviewAsset && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold">Brand Guidelines</h2>
+              <div>
+                <h2 className="text-xl font-semibold">{currentPreviewAsset.name}</h2>
+                <p className="text-sm text-gray-600">
+                  {currentPreviewAsset.size} • {currentPreviewAsset.format} • {currentPreviewAsset.description}
+                </p>
+              </div>
               <Button
                 variant="ghost"
-                onClick={() => setShowBrandGuidelines(false)}
+                onClick={() => setShowPreviewModal(false)}
                 className="text-gray-500 hover:text-gray-700"
               >
                 ✕
               </Button>
             </div>
-            <div className="overflow-auto max-h-[calc(90vh-80px)]">
-              <BrandGuidelinesPDF />
+            <div className="overflow-auto max-h-[calc(90vh-120px)] p-6">
+              <div className="flex flex-col items-center space-y-4">
+                {currentPreviewAsset.dataUrl && (
+                  <div className="bg-gradient-to-br from-slate-100 to-slate-200 p-6 rounded-xl shadow-inner max-w-full">
+                    <img
+                      src={currentPreviewAsset.dataUrl}
+                      alt={currentPreviewAsset.name}
+                      className="max-w-full h-auto rounded-lg shadow-lg"
+                      style={{ maxHeight: '60vh' }}
+                    />
+                  </div>
+                )}
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => {
+                      if (currentPreviewAsset.dataUrl) {
+                        const link = document.createElement('a');
+                        link.download = `${currentPreviewAsset.name.toLowerCase().replace(/\s+/g, '-')}-${currentPreviewAsset.size}.${currentPreviewAsset.format.toLowerCase()}`;
+                        link.href = currentPreviewAsset.dataUrl;
+                        link.click();
+                      }
+                    }}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download High-Quality Asset
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowPreviewModal(false)}
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 };

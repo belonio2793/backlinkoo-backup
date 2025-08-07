@@ -36,12 +36,17 @@ export function TrialNotificationBanner({ onSignUp }: TrialNotificationBannerPro
 
   useEffect(() => {
     checkUserAndTrialPosts();
-    
-    // Check every minute for updated trial posts
-    const interval = setInterval(checkUserAndTrialPosts, 60000);
-    
+
+    // Only check every 5 minutes to reduce load and random appearances
+    // Also ensure we don't re-check if user is logged in or banner is dismissed
+    const interval = setInterval(() => {
+      if (!currentUser && isVisible) {
+        checkUserAndTrialPosts();
+      }
+    }, 300000); // 5 minutes instead of 1 minute
+
     return () => clearInterval(interval);
-  }, []);
+  }, [currentUser, isVisible]);
 
   const checkUserAndTrialPosts = async () => {
     try {
@@ -55,21 +60,37 @@ export function TrialNotificationBanner({ onSignUp }: TrialNotificationBannerPro
         return;
       }
 
+      // Check if banner was globally dismissed for this session
+      const sessionDismissed = sessionStorage.getItem('trial_banner_dismissed');
+      if (sessionDismissed === 'true') {
+        setIsVisible(false);
+        return;
+      }
+
       // Get trial posts from in-memory storage (for guests)
       const storedTrialPosts = localStorage.getItem('trial_blog_posts');
       if (storedTrialPosts) {
         const posts: TrialPost[] = JSON.parse(storedTrialPosts);
+
+        // Load dismissed posts from localStorage for persistence
+        const dismissedFromStorage = localStorage.getItem('dismissed_trial_posts');
+        const dismissedIds = dismissedFromStorage ? new Set(JSON.parse(dismissedFromStorage)) : new Set();
+        setDismissedPosts(dismissedIds);
+
         const activePosts = posts.filter(post => {
           const expiresAt = new Date(post.expires_at);
           const now = new Date();
-          return now < expiresAt && !dismissedPosts.has(post.id);
+          return now < expiresAt && !dismissedIds.has(post.id);
         });
 
         setTrialPosts(activePosts);
         setIsVisible(activePosts.length > 0);
+      } else {
+        setIsVisible(false);
       }
     } catch (error) {
       console.warn('Failed to check trial posts:', error);
+      setIsVisible(false);
     }
   };
 
@@ -89,10 +110,22 @@ export function TrialNotificationBanner({ onSignUp }: TrialNotificationBannerPro
     return { hours, minutes, urgent };
   };
 
-  const dismissNotification = (postId: string) => {
-    setDismissedPosts(prev => new Set(prev).add(postId));
+  const dismissNotification = (postId: string, dismissAll = false) => {
+    if (dismissAll) {
+      // Dismiss banner entirely for this session
+      sessionStorage.setItem('trial_banner_dismissed', 'true');
+      setIsVisible(false);
+      return;
+    }
+
+    const newDismissedPosts = new Set(dismissedPosts).add(postId);
+    setDismissedPosts(newDismissedPosts);
+
+    // Persist dismissed posts to localStorage
+    localStorage.setItem('dismissed_trial_posts', JSON.stringify([...newDismissedPosts]));
+
     setTrialPosts(prev => prev.filter(post => post.id !== postId));
-    
+
     if (trialPosts.length <= 1) {
       setIsVisible(false);
     }
@@ -177,8 +210,16 @@ export function TrialNotificationBanner({ onSignUp }: TrialNotificationBannerPro
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => dismissNotification(mostUrgentPost.id)}
+              onClick={(e) => {
+                // If shift+click, dismiss all for session
+                if (e.shiftKey) {
+                  dismissNotification(mostUrgentPost.id, true);
+                } else {
+                  dismissNotification(mostUrgentPost.id);
+                }
+              }}
               className="text-white hover:bg-white/10 p-1"
+              title="Click to dismiss this post, Shift+Click to hide banner completely"
             >
               <X className="h-4 w-4" />
             </Button>
