@@ -274,7 +274,7 @@ export const OptimizedAppWrapper = () => {
           } />
           <Route path="/affiliate/test" element={
             <InstantEmailVerificationGuard>
-              <AffiliateTest />
+              <WorkingAffiliate />
             </InstantEmailVerificationGuard>
           } />
           <Route path="/affiliate/promotion-materials" element={
