@@ -625,7 +625,7 @@ ${referralUrl}`,
         // Page 4
         {
           type: "Data-Driven Results",
-          content: `Data speaks louder than opinions. After 6 months with Backlink ∞:\n\n📈 Domain Authority: +23 points\n📈 Referring domains: +287\n��� Organic traffic: +156%\n📈 Lead quality: Significantly improved\n\nROI has exceeded all expectations. ${referralUrl}`,
+          content: `Data speaks louder than opinions. After 6 months with Backlink ∞:\n\n📈 Domain Authority: +23 points\n📈 Referring domains: +287\n📈 Organic traffic: +156%\n📈 Lead quality: Significantly improved\n\nROI has exceeded all expectations. ${referralUrl}`,
           engagement: "Very High",
           audience: "Data analysts"
         },
@@ -947,7 +947,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Motivational Monday",
-          content: `💪 MOTIVATIONAL MONDAY 💪\n\n"Success isn't about working harder, it's about working smarter"\n\nThat's why I use Backlink ��� for link building 🧠\n\nWork smart, not hard! 💯\n\nLink in bio: ${referralUrl}\n\n#MotivationMonday #WorkSmart #Entrepreneur`,
+          content: `💪 MOTIVATIONAL MONDAY 💪\n\n"Success isn't about working harder, it's about working smarter"\n\nThat's why I use Backlink ∞ for link building 🧠\n\nWork smart, not hard! 💯\n\nLink in bio: ${referralUrl}\n\n#MotivationMonday #WorkSmart #Entrepreneur`,
           engagement: "High",
           audience: "Motivation seekers"
         },
@@ -960,13 +960,13 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Before and After",
-          content: `⬅️ BEFORE: Manual outreach nightmare\n• 20 emails/day\n• 2% response rate\n• Burnt out after 1 month\n\n➡️ AFTER: Backlink ∞ magic\n• 100+ automated emails/day\n• 15% response rate\n��� More time for strategy\n\nLink in bio: ${referralUrl}\n\n#BeforeAndAfter`,
+          content: `⬅️ BEFORE: Manual outreach nightmare\n• 20 emails/day\n• 2% response rate\n• Burnt out after 1 month\n\n➡️ AFTER: Backlink ∞ magic\n• 100+ automated emails/day\n• 15% response rate\n✅ More time for strategy\n\nLink in bio: ${referralUrl}\n\n#BeforeAndAfter`,
           engagement: "Very High",
           audience: "Transformation seekers"
         },
         {
           type: "Quick Win",
-          content: `⚡ QUICK WIN WEDNESDAY ⚡\n\nWant an instant SEO boost?\n\nStart building quality backlinks TODAY with Backlink ∞\n\nNo experience needed 🎯\nResults in 30 days 📈\nFree trial available 🆓\n\nLink in bio: ${referralUrl}\n\n#QuickWin #SEOBoost`,
+          content: `⚡ QUICK WIN WEDNESDAY ⚡\n\nWant an instant SEO boost?\n\nStart building quality backlinks TODAY with Backlink ∞\n\nNo experience needed 🎯\nResults in 30 days ✅\nFree trial available 🆓\n\nLink in bio: ${referralUrl}\n\n#QuickWin #SEOBoost`,
           engagement: "High",
           audience: "Quick results"
         },
@@ -1004,7 +1004,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Growth Hack",
-          content: `��� GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️��� Technical SEO ✅\n3️⃣ High-quality backlinks ✅\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
+          content: `🚨 GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️⃣ Technical SEO ✅\n3️⃣ High-quality backlinks ✅\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
           engagement: "Very High",
           audience: "Growth hackers"
         },
@@ -1042,7 +1042,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Final Push",
-          content: `🎯 FINAL CALL 🎯\n\nIf you're serious about SEO success:\n\n⏰ Don't wait another day\n⏰ Every moment counts\n��� Your competitors aren't waiting\n⏰ Start building links NOW\n\nBacklink ∞ = Your secret weapon! 🚀\n\nLink in bio: ${referralUrl}\n\n#FinalCall #TakeAction`,
+          content: `🎯 FINAL CALL 🎯\n\nIf you're serious about SEO success:\n\n⏰ Don't wait another day\n⏰ Every moment counts\n⚠️ Your competitors aren't waiting\n⏰ Start building links NOW\n\nBacklink ∞ = Your secret weapon! 🚀\n\nLink in bio: ${referralUrl}\n\n#FinalCall #TakeAction`,
           engagement: "High",
           audience: "Action takers"
         }
@@ -1125,7 +1125,7 @@ ${referralUrl}`,
         },
         {
           type: "ROI Breakdown",
-          content: `💰 ROI BREAKDOWN: Exact numbers from my Backlink ��� investment.
+          content: `💰 ROI BREAKDOWN: Exact numbers from my Backlink ∞ investment.
 
 $99/month turned into $5,000/month in additional revenue.
 
@@ -1313,35 +1313,35 @@ Here's the math: ${referralUrl}`,
         {
           label: "Opening",
           content: `<p>Hi [Name],</p>
-
+<br>
 <p>I hope this email finds you well.</p>
-
+<br>
 <p>As someone who values efficient SEO strategies, I wanted to share a tool that has significantly improved my link building results.</p>`,
           isHtml: true
         },
         {
           label: "Body",
           content: `<p>I've been using <strong>Backlink ∞</strong> for the past few months, and the results speak for themselves:</p>
-
+<br>
 <ul style="margin: 20px 0; padding-left: 20px;">
-  <li style="margin-bottom: 8px;"><strong>300% increase</strong> in high-quality backlinks</li>
-  <li style="margin-bottom: 8px;"><strong>50% reduction</strong> in outreach time</li>
-  <li style="margin-bottom: 8px;"><strong>Improved domain authority</strong> across all projects</li>
+  <li style="margin-bottom: 12px;"><strong>300% increase</strong> in high-quality backlinks</li>
+  <li style="margin-bottom: 12px;"><strong>50% reduction</strong> in outreach time</li>
+  <li style="margin-bottom: 12px;"><strong>Improved domain authority</strong> across all projects</li>
 </ul>
-
+<br>
 <p>What sets Backlink ∞ apart is their automated outreach system and focus on high-DA websites.</p>
-
+<br>
 <p>The platform has streamlined my entire link building process.</p>
-
+<br>
 <p>You can check it out here: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Backlink ∞ Platform</a></p>
-
+<br>
 <p>They're currently offering a <strong>free trial</strong>, so there's no risk in testing it out.</p>`,
           isHtml: true
         },
         {
           label: "Closing",
           content: `<p>I'd be happy to discuss my experience in more detail if you're interested.</p>
-
+<br>
 <p>Best regards,<br>[Your Name]</p>`,
           isHtml: true
         }
@@ -1355,35 +1355,35 @@ Here's the math: ${referralUrl}`,
         {
           label: "Opening",
           content: `<p>Hey [Name]!</p>
-
+<br>
 <p>Hope you're doing awesome!</p>
-
+<br>
 <p>I just had to share this SEO tool I've been using - it's been a <em>total game-changer</em> for my websites.</p>`,
           isHtml: true
         },
         {
           label: "Body",
           content: `<p>So I've been struggling with link building (you know how tedious it can be), and then I found <strong>Backlink ∞</strong>.</p>
-
+<br>
 <p>This platform is seriously impressive:</p>
-
+<br>
 <ul style="list-style: none; padding-left: 0; margin: 20px 0;">
-  <li style="margin-bottom: 10px;">✅ <strong>Automated outreach</strong> that actually works</li>
-  <li style="margin-bottom: 10px;">✅ <strong>High-quality backlinks</strong> from real websites</li>
-  <li style="margin-bottom: 10px;">✅ <strong>Super easy to use</strong> interface</li>
+  <li style="margin-bottom: 12px;">✅ <strong>Automated outreach</strong> that actually works</li>
+  <li style="margin-bottom: 12px;">✅ <strong>High-quality backlinks</strong> from real websites</li>
+  <li style="margin-bottom: 12px;">✅ <strong>Super easy to use</strong> interface</li>
 </ul>
-
+<br>
 <p>I've seen my rankings improve within just a few weeks!</p>
-
+<br>
 <p>Here's the link if you want to check it out: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Try Backlink ∞</a></p>
-
+<br>
 <p>They have a <strong>free trial</strong>, so you can test it risk-free.</p>`,
           isHtml: true
         },
         {
           label: "Closing",
           content: `<p>Let me know what you think if you try it out!</p>
-
+<br>
 <p>Cheers,<br>[Your Name]</p>`,
           isHtml: true
         }
@@ -1407,21 +1407,22 @@ Here's the math: ${referralUrl}`,
           content: `<div style="border-left: 4px solid #2563eb; padding-left: 20px; margin: 20px 0;">
   <h2 style="color: #2563eb;">SPOTLIGHT: Backlink ∞ - The Future of Link Building</h2>
 </div>
-
+<br>
 <p>In the ever-evolving world of SEO, link building remains one of the most crucial yet challenging aspects of digital marketing. That's where <strong>Backlink ∞</strong> comes in.</p>
-
+<br>
 <h3 style="color: #1e293b;">What makes it special:</h3>
-<ul>
-  <li><strong>AI-powered outreach automation</strong> - No more manual emails</li>
-  <li><strong>Focus on high-authority websites</strong> - Quality over quantity</li>
-  <li><strong>Comprehensive tracking and analytics</strong> - Know what works</li>
-  <li><strong>Time-saving automation features</strong> - Focus on strategy</li>
+<br>
+<ul style="margin: 20px 0; padding-left: 20px;">
+  <li style="margin-bottom: 12px;"><strong>AI-powered outreach automation</strong> - No more manual emails</li>
+  <li style="margin-bottom: 12px;"><strong>Focus on high-authority websites</strong> - Quality over quantity</li>
+  <li style="margin-bottom: 12px;"><strong>Comprehensive tracking and analytics</strong> - Know what works</li>
+  <li style="margin-bottom: 12px;"><strong>Time-saving automation features</strong> - Focus on strategy</li>
 </ul>
-
+<br>
 <div style="background: #ecfccb; border: 1px solid #bef264; padding: 15px; border-radius: 6px; margin: 20px 0;">
   <p style="margin: 0; color: #365314;"><strong>Success Story:</strong> The platform has gained significant traction among SEO professionals, with many reporting substantial improvements in their link building success rates.</p>
 </div>
-
+<br>
 <p>Interested in learning more? You can explore <a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Backlink ∞ here</a></p>`,
           isHtml: true
         }
@@ -1435,37 +1436,37 @@ Here's the math: ${referralUrl}`,
         {
           label: "Opening",
           content: `<p>Hi [Name],</p>
-
+<br>
 <p>I noticed your website [Website Name] and I'm impressed with your content quality.</p>
-
+<br>
 <p>I wanted to reach out because I recently discovered a tool that's been a game-changer for my SEO results.</p>`,
           isHtml: true
         },
         {
           label: "Body",
           content: `<p>Are you currently working on link building for your site?</p>
-
+<br>
 <p>I ask because I've been using <strong>Backlink ∞</strong> and the results have been incredible:</p>
-
+<br>
 <ul style="margin: 20px 0; padding-left: 20px;">
-  <li style="margin-bottom: 8px;"><strong>250% increase</strong> in quality backlinks</li>
-  <li style="margin-bottom: 8px;"><strong>Automated outreach</strong> that saves 15+ hours/week</li>
-  <li style="margin-bottom: 8px;"><strong>Higher success rates</strong> than manual methods</li>
+  <li style="margin-bottom: 12px;"><strong>250% increase</strong> in quality backlinks</li>
+  <li style="margin-bottom: 12px;"><strong>Automated outreach</strong> that saves 15+ hours/week</li>
+  <li style="margin-bottom: 12px;"><strong>Higher success rates</strong> than manual methods</li>
 </ul>
-
+<br>
 <p>The platform focuses on high-authority websites and uses AI to personalize outreach at scale.</p>
-
+<br>
 <p>Given your expertise in [Industry], I thought this might be valuable for your SEO strategy:</p>
-
+<br>
 <p><a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Check out Backlink ∞</a></p>`,
           isHtml: true
         },
         {
           label: "Closing",
           content: `<p>Would love to hear your thoughts if you take a look!</p>
-
+<br>
 <p>Best,<br>[Your Name]</p>
-
+<br>
 <p style="font-size: 12px; color: #666; margin-top: 15px;">P.S. They offer a free trial, so there's no risk in testing it out.</p>`,
           isHtml: true
         }
@@ -1479,37 +1480,37 @@ Here's the math: ${referralUrl}`,
         {
           label: "Opening",
           content: `<p>Hi [Name],</p>
-
+<br>
 <p>Hope you're having a great week!</p>
-
+<br>
 <p>I wanted to follow up on my previous email about Backlink ∞.</p>`,
           isHtml: true
         },
         {
           label: "Body",
           content: `<p>I know you're probably busy, so I'll keep this brief.</p>
-
+<br>
 <p>Since my last email, I've seen even more impressive results:</p>
-
+<br>
 <ul style="margin: 20px 0; padding-left: 20px;">
-  <li style="margin-bottom: 8px;"><strong>Just landed 12 high-DA backlinks</strong> in the past week</li>
-  <li style="margin-bottom: 8px;"><strong>Domain Authority increased by 8 points</strong></li>
-  <li style="margin-bottom: 8px;"><strong>Organic traffic up 45%</strong> this month</li>
+  <li style="margin-bottom: 12px;"><strong>Just landed 12 high-DA backlinks</strong> in the past week</li>
+  <li style="margin-bottom: 12px;"><strong>Domain Authority increased by 8 points</strong></li>
+  <li style="margin-bottom: 12px;"><strong>Organic traffic up 45%</strong> this month</li>
 </ul>
-
+<br>
 <p>The ROI has been phenomenal, and I genuinely think it could help with your SEO goals too.</p>
-
+<br>
 <p>Here's the link again if you'd like to take a look:</p>
-
+<br>
 <p><a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Backlink ∞ Platform</a></p>`,
           isHtml: true
         },
         {
           label: "Closing",
           content: `<p>No pressure at all - just wanted to share something that's been working well for me.</p>
-
+<br>
 <p>Either way, keep up the excellent work on your site!</p>
-
+<br>
 <p>Best regards,<br>[Your Name]</p>`,
           isHtml: true
         }
@@ -1615,7 +1616,7 @@ Here's the math: ${referralUrl}`,
                 <p className="text-gray-600 mb-4">Extended attribution window ensures maximum earnings</p>
                 <div className="space-y-2 text-sm text-blue-700">
                   <div className="flex items-center gap-2">
-                    <span>���</span>
+                    <span>📊</span>
                     <span>Cross-device tracking</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -2395,20 +2396,227 @@ Here's the math: ${referralUrl}`,
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Image className="h-5 w-5 text-orange-600" />
-                    Professional Marketing Assets
+                    Enterprise-Quality Creative Assets
                   </CardTitle>
                   <CardDescription>
-                    High-quality banners, graphics, and promotional materials for all platforms
+                    World-class marketing assets with proven sales psychology and professional design
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Asset Categories */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Banners & Display Ads */}
+
+                  {/* Live Asset Previews Section */}
+                  <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg border border-purple-200">
+                    <h3 className="text-lg font-semibold mb-4 text-purple-900">🎨 Live Asset Previews</h3>
+                    <p className="text-sm text-purple-700 mb-4">Interactive previews of our enterprise-quality marketing assets</p>
+
+                    {/* Animated Leaderboard Banner */}
+                    <div className="mb-6">
+                      <h4 className="font-medium text-sm mb-2">Animated Leaderboard Banner (728x90)</h4>
+                      <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 rounded-lg overflow-hidden border-2 border-white shadow-lg" style={{ width: '100%', maxWidth: '728px', height: '90px' }}>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+                        <div className="relative h-full flex items-center justify-between px-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                              <span className="text-lg font-bold text-gray-900">∞</span>
+                            </div>
+                            <div>
+                              <div className="text-white font-bold text-lg">Backlink ∞</div>
+                              <div className="text-blue-100 text-xs">Automated Link Building</div>
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-yellow-300 font-bold text-sm animate-pulse">🚀 300% More Backlinks</div>
+                            <div className="text-white text-xs">50% Higher DA Links</div>
+                          </div>
+                          <div className="bg-yellow-400 text-gray-900 px-4 py-2 rounded-full font-bold text-sm hover:bg-yellow-300 transition-colors cursor-pointer">
+                            Start Free Trial →
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Animated Square Banner */}
+                    <div className="mb-6">
+                      <h4 className="font-medium text-sm mb-2">Premium Square Banner (300x300)</h4>
+                      <div className="relative bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-xl overflow-hidden shadow-xl" style={{ width: '300px', height: '300px' }}>
+                        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent"></div>
+                        <div className="relative h-full flex flex-col items-center justify-center text-center p-6">
+                          <div className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mb-4 animate-pulse-glow">
+                            <span className="text-2xl font-bold text-gray-900">∞</span>
+                          </div>
+                          <h3 className="text-white font-bold text-xl mb-2">Backlink ∞</h3>
+                          <p className="text-blue-100 text-sm mb-4">The Smart Way to Build<br/>High-Quality Backlinks</p>
+                          <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-4 py-2 rounded-full font-bold text-sm mb-3">
+                            300% Faster Results
+                          </div>
+                          <div className="text-yellow-300 text-xs animate-pulse">✨ Start Your Free Trial Today</div>
+                        </div>
+                        {/* Floating particles effect */}
+                        <div className="absolute top-4 left-4 w-2 h-2 bg-yellow-300 rounded-full animate-ping"></div>
+                        <div className="absolute top-8 right-6 w-1 h-1 bg-blue-300 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
+                        <div className="absolute bottom-6 left-8 w-1.5 h-1.5 bg-purple-300 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
+                      </div>
+                    </div>
+
+                    {/* Modern Skyscraper Banner */}
+                    <div className="mb-6">
+                      <h4 className="font-medium text-sm mb-2">Elegant Skyscraper Banner (160x600)</h4>
+                      <div className="relative bg-gradient-to-b from-indigo-600 via-purple-700 to-pink-600 rounded-lg overflow-hidden shadow-xl" style={{ width: '160px', height: '300px' }}>
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
+                        <div className="relative h-full flex flex-col items-center text-center p-4">
+                          <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mb-3 mt-4">
+                            <span className="text-lg font-bold text-gray-900">∞</span>
+                          </div>
+                          <h3 className="text-white font-bold text-sm mb-2">Backlink ∞</h3>
+                          <div className="flex-1 flex flex-col justify-center space-y-3">
+                            <div className="bg-white/10 backdrop-blur rounded p-2">
+                              <div className="text-yellow-300 text-xs font-bold">🎯 High-DA</div>
+                              <div className="text-white text-xs">Backlinks</div>
+                            </div>
+                            <div className="bg-white/10 backdrop-blur rounded p-2">
+                              <div className="text-green-300 text-xs font-bold">⚡ AI</div>
+                              <div className="text-white text-xs">Outreach</div>
+                            </div>
+                            <div className="bg-white/10 backdrop-blur rounded p-2">
+                              <div className="text-blue-300 text-xs font-bold">📊 Real-time</div>
+                              <div className="text-white text-xs">Analytics</div>
+                            </div>
+                          </div>
+                          <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-3 py-2 rounded-full font-bold text-xs mb-4">
+                            Try Free
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Social Media Asset - Instagram Story */}
+                    <div className="mb-6">
+                      <h4 className="font-medium text-sm mb-2">Instagram Story Template (1080x1920)</h4>
+                      <div className="relative bg-gradient-to-br from-pink-500 via-purple-600 to-indigo-600 rounded-3xl overflow-hidden shadow-xl" style={{ width: '180px', height: '320px' }}>
+                        <div className="absolute inset-0">
+                          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent animate-gradient-shift"></div>
+                        </div>
+                        <div className="relative h-full flex flex-col items-center text-center p-6">
+                          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 mt-8 border-4 border-yellow-400">
+                            <span className="text-xl font-bold text-purple-600">∞</span>
+                          </div>
+                          <h3 className="text-white font-bold text-lg mb-2">Backlink ∞</h3>
+                          <p className="text-purple-100 text-sm mb-6">I just increased my<br/>organic traffic by<br/><span className="text-yellow-300 font-bold text-xl">300%!</span></p>
+                          <div className="flex-1 flex flex-col justify-center">
+                            <div className="bg-white/20 backdrop-blur rounded-full px-4 py-2 mb-3">
+                              <div className="text-white text-xs font-bold">✨ Automated Outreach</div>
+                            </div>
+                            <div className="bg-white/20 backdrop-blur rounded-full px-4 py-2 mb-3">
+                              <div className="text-white text-xs font-bold">📈 High-DA Links Only</div>
+                            </div>
+                            <div className="bg-white/20 backdrop-blur rounded-full px-4 py-2">
+                              <div className="text-white text-xs font-bold">🚀 Instant Results</div>
+                            </div>
+                          </div>
+                          <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-6 py-3 rounded-full font-bold text-sm mt-4">
+                            Swipe Up to Try
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Professional Asset Downloads */}
+                  <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-6 rounded-lg border border-gray-200 mb-6">
+                    <h3 className="text-lg font-semibold mb-4 text-gray-900">📦 Professional Asset Downloads</h3>
+                    <p className="text-sm text-gray-700 mb-4">Enterprise-quality marketing assets designed by professionals with proven sales psychology</p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {[
+                        {
+                          title: "Animated Banner Pack",
+                          description: "10 animated banners with CSS animations",
+                          fileSize: "2.1 MB",
+                          formats: ["HTML", "CSS", "PNG"],
+                          features: ["Responsive Design", "CSS3 Animations", "Call-to-Action Optimization"],
+                          psychology: ["Urgency triggers", "Social proof elements", "Benefit-focused copy"]
+                        },
+                        {
+                          title: "Social Media Kit",
+                          description: "Complete social media asset collection",
+                          fileSize: "5.3 MB",
+                          formats: ["PSD", "PNG", "JPG"],
+                          features: ["Instagram Templates", "Facebook Assets", "Twitter Headers"],
+                          psychology: ["FOMO triggers", "Success stories", "Authority positioning"]
+                        },
+                        {
+                          title: "Video Ad Templates",
+                          description: "After Effects video ad templates",
+                          fileSize: "12.7 MB",
+                          formats: ["AEP", "MP4", "MOV"],
+                          features: ["Professional Transitions", "Brand Animations", "Call-to-Action Overlays"],
+                          psychology: ["Problem-solution narrative", "Social proof videos", "Scarcity messaging"]
+                        },
+                        {
+                          title: "Email Signature Pack",
+                          description: "Professional email signatures with tracking",
+                          fileSize: "1.8 MB",
+                          formats: ["HTML", "PNG", "SVG"],
+                          features: ["HTML Signatures", "Click Tracking", "Mobile Responsive"],
+                          psychology: ["Authority building", "Trust signals", "Subtle call-to-action"]
+                        }
+                      ].map((asset, index) => (
+                        <div key={index} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                          <h4 className="font-semibold text-sm mb-2">{asset.title}</h4>
+                          <p className="text-xs text-gray-600 mb-3">{asset.description}</p>
+                          <div className="mb-3">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs text-gray-500">Size:</span>
+                              <Badge variant="outline" className="text-xs">{asset.fileSize}</Badge>
+                            </div>
+                            <div className="flex flex-wrap gap-1 mb-2">
+                              {asset.formats.map((format, i) => (
+                                <Badge key={i} variant="secondary" className="text-xs">{format}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="mb-3">
+                            <p className="text-xs font-medium text-gray-700 mb-1">Features:</p>
+                            <ul className="text-xs text-gray-600 space-y-1">
+                              {asset.features.map((feature, i) => (
+                                <li key={i} className="flex items-start gap-1">
+                                  <span className="text-green-500">✓</span>
+                                  {feature}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div className="mb-4">
+                            <p className="text-xs font-medium text-purple-700 mb-1">Sales Psychology:</p>
+                            <ul className="text-xs text-purple-600 space-y-1">
+                              {asset.psychology.map((psych, i) => (
+                                <li key={i} className="flex items-start gap-1">
+                                  <span className="text-purple-500">🧠</span>
+                                  {psych}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <Button
+                            size="sm"
+                            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                            onClick={() => downloadAsset(asset.title, '', 'ZIP')}
+                          >
+                            <Download className="h-3 w-3 mr-2" />
+                            Download Pack
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Spectacular Creative Asset Categories */}
+                  <div className="space-y-8">
+                    {/* Enhanced Display Banners */}
                     <div>
                       <h4 className="font-semibold mb-3 flex items-center gap-2">
                         <Monitor className="h-4 w-4" />
-                        Display Banners
+                        Enterprise Display Banners
                       </h4>
                       <div className="space-y-3">
                         {[

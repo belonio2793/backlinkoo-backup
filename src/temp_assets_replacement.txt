@@ -1,0 +1,194 @@
+{/* Spectacular Creative Asset Categories */}
+                  <div className="space-y-8">
+                    
+                    {/* Interactive Video Ads Section */}
+                    <div className="bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-xl border border-red-200">
+                      <h3 className="text-xl font-bold mb-4 text-red-900 flex items-center gap-2">
+                        🎬 Interactive Video Ad Templates
+                      </h3>
+                      <p className="text-red-700 mb-6">Professional video ads with industry-leading conversion psychology</p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Testimonial Video */}
+                        <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                          <div className="relative bg-gradient-to-br from-blue-600 to-purple-700 p-6 text-center text-white h-48 flex flex-col justify-center">
+                            <div className="absolute top-4 left-4 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">▶</span>
+                            </div>
+                            <h4 className="font-bold text-lg mb-2">Success Story Video</h4>
+                            <p className="text-sm opacity-90">"I got 347% more backlinks in 30 days"</p>
+                            <div className="mt-4 bg-yellow-400 text-gray-900 px-4 py-2 rounded-full text-sm font-bold">
+                              Watch My Results →
+                            </div>
+                          </div>
+                          <div className="p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge variant="outline">30-60 sec</Badge>
+                              <Badge variant="outline">After Effects</Badge>
+                            </div>
+                            <p className="text-xs text-gray-600 mb-3">Template with customer testimonial format, results graphics, and clear CTA</p>
+                            <Button size="sm" className="w-full bg-red-600 hover:bg-red-700">
+                              <Download className="h-3 w-3 mr-2" />
+                              Download Video Template
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Problem-Solution Video */}
+                        <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                          <div className="relative bg-gradient-to-br from-green-600 to-teal-700 p-6 text-center text-white h-48 flex flex-col justify-center">
+                            <div className="absolute top-4 left-4 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">▶</span>
+                            </div>
+                            <h4 className="font-bold text-lg mb-2">Problem-Solution Ad</h4>
+                            <p className="text-sm opacity-90">From manual outreach to automated success</p>
+                            <div className="mt-4 bg-yellow-400 text-gray-900 px-4 py-2 rounded-full text-sm font-bold">
+                              See How It Works
+                            </div>
+                          </div>
+                          <div className="p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge variant="outline">45 sec</Badge>
+                              <Badge variant="outline">Premiere Pro</Badge>
+                            </div>
+                            <p className="text-xs text-gray-600 mb-3">Hook → Problem → Solution → Proof → CTA format with motion graphics</p>
+                            <Button size="sm" className="w-full bg-green-600 hover:bg-green-700">
+                              <Download className="h-3 w-3 mr-2" />
+                              Download Video Template
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Demo Video */}
+                        <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                          <div className="relative bg-gradient-to-br from-purple-600 to-pink-700 p-6 text-center text-white h-48 flex flex-col justify-center">
+                            <div className="absolute top-4 left-4 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">▶</span>
+                            </div>
+                            <h4 className="font-bold text-lg mb-2">Product Demo</h4>
+                            <p className="text-sm opacity-90">Watch how easy it is to get high-DA links</p>
+                            <div className="mt-4 bg-yellow-400 text-gray-900 px-4 py-2 rounded-full text-sm font-bold">
+                              Try Free Now
+                            </div>
+                          </div>
+                          <div className="p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge variant="outline">2 min</Badge>
+                              <Badge variant="outline">Screen Record</Badge>
+                            </div>
+                            <p className="text-xs text-gray-600 mb-3">Platform walkthrough with voiceover and result highlights</p>
+                            <Button size="sm" className="w-full bg-purple-600 hover:bg-purple-700">
+                              <Download className="h-3 w-3 mr-2" />
+                              Download Demo Kit
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Advanced Social Media Assets */}
+                    <div className="bg-gradient-to-r from-pink-50 to-purple-50 p-6 rounded-xl border border-pink-200">
+                      <h3 className="text-xl font-bold mb-4 text-pink-900 flex items-center gap-2">
+                        📱 Next-Gen Social Media Assets
+                      </h3>
+                      <p className="text-pink-700 mb-6">Viral-ready content designed for maximum engagement</p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* TikTok Template */}
+                        <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+                          <div className="relative bg-gradient-to-br from-black via-gray-800 to-purple-900 text-white" style={{ height: '280px' }}>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                              <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full flex items-center justify-center mb-3">
+                                <span className="text-xl font-bold">∞</span>
+                              </div>
+                              <h4 className="font-bold text-lg mb-2">POV: You discover the ultimate backlink hack</h4>
+                              <div className="space-y-2 text-sm">
+                                <div className="bg-white/20 backdrop-blur rounded-full px-3 py-1">Before: 2 hours per link</div>
+                                <div className="bg-gradient-to-r from-green-400 to-blue-500 rounded-full px-3 py-1">After: 20 links per hour</div>
+                              </div>
+                              <div className="mt-3 text-xs opacity-75">#SEOHack #LinkBuilding #Growth</div>
+                            </div>
+                          </div>
+                          <div className="p-3">
+                            <Badge variant="outline" className="mb-2">TikTok 9:16</Badge>
+                            <Button size="sm" className="w-full bg-black text-white hover:bg-gray-800">
+                              <Download className="h-3 w-3 mr-2" />
+                              Get TikTok Pack
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* LinkedIn Carousel */}
+                        <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+                          <div className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white p-4" style={{ height: '280px' }}>
+                            <div className="flex flex-col justify-between h-full">
+                              <div>
+                                <h4 className="font-bold text-lg mb-2">5 Backlink Strategies That Actually Work in 2024</h4>
+                                <div className="text-sm space-y-1">
+                                  <div>→ Strategy #1: Automated outreach</div>
+                                  <div>→ Strategy #2: High-DA targeting</div>
+                                  <div>→ Strategy #3: AI personalization</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <div className="text-xs">Slide 1/5</div>
+                                <div className="bg-yellow-400 text-gray-900 px-3 py-1 rounded text-xs font-bold">Swipe →</div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-3">
+                            <Badge variant="outline" className="mb-2">LinkedIn Carousel</Badge>
+                            <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
+                              <Download className="h-3 w-3 mr-2" />
+                              Download Series
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Instagram Reel */}
+                        <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+                          <div className="relative bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 text-white p-4" style={{ height: '280px' }}>
+                            <div className="flex flex-col justify-center h-full text-center">
+                              <div className="text-3xl mb-2">📈</div>
+                              <h4 className="font-bold text-lg mb-2">Watch me build 100 backlinks</h4>
+                              <p className="text-sm mb-3">in just 1 hour using this tool</p>
+                              <div className="bg-white/20 backdrop-blur rounded-full px-4 py-2 text-sm mb-3">
+                                Time-lapse mode ON ⚡
+                              </div>
+                              <div className="text-xs">#Reels #SEO #BacklinkBuilding</div>
+                            </div>
+                          </div>
+                          <div className="p-3">
+                            <Badge variant="outline" className="mb-2">Instagram Reel</Badge>
+                            <Button size="sm" className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                              <Download className="h-3 w-3 mr-2" />
+                              Get Reel Template
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* YouTube Thumbnail */}
+                        <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+                          <div className="relative bg-gradient-to-r from-red-600 to-red-800 text-white p-4" style={{ height: '280px' }}>
+                            <div className="flex flex-col justify-center h-full text-center">
+                              <div className="text-4xl font-bold text-yellow-400 mb-2">300%</div>
+                              <h4 className="font-bold text-lg mb-2">MORE BACKLINKS</h4>
+                              <p className="text-sm mb-3">with this SECRET tool</p>
+                              <div className="bg-yellow-400 text-red-900 px-4 py-2 rounded-full text-sm font-bold inline-block">
+                                WATCH NOW!
+                              </div>
+                              <div className="mt-2 text-xs opacity-75">🔥 VIRAL STRATEGY REVEALED</div>
+                            </div>
+                          </div>
+                          <div className="p-3">
+                            <Badge variant="outline" className="mb-2">YouTube 16:9</Badge>
+                            <Button size="sm" className="w-full bg-red-600 hover:bg-red-700">
+                              <Download className="h-3 w-3 mr-2" />
+                              Get Thumbnail Pack
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>

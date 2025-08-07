@@ -173,6 +173,16 @@ export default {
 					'100%': {
 						transform: 'translateX(100%)'
 					}
+				},
+				'pulse-glow': {
+					'0%, 100%': {
+						opacity: '0.7',
+						transform: 'scale(1)'
+					},
+					'50%': {
+						opacity: '1',
+						transform: 'scale(1.05)'
+					}
 				}
 			},
 			animation: {
