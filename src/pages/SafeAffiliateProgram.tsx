@@ -440,13 +440,21 @@ Here's my experience: ${referralUrl}`,
         },
         {
           type: "Urgency",
-          content: `🔥 LAST 24 HOURS: Backlink ∞'s free trial ends soon. If you're serious about SEO, don't miss this opportunity to transform your link building: ${referralUrl}`,
+          content: `🔥 LAST 24 HOURS: Backlink ∞'s free trial ends soon.
+
+If you're serious about SEO, don't miss this opportunity to transform your link building:
+
+${referralUrl}`,
           engagement: "High",
           audience: "Decision makers"
         },
         {
           type: "Personal Story",
-          content: `2 years ago, I was manually sending 20 outreach emails daily. Today, Backlink ∞ sends 200+ while I focus on strategy. Game changer: ${referralUrl}`,
+          content: `2 years ago, I was manually sending 20 outreach emails daily.
+
+Today, Backlink ∞ sends 200+ while I focus on strategy.
+
+Game changer: ${referralUrl}`,
           engagement: "High",
           audience: "Personal brand builders"
         },
@@ -459,7 +467,11 @@ Here's my experience: ${referralUrl}`,
         },
         {
           type: "Challenge",
-          content: `Challenge: Get 50 high-quality backlinks in 30 days. Sounds impossible? Not with Backlink ∞. I did 87. Your turn: ${referralUrl}`,
+          content: `Challenge: Get 50 high-quality backlinks in 30 days.
+
+Sounds impossible? Not with Backlink ∞. I did 87.
+
+Your turn: ${referralUrl}`,
           engagement: "High",
           audience: "Competitive types"
         },
@@ -478,7 +490,9 @@ Here's my experience: ${referralUrl}`,
         },
         {
           type: "Prediction",
-          content: `Prediction: In 2024, businesses using AI for link building will dominate those doing manual outreach. Get ahead with Backlink ∞: ${referralUrl}`,
+          content: `Prediction: In 2024, businesses using AI for link building will dominate those doing manual outreach.
+
+Get ahead with Backlink ∞: ${referralUrl}`,
           engagement: "Medium",
           audience: "Forward thinkers"
         },
@@ -1047,7 +1061,7 @@ ${referralUrl}`,
         },
         {
           type: "Expert Interview",
-          content: `🎤 EXPERT INTERVIEW: SEO guru reveals why Backlink ∞ is the future of link building. Insider secrets and industry predictions you won't hear anywhere else: ${referralUrl}`,
+          content: `🎤 EXPERT INTERVIEW: SEO guru reveals why Backlink ��� is the future of link building. Insider secrets and industry predictions you won't hear anywhere else: ${referralUrl}`,
           engagement: "High",
           audience: "Expert insights"
         },
@@ -1515,7 +1529,7 @@ ${referralUrl}`,
 
               <div className="bg-white p-8 rounded-xl shadow-sm border-2 border-blue-200">
                 <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-2xl">⏰</span>
+                  <span className="text-2xl">���</span>
                 </div>
                 <h3 className="text-2xl font-bold mb-4">30-Day Cookies</h3>
                 <p className="text-gray-600 mb-4">Extended attribution window ensures maximum earnings</p>
