@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Download, Eye, FileText, Palette, Type, Layout, Target, BookOpen, Star, Shield, Globe, Infinity, Sparkles, Zap, TrendingUp, Award } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
