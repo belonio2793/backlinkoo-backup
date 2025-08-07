@@ -466,7 +466,7 @@ const SafeAffiliateProgram: React.FC = () => {
         },
         {
           label: "Body",
-          content: `I've been using Backlinkoo for the past few months, and the results speak for themselves:\n\n• 300% increase in high-quality backlinks\n• 50% reduction in outreach time\n• Improved domain authority across all projects\n\nWhat sets Backlinkoo apart is their automated outreach system and focus on high-DA websites. The platform has streamlined my entire link building process.\n\nYou can check it out here: ${referralUrl}\n\nThey're currently offering a free trial, so there's no risk in testing it out.`
+          content: `I've been using Backlink ∞ for the past few months, and the results speak for themselves:\n\n• 300% increase in high-quality backlinks\n• 50% reduction in outreach time\n• Improved domain authority across all projects\n\nWhat sets Backlink ∞ apart is their automated outreach system and focus on high-DA websites. The platform has streamlined my entire link building process.\n\nYou can check it out here: ${referralUrl}\n\nThey're currently offering a free trial, so there's no risk in testing it out.`
         },
         {
           label: "Closing",
@@ -484,7 +484,7 @@ const SafeAffiliateProgram: React.FC = () => {
         },
         {
           label: "Body",
-          content: `So I've been struggling with link building (you know how tedious it can be), and then I found Backlinkoo. This platform is seriously impressive:\n\n✅ Automated outreach that actually works\n✅ High-quality backlinks from real websites\n✅ Super easy to use interface\n\nI've seen my rankings improve within just a few weeks! Here's the link if you want to check it out: ${referralUrl}\n\nThey have a free trial, so you can test it risk-free.`
+          content: `So I've been struggling with link building (you know how tedious it can be), and then I found Backlink ∞. This platform is seriously impressive:\n\n✅ Automated outreach that actually works\n✅ High-quality backlinks from real websites\n✅ Super easy to use interface\n\nI've seen my rankings improve within just a few weeks! Here's the link if you want to check it out: ${referralUrl}\n\nThey have a free trial, so you can test it risk-free.`
         },
         {
           label: "Closing",
@@ -502,7 +502,7 @@ const SafeAffiliateProgram: React.FC = () => {
         },
         {
           label: "Feature Article",
-          content: `SPOTLIGHT: Backlinkoo - The Future of Link Building\n\nIn the ever-evolving world of SEO, link building remains one of the most crucial yet challenging aspects of digital marketing. That's where Backlinkoo comes in.\n\nWhat makes it special:\n• AI-powered outreach automation\n• Focus on high-authority websites\n• Comprehensive tracking and analytics\n• Time-saving automation features\n\nThe platform has gained significant traction among SEO professionals, with many reporting substantial improvements in their link building success rates.\n\nInterested in learning more? You can explore Backlinkoo here: ${referralUrl}`
+          content: `SPOTLIGHT: Backlink ∞ - The Future of Link Building\n\nIn the ever-evolving world of SEO, link building remains one of the most crucial yet challenging aspects of digital marketing. That's where Backlink ∞ comes in.\n\nWhat makes it special:\n• AI-powered outreach automation\n• Focus on high-authority websites\n• Comprehensive tracking and analytics\n• Time-saving automation features\n\nThe platform has gained significant traction among SEO professionals, with many reporting substantial improvements in their link building success rates.\n\nInterested in learning more? You can explore Backlink ∞ here: ${referralUrl}`
         }
       ]
     };
