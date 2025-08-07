@@ -55,7 +55,7 @@ export const AffiliateProgram: React.FC = () => {
     try {
       setLoading(true);
       setDatabaseError(false);
-      const profile = await enhancedAffiliateService.getAffiliateProfile(user.id);
+      const profile = await compatibilityAffiliateService.getAffiliateProfile(user.id);
       setAffiliateProfile(profile);
     } catch (error) {
       console.error('Failed to check affiliate status:', error);
