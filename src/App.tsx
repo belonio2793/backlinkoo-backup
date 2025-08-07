@@ -10,6 +10,7 @@ import { InstantAuthProvider } from "@/components/InstantAuth";
 import { EnhancedErrorBoundary } from "@/components/EnhancedErrorBoundary";
 import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
 import { PremiumPopupProvider } from "@/components/PremiumPopupProvider";
+import { affiliateService } from "@/services/affiliateService";
 
 // Lightweight initialization for better performance
 if (import.meta.env.DEV) {
@@ -21,6 +22,13 @@ import { queryClient } from "@/lib/queryClient";
 // Lightweight initialization for faster startup
 if (typeof window !== 'undefined') {
   console.log('⚡ Instant app initialization');
+
+  // Initialize affiliate tracking
+  setTimeout(() => {
+    affiliateService.initializeTracking().catch(() => {
+      // Silent fail for affiliate tracking to not impact user experience
+    });
+  }, 1000);
 
   // Defer heavy operations to after app mount
   setTimeout(() => {

@@ -246,17 +246,17 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background font-light">
       {/* Rotating Notification Banner */}
-      <RotatingNotificationBanner className="fixed top-0 left-0 right-0 z-[60]" />
+      <RotatingNotificationBanner className="sticky top-0 left-0 right-0 z-[60]" />
 
       {/* Header */}
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-16 z-50 mt-16">
-        <div className="w-full px-4 sm:px-6 py-4">
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="w-full px-4 sm:px-6 py-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-              <Infinity className="h-7 w-7 text-primary" />
-              <h1 className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground">Backlink</h1>
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+              <Infinity className="h-4 w-4 text-primary" />
+              <h1 className="text-sm sm:text-base md:text-lg font-semibold tracking-tight text-foreground">Backlink</h1>
             </div>
-            <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-1 sm:gap-2">
 
               {!authChecked ? (
                 <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
@@ -264,7 +264,7 @@ const Index = () => {
                 <>
                   <Button
                     onClick={() => navigate("/dashboard")}
-                    className="bg-transparent hover:bg-blue-50/50 border border-blue-200/60 text-blue-700 hover:text-blue-800 hover:border-blue-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+                    className="bg-transparent hover:bg-blue-50/50 border border-blue-200/60 text-blue-700 hover:text-blue-800 hover:border-blue-300/80 transition-all duration-200 font-medium px-4 py-1 text-sm backdrop-blur-sm shadow-sm hover:shadow-md"
                   >
                     Dashboard
                   </Button>
@@ -275,7 +275,7 @@ const Index = () => {
                       console.log('🚪 Sign out button clicked on home page');
                       handleSignOut();
                     }}
-                    className="bg-transparent hover:bg-red-50/50 border border-red-200/60 text-red-600 hover:text-red-700 hover:border-red-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+                    className="bg-transparent hover:bg-red-50/50 border border-red-200/60 text-red-600 hover:text-red-700 hover:border-red-300/80 transition-all duration-200 font-medium px-4 py-1 text-sm backdrop-blur-sm shadow-sm hover:shadow-md"
                     type="button"
                   >
                     Sign Out
@@ -298,7 +298,7 @@ const Index = () => {
                       <Button variant="ghost" onClick={() => {
                         setLoginModalTab("login");
                         setShowLoginModal(true);
-                      }} className="font-medium">
+                      }} className="font-medium text-sm px-3 py-1">
                         Sign In
                       </Button>
                     </>
@@ -308,7 +308,7 @@ const Index = () => {
                         console.log('Sign In button clicked');
                         setLoginModalTab("login");
                         setShowLoginModal(true);
-                      }} className="font-medium">
+                      }} className="font-medium text-sm px-3 py-1">
                         Sign In
                       </Button>
 
@@ -316,7 +316,7 @@ const Index = () => {
                         console.log('Get Started button clicked');
                         setLoginModalTab("signup");
                         setShowLoginModal(true);
-                      }} className="font-medium">
+                      }} className="font-medium text-sm px-3 py-1">
                         Create Account
                       </Button>
                     </>

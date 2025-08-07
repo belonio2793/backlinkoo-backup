@@ -1,36 +1,53 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { AffiliateService } from '@/services/affiliateService';
-import { 
-  DollarSign, 
-  Users, 
-  TrendingUp, 
-  Copy, 
-  ExternalLink,
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Badge } from '../ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Progress } from '../ui/progress';
+import { toast } from 'sonner';
+import {
+  DollarSign,
+  Users,
+  MousePointer,
+  TrendingUp,
+  Copy,
+  Share2,
+  Download,
+  BarChart3,
+  Target,
+  Award,
+  Link2,
+  QrCode,
   Calendar,
-  CreditCard,
-  Download
+  Eye,
+  Globe,
+  Smartphone,
+  Monitor,
+  Tablet,
+  ChevronUp,
+  ChevronDown,
+  ExternalLink,
+  Gift,
+  Trophy,
+  Zap
 } from 'lucide-react';
-import type { AffiliateProgram, AffiliateReferral } from '@/integrations/supabase/affiliate-types';
+import { affiliateService } from '../../services/affiliateService';
+import type { AffiliateProfile, AffiliateStats, AffiliateAnalytics } from '../../integrations/supabase/affiliate-types';
+import AffiliateGamification from './AffiliateGamification';
 
 interface AffiliateDashboardProps {
   userId: string;
 }
 
-export const AffiliateDashboard = ({ userId }: AffiliateDashboardProps) => {
-  const [affiliate, setAffiliate] = useState<AffiliateProgram | null>(null);
-  const [referrals, setReferrals] = useState<AffiliateReferral[]>([]);
-  const [stats, setStats] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [payoutAmount, setPayoutAmount] = useState<number>(0);
-  const [payoutMethod, setPayoutMethod] = useState<'paypal' | 'bank_transfer' | 'crypto'>('paypal');
-  const { toast } = useToast();
+export const AffiliateDashboard: React.FC<AffiliateDashboardProps> = ({ userId }) => {
+  const [affiliate, setAffiliate] = useState<AffiliateProfile | null>(null);
+  const [stats, setStats] = useState<AffiliateStats | null>(null);
+  const [analytics, setAnalytics] = useState<AffiliateAnalytics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [customUrl, setCustomUrl] = useState('');
+  const [selectedPeriod, setSelectedPeriod] = useState('30');
 
   useEffect(() => {
     loadAffiliateData();
@@ -38,114 +55,147 @@ export const AffiliateDashboard = ({ userId }: AffiliateDashboardProps) => {
 
   const loadAffiliateData = async () => {
     try {
-      const affiliateData = await AffiliateService.getAffiliateByUserId(userId);
-      if (!affiliateData) {
-        setIsLoading(false);
-        return;
-      }
-
-      setAffiliate(affiliateData);
+      setLoading(true);
       
-      const [referralsData, statsData] = await Promise.all([
-        AffiliateService.getAffiliateReferrals(affiliateData.id),
-        AffiliateService.getAffiliateStats(affiliateData.id)
+      // Get or create affiliate profile
+      let affiliateProfile = await affiliateService.getAffiliateProfile(userId);
+      if (!affiliateProfile) {
+        // Create affiliate profile if doesn't exist
+        affiliateProfile = await affiliateService.createAffiliateProfile(userId, 'user@example.com'); // Would get email from user context
+      }
+      
+      setAffiliate(affiliateProfile);
+
+      // Load stats and analytics
+      const [statsData, analyticsData] = await Promise.all([
+        affiliateService.getAffiliateStats(affiliateProfile.affiliate_id),
+        affiliateService.getAffiliateAnalytics(
+          affiliateProfile.affiliate_id,
+          new Date(Date.now() - parseInt(selectedPeriod) * 24 * 60 * 60 * 1000).toISOString(),
+          new Date().toISOString()
+        )
       ]);
 
-      setReferrals(referralsData);
       setStats(statsData);
-      setPayoutAmount(affiliateData.pending_earnings);
+      setAnalytics(analyticsData);
     } catch (error) {
-      console.error('Error loading affiliate data:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load affiliate data.',
-        variant: 'destructive'
-      });
+      console.error('Failed to load affiliate data:', error);
+      toast.error('Failed to load affiliate dashboard data');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
+  };
+
+  const generateReferralLink = (url?: string) => {
+    if (!affiliate) return '';
+    
+    const targetUrl = url || window.location.origin;
+    const link = affiliateService.generateAffiliateLink(affiliate.affiliate_id, targetUrl);
+    return link.base_url;
   };
 
   const copyToClipboard = async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast({
-        title: 'Copied!',
-        description: `${label} copied to clipboard.`,
-      });
+      setLinkCopied(true);
+      toast.success(`${label} copied to clipboard!`);
+      setTimeout(() => setLinkCopied(false), 2000);
     } catch (error) {
-      toast({
-        title: 'Copy Failed',
-        description: 'Could not copy to clipboard.',
-        variant: 'destructive'
-      });
+      toast.error('Failed to copy to clipboard');
     }
   };
 
-  const requestPayout = async () => {
-    if (!affiliate || payoutAmount < 100) {
-      toast({
-        title: 'Invalid Amount',
-        description: 'Minimum payout amount is $100.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    try {
-      await AffiliateService.requestPayout(affiliate.id, payoutAmount, payoutMethod);
-      toast({
-        title: 'Payout Requested',
-        description: 'Your payout request has been submitted for processing.',
-      });
-      loadAffiliateData(); // Refresh data
-    } catch (error) {
-      console.error('Payout request error:', error);
-      toast({
-        title: 'Request Failed',
-        description: 'Could not submit payout request.',
-        variant: 'destructive'
-      });
-    }
+  const getTierColor = (tier: string) => {
+    const colors = {
+      bronze: 'bg-amber-100 text-amber-800 border-amber-200',
+      silver: 'bg-gray-100 text-gray-800 border-gray-200',
+      gold: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      platinum: 'bg-purple-100 text-purple-800 border-purple-200',
+      partner: 'bg-blue-100 text-blue-800 border-blue-200'
+    };
+    return colors[tier as keyof typeof colors] || colors.bronze;
   };
 
-  if (isLoading) {
+  const getTierIcon = (tier: string) => {
+    const icons = {
+      bronze: Award,
+      silver: Award,
+      gold: Trophy,
+      platinum: Trophy,
+      partner: Zap
+    };
+    const Icon = icons[tier as keyof typeof icons] || Award;
+    return <Icon className="w-4 h-4" />;
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2
+    }).format(amount);
+  };
+
+  const formatPercentage = (value: number) => {
+    return `${value.toFixed(1)}%`;
+  };
+
+  if (loading) {
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-48 bg-muted rounded-lg"></div>
-        <div className="h-32 bg-muted rounded-lg"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  if (!affiliate) {
+  if (!affiliate || !stats) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Affiliate Program</CardTitle>
-          <CardDescription>You are not enrolled in our affiliate program.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={() => window.location.href = '/affiliate-signup'}>
-            Join Affiliate Program
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="max-w-md">
+          <CardContent className="p-6 text-center">
+            <h3 className="text-lg font-semibold mb-2">Affiliate Dashboard Not Available</h3>
+            <p className="text-gray-600 mb-4">Failed to load affiliate data</p>
+            <Button onClick={loadAffiliateData}>Retry</Button>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="max-w-7xl mx-auto p-6 space-y-8">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Affiliate Dashboard</h1>
+          <p className="text-gray-600 mt-1">Manage your referrals and track your earnings</p>
+        </div>
+        <div className="flex items-center gap-4 mt-4 md:mt-0">
+          <Badge className={`${getTierColor(affiliate.tier)} border`}>
+            {getTierIcon(affiliate.tier)}
+            <span className="ml-1 capitalize">{affiliate.tier} Affiliate</span>
+          </Badge>
+          <Badge variant={affiliate.status === 'active' ? 'default' : 'secondary'}>
+            {affiliate.status === 'active' ? 'Active' : 'Pending Approval'}
+          </Badge>
+        </div>
+      </div>
+
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Earnings</p>
-                <p className="text-3xl font-bold">${affiliate.total_earnings.toFixed(2)}</p>
+                <p className="text-sm font-medium text-gray-600">Total Earnings</p>
+                <p className="text-3xl font-bold text-green-600">{formatCurrency(stats.total_earnings)}</p>
+                <p className="text-sm text-gray-500">
+                  {formatCurrency(stats.pending_commissions)} pending
+                </p>
               </div>
-              <DollarSign className="h-8 w-8 text-primary" />
+              <div className="bg-green-100 p-3 rounded-full">
+                <DollarSign className="w-6 h-6 text-green-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -154,10 +204,15 @@ export const AffiliateDashboard = ({ userId }: AffiliateDashboardProps) => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                <p className="text-3xl font-bold text-orange-600">${affiliate.pending_earnings.toFixed(2)}</p>
+                <p className="text-sm font-medium text-gray-600">Total Clicks</p>
+                <p className="text-3xl font-bold">{stats.total_clicks.toLocaleString()}</p>
+                <p className="text-sm text-gray-500">
+                  {formatCurrency(stats.epc)} EPC
+                </p>
               </div>
-              <Calendar className="h-8 w-8 text-orange-600" />
+              <div className="bg-blue-100 p-3 rounded-full">
+                <MousePointer className="w-6 h-6 text-blue-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -166,10 +221,15 @@ export const AffiliateDashboard = ({ userId }: AffiliateDashboardProps) => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Paid Out</p>
-                <p className="text-3xl font-bold text-green-600">${affiliate.total_paid.toFixed(2)}</p>
+                <p className="text-sm font-medium text-gray-600">Conversions</p>
+                <p className="text-3xl font-bold">{stats.total_conversions}</p>
+                <p className="text-sm text-gray-500">
+                  {formatPercentage(stats.conversion_rate)} rate
+                </p>
               </div>
-              <CreditCard className="h-8 w-8 text-green-600" />
+              <div className="bg-purple-100 p-3 rounded-full">
+                <Target className="w-6 h-6 text-purple-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -178,148 +238,356 @@ export const AffiliateDashboard = ({ userId }: AffiliateDashboardProps) => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Conversions</p>
-                <p className="text-3xl font-bold">{stats?.total_conversions || 0}</p>
+                <p className="text-sm font-medium text-gray-600">Commission Rate</p>
+                <p className="text-3xl font-bold">{formatPercentage(affiliate.commission_rate * 100)}</p>
+                {stats.next_tier_threshold && (
+                  <p className="text-sm text-gray-500">
+                    {formatCurrency(stats.next_tier_threshold - stats.total_earnings)} to next tier
+                  </p>
+                )}
               </div>
-              <TrendingUp className="h-8 w-8 text-blue-600" />
+              <div className="bg-orange-100 p-3 rounded-full">
+                <TrendingUp className="w-6 h-6 text-orange-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Referral Tools */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Referral Links</CardTitle>
-          <CardDescription>Share these links to start earning commissions</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Custom ID</Label>
-            <div className="flex items-center gap-2">
-              <Input value={affiliate.custom_id} readOnly className="font-mono" />
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => copyToClipboard(affiliate.custom_id, 'Custom ID')}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          <div>
-            <Label>Affiliate Code</Label>
-            <div className="flex items-center gap-2">
-              <Input value={affiliate.affiliate_code} readOnly className="font-mono" />
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => copyToClipboard(affiliate.affiliate_code, 'Affiliate Code')}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          <div>
-            <Label>Referral URL</Label>
-            <div className="flex items-center gap-2">
-              <Input value={affiliate.referral_url} readOnly className="text-sm" />
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => copyToClipboard(affiliate.referral_url, 'Referral URL')}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => window.open(affiliate.referral_url, '_blank')}
-              >
-                <ExternalLink className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Payout Request */}
-      {affiliate.pending_earnings >= 100 && (
+      {/* Progress to Next Tier */}
+      {stats.next_tier_threshold && (
         <Card>
           <CardHeader>
-            <CardTitle>Request Payout</CardTitle>
-            <CardDescription>Minimum payout amount is $100</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <Trophy className="w-5 h-5" />
+              Progress to Next Tier
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Payout Amount</Label>
-                <Input
-                  type="number"
-                  value={payoutAmount}
-                  onChange={(e) => setPayoutAmount(Number(e.target.value))}
-                  max={affiliate.pending_earnings}
-                  min={100}
-                />
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span>Current: {formatCurrency(stats.total_earnings)}</span>
+                <span>Target: {formatCurrency(stats.next_tier_threshold)}</span>
               </div>
-              <div>
-                <Label>Payment Method</Label>
-                <Select value={payoutMethod} onValueChange={(value: any) => setPayoutMethod(value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="paypal">PayPal</SelectItem>
-                    <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                    <SelectItem value="crypto">Cryptocurrency</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <Progress 
+                value={(stats.total_earnings / stats.next_tier_threshold) * 100} 
+                className="h-3"
+              />
+              <p className="text-sm text-gray-600">
+                {formatCurrency(stats.next_tier_threshold - stats.total_earnings)} away from upgrading to the next tier
+              </p>
             </div>
-            <Button onClick={requestPayout} className="w-full">
-              Request Payout
-            </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Recent Referrals */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Referrals</CardTitle>
-          <CardDescription>Your latest referral activity</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {referrals.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">
-              No referrals yet. Start sharing your referral link!
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {referrals.slice(0, 10).map((referral) => (
-                <div key={referral.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <p className="font-medium">
-                      {referral.conversion_date ? 'Converted' : 'Clicked'}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(referral.created_at).toLocaleDateString()}
-                    </p>
+      <Tabs defaultValue="links" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-1 md:grid-cols-5">
+          <TabsTrigger value="links">Referral Links</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="commissions">Commissions</TabsTrigger>
+          <TabsTrigger value="achievements">Achievements</TabsTrigger>
+          <TabsTrigger value="resources">Resources</TabsTrigger>
+        </TabsList>
+
+        {/* Referral Links Tab */}
+        <TabsContent value="links" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Link2 className="w-5 h-5" />
+                Your Referral Links
+              </CardTitle>
+              <CardDescription>
+                Share these links to earn commissions on referrals
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Main Referral Link */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium">Main Referral Link</label>
+                <div className="flex gap-2">
+                  <Input 
+                    value={generateReferralLink()} 
+                    readOnly 
+                    className="font-mono text-sm"
+                  />
+                  <Button
+                    onClick={() => copyToClipboard(generateReferralLink(), 'Referral link')}
+                    variant="outline"
+                    size="icon"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Custom URL Generator */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium">Custom URL Generator</label>
+                <div className="flex gap-2">
+                  <Input 
+                    placeholder="Enter a specific URL to track..."
+                    value={customUrl}
+                    onChange={(e) => setCustomUrl(e.target.value)}
+                  />
+                  <Button
+                    onClick={() => {
+                      if (customUrl) {
+                        copyToClipboard(generateReferralLink(customUrl), 'Custom link');
+                      }
+                    }}
+                    variant="outline"
+                    disabled={!customUrl}
+                  >
+                    Generate & Copy
+                  </Button>
+                </div>
+                {customUrl && (
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm font-medium mb-1">Generated Link:</p>
+                    <p className="text-sm font-mono break-all">{generateReferralLink(customUrl)}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium">${referral.commission_earned.toFixed(2)}</p>
-                    <Badge variant={referral.commission_paid ? 'default' : 'secondary'}>
-                      {referral.commission_paid ? 'Paid' : 'Pending'}
-                    </Badge>
+                )}
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Button variant="outline" className="justify-start">
+                  <QrCode className="w-4 h-4 mr-2" />
+                  Generate QR Code
+                </Button>
+                <Button variant="outline" className="justify-start">
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Social Media Kit
+                </Button>
+                <Button variant="outline" className="justify-start">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Assets
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent value="analytics" className="space-y-6">
+          {analytics && (
+            <>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5" />
+                    Performance Analytics
+                  </CardTitle>
+                  <div className="flex gap-2">
+                    <select 
+                      value={selectedPeriod}
+                      onChange={(e) => setSelectedPeriod(e.target.value)}
+                      className="px-3 py-1 border rounded-md text-sm"
+                    >
+                      <option value="7">Last 7 days</option>
+                      <option value="30">Last 30 days</option>
+                      <option value="90">Last 90 days</option>
+                    </select>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-600">Period Clicks</p>
+                      <p className="text-2xl font-bold">{analytics.clicks.toLocaleString()}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-600">Period Conversions</p>
+                      <p className="text-2xl font-bold">{analytics.conversions}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-600">Period Earnings</p>
+                      <p className="text-2xl font-bold">{formatCurrency(analytics.earnings)}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Top Sources */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Top Traffic Sources</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {analytics.top_sources.map((source, index) => (
+                        <div key={source.source} className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-xs">
+                              {index + 1}
+                            </span>
+                            <span className="font-medium capitalize">{source.source}</span>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold">{source.clicks} clicks</p>
+                            <p className="text-sm text-gray-600">{source.conversions} conversions</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Device Breakdown */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Device Breakdown</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {Object.entries(analytics.device_breakdown).map(([device, count]) => {
+                        const percentage = analytics.clicks > 0 ? (count / analytics.clicks * 100).toFixed(1) : '0';
+                        const Icon = device === 'mobile' ? Smartphone : device === 'tablet' ? Tablet : Monitor;
+                        
+                        return (
+                          <div key={device} className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <Icon className="w-5 h-5 text-gray-600" />
+                              <span className="font-medium capitalize">{device}</span>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold">{count} clicks</p>
+                              <p className="text-sm text-gray-600">{percentage}%</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </>
+          )}
+        </TabsContent>
+
+        {/* Achievements Tab */}
+        <TabsContent value="achievements" className="space-y-6">
+          <AffiliateGamification
+            affiliateId={affiliate.affiliate_id}
+            currentTier={affiliate.tier}
+            totalEarnings={stats.total_earnings}
+            totalConversions={stats.total_conversions}
+            totalReferrals={stats.total_referrals}
+          />
+        </TabsContent>
+
+        {/* Commissions Tab */}
+        <TabsContent value="commissions" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Commission History</CardTitle>
+              <CardDescription>
+                Track your earnings and payout status
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* Commission Summary Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-sm text-green-600 font-medium">Paid Out</p>
+                    <p className="text-2xl font-bold text-green-700">{formatCurrency(stats.paid_commissions)}</p>
+                  </div>
+                  <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <p className="text-sm text-yellow-600 font-medium">Pending</p>
+                    <p className="text-2xl font-bold text-yellow-700">{formatCurrency(stats.pending_commissions)}</p>
+                  </div>
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm text-blue-600 font-medium">Lifetime Total</p>
+                    <p className="text-2xl font-bold text-blue-700">{formatCurrency(stats.total_earnings)}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+
+                {/* Payout Request */}
+                {stats.pending_commissions >= 50 && (
+                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Ready for Payout</h4>
+                        <p className="text-sm text-gray-600">
+                          You have {formatCurrency(stats.pending_commissions)} available for payout
+                        </p>
+                      </div>
+                      <Button>
+                        Request Payout
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Resources Tab */}
+        <TabsContent value="resources" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Download className="w-5 h-5" />
+                  Marketing Assets
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button variant="outline" className="w-full justify-start">
+                  <Download className="w-4 h-4 mr-2" />
+                  Banner Package (All Sizes)
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <Download className="w-4 h-4 mr-2" />
+                  Email Templates
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <Download className="w-4 h-4 mr-2" />
+                  Social Media Kit
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <Download className="w-4 h-4 mr-2" />
+                  Video Assets
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Gift className="w-5 h-5" />
+                  Training & Support
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button variant="outline" className="w-full justify-start">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Affiliate Marketing Guide
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Best Practices & Tips
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  SEO Academy Access
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Contact Affiliate Support
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
+
+export default AffiliateDashboard;
