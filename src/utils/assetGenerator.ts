@@ -473,8 +473,23 @@ export class AssetGenerator {
 
 // Export convenience functions
 export async function generateAsset(name: string): Promise<string> {
+  // Special handling for Brand Guidelines PDF
+  if (name === 'Brand Guidelines') {
+    try {
+      // Trigger the Brand Guidelines PDF generation
+      const event = new CustomEvent('generateBrandGuidelinesPDF');
+      window.dispatchEvent(event);
+
+      // Return a placeholder data URL for PDF
+      return 'data:application/pdf;base64,JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKL1Jlc291cmNlcyA8PAovUHJvY1NldCA0IDAgUgo+PgovTWVkaWFCb3ggWzAuMDAwIDAgNjEyLjAwMCA3OTIuMDAwXQo+PgplbmRvYmoKMyAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDIgMCBSCi9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKNCAwIG9iago8PAovQ29sb3JTcGFjZSAvRGV2aWNlUkdCCi9GaWx0ZXIgWy9GbGF0ZURlY29kZV0KPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0xlbmd0aCA0MgovRmlsdGVyIFsvRmxhdGVEZWNvZGVdCj4+CnN0cmVhbQp4nCvgcuBw4PLgcONyAAMeBw5HLggALgccBw4HLgAeO4AAAA==CmVuZHN0cmVhbQplbmRvYmoKeHJlZgo='
+    } catch (error) {
+      console.warn('PDF generation not yet ready, showing placeholder');
+      return 'data:application/pdf;base64,JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKL1Jlc291cmNlcyA8PAovUHJvY1NldCA0IDAgUgo+PgovTWVkaWFCb3ggWzAuMDAwIDAgNjEyLjAwMCA3OTIuMDAwXQo+PgplbmRvYmoKMyAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDIgMCBSCi9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKNCAwIG9iago8PAovQ29sb3JTcGFjZSAvRGV2aWNlUkdCCi9GaWx0ZXIgWy9GbGF0ZURlY29kZV0KPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0xlbmd0aCA0MgovRmlsdGVyIFsvRmxhdGVEZWNvZGVdCj4+CnN0cmVhbQp4nCvgcuBw4PLgcONyAAMeBw5HLgAeO4AAAA==CmVuZHN0cmVhbQplbmRvYmoKeHJlZgo='
+    }
+  }
+
   const generator = new AssetGenerator();
-  
+
   switch (name) {
     case 'Leaderboard Banner':
       return generator.generateLeaderboardBanner();
