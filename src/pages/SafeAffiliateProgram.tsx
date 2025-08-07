@@ -6,6 +6,7 @@ import { supabase } from '../integrations/supabase/client';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { LoginModal } from '../components/LoginModal';
+import CreativeAssetsShowcase from '../components/CreativeAssetsShowcase';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
