@@ -55,28 +55,28 @@ export const ComprehensiveAffiliateDashboard: React.FC<DashboardProps> = ({ user
       setLoading(true);
       
       // Load affiliate profile
-      const profile = await enhancedAffiliateService.getAffiliateProfile(userId);
+      const profile = await compatibilityAffiliateService.getAffiliateProfile(userId);
       if (!profile) {
         throw new Error('Affiliate profile not found');
       }
       setAffiliateProfile(profile);
 
       // Load dashboard metrics
-      const metrics = await enhancedAffiliateService.getDashboardMetrics(profile.affiliate_id);
+      const metrics = await compatibilityAffiliateService.getDashboardMetrics(profile.affiliate_code);
       setDashboardMetrics(metrics);
 
       // Load analytics for selected period
       const endDate = new Date().toISOString();
       const startDate = new Date(Date.now() - parseInt(selectedPeriod) * 24 * 60 * 60 * 1000).toISOString();
-      const analyticsData = await enhancedAffiliateService.getAffiliateAnalytics(profile.affiliate_id, startDate, endDate);
+      const analyticsData = await compatibilityAffiliateService.getAffiliateAnalytics(profile.affiliate_code, startDate, endDate);
       setAnalytics(analyticsData);
 
       // Load marketing assets
-      const assets = await enhancedAffiliateService.getMarketingAssets(profile.tier);
+      const assets = await compatibilityAffiliateService.getMarketingAssets(profile.tier);
       setMarketingAssets(assets);
 
       // Load commission tiers
-      const tiers = await enhancedAffiliateService.getCommissionTiers();
+      const tiers = await compatibilityAffiliateService.getCommissionTiers();
       setCommissionTiers(tiers);
 
     } catch (error: any) {
