@@ -548,7 +548,7 @@ ${referralUrl}`,
           type: "Case Study",
           content: `Case Study: How I increased organic traffic by 300% in 6 months using strategic link building.
 
-The secret? Backlink ∞'s platform made it scalable and efficient.
+The secret? Backlink ���'s platform made it scalable and efficient.
 
 ${referralUrl}`,
           engagement: "Very High",
@@ -1313,7 +1313,10 @@ Here's the math: ${referralUrl}`,
         {
           label: "Opening",
           content: `<p>Hi [Name],</p>
-<p>I hope this email finds you well. As someone who values efficient SEO strategies, I wanted to share a tool that has significantly improved my link building results.</p>`,
+
+<p>I hope this email finds you well.</p>
+
+<p>As someone who values efficient SEO strategies, I wanted to share a tool that has significantly improved my link building results.</p>`,
           isHtml: true
         },
         {
