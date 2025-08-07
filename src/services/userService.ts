@@ -61,7 +61,14 @@ class UserService {
       console.log('✅ userService: Profile loaded successfully:', profile);
       return profile;
     } catch (error: any) {
-      console.error('❌ userService: Error getting current user profile:', error.message || error);
+      const errorMessage = error.message || error;
+      console.error('❌ userService: Error getting current user profile:', errorMessage);
+
+      // Handle infinite recursion gracefully
+      if (errorMessage && errorMessage.includes('infinite recursion detected in policy')) {
+        console.warn('⚠️ Infinite recursion detected in RLS policy - returning null profile');
+      }
+
       return null;
     }
   }
