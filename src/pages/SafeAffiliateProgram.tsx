@@ -254,8 +254,23 @@ const SafeAffiliateProgram: React.FC = () => {
         });
       }
     } catch (error: any) {
-      const errorMessage = error.message || error.details || JSON.stringify(error);
-      console.error('Error joining affiliate program:', errorMessage);
+      let errorMessage = 'Unknown error occurred';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else {
+        errorMessage = 'Failed to join affiliate program. Please try again.';
+      }
+
+      console.error('Error joining affiliate program:', {
+        error,
+        message: errorMessage,
+        type: typeof error
+      });
 
       if (toast) {
         toast({
