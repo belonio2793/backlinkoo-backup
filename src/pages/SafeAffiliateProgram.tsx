@@ -212,7 +212,19 @@ const SafeAffiliateProgram: React.FC = () => {
       console.log('📊 Insert result:', { data, error });
 
       if (error) {
-        const errorMessage = error.message || error.details || error.hint || JSON.stringify(error);
+        // Extract meaningful error message
+        let errorMessage = 'Unknown database error';
+
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error.details) {
+          errorMessage = error.details;
+        } else if (error.hint) {
+          errorMessage = error.hint;
+        } else if (error.code) {
+          errorMessage = `Database error code: ${error.code}`;
+        }
+
         console.error('❌ Supabase error joining affiliate program:', {
           code: error.code,
           message: error.message,
@@ -220,6 +232,16 @@ const SafeAffiliateProgram: React.FC = () => {
           hint: error.hint,
           fullError: error
         });
+
+        // Check for specific error types
+        if (error.code === '23505') {
+          errorMessage = 'You already have an affiliate account. Please refresh the page.';
+        } else if (error.code === '42P01') {
+          errorMessage = 'Database table not found. Please contact support.';
+        } else if (error.code === '23503') {
+          errorMessage = 'Authentication error. Please sign out and sign back in.';
+        }
+
         throw new Error(`Failed to create affiliate account: ${errorMessage}`);
       }
 
