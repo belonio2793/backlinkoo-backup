@@ -1051,13 +1051,21 @@ Link in bio: ${referralUrl}
         // Page 1
         {
           type: "Tutorial",
-          content: `🎥 NEW VIDEO: "How I Built 500+ High-Quality Backlinks in 30 Days" - featuring Backlink ∞'s automated platform. This tool is a game-changer for SEO! ${referralUrl}`,
+          content: `🎥 NEW VIDEO: "How I Built 500+ High-Quality Backlinks in 30 Days" - featuring Backlink ∞'s automated platform.
+
+This tool is a game-changer for SEO!
+
+${referralUrl}`,
           engagement: "Very High",
           audience: "Content creators"
         },
         {
           type: "Review",
-          content: `📹 HONEST REVIEW: I tested Backlink ∞ for 90 days - here are my unfiltered results. Spoiler alert: The ROI is incredible! Full breakdown in today's video: ${referralUrl}`,
+          content: `📹 HONEST REVIEW: I tested Backlink ∞ for 90 days - here are my unfiltered results.
+
+Spoiler alert: The ROI is incredible!
+
+Full breakdown in today's video: ${referralUrl}`,
           engagement: "Very High",
           audience: "Review watchers"
         },
