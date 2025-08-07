@@ -114,7 +114,7 @@ export const ComprehensiveAffiliateDashboard: React.FC<DashboardProps> = ({ user
 
   const downloadAsset = async (assetId: string) => {
     try {
-      const downloadUrl = await enhancedAffiliateService.downloadAsset(assetId, affiliateProfile.affiliate_id);
+      const downloadUrl = await compatibilityAffiliateService.downloadAsset(assetId, affiliateProfile.affiliate_code);
       window.open(downloadUrl, '_blank');
       
       toast({
