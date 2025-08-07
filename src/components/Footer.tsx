@@ -146,13 +146,27 @@ export const Footer = () => {
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Company</h3>
             <div className="space-y-2">
-              <button
-                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.ADMIN, "Admin Dashboard")}
-                className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
-                title={!user ? "Sign in to access Admin Dashboard" : "Go to Admin Dashboard"}
-              >
-                Admin Dashboard
-              </button>
+              {user ? (
+                <button
+                  onClick={() => navigate('/admin')}
+                  className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
+                  title="Go to Admin Dashboard"
+                >
+                  Admin Dashboard
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setPendingNavigation({ route: '/admin' });
+                    setPendingActionDescription("Admin Dashboard");
+                    setShowLoginModal(true);
+                  }}
+                  className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
+                  title="Sign in to access Admin Dashboard"
+                >
+                  Admin Dashboard
+                </button>
+              )}
               <Link
                 to="/affiliate"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
