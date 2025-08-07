@@ -1,0 +1,501 @@
+import React from 'react';
+import { Monitor, Share2, FileText, Download, Eye, Sparkles, Crown, Star } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+
+interface AssetCardProps {
+  asset: {
+    name: string;
+    size: string;
+    format: string;
+    description: string;
+    preview: React.ReactNode;
+    category: string;
+  };
+  onDownload: (name: string) => void;
+  onPreview: (name: string) => void;
+}
+
+const AssetCard: React.FC<AssetCardProps> = ({ asset, onDownload, onPreview }) => (
+  <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl hover:shadow-purple-500/25 transition-all duration-700 hover:scale-[1.02] group">
+    <div className="flex items-center justify-between mb-6">
+      <div>
+        <h5 className="text-2xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">{asset.name}</h5>
+        <p className="text-purple-200 text-base font-medium">{asset.size} • {asset.description}</p>
+      </div>
+      <div className="flex items-center gap-3">
+        <Badge className="bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold text-sm px-4 py-1.5">
+          {asset.format}
+        </Badge>
+        <div className="w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse"></div>
+      </div>
+    </div>
+    
+    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl p-6 mb-8 border border-purple-500/20 shadow-inner backdrop-blur-sm">
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 p-2">
+        {asset.preview}
+      </div>
+    </div>
+    
+    <div className="flex gap-4">
+      <Button 
+        className="flex-1 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-700 hover:from-purple-700 hover:via-pink-700 hover:to-purple-800 text-white font-bold text-lg py-3 shadow-xl hover:shadow-purple-500/30 transition-all duration-300"
+        onClick={() => onDownload(asset.name)}
+      >
+        <Download className="h-5 w-5 mr-3" />
+        Download 4K
+      </Button>
+      <Button 
+        variant="outline" 
+        className="border-2 border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white font-bold px-6 py-3 transition-all duration-300"
+        onClick={() => onPreview(asset.name)}
+      >
+        <Eye className="h-5 w-5" />
+      </Button>
+    </div>
+  </div>
+);
+
+const CreativeAssetsShowcase: React.FC<{
+  onDownload: (name: string, preview: string, format: string) => void;
+  onPreview: (name: string, preview: string) => void;
+}> = ({ onDownload, onPreview }) => {
+  
+  const displayBanners = [
+    {
+      name: 'Leaderboard Banner',
+      size: '728x90',
+      format: 'PNG',
+      description: 'High-conversion display ad',
+      category: 'display',
+      preview: (
+        <div className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-xl overflow-hidden h-24 shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer transform -skew-x-12"></div>
+          <div className="relative h-full flex items-center justify-between px-8">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
+                <span className="text-2xl font-black text-gray-900">∞</span>
+              </div>
+              <div>
+                <div className="text-white font-black text-3xl drop-shadow-xl">Backlink ∞</div>
+                <div className="text-blue-100 text-lg font-bold">Revolutionary AI Link Building</div>
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <div className="text-yellow-300 font-black text-xl animate-bounce">🚀 500% ROI Guaranteed</div>
+              <div className="text-white text-lg font-bold">High-DA Links • AI Powered • 24h Results</div>
+            </div>
+            
+            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-8 py-4 rounded-full font-black text-lg hover:from-yellow-300 hover:to-orange-400 transition-all cursor-pointer shadow-2xl transform hover:scale-105">
+              START FREE TRIAL →
+            </div>
+          </div>
+          
+          <div className="absolute top-3 left-1/4 w-2 h-2 bg-yellow-300 rounded-full animate-ping"></div>
+          <div className="absolute top-5 right-1/3 w-3 h-3 bg-purple-300 rounded-full animate-ping delay-300"></div>
+          <div className="absolute bottom-4 left-1/3 w-2 h-2 bg-blue-300 rounded-full animate-ping delay-700"></div>
+        </div>
+      )
+    },
+    {
+      name: 'Rectangle Banner',
+      size: '300x250',
+      format: 'PNG', 
+      description: 'Premium display creative',
+      category: 'display',
+      preview: (
+        <div className="relative bg-gradient-to-br from-violet-900 via-purple-800 to-indigo-900 rounded-xl overflow-hidden aspect-[6/5] shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-radial from-yellow-400/30 via-transparent to-transparent"></div>
+          <div className="relative h-full flex flex-col items-center justify-center text-center p-8">
+            <div className="w-20 h-20 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mb-6 shadow-2xl animate-pulse">
+              <span className="text-4xl font-black text-gray-900">∞</span>
+            </div>
+            <h3 className="text-white font-black text-4xl mb-3 drop-shadow-xl">Backlink ∞</h3>
+            <p className="text-purple-100 text-xl mb-6 font-bold">The Ultimate AI-Powered<br/>Link Building Platform</p>
+            <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-4 py-2 rounded-full font-black text-lg mb-6 animate-bounce shadow-xl">
+              ⚡ 1000x Faster Than Manual
+            </div>
+            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-10 py-4 rounded-full font-black text-xl shadow-2xl transform hover:scale-105 transition-all cursor-pointer">
+              GET INSTANT ACCESS
+            </div>
+          </div>
+          
+          <div className="absolute top-4 right-4 w-4 h-4 bg-yellow-400 rounded-full animate-ping"></div>
+          <div className="absolute bottom-4 left-4 w-3 h-3 bg-purple-400 rounded-full animate-ping delay-500"></div>
+        </div>
+      )
+    },
+    {
+      name: 'Skyscraper Banner',
+      size: '160x600',
+      format: 'PNG',
+      description: 'Vertical premium ad',
+      category: 'display',
+      preview: (
+        <div className="relative bg-gradient-to-b from-indigo-900 via-purple-900 to-pink-900 rounded-xl overflow-hidden mx-auto shadow-2xl" style={{ width: '200px', height: '500px' }}>
+          <div className="absolute top-3 left-3 right-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"></div>
+          
+          <div className="relative h-full flex flex-col items-center text-center p-6">
+            <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mt-8 mb-4 shadow-2xl">
+              <span className="text-2xl font-black text-gray-900">∞</span>
+            </div>
+            <h3 className="text-white font-black text-2xl mb-3 drop-shadow-lg">Backlink ∞</h3>
+            <p className="text-purple-100 text-base mb-6 leading-tight font-semibold">AI-Powered<br/>Link Building<br/>Revolution</p>
+            
+            <div className="space-y-3 flex-1 flex flex-col justify-center">
+              <div className="bg-white/15 backdrop-blur rounded-xl p-3 border border-white/25 shadow-lg">
+                <div className="text-yellow-300 text-sm font-black">🎯 High-DA</div>
+                <div className="text-white text-sm font-bold">Backlinks</div>
+              </div>
+              <div className="bg-white/15 backdrop-blur rounded-xl p-3 border border-white/25 shadow-lg">
+                <div className="text-green-300 text-sm font-black">⚡ AI Outreach</div>
+                <div className="text-white text-sm font-bold">Automation</div>
+              </div>
+              <div className="bg-white/15 backdrop-blur rounded-xl p-3 border border-white/25 shadow-lg">
+                <div className="text-blue-300 text-sm font-black">📊 Real-time</div>
+                <div className="text-white text-sm font-bold">Analytics</div>
+              </div>
+            </div>
+            
+            <div className="text-yellow-300 font-black text-lg mb-2 animate-pulse">⚡ 500% ROI</div>
+            <div className="text-white text-sm mb-4 font-semibold">Guaranteed Results</div>
+            
+            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-6 py-3 rounded-full font-black text-lg mb-4 shadow-xl transform hover:scale-105 transition-all cursor-pointer">
+              TRY FREE
+            </div>
+            
+            <div className="text-white text-sm font-bold">Start Today &<br/>Dominate SERPs</div>
+          </div>
+        </div>
+      )
+    },
+    {
+      name: 'Mobile Banner',
+      size: '320x50', 
+      format: 'PNG',
+      description: 'Mobile-optimized ad',
+      category: 'display',
+      preview: (
+        <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-xl overflow-hidden h-16 shadow-2xl">
+          <div className="relative h-full flex items-center justify-between px-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-lg font-black text-gray-900">∞</span>
+              </div>
+              <div>
+                <div className="text-white font-black text-lg drop-shadow-lg">Backlink ∞</div>
+                <div className="text-blue-100 text-sm font-bold">AI Link Building</div>
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <div className="text-yellow-300 font-black text-sm animate-pulse">⚡ 500% Faster</div>
+              <div className="text-white text-sm font-bold">Try Free Today</div>
+            </div>
+            
+            <div className="text-white text-2xl font-black transform hover:scale-110 transition-all cursor-pointer">→</div>
+          </div>
+        </div>
+      )
+    }
+  ];
+
+  const socialAssets = [
+    {
+      name: 'Instagram Post',
+      size: '1080x1080',
+      format: 'PNG',
+      description: 'Premium Instagram creative',
+      category: 'social',
+      preview: (
+        <div className="relative bg-gradient-to-br from-pink-500 via-purple-600 to-indigo-600 rounded-2xl overflow-hidden aspect-square shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent"></div>
+          <div className="relative h-full flex flex-col items-center justify-center text-center p-8">
+            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 border-4 border-yellow-400 shadow-2xl">
+              <span className="text-3xl font-black text-purple-600">∞</span>
+            </div>
+            <h3 className="text-white font-black text-3xl mb-3 drop-shadow-xl">Backlink ∞</h3>
+            <p className="text-purple-100 text-xl mb-6 font-bold">I just increased my<br/>organic traffic by<br/><span className="text-yellow-300 font-black text-3xl animate-pulse">300%!</span></p>
+            <div className="space-y-3 mb-6">
+              <div className="bg-white/20 backdrop-blur rounded-full px-6 py-3 border border-white/30">
+                <div className="text-white text-lg font-black">✨ Automated Outreach</div>
+              </div>
+              <div className="bg-white/20 backdrop-blur rounded-full px-6 py-3 border border-white/30">
+                <div className="text-white text-lg font-black">📈 High-DA Links Only</div>
+              </div>
+              <div className="bg-white/20 backdrop-blur rounded-full px-6 py-3 border border-white/30">
+                <div className="text-white text-lg font-black">🚀 Instant Results</div>
+              </div>
+            </div>
+            <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-8 py-4 rounded-full font-black text-xl shadow-2xl">
+              Link in Bio
+            </div>
+            <div className="text-yellow-300 text-lg font-bold mt-4">#SEO #LinkBuilding #Growth</div>
+          </div>
+        </div>
+      )
+    },
+    {
+      name: 'Instagram Story',
+      size: '1080x1920',
+      format: 'PNG', 
+      description: 'Engaging story template',
+      category: 'social',
+      preview: (
+        <div className="relative bg-gradient-to-b from-pink-500 via-purple-600 to-indigo-600 rounded-3xl overflow-hidden mx-auto shadow-2xl" style={{ width: '220px', height: '400px' }}>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/10 to-transparent animate-gradient-shift"></div>
+          <div className="relative h-full flex flex-col items-center text-center p-8">
+            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 mt-12 border-4 border-yellow-400 shadow-2xl">
+              <span className="text-2xl font-black text-purple-600">∞</span>
+            </div>
+            <h3 className="text-white font-black text-3xl mb-3 drop-shadow-xl">Backlink ∞</h3>
+            <p className="text-purple-100 text-xl mb-8 font-bold">Secret to my<br/>SEO success?<br/><span className="text-yellow-300 font-black text-2xl">AI automation!</span></p>
+            <div className="flex-1 flex flex-col justify-center space-y-4">
+              <div className="bg-white/20 backdrop-blur rounded-full px-6 py-3 border border-white/30">
+                <div className="text-white text-lg font-black">✨ 500+ Backlinks</div>
+              </div>
+              <div className="bg-white/20 backdrop-blur rounded-full px-6 py-3 border border-white/30">
+                <div className="text-white text-lg font-black">📊 DA 70+ Sites</div>
+              </div>
+              <div className="bg-white/20 backdrop-blur rounded-full px-6 py-3 border border-white/30">
+                <div className="text-white text-lg font-black">⚡ 24h Delivery</div>
+              </div>
+            </div>
+            <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-8 py-4 rounded-full font-black text-xl shadow-2xl mt-8">
+              Swipe Up to Try
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      name: 'Facebook Post',
+      size: '1200x630',
+      format: 'PNG',
+      description: 'High-conversion Facebook ad',
+      category: 'social', 
+      preview: (
+        <div className="relative bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl overflow-hidden aspect-[1200/630] shadow-2xl">
+          <div className="relative h-full flex items-center justify-between p-8">
+            <div className="flex-1">
+              <h3 className="text-white font-black text-4xl mb-4 drop-shadow-xl">Backlink ∞</h3>
+              <p className="text-blue-100 text-2xl mb-6 font-bold">The Smart Way to Build<br/>High-Quality Backlinks</p>
+              <div className="text-cyan-300 text-xl font-bold mb-4">🎯 Automated Outreach • ⚡ Instant Results • 📊 Free Trial</div>
+              <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-8 py-4 rounded-full font-black text-xl shadow-2xl inline-block">
+                Start Your Free Trial Today
+              </div>
+            </div>
+            <div className="w-32 h-32 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
+              <span className="text-5xl font-black text-gray-900">∞</span>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      name: 'Twitter Header',
+      size: '1500x500',
+      format: 'PNG',
+      description: 'Professional Twitter banner', 
+      category: 'social',
+      preview: (
+        <div className="relative bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl overflow-hidden aspect-[3/1] shadow-2xl">
+          <div className="relative h-full flex items-center justify-center text-center p-8">
+            <div>
+              <h3 className="text-white font-black text-4xl mb-3 drop-shadow-xl">Backlink ∞ Affiliate</h3>
+              <p className="text-blue-100 text-xl font-bold mb-4">Automated Link Building Platform • Earn 20% Commission</p>
+              <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-8 py-3 rounded-full font-black text-xl shadow-xl inline-block">
+                Join Now & Start Earning
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+  ];
+
+  const brandAssets = [
+    {
+      name: 'Backlink ∞ Logo',
+      size: '1024x1024',
+      format: 'SVG',
+      description: 'Primary brand logo',
+      category: 'brand',
+      preview: (
+        <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden aspect-square shadow-2xl flex items-center justify-center">
+          <div className="w-40 h-40 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
+            <span className="text-6xl font-black text-gray-900">∞</span>
+          </div>
+          <div className="absolute bottom-6 left-6 right-6 text-center">
+            <h3 className="text-white font-black text-3xl drop-shadow-xl">Backlink</h3>
+          </div>
+        </div>
+      )
+    },
+    {
+      name: 'Logo + Tagline',
+      size: '1920x1080',
+      format: 'SVG',
+      description: 'Logo with tagline combination',
+      category: 'brand',
+      preview: (
+        <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden aspect-video shadow-2xl flex flex-col items-center justify-center p-8">
+          <div className="flex items-center gap-6 mb-4">
+            <div className="w-20 h-20 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-xl">
+              <span className="text-3xl font-black text-gray-900">∞</span>
+            </div>
+            <h3 className="text-white font-black text-5xl drop-shadow-xl">Backlink</h3>
+          </div>
+          <p className="text-gray-300 text-2xl font-bold text-center">Automated Link Building Platform</p>
+        </div>
+      )
+    },
+    {
+      name: 'Icon Only',
+      size: '512x512',
+      format: 'PNG',
+      description: 'Standalone icon version',
+      category: 'brand',
+      preview: (
+        <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden aspect-square shadow-2xl flex items-center justify-center">
+          <div className="w-32 h-32 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
+            <span className="text-5xl font-black text-gray-900">∞</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      name: 'Brand Guidelines',
+      size: '2480x3508',
+      format: 'PDF',
+      description: 'Complete brand guide',
+      category: 'brand',
+      preview: (
+        <div className="relative bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl overflow-hidden aspect-[210/297] shadow-2xl p-6">
+          <div className="bg-white rounded-xl h-full p-6 shadow-inner">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                <span className="text-lg font-black text-gray-900">∞</span>
+              </div>
+              <h3 className="text-gray-900 font-black text-xl">Brand Guidelines</h3>
+            </div>
+            <div className="space-y-3">
+              <div className="h-2 bg-gray-300 rounded"></div>
+              <div className="h-2 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-2 bg-gray-300 rounded w-1/2"></div>
+              <div className="h-2 bg-gray-200 rounded w-5/6"></div>
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                <div className="h-6 bg-yellow-400 rounded"></div>
+                <div className="h-6 bg-purple-500 rounded"></div>
+                <div className="h-6 bg-blue-500 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+  ];
+
+  return (
+    <div className="space-y-16">
+      {/* DISPLAY BANNERS SECTION */}
+      <div className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-3xl p-10 border border-purple-500/20 shadow-2xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-transparent to-pink-500/10"></div>
+        <div className="relative">
+          <div className="flex items-center gap-6 mb-10">
+            <div className="p-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl shadow-xl">
+              <Monitor className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h4 className="text-3xl font-black text-white mb-2">Enterprise Display Banners</h4>
+              <p className="text-purple-200 text-xl">Masterfully crafted advertising banners with psychological sales triggers</p>
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              <Star className="h-6 w-6 text-yellow-400 animate-pulse" />
+              <Crown className="h-6 w-6 text-purple-400" />
+              <Sparkles className="h-6 w-6 text-pink-400 animate-pulse" />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
+            {displayBanners.map((asset) => (
+              <AssetCard
+                key={asset.name}
+                asset={asset}
+                onDownload={onDownload}
+                onPreview={onPreview}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* SOCIAL MEDIA SECTION */}
+      <div className="bg-gradient-to-br from-slate-900 via-pink-900 to-slate-900 rounded-3xl p-10 border border-pink-500/20 shadow-2xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-pink-500/10 via-transparent to-purple-500/10"></div>
+        <div className="relative">
+          <div className="flex items-center gap-6 mb-10">
+            <div className="p-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl shadow-xl">
+              <Share2 className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h4 className="text-3xl font-black text-white mb-2">Social Media Graphics</h4>
+              <p className="text-pink-200 text-xl">Viral-ready social content with proven engagement psychology</p>
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              <Star className="h-6 w-6 text-yellow-400 animate-pulse" />
+              <Crown className="h-6 w-6 text-pink-400" />
+              <Sparkles className="h-6 w-6 text-purple-400 animate-pulse" />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
+            {socialAssets.map((asset) => (
+              <AssetCard
+                key={asset.name}
+                asset={asset}
+                onDownload={onDownload}
+                onPreview={onPreview}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* BRAND ASSETS SECTION */}
+      <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 rounded-3xl p-10 border border-blue-500/20 shadow-2xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-transparent to-cyan-500/10"></div>
+        <div className="relative">
+          <div className="flex items-center gap-6 mb-10">
+            <div className="p-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl shadow-xl">
+              <FileText className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h4 className="text-3xl font-black text-white mb-2">Brand Assets</h4>
+              <p className="text-blue-200 text-xl">Professional brand elements for consistent marketing</p>
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              <Star className="h-6 w-6 text-yellow-400 animate-pulse" />
+              <Crown className="h-6 w-6 text-blue-400" />
+              <Sparkles className="h-6 w-6 text-cyan-400 animate-pulse" />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
+            {brandAssets.map((asset) => (
+              <AssetCard
+                key={asset.name}
+                asset={asset}
+                onDownload={onDownload}
+                onPreview={onPreview}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CreativeAssetsShowcase;
