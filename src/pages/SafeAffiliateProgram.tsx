@@ -6,6 +6,46 @@ import { supabase } from '../integrations/supabase/client';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { LoginModal } from '../components/LoginModal';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Badge } from '../components/ui/badge';
+import { Progress } from '../components/ui/progress';
+import {
+  Copy,
+  Download,
+  ExternalLink,
+  BarChart3,
+  TrendingUp,
+  Users,
+  DollarSign,
+  Share2,
+  Mail,
+  MessageSquare,
+  Instagram,
+  Twitter,
+  Facebook,
+  Linkedin,
+  Youtube,
+  Globe,
+  Image,
+  FileText,
+  Smartphone,
+  Monitor,
+  Tablet,
+  Eye,
+  MousePointer,
+  Target,
+  Calendar,
+  Filter,
+  RefreshCw,
+  ArrowUpRight,
+  CheckCircle,
+  AlertCircle,
+  Info
+} from 'lucide-react';
 
 const SafeAffiliateProgram: React.FC = () => {
   const { user } = useAuth();
@@ -468,7 +508,7 @@ const SafeAffiliateProgram: React.FC = () => {
           <div className="bg-white rounded-lg shadow-sm border max-w-2xl mx-auto p-8">
             <div className="text-center mb-6">
               <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">⭐</span>
+                <span className="text-2xl">���</span>
               </div>
               <h2 className="text-2xl font-bold mb-2">You're Almost Ready!</h2>
               <p className="text-gray-600">
