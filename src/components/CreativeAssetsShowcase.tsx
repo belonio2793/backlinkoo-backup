@@ -670,6 +670,65 @@ const CreativeAssetsShowcase: React.FC<{
         </div>
       </div>
 
+      {/* Asset Preview Modal */}
+      {showPreviewModal && currentPreviewAsset && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <div>
+                <h2 className="text-xl font-semibold">{currentPreviewAsset.name}</h2>
+                <p className="text-sm text-gray-600">
+                  {currentPreviewAsset.size} • {currentPreviewAsset.format} • {currentPreviewAsset.description}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                onClick={() => setShowPreviewModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </Button>
+            </div>
+            <div className="overflow-auto max-h-[calc(90vh-120px)] p-6">
+              <div className="flex flex-col items-center space-y-4">
+                {currentPreviewAsset.dataUrl && (
+                  <div className="bg-gradient-to-br from-slate-100 to-slate-200 p-6 rounded-xl shadow-inner max-w-full">
+                    <img
+                      src={currentPreviewAsset.dataUrl}
+                      alt={currentPreviewAsset.name}
+                      className="max-w-full h-auto rounded-lg shadow-lg"
+                      style={{ maxHeight: '60vh' }}
+                    />
+                  </div>
+                )}
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => {
+                      if (currentPreviewAsset.dataUrl) {
+                        const link = document.createElement('a');
+                        link.download = `${currentPreviewAsset.name.toLowerCase().replace(/\s+/g, '-')}-${currentPreviewAsset.size}.${currentPreviewAsset.format.toLowerCase()}`;
+                        link.href = currentPreviewAsset.dataUrl;
+                        link.click();
+                      }
+                    }}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download High-Quality Asset
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowPreviewModal(false)}
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
