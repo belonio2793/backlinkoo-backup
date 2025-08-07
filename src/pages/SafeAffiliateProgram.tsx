@@ -1125,7 +1125,7 @@ ${referralUrl}`,
         },
         {
           type: "ROI Breakdown",
-          content: `💰 ROI BREAKDOWN: Exact numbers from my Backlink ∞ investment.
+          content: `💰 ROI BREAKDOWN: Exact numbers from my Backlink ��� investment.
 
 $99/month turned into $5,000/month in additional revenue.
 
@@ -1491,15 +1491,17 @@ Here's the math: ${referralUrl}`,
 
 <p>Since my last email, I've seen even more impressive results:</p>
 
-<ul>
-  <li><strong>Just landed 12 high-DA backlinks</strong> in the past week</li>
-  <li><strong>Domain Authority increased by 8 points</strong></li>
-  <li><strong>Organic traffic up 45%</strong> this month</li>
+<ul style="margin: 20px 0; padding-left: 20px;">
+  <li style="margin-bottom: 8px;"><strong>Just landed 12 high-DA backlinks</strong> in the past week</li>
+  <li style="margin-bottom: 8px;"><strong>Domain Authority increased by 8 points</strong></li>
+  <li style="margin-bottom: 8px;"><strong>Organic traffic up 45%</strong> this month</li>
 </ul>
 
 <p>The ROI has been phenomenal, and I genuinely think it could help with your SEO goals too.</p>
 
-<p>Here's the link again if you'd like to take a look: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none;">Backlink ∞ Platform</a></p>`,
+<p>Here's the link again if you'd like to take a look:</p>
+
+<p><a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Backlink ∞ Platform</a></p>`,
           isHtml: true
         },
         {
@@ -1613,7 +1615,7 @@ Here's the math: ${referralUrl}`,
                 <p className="text-gray-600 mb-4">Extended attribution window ensures maximum earnings</p>
                 <div className="space-y-2 text-sm text-blue-700">
                   <div className="flex items-center gap-2">
-                    <span>✓</span>
+                    <span>���</span>
                     <span>Cross-device tracking</span>
                   </div>
                   <div className="flex items-center gap-2">
