@@ -835,7 +835,7 @@ ${referralUrl}`,
         },
         {
           type: "Success Story",
-          content: `From struggling with SEO to ranking on page 1 - here's how Backlink ��� helped transform my online presence.
+          content: `From struggling with SEO to ranking on page 1 - here's how Backlink ∞ helped transform my online presence.
 
 The automated outreach and quality links made all the difference!
 
@@ -1221,7 +1221,7 @@ Here's the math: ${referralUrl}`,
         // Page 5
         {
           type: "Q&A Session",
-          content: `❓ LIVE Q&A: Everything you want to know about Backlink ∞. I'm answering your top 50 questions about features, pricing, results, and more. Timestamps included: ${referralUrl}`,
+          content: `�� LIVE Q&A: Everything you want to know about Backlink ∞. I'm answering your top 50 questions about features, pricing, results, and more. Timestamps included: ${referralUrl}`,
           engagement: "High",
           audience: "Question askers"
         },
@@ -2229,7 +2229,7 @@ Here's the math: ${referralUrl}`,
                             <strong>Your personalized post:</strong>
                           </p>
                           <p className="text-sm text-gray-700">
-                            {customMessage || "Your custom message will appear here..."} {affiliateData.referral_url}
+                            {customMessage || "Your custom message will appear here..."} {cleanUrl(affiliateData.referral_url)}
                           </p>
                           <Button
                             size="sm"
