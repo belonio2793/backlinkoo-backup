@@ -189,12 +189,41 @@ const CreativeAssetsShowcase: React.FC<{
   onDownload: (name: string, preview: string, format: string) => void;
   onPreview: (name: string, preview: string) => void;
 }> = ({ onDownload, onPreview }) => {
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [currentPreviewAsset, setCurrentPreviewAsset] = useState<{
+    name: string;
+    size: string;
+    format: string;
+    description: string;
+    dataUrl?: string;
+  } | null>(null);
 
   const handleDownload = (name: string, preview: string, format: string) => {
     onDownload(name, preview, format);
   };
 
-  const handlePreview = (name: string, preview: string) => {
+  const handlePreview = async (name: string, preview: string) => {
+    try {
+      // Find the asset details
+      const asset = [...displayBanners, ...brandAssets].find(a => a.name === name);
+      if (asset) {
+        // Generate high-quality asset for preview
+        const dataUrl = await generateAsset(asset.name);
+
+        setCurrentPreviewAsset({
+          name: asset.name,
+          size: asset.size,
+          format: asset.format,
+          description: asset.description,
+          dataUrl: dataUrl
+        });
+        setShowPreviewModal(true);
+      }
+    } catch (error) {
+      console.error('Failed to generate preview:', error);
+    }
+
+    // Also call the original callback
     onPreview(name, preview);
   };
   
