@@ -27,48 +27,9 @@ const SafeAffiliateProgram: React.FC = () => {
   }, [user]);
 
   const createTableIfNotExists = async () => {
-    return await createTableDirectly();
-  };
-
-  const createTableDirectly = async () => {
-    try {
-      console.log('🔧 Attempting direct table creation...');
-
-      // Try to create table using a simple SQL execution
-      const createSQL = `
-        CREATE TABLE IF NOT EXISTS affiliate_programs (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          user_id UUID NOT NULL,
-          affiliate_code VARCHAR(50) UNIQUE NOT NULL,
-          custom_id VARCHAR(8) UNIQUE NOT NULL,
-          status VARCHAR(20) DEFAULT 'active',
-          commission_rate DECIMAL(3,2) DEFAULT 0.50,
-          total_earnings DECIMAL(10,2) DEFAULT 0.00,
-          total_paid DECIMAL(10,2) DEFAULT 0.00,
-          pending_earnings DECIMAL(10,2) DEFAULT 0.00,
-          referral_url TEXT NOT NULL,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        );
-
-        ALTER TABLE affiliate_programs ENABLE ROW LEVEL SECURITY;
-
-        CREATE POLICY IF NOT EXISTS "affiliate_user_access" ON affiliate_programs
-        FOR ALL USING (auth.uid() = user_id);
-      `;
-
-      const { error } = await supabase.rpc('exec_sql', { sql_query: createSQL });
-
-      if (error) {
-        console.warn('Direct SQL creation warning:', error);
-        // Even if there's a warning, the table might be created
-      }
-
-      return true;
-    } catch (error) {
-      console.error('❌ Direct table creation failed:', error);
-      return false;
-    }
+    // Skip table creation - this should be handled via migrations or manual setup
+    console.log('⚠️ Table creation skipped - affiliate_programs table should exist');
+    return false;
   };
 
   const loadAffiliateData = async () => {
