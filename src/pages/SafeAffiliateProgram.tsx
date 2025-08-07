@@ -219,11 +219,11 @@ const SafeAffiliateProgram: React.FC = () => {
 
       // Clean any fly.dev URLs in existing data
       if (data && data.referral_url) {
-        const cleanedUrl = cleanUrl(data.referral_url);
-        data.referral_url = cleanedUrl;
+        const originalUrl = data.referral_url;
+        const cleanedUrl = cleanUrl(originalUrl);
 
         // If URL was changed from fly.dev to backlinkoo.com, update the database
-        if (cleanedUrl !== data.referral_url) {
+        if (cleanedUrl !== originalUrl) {
           try {
             await supabase
               .from('affiliate_programs')
@@ -234,6 +234,8 @@ const SafeAffiliateProgram: React.FC = () => {
             console.warn('⚠️ Could not update affiliate URL in database:', updateError);
           }
         }
+
+        data.referral_url = cleanedUrl;
       }
 
       setAffiliateData(data);
@@ -440,7 +442,7 @@ const SafeAffiliateProgram: React.FC = () => {
         // Page 1
         {
           type: "Discovery",
-          content: `🚀 Just discovered Backlink ��� - game-changing SEO tool for link building!
+          content: `🚀 Just discovered Backlink ∞ - game-changing SEO tool for link building!
 
 Their automated outreach is incredible. Check it out:
 
@@ -1026,7 +1028,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Story Series",
-          content: `💡 STORY TIME: How I went from SEO rookie to expert\n\nPart 3: The tool that changed everything\n\nEnter Backlink ∞ 🎯\nAutomated outreach ✅\nHigh-quality links ���\nTime freedom ✅\n\nLink in bio: ${referralUrl}\n\n#EntrepreneurLife #SEOJourney`,
+          content: `💡 STORY TIME: How I went from SEO rookie to expert\n\nPart 3: The tool that changed everything\n\nEnter Backlink ∞ 🎯\nAutomated outreach ✅\nHigh-quality links ✅\nTime freedom ✅\n\nLink in bio: ${referralUrl}\n\n#EntrepreneurLife #SEOJourney`,
           engagement: "High",
           audience: "Story lovers"
         },
