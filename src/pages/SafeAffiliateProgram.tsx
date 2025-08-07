@@ -625,7 +625,7 @@ ${referralUrl}`,
         // Page 4
         {
           type: "Data-Driven Results",
-          content: `Data speaks louder than opinions. After 6 months with Backlink ∞:\n\n📈 Domain Authority: +23 points\n📈 Referring domains: +287\n📈 Organic traffic: +156%\n📈 Lead quality: Significantly improved\n\nROI has exceeded all expectations. ${referralUrl}`,
+          content: `Data speaks louder than opinions. After 6 months with Backlink ∞:\n\n📈 Domain Authority: +23 points\n📈 Referring domains: +287\n��� Organic traffic: +156%\n📈 Lead quality: Significantly improved\n\nROI has exceeded all expectations. ${referralUrl}`,
           engagement: "Very High",
           audience: "Data analysts"
         },
@@ -1383,6 +1383,7 @@ Here's the math: ${referralUrl}`,
         {
           label: "Closing",
           content: `<p>Let me know what you think if you try it out!</p>
+
 <p>Cheers,<br>[Your Name]</p>`,
           isHtml: true
         }
