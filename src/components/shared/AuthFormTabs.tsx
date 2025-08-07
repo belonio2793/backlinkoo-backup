@@ -9,6 +9,8 @@ import { TrialConversionService } from "@/services/trialConversionService";
 
 import { validateEmail, validatePassword, validateRequired } from "@/utils/authValidation";
 import { Eye, EyeOff, Shield, CheckCircle } from "lucide-react";
+import CompactTestimonials from "@/components/CompactTestimonials";
+import TestimonialBanner from "@/components/TestimonialBanner";
 
 interface AuthFormTabsProps {
   onAuthSuccess?: (user: any) => void;
@@ -412,6 +414,13 @@ export function AuthFormTabs({
               </Button>
             </div>
           </div>
+
+          {/* Testimonial banner for login */}
+          {!isCompact && (
+            <div className="mt-6">
+              <TestimonialBanner />
+            </div>
+          )}
         </form>
       </TabsContent>
 
@@ -498,6 +507,13 @@ export function AuthFormTabs({
             {showTrialUpgrade ? "Upgrade Trial" : "Create Account"}
           </Button>
         </form>
+
+        {/* Testimonials for signup tab */}
+        {!isCompact && (
+          <div className="mt-8 pt-6 border-t border-gray-100">
+            <CompactTestimonials />
+          </div>
+        )}
       </TabsContent>
     </Tabs>
   );

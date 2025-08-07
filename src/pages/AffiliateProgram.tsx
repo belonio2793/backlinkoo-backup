@@ -9,6 +9,7 @@ import { affiliateService } from '../services/affiliateService';
 import AffiliateDashboard from '../components/affiliate/AffiliateDashboard';
 import AffiliateRegistration from '../components/affiliate/AffiliateRegistration';
 import AffiliateAssetLibrary from '../components/affiliate/AffiliateAssetLibrary';
+import AffiliateSetupGuide from '../components/AffiliateSetupGuide';
 import {
   DollarSign,
   Users,
@@ -40,6 +41,7 @@ export const AffiliateProgram: React.FC = () => {
   const [affiliateProfile, setAffiliateProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showRegistration, setShowRegistration] = useState(false);
+  const [databaseError, setDatabaseError] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -52,10 +54,14 @@ export const AffiliateProgram: React.FC = () => {
   const checkAffiliateStatus = async () => {
     try {
       setLoading(true);
+      setDatabaseError(false);
       const profile = await affiliateService.getAffiliateProfile(user.id);
       setAffiliateProfile(profile);
     } catch (error) {
       console.error('Failed to check affiliate status:', error);
+      if (error.message && error.message.includes('not set up yet')) {
+        setDatabaseError(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -65,6 +71,11 @@ export const AffiliateProgram: React.FC = () => {
     setShowRegistration(false);
     checkAffiliateStatus();
   };
+
+  // Show setup guide if database tables are missing
+  if (databaseError) {
+    return <AffiliateSetupGuide />;
+  }
 
   // If user is not logged in, show public affiliate program landing
   if (!user) {

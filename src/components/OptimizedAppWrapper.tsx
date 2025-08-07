@@ -16,6 +16,7 @@ import TermsOfService from '@/pages/TermsOfService';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import BlogPreview from '@/pages/BlogPreview';
 import NotFound from '@/pages/NotFound';
+import AffiliateTest from '@/pages/AffiliateTest';
 import Dashboard from '@/pages/Dashboard';
 import PaymentSuccess from '@/pages/PaymentSuccess';
 import PaymentCancelled from '@/pages/PaymentCancelled';
@@ -268,6 +269,11 @@ export const OptimizedAppWrapper = () => {
           <Route path="/affiliate" element={
             <InstantEmailVerificationGuard>
               <LazyAffiliateProgram />
+            </InstantEmailVerificationGuard>
+          } />
+          <Route path="/affiliate/test" element={
+            <InstantEmailVerificationGuard>
+              <AffiliateTest />
             </InstantEmailVerificationGuard>
           } />
           <Route path="/affiliate/promotion-materials" element={

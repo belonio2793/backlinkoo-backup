@@ -41,8 +41,13 @@ export class AffiliateService {
         .single();
 
       if (error) {
-        console.error('Error creating affiliate profile:', error);
-        throw new Error(`Failed to create affiliate profile: ${error.message}`);
+        if (error.code === '42P01' || error.message.includes('does not exist')) {
+          // Tables don't exist yet - show a helpful message
+          throw new Error('Affiliate system is not set up yet. Please contact an administrator to enable the affiliate program.');
+        } else {
+          console.error('Error creating affiliate profile:', error);
+          throw new Error(`Failed to create affiliate profile: ${error.message}`);
+        }
       }
 
       return data;
@@ -64,9 +69,18 @@ export class AffiliateService {
         .eq('status', 'active')
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching affiliate profile:', error);
-        return null;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No data found - normal case
+          return null;
+        } else if (error.code === '42P01' || error.message.includes('does not exist')) {
+          // Table doesn't exist - development mode, return null gracefully
+          console.log('⚠️ Affiliate tables not set up yet, affiliate page will show registration');
+          return null;
+        } else {
+          console.error('Error fetching affiliate profile:', error);
+          return null;
+        }
       }
 
       return data;
@@ -89,7 +103,11 @@ export class AffiliateService {
         .single();
 
       if (statsError) {
-        console.error('Error fetching affiliate stats:', statsError);
+        if (statsError.code === '42P01' || statsError.message.includes('does not exist')) {
+          console.log('⚠️ Affiliate stats view not available, using default stats');
+        } else {
+          console.error('Error fetching affiliate stats:', statsError);
+        }
         // Return default stats if view doesn't exist
         return {
           total_clicks: 0,
