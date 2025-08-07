@@ -736,26 +736,6 @@ const CreativeAssetsShowcase: React.FC<{
         </div>
       </div>
 
-      {/* Brand Guidelines Modal */}
-      {showBrandGuidelines && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold">Brand Guidelines</h2>
-              <Button
-                variant="ghost"
-                onClick={() => setShowBrandGuidelines(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </Button>
-            </div>
-            <div className="overflow-auto max-h-[calc(90vh-80px)]">
-              <BrandGuidelinesPDF />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
