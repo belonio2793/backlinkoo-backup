@@ -1030,7 +1030,7 @@ Link in bio: ${referralUrl}
         // Page 4
         {
           type: "Feature Friday",
-          content: `🌟 FEATURE FRIDAY 🌟\n\nSpotlight: Backlink ∞'s AI Outreach\n\n✨ Writes personalized emails\n✨ Finds perfect prospects\n✨ Follows up automatically\n✨ Tracks everything\n\nIt's like having a team of experts! 👥\n\nLink in bio: ${referralUrl}\n\n#FeatureFriday #AITools`,
+          content: `🌟 FEATURE FRIDAY 🌟\n\nSpotlight: Backlink ∞'s AI Outreach\n\n✨ Writes personalized emails\n✨ Finds perfect prospects\n✨ Follows up automatically\n✨ Tracks everything\n\nIt's like having a team of experts! ����\n\nLink in bio: ${referralUrl}\n\n#FeatureFriday #AITools`,
           engagement: "High",
           audience: "Feature enthusiasts"
         },
@@ -1155,7 +1155,7 @@ ${referralUrl}`,
         },
         {
           type: "Step by Step",
-          content: `📋 COMPLETE GUIDE: Setting up your first Backlink ∞ campaign (Beginner friendly).
+          content: `��� COMPLETE GUIDE: Setting up your first Backlink ∞ campaign (Beginner friendly).
 
 Follow along as I walk through every single step with zero experience assumed:
 
@@ -1740,54 +1740,91 @@ Here's the math: ${referralUrl}`,
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border max-w-2xl mx-auto p-8">
-            <div className="text-center mb-6">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">⭐</span>
-              </div>
-              <h2 className="text-2xl font-bold mb-2">You're Almost Ready!</h2>
-              <p className="text-gray-600">
-                Click below to activate your affiliate account and start earning 20% recurring commissions
-              </p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 py-6 mb-6">
+            {databaseSetupRequired ? (
+              // Show setup guide when database tables are missing
               <div className="text-center">
-                <span className="text-2xl mb-2 block">💰</span>
-                <h4 className="font-semibold">20% Commission</h4>
-                <p className="text-sm text-gray-600">Starting rate</p>
-              </div>
-              <div className="text-center">
-                <span className="text-2xl mb-2 block">⏰</span>
-                <h4 className="font-semibold">90-Day Tracking</h4>
-                <p className="text-sm text-gray-600">Cookie duration</p>
-              </div>
-              <div className="text-center">
-                <span className="text-2xl mb-2 block">📊</span>
-                <h4 className="font-semibold">Real-Time Stats</h4>
-                <p className="text-sm text-gray-600">Live dashboard</p>
-              </div>
-            </div>
+                <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">⚙️</span>
+                </div>
+                <h2 className="text-2xl font-bold mb-2 text-orange-800">Database Setup Required</h2>
+                <p className="text-gray-600 mb-6">
+                  The affiliate program database tables need to be set up before you can join.
+                </p>
 
-            <button 
-              className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50"
-              onClick={joinProgram}
-              disabled={isJoining}
-            >
-              {isJoining ? (
-                <>
-                  <span className="inline-block animate-spin mr-2">⭐</span>
-                  Activating Account...
-                </>
-              ) : (
-                <>
-                  Activate My Affiliate Account ✓
-                </>
-              )}
-            </button>
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 text-left">
+                  <h3 className="font-semibold text-orange-800 mb-2">Setup Instructions:</h3>
+                  <ol className="text-sm text-orange-700 space-y-2">
+                    <li>1. Contact your system administrator</li>
+                    <li>2. Run the SQL migration file in Supabase Dashboard</li>
+                    <li>3. Verify the affiliate_programs table exists</li>
+                    <li>4. Refresh this page</li>
+                  </ol>
+                </div>
 
-            <p className="text-xs text-gray-500 text-center mt-4">
-              No approval required • Instant activation • Start earning immediately
-            </p>
+                <button
+                  className="w-full bg-orange-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-orange-700 transition-colors"
+                  onClick={() => window.location.reload()}
+                >
+                  🔄 Refresh Page
+                </button>
+
+                <p className="text-xs text-gray-500 text-center mt-4">
+                  Contact support if you continue to see this message
+                </p>
+              </div>
+            ) : (
+              // Show normal activation UI when database is ready
+              <>
+                <div className="text-center mb-6">
+                  <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">⭐</span>
+                  </div>
+                  <h2 className="text-2xl font-bold mb-2">You're Almost Ready!</h2>
+                  <p className="text-gray-600">
+                    Click below to activate your affiliate account and start earning 20% recurring commissions
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 py-6 mb-6">
+                  <div className="text-center">
+                    <span className="text-2xl mb-2 block">💰</span>
+                    <h4 className="font-semibold">20% Commission</h4>
+                    <p className="text-sm text-gray-600">Starting rate</p>
+                  </div>
+                  <div className="text-center">
+                    <span className="text-2xl mb-2 block">⏰</span>
+                    <h4 className="font-semibold">90-Day Tracking</h4>
+                    <p className="text-sm text-gray-600">Cookie duration</p>
+                  </div>
+                  <div className="text-center">
+                    <span className="text-2xl mb-2 block">📊</span>
+                    <h4 className="font-semibold">Real-Time Stats</h4>
+                    <p className="text-sm text-gray-600">Live dashboard</p>
+                  </div>
+                </div>
+
+                <button
+                  className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50"
+                  onClick={joinProgram}
+                  disabled={isJoining}
+                >
+                  {isJoining ? (
+                    <>
+                      <span className="inline-block animate-spin mr-2">⭐</span>
+                      Activating Account...
+                    </>
+                  ) : (
+                    <>
+                      Activate My Affiliate Account ✓
+                    </>
+                  )}
+                </button>
+
+                <p className="text-xs text-gray-500 text-center mt-4">
+                  No approval required • Instant activation • Start earning immediately
+                </p>
+              </>
+            )}
           </div>
         </div>
         <Footer />
