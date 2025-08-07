@@ -267,9 +267,9 @@ export const OptimizedAppWrapper = () => {
             </InstantEmailVerificationGuard>
           } />
           <Route path="/affiliate" element={
-            <InstantEmailVerificationGuard>
-              <LazyAffiliateProgram />
-            </InstantEmailVerificationGuard>
+            <Suspense fallback={<PageLoader />}>
+              <AffiliateTestSimple />
+            </Suspense>
           } />
           <Route path="/affiliate/test" element={
             <InstantEmailVerificationGuard>
