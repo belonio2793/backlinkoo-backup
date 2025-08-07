@@ -701,7 +701,120 @@ const SafeAffiliateProgram: React.FC = () => {
           engagement: "High",
           audience: "Tip seekers"
         },
-        // Continue with Instagram templates...
+        // Page 2
+        {
+          type: "Results Showcase",
+          content: `📈 RESULTS DON'T LIE 📈\n\nBefore Backlink ∞: 2 backlinks/month\nAfter Backlink ∞: 25 backlinks/month\n\nSame effort, 12x results! 🚀\n\nLink in bio: ${referralUrl}\n\n#Results #SEOGrowth #Automation #BusinessGrowth`,
+          engagement: "Very High",
+          audience: "Results driven"
+        },
+        {
+          type: "Story Series",
+          content: `💡 STORY TIME: How I went from SEO rookie to expert\n\nPart 3: The tool that changed everything\n\nEnter Backlink ∞ 🎯\nAutomated outreach ✅\nHigh-quality links ✅\nTime freedom ✅\n\nLink in bio: ${referralUrl}\n\n#EntrepreneurLife #SEOJourney`,
+          engagement: "High",
+          audience: "Story lovers"
+        },
+        {
+          type: "Motivational Monday",
+          content: `💪 MOTIVATIONAL MONDAY 💪\n\n"Success isn't about working harder, it's about working smarter"\n\nThat's why I use Backlink ∞ for link building 🧠\n\nWork smart, not hard! 💯\n\nLink in bio: ${referralUrl}\n\n#MotivationMonday #WorkSmart #Entrepreneur`,
+          engagement: "High",
+          audience: "Motivation seekers"
+        },
+        // Page 3
+        {
+          type: "Process Reveal",
+          content: `🔍 HOW I BUILD 30+ BACKLINKS/MONTH\n\nStep 1: Log into Backlink ∞\nStep 2: Set targeting parameters\nStep 3: Let AI do the work\nStep 4: Watch links roll in 📊\n\nIt's that simple!\n\nLink in bio: ${referralUrl}\n\n#ProcessReveal #SEOHacks`,
+          engagement: "Very High",
+          audience: "Process learners"
+        },
+        {
+          type: "Before and After",
+          content: `⬅️ BEFORE: Manual outreach nightmare\n• 20 emails/day\n• 2% response rate\n• Burnt out after 1 month\n\n➡️ AFTER: Backlink ∞ magic\n• 100+ automated emails/day\n• 15% response rate\n• More time for strategy\n\nLink in bio: ${referralUrl}\n\n#BeforeAndAfter`,
+          engagement: "Very High",
+          audience: "Transformation seekers"
+        },
+        {
+          type: "Quick Win",
+          content: `⚡ QUICK WIN WEDNESDAY ⚡\n\nWant an instant SEO boost?\n\nStart building quality backlinks TODAY with Backlink ∞\n\nNo experience needed 🎯\nResults in 30 days 📈\nFree trial available 🆓\n\nLink in bio: ${referralUrl}\n\n#QuickWin #SEOBoost`,
+          engagement: "High",
+          audience: "Quick results"
+        },
+        // Page 4
+        {
+          type: "Feature Friday",
+          content: `🌟 FEATURE FRIDAY 🌟\n\nSpotlight: Backlink ∞'s AI Outreach\n\n✨ Writes personalized emails\n✨ Finds perfect prospects\n✨ Follows up automatically\n✨ Tracks everything\n\nIt's like having a team of experts! 👥\n\nLink in bio: ${referralUrl}\n\n#FeatureFriday #AITools`,
+          engagement: "High",
+          audience: "Feature enthusiasts"
+        },
+        {
+          type: "Success Saturday",
+          content: `🏆 SUCCESS SATURDAY 🏆\n\nCelebrating another win! 🎉\n\nJust landed 5 high-DA backlinks this week thanks to Backlink ∞\n\nDomain Authority: +3 points 📈\nOrganic traffic: +25% 🚀\n\nConsistency pays off!\n\nLink in bio: ${referralUrl}\n\n#SuccessSaturday #Wins`,
+          engagement: "High",
+          audience: "Success celebrators"
+        },
+        {
+          type: "Sunday Reflection",
+          content: `🌅 SUNDAY REFLECTION 🌅\n\nThis week I learned:\n\n💭 Working harder ≠ Better results\n💭 The right tools make all the difference\n💭 Backlink ∞ is that tool for SEO\n\nWhat did you learn?\n\nLink in bio: ${referralUrl}\n\n#SundayReflection #Lessons`,
+          engagement: "Medium",
+          audience: "Reflective thinkers"
+        },
+        // Page 5
+        {
+          type: "Myth Buster",
+          content: `🚫 MYTH BUSTER ALERT 🚫\n\nMyth: "AI can't do personalized outreach"\n\nReality: Backlink ∞'s AI writes better emails than most humans! 🤖\n\nPersonalization ✅\nContext awareness ✅\nHigh response rates ✅\n\nLink in bio: ${referralUrl}\n\n#MythBuster #AIFacts`,
+          engagement: "High",
+          audience: "Myth busters"
+        },
+        {
+          type: "Tool Tuesday",
+          content: `🛠️ TOOL TUESDAY 🛠️\n\nToday's spotlight: Backlink ∞\n\nWhat it does: Automates link building\nWhy I love it: Saves 20+ hours/week\nBest feature: AI-powered outreach\nPrice: Worth every penny\n\nLink in bio: ${referralUrl}\n\n#ToolTuesday #ProductivityTools`,
+          engagement: "High",
+          audience: "Tool enthusiasts"
+        },
+        {
+          type: "Growth Hack",
+          content: `💡 GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️⃣ Technical SEO ✅\n3️⃣ High-quality backlinks ✅\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
+          engagement: "Very High",
+          audience: "Growth hackers"
+        },
+        // Page 6
+        {
+          type: "Entrepreneur Life",
+          content: `👨‍💼 ENTREPRENEUR LIFE 👨‍💼\n\n6 AM: Coffee ☕\n8 AM: Check Backlink ∞ results 📊\n9 AM: 15 new quality backlinks! 🎉\n10 AM: Focus on other business priorities\n\nAutomation = Freedom! 🗽\n\nLink in bio: ${referralUrl}\n\n#EntrepreneurLife #Automation`,
+          engagement: "High",
+          audience: "Entrepreneurs"
+        },
+        {
+          type: "Behind the Scenes",
+          content: `🎬 BEHIND THE SCENES 🎬\n\nHow I really grew my website traffic:\n\n📹 Slide 1: The struggle was real\n📹 Slide 2: Found Backlink ∞\n📹 Slide 3: Set up campaigns\n📹 Slide 4: Results started flowing\n📹 Slide 5: Now living the dream\n\nLink in bio: ${referralUrl}\n\n#BehindTheScenes`,
+          engagement: "Very High",
+          audience: "BTS lovers"
+        },
+        {
+          type: "Weekend Warrior",
+          content: `⚡ WEEKEND WARRIOR ⚡\n\nWhile others rest, I optimize! 💪\n\nThis weekend's project:\nOptimizing my Backlink ∞ campaigns for even better results\n\nHustle never stops! 🔥\n\nLink in bio: ${referralUrl}\n\n#WeekendWarrior #HustleMode #SEOLife`,
+          engagement: "Medium",
+          audience: "Weekend workers"
+        },
+        // Page 7
+        {
+          type: "Grateful Thursday",
+          content: `🙏 GRATEFUL THURSDAY 🙏\n\nToday I'm grateful for:\n\n✨ Amazing tools like Backlink ∞\n✨ The opportunity to grow online\n✨ This incredible community\n✨ Your support and engagement\n\nWhat are you grateful for?\n\nLink in bio: ${referralUrl}\n\n#GratefulThursday #Blessed`,
+          engagement: "High",
+          audience: "Grateful hearts"
+        },
+        {
+          type: "Industry Update",
+          content: `📰 INDUSTRY UPDATE 📰\n\nLatest SEO trends:\n\n🔥 AI-powered link building\n🔥 Quality over quantity\n🔥 Automated outreach\n🔥 Data-driven strategies\n\nBacklink ∞ covers all of these! 💯\n\nLink in bio: ${referralUrl}\n\n#IndustryUpdate #SEOTrends`,
+          engagement: "Medium",
+          audience: "Industry watchers"
+        },
+        {
+          type: "Final Push",
+          content: `🎯 FINAL CALL 🎯\n\nIf you're serious about SEO success:\n\n⏰ Don't wait another day\n⏰ Every moment counts\n⏰ Your competitors aren't waiting\n⏰ Start building links NOW\n\nBacklink ∞ = Your secret weapon! 🚀\n\nLink in bio: ${referralUrl}\n\n#FinalCall #TakeAction`,
+          engagement: "High",
+          audience: "Action takers"
+        }
       ],
       youtube: [
         // Page 1
