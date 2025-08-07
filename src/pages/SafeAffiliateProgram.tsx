@@ -966,7 +966,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Quick Win",
-          content: `⚡ QUICK WIN WEDNESDAY ��\n\nWant an instant SEO boost?\n\nStart building quality backlinks TODAY with Backlink ∞\n\nNo experience needed 🎯\nResults in 30 days 📈\nFree trial available 🆓\n\nLink in bio: ${referralUrl}\n\n#QuickWin #SEOBoost`,
+          content: `⚡ QUICK WIN WEDNESDAY ⚡\n\nWant an instant SEO boost?\n\nStart building quality backlinks TODAY with Backlink ∞\n\nNo experience needed 🎯\nResults in 30 days 📈\nFree trial available 🆓\n\nLink in bio: ${referralUrl}\n\n#QuickWin #SEOBoost`,
           engagement: "High",
           audience: "Quick results"
         },
@@ -985,7 +985,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Sunday Reflection",
-          content: `🌅 SUNDAY REFLECTION 🌅\n\nThis week I learned:\n\n💭 Working harder ≠ Better results\n�� The right tools make all the difference\n💭 Backlink ∞ is that tool for SEO\n\nWhat did you learn?\n\nLink in bio: ${referralUrl}\n\n#SundayReflection #Lessons`,
+          content: `🌅 SUNDAY REFLECTION 🌅\n\nThis week I learned:\n\n💭 Working harder ≠ Better results\n💭 The right tools make all the difference\n💭 Backlink ∞ is that tool for SEO\n\nWhat did you learn?\n\nLink in bio: ${referralUrl}\n\n#SundayReflection #Lessons`,
           engagement: "Medium",
           audience: "Reflective thinkers"
         },
@@ -2611,11 +2611,11 @@ Here's the math: ${referralUrl}`,
                       <div>
                         <h5 className="font-medium mb-2 text-red-700">❌ Don'ts:</h5>
                         <ul className="space-y-1 text-xs">
-                          <li>��� Don't alter colors, fonts, or proportions</li>
+                          <li>• Don't alter colors, fonts, or proportions</li>
                           <li>• Don't add effects or filters to logos</li>
                           <li>• Don't use assets for competing services</li>
                           <li>• Don't make false or misleading claims</li>
-                          <li>• Don't use outdated brand materials</li>
+                          <li>�� Don't use outdated brand materials</li>
                         </ul>
                       </div>
                     </div>
