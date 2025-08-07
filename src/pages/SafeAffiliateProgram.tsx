@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
 import { Header } from '../components/Header';
+import { Footer } from '../components/Footer';
 
 const SafeAffiliateProgram: React.FC = () => {
   const { user } = useAuth();
@@ -319,6 +320,7 @@ const SafeAffiliateProgram: React.FC = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading affiliate dashboard...</p>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -440,6 +442,7 @@ const SafeAffiliateProgram: React.FC = () => {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -504,6 +507,7 @@ const SafeAffiliateProgram: React.FC = () => {
             </p>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -777,6 +781,7 @@ const SafeAffiliateProgram: React.FC = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
