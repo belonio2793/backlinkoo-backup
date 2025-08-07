@@ -217,6 +217,11 @@ const SafeAffiliateProgram: React.FC = () => {
         console.log('ℹ️ No affiliate profile found (expected for new users)');
       }
 
+      // Clean any fly.dev URLs in existing data
+      if (data && data.referral_url) {
+        data.referral_url = cleanUrl(data.referral_url);
+      }
+
       setAffiliateData(data);
       console.log('✅ Affiliate data loaded successfully:', data);
     } catch (error: any) {
@@ -2367,7 +2372,7 @@ Here's the math: ${referralUrl}`,
                         <h5 className="font-medium mb-1">Timing & Frequency:</h5>
                         <ul className="space-y-1 text-xs">
                           <li>• Tuesday-Thursday perform best</li>
-                          <li>• Send between 10 AM - 2 PM</li>
+                          <li>�� Send between 10 AM - 2 PM</li>
                           <li>• Follow up after 3-5 days</li>
                           <li>• Don't exceed 2 emails per week</li>
                         </ul>
