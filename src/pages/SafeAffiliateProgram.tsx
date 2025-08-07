@@ -139,6 +139,7 @@ const SafeAffiliateProgram: React.FC = () => {
       // Check if table doesn't exist
       if (error && error.message.includes('does not exist')) {
         console.log('🔧 Table does not exist, attempting to create it...');
+        setDatabaseSetupRequired(true);
 
         if (toast) {
           toast({
