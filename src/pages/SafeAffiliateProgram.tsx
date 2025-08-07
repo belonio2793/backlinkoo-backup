@@ -490,19 +490,31 @@ const SafeAffiliateProgram: React.FC = () => {
         // Page 1
         {
           type: "Professional",
-          content: `As an SEO professional, I'm always looking for tools that deliver real results. Backlink ∞'s automated link building platform has transformed how I approach SEO campaigns. The quality of links and time saved is remarkable. ${referralUrl}`,
+          content: `As an SEO professional, I'm always looking for tools that deliver real results.
+
+Backlink ∞'s automated link building platform has transformed how I approach SEO campaigns. The quality of links and time saved is remarkable.
+
+${referralUrl}`,
           engagement: "High",
           audience: "B2B professionals"
         },
         {
           type: "Case Study",
-          content: `Case Study: How I increased organic traffic by 300% in 6 months using strategic link building. The secret? Backlink ∞'s platform made it scalable and efficient. ${referralUrl}`,
+          content: `Case Study: How I increased organic traffic by 300% in 6 months using strategic link building.
+
+The secret? Backlink ∞'s platform made it scalable and efficient.
+
+${referralUrl}`,
           engagement: "Very High",
           audience: "Marketing managers"
         },
         {
           type: "Industry Trend",
-          content: `The future of SEO is automation. While competitors waste time on manual outreach, forward-thinking businesses are leveraging Backlink ∞ to scale their link building efforts efficiently. ${referralUrl}`,
+          content: `The future of SEO is automation.
+
+While competitors waste time on manual outreach, forward-thinking businesses are leveraging Backlink ∞ to scale their link building efforts efficiently.
+
+${referralUrl}`,
           engagement: "High",
           audience: "Business leaders"
         },
@@ -515,32 +527,52 @@ const SafeAffiliateProgram: React.FC = () => {
         },
         {
           type: "Process Improvement",
-          content: `Process improvement spotlight: How we reduced our link building time by 85% while improving quality scores. Backlink ∞'s automation handles prospecting, outreach, and follow-ups seamlessly. ${referralUrl}`,
+          content: `Process improvement spotlight: How we reduced our link building time by 85% while improving quality scores.
+
+Backlink ∞'s automation handles prospecting, outreach, and follow-ups seamlessly.
+
+${referralUrl}`,
           engagement: "High",
           audience: "Operations managers"
         },
         {
           type: "Team Efficiency",
-          content: `Team efficiency update: Since implementing Backlink ∞, our marketing team can focus on strategy and content creation instead of manual outreach. Productivity has increased by 200%. ${referralUrl}`,
+          content: `Team efficiency update: Since implementing Backlink ∞, our marketing team can focus on strategy and content creation instead of manual outreach.
+
+Productivity has increased by 200%.
+
+${referralUrl}`,
           engagement: "High",
           audience: "Team leaders"
         },
         // Page 3
         {
           type: "Consultant Insight",
-          content: `Consultant insight: I've evaluated dozens of link building tools for clients. Backlink ∞ consistently delivers the highest ROI with the least time investment. Here's why it's my top recommendation: ${referralUrl}`,
+          content: `Consultant insight: I've evaluated dozens of link building tools for clients.
+
+Backlink ∞ consistently delivers the highest ROI with the least time investment. Here's why it's my top recommendation:
+
+${referralUrl}`,
           engagement: "Very High",
           audience: "Consultants"
         },
         {
           type: "Agency Owner",
-          content: `Agency owner perspective: Scaling link building services was our biggest challenge until Backlink ∞. Now we can serve 5x more clients with the same team size. Game-changing for agency growth. ${referralUrl}`,
+          content: `Agency owner perspective: Scaling link building services was our biggest challenge until Backlink ∞.
+
+Now we can serve 5x more clients with the same team size. Game-changing for agency growth.
+
+${referralUrl}`,
           engagement: "High",
           audience: "Agency owners"
         },
         {
           type: "Startup Growth",
-          content: `Startup growth hack: With limited resources, we needed maximum SEO impact. Backlink ∞ delivered enterprise-level link building results at a fraction of the cost. Perfect for lean teams. ${referralUrl}`,
+          content: `Startup growth hack: With limited resources, we needed maximum SEO impact.
+
+Backlink ∞ delivered enterprise-level link building results at a fraction of the cost. Perfect for lean teams.
+
+${referralUrl}`,
           engagement: "High",
           audience: "Startup founders"
         },
@@ -804,7 +836,7 @@ const SafeAffiliateProgram: React.FC = () => {
         },
         {
           type: "Before and After",
-          content: `⬅️ BEFORE: Manual outreach nightmare\n• 20 emails/day\n• 2% response rate\n• Burnt out after 1 month\n\n➡️ AFTER: Backlink ∞ magic\n• 100+ automated emails/day\n• 15% response rate\n• More time for strategy\n\nLink in bio: ${referralUrl}\n\n#BeforeAndAfter`,
+          content: `⬅️ BEFORE: Manual outreach nightmare\n• 20 emails/day\n• 2% response rate\n• Burnt out after 1 month\n\n➡️ AFTER: Backlink ∞ magic\n• 100+ automated emails/day\n• 15% response rate\n��� More time for strategy\n\nLink in bio: ${referralUrl}\n\n#BeforeAndAfter`,
           engagement: "Very High",
           audience: "Transformation seekers"
         },
