@@ -835,7 +835,7 @@ ${referralUrl}`,
         },
         {
           type: "Success Story",
-          content: `From struggling with SEO to ranking on page 1 - here's how Backlink ∞ helped transform my online presence.
+          content: `From struggling with SEO to ranking on page 1 - here's how Backlink ��� helped transform my online presence.
 
 The automated outreach and quality links made all the difference!
 
@@ -2201,7 +2201,7 @@ Here's the math: ${referralUrl}`,
                           size="sm"
                           variant="outline"
                           onClick={() => setSocialPage(socialPage + 1)}
-                          disabled={(socialPage + 1) * 3 >= getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).length}
+                          disabled={(socialPage + 1) * 3 >= getSocialTemplates(selectedSocialPlatform, cleanUrl(affiliateData.referral_url)).length}
                           className="flex items-center gap-1"
                         >
                           Next →
