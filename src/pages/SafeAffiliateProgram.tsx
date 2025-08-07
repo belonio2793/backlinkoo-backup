@@ -198,7 +198,7 @@ const SafeAffiliateProgram: React.FC = () => {
                 className="border-2 border-blue-600 text-blue-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-colors"
                 onClick={() => navigate('/login')}
               >
-                📱 Sign In to Dashboard
+                ��� Sign In to Dashboard
               </button>
             </div>
 
@@ -453,40 +453,87 @@ const SafeAffiliateProgram: React.FC = () => {
 
         {/* Referral Links */}
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-          <h2 className="text-xl font-bold mb-4">🔗 Your Referral Links</h2>
-          <p className="text-gray-600 mb-6">Use these links to promote Backlinkoo and earn commissions</p>
-          
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold">🔗 Your Referral Links</h2>
+            <div className="bg-blue-50 px-3 py-1 rounded-lg">
+              <span className="text-xs text-blue-600 font-medium">Linked to User: {user.id.slice(-8)}</span>
+            </div>
+          </div>
+          <p className="text-gray-600 mb-4">
+            These links are permanently tied to your user account. All commissions will be credited to you.
+          </p>
+
+          {/* Tracking Info */}
+          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-green-600">✓</span>
+              <span className="font-medium text-sm">User ID Tracking Active</span>
+            </div>
+            <div className="text-xs text-gray-600 space-y-1">
+              <div>• Your affiliate code: <span className="font-mono bg-white px-1 rounded">{affiliateData.affiliate_code}</span></div>
+              <div>• User ID: <span className="font-mono bg-white px-1 rounded">{user.id}</span></div>
+              <div>• 30-day cookie tracking + permanent account linking</div>
+            </div>
+          </div>
+
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Homepage Link</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-sm font-medium text-gray-700">Homepage Link</label>
+                <span className="text-xs text-gray-500">Best for general promotion</span>
+              </div>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={affiliateData.referral_url}
                   readOnly
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
                 />
                 <button
                   onClick={() => copyToClipboard(affiliateData.referral_url)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
                   📋 Copy
                 </button>
               </div>
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Pricing Link</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-sm font-medium text-gray-700">Pricing Page Link</label>
+                <span className="text-xs text-gray-500">Higher conversion rate</span>
+              </div>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={`${window.location.origin}/pricing?ref=${affiliateData.affiliate_code}`}
                   readOnly
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
                 />
                 <button
                   onClick={() => copyToClipboard(`${window.location.origin}/pricing?ref=${affiliateData.affiliate_code}`)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  📋 Copy
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-sm font-medium text-gray-700">Free Trial Link</label>
+                <span className="text-xs text-gray-500">Low barrier entry</span>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={`${window.location.origin}/trial?ref=${affiliateData.affiliate_code}`}
+                  readOnly
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
+                />
+                <button
+                  onClick={() => copyToClipboard(`${window.location.origin}/trial?ref=${affiliateData.affiliate_code}`)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
                   📋 Copy
                 </button>
