@@ -1363,15 +1363,19 @@ Here's the math: ${referralUrl}`,
         },
         {
           label: "Body",
-          content: `<p>So I've been struggling with link building (you know how tedious it can be), and then I found <strong>Backlink ∞</strong>. This platform is seriously impressive:</p>
+          content: `<p>So I've been struggling with link building (you know how tedious it can be), and then I found <strong>Backlink ∞</strong>.</p>
 
-<ul style="list-style: none; padding-left: 0;">
-  <li>✅ <strong>Automated outreach</strong> that actually works</li>
-  <li>✅ <strong>High-quality backlinks</strong> from real websites</li>
-  <li>✅ <strong>Super easy to use</strong> interface</li>
+<p>This platform is seriously impressive:</p>
+
+<ul style="list-style: none; padding-left: 0; margin: 20px 0;">
+  <li style="margin-bottom: 10px;">✅ <strong>Automated outreach</strong> that actually works</li>
+  <li style="margin-bottom: 10px;">✅ <strong>High-quality backlinks</strong> from real websites</li>
+  <li style="margin-bottom: 10px;">✅ <strong>Super easy to use</strong> interface</li>
 </ul>
 
-<p>I've seen my rankings improve within just a few weeks! Here's the link if you want to check it out: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none;">Try Backlink ∞</a></p>
+<p>I've seen my rankings improve within just a few weeks!</p>
+
+<p>Here's the link if you want to check it out: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Try Backlink ∞</a></p>
 
 <p>They have a <strong>free trial</strong>, so you can test it risk-free.</p>`,
           isHtml: true
