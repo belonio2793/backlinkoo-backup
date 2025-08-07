@@ -393,7 +393,7 @@ const SafeAffiliateProgram: React.FC = () => {
         // Page 3
         {
           type: "Stats",
-          content: `📊 6 months with Backlink ∞:\n• 400+ high-quality backlinks\n• 65% increase in organic traffic\n• 23 point DA improvement\n\nResults speak louder than words: ${referralUrl}`,
+          content: `�� 6 months with Backlink ∞:\n• 400+ high-quality backlinks\n• 65% increase in organic traffic\n• 23 point DA improvement\n\nResults speak louder than words: ${referralUrl}`,
           engagement: "High",
           audience: "Data-driven marketers"
         },
@@ -572,7 +572,7 @@ const SafeAffiliateProgram: React.FC = () => {
         // Page 1
         {
           type: "Visual Story",
-          content: `📊 Behind the scenes of my SEO growth strategy ✨ Swipe to see how Backlink ∞ helped me build high-quality backlinks that actually work! Link in bio: ${referralUrl} #SEO #DigitalMarketing #Entrepreneur`,
+          content: `��� Behind the scenes of my SEO growth strategy ✨ Swipe to see how Backlink ∞ helped me build high-quality backlinks that actually work! Link in bio: ${referralUrl} #SEO #DigitalMarketing #Entrepreneur`,
           engagement: "High",
           audience: "Visual marketers"
         },
@@ -650,6 +650,58 @@ const SafeAffiliateProgram: React.FC = () => {
       ]
     };
     return tips[platform] || [];
+  };
+
+  const downloadAsset = (name: string, dataUrl: string, format: string) => {
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = `${name.toLowerCase().replace(/\s+/g, '-')}.${format.toLowerCase()}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    if (toast) {
+      toast({
+        title: "Download Started",
+        description: `${name} is being downloaded`,
+      });
+    }
+  };
+
+  const previewAsset = (name: string, dataUrl: string) => {
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write(`
+        <html>
+          <head>
+            <title>${name} - Preview</title>
+            <style>
+              body {
+                margin: 0;
+                padding: 20px;
+                background: #f3f4f6;
+                font-family: Arial, sans-serif;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+              }
+              img {
+                max-width: 100%;
+                height: auto;
+                border: 1px solid #d1d5db;
+                background: white;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+              }
+              h1 { color: #111827; margin-bottom: 20px; }
+            </style>
+          </head>
+          <body>
+            <h1>${name} - Preview</h1>
+            <img src="${dataUrl}" alt="${name}" />
+          </body>
+        </html>
+      `);
+    }
   };
 
   const getEmailTemplate = (templateType: string, referralUrl: string) => {
