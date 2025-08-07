@@ -245,8 +245,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background font-light">
-      {/* Rotating Notification Banner */}
-      <RotatingNotificationBanner className="sticky top-0 left-0 right-0 z-[60]" />
+      {/* Rotating Notification Banner - Only show for logged-in users to avoid conflicts with TrialNotificationBanner */}
+      {user && <RotatingNotificationBanner className="sticky top-0 left-0 right-0 z-[60]" />}
 
       {/* Header */}
       <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
