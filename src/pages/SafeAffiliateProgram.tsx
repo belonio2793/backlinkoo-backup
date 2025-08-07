@@ -825,7 +825,7 @@ Here's what happened... ${referralUrl}`,
         },
         {
           type: "Local Business",
-          content: `Local business owners - listen up! 📢 Getting found online is crucial for your success. Backlink ��� helped my local service business rank #1 for our main keywords. Now we're booked solid! ${referralUrl}`,
+          content: `Local business owners - listen up! 📢 Getting found online is crucial for your success. Backlink ∞ helped my local service business rank #1 for our main keywords. Now we're booked solid! ${referralUrl}`,
           engagement: "High",
           audience: "Local businesses"
         },
@@ -1435,37 +1435,37 @@ Here's the math: ${referralUrl}`,
         {
           label: "Opening",
           content: `<p>Hi [Name],</p>
-
+<br>
 <p>I noticed your website [Website Name] and I'm impressed with your content quality.</p>
-
+<br>
 <p>I wanted to reach out because I recently discovered a tool that's been a game-changer for my SEO results.</p>`,
           isHtml: true
         },
         {
           label: "Body",
           content: `<p>Are you currently working on link building for your site?</p>
-
+<br>
 <p>I ask because I've been using <strong>Backlink ∞</strong> and the results have been incredible:</p>
-
+<br>
 <ul style="margin: 20px 0; padding-left: 20px;">
-  <li style="margin-bottom: 8px;"><strong>250% increase</strong> in quality backlinks</li>
-  <li style="margin-bottom: 8px;"><strong>Automated outreach</strong> that saves 15+ hours/week</li>
-  <li style="margin-bottom: 8px;"><strong>Higher success rates</strong> than manual methods</li>
+  <li style="margin-bottom: 12px;"><strong>250% increase</strong> in quality backlinks</li>
+  <li style="margin-bottom: 12px;"><strong>Automated outreach</strong> that saves 15+ hours/week</li>
+  <li style="margin-bottom: 12px;"><strong>Higher success rates</strong> than manual methods</li>
 </ul>
-
+<br>
 <p>The platform focuses on high-authority websites and uses AI to personalize outreach at scale.</p>
-
+<br>
 <p>Given your expertise in [Industry], I thought this might be valuable for your SEO strategy:</p>
-
+<br>
 <p><a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Check out Backlink ∞</a></p>`,
           isHtml: true
         },
         {
           label: "Closing",
           content: `<p>Would love to hear your thoughts if you take a look!</p>
-
+<br>
 <p>Best,<br>[Your Name]</p>
-
+<br>
 <p style="font-size: 12px; color: #666; margin-top: 15px;">P.S. They offer a free trial, so there's no risk in testing it out.</p>`,
           isHtml: true
         }
@@ -1641,7 +1641,7 @@ Here's the math: ${referralUrl}`,
                     <span>Marketing asset library</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span>���</span>
+                    <span>✓</span>
                     <span>Real-time analytics</span>
                   </div>
                   <div className="flex items-center gap-2">
