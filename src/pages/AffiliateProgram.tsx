@@ -417,7 +417,7 @@ export const AffiliateProgram: React.FC = () => {
         </div>
 
         <TabsContent value="dashboard" className="mt-0">
-          <AffiliateDashboard userId={user.id} />
+          <ComprehensiveAffiliateDashboard userId={user.id} />
         </TabsContent>
 
         <TabsContent value="assets" className="mt-0">
