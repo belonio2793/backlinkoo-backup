@@ -54,10 +54,14 @@ export const AffiliateProgram: React.FC = () => {
   const checkAffiliateStatus = async () => {
     try {
       setLoading(true);
+      setDatabaseError(false);
       const profile = await affiliateService.getAffiliateProfile(user.id);
       setAffiliateProfile(profile);
     } catch (error) {
       console.error('Failed to check affiliate status:', error);
+      if (error.message && error.message.includes('not set up yet')) {
+        setDatabaseError(true);
+      }
     } finally {
       setLoading(false);
     }
