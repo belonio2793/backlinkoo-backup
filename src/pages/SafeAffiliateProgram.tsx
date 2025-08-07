@@ -185,12 +185,24 @@ const SafeAffiliateProgram: React.FC = () => {
 
       // Create a safe error message for display
       let displayMessage = 'Failed to load affiliate data';
-      if (error instanceof Error) {
-        displayMessage = error.message;
-      } else if (typeof error === 'string') {
-        displayMessage = error;
-      } else if (error?.message) {
-        displayMessage = String(error.message);
+
+      try {
+        if (error instanceof Error) {
+          displayMessage = error.message;
+        } else if (typeof error === 'string') {
+          displayMessage = error;
+        } else if (error?.message) {
+          displayMessage = String(error.message);
+        } else if (error?.details) {
+          displayMessage = String(error.details);
+        } else if (error?.hint) {
+          displayMessage = String(error.hint);
+        } else {
+          // Safely stringify the error object
+          displayMessage = 'Database connection error. Please refresh the page.';
+        }
+      } catch (stringifyError) {
+        displayMessage = 'Database connection error. Please refresh the page.';
       }
 
       if (toast) {
