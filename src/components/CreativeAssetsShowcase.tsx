@@ -637,9 +637,11 @@ const CreativeAssetsShowcase: React.FC<{
       category: 'brand',
       preview: (
         <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden aspect-square shadow-2xl flex items-center justify-center">
-          <div className="w-32 h-32 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
-            <span className="text-5xl font-black text-gray-900">���</span>
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 animate-pulse"></div>
+          <div className="relative w-40 h-40 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-full flex items-center justify-center shadow-2xl border-4 border-white/20">
+            <span className="text-6xl font-black text-white drop-shadow-xl">∞</span>
           </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/10 rounded-2xl"></div>
         </div>
       )
     },
