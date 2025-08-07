@@ -757,7 +757,13 @@ ${referralUrl}`,
         // Page 1
         {
           type: "Recommendation",
-          content: `���� Recommendation for small business owners: If you're struggling with SEO and getting your website noticed, Backlink ∞ is a game-changer. Their platform simplifies link building and delivers real results. ${referralUrl}`,
+          content: `🌟 Recommendation for small business owners:
+
+If you're struggling with SEO and getting your website noticed, Backlink ∞ is a game-changer.
+
+Their platform simplifies link building and delivers real results.
+
+${referralUrl}`,
           engagement: "High",
           audience: "Small business owners"
         },
