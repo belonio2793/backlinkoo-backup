@@ -31,6 +31,14 @@ export const RotatingNotificationBanner = ({
 }: RotatingNotificationBannerProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+
+  // Check if banner was dismissed in this session
+  useEffect(() => {
+    const dismissed = sessionStorage.getItem('rotating_banner_dismissed');
+    if (dismissed === 'true') {
+      setIsVisible(false);
+    }
+  }, []);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
