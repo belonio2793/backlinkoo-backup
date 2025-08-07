@@ -393,7 +393,7 @@ const SafeAffiliateProgram: React.FC = () => {
         // Page 3
         {
           type: "Stats",
-          content: `📊 6 months with Backlink ∞:\n• 400+ high-quality backlinks\n• 65% increase in organic traffic\n• 23 point DA improvement\n\nResults speak louder than words: ${referralUrl}`,
+          content: `�� 6 months with Backlink ∞:\n• 400+ high-quality backlinks\n• 65% increase in organic traffic\n• 23 point DA improvement\n\nResults speak louder than words: ${referralUrl}`,
           engagement: "High",
           audience: "Data-driven marketers"
         },
@@ -674,19 +674,35 @@ ${referralUrl}`,
         // Page 7
         {
           type: "Future of Work",
-          content: `Future of work insight: SEO professionals aren't being replaced by AI—they're being empowered by it. Backlink ∞ allows our team to focus on strategy while automation handles execution. This is the future. ${referralUrl}`,
+          content: `Future of work insight: SEO professionals aren't being replaced by AI—they're being empowered by it.
+
+Backlink ∞ allows our team to focus on strategy while automation handles execution.
+
+This is the future.
+
+${referralUrl}`,
           engagement: "Very High",
           audience: "HR leaders"
         },
         {
           type: "Investment Thesis",
-          content: `Investment thesis: Marketing technology that delivers measurable ROI will dominate the next decade. Backlink ∞'s proven track record makes it a cornerstone of our digital strategy portfolio. ${referralUrl}`,
+          content: `Investment thesis: Marketing technology that delivers measurable ROI will dominate the next decade.
+
+Backlink ∞'s proven track record makes it a cornerstone of our digital strategy portfolio.
+
+${referralUrl}`,
           engagement: "High",
           audience: "Investors"
         },
         {
           type: "Market Leadership",
-          content: `Market leadership requires constant innovation. While others debate the value of automated link building, we're already seeing 400% improvement in client outcomes with Backlink ∞. Lead, follow, or get left behind. ${referralUrl}`,
+          content: `Market leadership requires constant innovation.
+
+While others debate the value of automated link building, we're already seeing 400% improvement in client outcomes with Backlink ∞.
+
+Lead, follow, or get left behind.
+
+${referralUrl}`,
           engagement: "Very High",
           audience: "Market leaders"
         }
@@ -937,7 +953,7 @@ ${referralUrl}`,
         },
         {
           type: "Weekend Warrior",
-          content: `⚡ WEEKEND WARRIOR ⚡\n\nWhile others rest, I optimize! 💪\n\nThis weekend's project:\nOptimizing my Backlink ∞ campaigns for even better results\n\nHustle never stops! 🔥\n\nLink in bio: ${referralUrl}\n\n#WeekendWarrior #HustleMode #SEOLife`,
+          content: `⚡ WEEKEND WARRIOR ⚡\n\nWhile others rest, I optimize! ��\n\nThis weekend's project:\nOptimizing my Backlink ∞ campaigns for even better results\n\nHustle never stops! 🔥\n\nLink in bio: ${referralUrl}\n\n#WeekendWarrior #HustleMode #SEOLife`,
           engagement: "Medium",
           audience: "Weekend workers"
         },
