@@ -30,12 +30,23 @@ const SafeAffiliateProgram: React.FC = () => {
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error loading affiliate data:', error);
+        const errorMessage = error.message || error.details || JSON.stringify(error);
+        console.error('Error loading affiliate data:', errorMessage);
+        throw new Error(`Database error: ${errorMessage}`);
       }
 
       setAffiliateData(data);
-    } catch (error) {
-      console.error('Failed to load affiliate data:', error);
+    } catch (error: any) {
+      const errorMessage = error.message || error.details || JSON.stringify(error);
+      console.error('Failed to load affiliate data:', errorMessage);
+
+      if (toast) {
+        toast({
+          title: "Error loading affiliate data",
+          description: errorMessage,
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }
