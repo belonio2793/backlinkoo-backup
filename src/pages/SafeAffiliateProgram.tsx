@@ -966,7 +966,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Quick Win",
-          content: `⚡ QUICK WIN WEDNESDAY ⚡\n\nWant an instant SEO boost?\n\nStart building quality backlinks TODAY with Backlink ∞\n\nNo experience needed 🎯\nResults in 30 days 📈\nFree trial available 🆓\n\nLink in bio: ${referralUrl}\n\n#QuickWin #SEOBoost`,
+          content: `⚡ QUICK WIN WEDNESDAY ⚡\n\nWant an instant SEO boost?\n\nStart building quality backlinks TODAY with Backlink ∞\n\nNo experience needed 🎯\nResults in 30 days ���\nFree trial available 🆓\n\nLink in bio: ${referralUrl}\n\n#QuickWin #SEOBoost`,
           engagement: "High",
           audience: "Quick results"
         },
@@ -1407,21 +1407,22 @@ Here's the math: ${referralUrl}`,
           content: `<div style="border-left: 4px solid #2563eb; padding-left: 20px; margin: 20px 0;">
   <h2 style="color: #2563eb;">SPOTLIGHT: Backlink ∞ - The Future of Link Building</h2>
 </div>
-
+<br>
 <p>In the ever-evolving world of SEO, link building remains one of the most crucial yet challenging aspects of digital marketing. That's where <strong>Backlink ∞</strong> comes in.</p>
-
+<br>
 <h3 style="color: #1e293b;">What makes it special:</h3>
-<ul>
-  <li><strong>AI-powered outreach automation</strong> - No more manual emails</li>
-  <li><strong>Focus on high-authority websites</strong> - Quality over quantity</li>
-  <li><strong>Comprehensive tracking and analytics</strong> - Know what works</li>
-  <li><strong>Time-saving automation features</strong> - Focus on strategy</li>
+<br>
+<ul style="margin: 20px 0; padding-left: 20px;">
+  <li style="margin-bottom: 12px;"><strong>AI-powered outreach automation</strong> - No more manual emails</li>
+  <li style="margin-bottom: 12px;"><strong>Focus on high-authority websites</strong> - Quality over quantity</li>
+  <li style="margin-bottom: 12px;"><strong>Comprehensive tracking and analytics</strong> - Know what works</li>
+  <li style="margin-bottom: 12px;"><strong>Time-saving automation features</strong> - Focus on strategy</li>
 </ul>
-
+<br>
 <div style="background: #ecfccb; border: 1px solid #bef264; padding: 15px; border-radius: 6px; margin: 20px 0;">
   <p style="margin: 0; color: #365314;"><strong>Success Story:</strong> The platform has gained significant traction among SEO professionals, with many reporting substantial improvements in their link building success rates.</p>
 </div>
-
+<br>
 <p>Interested in learning more? You can explore <a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Backlink ∞ here</a></p>`,
           isHtml: true
         }
