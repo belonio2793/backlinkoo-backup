@@ -77,6 +77,16 @@ const SafeAffiliateProgram: React.FC = () => {
   const createTableIfNotExists = async () => {
     // Skip table creation - this should be handled via migrations or manual setup
     console.log('⚠️ Table creation skipped - affiliate_programs table should exist');
+
+    // Show helpful error message to users
+    if (toast) {
+      toast({
+        title: "Database Setup Required",
+        description: "The affiliate system needs to be set up by an administrator. Please contact support.",
+        variant: "destructive"
+      });
+    }
+
     return false;
   };
 
