@@ -452,6 +452,19 @@ const SafeAffiliateProgram: React.FC = () => {
           </div>
         </div>
         <Footer />
+
+        {/* Login Modal for Authentication */}
+        <LoginModal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          onAuthSuccess={(authenticatedUser) => {
+            setShowLoginModal(false);
+            // After successful auth, reload the page to show affiliate dashboard
+            window.location.reload();
+          }}
+          defaultTab={defaultTab}
+          pendingAction="access the affiliate program"
+        />
       </div>
     );
   }
