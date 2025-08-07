@@ -2396,13 +2396,131 @@ Here's the math: ${referralUrl}`,
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Image className="h-5 w-5 text-orange-600" />
-                    Professional Marketing Assets
+                    Enterprise-Quality Creative Assets
                   </CardTitle>
                   <CardDescription>
-                    High-quality banners, graphics, and promotional materials for all platforms
+                    World-class marketing assets with proven sales psychology and professional design
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+
+                  {/* Live Asset Previews Section */}
+                  <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg border border-purple-200">
+                    <h3 className="text-lg font-semibold mb-4 text-purple-900">🎨 Live Asset Previews</h3>
+                    <p className="text-sm text-purple-700 mb-4">Interactive previews of our enterprise-quality marketing assets</p>
+
+                    {/* Animated Leaderboard Banner */}
+                    <div className="mb-6">
+                      <h4 className="font-medium text-sm mb-2">Animated Leaderboard Banner (728x90)</h4>
+                      <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 rounded-lg overflow-hidden border-2 border-white shadow-lg" style={{ width: '100%', maxWidth: '728px', height: '90px' }}>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+                        <div className="relative h-full flex items-center justify-between px-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                              <span className="text-lg font-bold text-gray-900">∞</span>
+                            </div>
+                            <div>
+                              <div className="text-white font-bold text-lg">Backlink ∞</div>
+                              <div className="text-blue-100 text-xs">Automated Link Building</div>
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-yellow-300 font-bold text-sm animate-pulse">🚀 300% More Backlinks</div>
+                            <div className="text-white text-xs">50% Higher DA Links</div>
+                          </div>
+                          <div className="bg-yellow-400 text-gray-900 px-4 py-2 rounded-full font-bold text-sm hover:bg-yellow-300 transition-colors cursor-pointer">
+                            Start Free Trial →
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Animated Square Banner */}
+                    <div className="mb-6">
+                      <h4 className="font-medium text-sm mb-2">Premium Square Banner (300x300)</h4>
+                      <div className="relative bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-xl overflow-hidden shadow-xl" style={{ width: '300px', height: '300px' }}>
+                        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent"></div>
+                        <div className="relative h-full flex flex-col items-center justify-center text-center p-6">
+                          <div className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mb-4 animate-pulse-glow">
+                            <span className="text-2xl font-bold text-gray-900">∞</span>
+                          </div>
+                          <h3 className="text-white font-bold text-xl mb-2">Backlink ∞</h3>
+                          <p className="text-blue-100 text-sm mb-4">The Smart Way to Build<br/>High-Quality Backlinks</p>
+                          <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-4 py-2 rounded-full font-bold text-sm mb-3">
+                            300% Faster Results
+                          </div>
+                          <div className="text-yellow-300 text-xs animate-pulse">✨ Start Your Free Trial Today</div>
+                        </div>
+                        {/* Floating particles effect */}
+                        <div className="absolute top-4 left-4 w-2 h-2 bg-yellow-300 rounded-full animate-ping"></div>
+                        <div className="absolute top-8 right-6 w-1 h-1 bg-blue-300 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
+                        <div className="absolute bottom-6 left-8 w-1.5 h-1.5 bg-purple-300 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
+                      </div>
+                    </div>
+
+                    {/* Modern Skyscraper Banner */}
+                    <div className="mb-6">
+                      <h4 className="font-medium text-sm mb-2">Elegant Skyscraper Banner (160x600)</h4>
+                      <div className="relative bg-gradient-to-b from-indigo-600 via-purple-700 to-pink-600 rounded-lg overflow-hidden shadow-xl" style={{ width: '160px', height: '300px' }}>
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
+                        <div className="relative h-full flex flex-col items-center text-center p-4">
+                          <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mb-3 mt-4">
+                            <span className="text-lg font-bold text-gray-900">∞</span>
+                          </div>
+                          <h3 className="text-white font-bold text-sm mb-2">Backlink ∞</h3>
+                          <div className="flex-1 flex flex-col justify-center space-y-3">
+                            <div className="bg-white/10 backdrop-blur rounded p-2">
+                              <div className="text-yellow-300 text-xs font-bold">🎯 High-DA</div>
+                              <div className="text-white text-xs">Backlinks</div>
+                            </div>
+                            <div className="bg-white/10 backdrop-blur rounded p-2">
+                              <div className="text-green-300 text-xs font-bold">⚡ AI</div>
+                              <div className="text-white text-xs">Outreach</div>
+                            </div>
+                            <div className="bg-white/10 backdrop-blur rounded p-2">
+                              <div className="text-blue-300 text-xs font-bold">📊 Real-time</div>
+                              <div className="text-white text-xs">Analytics</div>
+                            </div>
+                          </div>
+                          <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-3 py-2 rounded-full font-bold text-xs mb-4">
+                            Try Free
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Social Media Asset - Instagram Story */}
+                    <div className="mb-6">
+                      <h4 className="font-medium text-sm mb-2">Instagram Story Template (1080x1920)</h4>
+                      <div className="relative bg-gradient-to-br from-pink-500 via-purple-600 to-indigo-600 rounded-3xl overflow-hidden shadow-xl" style={{ width: '180px', height: '320px' }}>
+                        <div className="absolute inset-0">
+                          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent animate-gradient-shift"></div>
+                        </div>
+                        <div className="relative h-full flex flex-col items-center text-center p-6">
+                          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 mt-8 border-4 border-yellow-400">
+                            <span className="text-xl font-bold text-purple-600">∞</span>
+                          </div>
+                          <h3 className="text-white font-bold text-lg mb-2">Backlink ∞</h3>
+                          <p className="text-purple-100 text-sm mb-6">I just increased my<br/>organic traffic by<br/><span className="text-yellow-300 font-bold text-xl">300%!</span></p>
+                          <div className="flex-1 flex flex-col justify-center">
+                            <div className="bg-white/20 backdrop-blur rounded-full px-4 py-2 mb-3">
+                              <div className="text-white text-xs font-bold">✨ Automated Outreach</div>
+                            </div>
+                            <div className="bg-white/20 backdrop-blur rounded-full px-4 py-2 mb-3">
+                              <div className="text-white text-xs font-bold">📈 High-DA Links Only</div>
+                            </div>
+                            <div className="bg-white/20 backdrop-blur rounded-full px-4 py-2">
+                              <div className="text-white text-xs font-bold">🚀 Instant Results</div>
+                            </div>
+                          </div>
+                          <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-6 py-3 rounded-full font-bold text-sm mt-4">
+                            Swipe Up to Try
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Asset Categories */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Banners & Display Ads */}
