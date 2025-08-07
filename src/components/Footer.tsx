@@ -153,6 +153,12 @@ export const Footer = () => {
               >
                 Admin Dashboard
               </button>
+              <Link
+                to="/affiliate"
+                className="block text-gray-600 hover:text-gray-900 text-sm"
+              >
+                Affiliate Program
+              </Link>
               <a
                 href="mailto:support@backlinkoo.com"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
