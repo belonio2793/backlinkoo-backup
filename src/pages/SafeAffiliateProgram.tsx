@@ -233,7 +233,7 @@ const SafeAffiliateProgram: React.FC = () => {
 
       const affiliateCode = generateAffiliateCode();
       const customId = Math.random().toString(36).substr(2, 8).toUpperCase();
-      const referralUrl = `${window.location.origin}?ref=${affiliateCode}`;
+      const referralUrl = `https://backlinkoo.com?ref=${affiliateCode}`;
 
       console.log('📝 Affiliate data to insert:', {
         user_id: user.id,
@@ -1054,7 +1054,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Industry Update",
-          content: `📰 INDUSTRY UPDATE ���\n\nLatest SEO trends:\n\n🔥 AI-powered link building\n🔥 Quality over quantity\n🔥 Automated outreach\n🔥 Data-driven strategies\n\nBacklink ∞ covers all of these! 💯\n\nLink in bio: ${referralUrl}\n\n#IndustryUpdate #SEOTrends`,
+          content: `📰 INDUSTRY UPDATE 📰\n\nLatest SEO trends:\n\n🔥 AI-powered link building\n🔥 Quality over quantity\n🔥 Automated outreach\n🔥 Data-driven strategies\n\nBacklink ∞ covers all of these! 💯\n\nLink in bio: ${referralUrl}\n\n#IndustryUpdate #SEOTrends`,
           engagement: "Medium",
           audience: "Industry watchers"
         },
@@ -1922,12 +1922,12 @@ Here's the math: ${referralUrl}`,
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={`${window.location.origin}/pricing?ref=${affiliateData.affiliate_code}`}
+                  value={`https://backlinkoo.com/pricing?ref=${affiliateData.affiliate_code}`}
                   readOnly
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
                 />
                 <button
-                  onClick={() => copyToClipboard(`${window.location.origin}/pricing?ref=${affiliateData.affiliate_code}`)}
+                  onClick={() => copyToClipboard(`https://backlinkoo.com/pricing?ref=${affiliateData.affiliate_code}`)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
                   📋 Copy
@@ -1943,12 +1943,12 @@ Here's the math: ${referralUrl}`,
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={`${window.location.origin}/trial?ref=${affiliateData.affiliate_code}`}
+                  value={`https://backlinkoo.com/trial?ref=${affiliateData.affiliate_code}`}
                   readOnly
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
                 />
                 <button
-                  onClick={() => copyToClipboard(`${window.location.origin}/trial?ref=${affiliateData.affiliate_code}`)}
+                  onClick={() => copyToClipboard(`https://backlinkoo.com/trial?ref=${affiliateData.affiliate_code}`)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
                   📋 Copy
