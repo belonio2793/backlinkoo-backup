@@ -62,6 +62,8 @@ const SafeAffiliateProgram: React.FC = () => {
   const [selectedEmailTemplate, setSelectedEmailTemplate] = useState('professional');
   const [customMessage, setCustomMessage] = useState('');
   const [trackingTimeRange, setTrackingTimeRange] = useState('7d');
+  const [socialPage, setSocialPage] = useState(0);
+  const [emailPage, setEmailPage] = useState(0);
 
   useEffect(() => {
     if (user) {
@@ -753,7 +755,7 @@ const SafeAffiliateProgram: React.FC = () => {
                 <div className="text-xs font-mono text-gray-700">{user.id.slice(-8)}</div>
               </div>
               <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium border border-orange-200">
-                🥉 Bronze Affiliate
+                �� Bronze Affiliate
               </span>
               <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
                 ✓ Active
@@ -1157,7 +1159,7 @@ const SafeAffiliateProgram: React.FC = () => {
                       <div>
                         <h5 className="font-medium mb-1">Subject Line Best Practices:</h5>
                         <ul className="space-y-1 text-xs">
-                          <li>��� Keep it under 50 characters</li>
+                          <li>• Keep it under 50 characters</li>
                           <li>• Use action words and urgency</li>
                           <li>• Personalize when possible</li>
                           <li>• Avoid spam trigger words</li>
