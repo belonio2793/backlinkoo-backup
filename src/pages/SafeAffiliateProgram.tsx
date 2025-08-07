@@ -365,7 +365,7 @@ ${referralUrl}`,
         },
         {
           type: "Results",
-          content: `📈 Increased my domain authority by 15 points using Backlink ���'s link building platform.
+          content: `📈 Increased my domain authority by 15 points using Backlink ∞'s link building platform.
 
 The ROI is amazing!
 
@@ -1174,7 +1174,7 @@ Here's the math: ${referralUrl}`,
         // Page 6
         {
           type: "Troubleshooting",
-          content: `🔧 TROUBLESHOOTING GUIDE: Common Backlink ∞ issues and how to fix them. Save hours of frustration with these proven solutions from someone who's seen it all: ${referralUrl}`,
+          content: `��� TROUBLESHOOTING GUIDE: Common Backlink ∞ issues and how to fix them. Save hours of frustration with these proven solutions from someone who's seen it all: ${referralUrl}`,
           engagement: "Medium",
           audience: "Problem solvers"
         },
