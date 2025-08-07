@@ -352,19 +352,19 @@ const SafeAffiliateProgram: React.FC = () => {
       twitter: [
         {
           type: "Discovery",
-          content: `🚀 Just discovered Backlinkoo - game-changing SEO tool for link building! Their automated outreach is incredible. Check it out: ${referralUrl}`,
+          content: `🚀 Just discovered Backlink ∞ - game-changing SEO tool for link building! Their automated outreach is incredible. Check it out: ${referralUrl}`,
           engagement: "High",
           audience: "SEO professionals"
         },
         {
           type: "Results",
-          content: `📈 Increased my domain authority by 15 points using Backlinkoo's link building platform. The ROI is amazing! ${referralUrl} #SEO #LinkBuilding`,
+          content: `📈 Increased my domain authority by 15 points using Backlink ∞'s link building platform. The ROI is amazing! ${referralUrl} #SEO #LinkBuilding`,
           engagement: "Very High",
           audience: "Digital marketers"
         },
         {
           type: "Tips",
-          content: `💡 Pro tip: Quality backlinks > quantity. Backlinkoo helps you get high-DA links that actually move the needle. Try it: ${referralUrl}`,
+          content: `💡 Pro tip: Quality backlinks > quantity. Backlink ∞ helps you get high-DA links that actually move the needle. Try it: ${referralUrl}`,
           engagement: "Medium",
           audience: "Business owners"
         }
@@ -372,13 +372,13 @@ const SafeAffiliateProgram: React.FC = () => {
       linkedin: [
         {
           type: "Professional",
-          content: `As an SEO professional, I'm always looking for tools that deliver real results. Backlinkoo's automated link building platform has transformed how I approach SEO campaigns. The quality of links and time saved is remarkable. ${referralUrl}`,
+          content: `As an SEO professional, I'm always looking for tools that deliver real results. Backlink ∞'s automated link building platform has transformed how I approach SEO campaigns. The quality of links and time saved is remarkable. ${referralUrl}`,
           engagement: "High",
           audience: "B2B professionals"
         },
         {
           type: "Case Study",
-          content: `Case Study: How I increased organic traffic by 300% in 6 months using strategic link building. The secret? Backlinkoo's platform made it scalable and efficient. ${referralUrl}`,
+          content: `Case Study: How I increased organic traffic by 300% in 6 months using strategic link building. The secret? Backlink ∞'s platform made it scalable and efficient. ${referralUrl}`,
           engagement: "Very High",
           audience: "Marketing managers"
         }
@@ -386,13 +386,13 @@ const SafeAffiliateProgram: React.FC = () => {
       facebook: [
         {
           type: "Recommendation",
-          content: `🌟 Recommendation for small business owners: If you're struggling with SEO and getting your website noticed, Backlinkoo is a game-changer. Their platform simplifies link building and delivers real results. ${referralUrl}`,
+          content: `🌟 Recommendation for small business owners: If you're struggling with SEO and getting your website noticed, Backlink ∞ is a game-changer. Their platform simplifies link building and delivers real results. ${referralUrl}`,
           engagement: "High",
           audience: "Small business owners"
         },
         {
           type: "Success Story",
-          content: `From struggling with SEO to ranking on page 1 - here's how Backlinkoo helped transform my online presence. The automated outreach and quality links made all the difference! ${referralUrl}`,
+          content: `From struggling with SEO to ranking on page 1 - here's how Backlink ∞ helped transform my online presence. The automated outreach and quality links made all the difference! ${referralUrl}`,
           engagement: "Very High",
           audience: "Entrepreneurs"
         }
@@ -400,7 +400,7 @@ const SafeAffiliateProgram: React.FC = () => {
       instagram: [
         {
           type: "Visual Story",
-          content: `📊 Behind the scenes of my SEO growth strategy ✨ Swipe to see how Backlinkoo helped me build high-quality backlinks that actually work! Link in bio: ${referralUrl} #SEO #DigitalMarketing #Entrepreneur`,
+          content: `📊 Behind the scenes of my SEO growth strategy ✨ Swipe to see how Backlink ∞ helped me build high-quality backlinks that actually work! Link in bio: ${referralUrl} #SEO #DigitalMarketing #Entrepreneur`,
           engagement: "High",
           audience: "Visual marketers"
         }
@@ -408,7 +408,7 @@ const SafeAffiliateProgram: React.FC = () => {
       youtube: [
         {
           type: "Tutorial",
-          content: `🎥 NEW VIDEO: "How I Built 500+ High-Quality Backlinks in 30 Days" - featuring Backlinkoo's automated platform. This tool is a game-changer for SEO! ${referralUrl}`,
+          content: `🎥 NEW VIDEO: "How I Built 500+ High-Quality Backlinks in 30 Days" - featuring Backlink ∞'s automated platform. This tool is a game-changer for SEO! ${referralUrl}`,
           engagement: "Very High",
           audience: "Content creators"
         }
