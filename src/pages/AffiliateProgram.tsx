@@ -72,6 +72,11 @@ export const AffiliateProgram: React.FC = () => {
     checkAffiliateStatus();
   };
 
+  // Show setup guide if database tables are missing
+  if (databaseError) {
+    return <AffiliateSetupGuide />;
+  }
+
   // If user is not logged in, show public affiliate program landing
   if (!user) {
     return (
