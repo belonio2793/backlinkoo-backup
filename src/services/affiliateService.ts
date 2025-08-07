@@ -558,16 +558,27 @@ export class AffiliateService {
     affiliateId: string,
     updates: { earnings?: number; conversions?: number; lifetimeValue?: number }
   ): Promise<void> {
-    const updateQuery: any = { updated_at: new Date().toISOString() };
-    
+    // Get current values first
+    const { data: currentProfile } = await supabase
+      .from('affiliate_profiles')
+      .select('total_earnings, total_conversions, lifetime_value')
+      .eq('affiliate_id', affiliateId)
+      .single();
+
+    if (!currentProfile) return;
+
+    const updateQuery: any = {
+      updated_at: new Date().toISOString()
+    };
+
     if (updates.earnings) {
-      updateQuery.total_earnings = supabase.raw(`total_earnings + ${updates.earnings}`);
+      updateQuery.total_earnings = currentProfile.total_earnings + updates.earnings;
     }
     if (updates.conversions) {
-      updateQuery.total_conversions = supabase.raw(`total_conversions + ${updates.conversions}`);
+      updateQuery.total_conversions = currentProfile.total_conversions + updates.conversions;
     }
     if (updates.lifetimeValue) {
-      updateQuery.lifetime_value = supabase.raw(`lifetime_value + ${updates.lifetimeValue}`);
+      updateQuery.lifetime_value = currentProfile.lifetime_value + updates.lifetimeValue;
     }
 
     await supabase
