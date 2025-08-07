@@ -145,7 +145,7 @@ const SafeAffiliateProgram: React.FC = () => {
       }
 
       if (error && error.code === 'PGRST116') {
-        console.log('���️ No affiliate profile found (expected for new users)');
+        console.log('ℹ️ No affiliate profile found (expected for new users)');
       }
 
       setAffiliateData(data);
@@ -256,6 +256,12 @@ const SafeAffiliateProgram: React.FC = () => {
     } catch (error: any) {
       let errorMessage = 'Unknown error occurred';
 
+      console.error('Error joining affiliate program:');
+      console.error('Error type:', typeof error);
+      console.error('Error instance:', error instanceof Error);
+      console.error('Error string:', String(error));
+      console.error('Error JSON:', JSON.stringify(error, null, 2));
+
       if (error instanceof Error) {
         errorMessage = error.message;
       } else if (typeof error === 'string') {
@@ -265,12 +271,6 @@ const SafeAffiliateProgram: React.FC = () => {
       } else {
         errorMessage = 'Failed to join affiliate program. Please try again.';
       }
-
-      console.error('Error joining affiliate program:', {
-        error,
-        message: errorMessage,
-        type: typeof error
-      });
 
       if (toast) {
         toast({
@@ -543,7 +543,7 @@ const SafeAffiliateProgram: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Affiliate Dashboard</h1>
-                <p className="text-gray-600">Welcome back, {user.email?.split('@')[0]}! ����</p>
+                <p className="text-gray-600">Welcome back, {user.email?.split('@')[0]}! 👋</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
