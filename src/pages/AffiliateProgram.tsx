@@ -41,6 +41,7 @@ export const AffiliateProgram: React.FC = () => {
   const [affiliateProfile, setAffiliateProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showRegistration, setShowRegistration] = useState(false);
+  const [databaseError, setDatabaseError] = useState(false);
 
   useEffect(() => {
     if (user) {
