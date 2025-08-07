@@ -17,7 +17,7 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import BlogPreview from '@/pages/BlogPreview';
 import NotFound from '@/pages/NotFound';
 import AffiliateTest from '@/pages/AffiliateTest';
-import AffiliateHub from '@/pages/AffiliateHub';
+import WorkingAffiliate from '@/pages/WorkingAffiliate';
 import Dashboard from '@/pages/Dashboard';
 import PaymentSuccess from '@/pages/PaymentSuccess';
 import PaymentCancelled from '@/pages/PaymentCancelled';
