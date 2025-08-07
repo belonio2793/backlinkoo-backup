@@ -84,10 +84,14 @@ const SafeAffiliateProgram: React.FC = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        const errorMessage = error.message || error.details || JSON.stringify(error);
+        console.error('Supabase error joining affiliate program:', errorMessage);
+        throw new Error(`Failed to create affiliate account: ${errorMessage}`);
+      }
 
       setAffiliateData(data);
-      
+
       if (toast) {
         toast({
           title: "🎉 Welcome to the Affiliate Program!",
@@ -95,11 +99,13 @@ const SafeAffiliateProgram: React.FC = () => {
         });
       }
     } catch (error: any) {
-      console.error('Error joining affiliate program:', error);
+      const errorMessage = error.message || error.details || JSON.stringify(error);
+      console.error('Error joining affiliate program:', errorMessage);
+
       if (toast) {
         toast({
           title: "Join failed",
-          description: error.message || "Please try again",
+          description: errorMessage.length > 100 ? "Database error occurred. Please try again." : errorMessage,
           variant: "destructive"
         });
       }
