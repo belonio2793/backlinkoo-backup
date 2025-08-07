@@ -1088,7 +1088,11 @@ Timestamps in description: ${referralUrl}`,
         },
         {
           type: "Before vs After",
-          content: `📊 DRAMATIC BEFORE & AFTER: My website's transformation using Backlink ∞. Traffic charts, ranking improvements, and revenue growth - all the data revealed! ${referralUrl}`,
+          content: `📊 DRAMATIC BEFORE & AFTER: My website's transformation using Backlink ∞.
+
+Traffic charts, ranking improvements, and revenue growth - all the data revealed!
+
+${referralUrl}`,
           engagement: "Very High",
           audience: "Data lovers"
         },
@@ -1158,7 +1162,7 @@ Timestamps in description: ${referralUrl}`,
         // Page 6
         {
           type: "Troubleshooting",
-          content: `🔧 TROUBLESHOOTING GUIDE: Common Backlink ∞ issues and how to fix them. Save hours of frustration with these proven solutions from someone who's seen it all: ${referralUrl}`,
+          content: `�� TROUBLESHOOTING GUIDE: Common Backlink ∞ issues and how to fix them. Save hours of frustration with these proven solutions from someone who's seen it all: ${referralUrl}`,
           engagement: "Medium",
           audience: "Problem solvers"
         },
