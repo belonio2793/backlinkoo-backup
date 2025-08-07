@@ -21,6 +21,30 @@ const SafeAffiliateProgram: React.FC = () => {
     }
   }, [user]);
 
+  const createTableIfNotExists = async () => {
+    try {
+      console.log('🔧 Attempting to create affiliate_programs table...');
+
+      const response = await fetch('/api/create-affiliate-tables', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        console.log('✅ Table creation completed:', result);
+        return true;
+      } else {
+        console.error('❌ Table creation failed:', result);
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Table creation error:', error);
+      return false;
+    }
+  };
+
   const loadAffiliateData = async () => {
     try {
       console.log('🔄 Loading affiliate data for user:', user.id);
@@ -32,6 +56,48 @@ const SafeAffiliateProgram: React.FC = () => {
         .single();
 
       console.log('📊 Affiliate query result:', { data, error });
+
+      // Check if table doesn't exist
+      if (error && error.message.includes('does not exist')) {
+        console.log('🔧 Table does not exist, creating it...');
+
+        if (toast) {
+          toast({
+            title: "Setting up affiliate system",
+            description: "Creating database tables...",
+            variant: "default"
+          });
+        }
+
+        const tableCreated = await createTableIfNotExists();
+
+        if (tableCreated) {
+          // Retry loading data after table creation
+          const { data: retryData, error: retryError } = await supabase
+            .from('affiliate_programs')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+          if (retryError && retryError.code !== 'PGRST116') {
+            throw new Error(`Database error after table creation: ${retryError.message}`);
+          }
+
+          setAffiliateData(retryData);
+
+          if (toast) {
+            toast({
+              title: "Affiliate system ready",
+              description: "Database setup completed successfully",
+              variant: "default"
+            });
+          }
+
+          return;
+        } else {
+          throw new Error('Failed to create affiliate_programs table');
+        }
+      }
 
       if (error && error.code !== 'PGRST116') {
         const errorMessage = error.message || error.details || error.hint || JSON.stringify(error);
