@@ -217,7 +217,7 @@ export class EnhancedAffiliateService {
    * Generate affiliate tracking link
    */
   generateTrackingLink(affiliateId: string, targetUrl: string, utmParams?: any): string {
-    const url = new URL(targetUrl, window.location.origin);
+    const url = new URL(targetUrl, 'https://backlinkoo.com');
     url.searchParams.set('ref', affiliateId);
     
     if (utmParams) {
