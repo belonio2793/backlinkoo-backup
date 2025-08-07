@@ -75,7 +75,7 @@ const SafeAffiliateProgram: React.FC = () => {
 
   const createTableIfNotExists = async () => {
     // Skip table creation - this should be handled via migrations or manual setup
-    console.log('⚠️ Table creation skipped - affiliate_programs table should exist');
+    console.log('��️ Table creation skipped - affiliate_programs table should exist');
     return false;
   };
 
@@ -469,7 +469,7 @@ Game changer: ${referralUrl}`,
           type: "Challenge",
           content: `Challenge: Get 50 high-quality backlinks in 30 days.
 
-Sounds impossible? Not with Backlink ∞. I did 87.
+Sounds impossible? Not with Backlink ��. I did 87.
 
 Your turn: ${referralUrl}`,
           engagement: "High",
@@ -1125,7 +1125,7 @@ ${referralUrl}`,
         },
         {
           type: "ROI Breakdown",
-          content: `💰 ROI BREAKDOWN: Exact numbers from my Backlink ��� investment.
+          content: `💰 ROI BREAKDOWN: Exact numbers from my Backlink ∞ investment.
 
 $99/month turned into $5,000/month in additional revenue.
 
@@ -1616,7 +1616,7 @@ Here's the math: ${referralUrl}`,
                 <p className="text-gray-600 mb-4">Extended attribution window ensures maximum earnings</p>
                 <div className="space-y-2 text-sm text-blue-700">
                   <div className="flex items-center gap-2">
-                    <span>���</span>
+                    <span>📊</span>
                     <span>Cross-device tracking</span>
                   </div>
                   <div className="flex items-center gap-2">
