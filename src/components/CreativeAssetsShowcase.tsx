@@ -701,8 +701,8 @@ const CreativeAssetsShowcase: React.FC<{
               <AssetCard
                 key={asset.name}
                 asset={asset}
-                onDownload={onDownload}
-                onPreview={onPreview}
+                onDownload={handleDownload}
+                onPreview={handlePreview}
               />
             ))}
           </div>
@@ -733,8 +733,8 @@ const CreativeAssetsShowcase: React.FC<{
               <AssetCard
                 key={asset.name}
                 asset={asset}
-                onDownload={onDownload}
-                onPreview={onPreview}
+                onDownload={handleDownload}
+                onPreview={handlePreview}
               />
             ))}
           </div>
@@ -765,8 +765,8 @@ const CreativeAssetsShowcase: React.FC<{
               <AssetCard
                 key={asset.name}
                 asset={asset}
-                onDownload={onDownload}
-                onPreview={onPreview}
+                onDownload={handleDownload}
+                onPreview={handlePreview}
               />
             ))}
           </div>
