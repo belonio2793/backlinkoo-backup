@@ -210,8 +210,16 @@ export function TrialNotificationBanner({ onSignUp }: TrialNotificationBannerPro
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => dismissNotification(mostUrgentPost.id)}
+              onClick={(e) => {
+                // If shift+click, dismiss all for session
+                if (e.shiftKey) {
+                  dismissNotification(mostUrgentPost.id, true);
+                } else {
+                  dismissNotification(mostUrgentPost.id);
+                }
+              }}
               className="text-white hover:bg-white/10 p-1"
+              title="Click to dismiss this post, Shift+Click to hide banner completely"
             >
               <X className="h-4 w-4" />
             </Button>
