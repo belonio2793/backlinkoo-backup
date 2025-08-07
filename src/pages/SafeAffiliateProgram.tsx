@@ -421,14 +421,20 @@ Who else needs this? ${referralUrl}`,
         },
         {
           type: "Behind the Scenes",
-          content: `BTS: How I went from 50 to 500 referring domains in 90 days using @BacklinkInfinity's automated platform. The secret sauce inside: ${referralUrl}`,
+          content: `BTS: How I went from 50 to 500 referring domains in 90 days using @BacklinkInfinity's automated platform.
+
+The secret sauce inside: ${referralUrl}`,
           engagement: "High",
           audience: "Growth hackers"
         },
         // Page 4
         {
           type: "Quote Tweet Ready",
-          content: `"Link building is dead" - Wrong! It's evolved. Backlink ∞ proves that AI-powered outreach is the future of SEO. Here's my experience: ${referralUrl}`,
+          content: `"Link building is dead" - Wrong!
+
+It's evolved. Backlink ∞ proves that AI-powered outreach is the future of SEO.
+
+Here's my experience: ${referralUrl}`,
           engagement: "Medium",
           audience: "SEO community"
         },
@@ -727,7 +733,7 @@ ${referralUrl}`,
         // Page 1
         {
           type: "Recommendation",
-          content: `🌟 Recommendation for small business owners: If you're struggling with SEO and getting your website noticed, Backlink ∞ is a game-changer. Their platform simplifies link building and delivers real results. ${referralUrl}`,
+          content: `���� Recommendation for small business owners: If you're struggling with SEO and getting your website noticed, Backlink ∞ is a game-changer. Their platform simplifies link building and delivers real results. ${referralUrl}`,
           engagement: "High",
           audience: "Small business owners"
         },
@@ -1924,7 +1930,7 @@ ${referralUrl}`,
                             disabled={socialPage === 0}
                             className="h-7 px-2"
                           >
-                            ←
+                            ��
                           </Button>
                           <span className="text-xs text-gray-500">
                             {socialPage + 1} / {Math.ceil(getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).length / 3)}
