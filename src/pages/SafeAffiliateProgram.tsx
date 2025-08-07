@@ -138,26 +138,67 @@ const SafeAffiliateProgram: React.FC = () => {
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+        {/* Header with Login/Signup */}
+        <div className="bg-white/80 backdrop-blur-sm border-b border-blue-100 sticky top-0 z-50">
+          <div className="max-w-6xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">∞</span>
+                <span className="text-xl font-bold text-gray-900">Backlinkoo Affiliates</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => navigate('/login')}
+                  className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={() => navigate('/login')}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                >
+                  Join Program
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="max-w-6xl mx-auto px-6 py-20">
           <div className="text-center">
+            {/* Auth Required Notice */}
+            <div className="bg-orange-100 border border-orange-200 rounded-lg p-4 mb-8 max-w-2xl mx-auto">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <span className="text-orange-600">🔒</span>
+                <span className="font-semibold text-orange-800">Account Required</span>
+              </div>
+              <p className="text-orange-700 text-sm">
+                Please sign in or create an account to access the affiliate program.
+                Your user ID is linked to your affiliate tracking for accurate commission attribution.
+              </p>
+            </div>
+
             <h1 className="text-5xl font-bold text-gray-900 mb-6">
               Earn <span className="text-blue-600">$10,000+</span> Monthly
               <br />
               with Backlinkoo Affiliate Program
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Join the most lucrative affiliate program in the SEO industry. Earn up to 35% 
+              Join the most lucrative affiliate program in the SEO industry. Earn up to 35%
               recurring commissions promoting the world's leading backlink building platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-              <button 
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
+              <button
+                className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
                 onClick={() => navigate('/login')}
               >
-                Join Now - Free →
+                🚀 Create Account & Join
               </button>
-              <button className="border border-blue-600 text-blue-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-colors">
-                ▶ Watch Demo
+              <button
+                className="border-2 border-blue-600 text-blue-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-colors"
+                onClick={() => navigate('/login')}
+              >
+                📱 Sign In to Dashboard
               </button>
             </div>
 
