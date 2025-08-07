@@ -274,20 +274,83 @@ const CreativeAssetsShowcase: React.FC<{
       size: '1200x630',
       format: 'PNG',
       description: 'High-conversion Facebook ad',
-      category: 'social', 
+      category: 'social',
       preview: (
-        <div className="relative bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl overflow-hidden aspect-[1200/630] shadow-2xl">
-          <div className="relative h-full flex items-center justify-between p-8">
-            <div className="flex-1">
-              <h3 className="text-white font-black text-4xl mb-4 drop-shadow-xl">Backlink ∞</h3>
-              <p className="text-blue-100 text-2xl mb-6 font-bold">The Smart Way to Build<br/>High-Quality Backlinks</p>
-              <div className="text-cyan-300 text-xl font-bold mb-4">🎯 Automated Outreach • ⚡ Instant Results • 📊 Free Trial</div>
-              <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-8 py-4 rounded-full font-black text-xl shadow-2xl inline-block">
-                Start Your Free Trial Today
+        <div className="relative bg-gradient-to-br from-blue-900 via-indigo-800 to-purple-900 rounded-2xl overflow-hidden aspect-[1200/630] shadow-2xl">
+          {/* Animated background elements */}
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-4 left-4 w-20 h-20 bg-yellow-400 rounded-full blur-xl animate-pulse"></div>
+            <div className="absolute bottom-6 right-6 w-16 h-16 bg-pink-400 rounded-full blur-lg animate-ping"></div>
+            <div className="absolute top-1/2 left-1/3 w-12 h-12 bg-cyan-400 rounded-full blur-md animate-bounce"></div>
+          </div>
+
+          {/* Main content */}
+          <div className="relative h-full flex items-center p-10">
+            <div className="flex-1 pr-8">
+              {/* Success story header */}
+              <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm rounded-xl p-4 mb-6 border border-green-400/30">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">✓</span>
+                  </div>
+                  <span className="text-green-300 font-bold text-lg">SUCCESS STORY</span>
+                </div>
+                <p className="text-white text-xl font-bold">"I went from 0 to 50,000 monthly organic visitors in 90 days!"</p>
+              </div>
+
+              {/* Main headline */}
+              <h3 className="text-white font-black text-5xl mb-4 drop-shadow-xl leading-tight">
+                Backlink <span className="text-yellow-400">∞</span>
+              </h3>
+              <p className="text-blue-100 text-2xl mb-6 font-bold leading-relaxed">
+                The AI That Builds High-DA Backlinks<br/>
+                <span className="text-yellow-300">While You Sleep</span>
+              </p>
+
+              {/* Benefits */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="text-center">
+                  <div className="text-yellow-400 text-2xl font-black">500+</div>
+                  <div className="text-cyan-300 text-sm font-bold">Backlinks/Month</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-yellow-400 text-2xl font-black">DA 70+</div>
+                  <div className="text-cyan-300 text-sm font-bold">High Authority</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-yellow-400 text-2xl font-black">24h</div>
+                  <div className="text-cyan-300 text-sm font-bold">First Results</div>
+                </div>
+              </div>
+
+              {/* CTA */}
+              <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white px-10 py-5 rounded-2xl font-black text-2xl shadow-2xl inline-block transform hover:scale-105 transition-all cursor-pointer">
+                🚀 Start Free Trial - Get 100 Backlinks
               </div>
             </div>
-            <div className="w-32 h-32 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
-              <span className="text-5xl font-black text-gray-900">∞</span>
+
+            {/* Right side visual */}
+            <div className="flex flex-col items-center">
+              <div className="w-40 h-40 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse mb-6 relative">
+                <span className="text-6xl font-black text-gray-900">∞</span>
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-black">AI</span>
+                </div>
+              </div>
+
+              {/* Growth arrow */}
+              <div className="flex flex-col items-center">
+                <div className="text-green-400 text-4xl font-black animate-bounce">↗</div>
+                <div className="text-green-300 text-lg font-bold">+500% Growth</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom social proof */}
+          <div className="absolute bottom-4 left-10 right-10 bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-white font-bold">🔥 2,847 businesses grew 300%+ this month</span>
+              <span className="text-yellow-300 font-bold">Limited Time: 50% OFF</span>
             </div>
           </div>
         </div>
@@ -297,17 +360,85 @@ const CreativeAssetsShowcase: React.FC<{
       name: 'Twitter Header',
       size: '1500x500',
       format: 'PNG',
-      description: 'Professional Twitter banner', 
+      description: 'Professional Twitter banner',
       category: 'social',
       preview: (
-        <div className="relative bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl overflow-hidden aspect-[3/1] shadow-2xl">
-          <div className="relative h-full flex items-center justify-center text-center p-8">
-            <div>
-              <h3 className="text-white font-black text-4xl mb-3 drop-shadow-xl">Backlink ∞ Affiliate</h3>
-              <p className="text-blue-100 text-xl font-bold mb-4">Automated Link Building Platform • Earn 20% Commission</p>
-              <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-8 py-3 rounded-full font-black text-xl shadow-xl inline-block">
-                Join Now & Start Earning
+        <div className="relative bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 rounded-2xl overflow-hidden aspect-[3/1] shadow-2xl">
+          {/* Grid pattern overlay */}
+          <div className="absolute inset-0 opacity-10" style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
+            backgroundSize: '40px 40px'
+          }}></div>
+
+          {/* Floating elements */}
+          <div className="absolute top-8 right-20 w-4 h-4 bg-yellow-400 rounded-full animate-ping"></div>
+          <div className="absolute bottom-12 left-32 w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></div>
+          <div className="absolute top-16 left-1/3 w-2 h-2 bg-pink-400 rounded-full animate-bounce"></div>
+
+          {/* Main content */}
+          <div className="relative h-full flex items-center justify-between p-12">
+            {/* Left side */}
+            <div className="flex items-center gap-8">
+              <div className="w-24 h-24 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl">
+                <span className="text-4xl font-black text-gray-900">∞</span>
               </div>
+
+              <div>
+                <h3 className="text-white font-black text-4xl mb-2 drop-shadow-xl">
+                  Backlink <span className="text-yellow-400">∞</span> Affiliate
+                </h3>
+                <p className="text-blue-200 text-xl font-bold mb-3">
+                  AI-Powered Link Building • Earn Premium Commissions
+                </p>
+                <div className="flex items-center gap-4">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-bold text-sm">
+                    💰 Up to 35% Commission
+                  </div>
+                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full font-bold text-sm">
+                    🚀 $10K+ Monthly Potential
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right side metrics */}
+            <div className="text-right">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-xl">
+                <div className="text-center mb-4">
+                  <div className="text-yellow-400 text-3xl font-black">JOIN THE</div>
+                  <div className="text-white text-2xl font-bold">SUCCESS NETWORK</div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <div className="text-cyan-400 text-2xl font-black">5,847</div>
+                    <div className="text-white text-xs font-bold">Active Affiliates</div>
+                  </div>
+                  <div>
+                    <div className="text-green-400 text-2xl font-black">$2.3M</div>
+                    <div className="text-white text-xs font-bold">Paid Out</div>
+                  </div>
+                  <div>
+                    <div className="text-pink-400 text-2xl font-black">89%</div>
+                    <div className="text-white text-xs font-bold">Success Rate</div>
+                  </div>
+                  <div>
+                    <div className="text-orange-400 text-2xl font-black">24h</div>
+                    <div className="text-white text-xs font-bold">Fast Approval</div>
+                  </div>
+                </div>
+
+                <div className="mt-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-6 py-3 rounded-full font-black text-lg text-center shadow-xl">
+                  START EARNING TODAY
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Top notification bar */}
+          <div className="absolute top-4 left-12 right-12 bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm rounded-xl p-2 border border-green-400/30">
+            <div className="text-center">
+              <span className="text-green-300 font-bold text-sm">🔥 TRENDING: New affiliate earned $15,247 in their first month!</span>
             </div>
           </div>
         </div>
