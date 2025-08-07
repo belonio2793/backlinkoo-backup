@@ -3,7 +3,6 @@ import { Monitor, Share2, FileText, Download, Eye, Sparkles, Crown, Star } from 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { generateAsset } from '@/utils/assetGenerator';
-import BrandGuidelinesPDF from './BrandGuidelinesPDF';
 
 interface AssetCardProps {
   asset: {
