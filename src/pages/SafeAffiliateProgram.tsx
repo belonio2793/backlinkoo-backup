@@ -1507,9 +1507,9 @@ Here's the math: ${referralUrl}`,
         {
           label: "Closing",
           content: `<p>No pressure at all - just wanted to share something that's been working well for me.</p>
-
+<br>
 <p>Either way, keep up the excellent work on your site!</p>
-
+<br>
 <p>Best regards,<br>[Your Name]</p>`,
           isHtml: true
         }
