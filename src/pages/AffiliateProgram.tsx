@@ -393,7 +393,7 @@ export const AffiliateProgram: React.FC = () => {
   if (showRegistration) {
     return (
       <div className="min-h-screen bg-background">
-        <AffiliateRegistration
+        <EnhancedAffiliateRegistration
           userId={user.id}
           userEmail={user.email}
           onRegistrationComplete={handleRegistrationComplete}
