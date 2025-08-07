@@ -86,7 +86,10 @@ export const RotatingNotificationBanner = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setIsVisible(false)}
+            onClick={() => {
+              setIsVisible(false);
+              sessionStorage.setItem('rotating_banner_dismissed', 'true');
+            }}
             className="ml-2 sm:ml-4 text-white hover:text-gray-200 hover:bg-white/10 flex-shrink-0 h-8 w-8 p-0"
           >
             <X className="h-3 w-3 sm:h-4 sm:w-4" />
