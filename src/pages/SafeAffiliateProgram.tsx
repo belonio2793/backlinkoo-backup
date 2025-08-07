@@ -498,20 +498,30 @@ Get ahead with Backlink ∞: ${referralUrl}`,
         },
         {
           type: "Question Hook",
-          content: `What if I told you that you could automate 90% of your link building while getting better results? Meet Backlink ∞: ${referralUrl}`,
+          content: `What if I told you that you could automate 90% of your link building while getting better results?
+
+Meet Backlink ∞: ${referralUrl}`,
           engagement: "High",
           audience: "Curious minds"
         },
         // Page 7
         {
           type: "Resource",
-          content: `📚 Resource: The only link building tool you'll ever need. Backlink ∞ handles prospecting, outreach, and follow-ups automatically: ${referralUrl}`,
+          content: `📚 Resource: The only link building tool you'll ever need.
+
+Backlink ∞ handles prospecting, outreach, and follow-ups automatically:
+
+${referralUrl}`,
           engagement: "Medium",
           audience: "Resource collectors"
         },
         {
           type: "Industry Insight",
-          content: `SEO industry insight: Manual link building is becoming obsolete. Smart agencies are switching to Backlink ∞ for scalable results: ${referralUrl}`,
+          content: `SEO industry insight: Manual link building is becoming obsolete.
+
+Smart agencies are switching to Backlink ∞ for scalable results:
+
+${referralUrl}`,
           engagement: "High",
           audience: "Industry watchers"
         },
