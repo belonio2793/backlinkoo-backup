@@ -10,6 +10,7 @@ import ComprehensiveAffiliateDashboard from '../components/affiliate/Comprehensi
 import EnhancedAffiliateRegistration from '../components/affiliate/EnhancedAffiliateRegistration';
 import AffiliateAssetLibrary from '../components/affiliate/AffiliateAssetLibrary';
 import AffiliateSetupGuide from '../components/AffiliateSetupGuide';
+import { Footer } from '../components/Footer';
 import {
   DollarSign,
   Users,
@@ -489,6 +490,7 @@ export const AffiliateProgram: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
+      <Footer />
     </div>
   );
 };

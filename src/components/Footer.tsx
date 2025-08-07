@@ -147,12 +147,18 @@ export const Footer = () => {
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Company</h3>
             <div className="space-y-2">
               <button
-                onClick={() => handleSmartNavigation(FOOTER_NAV_CONFIGS.ADMIN, "Admin Dashboard")}
+                onClick={() => navigate('/admin')}
                 className="block text-gray-600 hover:text-gray-900 text-sm text-left w-full hover:cursor-pointer transition-colors"
-                title={!user ? "Sign in to access Admin Dashboard" : "Go to Admin Dashboard"}
+                title="Go to Admin Dashboard"
               >
                 Admin Dashboard
               </button>
+              <Link
+                to="/affiliate"
+                className="block text-gray-600 hover:text-gray-900 text-sm"
+              >
+                Affiliate Program
+              </Link>
               <a
                 href="mailto:support@backlinkoo.com"
                 className="block text-gray-600 hover:text-gray-900 text-sm"
