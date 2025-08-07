@@ -1322,19 +1322,19 @@ Here's the math: ${referralUrl}`,
         {
           label: "Body",
           content: `<p>I've been using <strong>Backlink ∞</strong> for the past few months, and the results speak for themselves:</p>
-
+<br>
 <ul style="margin: 20px 0; padding-left: 20px;">
-  <li style="margin-bottom: 8px;"><strong>300% increase</strong> in high-quality backlinks</li>
-  <li style="margin-bottom: 8px;"><strong>50% reduction</strong> in outreach time</li>
-  <li style="margin-bottom: 8px;"><strong>Improved domain authority</strong> across all projects</li>
+  <li style="margin-bottom: 12px;"><strong>300% increase</strong> in high-quality backlinks</li>
+  <li style="margin-bottom: 12px;"><strong>50% reduction</strong> in outreach time</li>
+  <li style="margin-bottom: 12px;"><strong>Improved domain authority</strong> across all projects</li>
 </ul>
-
+<br>
 <p>What sets Backlink ∞ apart is their automated outreach system and focus on high-DA websites.</p>
-
+<br>
 <p>The platform has streamlined my entire link building process.</p>
-
+<br>
 <p>You can check it out here: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Backlink ∞ Platform</a></p>
-
+<br>
 <p>They're currently offering a <strong>free trial</strong>, so there's no risk in testing it out.</p>`,
           isHtml: true
         },
