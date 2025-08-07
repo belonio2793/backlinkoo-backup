@@ -178,7 +178,7 @@ const SafeAffiliateProgram: React.FC = () => {
       }
 
       setAffiliateData(data);
-      console.log('�� Affiliate data loaded successfully:', data);
+      console.log('✅ Affiliate data loaded successfully:', data);
     } catch (error: any) {
       console.error('Failed to load affiliate data:', error);
 
@@ -625,7 +625,7 @@ ${referralUrl}`,
         // Page 4
         {
           type: "Data-Driven Results",
-          content: `Data speaks louder than opinions. After 6 months with Backlink ∞:\n\n📈 Domain Authority: +23 points\n📈 Referring domains: +287\n📈 Organic traffic: +156%\n📈 Lead quality: Significantly improved\n\nROI has exceeded all expectations. ${referralUrl}`,
+          content: `Data speaks louder than opinions. After 6 months with Backlink ∞:\n\n📈 Domain Authority: +23 points\n�� Referring domains: +287\n📈 Organic traffic: +156%\n📈 Lead quality: Significantly improved\n\nROI has exceeded all expectations. ${referralUrl}`,
           engagement: "Very High",
           audience: "Data analysts"
         },
@@ -2125,7 +2125,7 @@ Here's the math: ${referralUrl}`,
                   {/* Platform-Specific Tips */}
                   <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
                     <h4 className="font-semibold text-blue-900 mb-2">
-                      💡 {selectedSocialPlatform.charAt(0).toUpperCase() + selectedSocialPlatform.slice(1)} Best Practices
+                      ���� {selectedSocialPlatform.charAt(0).toUpperCase() + selectedSocialPlatform.slice(1)} Best Practices
                     </h4>
                     <div className="text-sm text-blue-800 space-y-1">
                       {getPlatformTips(selectedSocialPlatform).map((tip, index) => (
