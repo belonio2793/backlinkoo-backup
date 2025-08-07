@@ -23,19 +23,34 @@ const SafeAffiliateProgram: React.FC = () => {
 
   const loadAffiliateData = async () => {
     try {
+      console.log('🔄 Loading affiliate data for user:', user.id);
+
       const { data, error } = await supabase
         .from('affiliate_programs')
         .select('*')
         .eq('user_id', user.id)
         .single();
 
+      console.log('📊 Affiliate query result:', { data, error });
+
       if (error && error.code !== 'PGRST116') {
-        const errorMessage = error.message || error.details || JSON.stringify(error);
-        console.error('Error loading affiliate data:', errorMessage);
+        const errorMessage = error.message || error.details || error.hint || JSON.stringify(error);
+        console.error('❌ Error loading affiliate data:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          fullError: error
+        });
         throw new Error(`Database error: ${errorMessage}`);
       }
 
+      if (error && error.code === 'PGRST116') {
+        console.log('ℹ️ No affiliate profile found (expected for new users)');
+      }
+
       setAffiliateData(data);
+      console.log('✅ Affiliate data loaded successfully:', data);
     } catch (error: any) {
       const errorMessage = error.message || error.details || JSON.stringify(error);
       console.error('Failed to load affiliate data:', errorMessage);
