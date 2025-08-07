@@ -1858,7 +1858,7 @@ ${referralUrl}`,
                                 <Copy className="h-3 w-3" />
                               </Button>
                             </div>
-                            <p className="text-sm text-gray-700 mb-3">{template.content}</p>
+                            <p className="text-sm text-gray-700 mb-3 whitespace-pre-line">{template.content}</p>
                             <div className="flex items-center gap-2 text-xs text-gray-500">
                               <Eye className="h-3 w-3" />
                               <span>Est. {template.engagement} engagement</span>
