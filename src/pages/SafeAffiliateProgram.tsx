@@ -566,7 +566,120 @@ const SafeAffiliateProgram: React.FC = () => {
           engagement: "High",
           audience: "Community members"
         },
-        // Continue with Facebook templates...
+        // Page 2
+        {
+          type: "Behind the Scenes",
+          content: `Behind the scenes of my business growth: I've been quietly testing different SEO strategies, and Backlink ∞ has been the secret weapon that's finally moving the needle. Here's what happened... ${referralUrl}`,
+          engagement: "Very High",
+          audience: "Business owners"
+        },
+        {
+          type: "Problem Solver",
+          content: `Struggling with getting your website noticed? 🤔 You're not alone! I was in the same boat until I found Backlink ∞. This platform has completely changed my approach to SEO and the results speak for themselves. ${referralUrl}`,
+          engagement: "High",
+          audience: "Problem seekers"
+        },
+        {
+          type: "Group Share",
+          content: `Friends! I had to share this with you all. After months of trying different SEO strategies, I finally found something that works. Backlink ∞ has helped me increase my website traffic by 300% in just 2 months! ${referralUrl}`,
+          engagement: "High",
+          audience: "Facebook groups"
+        },
+        // Page 3
+        {
+          type: "Educational",
+          content: `Did you know that 91% of web pages never get organic traffic from Google? The main reason? Poor backlink profile. That's exactly why I started using Backlink ∞ to build high-quality links systematically. ${referralUrl}`,
+          engagement: "Medium",
+          audience: "Learners"
+        },
+        {
+          type: "Before and After",
+          content: `January: 500 monthly visitors\nJune: 5,000 monthly visitors\n\nWhat changed? I started using Backlink ∞ for strategic link building. The automated outreach saved me hours while delivering better results than manual efforts. ${referralUrl}`,
+          engagement: "Very High",
+          audience: "Results focused"
+        },
+        {
+          type: "Local Business",
+          content: `Local business owners - listen up! 📢 Getting found online is crucial for your success. Backlink ∞ helped my local service business rank #1 for our main keywords. Now we're booked solid! ${referralUrl}`,
+          engagement: "High",
+          audience: "Local businesses"
+        },
+        // Page 4
+        {
+          type: "Honest Review",
+          content: `Honest review time: I've tried countless SEO tools over the years, and most over-promise and under-deliver. Backlink ∞ is different. It actually does what it claims - builds quality backlinks efficiently. Worth every penny. ${referralUrl}`,
+          engagement: "Very High",
+          audience: "Skeptical buyers"
+        },
+        {
+          type: "Time Saver",
+          content: `As a busy entrepreneur, time is my most valuable asset. Backlink ∞ has given me back 15+ hours per week that I used to spend on manual outreach. Now I can focus on growing my business instead! ${referralUrl}`,
+          engagement: "High",
+          audience: "Busy professionals"
+        },
+        {
+          type: "ROI Focused",
+          content: `Best investment I've made for my business this year: Backlink ∞. Cost: $99/month. ROI: 500%+ from increased organic traffic and leads. Sometimes the numbers don't lie! ${referralUrl}`,
+          engagement: "High",
+          audience: "ROI conscious"
+        },
+        // Page 5
+        {
+          type: "Milestone",
+          content: `🎉 Celebrating a major milestone! Thanks to strategic link building with Backlink ∞, we just hit 100,000 monthly organic visitors. A year ago, we were at 10,000. Dreams do come true with the right tools! ${referralUrl}`,
+          engagement: "Very High",
+          audience: "Celebrators"
+        },
+        {
+          type: "Comparison",
+          content: `I used to pay $2,000/month for a link building agency. They delivered 5-10 links per month. Backlink ∞ delivers 20-30 higher quality links for $99/month. The choice is obvious! ${referralUrl}`,
+          engagement: "High",
+          audience: "Budget conscious"
+        },
+        {
+          type: "Urgency",
+          content: `If you're serious about growing your online presence, don't wait another day. Every day you delay is potential traffic and revenue lost. I wish I had found Backlink ∞ sooner! ${referralUrl}`,
+          engagement: "Medium",
+          audience: "Procrastinators"
+        },
+        // Page 6
+        {
+          type: "Testimonial Style",
+          content: `"I was skeptical about automated link building until I tried Backlink ∞. Three months later, my domain authority increased by 20 points and organic traffic doubled. This tool is the real deal!" - Happy user ${referralUrl}`,
+          engagement: "High",
+          audience: "Social proof seekers"
+        },
+        {
+          type: "Industry Insight",
+          content: `The SEO industry is evolving fast. Manual link building is becoming obsolete. Smart business owners are switching to AI-powered solutions like Backlink ∞ to stay competitive. Don't get left behind! ${referralUrl}`,
+          engagement: "Medium",
+          audience: "Industry watchers"
+        },
+        {
+          type: "Personal Journey",
+          content: `My entrepreneurship journey taught me that success comes from finding the right tools and leveraging them effectively. Backlink ∞ has been that game-changing tool for my SEO strategy. What's yours? ${referralUrl}`,
+          engagement: "High",
+          audience: "Personal brand"
+        },
+        // Page 7
+        {
+          type: "Question Hook",
+          content: `Quick question: What if you could build high-quality backlinks while you sleep? Sounds too good to be true, right? That's exactly what Backlink ∞ does with its automated outreach system. Mind blown! 🤯 ${referralUrl}`,
+          engagement: "High",
+          audience: "Curious minds"
+        },
+        {
+          type: "Challenge",
+          content: `I challenge you to find a more efficient way to build quality backlinks than Backlink ∞. I've been searching for 3 years and nothing comes close. Prove me wrong! (Spoiler: you can't) ${referralUrl}`,
+          engagement: "Medium",
+          audience: "Competitive types"
+        },
+        {
+          type: "Future Prediction",
+          content: `Prediction: In 2024, businesses using AI for link building will dominate search results. Those stuck with manual methods will wonder what happened. Get ahead of the curve with Backlink ∞! ${referralUrl}`,
+          engagement: "Medium",
+          audience: "Forward thinkers"
+        }
       ],
       instagram: [
         // Page 1
