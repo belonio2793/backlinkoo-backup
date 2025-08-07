@@ -75,7 +75,7 @@ const SafeAffiliateProgram: React.FC = () => {
 
   const createTableIfNotExists = async () => {
     // Skip table creation - this should be handled via migrations or manual setup
-    console.log('��️ Table creation skipped - affiliate_programs table should exist');
+    console.log('⚠️ Table creation skipped - affiliate_programs table should exist');
     return false;
   };
 
@@ -469,7 +469,7 @@ Game changer: ${referralUrl}`,
           type: "Challenge",
           content: `Challenge: Get 50 high-quality backlinks in 30 days.
 
-Sounds impossible? Not with Backlink ��. I did 87.
+Sounds impossible? Not with Backlink ∞. I did 87.
 
 Your turn: ${referralUrl}`,
           engagement: "High",
@@ -1174,7 +1174,7 @@ Here's the math: ${referralUrl}`,
         // Page 6
         {
           type: "Troubleshooting",
-          content: `��� TROUBLESHOOTING GUIDE: Common Backlink ∞ issues and how to fix them. Save hours of frustration with these proven solutions from someone who's seen it all: ${referralUrl}`,
+          content: `🔧 TROUBLESHOOTING GUIDE: Common Backlink ∞ issues and how to fix them. Save hours of frustration with these proven solutions from someone who's seen it all: ${referralUrl}`,
           engagement: "Medium",
           audience: "Problem solvers"
         },
