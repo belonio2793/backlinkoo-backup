@@ -1042,7 +1042,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Final Push",
-          content: `🎯 FINAL CALL 🎯\n\nIf you're serious about SEO success:\n\n⏰ Don't wait another day\n⏰ Every moment counts\n⏰ Your competitors aren't waiting\n⏰ Start building links NOW\n\nBacklink ∞ = Your secret weapon! 🚀\n\nLink in bio: ${referralUrl}\n\n#FinalCall #TakeAction`,
+          content: `🎯 FINAL CALL 🎯\n\nIf you're serious about SEO success:\n\n⏰ Don't wait another day\n⏰ Every moment counts\n��� Your competitors aren't waiting\n⏰ Start building links NOW\n\nBacklink ∞ = Your secret weapon! 🚀\n\nLink in bio: ${referralUrl}\n\n#FinalCall #TakeAction`,
           engagement: "High",
           audience: "Action takers"
         }
@@ -1447,15 +1447,17 @@ Here's the math: ${referralUrl}`,
 
 <p>I ask because I've been using <strong>Backlink ∞</strong> and the results have been incredible:</p>
 
-<ul>
-  <li><strong>250% increase</strong> in quality backlinks</li>
-  <li><strong>Automated outreach</strong> that saves 15+ hours/week</li>
-  <li><strong>Higher success rates</strong> than manual methods</li>
+<ul style="margin: 20px 0; padding-left: 20px;">
+  <li style="margin-bottom: 8px;"><strong>250% increase</strong> in quality backlinks</li>
+  <li style="margin-bottom: 8px;"><strong>Automated outreach</strong> that saves 15+ hours/week</li>
+  <li style="margin-bottom: 8px;"><strong>Higher success rates</strong> than manual methods</li>
 </ul>
 
 <p>The platform focuses on high-authority websites and uses AI to personalize outreach at scale.</p>
 
-<p>Given your expertise in [Industry], I thought this might be valuable for your SEO strategy: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none;">Check out Backlink ∞</a></p>`,
+<p>Given your expertise in [Industry], I thought this might be valuable for your SEO strategy:</p>
+
+<p><a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Check out Backlink ∞</a></p>`,
           isHtml: true
         },
         {
