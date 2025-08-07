@@ -90,13 +90,40 @@ const SafeAffiliateProgram: React.FC = () => {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('affiliate_programs')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      let data, error;
 
-      console.log('📊 Affiliate query result:', { data, error });
+      // Add retry mechanism for database queries
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const result = await supabase
+            .from('affiliate_programs')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+          data = result.data;
+          error = result.error;
+
+          console.log(`📊 Affiliate query result (attempt ${attempt}):`, { data, error });
+
+          // Break if successful or if it's a logical error (not a network error)
+          if (!error || error.code === 'PGRST116' || error.message.includes('does not exist')) {
+            break;
+          }
+
+          // If it's a potential network error, wait before retrying
+          if (attempt < 3) {
+            console.log(`⏳ Retrying query in ${attempt * 1000}ms...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+          }
+        } catch (networkError) {
+          console.error(`Network error on attempt ${attempt}:`, networkError);
+          if (attempt === 3) {
+            throw new Error('Database connection failed after 3 attempts. Please check your internet connection and try again.');
+          }
+          await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        }
+      }
 
       // Check if table doesn't exist
       if (error && error.message.includes('does not exist')) {
@@ -185,12 +212,24 @@ const SafeAffiliateProgram: React.FC = () => {
 
       // Create a safe error message for display
       let displayMessage = 'Failed to load affiliate data';
-      if (error instanceof Error) {
-        displayMessage = error.message;
-      } else if (typeof error === 'string') {
-        displayMessage = error;
-      } else if (error?.message) {
-        displayMessage = String(error.message);
+
+      try {
+        if (error instanceof Error) {
+          displayMessage = error.message;
+        } else if (typeof error === 'string') {
+          displayMessage = error;
+        } else if (error?.message) {
+          displayMessage = String(error.message);
+        } else if (error?.details) {
+          displayMessage = String(error.details);
+        } else if (error?.hint) {
+          displayMessage = String(error.hint);
+        } else {
+          // Safely stringify the error object
+          displayMessage = 'Database connection error. Please refresh the page.';
+        }
+      } catch (stringifyError) {
+        displayMessage = 'Database connection error. Please refresh the page.';
       }
 
       if (toast) {
@@ -221,7 +260,7 @@ const SafeAffiliateProgram: React.FC = () => {
 
       const affiliateCode = generateAffiliateCode();
       const customId = Math.random().toString(36).substr(2, 8).toUpperCase();
-      const referralUrl = `${window.location.origin}?ref=${affiliateCode}`;
+      const referralUrl = `https://backlinkoo.com?ref=${affiliateCode}`;
 
       console.log('📝 Affiliate data to insert:', {
         user_id: user.id,
@@ -295,19 +334,24 @@ const SafeAffiliateProgram: React.FC = () => {
     } catch (error: any) {
       let errorMessage = 'Unknown error occurred';
 
-      console.error('Error joining affiliate program:');
-      console.error('Error type:', typeof error);
-      console.error('Error instance:', error instanceof Error);
-      console.error('Error string:', String(error));
-      console.error('Error JSON:', JSON.stringify(error, null, 2));
+      console.error('Error joining affiliate program:', error);
 
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      } else {
+      try {
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else if (error?.message) {
+          errorMessage = String(error.message);
+        } else if (error?.details) {
+          errorMessage = String(error.details);
+        } else if (error?.hint) {
+          errorMessage = String(error.hint);
+        } else {
+          errorMessage = 'Failed to join affiliate program. Please try again.';
+        }
+      } catch (stringifyError) {
+        console.error('Error stringifying error object:', stringifyError);
         errorMessage = 'Failed to join affiliate program. Please try again.';
       }
 
@@ -1168,7 +1212,7 @@ Here's the math: ${referralUrl}`,
         },
         {
           type: "Behind the Scenes",
-          content: `🎬 BEHIND THE SCENES: My entire link building operation revealed. See exactly how I manage multiple Backlink ∞ campaigns and scale to 6-figure results: ${referralUrl}`,
+          content: `�� BEHIND THE SCENES: My entire link building operation revealed. See exactly how I manage multiple Backlink ∞ campaigns and scale to 6-figure results: ${referralUrl}`,
           engagement: "Very High",
           audience: "BTS enthusiasts"
         },
@@ -1905,12 +1949,12 @@ Here's the math: ${referralUrl}`,
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={`${window.location.origin}/pricing?ref=${affiliateData.affiliate_code}`}
+                  value={`https://backlinkoo.com/pricing?ref=${affiliateData.affiliate_code}`}
                   readOnly
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
                 />
                 <button
-                  onClick={() => copyToClipboard(`${window.location.origin}/pricing?ref=${affiliateData.affiliate_code}`)}
+                  onClick={() => copyToClipboard(`https://backlinkoo.com/pricing?ref=${affiliateData.affiliate_code}`)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
                   📋 Copy
@@ -1926,12 +1970,12 @@ Here's the math: ${referralUrl}`,
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={`${window.location.origin}/trial?ref=${affiliateData.affiliate_code}`}
+                  value={`https://backlinkoo.com/trial?ref=${affiliateData.affiliate_code}`}
                   readOnly
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
                 />
                 <button
-                  onClick={() => copyToClipboard(`${window.location.origin}/trial?ref=${affiliateData.affiliate_code}`)}
+                  onClick={() => copyToClipboard(`https://backlinkoo.com/trial?ref=${affiliateData.affiliate_code}`)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
                   📋 Copy

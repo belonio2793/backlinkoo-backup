@@ -138,7 +138,7 @@ export class AffiliateService {
    * Generate affiliate tracking link
    */
   generateAffiliateLink(affiliateId: string, targetUrl: string = '', utmParams?: Record<string, string>) {
-    const baseUrl = window.location.origin;
+    const baseUrl = 'https://backlinkoo.com';
     const url = new URL(targetUrl || baseUrl);
     
     // Add affiliate tracking parameter

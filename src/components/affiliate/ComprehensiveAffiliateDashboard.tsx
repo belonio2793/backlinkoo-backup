@@ -91,7 +91,7 @@ export const ComprehensiveAffiliateDashboard: React.FC<DashboardProps> = ({ user
     }
   };
 
-  const generateReferralLink = (baseUrl: string = window.location.origin) => {
+  const generateReferralLink = (baseUrl: string = 'https://backlinkoo.com') => {
     if (!affiliateProfile) return '';
     return compatibilityAffiliateService.generateTrackingLink(affiliateProfile.affiliate_code, baseUrl);
   };
