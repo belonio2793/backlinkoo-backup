@@ -872,7 +872,7 @@ Here's what happened... ${referralUrl}`,
         },
         {
           type: "Group Share",
-          content: `Friends! I had to share this with you all. After months of trying different SEO strategies, I finally found something that works. Backlink �� has helped me increase my website traffic by 300% in just 2 months! ${referralUrl}`,
+          content: `Friends! I had to share this with you all. After months of trying different SEO strategies, I finally found something that works. Backlink ∞ has helped me increase my website traffic by 300% in just 2 months! ${referralUrl}`,
           engagement: "High",
           audience: "Facebook groups"
         },
@@ -2307,7 +2307,7 @@ Here's the math: ${referralUrl}`,
                   <div>
                     <div className="bg-white border border-gray-200 rounded-lg p-6">
                       <div className="space-y-4">
-                        {getEmailTemplate(selectedEmailTemplate, affiliateData.referral_url).map((section, index) => (
+                        {getEmailTemplate(selectedEmailTemplate, cleanUrl(affiliateData.referral_url)).map((section, index) => (
                           <div key={index}>
                             <Label className="text-xs text-gray-500 uppercase tracking-wide">
                               {section.label}
