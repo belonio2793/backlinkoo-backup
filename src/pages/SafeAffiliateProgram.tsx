@@ -1707,6 +1707,41 @@ const SafeAffiliateProgram: React.FC = () => {
                           </div>
                         ))}
                       </div>
+
+                      {/* Bottom Pagination Controls */}
+                      <div className="flex items-center justify-center gap-3 mt-4 pt-3 border-t border-gray-200">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSocialPage(Math.max(0, socialPage - 1))}
+                          disabled={socialPage === 0}
+                          className="flex items-center gap-1"
+                        >
+                          ← Previous
+                        </Button>
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: Math.ceil(getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).length / 3) }, (_, index) => (
+                            <Button
+                              key={index}
+                              size="sm"
+                              variant={socialPage === index ? "default" : "ghost"}
+                              onClick={() => setSocialPage(index)}
+                              className="w-8 h-8 p-0"
+                            >
+                              {index + 1}
+                            </Button>
+                          ))}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSocialPage(socialPage + 1)}
+                          disabled={(socialPage + 1) * 3 >= getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).length}
+                          className="flex items-center gap-1"
+                        >
+                          Next →
+                        </Button>
+                      </div>
                     </div>
 
                     <div>
