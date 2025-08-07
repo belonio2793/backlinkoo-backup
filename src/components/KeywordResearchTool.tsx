@@ -413,7 +413,7 @@ export const KeywordResearchTool = () => {
     { code: "TD", name: "Chad", flag: "🇹🇩" },
     { code: "TF", name: "French Southern Territories", flag: "🇹🇫" },
     { code: "TG", name: "Togo", flag: "🇹🇬" },
-    { code: "TH", name: "Thailand", flag: "🇹���" },
+    { code: "TH", name: "Thailand", flag: "🇹🇭" },
     { code: "TJ", name: "Tajikistan", flag: "🇹🇯" },
     { code: "TK", name: "Tokelau", flag: "🇹🇰" },
     { code: "TL", name: "Timor-Leste", flag: "🇹🇱" },

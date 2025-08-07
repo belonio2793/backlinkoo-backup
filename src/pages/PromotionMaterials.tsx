@@ -149,7 +149,7 @@ Learn more: [Your Affiliate Link]
     twitter: [
       {
         title: "Quick Win Tweet",
-        content: `��� SEO professionals: Stop wasting money on low-quality backlinks
+        content: `🚨 SEO professionals: Stop wasting money on low-quality backlinks
 
 What you need:
 ✅ High DA domains
