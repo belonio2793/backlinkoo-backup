@@ -256,7 +256,7 @@ export const supabase = hasValidCredentials ?
         }).then(response => {
           if (timeoutId) clearTimeout(timeoutId);
           return response;
-        }).catch(error => {
+        }).catch(async (error) => {
           if (timeoutId) clearTimeout(timeoutId);
 
           // Handle specific error types
@@ -265,13 +265,33 @@ export const supabase = hasValidCredentials ?
             throw new Error('Request timeout - please try again');
           }
 
-          // Enhanced FullStory error handling
+          // Enhanced FullStory error handling with retry
           if (error.message?.includes('Failed to fetch') ||
+              error.message?.includes('Third-party script interference') ||
               error.stack?.includes('fullstory') ||
               error.stack?.includes('edge.fullstory.com')) {
-            console.warn('🔍 FullStory interference detected in Supabase request:', url);
-            // Don't throw - let the calling code handle gracefully
-            throw new Error('Third-party script interference - request may have been blocked');
+
+            console.warn('🔍 FullStory interference detected, attempting bypass retry for:', url);
+
+            try {
+              // Import the bypass fetch dynamically to avoid circular imports
+              const { createBypassFetch } = await import('../../utils/fullstoryWorkaround');
+              const bypassFetch = createBypassFetch();
+
+              // Retry with XMLHttpRequest-based fetch
+              const retryResponse = await bypassFetch(url, {
+                ...options,
+                signal: finalSignal,
+              });
+
+              console.log('✅ Successfully bypassed FullStory interference for:', url);
+              return retryResponse;
+
+            } catch (bypassError) {
+              console.error('❌ Bypass retry also failed:', bypassError);
+              // If bypass also fails, provide a more helpful error message
+              throw new Error(`Network request failed due to third-party script interference. Please try refreshing the page or disabling browser extensions.`);
+            }
           }
 
           console.warn('Supabase fetch error:', error);
