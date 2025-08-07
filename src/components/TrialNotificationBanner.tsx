@@ -110,10 +110,22 @@ export function TrialNotificationBanner({ onSignUp }: TrialNotificationBannerPro
     return { hours, minutes, urgent };
   };
 
-  const dismissNotification = (postId: string) => {
-    setDismissedPosts(prev => new Set(prev).add(postId));
+  const dismissNotification = (postId: string, dismissAll = false) => {
+    if (dismissAll) {
+      // Dismiss banner entirely for this session
+      sessionStorage.setItem('trial_banner_dismissed', 'true');
+      setIsVisible(false);
+      return;
+    }
+
+    const newDismissedPosts = new Set(dismissedPosts).add(postId);
+    setDismissedPosts(newDismissedPosts);
+
+    // Persist dismissed posts to localStorage
+    localStorage.setItem('dismissed_trial_posts', JSON.stringify([...newDismissedPosts]));
+
     setTrialPosts(prev => prev.filter(post => post.id !== postId));
-    
+
     if (trialPosts.length <= 1) {
       setIsVisible(false);
     }
