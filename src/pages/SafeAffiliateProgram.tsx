@@ -985,7 +985,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Sunday Reflection",
-          content: `🌅 SUNDAY REFLECTION 🌅\n\nThis week I learned:\n\n💭 Working harder ≠ Better results\n💭 The right tools make all the difference\n💭 Backlink ∞ is that tool for SEO\n\nWhat did you learn?\n\nLink in bio: ${referralUrl}\n\n#SundayReflection #Lessons`,
+          content: `🌅 SUNDAY REFLECTION 🌅\n\nThis week I learned:\n\n💭 Working harder ≠ Better results\n�� The right tools make all the difference\n💭 Backlink ∞ is that tool for SEO\n\nWhat did you learn?\n\nLink in bio: ${referralUrl}\n\n#SundayReflection #Lessons`,
           engagement: "Medium",
           audience: "Reflective thinkers"
         },
@@ -1004,7 +1004,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Growth Hack",
-          content: `��� GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️⃣ Technical SEO ✅\n3️⃣ High-quality backlinks ✅\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
+          content: `��� GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️��� Technical SEO ✅\n3️⃣ High-quality backlinks ✅\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
           engagement: "Very High",
           audience: "Growth hackers"
         },
@@ -1098,7 +1098,11 @@ ${referralUrl}`,
         },
         {
           type: "Step by Step",
-          content: `📋 COMPLETE GUIDE: Setting up your first Backlink ∞ campaign (Beginner friendly). Follow along as I walk through every single step with zero experience assumed: ${referralUrl}`,
+          content: `📋 COMPLETE GUIDE: Setting up your first Backlink ∞ campaign (Beginner friendly).
+
+Follow along as I walk through every single step with zero experience assumed:
+
+${referralUrl}`,
           engagement: "High",
           audience: "Beginners"
         },
@@ -1162,7 +1166,7 @@ ${referralUrl}`,
         // Page 6
         {
           type: "Troubleshooting",
-          content: `�� TROUBLESHOOTING GUIDE: Common Backlink ∞ issues and how to fix them. Save hours of frustration with these proven solutions from someone who's seen it all: ${referralUrl}`,
+          content: `🔧 TROUBLESHOOTING GUIDE: Common Backlink ∞ issues and how to fix them. Save hours of frustration with these proven solutions from someone who's seen it all: ${referralUrl}`,
           engagement: "Medium",
           audience: "Problem solvers"
         },
@@ -1419,7 +1423,7 @@ ${referralUrl}`,
           label: "Body",
           content: `<p>Are you currently working on link building for your site?</p>
 
-<p>I ask because I've been using <strong>Backlink ∞</strong> and the results have been incredible:</p>
+<p>I ask because I've been using <strong>Backlink ���</strong> and the results have been incredible:</p>
 
 <ul>
   <li><strong>250% increase</strong> in quality backlinks</li>
