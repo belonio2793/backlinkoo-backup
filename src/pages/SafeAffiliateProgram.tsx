@@ -99,15 +99,25 @@ const SafeAffiliateProgram: React.FC = () => {
       }
 
       if (error && error.code !== 'PGRST116') {
-        const errorMessage = error.message || error.details || error.hint || JSON.stringify(error);
+        // Create a safe error message without JSON.stringify to avoid circular refs
+        let safeErrorMessage = 'Unknown database error';
+        if (typeof error.message === 'string') {
+          safeErrorMessage = error.message;
+        } else if (typeof error.details === 'string') {
+          safeErrorMessage = error.details;
+        } else if (typeof error.hint === 'string') {
+          safeErrorMessage = error.hint;
+        } else if (error.code) {
+          safeErrorMessage = `Database error code: ${error.code}`;
+        }
+
         console.error('❌ Error loading affiliate data:', {
           code: error.code,
           message: error.message,
           details: error.details,
-          hint: error.hint,
-          fullError: error
+          hint: error.hint
         });
-        throw new Error(`Database error: ${errorMessage}`);
+        throw new Error(`Database error: ${safeErrorMessage}`);
       }
 
       if (error && error.code === 'PGRST116') {
@@ -117,13 +127,22 @@ const SafeAffiliateProgram: React.FC = () => {
       setAffiliateData(data);
       console.log('�� Affiliate data loaded successfully:', data);
     } catch (error: any) {
-      const errorMessage = error.message || error.details || JSON.stringify(error);
-      console.error('Failed to load affiliate data:', errorMessage);
+      console.error('Failed to load affiliate data:', error);
+
+      // Create a safe error message for display
+      let displayMessage = 'Failed to load affiliate data';
+      if (error instanceof Error) {
+        displayMessage = error.message;
+      } else if (typeof error === 'string') {
+        displayMessage = error;
+      } else if (error?.message) {
+        displayMessage = String(error.message);
+      }
 
       if (toast) {
         toast({
           title: "Error loading affiliate data",
-          description: errorMessage,
+          description: displayMessage.length > 100 ? "Database connection issue. Please refresh the page." : displayMessage,
           variant: "destructive"
         });
       }
