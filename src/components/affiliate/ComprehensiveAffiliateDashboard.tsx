@@ -93,7 +93,7 @@ export const ComprehensiveAffiliateDashboard: React.FC<DashboardProps> = ({ user
 
   const generateReferralLink = (baseUrl: string = window.location.origin) => {
     if (!affiliateProfile) return '';
-    return enhancedAffiliateService.generateTrackingLink(affiliateProfile.affiliate_id, baseUrl);
+    return compatibilityAffiliateService.generateTrackingLink(affiliateProfile.affiliate_code, baseUrl);
   };
 
   const copyToClipboard = async (text: string, label: string) => {
