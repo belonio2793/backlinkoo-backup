@@ -800,7 +800,7 @@ Here's what happened... ${referralUrl}`,
         },
         {
           type: "Problem Solver",
-          content: `Struggling with getting your website noticed? �� You're not alone! I was in the same boat until I found Backlink ��. This platform has completely changed my approach to SEO and the results speak for themselves. ${referralUrl}`,
+          content: `Struggling with getting your website noticed? 🤔 You're not alone! I was in the same boat until I found Backlink ∞. This platform has completely changed my approach to SEO and the results speak for themselves. ${referralUrl}`,
           engagement: "High",
           audience: "Problem seekers"
         },
@@ -966,7 +966,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Quick Win",
-          content: `⚡ QUICK WIN WEDNESDAY ⚡\n\nWant an instant SEO boost?\n\nStart building quality backlinks TODAY with Backlink ∞\n\nNo experience needed 🎯\nResults in 30 days 📈\nFree trial available 🆓\n\nLink in bio: ${referralUrl}\n\n#QuickWin #SEOBoost`,
+          content: `⚡ QUICK WIN WEDNESDAY ��\n\nWant an instant SEO boost?\n\nStart building quality backlinks TODAY with Backlink ∞\n\nNo experience needed 🎯\nResults in 30 days 📈\nFree trial available 🆓\n\nLink in bio: ${referralUrl}\n\n#QuickWin #SEOBoost`,
           engagement: "High",
           audience: "Quick results"
         },
@@ -1042,7 +1042,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Final Push",
-          content: `🎯 FINAL CALL 🎯\n\nIf you're serious about SEO success:\n\n⏰ Don't wait another day\n��� Every moment counts\n⏰ Your competitors aren't waiting\n⏰ Start building links NOW\n\nBacklink ∞ = Your secret weapon! 🚀\n\nLink in bio: ${referralUrl}\n\n#FinalCall #TakeAction`,
+          content: `🎯 FINAL CALL 🎯\n\nIf you're serious about SEO success:\n\n⏰ Don't wait another day\n⏰ Every moment counts\n⏰ Your competitors aren't waiting\n⏰ Start building links NOW\n\nBacklink ∞ = Your secret weapon! 🚀\n\nLink in bio: ${referralUrl}\n\n#FinalCall #TakeAction`,
           engagement: "High",
           audience: "Action takers"
         }
@@ -2611,7 +2611,7 @@ Here's the math: ${referralUrl}`,
                       <div>
                         <h5 className="font-medium mb-2 text-red-700">❌ Don'ts:</h5>
                         <ul className="space-y-1 text-xs">
-                          <li>• Don't alter colors, fonts, or proportions</li>
+                          <li>��� Don't alter colors, fonts, or proportions</li>
                           <li>• Don't add effects or filters to logos</li>
                           <li>• Don't use assets for competing services</li>
                           <li>• Don't make false or misleading claims</li>
