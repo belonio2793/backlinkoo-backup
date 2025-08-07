@@ -947,7 +947,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Motivational Monday",
-          content: `💪 MOTIVATIONAL MONDAY 💪\n\n"Success isn't about working harder, it's about working smarter"\n\nThat's why I use Backlink ∞ for link building 🧠\n\nWork smart, not hard! 💯\n\nLink in bio: ${referralUrl}\n\n#MotivationMonday #WorkSmart #Entrepreneur`,
+          content: `💪 MOTIVATIONAL MONDAY 💪\n\n"Success isn't about working harder, it's about working smarter"\n\nThat's why I use Backlink �� for link building 🧠\n\nWork smart, not hard! 💯\n\nLink in bio: ${referralUrl}\n\n#MotivationMonday #WorkSmart #Entrepreneur`,
           engagement: "High",
           audience: "Motivation seekers"
         },
@@ -1341,6 +1341,7 @@ Here's the math: ${referralUrl}`,
         {
           label: "Closing",
           content: `<p>I'd be happy to discuss my experience in more detail if you're interested.</p>
+
 <p>Best regards,<br>[Your Name]</p>`,
           isHtml: true
         }
@@ -2614,7 +2615,7 @@ Here's the math: ${referralUrl}`,
                         </ul>
                       </div>
                       <div>
-                        <h5 className="font-medium mb-2 text-red-700">��� Don'ts:</h5>
+                        <h5 className="font-medium mb-2 text-red-700">❌ Don'ts:</h5>
                         <ul className="space-y-1 text-xs">
                           <li>• Don't alter colors, fonts, or proportions</li>
                           <li>• Don't add effects or filters to logos</li>
