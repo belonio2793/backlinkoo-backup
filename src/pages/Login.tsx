@@ -8,6 +8,7 @@ import { AuthFormTabs } from "@/components/shared/AuthFormTabs";
 import { validateEmail } from "@/utils/authValidation";
 import { useNavigate } from "react-router-dom";
 import { Infinity, Mail, ArrowLeft } from "lucide-react";
+import AnimatedTestimonials from "@/components/AnimatedTestimonials";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
