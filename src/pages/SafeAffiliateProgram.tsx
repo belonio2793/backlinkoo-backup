@@ -1058,7 +1058,7 @@ Link in bio: ${referralUrl}
         // Page 5
         {
           type: "Myth Buster",
-          content: `🚫 MYTH BUSTER ALERT 🚫\n\nMyth: "AI can't do personalized outreach"\n\nReality: Backlink ∞'s AI writes better emails than most humans! 🤖\n\nPersonalization ✅\nContext awareness ✅\nHigh response rates ✅\n\nLink in bio: ${referralUrl}\n\n#MythBuster #AIFacts`,
+          content: `🚫 MYTH BUSTER ALERT 🚫\n\nMyth: "AI can't do personalized outreach"\n\nReality: Backlink ∞'s AI writes better emails than most humans! 🤖\n\nPersonalization ���\nContext awareness ✅\nHigh response rates ✅\n\nLink in bio: ${referralUrl}\n\n#MythBuster #AIFacts`,
           engagement: "High",
           audience: "Myth busters"
         },
@@ -1857,7 +1857,7 @@ Here's the math: ${referralUrl}`,
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Affiliate Dashboard</h1>
-                <p className="text-gray-600">Welcome back, {user.email?.split('@')[0]}! 👋</p>
+                <p className="text-gray-600">Welcome back, {user.email?.split('@')[0]}! ���</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -1986,12 +1986,12 @@ Here's the math: ${referralUrl}`,
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={affiliateData.referral_url}
+                  value={cleanUrl(affiliateData.referral_url)}
                   readOnly
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
                 />
                 <button
-                  onClick={() => copyToClipboard(affiliateData.referral_url)}
+                  onClick={() => copyToClipboard(cleanUrl(affiliateData.referral_url))}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
                   📋 Copy
