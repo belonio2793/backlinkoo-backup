@@ -89,7 +89,7 @@ export const AffiliateDashboard: React.FC<AffiliateDashboardProps> = ({ userId }
   const generateReferralLink = (url?: string) => {
     if (!affiliate) return '';
     
-    const targetUrl = url || window.location.origin;
+    const targetUrl = url || 'https://backlinkoo.com';
     const link = affiliateService.generateAffiliateLink(affiliate.affiliate_id, targetUrl);
     return link.base_url;
   };
