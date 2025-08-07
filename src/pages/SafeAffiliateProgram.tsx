@@ -708,7 +708,7 @@ const SafeAffiliateProgram: React.FC = () => {
 
 <ul style="list-style: none; padding-left: 0;">
   <li>✅ <strong>Automated outreach</strong> that actually works</li>
-  <li>✅ <strong>High-quality backlinks</strong> from real websites</li>
+  <li>��� <strong>High-quality backlinks</strong> from real websites</li>
   <li>✅ <strong>Super easy to use</strong> interface</li>
 </ul>
 
@@ -871,7 +871,7 @@ const SafeAffiliateProgram: React.FC = () => {
                     <span>Session persistence</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span>��</span>
+                    <span>✓</span>
                     <span>First-click attribution</span>
                   </div>
                 </div>
@@ -1417,17 +1417,37 @@ const SafeAffiliateProgram: React.FC = () => {
                               {section.label}
                             </Label>
                             <div className="mt-1 p-3 bg-gray-50 rounded border text-sm">
-                              {section.content}
+                              {section.isHtml ? (
+                                <div
+                                  dangerouslySetInnerHTML={{ __html: section.content }}
+                                  className="prose prose-sm max-w-none"
+                                />
+                              ) : (
+                                <div className="whitespace-pre-line">{section.content}</div>
+                              )}
                             </div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => copyToClipboard(section.content)}
-                              className="mt-2"
-                            >
-                              <Copy className="h-4 w-4 mr-2" />
-                              Copy {section.label}
-                            </Button>
+                            <div className="flex gap-2 mt-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => copyToClipboard(section.content.replace(/<[^>]*>/g, ''))}
+                                className=""
+                              >
+                                <Copy className="h-4 w-4 mr-2" />
+                                Copy Text
+                              </Button>
+                              {section.isHtml && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => copyToClipboard(section.content)}
+                                  className=""
+                                >
+                                  <Copy className="h-4 w-4 mr-2" />
+                                  Copy HTML
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         ))}
                       </div>
