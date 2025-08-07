@@ -193,10 +193,6 @@ const CreativeAssetsShowcase: React.FC<{
   const [showBrandGuidelines, setShowBrandGuidelines] = useState(false);
 
   const handleDownload = (name: string, preview: string, format: string) => {
-    if (name === 'Brand Guidelines') {
-      setShowBrandGuidelines(true);
-      return;
-    }
     onDownload(name, preview, format);
   };
 
