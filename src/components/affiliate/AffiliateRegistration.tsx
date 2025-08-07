@@ -90,7 +90,7 @@ export const AffiliateRegistration: React.FC<AffiliateRegistrationProps> = ({
       // Store additional registration data (would be saved to database)
       console.log('Registration data:', formData);
       
-      toast.success('Welcome to the Backlinkoo Affiliate Program!');
+      toast.success('Welcome to the Backlink ∞ Affiliate Program!');
       onRegistrationComplete();
     } catch (error) {
       console.error('Registration failed:', error);
@@ -120,7 +120,7 @@ export const AffiliateRegistration: React.FC<AffiliateRegistrationProps> = ({
           <div className="space-y-8">
             <div className="text-center">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Welcome to the Backlinkoo Affiliate Program
+                Welcome to the Backlink ∞ Affiliate Program
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 Join thousands of successful affiliates earning substantial commissions by promoting the world's 
@@ -172,7 +172,7 @@ export const AffiliateRegistration: React.FC<AffiliateRegistrationProps> = ({
                 <Badge className="bg-green-100 text-green-800">Top Performer</Badge>
               </div>
               <blockquote className="text-lg italic text-gray-700 mb-3">
-                "I've earned over $15,000 in my first 6 months with Backlinkoo's affiliate program. 
+                "I've earned over $15,000 in my first 6 months with Backlink ∞'s affiliate program. 
                 The conversion rates are incredible and the support team is amazing!"
               </blockquote>
               <cite className="text-sm text-gray-600">— Sarah K., Digital Marketing Agency Owner</cite>
@@ -284,13 +284,13 @@ export const AffiliateRegistration: React.FC<AffiliateRegistrationProps> = ({
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Promotion Strategy</h2>
               <p className="text-gray-600">
-                Select how you plan to promote Backlinkoo to optimize your success
+                Select how you plan to promote Backlink ∞ to optimize your success
               </p>
             </div>
 
             <div className="space-y-6">
               <div className="space-y-3">
-                <Label>How do you plan to promote Backlinkoo? (Select all that apply)</Label>
+                <Label>How do you plan to promote Backlink ∞? (Select all that apply)</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {[
                     { id: 'blog', label: 'Blog Content & Reviews', icon: FileText },
@@ -325,7 +325,7 @@ export const AffiliateRegistration: React.FC<AffiliateRegistrationProps> = ({
                 <Label htmlFor="goals">What are your affiliate marketing goals?</Label>
                 <Textarea
                   id="goals"
-                  placeholder="Tell us about your goals, target audience, and how you plan to integrate Backlinkoo into your content strategy..."
+                  placeholder="Tell us about your goals, target audience, and how you plan to integrate Backlink ∞ into your content strategy..."
                   rows={4}
                   value={formData.goals}
                   onChange={(e) => handleInputChange('goals', e.target.value)}
