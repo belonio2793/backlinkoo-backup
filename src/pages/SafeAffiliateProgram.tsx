@@ -57,6 +57,11 @@ const SafeAffiliateProgram: React.FC = () => {
   const [isJoining, setIsJoining] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [defaultTab, setDefaultTab] = useState<'login' | 'signup'>('login');
+  const [activeToolkitTab, setActiveToolkitTab] = useState('social');
+  const [selectedSocialPlatform, setSelectedSocialPlatform] = useState('twitter');
+  const [selectedEmailTemplate, setSelectedEmailTemplate] = useState('professional');
+  const [customMessage, setCustomMessage] = useState('');
+  const [trackingTimeRange, setTrackingTimeRange] = useState('7d');
 
   useEffect(() => {
     if (user) {
@@ -508,7 +513,7 @@ const SafeAffiliateProgram: React.FC = () => {
           <div className="bg-white rounded-lg shadow-sm border max-w-2xl mx-auto p-8">
             <div className="text-center mb-6">
               <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">���</span>
+                <span className="text-2xl">⭐</span>
               </div>
               <h2 className="text-2xl font-bold mb-2">You're Almost Ready!</h2>
               <p className="text-gray-600">
