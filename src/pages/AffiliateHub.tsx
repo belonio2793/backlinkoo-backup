@@ -107,7 +107,7 @@ const AffiliateHub: React.FC = () => {
   const loadAffiliateData = async () => {
     try {
       setLoading(true);
-      
+
       // Check if user has affiliate profile
       const { data: profile, error } = await supabase
         .from('affiliate_programs')
@@ -117,8 +117,21 @@ const AffiliateHub: React.FC = () => {
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error loading affiliate profile:', error);
+
+        // Check if it's a table not found error
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          console.log('🚫 affiliate_programs table not found');
+          setTableNotFound(true);
+          setSystemReady(false);
+          return;
+        }
+
         throw error;
       }
+
+      // If we get here, the table exists and we can access it
+      setSystemReady(true);
+      setTableNotFound(false);
 
       if (profile) {
         setAffiliateProfile(profile);
@@ -126,9 +139,10 @@ const AffiliateHub: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Failed to load affiliate data:', error);
-      if (error.message?.includes('does not exist')) {
-        // Table doesn't exist, but that's ok - user just needs to join
-        console.log('Affiliate table not found - user needs to join program');
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        console.log('🚫 affiliate_programs table not found');
+        setTableNotFound(true);
+        setSystemReady(false);
       } else {
         toast({
           title: "Error loading data",
