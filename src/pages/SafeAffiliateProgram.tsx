@@ -836,7 +836,120 @@ const SafeAffiliateProgram: React.FC = () => {
           engagement: "High",
           audience: "Strategy learners"
         },
-        // Continue with YouTube templates...
+        // Page 2
+        {
+          type: "Live Test",
+          content: `🎬 LIVE TEST: Building backlinks in real-time with Backlink ∞. Watch me set up a campaign from scratch and get our first links within 24 hours! Timestamps in description: ${referralUrl}`,
+          engagement: "Very High",
+          audience: "Live action fans"
+        },
+        {
+          type: "Before vs After",
+          content: `📊 DRAMATIC BEFORE & AFTER: My website's transformation using Backlink ∞. Traffic charts, ranking improvements, and revenue growth - all the data revealed! ${referralUrl}`,
+          engagement: "Very High",
+          audience: "Data lovers"
+        },
+        {
+          type: "Step by Step",
+          content: `📋 COMPLETE GUIDE: Setting up your first Backlink ∞ campaign (Beginner friendly). Follow along as I walk through every single step with zero experience assumed: ${referralUrl}`,
+          engagement: "High",
+          audience: "Beginners"
+        },
+        // Page 3
+        {
+          type: "Tool Comparison",
+          content: `⚔️ ULTIMATE COMPARISON: Backlink ∞ vs 7 other link building tools. I spent $3,000 testing them all so you don't have to. The winner might surprise you! ${referralUrl}`,
+          engagement: "Very High",
+          audience: "Comparison shoppers"
+        },
+        {
+          type: "Expert Interview",
+          content: `🎤 EXPERT INTERVIEW: SEO guru reveals why Backlink ∞ is the future of link building. Insider secrets and industry predictions you won't hear anywhere else: ${referralUrl}`,
+          engagement: "High",
+          audience: "Expert insights"
+        },
+        {
+          type: "ROI Breakdown",
+          content: `💰 ROI BREAKDOWN: Exact numbers from my Backlink ∞ investment. $99/month turned into $5,000/month in additional revenue. Here's the math: ${referralUrl}`,
+          engagement: "Very High",
+          audience: "ROI focused"
+        },
+        // Page 4
+        {
+          type: "Screen Recording",
+          content: `💻 SCREEN RECORDING: Watch over my shoulder as I use Backlink ∞ for 30 minutes. Real campaigns, real results, no fluff - just pure value: ${referralUrl}`,
+          engagement: "High",
+          audience: "Visual learners"
+        },
+        {
+          type: "Mistakes to Avoid",
+          content: `❌ 10 COSTLY MISTAKES I made with Backlink ∞ (and how to avoid them). Learn from my failures so you can succeed faster. Don't make these same errors! ${referralUrl}`,
+          engagement: "High",
+          audience: "Mistake avoiders"
+        },
+        {
+          type: "Advanced Strategy",
+          content: `🚀 ADVANCED STRATEGY: How I use Backlink ∞ to build topic authority and dominate competitive niches. This isn't beginner stuff - proceed with caution! ${referralUrl}`,
+          engagement: "High",
+          audience: "Advanced users"
+        },
+        // Page 5
+        {
+          type: "Q&A Session",
+          content: `❓ LIVE Q&A: Everything you want to know about Backlink ∞. I'm answering your top 50 questions about features, pricing, results, and more. Timestamps included: ${referralUrl}`,
+          engagement: "High",
+          audience: "Question askers"
+        },
+        {
+          type: "Update Video",
+          content: `🆕 MAJOR UPDATE: New Backlink ∞ features that will blow your mind! AI improvements, better targeting, and automation upgrades that change everything: ${referralUrl}`,
+          engagement: "High",
+          audience: "Update watchers"
+        },
+        {
+          type: "Behind the Scenes",
+          content: `🎬 BEHIND THE SCENES: My entire link building operation revealed. See exactly how I manage multiple Backlink ∞ campaigns and scale to 6-figure results: ${referralUrl}`,
+          engagement: "Very High",
+          audience: "BTS enthusiasts"
+        },
+        // Page 6
+        {
+          type: "Troubleshooting",
+          content: `🔧 TROUBLESHOOTING GUIDE: Common Backlink ∞ issues and how to fix them. Save hours of frustration with these proven solutions from someone who's seen it all: ${referralUrl}`,
+          engagement: "Medium",
+          audience: "Problem solvers"
+        },
+        {
+          type: "Success Stories",
+          content: `🏆 SUCCESS STORIES: 5 entrepreneurs who transformed their businesses with Backlink ∞. Their strategies, results, and advice for getting started: ${referralUrl}`,
+          engagement: "High",
+          audience: "Inspiration seekers"
+        },
+        {
+          type: "Monthly Results",
+          content: `📈 MONTHLY RESULTS: Complete transparency on my Backlink ∞ performance. Traffic stats, ranking improvements, and revenue generated - nothing hidden! ${referralUrl}`,
+          engagement: "Very High",
+          audience: "Transparency lovers"
+        },
+        // Page 7
+        {
+          type: "Automation Setup",
+          content: `🤖 AUTOMATION MASTERCLASS: Set up Backlink ∞ to run completely on autopilot. My exact workflows for hands-off link building that works 24/7: ${referralUrl}`,
+          engagement: "High",
+          audience: "Automation fans"
+        },
+        {
+          type: "Industry Secrets",
+          content: `🤫 INDUSTRY SECRETS: What link building agencies don't want you to know about Backlink ∞. Insider knowledge from 10 years in the SEO trenches: ${referralUrl}`,
+          engagement: "Very High",
+          audience: "Secret seekers"
+        },
+        {
+          type: "Final Verdict",
+          content: `⚖️ FINAL VERDICT: After 1 year of using Backlink ∞, here's my honest assessment. Is it worth the hype? The answer might shock you. Watch until the end! ${referralUrl}`,
+          engagement: "Very High",
+          audience: "Decision makers"
+        }
       ]
     };
     return templates[platform] || [];
