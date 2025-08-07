@@ -219,7 +219,21 @@ const SafeAffiliateProgram: React.FC = () => {
 
       // Clean any fly.dev URLs in existing data
       if (data && data.referral_url) {
-        data.referral_url = cleanUrl(data.referral_url);
+        const cleanedUrl = cleanUrl(data.referral_url);
+        data.referral_url = cleanedUrl;
+
+        // If URL was changed from fly.dev to backlinkoo.com, update the database
+        if (cleanedUrl !== data.referral_url) {
+          try {
+            await supabase
+              .from('affiliate_programs')
+              .update({ referral_url: cleanedUrl })
+              .eq('user_id', user.id);
+            console.log('✅ Updated affiliate URL in database from fly.dev to backlinkoo.com');
+          } catch (updateError) {
+            console.warn('⚠️ Could not update affiliate URL in database:', updateError);
+          }
+        }
       }
 
       setAffiliateData(data);
@@ -426,7 +440,7 @@ const SafeAffiliateProgram: React.FC = () => {
         // Page 1
         {
           type: "Discovery",
-          content: `🚀 Just discovered Backlink ∞ - game-changing SEO tool for link building!
+          content: `🚀 Just discovered Backlink ��� - game-changing SEO tool for link building!
 
 Their automated outreach is incredible. Check it out:
 
@@ -1012,7 +1026,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Story Series",
-          content: `💡 STORY TIME: How I went from SEO rookie to expert\n\nPart 3: The tool that changed everything\n\nEnter Backlink ∞ 🎯\nAutomated outreach ✅\nHigh-quality links ✅\nTime freedom ✅\n\nLink in bio: ${referralUrl}\n\n#EntrepreneurLife #SEOJourney`,
+          content: `💡 STORY TIME: How I went from SEO rookie to expert\n\nPart 3: The tool that changed everything\n\nEnter Backlink ∞ 🎯\nAutomated outreach ✅\nHigh-quality links ���\nTime freedom ✅\n\nLink in bio: ${referralUrl}\n\n#EntrepreneurLife #SEOJourney`,
           engagement: "High",
           audience: "Story lovers"
         },
@@ -2372,7 +2386,7 @@ Here's the math: ${referralUrl}`,
                         <h5 className="font-medium mb-1">Timing & Frequency:</h5>
                         <ul className="space-y-1 text-xs">
                           <li>• Tuesday-Thursday perform best</li>
-                          <li>�� Send between 10 AM - 2 PM</li>
+                          <li>• Send between 10 AM - 2 PM</li>
                           <li>• Follow up after 3-5 days</li>
                           <li>• Don't exceed 2 emails per week</li>
                         </ul>
