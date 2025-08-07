@@ -1313,9 +1313,9 @@ Here's the math: ${referralUrl}`,
         {
           label: "Opening",
           content: `<p>Hi [Name],</p>
-
+<br>
 <p>I hope this email finds you well.</p>
-
+<br>
 <p>As someone who values efficient SEO strategies, I wanted to share a tool that has significantly improved my link building results.</p>`,
           isHtml: true
         },
