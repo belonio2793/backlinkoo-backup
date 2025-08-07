@@ -178,7 +178,7 @@ const SafeAffiliateProgram: React.FC = () => {
       }
 
       setAffiliateData(data);
-      console.log('�� Affiliate data loaded successfully:', data);
+      console.log('✅ Affiliate data loaded successfully:', data);
     } catch (error: any) {
       console.error('Failed to load affiliate data:', error);
 
@@ -355,26 +355,42 @@ const SafeAffiliateProgram: React.FC = () => {
         // Page 1
         {
           type: "Discovery",
-          content: `🚀 Just discovered Backlink ∞ - game-changing SEO tool for link building! Their automated outreach is incredible. Check it out: ${referralUrl}`,
+          content: `🚀 Just discovered Backlink ∞ - game-changing SEO tool for link building!
+
+Their automated outreach is incredible. Check it out:
+
+${referralUrl}`,
           engagement: "High",
           audience: "SEO professionals"
         },
         {
           type: "Results",
-          content: `📈 Increased my domain authority by 15 points using Backlink ∞'s link building platform. The ROI is amazing! ${referralUrl} #SEO #LinkBuilding`,
+          content: `📈 Increased my domain authority by 15 points using Backlink ∞'s link building platform.
+
+The ROI is amazing!
+
+${referralUrl} #SEO #LinkBuilding`,
           engagement: "Very High",
           audience: "Digital marketers"
         },
         {
           type: "Tips",
-          content: `💡 Pro tip: Quality backlinks > quantity. Backlink ∞ helps you get high-DA links that actually move the needle. Try it: ${referralUrl}`,
+          content: `💡 Pro tip: Quality backlinks > quantity.
+
+Backlink ∞ helps you get high-DA links that actually move the needle.
+
+Try it: ${referralUrl}`,
           engagement: "Medium",
           audience: "Business owners"
         },
         // Page 2
         {
           type: "Question",
-          content: `Struggling with link building? 🤔 I was too until I found Backlink ∞. Their automated system has saved me 20+ hours per week. Who else needs this? ${referralUrl}`,
+          content: `Struggling with link building? 🤔
+
+I was too until I found Backlink ∞. Their automated system has saved me 20+ hours per week.
+
+Who else needs this? ${referralUrl}`,
           engagement: "High",
           audience: "SEO beginners"
         },
@@ -405,26 +421,40 @@ const SafeAffiliateProgram: React.FC = () => {
         },
         {
           type: "Behind the Scenes",
-          content: `BTS: How I went from 50 to 500 referring domains in 90 days using @BacklinkInfinity's automated platform. The secret sauce inside: ${referralUrl}`,
+          content: `BTS: How I went from 50 to 500 referring domains in 90 days using @BacklinkInfinity's automated platform.
+
+The secret sauce inside: ${referralUrl}`,
           engagement: "High",
           audience: "Growth hackers"
         },
         // Page 4
         {
           type: "Quote Tweet Ready",
-          content: `"Link building is dead" - Wrong! It's evolved. Backlink ∞ proves that AI-powered outreach is the future of SEO. Here's my experience: ${referralUrl}`,
+          content: `"Link building is dead" - Wrong!
+
+It's evolved. Backlink ∞ proves that AI-powered outreach is the future of SEO.
+
+Here's my experience: ${referralUrl}`,
           engagement: "Medium",
           audience: "SEO community"
         },
         {
           type: "Urgency",
-          content: `🔥 LAST 24 HOURS: Backlink ∞'s free trial ends soon. If you're serious about SEO, don't miss this opportunity to transform your link building: ${referralUrl}`,
+          content: `🔥 LAST 24 HOURS: Backlink ∞'s free trial ends soon.
+
+If you're serious about SEO, don't miss this opportunity to transform your link building:
+
+${referralUrl}`,
           engagement: "High",
           audience: "Decision makers"
         },
         {
           type: "Personal Story",
-          content: `2 years ago, I was manually sending 20 outreach emails daily. Today, Backlink ∞ sends 200+ while I focus on strategy. Game changer: ${referralUrl}`,
+          content: `2 years ago, I was manually sending 20 outreach emails daily.
+
+Today, Backlink ∞ sends 200+ while I focus on strategy.
+
+Game changer: ${referralUrl}`,
           engagement: "High",
           audience: "Personal brand builders"
         },
@@ -437,7 +467,11 @@ const SafeAffiliateProgram: React.FC = () => {
         },
         {
           type: "Challenge",
-          content: `Challenge: Get 50 high-quality backlinks in 30 days. Sounds impossible? Not with Backlink ∞. I did 87. Your turn: ${referralUrl}`,
+          content: `Challenge: Get 50 high-quality backlinks in 30 days.
+
+Sounds impossible? Not with Backlink ∞. I did 87.
+
+Your turn: ${referralUrl}`,
           engagement: "High",
           audience: "Competitive types"
         },
@@ -456,26 +490,38 @@ const SafeAffiliateProgram: React.FC = () => {
         },
         {
           type: "Prediction",
-          content: `Prediction: In 2024, businesses using AI for link building will dominate those doing manual outreach. Get ahead with Backlink ∞: ${referralUrl}`,
+          content: `Prediction: In 2024, businesses using AI for link building will dominate those doing manual outreach.
+
+Get ahead with Backlink ∞: ${referralUrl}`,
           engagement: "Medium",
           audience: "Forward thinkers"
         },
         {
           type: "Question Hook",
-          content: `What if I told you that you could automate 90% of your link building while getting better results? Meet Backlink ∞: ${referralUrl}`,
+          content: `What if I told you that you could automate 90% of your link building while getting better results?
+
+Meet Backlink ∞: ${referralUrl}`,
           engagement: "High",
           audience: "Curious minds"
         },
         // Page 7
         {
           type: "Resource",
-          content: `📚 Resource: The only link building tool you'll ever need. Backlink ∞ handles prospecting, outreach, and follow-ups automatically: ${referralUrl}`,
+          content: `📚 Resource: The only link building tool you'll ever need.
+
+Backlink ∞ handles prospecting, outreach, and follow-ups automatically:
+
+${referralUrl}`,
           engagement: "Medium",
           audience: "Resource collectors"
         },
         {
           type: "Industry Insight",
-          content: `SEO industry insight: Manual link building is becoming obsolete. Smart agencies are switching to Backlink ∞ for scalable results: ${referralUrl}`,
+          content: `SEO industry insight: Manual link building is becoming obsolete.
+
+Smart agencies are switching to Backlink ∞ for scalable results:
+
+${referralUrl}`,
           engagement: "High",
           audience: "Industry watchers"
         },
@@ -490,19 +536,31 @@ const SafeAffiliateProgram: React.FC = () => {
         // Page 1
         {
           type: "Professional",
-          content: `As an SEO professional, I'm always looking for tools that deliver real results. Backlink ∞'s automated link building platform has transformed how I approach SEO campaigns. The quality of links and time saved is remarkable. ${referralUrl}`,
+          content: `As an SEO professional, I'm always looking for tools that deliver real results.
+
+Backlink ∞'s automated link building platform has transformed how I approach SEO campaigns. The quality of links and time saved is remarkable.
+
+${referralUrl}`,
           engagement: "High",
           audience: "B2B professionals"
         },
         {
           type: "Case Study",
-          content: `Case Study: How I increased organic traffic by 300% in 6 months using strategic link building. The secret? Backlink ∞'s platform made it scalable and efficient. ${referralUrl}`,
+          content: `Case Study: How I increased organic traffic by 300% in 6 months using strategic link building.
+
+The secret? Backlink ∞'s platform made it scalable and efficient.
+
+${referralUrl}`,
           engagement: "Very High",
           audience: "Marketing managers"
         },
         {
           type: "Industry Trend",
-          content: `The future of SEO is automation. While competitors waste time on manual outreach, forward-thinking businesses are leveraging Backlink ∞ to scale their link building efforts efficiently. ${referralUrl}`,
+          content: `The future of SEO is automation.
+
+While competitors waste time on manual outreach, forward-thinking businesses are leveraging Backlink ∞ to scale their link building efforts efficiently.
+
+${referralUrl}`,
           engagement: "High",
           audience: "Business leaders"
         },
@@ -515,61 +573,228 @@ const SafeAffiliateProgram: React.FC = () => {
         },
         {
           type: "Process Improvement",
-          content: `Process improvement spotlight: How we reduced our link building time by 85% while improving quality scores. Backlink ∞'s automation handles prospecting, outreach, and follow-ups seamlessly. ${referralUrl}`,
+          content: `Process improvement spotlight: How we reduced our link building time by 85% while improving quality scores.
+
+Backlink ∞'s automation handles prospecting, outreach, and follow-ups seamlessly.
+
+${referralUrl}`,
           engagement: "High",
           audience: "Operations managers"
         },
         {
           type: "Team Efficiency",
-          content: `Team efficiency update: Since implementing Backlink ∞, our marketing team can focus on strategy and content creation instead of manual outreach. Productivity has increased by 200%. ${referralUrl}`,
+          content: `Team efficiency update: Since implementing Backlink ∞, our marketing team can focus on strategy and content creation instead of manual outreach.
+
+Productivity has increased by 200%.
+
+${referralUrl}`,
           engagement: "High",
           audience: "Team leaders"
         },
         // Page 3
         {
           type: "Consultant Insight",
-          content: `Consultant insight: I've evaluated dozens of link building tools for clients. Backlink ∞ consistently delivers the highest ROI with the least time investment. Here's why it's my top recommendation: ${referralUrl}`,
+          content: `Consultant insight: I've evaluated dozens of link building tools for clients.
+
+Backlink ∞ consistently delivers the highest ROI with the least time investment. Here's why it's my top recommendation:
+
+${referralUrl}`,
           engagement: "Very High",
           audience: "Consultants"
         },
         {
           type: "Agency Owner",
-          content: `Agency owner perspective: Scaling link building services was our biggest challenge until Backlink ∞. Now we can serve 5x more clients with the same team size. Game-changing for agency growth. ${referralUrl}`,
+          content: `Agency owner perspective: Scaling link building services was our biggest challenge until Backlink ∞.
+
+Now we can serve 5x more clients with the same team size. Game-changing for agency growth.
+
+${referralUrl}`,
           engagement: "High",
           audience: "Agency owners"
         },
         {
           type: "Startup Growth",
-          content: `Startup growth hack: With limited resources, we needed maximum SEO impact. Backlink ∞ delivered enterprise-level link building results at a fraction of the cost. Perfect for lean teams. ${referralUrl}`,
+          content: `Startup growth hack: With limited resources, we needed maximum SEO impact.
+
+Backlink ∞ delivered enterprise-level link building results at a fraction of the cost. Perfect for lean teams.
+
+${referralUrl}`,
           engagement: "High",
           audience: "Startup founders"
         },
-        // Continue with more LinkedIn templates...
+        // Page 4
+        {
+          type: "Data-Driven Results",
+          content: `Data speaks louder than opinions. After 6 months with Backlink ∞:\n\n📈 Domain Authority: +23 points\n📈 Referring domains: +287\n��� Organic traffic: +156%\n📈 Lead quality: Significantly improved\n\nROI has exceeded all expectations. ${referralUrl}`,
+          engagement: "Very High",
+          audience: "Data analysts"
+        },
+        {
+          type: "Executive Summary",
+          content: `Executive summary for leadership teams:
+
+The biggest competitive advantage in digital marketing today isn't more budget—it's better automation.
+
+Backlink ∞ has become our strategic differentiator.
+
+${referralUrl}`,
+          engagement: "High",
+          audience: "Executives"
+        },
+        {
+          type: "Technology Innovation",
+          content: `Innovation spotlight: AI-powered link building isn't the future—it's the present.
+
+Companies using platforms like Backlink ∞ are already outpacing traditional SEO agencies by 300%.
+
+Time to adapt or fall behind.
+
+${referralUrl}`,
+          engagement: "High",
+          audience: "Tech leaders"
+        },
+        // Page 5
+        {
+          type: "Strategic Partnership",
+          content: `Strategic insight: We've integrated Backlink ∞ into our client delivery process.
+
+What used to take our team 40 hours now takes 4 hours with better results.
+
+This is how modern agencies stay competitive.
+
+${referralUrl}`,
+          engagement: "Very High",
+          audience: "Agency partners"
+        },
+        {
+          type: "Industry Transformation",
+          content: `The SEO industry is experiencing its biggest transformation since Google's PageRank algorithm.
+
+Backlink ∞ represents the next evolution—combining AI precision with human strategy for unprecedented results.
+
+${referralUrl}`,
+          engagement: "High",
+          audience: "Industry leaders"
+        },
+        {
+          type: "Competitive Intelligence",
+          content: `Competitive intelligence update: While competitors struggle with manual outreach, we've automated 90% of our link building pipeline with Backlink ∞.
+
+Market share is shifting to those who adapt fastest.
+
+${referralUrl}`,
+          engagement: "High",
+          audience: "Strategic planners"
+        },
+        // Page 6
+        {
+          type: "Operational Excellence",
+          content: `Operational excellence achievement: Backlink ∞ has enabled us to standardize our link building process across all client accounts.
+
+Consistency, quality, and scalability—the trifecta of successful operations.
+
+${referralUrl}`,
+          engagement: "High",
+          audience: "Operations leaders"
+        },
+        {
+          type: "Digital Transformation",
+          content: `Digital transformation case study: Legacy SEO agencies are struggling to adapt while tech-forward companies using Backlink ∞ are capturing market share.
+
+Evolution isn't optional—it's essential.
+
+${referralUrl}`,
+          engagement: "Very High",
+          audience: "Transformation officers"
+        },
+        {
+          type: "Thought Leadership",
+          content: `Thought leadership perspective: The convergence of AI and SEO is creating new possibilities.
+
+Backlink ∞ exemplifies how intelligent automation can amplify human expertise rather than replace it.
+
+${referralUrl}`,
+          engagement: "High",
+          audience: "Thought leaders"
+        },
+        // Page 7
+        {
+          type: "Future of Work",
+          content: `Future of work insight: SEO professionals aren't being replaced by AI—they're being empowered by it.
+
+Backlink ∞ allows our team to focus on strategy while automation handles execution.
+
+This is the future.
+
+${referralUrl}`,
+          engagement: "Very High",
+          audience: "HR leaders"
+        },
+        {
+          type: "Investment Thesis",
+          content: `Investment thesis: Marketing technology that delivers measurable ROI will dominate the next decade.
+
+Backlink ∞'s proven track record makes it a cornerstone of our digital strategy portfolio.
+
+${referralUrl}`,
+          engagement: "High",
+          audience: "Investors"
+        },
+        {
+          type: "Market Leadership",
+          content: `Market leadership requires constant innovation.
+
+While others debate the value of automated link building, we're already seeing 400% improvement in client outcomes with Backlink ∞.
+
+Lead, follow, or get left behind.
+
+${referralUrl}`,
+          engagement: "Very High",
+          audience: "Market leaders"
+        }
       ],
       facebook: [
         // Page 1
         {
           type: "Recommendation",
-          content: `🌟 Recommendation for small business owners: If you're struggling with SEO and getting your website noticed, Backlink ∞ is a game-changer. Their platform simplifies link building and delivers real results. ${referralUrl}`,
+          content: `🌟 Recommendation for small business owners:
+
+If you're struggling with SEO and getting your website noticed, Backlink ∞ is a game-changer.
+
+Their platform simplifies link building and delivers real results.
+
+${referralUrl}`,
           engagement: "High",
           audience: "Small business owners"
         },
         {
           type: "Success Story",
-          content: `From struggling with SEO to ranking on page 1 - here's how Backlink ∞ helped transform my online presence. The automated outreach and quality links made all the difference! ${referralUrl}`,
+          content: `From struggling with SEO to ranking on page 1 - here's how Backlink ∞ helped transform my online presence.
+
+The automated outreach and quality links made all the difference!
+
+${referralUrl}`,
           engagement: "Very High",
           audience: "Entrepreneurs"
         },
         {
           type: "Community Help",
-          content: `Hey everyone! 👋 I know many of you are working on growing your online businesses. I recently discovered this amazing tool called Backlink ∞ that has seriously boosted my website's visibility. Thought I'd share! ${referralUrl}`,
+          content: `Hey everyone! 👋
+
+I know many of you are working on growing your online businesses. I recently discovered this amazing tool called Backlink ∞ that has seriously boosted my website's visibility.
+
+Thought I'd share! ${referralUrl}`,
           engagement: "High",
           audience: "Community members"
         },
         // Page 2
         {
           type: "Behind the Scenes",
-          content: `Behind the scenes of my business growth: I've been quietly testing different SEO strategies, and Backlink ∞ has been the secret weapon that's finally moving the needle. Here's what happened... ${referralUrl}`,
+          content: `Behind the scenes of my business growth:
+
+I've been quietly testing different SEO strategies, and Backlink ∞ has been the secret weapon that's finally moving the needle.
+
+Here's what happened... ${referralUrl}`,
           engagement: "Very High",
           audience: "Business owners"
         },
@@ -685,7 +910,13 @@ const SafeAffiliateProgram: React.FC = () => {
         // Page 1
         {
           type: "Visual Story",
-          content: `📊 Behind the scenes of my SEO growth strategy ✨ Swipe to see how Backlink ∞ helped me build high-quality backlinks that actually work! Link in bio: ${referralUrl} #SEO #DigitalMarketing #Entrepreneur`,
+          content: `📊 Behind the scenes of my SEO growth strategy ✨
+
+Swipe to see how Backlink ∞ helped me build high-quality backlinks that actually work!
+
+Link in bio: ${referralUrl}
+
+#SEO #DigitalMarketing #Entrepreneur`,
           engagement: "High",
           audience: "Visual marketers"
         },
@@ -716,7 +947,7 @@ const SafeAffiliateProgram: React.FC = () => {
         },
         {
           type: "Motivational Monday",
-          content: `💪 MOTIVATIONAL MONDAY 💪\n\n"Success isn't about working harder, it's about working smarter"\n\nThat's why I use Backlink ∞ for link building 🧠\n\nWork smart, not hard! 💯\n\nLink in bio: ${referralUrl}\n\n#MotivationMonday #WorkSmart #Entrepreneur`,
+          content: `💪 MOTIVATIONAL MONDAY 💪\n\n"Success isn't about working harder, it's about working smarter"\n\nThat's why I use Backlink ��� for link building 🧠\n\nWork smart, not hard! 💯\n\nLink in bio: ${referralUrl}\n\n#MotivationMonday #WorkSmart #Entrepreneur`,
           engagement: "High",
           audience: "Motivation seekers"
         },
@@ -729,7 +960,7 @@ const SafeAffiliateProgram: React.FC = () => {
         },
         {
           type: "Before and After",
-          content: `⬅️ BEFORE: Manual outreach nightmare\n• 20 emails/day\n• 2% response rate\n• Burnt out after 1 month\n\n➡️ AFTER: Backlink ∞ magic\n• 100+ automated emails/day\n• 15% response rate\n• More time for strategy\n\nLink in bio: ${referralUrl}\n\n#BeforeAndAfter`,
+          content: `⬅️ BEFORE: Manual outreach nightmare\n• 20 emails/day\n• 2% response rate\n• Burnt out after 1 month\n\n➡️ AFTER: Backlink ∞ magic\n• 100+ automated emails/day\n• 15% response rate\n��� More time for strategy\n\nLink in bio: ${referralUrl}\n\n#BeforeAndAfter`,
           engagement: "Very High",
           audience: "Transformation seekers"
         },
@@ -773,7 +1004,7 @@ const SafeAffiliateProgram: React.FC = () => {
         },
         {
           type: "Growth Hack",
-          content: `💡 GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️⃣ Technical SEO ✅\n3️⃣ High-quality backlinks ✅\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
+          content: `��� GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️��� Technical SEO ✅\n3️⃣ High-quality backlinks ✅\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
           engagement: "Very High",
           audience: "Growth hackers"
         },
@@ -811,7 +1042,7 @@ const SafeAffiliateProgram: React.FC = () => {
         },
         {
           type: "Final Push",
-          content: `🎯 FINAL CALL 🎯\n\nIf you're serious about SEO success:\n\n⏰ Don't wait another day\n⏰ Every moment counts\n⏰ Your competitors aren't waiting\n⏰ Start building links NOW\n\nBacklink ∞ = Your secret weapon! 🚀\n\nLink in bio: ${referralUrl}\n\n#FinalCall #TakeAction`,
+          content: `🎯 FINAL CALL 🎯\n\nIf you're serious about SEO success:\n\n⏰ Don't wait another day\n⏰ Every moment counts\n��� Your competitors aren't waiting\n⏰ Start building links NOW\n\nBacklink ∞ = Your secret weapon! 🚀\n\nLink in bio: ${referralUrl}\n\n#FinalCall #TakeAction`,
           engagement: "High",
           audience: "Action takers"
         }
@@ -820,13 +1051,21 @@ const SafeAffiliateProgram: React.FC = () => {
         // Page 1
         {
           type: "Tutorial",
-          content: `🎥 NEW VIDEO: "How I Built 500+ High-Quality Backlinks in 30 Days" - featuring Backlink ∞'s automated platform. This tool is a game-changer for SEO! ${referralUrl}`,
+          content: `🎥 NEW VIDEO: "How I Built 500+ High-Quality Backlinks in 30 Days" - featuring Backlink ∞'s automated platform.
+
+This tool is a game-changer for SEO!
+
+${referralUrl}`,
           engagement: "Very High",
           audience: "Content creators"
         },
         {
           type: "Review",
-          content: `📹 HONEST REVIEW: I tested Backlink ∞ for 90 days - here are my unfiltered results. Spoiler alert: The ROI is incredible! Full breakdown in today's video: ${referralUrl}`,
+          content: `📹 HONEST REVIEW: I tested Backlink ∞ for 90 days - here are my unfiltered results.
+
+Spoiler alert: The ROI is incredible!
+
+Full breakdown in today's video: ${referralUrl}`,
           engagement: "Very High",
           audience: "Review watchers"
         },
@@ -839,26 +1078,42 @@ const SafeAffiliateProgram: React.FC = () => {
         // Page 2
         {
           type: "Live Test",
-          content: `🎬 LIVE TEST: Building backlinks in real-time with Backlink ∞. Watch me set up a campaign from scratch and get our first links within 24 hours! Timestamps in description: ${referralUrl}`,
+          content: `🎬 LIVE TEST: Building backlinks in real-time with Backlink ∞.
+
+Watch me set up a campaign from scratch and get our first links within 24 hours!
+
+Timestamps in description: ${referralUrl}`,
           engagement: "Very High",
           audience: "Live action fans"
         },
         {
           type: "Before vs After",
-          content: `📊 DRAMATIC BEFORE & AFTER: My website's transformation using Backlink ∞. Traffic charts, ranking improvements, and revenue growth - all the data revealed! ${referralUrl}`,
+          content: `📊 DRAMATIC BEFORE & AFTER: My website's transformation using Backlink ∞.
+
+Traffic charts, ranking improvements, and revenue growth - all the data revealed!
+
+${referralUrl}`,
           engagement: "Very High",
           audience: "Data lovers"
         },
         {
           type: "Step by Step",
-          content: `📋 COMPLETE GUIDE: Setting up your first Backlink ∞ campaign (Beginner friendly). Follow along as I walk through every single step with zero experience assumed: ${referralUrl}`,
+          content: `📋 COMPLETE GUIDE: Setting up your first Backlink ∞ campaign (Beginner friendly).
+
+Follow along as I walk through every single step with zero experience assumed:
+
+${referralUrl}`,
           engagement: "High",
           audience: "Beginners"
         },
         // Page 3
         {
           type: "Tool Comparison",
-          content: `⚔️ ULTIMATE COMPARISON: Backlink ∞ vs 7 other link building tools. I spent $3,000 testing them all so you don't have to. The winner might surprise you! ${referralUrl}`,
+          content: `⚔️ ULTIMATE COMPARISON: Backlink ∞ vs 7 other link building tools.
+
+I spent $3,000 testing them all so you don't have to. The winner might surprise you!
+
+${referralUrl}`,
           engagement: "Very High",
           audience: "Comparison shoppers"
         },
@@ -870,7 +1125,11 @@ const SafeAffiliateProgram: React.FC = () => {
         },
         {
           type: "ROI Breakdown",
-          content: `💰 ROI BREAKDOWN: Exact numbers from my Backlink ∞ investment. $99/month turned into $5,000/month in additional revenue. Here's the math: ${referralUrl}`,
+          content: `💰 ROI BREAKDOWN: Exact numbers from my Backlink ��� investment.
+
+$99/month turned into $5,000/month in additional revenue.
+
+Here's the math: ${referralUrl}`,
           engagement: "Very High",
           audience: "ROI focused"
         },
@@ -1054,22 +1313,27 @@ const SafeAffiliateProgram: React.FC = () => {
         {
           label: "Opening",
           content: `<p>Hi [Name],</p>
-<p>I hope this email finds you well. As someone who values efficient SEO strategies, I wanted to share a tool that has significantly improved my link building results.</p>`,
+
+<p>I hope this email finds you well.</p>
+
+<p>As someone who values efficient SEO strategies, I wanted to share a tool that has significantly improved my link building results.</p>`,
           isHtml: true
         },
         {
           label: "Body",
           content: `<p>I've been using <strong>Backlink ∞</strong> for the past few months, and the results speak for themselves:</p>
 
-<ul>
-  <li><strong>300% increase</strong> in high-quality backlinks</li>
-  <li><strong>50% reduction</strong> in outreach time</li>
-  <li><strong>Improved domain authority</strong> across all projects</li>
+<ul style="margin: 20px 0; padding-left: 20px;">
+  <li style="margin-bottom: 8px;"><strong>300% increase</strong> in high-quality backlinks</li>
+  <li style="margin-bottom: 8px;"><strong>50% reduction</strong> in outreach time</li>
+  <li style="margin-bottom: 8px;"><strong>Improved domain authority</strong> across all projects</li>
 </ul>
 
-<p>What sets Backlink ∞ apart is their automated outreach system and focus on high-DA websites. The platform has streamlined my entire link building process.</p>
+<p>What sets Backlink ∞ apart is their automated outreach system and focus on high-DA websites.</p>
 
-<p>You can check it out here: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none;">Backlink ∞ Platform</a></p>
+<p>The platform has streamlined my entire link building process.</p>
+
+<p>You can check it out here: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Backlink ∞ Platform</a></p>
 
 <p>They're currently offering a <strong>free trial</strong>, so there's no risk in testing it out.</p>`,
           isHtml: true
@@ -1077,6 +1341,7 @@ const SafeAffiliateProgram: React.FC = () => {
         {
           label: "Closing",
           content: `<p>I'd be happy to discuss my experience in more detail if you're interested.</p>
+
 <p>Best regards,<br>[Your Name]</p>`,
           isHtml: true
         }
@@ -1090,20 +1355,27 @@ const SafeAffiliateProgram: React.FC = () => {
         {
           label: "Opening",
           content: `<p>Hey [Name]!</p>
-<p>Hope you're doing awesome! I just had to share this SEO tool I've been using - it's been a <em>total game-changer</em> for my websites.</p>`,
+
+<p>Hope you're doing awesome!</p>
+
+<p>I just had to share this SEO tool I've been using - it's been a <em>total game-changer</em> for my websites.</p>`,
           isHtml: true
         },
         {
           label: "Body",
-          content: `<p>So I've been struggling with link building (you know how tedious it can be), and then I found <strong>Backlink ∞</strong>. This platform is seriously impressive:</p>
+          content: `<p>So I've been struggling with link building (you know how tedious it can be), and then I found <strong>Backlink ∞</strong>.</p>
 
-<ul style="list-style: none; padding-left: 0;">
-  <li>✅ <strong>Automated outreach</strong> that actually works</li>
-  <li>✅ <strong>High-quality backlinks</strong> from real websites</li>
-  <li>✅ <strong>Super easy to use</strong> interface</li>
+<p>This platform is seriously impressive:</p>
+
+<ul style="list-style: none; padding-left: 0; margin: 20px 0;">
+  <li style="margin-bottom: 10px;">✅ <strong>Automated outreach</strong> that actually works</li>
+  <li style="margin-bottom: 10px;">✅ <strong>High-quality backlinks</strong> from real websites</li>
+  <li style="margin-bottom: 10px;">✅ <strong>Super easy to use</strong> interface</li>
 </ul>
 
-<p>I've seen my rankings improve within just a few weeks! Here's the link if you want to check it out: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none;">Try Backlink ∞</a></p>
+<p>I've seen my rankings improve within just a few weeks!</p>
+
+<p>Here's the link if you want to check it out: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Try Backlink ∞</a></p>
 
 <p>They have a <strong>free trial</strong>, so you can test it risk-free.</p>`,
           isHtml: true
@@ -1111,6 +1383,7 @@ const SafeAffiliateProgram: React.FC = () => {
         {
           label: "Closing",
           content: `<p>Let me know what you think if you try it out!</p>
+
 <p>Cheers,<br>[Your Name]</p>`,
           isHtml: true
         }
@@ -1150,6 +1423,94 @@ const SafeAffiliateProgram: React.FC = () => {
 </div>
 
 <p>Interested in learning more? You can explore <a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Backlink ∞ here</a></p>`,
+          isHtml: true
+        }
+      ],
+      direct_outreach: [
+        {
+          label: "Subject Line",
+          content: "Quick question about your SEO strategy",
+          isHtml: false
+        },
+        {
+          label: "Opening",
+          content: `<p>Hi [Name],</p>
+
+<p>I noticed your website [Website Name] and I'm impressed with your content quality.</p>
+
+<p>I wanted to reach out because I recently discovered a tool that's been a game-changer for my SEO results.</p>`,
+          isHtml: true
+        },
+        {
+          label: "Body",
+          content: `<p>Are you currently working on link building for your site?</p>
+
+<p>I ask because I've been using <strong>Backlink ∞</strong> and the results have been incredible:</p>
+
+<ul style="margin: 20px 0; padding-left: 20px;">
+  <li style="margin-bottom: 8px;"><strong>250% increase</strong> in quality backlinks</li>
+  <li style="margin-bottom: 8px;"><strong>Automated outreach</strong> that saves 15+ hours/week</li>
+  <li style="margin-bottom: 8px;"><strong>Higher success rates</strong> than manual methods</li>
+</ul>
+
+<p>The platform focuses on high-authority websites and uses AI to personalize outreach at scale.</p>
+
+<p>Given your expertise in [Industry], I thought this might be valuable for your SEO strategy:</p>
+
+<p><a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Check out Backlink ∞</a></p>`,
+          isHtml: true
+        },
+        {
+          label: "Closing",
+          content: `<p>Would love to hear your thoughts if you take a look!</p>
+
+<p>Best,<br>[Your Name]</p>
+
+<p style="font-size: 12px; color: #666; margin-top: 15px;">P.S. They offer a free trial, so there's no risk in testing it out.</p>`,
+          isHtml: true
+        }
+      ],
+      follow_up: [
+        {
+          label: "Subject Line",
+          content: "Re: SEO tool recommendation - any thoughts?",
+          isHtml: false
+        },
+        {
+          label: "Opening",
+          content: `<p>Hi [Name],</p>
+
+<p>Hope you're having a great week!</p>
+
+<p>I wanted to follow up on my previous email about Backlink ∞.</p>`,
+          isHtml: true
+        },
+        {
+          label: "Body",
+          content: `<p>I know you're probably busy, so I'll keep this brief.</p>
+
+<p>Since my last email, I've seen even more impressive results:</p>
+
+<ul style="margin: 20px 0; padding-left: 20px;">
+  <li style="margin-bottom: 8px;"><strong>Just landed 12 high-DA backlinks</strong> in the past week</li>
+  <li style="margin-bottom: 8px;"><strong>Domain Authority increased by 8 points</strong></li>
+  <li style="margin-bottom: 8px;"><strong>Organic traffic up 45%</strong> this month</li>
+</ul>
+
+<p>The ROI has been phenomenal, and I genuinely think it could help with your SEO goals too.</p>
+
+<p>Here's the link again if you'd like to take a look:</p>
+
+<p><a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Backlink ∞ Platform</a></p>`,
+          isHtml: true
+        },
+        {
+          label: "Closing",
+          content: `<p>No pressure at all - just wanted to share something that's been working well for me.</p>
+
+<p>Either way, keep up the excellent work on your site!</p>
+
+<p>Best regards,<br>[Your Name]</p>`,
           isHtml: true
         }
       ]
@@ -1254,7 +1615,7 @@ const SafeAffiliateProgram: React.FC = () => {
                 <p className="text-gray-600 mb-4">Extended attribution window ensures maximum earnings</p>
                 <div className="space-y-2 text-sm text-blue-700">
                   <div className="flex items-center gap-2">
-                    <span>✓</span>
+                    <span>���</span>
                     <span>Cross-device tracking</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -1697,7 +2058,7 @@ const SafeAffiliateProgram: React.FC = () => {
                                 <Copy className="h-3 w-3" />
                               </Button>
                             </div>
-                            <p className="text-sm text-gray-700 mb-3">{template.content}</p>
+                            <p className="text-sm text-gray-700 mb-3 whitespace-pre-line">{template.content}</p>
                             <div className="flex items-center gap-2 text-xs text-gray-500">
                               <Eye className="h-3 w-3" />
                               <span>Est. {template.engagement} engagement</span>
@@ -1813,11 +2174,13 @@ const SafeAffiliateProgram: React.FC = () => {
                   {/* Template Selection */}
                   <div>
                     <Label className="text-sm font-medium mb-3 block">Email Template Type</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
                       {[
                         { id: 'professional', name: 'Professional', desc: 'B2B focused', icon: '💼' },
                         { id: 'casual', name: 'Casual', desc: 'Friendly tone', icon: '😊' },
-                        { id: 'newsletter', name: 'Newsletter', desc: 'Content style', icon: '📰' }
+                        { id: 'newsletter', name: 'Newsletter', desc: 'Content style', icon: '📰' },
+                        { id: 'direct_outreach', name: 'Direct Outreach', desc: 'Personal approach', icon: '📧' },
+                        { id: 'follow_up', name: 'Follow-up', desc: 'Second contact', icon: '🔄' }
                       ].map((template) => (
                         <button
                           key={template.id}
