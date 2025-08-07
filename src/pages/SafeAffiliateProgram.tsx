@@ -947,7 +947,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Motivational Monday",
-          content: `💪 MOTIVATIONAL MONDAY 💪\n\n"Success isn't about working harder, it's about working smarter"\n\nThat's why I use Backlink �� for link building 🧠\n\nWork smart, not hard! 💯\n\nLink in bio: ${referralUrl}\n\n#MotivationMonday #WorkSmart #Entrepreneur`,
+          content: `💪 MOTIVATIONAL MONDAY 💪\n\n"Success isn't about working harder, it's about working smarter"\n\nThat's why I use Backlink ��� for link building 🧠\n\nWork smart, not hard! 💯\n\nLink in bio: ${referralUrl}\n\n#MotivationMonday #WorkSmart #Entrepreneur`,
           engagement: "High",
           audience: "Motivation seekers"
         },
@@ -1355,7 +1355,10 @@ Here's the math: ${referralUrl}`,
         {
           label: "Opening",
           content: `<p>Hey [Name]!</p>
-<p>Hope you're doing awesome! I just had to share this SEO tool I've been using - it's been a <em>total game-changer</em> for my websites.</p>`,
+
+<p>Hope you're doing awesome!</p>
+
+<p>I just had to share this SEO tool I've been using - it's been a <em>total game-changer</em> for my websites.</p>`,
           isHtml: true
         },
         {
