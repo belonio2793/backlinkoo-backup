@@ -2,6 +2,7 @@ import React from 'react';
 import { Monitor, Share2, FileText, Download, Eye, Sparkles, Crown, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { generateAsset } from '@/utils/assetGenerator';
 
 interface AssetCardProps {
   asset: {
@@ -174,7 +175,7 @@ const CreativeAssetsShowcase: React.FC<{
           <div className="relative h-full flex items-center justify-between px-8">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
-                <span className="text-2xl font-black text-gray-900">���</span>
+                <span className="text-2xl font-black text-gray-900">∞</span>
               </div>
               <div>
                 <div className="text-white font-black text-3xl drop-shadow-xl">Backlink ∞</div>
@@ -485,7 +486,7 @@ const CreativeAssetsShowcase: React.FC<{
 
               <div>
                 <h3 className="text-white font-black text-4xl mb-2 drop-shadow-xl">
-                  Backlink <span className="text-yellow-400">∞</span> Affiliate
+                  Backlink <span className="text-yellow-400">��</span> Affiliate
                 </h3>
                 <p className="text-blue-200 text-xl font-bold mb-3">
                   AI-Powered Link Building • Earn Premium Commissions
