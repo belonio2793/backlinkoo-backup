@@ -768,40 +768,511 @@ const SafeAffiliateProgram: React.FC = () => {
           </div>
         </div>
 
-        {/* Quick Actions */}
+        {/* Comprehensive Affiliate Marketing Toolkit */}
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-          <h2 className="text-xl font-bold mb-4">🚀 Quick Start Guide</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button
-              onClick={() => copyToClipboard(affiliateData.referral_url)}
-              className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 transition-colors text-center group hover:bg-blue-50"
-            >
-              <span className="block text-2xl mb-2 group-hover:scale-110 transition-transform">📱</span>
-              <span className="font-semibold">Share on Social</span>
-              <p className="text-sm text-gray-600">Post your referral links</p>
-            </button>
-
-            <button
-              onClick={() => copyToClipboard(`Check out Backlinkoo - the best SEO tool I've found! ${affiliateData.referral_url}`)}
-              className="p-4 border-2 border-gray-200 rounded-lg hover:border-green-300 transition-colors text-center group hover:bg-green-50"
-            >
-              <span className="block text-2xl mb-2 group-hover:scale-110 transition-transform">📧</span>
-              <span className="font-semibold">Email Template</span>
-              <p className="text-sm text-gray-600">Copy email template</p>
-            </button>
-
-            <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 transition-colors text-center group hover:bg-purple-50">
-              <span className="block text-2xl mb-2 group-hover:scale-110 transition-transform">📊</span>
-              <span className="font-semibold">Track Performance</span>
-              <p className="text-sm text-gray-600">View click analytics</p>
-            </button>
-
-            <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-orange-300 transition-colors text-center group hover:bg-orange-50">
-              <span className="block text-2xl mb-2 group-hover:scale-110 transition-transform">🎯</span>
-              <span className="font-semibold">Marketing Assets</span>
-              <p className="text-sm text-gray-600">Download banners</p>
-            </button>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">🚀 Affiliate Marketing Toolkit</h2>
+            <Badge variant="secondary" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+              Pro Tools
+            </Badge>
           </div>
+
+          <Tabs value={activeToolkitTab} onValueChange={setActiveToolkitTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-4 mb-6">
+              <TabsTrigger value="social" className="flex items-center gap-2">
+                <Share2 className="h-4 w-4" />
+                Social Media
+              </TabsTrigger>
+              <TabsTrigger value="email" className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                Email Templates
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Analytics
+              </TabsTrigger>
+              <TabsTrigger value="assets" className="flex items-center gap-2">
+                <Image className="h-4 w-4" />
+                Creative Assets
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Social Media Tab */}
+            <TabsContent value="social" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Share2 className="h-5 w-5 text-blue-600" />
+                    Social Media Promotion Hub
+                  </CardTitle>
+                  <CardDescription>
+                    Ready-to-use content for all major platforms with optimized messaging
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Platform Selection */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Choose Platform</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                      {[
+                        { id: 'twitter', name: 'Twitter', icon: Twitter, color: 'bg-blue-500', textColor: 'text-blue-600' },
+                        { id: 'linkedin', name: 'LinkedIn', icon: Linkedin, color: 'bg-blue-700', textColor: 'text-blue-700' },
+                        { id: 'facebook', name: 'Facebook', icon: Facebook, color: 'bg-blue-600', textColor: 'text-blue-600' },
+                        { id: 'instagram', name: 'Instagram', icon: Instagram, color: 'bg-pink-500', textColor: 'text-pink-600' },
+                        { id: 'youtube', name: 'YouTube', icon: Youtube, color: 'bg-red-600', textColor: 'text-red-600' }
+                      ].map((platform) => (
+                        <button
+                          key={platform.id}
+                          onClick={() => setSelectedSocialPlatform(platform.id)}
+                          className={`p-3 rounded-lg border-2 transition-all duration-200 ${
+                            selectedSocialPlatform === platform.id
+                              ? `border-blue-500 bg-blue-50 ${platform.textColor}`
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <platform.icon className="h-6 w-6 mx-auto mb-1" />
+                          <span className="text-xs font-medium">{platform.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Content Templates */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <Label className="text-sm font-medium mb-3 block">Ready-to-Post Content</Label>
+                      <div className="space-y-3">
+                        {getSocialTemplates(selectedSocialPlatform, affiliateData.referral_url).map((template, index) => (
+                          <div key={index} className="p-4 bg-gray-50 rounded-lg border">
+                            <div className="flex items-start justify-between mb-2">
+                              <Badge variant="outline" className="text-xs">
+                                {template.type}
+                              </Badge>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => copyToClipboard(template.content)}
+                                className="h-7 px-2"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <p className="text-sm text-gray-700 mb-3">{template.content}</p>
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <Eye className="h-3 w-3" />
+                              <span>Est. {template.engagement} engagement</span>
+                              <Target className="h-3 w-3 ml-2" />
+                              <span>{template.audience}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm font-medium mb-3 block">Custom Message Builder</Label>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="custom-message" className="text-xs text-gray-600">
+                            Add your personal touch
+                          </Label>
+                          <textarea
+                            id="custom-message"
+                            value={customMessage}
+                            onChange={(e) => setCustomMessage(e.target.value)}
+                            placeholder="Share your experience with Backlinkoo..."
+                            className="w-full h-24 p-3 border border-gray-300 rounded-md text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <p className="text-sm text-blue-800 mb-2">
+                            <strong>Your personalized post:</strong>
+                          </p>
+                          <p className="text-sm text-gray-700">
+                            {customMessage || "Your custom message will appear here..."} {affiliateData.referral_url}
+                          </p>
+                          <Button
+                            size="sm"
+                            className="mt-3"
+                            onClick={() => copyToClipboard(`${customMessage} ${affiliateData.referral_url}`)}
+                          >
+                            <Copy className="h-4 w-4 mr-2" />
+                            Copy Custom Post
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Platform-Specific Tips */}
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+                    <h4 className="font-semibold text-blue-900 mb-2">
+                      💡 {selectedSocialPlatform.charAt(0).toUpperCase() + selectedSocialPlatform.slice(1)} Best Practices
+                    </h4>
+                    <div className="text-sm text-blue-800 space-y-1">
+                      {getPlatformTips(selectedSocialPlatform).map((tip, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0 text-green-600" />
+                          <span>{tip}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Email Templates Tab */}
+            <TabsContent value="email" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Mail className="h-5 w-5 text-green-600" />
+                    Professional Email Templates
+                  </CardTitle>
+                  <CardDescription>
+                    High-converting email templates for different audiences and scenarios
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Template Selection */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Email Template Type</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {[
+                        { id: 'professional', name: 'Professional', desc: 'B2B focused', icon: '💼' },
+                        { id: 'casual', name: 'Casual', desc: 'Friendly tone', icon: '😊' },
+                        { id: 'newsletter', name: 'Newsletter', desc: 'Content style', icon: '📰' }
+                      ].map((template) => (
+                        <button
+                          key={template.id}
+                          onClick={() => setSelectedEmailTemplate(template.id)}
+                          className={`p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                            selectedEmailTemplate === template.id
+                              ? 'border-green-500 bg-green-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="text-2xl mb-2">{template.icon}</div>
+                          <div className="font-medium">{template.name}</div>
+                          <div className="text-sm text-gray-600">{template.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Email Template Content */}
+                  <div>
+                    <div className="bg-white border border-gray-200 rounded-lg p-6">
+                      <div className="space-y-4">
+                        {getEmailTemplate(selectedEmailTemplate, affiliateData.referral_url).map((section, index) => (
+                          <div key={index}>
+                            <Label className="text-xs text-gray-500 uppercase tracking-wide">
+                              {section.label}
+                            </Label>
+                            <div className="mt-1 p-3 bg-gray-50 rounded border text-sm">
+                              {section.content}
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => copyToClipboard(section.content)}
+                              className="mt-2"
+                            >
+                              <Copy className="h-4 w-4 mr-2" />
+                              Copy {section.label}
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Email Performance Tips */}
+                  <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border border-green-200">
+                    <h4 className="font-semibold text-green-900 mb-2">📈 Email Marketing Tips</h4>
+                    <div className="grid md:grid-cols-2 gap-4 text-sm text-green-800">
+                      <div>
+                        <h5 className="font-medium mb-1">Subject Line Best Practices:</h5>
+                        <ul className="space-y-1 text-xs">
+                          <li>• Keep it under 50 characters</li>
+                          <li>• Use action words and urgency</li>
+                          <li>• Personalize when possible</li>
+                          <li>• Avoid spam trigger words</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <h5 className="font-medium mb-1">Timing & Frequency:</h5>
+                        <ul className="space-y-1 text-xs">
+                          <li>• Tuesday-Thursday perform best</li>
+                          <li>• Send between 10 AM - 2 PM</li>
+                          <li>• Follow up after 3-5 days</li>
+                          <li>• Don't exceed 2 emails per week</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Analytics Tab */}
+            <TabsContent value="analytics" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-purple-600" />
+                    Performance Analytics Dashboard
+                  </CardTitle>
+                  <CardDescription>
+                    Track your affiliate performance with detailed insights and recommendations
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Time Range Selector */}
+                  <div className="flex items-center gap-4">
+                    <Label className="text-sm font-medium">Time Range:</Label>
+                    <div className="flex gap-2">
+                      {[
+                        { id: '7d', label: '7 Days' },
+                        { id: '30d', label: '30 Days' },
+                        { id: '90d', label: '90 Days' },
+                        { id: '1y', label: '1 Year' }
+                      ].map((range) => (
+                        <Button
+                          key={range.id}
+                          size="sm"
+                          variant={trackingTimeRange === range.id ? "default" : "outline"}
+                          onClick={() => setTrackingTimeRange(range.id)}
+                        >
+                          {range.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Key Metrics */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {[
+                      { label: 'Total Clicks', value: '0', change: '+0%', icon: MousePointer, color: 'blue' },
+                      { label: 'Conversions', value: '0', change: '+0%', icon: Target, color: 'green' },
+                      { label: 'Conversion Rate', value: '0%', change: '+0%', icon: TrendingUp, color: 'purple' },
+                      { label: 'Earnings', value: '$0.00', change: '+$0', icon: DollarSign, color: 'orange' }
+                    ].map((metric) => (
+                      <div key={metric.label} className="p-4 bg-gray-50 rounded-lg border">
+                        <div className="flex items-center justify-between mb-2">
+                          <metric.icon className={`h-5 w-5 text-${metric.color}-600`} />
+                          <Badge variant="outline" className="text-xs">
+                            {metric.change}
+                          </Badge>
+                        </div>
+                        <div className="text-2xl font-bold text-gray-900">{metric.value}</div>
+                        <div className="text-sm text-gray-600">{metric.label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Performance Chart Placeholder */}
+                  <div className="h-64 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                    <div className="text-center text-gray-500">
+                      <BarChart3 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p className="font-medium">Performance Chart</p>
+                      <p className="text-sm">Data will appear here once you start generating clicks</p>
+                    </div>
+                  </div>
+
+                  {/* Traffic Sources */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-semibold mb-3">Top Traffic Sources</h4>
+                      <div className="space-y-3">
+                        {[
+                          { source: 'Direct Link', clicks: 0, percentage: 0 },
+                          { source: 'Social Media', clicks: 0, percentage: 0 },
+                          { source: 'Email', clicks: 0, percentage: 0 },
+                          { source: 'Other', clicks: 0, percentage: 0 }
+                        ].map((source) => (
+                          <div key={source.source} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                            <span className="text-sm font-medium">{source.source}</span>
+                            <div className="flex items-center gap-3">
+                              <Progress value={source.percentage} className="w-20 h-2" />
+                              <span className="text-sm text-gray-600 w-12">{source.clicks}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold mb-3">Performance Insights</h4>
+                      <div className="space-y-3">
+                        <div className="p-3 bg-blue-50 rounded border border-blue-200">
+                          <div className="flex items-start gap-3">
+                            <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+                            <div>
+                              <p className="text-sm font-medium text-blue-900">Getting Started</p>
+                              <p className="text-xs text-blue-700">Start sharing your referral links to see analytics data</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="p-3 bg-yellow-50 rounded border border-yellow-200">
+                          <div className="flex items-start gap-3">
+                            <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                            <div>
+                              <p className="text-sm font-medium text-yellow-900">Optimization Tip</p>
+                              <p className="text-xs text-yellow-700">Focus on social media promotion for better conversion rates</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Creative Assets Tab */}
+            <TabsContent value="assets" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Image className="h-5 w-5 text-orange-600" />
+                    Professional Marketing Assets
+                  </CardTitle>
+                  <CardDescription>
+                    High-quality banners, graphics, and promotional materials for all platforms
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Asset Categories */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Banners & Display Ads */}
+                    <div>
+                      <h4 className="font-semibold mb-3 flex items-center gap-2">
+                        <Monitor className="h-4 w-4" />
+                        Display Banners
+                      </h4>
+                      <div className="space-y-3">
+                        {[
+                          { name: 'Leaderboard', size: '728x90', format: 'PNG/JPG' },
+                          { name: 'Rectangle', size: '300x250', format: 'PNG/JPG' },
+                          { name: 'Skyscraper', size: '160x600', format: 'PNG/JPG' },
+                          { name: 'Mobile Banner', size: '320x50', format: 'PNG/JPG' }
+                        ].map((banner) => (
+                          <div key={banner.name} className="p-3 bg-gray-50 rounded border">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium text-sm">{banner.name}</span>
+                              <Badge variant="outline" className="text-xs">{banner.format}</Badge>
+                            </div>
+                            <p className="text-xs text-gray-600 mb-2">{banner.size}px</p>
+                            <Button size="sm" variant="outline" className="w-full">
+                              <Download className="h-3 w-3 mr-2" />
+                              Download
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Social Media Graphics */}
+                    <div>
+                      <h4 className="font-semibold mb-3 flex items-center gap-2">
+                        <Share2 className="h-4 w-4" />
+                        Social Graphics
+                      </h4>
+                      <div className="space-y-3">
+                        {[
+                          { name: 'Instagram Post', size: '1080x1080', platform: 'Instagram' },
+                          { name: 'Instagram Story', size: '1080x1920', platform: 'Instagram' },
+                          { name: 'Facebook Post', size: '1200x630', platform: 'Facebook' },
+                          { name: 'Twitter Header', size: '1500x500', platform: 'Twitter' }
+                        ].map((graphic) => (
+                          <div key={graphic.name} className="p-3 bg-gray-50 rounded border">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium text-sm">{graphic.name}</span>
+                              <Badge variant="outline" className="text-xs">{graphic.platform}</Badge>
+                            </div>
+                            <p className="text-xs text-gray-600 mb-2">{graphic.size}px</p>
+                            <Button size="sm" variant="outline" className="w-full">
+                              <Download className="h-3 w-3 mr-2" />
+                              Download
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Logo & Brand Assets */}
+                    <div>
+                      <h4 className="font-semibold mb-3 flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Brand Assets
+                      </h4>
+                      <div className="space-y-3">
+                        {[
+                          { name: 'Backlinkoo Logo', type: 'High-res PNG', use: 'General use' },
+                          { name: 'Logo + Tagline', type: 'Vector SVG', use: 'Professional' },
+                          { name: 'Icon Only', type: 'PNG/SVG', use: 'Small spaces' },
+                          { name: 'Brand Guidelines', type: 'PDF', use: 'Reference' }
+                        ].map((asset) => (
+                          <div key={asset.name} className="p-3 bg-gray-50 rounded border">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium text-sm">{asset.name}</span>
+                              <Badge variant="outline" className="text-xs">{asset.type}</Badge>
+                            </div>
+                            <p className="text-xs text-gray-600 mb-2">{asset.use}</p>
+                            <Button size="sm" variant="outline" className="w-full">
+                              <Download className="h-3 w-3 mr-2" />
+                              Download
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Asset Usage Guidelines */}
+                  <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-lg border border-orange-200">
+                    <h4 className="font-semibold text-orange-900 mb-3">📋 Asset Usage Guidelines</h4>
+                    <div className="grid md:grid-cols-2 gap-4 text-sm text-orange-800">
+                      <div>
+                        <h5 className="font-medium mb-2 text-green-700">✅ Do's:</h5>
+                        <ul className="space-y-1 text-xs">
+                          <li>• Use assets as provided without modification</li>
+                          <li>• Maintain proper spacing around logos</li>
+                          <li>• Use high-resolution versions for print</li>
+                          <li>• Include your affiliate tracking code</li>
+                          <li>• Follow platform-specific size requirements</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <h5 className="font-medium mb-2 text-red-700">❌ Don'ts:</h5>
+                        <ul className="space-y-1 text-xs">
+                          <li>• Don't alter colors, fonts, or proportions</li>
+                          <li>• Don't add effects or filters to logos</li>
+                          <li>• Don't use assets for competing services</li>
+                          <li>• Don't make false or misleading claims</li>
+                          <li>• Don't use outdated brand materials</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Custom Asset Request */}
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="font-semibold text-blue-900 mb-2">🎨 Need Custom Assets?</h4>
+                    <p className="text-sm text-blue-800 mb-3">
+                      Our design team can create custom promotional materials for high-performing affiliates.
+                    </p>
+                    <Button size="sm" variant="outline" className="bg-white">
+                      <Mail className="h-4 w-4 mr-2" />
+                      Request Custom Assets
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Earnings Potential Calculator */}
