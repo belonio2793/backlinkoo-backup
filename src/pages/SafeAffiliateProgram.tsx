@@ -544,7 +544,7 @@ const SafeAffiliateProgram: React.FC = () => {
             <h1 className="text-5xl font-bold text-gray-900 mb-6">
               Earn <span className="text-blue-600">$10,000+</span> Monthly
               <br />
-              with Backlinkoo Affiliate Program
+              with Backlink ∞ Affiliate Program
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Join the most lucrative affiliate program in the SEO industry. Earn up to 35%
@@ -668,7 +668,7 @@ const SafeAffiliateProgram: React.FC = () => {
         <Header />
         <div className="max-w-4xl mx-auto px-6 py-12">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Join the Backlinkoo Affiliate Program</h1>
+            <h1 className="text-3xl font-bold mb-2">Join the Backlink ∞ Affiliate Program</h1>
             <p className="text-gray-600">Start earning commissions by promoting the world's leading SEO platform</p>
           </div>
 
@@ -1042,7 +1042,7 @@ const SafeAffiliateProgram: React.FC = () => {
                             id="custom-message"
                             value={customMessage}
                             onChange={(e) => setCustomMessage(e.target.value)}
-                            placeholder="Share your experience with Backlinkoo..."
+                            placeholder="Share your experience with Backlink ∞..."
                             className="w-full h-24 p-3 border border-gray-300 rounded-md text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         </div>
@@ -1157,7 +1157,7 @@ const SafeAffiliateProgram: React.FC = () => {
                       <div>
                         <h5 className="font-medium mb-1">Subject Line Best Practices:</h5>
                         <ul className="space-y-1 text-xs">
-                          <li>• Keep it under 50 characters</li>
+                          <li>��� Keep it under 50 characters</li>
                           <li>• Use action words and urgency</li>
                           <li>• Personalize when possible</li>
                           <li>• Avoid spam trigger words</li>
@@ -1372,7 +1372,7 @@ const SafeAffiliateProgram: React.FC = () => {
                       </h4>
                       <div className="space-y-3">
                         {[
-                          { name: 'Backlinkoo Logo', type: 'High-res PNG', use: 'General use' },
+                          { name: 'Backlink ∞ Logo', type: 'High-res PNG', use: 'General use' },
                           { name: 'Logo + Tagline', type: 'Vector SVG', use: 'Professional' },
                           { name: 'Icon Only', type: 'PNG/SVG', use: 'Small spaces' },
                           { name: 'Brand Guidelines', type: 'PDF', use: 'Reference' }
