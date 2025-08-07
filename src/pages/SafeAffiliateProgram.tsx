@@ -1004,7 +1004,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Growth Hack",
-          content: `💡 GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️⃣ Technical SEO ✅\n3️⃣ High-quality backlinks ✅\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
+          content: `��� GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️⃣ Technical SEO ✅\n3️⃣ High-quality backlinks ✅\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
           engagement: "Very High",
           audience: "Growth hackers"
         },
@@ -1078,7 +1078,11 @@ Full breakdown in today's video: ${referralUrl}`,
         // Page 2
         {
           type: "Live Test",
-          content: `🎬 LIVE TEST: Building backlinks in real-time with Backlink ∞. Watch me set up a campaign from scratch and get our first links within 24 hours! Timestamps in description: ${referralUrl}`,
+          content: `🎬 LIVE TEST: Building backlinks in real-time with Backlink ∞.
+
+Watch me set up a campaign from scratch and get our first links within 24 hours!
+
+Timestamps in description: ${referralUrl}`,
           engagement: "Very High",
           audience: "Live action fans"
         },
