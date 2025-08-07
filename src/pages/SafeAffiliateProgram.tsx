@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
+import { Header } from '../components/Header';
 
 const SafeAffiliateProgram: React.FC = () => {
   const { user } = useAuth();
@@ -325,31 +326,8 @@ const SafeAffiliateProgram: React.FC = () => {
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-        {/* Header with Login/Signup */}
-        <div className="bg-white/80 backdrop-blur-sm border-b border-blue-100 sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">∞</span>
-                <span className="text-xl font-bold text-gray-900">Backlinkoo Affiliates</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => navigate('/login')}
-                  className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  Sign In
-                </button>
-                <button
-                  onClick={() => navigate('/login')}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-                >
-                  Join Program
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Use original header */}
+        <Header />
 
         <div className="max-w-6xl mx-auto px-6 py-20">
           <div className="text-center">
@@ -533,7 +511,10 @@ const SafeAffiliateProgram: React.FC = () => {
   // Affiliate Dashboard
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Enhanced Header */}
+      {/* Use original header */}
+      <Header />
+
+      {/* Affiliate Status Banner */}
       <div className="bg-white border-b shadow-sm">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
