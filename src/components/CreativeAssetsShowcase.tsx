@@ -197,10 +197,6 @@ const CreativeAssetsShowcase: React.FC<{
   };
 
   const handlePreview = (name: string, preview: string) => {
-    if (name === 'Brand Guidelines') {
-      setShowBrandGuidelines(true);
-      return;
-    }
     onPreview(name, preview);
   };
   
@@ -362,7 +358,7 @@ const CreativeAssetsShowcase: React.FC<{
             <p className="text-purple-100 text-xl mb-6 font-bold">I just increased my<br/>organic traffic by<br/><span className="text-yellow-300 font-black text-3xl animate-pulse">300%!</span></p>
             <div className="space-y-3 mb-6">
               <div className="bg-white/20 backdrop-blur rounded-full px-6 py-3 border border-white/30">
-                <div className="text-white text-lg font-black">✨ Automated Outreach</div>
+                <div className="text-white text-lg font-black">��� Automated Outreach</div>
               </div>
               <div className="bg-white/20 backdrop-blur rounded-full px-6 py-3 border border-white/30">
                 <div className="text-white text-lg font-black">📈 High-DA Links Only</div>
