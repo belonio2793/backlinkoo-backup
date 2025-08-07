@@ -548,7 +548,7 @@ ${referralUrl}`,
           type: "Case Study",
           content: `Case Study: How I increased organic traffic by 300% in 6 months using strategic link building.
 
-The secret? Backlink ���'s platform made it scalable and efficient.
+The secret? Backlink ∞'s platform made it scalable and efficient.
 
 ${referralUrl}`,
           engagement: "Very High",
@@ -1323,15 +1323,17 @@ Here's the math: ${referralUrl}`,
           label: "Body",
           content: `<p>I've been using <strong>Backlink ∞</strong> for the past few months, and the results speak for themselves:</p>
 
-<ul>
-  <li><strong>300% increase</strong> in high-quality backlinks</li>
-  <li><strong>50% reduction</strong> in outreach time</li>
-  <li><strong>Improved domain authority</strong> across all projects</li>
+<ul style="margin: 20px 0; padding-left: 20px;">
+  <li style="margin-bottom: 8px;"><strong>300% increase</strong> in high-quality backlinks</li>
+  <li style="margin-bottom: 8px;"><strong>50% reduction</strong> in outreach time</li>
+  <li style="margin-bottom: 8px;"><strong>Improved domain authority</strong> across all projects</li>
 </ul>
 
-<p>What sets Backlink ∞ apart is their automated outreach system and focus on high-DA websites. The platform has streamlined my entire link building process.</p>
+<p>What sets Backlink ∞ apart is their automated outreach system and focus on high-DA websites.</p>
 
-<p>You can check it out here: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none;">Backlink ∞ Platform</a></p>
+<p>The platform has streamlined my entire link building process.</p>
+
+<p>You can check it out here: <a href="${referralUrl}" style="color: #2563eb; text-decoration: none; font-weight: bold;">Backlink ∞ Platform</a></p>
 
 <p>They're currently offering a <strong>free trial</strong>, so there's no risk in testing it out.</p>`,
           isHtml: true
@@ -2612,7 +2614,7 @@ Here's the math: ${referralUrl}`,
                         </ul>
                       </div>
                       <div>
-                        <h5 className="font-medium mb-2 text-red-700">❌ Don'ts:</h5>
+                        <h5 className="font-medium mb-2 text-red-700">��� Don'ts:</h5>
                         <ul className="space-y-1 text-xs">
                           <li>• Don't alter colors, fonts, or proportions</li>
                           <li>• Don't add effects or filters to logos</li>
