@@ -414,6 +414,13 @@ export function AuthFormTabs({
               </Button>
             </div>
           </div>
+
+          {/* Testimonial banner for login */}
+          {!isCompact && (
+            <div className="mt-6">
+              <TestimonialBanner />
+            </div>
+          )}
         </form>
       </TabsContent>
 
