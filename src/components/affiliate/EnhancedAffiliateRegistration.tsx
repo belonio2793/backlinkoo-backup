@@ -166,7 +166,7 @@ export const EnhancedAffiliateRegistration: React.FC<RegistrationProps> = ({
 
     setIsSubmitting(true);
     try {
-      await enhancedAffiliateService.createAffiliateProfile(userId, {
+      await compatibilityAffiliateService.createAffiliateProfile(userId, {
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: formData.email,
