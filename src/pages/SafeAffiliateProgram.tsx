@@ -375,7 +375,7 @@ ${referralUrl} #SEO #LinkBuilding`,
         },
         {
           type: "Tips",
-          content: `��� Pro tip: Quality backlinks > quantity.
+          content: `💡 Pro tip: Quality backlinks > quantity.
 
 Backlink ∞ helps you get high-DA links that actually move the needle.
 
@@ -1659,7 +1659,7 @@ Here's the math: ${referralUrl}`,
         <Header />
         <div className="max-w-4xl mx-auto px-6 py-12">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Join the Backlink ��� Affiliate Program</h1>
+            <h1 className="text-3xl font-bold mb-2">Join the Backlink ∞ Affiliate Program</h1>
             <p className="text-gray-600">Start earning commissions by promoting the world's leading SEO platform</p>
           </div>
 
@@ -1845,7 +1845,7 @@ Here's the math: ${referralUrl}`,
           {/* Tracking Info */}
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-green-600">���</span>
+              <span className="text-green-600">✓</span>
               <span className="font-medium text-sm">User ID Tracking Active</span>
             </div>
             <div className="text-xs text-gray-600 space-y-1">
