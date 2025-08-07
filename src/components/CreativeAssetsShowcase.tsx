@@ -190,6 +190,23 @@ const CreativeAssetsShowcase: React.FC<{
   onDownload: (name: string, preview: string, format: string) => void;
   onPreview: (name: string, preview: string) => void;
 }> = ({ onDownload, onPreview }) => {
+  const [showBrandGuidelines, setShowBrandGuidelines] = useState(false);
+
+  const handleDownload = (name: string, preview: string, format: string) => {
+    if (name === 'Brand Guidelines') {
+      setShowBrandGuidelines(true);
+      return;
+    }
+    onDownload(name, preview, format);
+  };
+
+  const handlePreview = (name: string, preview: string) => {
+    if (name === 'Brand Guidelines') {
+      setShowBrandGuidelines(true);
+      return;
+    }
+    onPreview(name, preview);
+  };
   
   const displayBanners = [
     {
