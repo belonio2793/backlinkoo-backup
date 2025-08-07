@@ -769,20 +769,32 @@ ${referralUrl}`,
         },
         {
           type: "Success Story",
-          content: `From struggling with SEO to ranking on page 1 - here's how Backlink ∞ helped transform my online presence. The automated outreach and quality links made all the difference! ${referralUrl}`,
+          content: `From struggling with SEO to ranking on page 1 - here's how Backlink ∞ helped transform my online presence.
+
+The automated outreach and quality links made all the difference!
+
+${referralUrl}`,
           engagement: "Very High",
           audience: "Entrepreneurs"
         },
         {
           type: "Community Help",
-          content: `Hey everyone! 👋 I know many of you are working on growing your online businesses. I recently discovered this amazing tool called Backlink ∞ that has seriously boosted my website's visibility. Thought I'd share! ${referralUrl}`,
+          content: `Hey everyone! 👋
+
+I know many of you are working on growing your online businesses. I recently discovered this amazing tool called Backlink ∞ that has seriously boosted my website's visibility.
+
+Thought I'd share! ${referralUrl}`,
           engagement: "High",
           audience: "Community members"
         },
         // Page 2
         {
           type: "Behind the Scenes",
-          content: `Behind the scenes of my business growth: I've been quietly testing different SEO strategies, and Backlink ∞ has been the secret weapon that's finally moving the needle. Here's what happened... ${referralUrl}`,
+          content: `Behind the scenes of my business growth:
+
+I've been quietly testing different SEO strategies, and Backlink ∞ has been the secret weapon that's finally moving the needle.
+
+Here's what happened... ${referralUrl}`,
           engagement: "Very High",
           audience: "Business owners"
         },
@@ -1714,7 +1726,7 @@ ${referralUrl}`,
           <div className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-lg p-6 mb-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold mb-2">🎉 Welcome to the Affiliate Program!</h2>
+                <h2 className="text-xl font-bold mb-2">�� Welcome to the Affiliate Program!</h2>
                 <p className="text-green-100">
                   Your account is active and ready to earn commissions. Your unique affiliate links are tied to User ID: {user.id.slice(-8)}
                 </p>
