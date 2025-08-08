@@ -48,6 +48,9 @@ export const LazyScrapePage = lazy(() => import('@/pages/ScrapePage'));
 // Backlink automation component
 export const LazyBacklinkAutomation = lazy(() => import('@/pages/BacklinkAutomation'));
 
+// Admin campaign management component
+export const LazyAdminCampaignManager = lazy(() => import('@/pages/AdminCampaignManager'));
+
 // API Testing components
 export const LazyOpenAITest = lazy(() => import('@/pages/OpenAITest'));
 export const LazySystemTest = lazy(() => import('@/components/SystemTest').then(module => ({ default: module.SystemTest })));
