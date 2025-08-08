@@ -48,6 +48,8 @@ export default function ScrapePage() {
       // Simulate progress updates
       setScrapingProgress(10);
 
+      console.log('Starting scrape for keyword:', keyword.trim());
+
       const response = await fetch('/.netlify/functions/email-scraper', {
         method: 'POST',
         headers: {
@@ -56,8 +58,13 @@ export default function ScrapePage() {
         body: JSON.stringify({ keyword: keyword.trim() })
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Response error text:', errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
 
       setScrapingProgress(50);
