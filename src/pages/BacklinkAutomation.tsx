@@ -72,7 +72,12 @@ export default function BacklinkAutomation() {
 
   // Load campaigns on component mount
   useEffect(() => {
-    loadCampaigns();
+    // Add a small delay to ensure the page loads first
+    const timer = setTimeout(() => {
+      loadCampaigns();
+    }, 500);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const loadCampaigns = async () => {
