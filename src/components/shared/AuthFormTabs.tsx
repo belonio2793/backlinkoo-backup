@@ -60,8 +60,8 @@ export function AuthFormTabs({
     e.preventDefault();
     if (isLoading) return;
 
-    const trimmedEmail = loginEmail.trim();
-    const trimmedPassword = loginPassword.trim();
+    const trimmedEmail = (loginEmail || "").trim();
+    const trimmedPassword = (loginPassword || "").trim();
 
     if (!trimmedEmail || !trimmedPassword) {
       toast({
