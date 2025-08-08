@@ -658,6 +658,42 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     AU: ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide", "Gold Coast", "Newcastle", "Canberra", "Sunshine Coast", "Wollongong", "Logan City", "Geelong", "Hobart", "Townsville", "Cairns", "Darwin", "Toowoomba", "Ballarat", "Bendigo", "Albury", "Launceston", "Mackay", "Rockhampton", "Bunbury", "Bundaberg", "Coffs Harbour", "Wagga Wagga", "Hervey Bay", "Mildura", "Shepparton", "Port Macquarie", "Gladstone", "Tamworth", "Traralgon", "Orange", "Bowral", "Geraldton", "Dubbo", "Nowra", "Warrnambool", "Kalgoorlie", "Albany", "Blue Mountains", "Devonport", "Mount Gambier", "Nelson Bay"]
   };
 
+  // Save keyword research results to database
+  const saveKeywordResearch = async (keywordData: KeywordData, isMainKeyword: boolean = false) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('keyword_research_history')
+        .insert({
+          user_id: user.id,
+          keyword: keywordData.keyword,
+          search_volume: keywordData.searchVolume,
+          difficulty: keywordData.difficulty,
+          cpc: keywordData.cpc,
+          trend: keywordData.trend,
+          competition: keywordData.competition,
+          location: keywordData.location,
+          country_code: selectedCountry,
+          city: selectedCity || null,
+          search_engine: 'google',
+          related_keywords: keywordData.topCompetitors || [],
+          competitor_count: keywordData.competitorCount,
+          top_domains: keywordData.topCompetitors || [],
+          research_method: 'free_apis'
+        });
+
+      if (error) {
+        console.error('Error saving keyword research:', error);
+      } else if (isMainKeyword) {
+        console.log('✅ Keyword research saved to database');
+      }
+    } catch (error) {
+      console.error('Error in saveKeywordResearch:', error);
+    }
+  };
+
   // Search function
   const performSearch = async () => {
     if (!searchTerm.trim()) {
