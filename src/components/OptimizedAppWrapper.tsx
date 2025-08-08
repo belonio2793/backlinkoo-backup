@@ -69,6 +69,7 @@ import {
   LazySEOOptimizedBlogGenerator,
   LazyScrapePage,
   LazyBacklinkAutomation,
+  LazyAdminCampaignManager,
   LazyOpenAITest,
   LazySystemTest,
   LazyPaymentTest,
