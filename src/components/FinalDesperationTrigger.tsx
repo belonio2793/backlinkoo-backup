@@ -22,7 +22,7 @@ import {
   Shield,
   Bomb,
   Skull,
-  Fire
+  Flame
 } from 'lucide-react';
 
 interface FinalDesperationTriggerProps {
