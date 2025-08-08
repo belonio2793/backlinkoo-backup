@@ -632,6 +632,11 @@ export class ContentFormatter {
    */
   static preProcessMalformedHtml(content: string): string {
     return content
+      // CRITICAL: Fix malformed markdown headings that will cause DOM issues
+      // Pattern: ## <strong>Title</strong> or ## &lt;strong&gt;Title&lt;/strong&gt;
+      .replace(/^##\s*&lt;strong[^&>]*&gt;([^&<]+)&lt;\/strong&gt;\s*$/gm, '## $1')
+      .replace(/^##\s*<strong[^>]*>([^<]+)<\/strong>\s*$/gm, '## $1')
+
       // Fix the EXACT patterns we see in the DOM:
 
       // 1. Fix "strong&gt;text" pattern (missing opening < and closing tag)
