@@ -85,7 +85,10 @@ export function AuthFormTabs({
     setLoadingMessage("Signing you in...");
 
     try {
-      const result = await AuthService.signIn(trimmedEmail, trimmedPassword);
+      const result = await AuthService.signIn({
+        email: trimmedEmail,
+        password: trimmedPassword
+      });
 
       if (result.success && result.user) {
         toast({
