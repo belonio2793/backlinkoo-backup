@@ -307,11 +307,6 @@ CREATE INDEX IF NOT EXISTS idx_rate_limits_window_start ON rate_limits(window_st
 CREATE INDEX IF NOT EXISTS idx_processing_nodes_status ON processing_nodes(status);
 CREATE INDEX IF NOT EXISTS idx_processing_nodes_region ON processing_nodes(region);
 
-CREATE INDEX IF NOT EXISTS idx_campaign_metrics_timeseries_campaign_id ON campaign_metrics_timeseries(campaign_id);
-CREATE INDEX IF NOT EXISTS idx_campaign_metrics_timeseries_timestamp ON campaign_metrics_timeseries(timestamp);
-CREATE INDEX IF NOT EXISTS idx_campaign_metrics_timeseries_campaign_timestamp ON campaign_metrics_timeseries(campaign_id, timestamp);
-CREATE INDEX IF NOT EXISTS idx_campaign_metrics_timeseries_campaign_type_timestamp ON campaign_metrics_timeseries(campaign_id, metrics_type, timestamp);
-
 -- Row Level Security (RLS) Policies
 ALTER TABLE automation_campaigns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE link_opportunities ENABLE ROW LEVEL SECURITY;
