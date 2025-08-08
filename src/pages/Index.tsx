@@ -297,8 +297,7 @@ const Index = () => {
                         className="bg-amber-600 hover:bg-amber-700 text-white"
                       />
                       <Button variant="ghost" onClick={() => {
-                        setLoginModalTab("login");
-                        setShowLoginModal(true);
+                        openLoginModal();
                       }} className="font-medium text-sm px-3 py-1">
                         Sign In
                       </Button>
@@ -307,16 +306,14 @@ const Index = () => {
                     <>
                       <Button variant="ghost" onClick={() => {
                         console.log('Sign In button clicked');
-                        setLoginModalTab("login");
-                        setShowLoginModal(true);
+                        openLoginModal();
                       }} className="font-medium text-sm px-3 py-1">
                         Sign In
                       </Button>
 
                       <Button onClick={() => {
                         console.log('Get Started button clicked');
-                        setLoginModalTab("signup");
-                        setShowLoginModal(true);
+                        openSignupModal();
                       }} className="font-medium text-sm px-3 py-1">
                         Create Account
                       </Button>
